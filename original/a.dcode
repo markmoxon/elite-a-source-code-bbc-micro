@@ -1,0 +1,1 @@
+\ a.dcode - ELITE III in-flight code	GET ":0.a.global"	ORG $11E3	LOAD $11E3	EXEC $11E3dcode_in:	JMP startboot_in:	JMP startwrch_in:	JMP wrchdst	EQUW $114Bbrk_in:	JMP brkdst	GET "a.dcode_1"	GET "a.dcode_2"	GET "a.dcode_3"
