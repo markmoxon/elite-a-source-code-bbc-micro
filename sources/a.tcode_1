@@ -456,7 +456,7 @@
 
 .pair_list
 
- EQUS "", &0C, "", &0A, "ABOUSEITILETSTONLONUTHNO"
+ EQUS &0C, &0A, "ABOUSEITILETSTONLONUTHNO"
 
 .to880
 
@@ -4504,4 +4504,4 @@
 
 .rdcode
 
- EQUS "R.1.F", &0D, ""
+ EQUS "R.1.F", &0D

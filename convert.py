@@ -33,7 +33,7 @@ def process_file(input_file, output_file, source_file):
             line = line.replace("_07c0", "_07C0")
             line = line.replace("_07e0", "_07E0")
 
-        if line.endswith("..<\n"):
+        if line.endswith(".<\n"):
             continue
 
         a = re_llabel.search(line)
@@ -53,6 +53,7 @@ def process_file(input_file, output_file, source_file):
             if s.group(2).startswith("EQUA"):
                 z = re_equa.search(s.group(2))
                 line += ' EQUS "' + convert_equa(z.group(1)) + '"\n'
+                line = line.replace('EQUS "", ', 'EQUS ').replace(', ""', '')
             else:
                 line += " " + s.group(2).replace("$", "&") + "\n"
         elif q:
@@ -62,6 +63,7 @@ def process_file(input_file, output_file, source_file):
             line = "\n." + m.group(1) + "\n\n"
         elif n:
             line = ' EQUS "' + convert_equa(n.group(1)) + '"\n'
+            line = line.replace('EQUS "", ', 'EQUS ').replace(', ""', '')
         elif r:
             line = 'INCLUDE "sources/' + r.group(1).replace(":0.", "").replace(":2.", "") + '"\n'
         elif p:

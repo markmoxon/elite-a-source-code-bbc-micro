@@ -7,7 +7,7 @@
 
 .ltcode
 
- EQUS "L.1.D", &0D, ""
+ EQUS "L.1.D", &0D
 
 .launch
 
@@ -393,7 +393,7 @@
 
 .pair_list
 
- EQUS "", &0C, "", &0A, "ABOUSEITILETSTONLONUTHNO"
+ EQUS &0C, &0A, "ABOUSEITILETSTONLONUTHNO"
 
 .to880
 

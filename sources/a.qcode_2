@@ -1681,11 +1681,11 @@
 
 .cat_line
 
- EQUS ".:0", &0D, ""
+ EQUS ".:0", &0D
 
 .del_line
 
- EQUS "DEL.:0.E.1234567", &0D, ""
+ EQUS "DEL.:0.E.1234567", &0D
 
 .show_cat
 
@@ -4487,7 +4487,7 @@
  EQUS "GHAVIAL  "
  EQUD 1365000
 
- EQUS "F", &90, "-DE-L", &9B, "", &85, ""
+ EQUS "F", &90, "-DE-L", &9B, &85
  EQUD 1435000
 
  EQUS "MONITOR  "

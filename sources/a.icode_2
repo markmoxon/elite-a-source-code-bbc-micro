@@ -3529,7 +3529,7 @@
 
 .ship_load
 
- EQUS "L.S.0", &0D, ""
+ EQUS "L.S.0", &0D
 
 
 .ship_file

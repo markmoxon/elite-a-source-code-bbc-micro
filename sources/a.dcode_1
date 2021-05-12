@@ -7,7 +7,7 @@
 
 .l_11f8
 
- EQUS "L.1.D", &0D, ""
+ EQUS "L.1.D", &0D
 
 .run_tcode
 

@@ -282,7 +282,7 @@ oscli = &FFF7
 
 .tube_run
 
- EQUS "R.2.H", &0D, ""
+ EQUS "R.2.H", &0D
 
  \tube_400	EQUD &0400
 
@@ -343,7 +343,7 @@ oscli = &FFF7
 
 .l_tcode
 
- EQUS "L.1.D", &0D, ""
+ EQUS "L.1.D", &0D
 
 
 .seed
@@ -661,7 +661,7 @@ oscli = &FFF7
 
 .l_1d44
 
- EQUS "DIR e", &0D, ""
+ EQUS "DIR e", &0D
 
 
 .to7800
@@ -1009,7 +1009,7 @@ oscli = &FFF7
  BPL ulaloop3
  BMI return
 
- EQUS ":0.E.NEWCOME", &0D, ""
+ EQUS ":0.E.NEWCOME", &0D
  EQUB &00, &14, &AD, &4A, &5A, &48, &02, &53, &B7, &00, &00, &13
  EQUB &88, &3C, &00, &00, &00, &00, &00, &00, &00, &00, &00, &00
  EQUB &00, &00, &00, &00, &00, &00, &00, &00, &00, &00, &00, &00

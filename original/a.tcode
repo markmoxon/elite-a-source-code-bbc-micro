@@ -1,23 +1,1 @@
-\ a.tcode - ELITE III docked code
-
-	GET ":0.a.global"
-
-	ORG $11E3
-	LOAD $11E3
-	EXEC $11E3
-
-dcode_in:
-	JMP dcode_2
-boot_in:
-	JMP boot_2
-wrch_in:
-	JMP wrchdst
-	EQUW $114B
-brk_in:
-	JMP brk_go
-
-	GET "a.tcode_1"
-
-	GET "a.tcode_2"
-
-	GET "a.tcode_3"
+\ a.tcode - ELITE III docked code	GET ":0.a.global"	ORG $11E3	LOAD $11E3	EXEC $11E3dcode_in:	JMP dcode_2boot_in:	JMP boot_2wrch_in:	JMP wrchdst	EQUW $114Bbrk_in:	JMP brk_go	GET "a.tcode_1"	GET "a.tcode_2"	GET "a.tcode_3"

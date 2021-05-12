@@ -2922,7 +2922,7 @@
 
 .d_mox
 
- EQUS "L.S.0", &0D, ""
+ EQUS "L.S.0", &0D
 
 .clr_ships
 

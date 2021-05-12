@@ -112,6 +112,7 @@ tube_r4s = &FEFE
 tube_r4d = &FEFF
 
 
+
 ._117C
 
  EQUS ":0.E"
@@ -126,7 +127,7 @@ tube_r4d = &FEFF
 
 ._1188
 
- EQUS "", &0D, ""
+ EQUS &0D
 
 .commander
 

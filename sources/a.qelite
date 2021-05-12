@@ -81,7 +81,7 @@ tube_brk = &16	\ tube BRK vector
 
 .tube_run
 
- EQUS "R.2.T", &0D, ""
+ EQUS "R.2.T", &0D
 
 
 .tube_get
