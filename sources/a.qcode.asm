@@ -301,4 +301,4 @@ ship_total = 38
 
  EQUB 255, &00, 0, 0
 
-SAVE "output/2.T.unpatched.bin", CODE%, P%, LOAD%
+SAVE "output/2.T.bin", CODE%, P%, LOAD%
