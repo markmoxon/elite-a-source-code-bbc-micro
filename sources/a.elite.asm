@@ -389,7 +389,7 @@ oscli = &FFF7
 .tob00
 
  LDX #<(l_tcode-tob00+&B00)
- LDY #HI((l_tcode-tob00+&B00))
+ LDY #>(l_tcode-tob00+&B00)
  JSR oscli
  JMP &11E6
 
@@ -1292,15 +1292,15 @@ ORG &DD00
 
  SEI
  PHA
- LDA #LO(do_filev	\ reset FILEV)
+ LDA #LO(do_filev)	\ reset FILEV
  STA filev
  LDA #HI(do_filev)
  STA filev+1
- LDA #LO(do_fscv	\ reset FSCV)
+ LDA #LO(do_fscv)	\ reset FSCV
  STA fscv
  LDA #HI(do_fscv)
  STA fscv+1
- LDA #LO(do_bytev	\ replace BYTEV)
+ LDA #LO(do_bytev)	\ replace BYTEV
  STA bytev
  LDA #HI(do_bytev)
  STA bytev+1

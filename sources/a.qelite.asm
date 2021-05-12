@@ -1189,8 +1189,8 @@ tube_brk = &16	\ tube BRK vector
 .draw_S
 
  LDA #&C0
- LDX #LO((d_3832+3))
- LDY #HI((d_3832+3))
+ LDX #<(d_3832+3)
+ LDY #>(d_3832+3)
 
 .draw_let
 

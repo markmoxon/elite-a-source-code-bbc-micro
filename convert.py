@@ -86,9 +86,9 @@ def process_file(input_file, output_file, source_file):
             else:
                 inst = p.group(1)
                 if "#<" in inst:
-                    inst = inst.replace("#<", "#LO(") + ")"
+                    inst = re.sub(r'#<(\w+)', r'#LO(\1)', inst)
                 elif "#>" in inst:
-                    inst = inst.replace("#>", "#HI(") + ")"
+                    inst = re.sub(r'#>(\w+)', r'#HI(\1)', inst)
                 line = " " + inst.replace("$", "&") + "\n"
         output_file.write(line)
 

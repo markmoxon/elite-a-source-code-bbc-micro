@@ -4760,7 +4760,7 @@
  EQUD 2400000
 
  EQUS "ANACONDA "
- EQUD 4500000
+ EQUD 4000000 \ Need to change this to 4000000 to bring in line with patched version and a.qcode
 
  EQUS "ASP MK2  "
  EQUD 8950000
