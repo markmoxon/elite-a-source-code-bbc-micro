@@ -139,6 +139,6 @@ for source_file in source_files:
             if source_file == "a.qelite":
                 output_file.write('\nSAVE "output/2.H.bin", CODE%, P%, LOAD%')
             if source_file == "a.elite":
-                output_file.write('\nSAVE "output/Elite.bin", CODE%, P%, LOAD%')
+                output_file.write('\nSAVE "output/ELITE.bin", CODE%, P%, LOAD%')
 
 print()

@@ -1111,4 +1111,4 @@ oscli = &FFF7
  EQUB &00, &00, &00, &00
 
 
-SAVE "output/Elite.bin", CODE%, P%, LOAD%
+SAVE "output/ELITE.bin", CODE%, P%, LOAD%
