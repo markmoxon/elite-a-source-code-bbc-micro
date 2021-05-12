@@ -1,7 +1,8 @@
-beebasm -i "sources/a.tcode" -v > output/compile.txt
-beebasm -i "sources/a.dcode" -v >> output/compile.txt
-beebasm -i "sources/make1d.asm" -v >> output/compile.txt
-beebasm -i "sources/a.qcode" -v >> output/compile.txt
-beebasm -i "sources/a.qelite" -v >> output/compile.txt
-beebasm -i "sources/a.elite" -v >> output/compile.txt
+beebasm -i "sources/a.tcode.asm" -v > output/compile.txt
+beebasm -i "sources/a.dcode.asm" -v >> output/compile.txt
+beebasm -i "sources/a.icode.asm" -v >> output/compile.txt
+beebasm -i "sources/1.d.asm" -v >> output/compile.txt
+beebasm -i "sources/a.qcode.asm" -v >> output/compile.txt
+beebasm -i "sources/a.qelite.asm" -v >> output/compile.txt
+beebasm -i "sources/a.elite.asm" -v >> output/compile.txt
 python sources/crc32.py extracted output

@@ -66,7 +66,7 @@ def process_file(input_file, output_file, source_file):
             line = ' EQUS "' + convert_equa(n.group(1)) + '"\n'
             line = line.replace('EQUS "", ', 'EQUS ').replace(', ""', '')
         elif r:
-            line = 'INCLUDE "sources/' + r.group(1).replace(":0.", "").replace(":2.", "") + '"\n'
+            line = 'INCLUDE "sources/' + r.group(1).replace(":0.", "").replace(":2.", "") + '.asm"\n'
         elif p:
             if p.group(1).startswith("LOAD"):
                 line = line.replace("$FFFF", "$").replace("\tLOAD $", "LOAD% = &")
@@ -130,7 +130,7 @@ for source_file in source_files:
     input = source_folder + source_file
 
     with open(input, "r", encoding="latin-1") as input_file:
-        output = dest_folder + source_file
+        output = dest_folder + source_file + ".asm"
         print(".", end="", flush=True)
 
         with open(output, "w") as output_file:

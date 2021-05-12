@@ -1,6 +1,6 @@
  \ a.icode - ELITE III encyclopedia
 
-INCLUDE "sources/a.global"
+INCLUDE "sources/a.global.asm"
 
 CODE% = &11E3
 ORG CODE%
@@ -25,10 +25,10 @@ EXEC% = &11E3
 
  JMP brk_go
 
-INCLUDE "sources/a.icode_1"
+INCLUDE "sources/a.icode_1.asm"
 
-INCLUDE "sources/a.icode_2"
+INCLUDE "sources/a.icode_2.asm"
 
-INCLUDE "sources/a.icode_3"
+INCLUDE "sources/a.icode_3.asm"
 
 SAVE "output/1.E.bin", CODE%, P%, LOAD%
