@@ -17,14 +17,15 @@ dest_folder = "sources/"
 re_label = re.compile(r'^([a-z0-9A-Z_]+):?(\s+.*)*$')
 re_llabel = re.compile(r'(l_[0-9A-F]{4})')
 re_instruction = re.compile(r'^\s*(.+)$')
+re_labelinstruction = re.compile(r'^([a-z0-9A-Z_]+):?\s+(.+)$')
 re_equa = re.compile(r'^\s*EQUA\s*"(.+)"$')
-re_opt = re.compile(r'^\s*OPT.+$')
 re_var = re.compile(r'^([a-z0-9A-Z_]+):?\s*EQU \s*(\$?)(.+)$')
 re_get = re.compile(r'^\s+GET\s*"(.+)"$')
-re_labelinstruction = re.compile(r'^([a-z0-9A-Z_]+):?\s+(.+)$')
 
 
 def process_file(input_file, output_file, source_file):
+    code_defined = False
+
     for line in input_file:
         # Manual fixes for scoping and case issues that trigger BeebAsm errors
         if source_file == "a.qcode_4":
@@ -58,7 +59,7 @@ def process_file(input_file, output_file, source_file):
                 line += " " + s.group(2).replace("$", "&") + "\n"
         elif q:
             amp = q.group(2).replace("$", "&")
-            line = q.group(1) + " = " + amp + q.group(3) + "\n"
+            line = q.group(1) + " = " + amp + q.group(3).replace("$", "&").replace("PC", "P%") + "\n"
         elif m:
             line = "\n." + m.group(1) + "\n\n"
         elif n:
@@ -72,9 +73,16 @@ def process_file(input_file, output_file, source_file):
             elif p.group(1).startswith("EXEC"):
                 line = line.replace("$FFFF", "$").replace("\tEXEC $", "EXEC% = &").replace("\tEXEC ", "\\EXEC = ")
             elif p.group(1).startswith("ORG"):
-                line = line.replace("$FFFF", "$").replace("\tORG $", "CODE% = &") + "ORG CODE%\n"
+                if code_defined:
+                    line = line.replace("$FFFF", "$").replace("\tORG $", "ORG &")
+                else:
+                    line = line.replace("$FFFF", "$").replace("\tORG $", "CODE% = &") + "ORG CODE%\n"
+                    code_defined = True
             elif p.group(1).startswith("OPT"):
-                line = line.replace("\tOPT", "\\OPT")
+                if p.group(1).startswith("OPT CMOS"):
+                    line = "CPU 1"
+                else:
+                    line = line.replace("\tOPT", "\\OPT")
             else:
                 line = " " + p.group(1).replace("$", "&") + "\n"
         output_file.write(line)
@@ -139,6 +147,7 @@ for source_file in source_files:
             if source_file == "a.qelite":
                 output_file.write('\nSAVE "output/2.H.bin", CODE%, P%, LOAD%')
             if source_file == "a.elite":
-                output_file.write('\nSAVE "output/ELITE.bin", CODE%, P%, LOAD%')
+                output_file.write('\nCOPYBLOCK &DD00, P%, to_dd00')
+                output_file.write('\nSAVE "output/ELITE.bin", CODE%, to_dd00+dd00_len, LOAD%')
 
 print()

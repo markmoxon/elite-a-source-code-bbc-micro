@@ -1,8 +1,7 @@
  \ a.qcode - ELITE III second processor code
 
 \OPT TABS=16
-\OPT CMOS
-
+CPU 1
 CODE% = &1000
 ORG CODE%
 LOAD% = &1000

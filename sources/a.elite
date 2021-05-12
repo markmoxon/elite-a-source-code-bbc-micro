@@ -9,7 +9,10 @@ key_tube = &90
 
 brkv = &0202
 irq1v = &0204
+bytev = &020A
 wrchv = &020E
+filev = &0212
+fscv = &021E
 netv = &0224
 ind2v = &0232
 cmdr_iff = &036E
@@ -51,6 +54,8 @@ oscli = &FFF7
 
  EQUB &04, &01, &04, &F8, &2C, &04, &06, &08, &16, &00, &00, &81
  EQUB &7E, &00
+
+\OPT NOCMOS
 
 
 .l_197b
@@ -197,7 +202,55 @@ oscli = &FFF7
  LDA #&39
  STA &FE45
  CLI 
- LDA #&EA
+ LDA #0	\ test for BBC Master
+ LDX #1
+ JSR osbyte	\ get OS version
+ CPX #3
+ BCC not_master
+ LDX #0	\ copy master code to DD00
+
+.cpmaster
+
+ LDA to_dd00,X
+ STA &DD00,X
+ INX
+ CPX #dd00_len
+ BNE cpmaster
+ LDA #&8F	\ service call
+ LDX #&21	\ ?
+ LDY #&C0	\ ? top of absolute workspace
+ JSR osbyte	\ ? in XY
+ STX put0+1	\ modify workspace save address
+ STX put1+1
+ STX put2+1
+ STX get0+1	\ modify workspace restore address
+ STX get1+1
+ STX get2+1
+ STY put0+2
+ STY get0+2
+ INY
+ STY put1+2
+ STY get1+2
+ INY
+ STY put2+2
+ STY get2+2
+ LDA filev	\ modify address for old FILEV
+ STA old_filev+1
+ LDA filev+1
+ STA old_filev+2
+ LDA fscv	\ modify address for old FSCV
+ STA old_fscv+1
+ LDA fscv+1
+ STA old_fscv+2
+ LDA bytev	\ modify address for old BYTEV
+ STA old_bytev+1
+ LDA bytev+1
+ STA old_bytev+2
+ JSR set_vectors	\ replace FILEV and FSCV
+
+.not_master
+
+ LDA #&EA	\ test for tube
  LDY #&FF
  LDX #&00
  JSR osbyte
@@ -1111,4 +1164,157 @@ oscli = &FFF7
  EQUB &00, &00, &00, &00
 
 
-SAVE "output/ELITE.bin", CODE%, P%, LOAD%
+ \ BBC Master 128 code for save/restore characters
+CPU 1
+.to_dd00
+
+ORG &DD00
+
+ \ trap FILEV
+
+.do_filev
+
+ JSR restorews	\ restore workspace
+
+.old_filev
+
+ JSR &100	\ address modified by master set-up
+
+.savews
+
+ PHP	\ save workspace, copy in characters
+ PHA
+ PHX
+ PHY
+ LDA #8	\ select ROM workspace at &C000
+ TSB &FE34
+ LDX #0
+
+.putws
+
+ LDA &C000,X	\ save absolute workspace
+
+.put0
+
+ STA &C000,X	\ address modified by master set-up
+ LDA &C100,X
+
+.put1
+
+ STA &C100,X	\ address modified by master set-up
+ LDA &C200,X
+
+.put2
+
+ STA &C200,X	\ address modified by master set-up
+ INX
+ BNE putws
+ LDA &F4	\ save ROM number
+ PHA
+ LDA #&80	\ select RAM from &8000-&8FFF
+ STA &F4
+ STA &FE30
+ LDX #0
+
+.copych
+
+ LDA &8900,X	\ copy character definitions
+ STA &C000,X
+ LDA &8A00,X
+ STA &C100,X
+ LDA &8B00,X
+ STA &C200,X
+ INX
+ BNE copych
+ PLA	\ restore ROM selection
+ STA &F4
+ STA &FE30
+ PLY
+ PLX
+ PLA
+ PLP
+ RTS
+
+ \ trap FILEV
+
+.do_fscv
+
+ JSR restorews	\ restore workspace
+
+.old_fscv
+
+ JSR &100	\ address modified by master setup
+ JMP savews	\ save workspace, restore characters
+
+ \ restore ROM workspace
+
+.restorews
+
+ PHA
+ PHX
+ LDX #0
+
+.getws
+
+ \ restore absolute workspace
+
+.get0
+
+ LDA &C000,X	\ address modified by master set-up
+ STA &C000,X
+
+.get1
+
+ LDA &C100,X	\ address modified by master set-up
+ STA &C100,X
+
+.get2
+
+ LDA &C200,X	\ address modified by master set-up
+ STA &C200,X
+ INX
+ BNE getws
+ PLX
+ PLA
+ RTS
+
+ \ trap BYTEV
+
+.do_bytev
+
+ CMP #&8F	\ ROM service request
+ BNE old_bytev
+ CPX #&F	\ vector claim?
+ BNE old_bytev
+ JSR old_bytev
+
+.set_vectors
+
+ SEI
+ PHA
+ LDA #<do_filev	\ reset FILEV
+ STA filev
+ LDA #>do_filev
+ STA filev+1
+ LDA #<do_fscv	\ reset FSCV
+ STA fscv
+ LDA #>do_fscv
+ STA fscv+1
+ LDA #<do_bytev	\ replace BYTEV
+ STA bytev
+ LDA #>do_bytev
+ STA bytev+1
+ PLA
+ CLI
+ RTS
+
+
+.old_bytev
+
+ JMP &100	\ address modified by master set_up
+
+dd00_len = P%-&DD00	\ length of code at DD00
+
+
+COPYBLOCK &DD00, P%, to_dd00
+SAVE "output/ELITE.bin", CODE%, to_dd00+dd00_len, LOAD%

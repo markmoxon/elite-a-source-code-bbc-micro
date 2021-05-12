@@ -4,6 +4,6 @@ INCBIN "output/tcode.bin"
 
 ORG &5600
 
-INCBIN "extracted/S.T"
+INCBIN "extracted/S.T.bin"
 
 SAVE "output/1.D.bin", &11E3, &6000
