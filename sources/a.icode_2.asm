@@ -1175,8 +1175,8 @@
  LDA #&81
  STA &FE4E
  JSR flush_inp
- LDX #<word_0
- LDY #>word_0
+ LDX #LO(word_0)
+ LDY #HI(word_0)
  LDA #&00
  JSR osword
  BCC l_39e1
@@ -3320,8 +3320,8 @@
  CMP ship_load+&04
  BEQ ship_skip
  STA ship_load+&04
- LDX #<ship_load
- LDY #>ship_load
+ LDX #LO(ship_load)
+ LDY #HI(ship_load)
  JSR oscli
 
 .ship_skip

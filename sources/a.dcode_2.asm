@@ -1066,17 +1066,17 @@
 .l_381b
 
  LDA #&38
- LDX #<l_3832
+ LDX #LO(l_3832)
  BNE l_3825
 
 .l_3821
 
  LDA #&C0
- LDX #<l_3832+3
+ LDX #LO(l_3832+3)
 
 .l_3825
 
- LDY #>l_3832
+ LDY #HI(l_3832)
  STA ptr
  LDA #&7D
  STX font
@@ -2916,8 +2916,8 @@
  CLC
  ADC #&41
  STA d_mox+&04
- LDX #<d_mox
- LDY #>d_mox
+ LDX #LO(d_mox)
+ LDY #HI(d_mox)
  JMP oscli
 
 .d_mox

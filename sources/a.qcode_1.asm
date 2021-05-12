@@ -81,9 +81,9 @@
 
 .set_brk
 
- LDA #<brk_go
+ LDA #LO(brk_go)
  STA brkv
- LDA #>brk_go
+ LDA #HI(brk_go)
  STA brkv+&01
  RTS
 
@@ -97,9 +97,9 @@
  PHA
  LDA &23
  PHA
- LDA #<msg_3
+ LDA #LO(msg_3)
  STA &22
- LDA #>msg_3
+ LDA #HI(msg_3)
  BNE l_12de
 
 .write_msg2
@@ -112,9 +112,9 @@
  PHA
  LDA &23
  PHA
- LDA #<msg_2
+ LDA #LO(msg_2)
  STA &22
- LDA #>msg_2
+ LDA #HI(msg_2)
  BNE l_12de
 
 .l_12b1
@@ -141,9 +141,9 @@
  PHA
  LDA &23
  PHA
- LDA #<msg_1
+ LDA #LO(msg_1)
  STA &22
- LDA #>msg_1
+ LDA #HI(msg_1)
 
 .l_12de
 

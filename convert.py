@@ -84,7 +84,12 @@ def process_file(input_file, output_file, source_file):
                 else:
                     line = line.replace("\tOPT", "\\OPT")
             else:
-                line = " " + p.group(1).replace("$", "&") + "\n"
+                inst = p.group(1)
+                if "#<" in inst:
+                    inst = inst.replace("#<", "#LO(") + ")"
+                elif "#>" in inst:
+                    inst = inst.replace("#>", "#HI(") + ")"
+                line = " " + inst.replace("$", "&") + "\n"
         output_file.write(line)
 
 

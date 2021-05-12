@@ -1853,8 +1853,8 @@
  LDA #&81
  STA &FE4E
  JSR flush_inp
- LDX #<word_0
- LDY #>word_0
+ LDX #LO(word_0)
+ LDY #HI(word_0)
  LDA #&00
  JSR osword
  BCC l_39e1
@@ -1928,8 +1928,8 @@
  STA &0355
  STA &03CF
  STA cursor_x
- LDX #<cat_line
- LDY #>cat_line
+ LDX #LO(cat_line)
+ LDY #HI(cat_line)
  JSR oscli
  DEC &03CF
  \	PLA
@@ -1960,8 +1960,8 @@
  STA del_line+&06,X
  DEX
  BNE l_3a5b
- LDX #<del_line
- LDY #>del_line
+ LDX #LO(del_line)
+ LDY #HI(del_line)
  JSR oscli
  JMP disk_menu
  \l_3a6d
@@ -1995,9 +1995,9 @@
  JSR clr_bc
  TSX
  STX brk_new+&01	\STX l_3a6d
- LDA #<brk_new
+ LDA #LO(brk_new)
  STA brk_in+&01
- LDA #>brk_new
+ LDA #HI(brk_new)
  STA brk_in+&02
  LDA #&01
  JSR write_msg1

@@ -1,8 +1,8 @@
 
 .l_11f1
 
- LDX #<l_11f8
- LDY #>l_11f8
+ LDX #LO(l_11f8)
+ LDY #HI(l_11f8)
  JSR oscli
 
 .l_11f8

@@ -636,9 +636,9 @@
 .l_323f
 
  TAX
- LDA #<_0400
+ LDA #LO(_0400)
  STA &22
- LDA #>_0400
+ LDA #HI(_0400)
  STA &23
  LDY #0
  TXA
@@ -1626,8 +1626,8 @@
  JSR tube_write
  JSR tube_read
  JSR flush_inp
- LDX #<word_0
- LDY #>word_0
+ LDX #LO(word_0)
+ LDY #HI(word_0)
  LDA #&00
  JSR osword
  BCC l_39e1
@@ -1704,8 +1704,8 @@
  LDA #&00
  JSR tube_write
  STA cursor_x
- LDX #<cat_line
- LDY #>cat_line
+ LDX #LO(cat_line)
+ LDY #HI(cat_line)
  JSR oscli
  CLC
 
@@ -1732,8 +1732,8 @@
  STA del_line+&06,X
  DEX
  BNE l_3a5b
- LDX #<del_line
- LDY #>del_line
+ LDX #LO(del_line)
+ LDY #HI(del_line)
  JSR oscli
  JMP disk_menu
  \l_3a6d
@@ -1767,9 +1767,9 @@
  JSR clr_bc
  TSX
  STX brk_new+&01	\l_3a6d
- LDA #<brk_new
+ LDA #LO(brk_new)
  STA brkv
- LDA #>brk_new
+ LDA #HI(brk_new)
  STA brkv+&01
  LDA #&01
  JSR write_msg1

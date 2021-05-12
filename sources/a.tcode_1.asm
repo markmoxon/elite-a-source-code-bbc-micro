@@ -102,9 +102,9 @@
 
 .set_brk
 
- LDA #<brk_go
+ LDA #LO(brk_go)
  STA brk_in+&01
- LDA #>brk_go
+ LDA #HI(brk_go)
  STA brk_in+&02
  RTS
 
@@ -118,9 +118,9 @@
  PHA
  LDA &23
  PHA
- LDA #<msg_2
+ LDA #LO(msg_2)
  STA &22
- LDA #>msg_2
+ LDA #HI(msg_2)
  BNE l_12de
 
 .l_12b1
@@ -147,9 +147,9 @@
  PHA
  LDA &23
  PHA
- LDA #<msg_1
+ LDA #LO(msg_1)
  STA &22
- LDA #>msg_1
+ LDA #HI(msg_1)
 
 .l_12de
 
@@ -4441,8 +4441,8 @@
  STA &0880,X
  DEX
  BPL l_2e94
- LDX #<rdcode
- LDY #>rdcode
+ LDX #LO(rdcode)
+ LDY #HI(rdcode)
  JMP oscli
 
 .sub_money

@@ -64,16 +64,16 @@ cursor_y = &9F
 
  LDX #&FF
  TXS
- LDA #<tube_wrch
+ LDA #LO(tube_wrch)
  STA wrchv
- LDA #>tube_wrch
+ LDA #HI(tube_wrch)
  STA wrchv+&01
- LDA #<tube_brk
+ LDA #LO(tube_brk)
  STA brkv
- LDA #>tube_brk
+ LDA #HI(tube_brk)
  STA brkv+&01
- LDX #<tube_run
- LDY #>tube_run
+ LDX #LO(tube_run)
+ LDY #HI(tube_run)
  JMP oscli
 
 tube_brk = &16	\ tube BRK vector
@@ -1182,15 +1182,15 @@ tube_brk = &16	\ tube BRK vector
 .draw_E
 
  LDA #&38
- LDX #<d_3832
- LDY #>d_3832
+ LDX #LO(d_3832)
+ LDY #HI(d_3832)
  JMP draw_let
 
 .draw_S
 
  LDA #&C0
- LDX #<(d_3832+3)
- LDY #>(d_3832+3)
+ LDX #LO((d_3832+3))
+ LDY #HI((d_3832+3))
 
 .draw_let
 

@@ -65,9 +65,9 @@ oscli = &FFF7
  LDX #&FF
  LDY #&01
  JSR osbyte
- LDA #<l_1900
+ LDA #LO(l_1900)
  STA &70
- LDA #>l_1900
+ LDA #HI(l_1900)
  STA &71
  LDY #&00
 
@@ -84,9 +84,9 @@ oscli = &FFF7
  JSR osbyte
  LDA #&60
  STA ind2v
- LDA #>ind2v
+ LDA #HI(ind2v)
  STA netv+&01
- LDA #<ind2v
+ LDA #LO(ind2v)
  STA netv
  LDA #&BE
  LDX #&08
@@ -116,9 +116,9 @@ oscli = &FFF7
  STA &70
  LDA #&11
  STA &71
- LDA #<to1100
+ LDA #LO(to1100)
  STA &72
- LDA #>to1100
+ LDA #HI(to1100)
  STA &73
  JSR decode
  LDA #&EE
@@ -129,9 +129,9 @@ oscli = &FFF7
  STA &70
  LDA #&78
  STA &71
- LDA #<to7800
+ LDA #LO(to7800)
  STA &72
- LDA #>to7800
+ LDA #HI(to7800)
  STA &73
  LDX #&08
  JSR decodex
@@ -139,43 +139,43 @@ oscli = &FFF7
  STA &70
  LDA #&61
  STA &71
- LDA #<to6100
+ LDA #LO(to6100)
  STA &72
- LDA #>to6100
+ LDA #HI(to6100)
  STA &73
  JSR decode
  LDA #&63
  STA &71
- LDA #<to6300
+ LDA #LO(to6300)
  STA &72
- LDA #>to6300
+ LDA #HI(to6300)
  STA &73
  JSR decode
  LDA #&76
  STA &71
- LDA #<to7600
+ LDA #LO(to7600)
  STA &72
- LDA #>to7600
+ LDA #HI(to7600)
  STA &73
  JSR decode
- LDX #<envelope1
- LDY #>envelope1
+ LDX #LO(envelope1)
+ LDY #HI(envelope1)
  LDA #&08
  JSR osword
- LDX #<envelope2
- LDY #>envelope2
+ LDX #LO(envelope2)
+ LDY #HI(envelope2)
  LDA #&08
  JSR osword
- LDX #<envelope3
- LDY #>envelope3
+ LDX #LO(envelope3)
+ LDY #HI(envelope3)
  LDA #&08
  JSR osword
- LDX #<envelope4
- LDY #>envelope4
+ LDX #LO(envelope4)
+ LDY #HI(envelope4)
  LDA #&08
  JSR osword
- LDX #<l_1d44
- LDY #>l_1d44
+ LDX #LO(l_1d44)
+ LDY #HI(l_1d44)
  JSR oscli
  LDA #&F0	\ set up DDRB
  STA &FE62
@@ -266,9 +266,9 @@ oscli = &FFF7
  STA &70
  LDA #&04
  STA &71
- LDA #<to400
+ LDA #LO(to400)
  STA &72
- LDA #>to400
+ LDA #HI(to400)
  STA &73
  LDX #&04
  JSR decodex
@@ -280,9 +280,9 @@ oscli = &FFF7
  STA &70
  LDA #&0B
  STA &71
- LDA #<tob00
+ LDA #LO(tob00)
  STA &72
- LDA #>tob00
+ LDA #HI(tob00)
  STA &73
  JSR decode
  LDY #&23
@@ -304,13 +304,13 @@ oscli = &FFF7
  JSR osbyte
  STX key_tube
  STY key_tube+&01
- \	LDX #<tube_400
- \	LDY #>tube_400
+ \	LDX #LO(tube_400)
+ \	LDY #HI(tube_400)
  \	LDA #1
  \	JSR &0406
- \	LDA #<to400
+ \	LDA #LO(to400)
  \	STA &72
- \	LDA #>to400
+ \	LDA #HI(to400)
  \	STA &73
  \	LDX #&04
  \	LDY #&00
@@ -324,12 +324,12 @@ oscli = &FFF7
  \	INC &73
  \	DEX
  \	BNE tube_wr
- \	LDA #<tube_wrch
+ \	LDA #LO(tube_wrch)
  \	STA wrchv
- \	LDA #>tube_wrch
+ \	LDA #HI(tube_wrch)
  \	STA wrchv+&01
- LDX #<tube_run
- LDY #>tube_run
+ LDX #LO(tube_run)
+ LDY #HI(tube_run)
  JMP oscli
 
 
@@ -389,7 +389,7 @@ oscli = &FFF7
 .tob00
 
  LDX #<(l_tcode-tob00+&B00)
- LDY #>(l_tcode-tob00+&B00)
+ LDY #HI((l_tcode-tob00+&B00))
  JSR oscli
  JMP &11E6
 
@@ -1292,17 +1292,17 @@ ORG &DD00
 
  SEI
  PHA
- LDA #<do_filev	\ reset FILEV
+ LDA #LO(do_filev	\ reset FILEV)
  STA filev
- LDA #>do_filev
+ LDA #HI(do_filev)
  STA filev+1
- LDA #<do_fscv	\ reset FSCV
+ LDA #LO(do_fscv	\ reset FSCV)
  STA fscv
- LDA #>do_fscv
+ LDA #HI(do_fscv)
  STA fscv+1
- LDA #<do_bytev	\ replace BYTEV
+ LDA #LO(do_bytev	\ replace BYTEV)
  STA bytev
- LDA #>do_bytev
+ LDA #HI(do_bytev)
  STA bytev+1
  PLA
  CLI
