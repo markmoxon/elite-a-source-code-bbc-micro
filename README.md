@@ -4,6 +4,10 @@
 
 This repository contains the original source code for Elite-A on the BBC Micro.
 
+The [source files](sources) have been converted to build on modern computers using BeebAsm.
+
+The original source files can be found in the [sources/original_sources](sources/original_sources) folder, along with details of how the original source files were converted to work with BeebAsm.
+
 ---
 
 Right on, Commanders!
