@@ -1,8 +1,3 @@
-INCLUDE "sources/elite-header.h.asm"
-
-_RELEASED               = (_RELEASE = 1)
-_PATCHED                = (_RELEASE = 2)
-
  \ a.tcode - ELITE III docked code
 
 INCLUDE "sources/a.global.asm"

@@ -4721,8 +4721,6 @@
 
 .new_price
 
-IF _PATCHED
-
  EQUD 270000
 
  EQUS "GECKO    "
@@ -4762,58 +4760,11 @@ IF _PATCHED
  EQUD 2400000
 
  EQUS "ANACONDA "
- EQUD 4000000
+ EQUD 4500000
 
  EQUS "ASP MK2  "
  EQUD 8950000
 
-ELIF _RELEASED
-
- EQUD 310000
-
- EQUS "GECKO    "
- EQUD 400000
-
- EQUS "MORAY    "
- EQUD 565000
-
- EQUS "COBRA MK1"
- EQUD 750000
-
- EQUS "IGUANA   "
- EQUD 1315000
-
- EQUS "OPHIDIAN "
- EQUD 1470000
-
- EQUS "CHAMELEON"
- EQUD 2250000
-
- EQUS "COBRA MK3"
- EQUD 2870000
-
- EQUS "F", &90, "-DE-L", &9B, &85
- EQUD 3595000
-
- EQUS "GHAVIAL  "
- EQUD 3795000
-
- EQUS "MONITOR  "
- EQUD 5855000
-
- EQUS "PYTHON   "
- EQUD 7620000
-
- EQUS "BOA      "
- EQUD 9600000
-
- EQUS "ASP MK2  "
- EQUD 10120000
-
- EQUS "ANACONDA "
- EQUD 18695000
-
-ENDIF
 
 .new_details
 
@@ -4849,8 +4800,6 @@ ENDIF
  EQUB &07, &01,  42, &2B,  70, &00
  EQUB &EF	\, &11, &0A, &00
 
-IF _PATCHED
-
  EQUB &11, &90, &99, &32, &04, &04	\ ghavial
  EQUB &09, &01,  37, &38,  80, &00
  EQUB &CF	\, &31, &09, &00
@@ -4858,18 +4807,6 @@ IF _PATCHED
  EQUB &12, &92, &9C, &32, &04, &04	\ fer-de-lance
  EQUB &08, &02,  45, &0A,  85, &34
  EQUB &DF	\, &21, &09, &00
-
-ELIF _RELEASED
-
- EQUB &12, &92, &9C, &32, &04, &04	\ fer-de-lance
- EQUB &08, &02,  45, &0A,  85, &34
- EQUB &DF	\, &21, &09, &00
-
- EQUB &11, &90, &99, &32, &04, &04	\ ghavial
- EQUB &09, &01,  37, &38,  80, &00
- EQUB &CF	\, &31, &09, &00
-
-ENDIF
 
  EQUB &18, &93, &9C, &32, &04, &09	\ monitor
  EQUB &0A, &01,  24, &52, 110, &4E
@@ -4883,8 +4820,6 @@ ENDIF
  EQUB &0A, &01,  36, &85,  90, &00
  EQUB &BF	\, &41, &0A, &00
 
-IF _PATCHED
-
  EQUB &1C, &90, &7F, &32, &04, &11	\ anaconda
  EQUB &0D, &01,  21, &FE, 100, &4E
  EQUB &AF	\, &51, &0C, &00
@@ -4893,14 +4828,3 @@ IF _PATCHED
  EQUB &0A, &01,  60, &07, 125, &34
  EQUB &DF	\, &21, &07, &00
 
-ELIF _RELEASED
-
- EQUB &10, &91, &9F, &0C, &01, &02	\ asp 2
- EQUB &0A, &01,  60, &07, 125, &34
- EQUB &DF	\, &21, &07, &00
-
- EQUB &1C, &90, &7F, &32, &04, &11	\ anaconda
- EQUB &0D, &01,  21, &FE, 100, &4E
- EQUB &AF	\, &51, &0C, &00
-
-ENDIF

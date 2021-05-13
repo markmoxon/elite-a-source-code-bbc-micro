@@ -1,374 +1,9 @@
 
-.equip
-
- LDA #&20
- JSR clr_scrn
- JSR flush_inp
- LDA #&0C
- STA cursor_x
- LDA #&CF
- JSR spc_token
- LDA #&B9
- JSR header
- \	LDA #&80
- \	STA vdu_stat
- JSR vdu_80
- INC cursor_y
- JSR l_3c91	\ check CTRL
- BPL n_eqship
- JMP n_buyship	\ branch
-
-.jmp_start2
-
- JMP start_loop
-
-.n_eqship
-
- LDA home_tech
- CLC
- ADC #&02
- CMP #&0C
- BCC l_2f30
- LDA #&0E
-
-.l_2f30
-
- STA &81
- STA &03AB
- INC &81
- LDA new_range
- SEC
- SBC cmdr_fuel
- ASL A
- STA equip_costs
- LDA #0
- ROL A
- STA equip_costs+1
- LDX #&01
-
-.l_2f43
-
- STX &89
- JSR new_line
- LDX &89
- CLC
- JSR writed_3
- JSR price_spc
- LDA &89
- CLC
- ADC #&68
- JSR de_token
- LDA &89
- JSR equip_price
- SEC
- LDA #&19
- STA cursor_x
- LDA #&06
- JSR writed_word
- LDX &89
- INX
- CPX &81
- BCC l_2f43
- JSR clr_line
- LDA #&7F
- JSR token_query
- JSR buy_quant
- BEQ jmp_start2
- BCS jmp_start2
- SBC #&00
- LDX #&02
- STX cursor_x
- INC cursor_y
- PHA
- CMP #&02
- BCC equip_space
- LDA cmdr_cargo+&10
- SEC
- LDX #&C
- JSR tot_cargo
- BCC equip_isspace
- LDA #&0E
- JMP query_beep
-
-.equip_isspace
-
- \**
- DEC new_hold	\**
- PLA
- PHA
-
-.equip_space
-
- JSR equip_pay
- PLA
- BNE equip_nfuel
- LDX new_range
- STX cmdr_fuel
- JSR console
- LDA #&00
-
-.equip_nfuel
-
- CMP #&01
- BNE equip_nmisl
- LDX cmdr_misl
- INX
- LDY #&7C
- CPX new_missiles
- BCS l_2fe8
- STX cmdr_misl
- JSR show_missle
-
-.equip_nmisl
-
- LDY #&6B
- CMP #&02
- BNE equip_nhold
- LDX cmdr_hold
- BNE equip_gotit
- DEC cmdr_hold
-
-.equip_nhold
-
- CMP #&03
- BNE equip_necm
- INY
- LDX cmdr_ecm
- BNE equip_gotit
- DEC cmdr_ecm
-
-.equip_necm
-
- CMP #&04
- BNE equip_npulse
- LDY new_pulse
- BNE equip_leap
-
-.equip_npulse
-
- CMP #&05
- BNE equip_nbeam
- LDY new_beam
-
-.equip_leap
-
- BNE equip_frog
-
-.equip_nbeam
-
- LDY #&6F
- CMP #&06
- BNE equip_nscoop
- LDX cmdr_scoop
- BEQ l_3000
-
-.equip_gotit
-
- INC new_hold
-
-.l_2fe8
-
- STY &40
- JSR equip_price2
- JSR add_money
- LDA &40
- JSR spc_token
- LDA #&1F
- JSR de_token
-
-.equip_beep
-
- JSR beep_wait
- JMP start_loop
-
-.l_3000
-
- DEC cmdr_scoop
-
-.equip_nscoop
-
- INY
- CMP #&07
- BNE equip_nescape
- LDX cmdr_escape
- BNE equip_gotit
- DEC cmdr_escape
-
-.equip_nescape
-
- INY
- CMP #&08
- BNE equip_nbomb
- LDX cmdr_bomb
- BNE equip_gotit
- DEC cmdr_bomb
-
-.equip_nbomb
-
- INY
- CMP #&09
- BNE equip_nunit
- LDX cmdr_eunit
- BNE equip_gotit
- LDX new_energy
- STX cmdr_eunit
-
-.equip_nunit
-
- INY
- CMP #&0A
- BNE equip_ndock
- LDX cmdr_dock
- BNE equip_gotit
- DEC cmdr_dock
-
-.equip_ndock
-
- INY
- CMP #&0B
- BNE equip_nhype
- LDX cmdr_ghype
-
-.equip_gfrog
-
- BNE equip_gotit
- DEC cmdr_ghype
-
-.equip_nhype
-
- INY
- CMP #&0C
- BNE equip_nmilt
- LDY new_military
-
-.equip_frog
-
- BNE equip_merge
-
-.equip_nmilt
-
- INY
- CMP #&0D
- BNE equip_nmine
- LDY new_mining
-
-.equip_merge
-
- PHA
- TYA
- PHA
- JSR equip_side
- PLA
- LDY cmdr_laser,X
- BEQ l_3113
- PLA
- LDY #&BB
- BNE equip_gfrog
-
-.l_3113
-
- STA cmdr_laser,X
- PLA
-
-.equip_nmine
-
- JSR buy_money
- JMP equip
-
-.buy_money
-
- JSR price_spc
- LDA #&77
- JSR spc_token
-
 .beep_wait
 
  JSR sound_20
  LDY #&32
  JMP y_sync
-
-.equip_pay
-
- JSR equip_price2
- JSR sub_money
- BCS equip_quit
- LDA #&C5
-
-.query_beep
-
- JSR token_query
- JMP equip_beep
-
-.equip_price
-
- SEC
- SBC #&01
-
-.equip_price2
-
- ASL A
- BEQ n_fcost
- ADC new_costs
-
-.n_fcost
-
- TAY
- LDX equip_costs,Y
- LDA equip_costs+&01,Y
- TAY
-
-.equip_quit
-
- RTS
-
-.equip_side
-
- LDA home_tech
- CMP #&08
- BCC l_309f
- LDA #&20
- JSR clr_scrn
-
-.l_309f
-
- LDY #&10
- STY cursor_y
-
-.l_30a3
-
- LDX #&0C
- STX cursor_x
- LDA cursor_y
- CLC
- ADC #&20
- JSR spc_token
- LDA cursor_y
- CLC
- ADC #&50
- JSR de_token
- INC cursor_y
- LDA new_mounts
- ORA #&10
- CMP cursor_y
- BNE l_30a3
- JSR clr_line
-
-.l_30c1
-
- LDA #&AF
- JSR token_query
- JSR get_keyy
- SEC
- SBC #&30
- CMP new_mounts
- BCC l_30d6
- JSR clr_line
- JMP l_30c1
-
-.l_30d6
-
- TAX
- RTS
 
 .snap_cursor
 
@@ -524,20 +159,16 @@
  DEX
  BEQ show_fuel
  DEX
- \	BNE l_31cb
- \	LDA #&80
- \	STA vdu_stat
- \	RTS
- BEQ vdu_80
- \l_31cb
+ BNE l_31cb
+ LDA #&80
+ STA vdu_stat
+ RTS
+
+.l_31cb
+
  DEX
  DEX
  BNE l_31d2
- EQUB &2C
-
-.vdu_80
-
- LDX #&80
  STX vdu_stat
  RTS
 
@@ -636,10 +267,11 @@
 .l_323f
 
  TAX
- LDY #&00
- STY &22
+ LDA #&00
+ STA &22
  LDA #&04
  STA &23
+ LDY #&00
  TXA
  BEQ l_3260
 
@@ -779,8 +411,6 @@
  STA &1E
  LDA ship_data+&01,Y
  STA &1F
- CPY #&04
- BEQ l_3352
  LDY #&05
  LDA (&1E),Y
  STA &06
@@ -807,9 +437,6 @@
  STA &03B0
  LDA &68
  STA &03B1
-
-.l_3352
-
  LDY #&0E
  LDA (&1E),Y
  STA &69
@@ -837,28 +464,6 @@
  DEY
  BPL l_336d
  SEC
- RTS
-
-.put_missle
-
- TXA
- ASL A
- ASL A
- ASL A
- STA &D1
- LDA #&31-8
- SBC &D1
- STA ptr
- LDA #&7E
- STA ptr+&01
- TYA
- LDY #&05
-
-.l_33ba
-
- STA (ptr),Y
- DEY
- BNE l_33ba
  RTS
 
 .l_33c0
@@ -1314,26 +919,6 @@
  EQUB &13, &04, &C2, &FF
  EQUB &13, &00, &00, &00
 
-.clr_boot
-
- JSR clr_ships
- LDX #&06
-
-.l_3687
-
- STA &2A,X
- DEX
- BPL l_3687
- TXA
- STA &8E
- LDX #&02
-
-.l_3691
-
- STA f_shield,X
- DEX
- BPL l_3691
-
 .clr_common
 
  LDA #&12
@@ -1366,7 +951,6 @@
  STA &03B0
  LDA #&0C
  STA &03B1
- JSR console
 
 .init_ship
 
@@ -1384,30 +968,6 @@
  ORA #&80
  STA &54
  RTS
-
-.show_missle
-
- LDX #&03
-
-.l_36ef
-
- LDY #&00
- CPX cmdr_misl
- BCS miss_miss	\BCC l_36fd
- LDY #&EE
-
-.miss_miss
-
- JSR put_missle
- DEX
- BPL l_36ef
- RTS
- \l_36fd
- \	LDY #&EE
- \	JSR put_missle
- \	DEX
- \	BPL l_36fd
- \	RTS
 
 .l_3706
 
@@ -1462,7 +1022,7 @@
 
  CMP #&76
  BNE not_status
- JMP status
+ JMP info_menu
 
 .not_status
 
@@ -1480,6 +1040,12 @@
 
  CMP #&75
  BNE not_data
+ JSR l_3c91
+ BPL jump_data
+ JMP launch
+
+.jump_data
+
  JSR snap_hype
  JMP data_onsys
 
@@ -1487,57 +1053,30 @@
 
  CMP #&77
  BNE not_invnt
- JMP inventory
+ JMP info_menu
 
 .not_invnt
 
  CMP #&16
  BNE not_price
- JMP mark_price
+ JMP info_menu
 
 .not_price
 
  CMP #&20
- BNE not_launch
- JSR l_3c91
- BMI jump_stay
- JMP launch
-
-.jump_stay
-
- JMP stay_here
-
-.not_launch
-
+ BEQ jump_menu
+ CMP #&71
+ BEQ jump_menu
+ CMP #&72
+ BEQ jump_menu
  CMP #&73
  BNE not_equip
- JMP equip
+
+.jump_menu
+
+ JMP info_menu
 
 .not_equip
-
- CMP #&71
- BNE not_buy
- JMP buy_cargo
-
-.not_buy
-
- CMP #&47
- BNE not_disk
- JSR disk_menu
- BCC not_loaded
- JMP not_loadc
-
-.not_loaded
-
- JMP start_loop
-
-.not_disk
-
- CMP #&72
- BNE not_sell
- JMP sell_cargo
-
-.not_sell
 
  CMP #&54
  BNE not_hype
@@ -1603,9 +1142,8 @@
  JSR snap_cursor
  STA vdu_stat
  JSR write_planet
- \	LDA #&80
- \	STA vdu_stat
- JSR vdu_80
+ LDA #&80
+ STA vdu_stat
  LDA #&01
  STA cursor_x
  INC cursor_y
@@ -1615,238 +1153,22 @@
 
  EQUB &00
 
+.jmp_escape
+
+ JMP escape
+
 .brk_go
 
  DEC err_count
- BNE escape
+ BNE jmp_escape
  JSR clr_common
-
-.boot_go
-
- JSR set_brk
- LDX #&0A
- LDA #&00
-
-.l_387c
-
- STA &03C5,X
- DEX
- BPL l_387c
- LDA #&7F	\ IN
- STA b_flag	\ IN
-
-.stack_init
-
- LDX #&FF
- TXS
-
-.escape
-
- LDX #&03
- STX cursor_x
- JSR fx2000
- LDX #&0B
- LDA #&06
- JSR rotate
- CMP #&44
- BNE not_loadc
- JSR copy_cmdr
- JSR disk_menu
-
-.not_loadc
-
- JSR copy_cmdr
- JSR show_missle
- LDA #&07
- LDX #&13
- JSR rotate
- JSR set_home
- JSR home_setup
 
 .start_loop
 
  LDA #&FF
  STA &8E
- LDA #&76
+ LDA #&73
  JMP function
-
-.copy_cmdr
-
- LDX #&53
-
-.l_38bb
-
- LDA &1180,X
- STA &034F,X
- DEX
- BNE l_38bb
- STX &87
-
-.l_38c6
-
- JSR cmdr_code
- CMP commander+&4B
- BNE l_38c6
- JMP n_load	\ load ship details
-
-.rotate
-
- PHA
- STX &8C
- JSR clr_boot
- LDA #&01
- JSR clr_scrn
- DEC &87
- LDA #&60
- STA &54
- LDA #&DB
- STA &4D
- LDX #&7F
- STX &63
- STX &64
- \	INX
- \	STX vdu_stat
- JSR vdu_80
- LDA &8C
- JSR ins_ship
- LDY #&06
- STY cursor_x
- LDA #&1E
- JSR de_tokln
- LDY #&06
- STY cursor_x
- INC cursor_y
- LDA x_flag
- BEQ l_392b
- LDA #&0D
- JSR write_msg1
- INC cursor_y
- INC cursor_y
- LDA #&03
- STA cursor_x
- LDA #&72
- JSR write_msg1
-
-.l_392b
-
- LDA err_count
- BEQ l_3945
- INC err_count
- LDA #&07
- STA cursor_x
- LDA #&0A
- STA cursor_y
- LDY #&00
-
-.l_393d
-
- JSR oswrch
- INY
- LDA (brk_line),Y
- BNE l_393d
-
-.l_3945
-
- JSR clr_line
- STY &7D
- STY k_flag
- PLA
- JSR write_msg1
- LDA #&0C
- LDX #&07
- STX cursor_x
- JSR write_msg1
-
-.l_395a
-
- LDA &4D
- CMP #&01
- BEQ l_3962
- DEC &4D
-
-.l_3962
-
- JSR l_14e1
- LDA #&80
- STA &4C
- ASL A
- STA &46
- STA &49
- JSR l_400f
- DEC &8A
- LDA #&51
- STA &FE60
- LDA &FE40
- AND #&10
- BEQ l_3980
- JSR scan_10
- BEQ l_395a
- RTS
-
-.l_3980
-
- DEC k_flag
- RTS
-
-.cmdr_code
-
- LDX #&49
- SEC
- TXA
-
-.l_3988
-
- ADC &1188,X
- EOR commander,X
- DEX
- BNE l_3988
- RTS
-
-.copy_name
-
- LDX #&07
-
-.l_3994
-
- LDA &4B,X
- STA &1181,X
- DEX
- BPL l_3994
-
-.l_399c
-
- LDX #&07
-
-.l_399e
-
- LDA &1181,X
- STA &4B,X
- DEX
- BPL l_399e
- RTS
-
-.get_fname
-
- LDY #&08
- JSR y_sync
- LDX #&04
-
-.l_39ae
-
- LDA &117C,X
- STA &46,X
- DEX
- BPL l_39ae
- LDA #&07
- STA word_0+&02
- LDA #&08
- JSR write_msg1
- JSR get_line
- LDA #&09
- STA word_0+&02
- TYA
- BEQ l_399c
- RTS
 
 .get_line
 
@@ -1883,12 +1205,6 @@
  BPL l_39f2
  RTS
 
-.clr_bc
-
- LDX #&0C
- JSR clr_page
- DEX
-
 .clr_page
 
  LDY #&00
@@ -1905,247 +1221,6 @@
  INY
  BNE l_3a07
  RTS
-
-.cat_line
-
- EQUS ".:0", &0D
-
-.del_line
-
- EQUS "DEL.:0.E.1234567", &0D
-
-.show_cat
-
- JSR get_drive
- BCS cat_quit
- STA cat_line+&02
- STA l_1c8d+&01
- LDA #&04
- JSR write_msg1
- \	LDA &0355
- \	PHA
- LDA #&01
- STA &0355
- STA &03CF
- STA cursor_x
- LDX #LO(cat_line)
- LDY #HI(cat_line)
- JSR oscli
- DEC &03CF
- \	PLA
- LDA &1186
- STA &0355
- CLC
-
-.cat_quit
-
- RTS
-
-.disk_del
-
- JSR show_cat
- BCS disk_menu
- LDA cat_line+&02
- STA del_line+&05
- LDA #&09
- JSR write_msg1
- JSR get_line
- TYA
- BEQ disk_menu
- LDX #&09
-
-.l_3a5b
-
- LDA &4A,X
- STA del_line+&06,X
- DEX
- BNE l_3a5b
- LDX #LO(del_line)
- LDY #HI(del_line)
- JSR oscli
- JMP disk_menu
- \l_3a6d
- \	EQUB &00
-
-.brk_new
-
- LDX #&FF	\LDX l_3a6d
- TXS
- LDY #&00
- LDA #&07
-
-.l_3a76
-
- JSR oswrch
- INY
- LDA (brk_line),Y
- BNE l_3a76
- BEQ l_3a83
-
-.disk_cat
-
- JSR show_cat
-
-.l_3a83
-
- JSR get_key
-
-.disk_menu
-
- JSR clr_bc
- TSX
- STX brk_new+&01	\STX l_3a6d
- LDA #LO(brk_new)
- STA brk_in+&01
- LDA #HI(brk_new)
- STA brk_in+&02
- LDA #&01
- JSR write_msg1
- JSR get_key
- CMP #&31
- BCC disk_exit
- CMP #&34
- BEQ disk_del
- BCS disk_exit
- CMP #&32
- BCS not_dload
- LDA #&00
- JSR confirm
- BNE disk_exit
- JSR get_fname
- JSR read_file
- JSR copy_name
- SEC
- BCS l_3b15
-
-.not_dload
-
- BNE disk_cat
- LDA #&FF
- JSR confirm
- BNE disk_exit
- JSR get_fname
- JSR copy_name
- LDX #&4B
-
-.l_3acb
-
- LDA cmdr_mission,X
- STA &0B00,X
- STA commander,X
- DEX
- BPL l_3acb
- JSR cmdr_code
- STA commander+&4B
- STA &0B4B
- EOR #&A9
- STA commander+&4A
- STA &0B4A
- LDY #&0B
- STY &0C0B
- INY
- STY &0C0F
- LDA #&00
- JSR disk_file
-
-.disk_exit
-
- CLC
-
-.l_3b15
-
- JMP set_brk
-
-.confirm
-
- CMP save_lock
- BEQ confirmed
- LDA #&03
- JSR write_msg1
- JSR get_key
- JSR wrchdst
- ORA #&20
- PHA
- JSR new_line
- JSR l_1c8a
- PLA
- CMP #&79
-
-.confirmed
-
- RTS
-
-.disk_file
-
- PHA
- JSR get_drive
- STA &47
- PLA
- BCS file_quit
- STA save_lock
- LDX #&46
- STX &0C00
- LDX #&00
- LDY #&0C
- JSR osfile
- CLC
-
-.file_quit
-
- RTS
-
-.get_drive
-
- LDA #&02
- JSR write_msg1
- JSR get_key
- ORA #&10
- JSR wrchdst
- PHA
- JSR l_1c8a
- PLA
- CMP #&30
- BCC bad_stat
- CMP #&34
- RTS
-
-.read_file
-
- JSR clr_bc
- LDY #&0B
- STY &0C03
- INC &0C0B
- LDA #&FF
- JSR disk_file
- BCS bad_stat
- LDA &0B00
- BMI illegal
- LDX #&4B
-
-.l_3b61
-
- LDA &0B00,X
- STA commander,X
- DEX
- BPL l_3b61
-
-.bad_stat
-
- SEC
- RTS
-
-.illegal
-
- BRK
- EQUB &49
- EQUS "Not ELITE III file"
- BRK
-
-.fx2000
-
- LDY #&00
- LDA #&C8
- JMP osbyte
 
 .l_3bd6
 
@@ -2325,7 +1400,6 @@
 
  JSR tog_flag
  INY
- \	CPY #&47
  CPY #&48
  BNE flag_loop
  CPX #&10
@@ -2403,26 +1477,6 @@
  BEQ frz_ret
  LDA #&FD
  JMP de_token
-
-.cargo_data
-
- EQUB &13, &82, &06, &01
- EQUB &14, &81, &0A, &03
- EQUB &41, &83, &02, &07
- EQUB &28, &85, &E2, &1F
- EQUB &53, &85, &FB, &0F
- EQUB &C4, &08, &36, &03
- EQUB &EB, &1D, &08, &78
- EQUB &9A, &0E, &38, &03
- EQUB &75, &06, &28, &07
- EQUB &4E, &01, &11, &1F
- EQUB &7C, &0D, &1D, &07
- EQUB &B0, &89, &DC, &3F
- EQUB &20, &81, &35, &03
- EQUB &61, &A1, &42, &07
- EQUB &AB, &A2, &37, &1F
- EQUB &2D, &C1, &FA, &0F
- EQUB &35, &0F, &C0, &07
 
 .l_3dea
 
@@ -2697,9 +1751,6 @@
 
  CMP &81
  BCS l_3f93
-
-.l_3f79
-
  LDX #&FE
  STX &82
 
@@ -4203,18 +3254,335 @@
 
  EOR &3D
  RTS
- \ additions start here
 
-.n_buyship
+
+.info_menu
 
  LDX #&00
- SEC
- LDA #&0F	\LDA #&0D
- SBC home_econ
- SBC home_econ	\++
- STA &03AB
+ JSR menu
+ CMP #&01
+ BNE n_shipsag
+ JMP ships_ag
 
-.n_bloop
+.n_shipsag
+
+ CMP #&02
+ BNE n_shipskw
+ JMP ships_kw
+
+.n_shipskw
+
+ CMP #&03
+ BNE n_equipdat
+ JMP equip_data
+
+.n_equipdat
+
+ CMP #&04
+ BNE n_controls
+ JMP controls
+
+.n_controls
+
+ CMP #&05
+ BNE jmp_start3
+ JMP trading
+
+.jmp_start3
+
+ JSR beep_wait
+ JMP start_loop
+
+.ships_ag
+
+
+.ships_kw
+
+ PHA
+ TAX
+ JSR menu
+ SBC #&00
+ PLP
+ BCS ship_over
+ ADC menu_entry+1
+
+.ship_over
+
+ STA &8C
+ CLC
+ ADC #&07
+ PHA
+ LDA #&20
+ JSR clr_scrn
+ JSR clr_deflowr
+ LDX &8C
+ LDA ship_file,X
+ CMP ship_load+&04
+ BEQ ship_skip
+ STA ship_load+&04
+ LDX #LO(ship_load)
+ LDY #HI(ship_load)
+ JSR oscli
+
+.ship_skip
+
+ LDX &8C
+ LDA ship_centre,X
+ STA cursor_x
+ PLA
+ JSR write_msg2
+ JSR hline_19
+ JSR init_ship
+ LDA #&60
+ STA &54
+ LDA #&B0
+ STA &4D
+ LDX #&7F
+ STX &63
+ STX &64
+ INX
+ STA vdu_stat
+ LDA &8C
+ JSR write_card
+ LDX &8C
+ LDA ship_posn,X
+ JSR ins_ship
+
+.l_release
+
+ JSR scan_10
+ BNE l_release
+
+.l_395a
+
+ LDX &8C
+ LDA ship_dist,X
+ CMP &4D
+ BEQ l_3962
+ DEC &4D
+
+.l_3962
+
+ JSR l_14e1
+ LDA #&80
+ STA &4C
+ ASL A
+ STA &46
+ STA &49
+ JSR l_400f
+ DEC &8A
+ JSR sync
+ JSR scan_10
+ BEQ l_395a
+ JMP start_loop
+
+.controls
+
+ LDX #&03
+ JSR menu
+ ADC #&56
+ PHA
+ ADC #&04
+ PHA
+ LDA #&20
+ JSR clr_scrn
+ JSR clr_deflowr
+ LDA #&0B
+ STA cursor_x
+ PLA
+ JSR write_msg2
+ JSR hline_19
+ JSR set_deflowr
+ INC cursor_y
+ PLA
+ JSR write_msg2
+ JMP l_restart
+
+.equip_data
+
+ LDX #&04
+ JSR menu
+ ADC #&6B
+ PHA
+ SBC #&0C
+ PHA
+ LDA #&20
+ JSR clr_scrn
+ JSR clr_deflowr
+ LDA #&0B
+ STA cursor_x
+ PLA
+ JSR write_msg2
+ JSR hline_19
+ JSR set_deflowr
+ JSR set_forclwr
+ INC cursor_y
+ INC cursor_y
+ LDA #&01
+ STA cursor_x
+ PLA
+ JSR write_msg2
+ JMP l_restart
+
+.trading
+
+
+.l_restart
+
+ JSR l_250e
+ JMP start_loop
+
+
+.write_card
+
+ ASL A
+ TAY
+ LDA card_addr,Y
+ STA &22
+ LDA card_addr+1,Y
+ STA &23
+
+.card_repeat
+
+ JSR clr_deflowr
+ LDY #&00
+ LDA (&22),Y
+ TAX
+ BEQ quit_card
+ BNE card_check
+
+.card_find
+
+ INY
+ INY
+ INY
+ LDA card_pattern-1,Y
+ BNE card_find
+
+.card_check
+
+ DEX
+ BNE card_find
+
+.card_found
+
+ LDA card_pattern,Y
+ STA cursor_x
+ LDA card_pattern+1,Y
+ STA cursor_y
+ LDA card_pattern+2,Y
+ BEQ card_details
+ JSR write_msg2
+ INY
+ INY
+ INY
+ BNE card_found
+
+.card_details
+
+ JSR set_deflowr
+ LDY #&00
+
+.card_loop
+
+ INY
+ LDA (&22),Y
+ BEQ card_end
+ BMI card_msg
+ CMP #&20
+ BCC card_macro
+ JSR msg_alpha
+ JMP card_loop
+
+.card_macro
+
+ JSR msg_macro
+ JMP card_loop
+
+.card_msg
+
+ CMP #&D7
+ BCS card_pairs
+ AND #&7F
+ JSR write_msg2
+ JMP card_loop
+
+.card_pairs
+
+ JSR msg_pairs
+ JMP card_loop
+
+.card_end
+
+ TYA
+ SEC
+ ADC &22
+ STA &22
+ BCC card_repeat
+ INC &23
+ BCS card_repeat
+
+.quit_card
+
+ RTS
+
+
+.ship_load
+
+ EQUS "L.S.0", &0D
+
+
+.ship_file
+
+ EQUB 'A', 'H', 'I', 'K', 'J', 'P', 'B'
+ EQUB 'N', 'A', 'B', 'A', 'M', 'E', 'B'
+ EQUB 'G', 'I', 'M', 'A', 'O', 'F', 'E'
+ EQUB 'L', 'L', 'C', 'C', 'P', 'A', 'H'
+
+
+.ship_posn
+
+ EQUB 19, 14, 27, 11, 20, 12, 17
+ EQUB 11,  2,  2,  3, 25, 17, 11
+ EQUB 20, 17, 17, 11, 22, 21, 11
+ EQUB  9, 17, 29, 30, 10, 16, 15
+
+
+.ship_dist
+
+ EQUB &01, &02, &01, &02, &01, &01, &01
+ EQUB &02, &04, &04, &01, &01, &01, &02
+ EQUB &01, &02, &01, &02, &01, &01, &02
+ EQUB &01, &01, &03, &01, &01, &01, &01
+
+
+.menu
+
+ LDA menu_entry,X
+ STA &03AB
+ LDA menu_offset,X
+ STA &03AD
+ LDA menu_query,X
+ PHA
+ LDA menu_title,X	
+ PHA
+ LDA menu_titlex,X
+ PHA
+ LDA #&20
+ JSR clr_scrn
+ JSR clr_deflowr
+ PLA
+ STA cursor_x
+ PLA
+ JSR write_msg2
+ JSR hline_19
+ JSR set_deflowr
+ LDA #&80
+ STA vdu_stat
+ INC cursor_y
+ LDX #&00
+
+.menu_loop
 
  STX &89
  JSR new_line
@@ -4223,684 +3591,46 @@
  CLC
  JSR writed_3
  JSR price_spc
- LDY &89
- JSR n_name
- LDY &89
- JSR n_price
- LDA #&16
- STA cursor_x
- LDA #&09
- STA &80
- SEC
- JSR l_1bd0
+ CLC
+ LDA &89
+ ADC &03AD
+ JSR write_msg2
  LDX &89
  INX
  CPX &03AB
- BCC n_bloop
+ BCC menu_loop
  JSR clr_line
- LDA #&B9
- JSR token_query
- JSR buy_quant
- BEQ jmp_start3
- BCS jmp_start3
- SBC #&00
- CMP &03AB
- BCS jmp_start3
- LDX #&02
- STX cursor_x
- INC cursor_y
- STA &81
- LDY new_type
- JSR n_price
- CLC
- LDX #3
-
-.n_addl
-
- LDA cmdr_money,X
- ADC &40,X
- STA &09,X
- DEX
- BPL n_addl
- LDY &81
- JSR n_price
- SEC
- LDX #3
-
-.n_subl
-
- LDA &09,X
- SBC &40,X
- STA &40,X
- DEX
- BPL n_subl
- LDA &81
- BCS n_buy
-
-.cash_query
-
- LDA #&C5
- JSR token_query
-
-.jmp_start3
-
- JSR beep_wait
- JMP start_loop
-
-.n_buy
-
- TAX
- LDY #3
-
-.n_cpyl
-
- LDA &40,Y
- STA cmdr_money,Y
- DEY
- BPL n_cpyl
- LDA #&00
- LDY #&24
-
-.n_wipe
-
- STA &0368,Y
- DEY
- BPL n_wipe
- STX new_type
- JSR n_load
- LDA new_range
- STA cmdr_fuel
- JSR show_missle
- JMP start_loop
-
-
-.n_load
-
- LDY new_type
- LDX new_offsets,Y
- LDY #0
-
-.n_lname
-
- CPY #9
- BCS n_linfo
- LDA new_ships,X
- EOR #&23
- STA new_name,Y
-
-.n_linfo
-
- LDA new_details,X
- STA new_pulse,Y
- INX
- INY
- CPY #13
- BNE n_lname
- LDA new_max
- EOR #&FE
- STA new_min
- LDY #&0B
-
-.count_lasers
-
- LDX count_offs,Y
- LDA cmdr_laser,X
- BEQ count_sys
- DEC new_hold	\**
-
-.count_sys
-
- DEY
- BPL count_lasers
- RTS
-
-.count_offs
-
- EQUB &00, &01, &02, &03, &06, &18, &19, &1A, &1B, &1C, &1D, &1E
-
-
-.n_name
-
- \ name ship in 0 <= Y <= &C
- LDX new_offsets,Y
- LDA #9
- STA &41
-
-.n_lprint
-
- LDA new_ships,X
- STX &40
- JSR de_token
- LDX &40
- INX
- DEC &41
- BNE n_lprint
- RTS
-
-
-.n_price
-
- \ put price 0 <= Y <= &C into 40-43
- LDX new_offsets,Y
- LDY #3
-
-.n_lprice
-
- LDA new_price,X
- STA &40,Y
- INX
- DEY
- BPL n_lprice
- RTS
-
-
-.cour_buy
-
- LDA cmdr_cour
- ORA cmdr_cour+1
- BEQ cour_start
- JMP jmp_start3
-
-.cour_start
-
- LDA #&0A
- STA cursor_x
- LDA #&6F
- JSR write_msg1
- JSR hline_19
- \	LDA #&80
- \	STA vdu_stat
- JSR vdu_80
- LDA cmdr_price
- EOR cmdr_homex
- EOR cmdr_homey
- EOR cmdr_legal
- EOR cmdr_kills
- STA &46
- SEC
- LDA cmdr_legal
- ADC cmdr_galxy
- ADC cmdr_ship
- STA &47
- ADC &46
- SBC cmdr_courx
- SBC cmdr_coury
- AND #&0F
- STA &03AB
- BEQ cour_pres
- LDA #&00
- STA &49
- STA &4C
- JSR copy_xy
-
-.cour_loop
-
- LDA &49
- CMP &03AB
- BCC cour_count
-
-.cour_menu
-
- JSR clr_line
- LDA #&CE
- JSR token_query
- JSR buy_quant
- BEQ cour_pres
- BCS cour_pres
- TAX
- DEX
- CPX &49
- BCS cour_pres
- LDA #&02
- STA cursor_x
- INC cursor_y
- STX &46
- LDY &0C50,X
- LDA &0C40,X
- TAX
- JSR sub_money
- BCS cour_cash
- JMP cash_query
-
-.cour_cash
-
- LDX &46
- LDA &0C00,X
- STA cmdr_courx
- LDA &0C10,X
- STA cmdr_coury
- CLC
- LDA &0C20,X
- ADC cmdr_legal
- STA cmdr_legal
- LDA &0C30,X
- STA cmdr_cour+1
- LDA &0C40,X
- STA cmdr_cour
-
-.cour_pres
-
- JMP jmp_start3
-
-.cour_count
-
- JSR permute_4
- INC &4C
- BEQ cour_menu
- DEC &46
- BNE cour_count	
- LDX &49
- LDA &6F
- CMP cmdr_homex
- BNE cour_star
- LDA &6D
- CMP cmdr_homey
- BNE cour_star
- JMP cour_next
-
-.cour_star
-
- LDA &6F
- EOR &71
- EOR &47
- CMP cmdr_legal
- BCC cour_legal
- LDA #0
-
-.cour_legal
-
- STA &0C20,X
- LDA &6F
- STA &0C00,X
- SEC
- SBC cmdr_homex
- BCS cour_negx
- EOR #&FF
- ADC #&01
-
-.cour_negx
-
- JSR square
- STA &41
- LDA &1B
- STA &40
- LDX &49
- LDA &6D
- STA &0C10,X
- SEC
- SBC cmdr_homey
- BCS cour_negy
- EOR #&FF
- ADC #&01
-
-.cour_negy
-
- LSR A
- JSR square
- PHA
- LDA &1B
- CLC
- ADC &40
- STA &81
  PLA
- ADC &41
- STA &82
- JSR sqr_root
- LDX &49
- LDA &6D
- EOR &71
- EOR &47
- LSR A
- LSR A
- LSR A
- CMP &81
- BCS cour_dist
- LDA &81
-
-.cour_dist
-
- ORA &0C20,X
- STA &0C30,X
- STA &4A
- LSR A
- ROR &4A
- LSR A
- ROR &4A
- LSR A
- ROR &4A
- STA &4B
- STA &0C50,X
- LDA &4A
- STA &0C40,X
- LDA #&01
- STA cursor_x
- CLC
- LDA &49
- ADC #&03
- STA cursor_y
- LDX &49
- INX
- CLC
- JSR writed_3
- JSR price_spc
- JSR write_planet
- LDX &4A
- LDY &4B
- SEC
- LDA #&19
- STA cursor_x
- LDA #&06
- JSR writed_word
- INC &49
-
-.cour_next
-
- LDA &47
- STA &46
- JMP cour_loop
-
-
-.cour_dock
-
- LDA cmdr_cour
- ORA cmdr_cour+1
- BEQ cour_quit
- LDA cmdr_homex
- CMP cmdr_courx
- BNE cour_half
- LDA cmdr_homey
- CMP cmdr_coury
- BNE cour_half
- LDA #&02
- JSR clr_scrn
- LDA #&06
- STA cursor_x
- LDA #&0A
- STA cursor_y
- LDA #&71
- JSR write_msg1
- LDX cmdr_cour
- LDY cmdr_cour+1
- SEC
- LDA #&06
- JSR writed_word
- LDA #&E2
- JSR de_token
- LDX cmdr_cour
- LDY cmdr_cour+1
- JSR add_money
- LDA #0
- STA cmdr_cour
- STA cmdr_cour+1
- LDY #&60
- JSR y_sync
-
-.cour_half
-
- LSR cmdr_cour+1
- ROR cmdr_cour
-
-.cour_quit
-
+ JSR write_msg2
+ LDA #'?'
+ JSR punctuate
+ JSR buy_quant
+ BEQ menu_start
+ BCS menu_start
  RTS
 
-
-.stay_here
-
- LDX #&F4
- LDY #&01
- JSR sub_money
- BCC stay_quit
- JSR cour_dock
- JSR rnd_seq
- STA cmdr_price
- LDX #&00
- STX &96
-
-.d_31d8
-
- LDA cargo_data+&01,X
- STA &74
- JSR mult_flag
- LDA cargo_data+&03,X
- AND cmdr_price
- CLC
- ADC cargo_data+&02,X
- LDY &74
- BMI d_31f4
- SEC
- SBC &76
- JMP d_31f7
-
-.d_31f4
-
- CLC
- ADC &76
-
-.d_31f7
-
- BPL d_31fb
- LDA #&00
-
-.d_31fb
-
- LDY &96
- AND #&3F
- STA cmdr_avail,Y
- INY
- TYA
- STA &96
- ASL A
- ASL A
- TAX
- CMP #&3F
- BCC d_31d8
-
-.stay_quit
+.menu_start
 
  JMP start_loop
 
 
-.new_offsets
+.menu_title
 
- EQUB   0,  13,  26,  39,  52,  65,  78,  91
- EQUB 104, 117, 130, 143, 156, 169, 182	\, 195
+ EQUB &01, &02, &03, &05, &04
 
- \ Name
- \ Price
- \ Pulse, Beam, Military, Mining Lasers, Mounts, Missiles
- \ Shields, Energy, Speed, Hold, Range, Costs
- \ Manouvre-h, Manoevre-l	\, Spare, Spare
+.menu_titlex
 
-.new_ships
+ EQUB &05, &0C, &0C, &0C, &0B
 
+.menu_offset
 
-.new_adder
+ EQUB &02, &07, &15, &5B, &5F
 
- EQUS "ADDER    "
+.menu_entry
 
-.new_price
+ EQUB &04, &0E, &0E, &04, &0D
 
-IF _PATCHED
+.menu_query
 
- EQUD 270000
+ EQUB &06, &43, &43, &05, &04
 
- EQUS "GECKO    "
- EQUD 325000
-
- EQUS "MORAY    "
- EQUD 360000
-
- EQUS "COBRA MK1"
- EQUD 395000
-
- EQUS "IGUANA   "
- EQUD 640000
-
- EQUS "OPHIDIAN "
- EQUD 645000
-
- EQUS "CHAMELEON"
- EQUD 975000
-
- EQUS "COBRA MK3"
- EQUD 1000000
-
- EQUS "GHAVIAL  "
- EQUD 1365000
-
- EQUS "F", &90, "-DE-L", &9B, &85
- EQUD 1435000
-
- EQUS "MONITOR  "
- EQUD 1750000
-
- EQUS "PYTHON   "
- EQUD 2050000
-
- EQUS "BOA      "
- EQUD 2400000
-
- EQUS "ANACONDA "
- EQUD 4000000
-
- EQUS "ASP MK2  "
- EQUD 8950000
-
-ELIF _RELEASED
-
- EQUD 310000
-
- EQUS "GECKO    "
- EQUD 400000
-
- EQUS "MORAY    "
- EQUD 565000
-
- EQUS "COBRA MK1"
- EQUD 750000
-
- EQUS "IGUANA   "
- EQUD 1315000
-
- EQUS "OPHIDIAN "
- EQUD 1470000
-
- EQUS "CHAMELEON"
- EQUD 2250000
-
- EQUS "COBRA MK3"
- EQUD 2870000
-
- EQUS "F", &90, "-DE-L", &9B, &85
- EQUD 3595000
-
- EQUS "GHAVIAL  "
- EQUD 3795000
-
- EQUS "MONITOR  "
- EQUD 5855000
-
- EQUS "PYTHON   "
- EQUD 7620000
-
- EQUS "BOA      "
- EQUD 9600000
-
- EQUS "ASP MK2  "
- EQUD 10120000
-
- EQUS "ANACONDA "
- EQUD 18695000
-
-ENDIF
-
-.new_details
-
- EQUB &0E, &8E, &92, &19, &02, &02	\ adder
- EQUB &04, &01,  36, &09,  60, &1A
- EQUB &DF	\, &21, &05, &00
-
- EQUB &0E, &8F, &93, &19, &04, &03	\ gecko
- EQUB &05, &01,  45, &0A,  70, &1A
- EQUB &EF	\, &11, &06, &00
-
- EQUB &10, &8F, &96, &19, &04, &03	\ moray
- EQUB &06, &01,  38, &0C,  80, &68
- EQUB &EF	\, &11, &07, &00
-
- EQUB &0E, &8E, &94, &19, &04, &04	\ cobra 1
- EQUB &05, &01,  39, &0F,  60, &1A
- EQUB &CF	\, &31, &08, &00
-
- EQUB &0E, &8E, &94, &19, &04, &04	\ iguana
- EQUB &07, &01,  50, &16,  75, &00
- EQUB &DF	\, &21, &08, &00
-
- EQUB &0D, &8D, &90, &0C, &01, &03	\ ophidian
- EQUB &04, &01,  51, &19,  70, &68
- EQUB &FF	\, &01, &06, &00
-
- EQUB &10, &8F, &97, &32, &02, &04	\ chameleon
- EQUB &08, &01,  43, &24,  80, &68
- EQUB &DF	\, &21, &05, &00
-
- EQUB &12, &8F, &98, &32, &04, &05	\ cobra 3
- EQUB &07, &01,  42, &2B,  70, &00
- EQUB &EF	\, &11, &0A, &00
-
-IF _PATCHED
-
- EQUB &11, &90, &99, &32, &04, &04	\ ghavial
- EQUB &09, &01,  37, &38,  80, &00
- EQUB &CF	\, &31, &09, &00
-
- EQUB &12, &92, &9C, &32, &04, &04	\ fer-de-lance
- EQUB &08, &02,  45, &0A,  85, &34
- EQUB &DF	\, &21, &09, &00
-
-ELIF _RELEASED
-
- EQUB &12, &92, &9C, &32, &04, &04	\ fer-de-lance
- EQUB &08, &02,  45, &0A,  85, &34
- EQUB &DF	\, &21, &09, &00
-
- EQUB &11, &90, &99, &32, &04, &04	\ ghavial
- EQUB &09, &01,  37, &38,  80, &00
- EQUB &CF	\, &31, &09, &00
-
-ENDIF
-
- EQUB &18, &93, &9C, &32, &04, &09	\ monitor
- EQUB &0A, &01,  24, &52, 110, &4E
- EQUB &BF	\, &41, &0C, &00
-
- EQUB &18, &92, &9B, &32, &04, &05	\ python
- EQUB &0B, &01,  30, &6B,  80, &1A
- EQUB &AF	\, &51, &09, &00
-
- EQUB &14, &8E, &98, &32, &02, &07	\ boa
- EQUB &0A, &01,  36, &85,  90, &00
- EQUB &BF	\, &41, &0A, &00
-
-IF _PATCHED
-
- EQUB &1C, &90, &7F, &32, &04, &11	\ anaconda
- EQUB &0D, &01,  21, &FE, 100, &4E
- EQUB &AF	\, &51, &0C, &00
-
- EQUB &10, &91, &9F, &0C, &01, &02	\ asp 2
- EQUB &0A, &01,  60, &07, 125, &34
- EQUB &DF	\, &21, &07, &00
-
-ELIF _RELEASED
-
- EQUB &10, &91, &9F, &0C, &01, &02	\ asp 2
- EQUB &0A, &01,  60, &07, 125, &34
- EQUB &DF	\, &21, &07, &00
-
- EQUB &1C, &90, &7F, &32, &04, &11	\ anaconda
- EQUB &0D, &01,  21, &FE, 100, &4E
- EQUB &AF	\, &51, &0C, &00
-
-ENDIF

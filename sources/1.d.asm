@@ -1,3 +1,8 @@
+INCLUDE "sources/elite-header.h.asm"
+
+_RELEASED               = (_RELEASE = 1)
+_PATCHED                = (_RELEASE = 2)
+
 ORG &11E3
 
 INCBIN "output/tcode.bin"

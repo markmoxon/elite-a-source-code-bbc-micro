@@ -4461,9 +4461,7 @@
 
 .new_price
 
-_PATCH = FALSE
-
-IF _PATCH
+IF _PATCHED
 
  EQUD 270000
 
@@ -4509,7 +4507,7 @@ IF _PATCH
  EQUS "ASP MK2  "
  EQUD 8950000
 
-ELSE
+ELIF _RELEASED
 
  EQUD 310000
 
@@ -4591,7 +4589,7 @@ ENDIF
  EQUB &07, &01,  42, &2B,  70, &00
  EQUB &EF	\, &11, &0A, &00
 
-IF _PATCH
+IF _PATCHED
 
  EQUB &11, &90, &99, &32, &04, &04	\ ghavial
  EQUB &09, &01,  37, &38,  80, &00
@@ -4601,7 +4599,7 @@ IF _PATCH
  EQUB &08, &02,  45, &0A,  85, &34
  EQUB &DF	\, &21, &09, &00
 
-ELSE
+ELIF _RELEASED
 
  EQUB &12, &92, &9C, &32, &04, &04	\ fer-de-lance
  EQUB &08, &02,  45, &0A,  85, &34
@@ -4625,7 +4623,7 @@ ENDIF
  EQUB &0A, &01,  36, &85,  90, &00
  EQUB &BF	\, &41, &0A, &00
 
-IF _PATCH
+IF _PATCHED
 
  EQUB &1C, &90, &7F, &32, &04, &11	\ anaconda
  EQUB &0D, &01,  21, &FE, 100, &4E
@@ -4635,7 +4633,7 @@ IF _PATCH
  EQUB &0A, &01,  60, &07, 125, &34
  EQUB &DF	\, &21, &07, &00
 
-ELSE
+ELIF _RELEASED
 
  EQUB &10, &91, &9F, &0C, &01, &02	\ asp 2
  EQUB &0A, &01,  60, &07, 125, &34

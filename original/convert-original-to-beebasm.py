@@ -1,8 +1,38 @@
+#!/usr/bin/env python
+#
+# ******************************************************************************
+#
+# ELITE-A SCRIPT TO CONVERT ORIGINAL SOURCES FOR BEEBASM
+#
+# Written by Mark Moxon
+#
+# This script converts the original source files for Elite-A from Angus Duggan's
+# source disc so they compile with BeebAsm.
+#
+# To convert the files, cd into the folder containing the files and this script,
+# and do the following:
+#
+#   python convert-original-to-beebasm.py
+#
+# This will convert the source files to BeebAsm format and save them into the
+# converted subfolder. You can them compile them using a command like this:
+#
+#   beebasm -i converted/a.tcode.asm
+#
+# By default the compilation will save binaries into a folder called output, so
+# you will need to create this first.
+#
+# This process mirrors the original multi-step compilation system, just using
+# BeebAsm rather than Angus's original handwritten compiler.
+#
+# ******************************************************************************
+
 import re
 
 
-# Config
-source_folder = "original/"
+source_folder = ""
+dest_folder = "converted/"
+
 source_files = ["a.global",
                 "a.tcode", "a.tcode_1", "a.tcode_2", "a.tcode_3",
                 "a.dcode", "a.dcode_1", "a.dcode_2", "a.dcode_3",
@@ -12,7 +42,6 @@ source_files = ["a.global",
                 "a.qelite",
                 "a.elite"
                 ]
-dest_folder = "sources/"
 
 re_label = re.compile(r'^([a-z0-9A-Z_]+):?(\s+.*)*$')
 re_llabel = re.compile(r'(l_[0-9A-F]{4})')
@@ -33,8 +62,6 @@ def process_file(input_file, output_file, source_file):
         if source_file == "a.qcode_3":
             line = line.replace("_07c0", "_07C0")
             line = line.replace("_07e0", "_07E0")
-        if source_file == "a.tcode_2":
-            line = line.replace("EQUD 4500000", "EQUD 4000000")
 
         if line.endswith(".<\n"):
             continue
