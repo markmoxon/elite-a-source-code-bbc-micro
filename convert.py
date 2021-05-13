@@ -33,6 +33,8 @@ def process_file(input_file, output_file, source_file):
         if source_file == "a.qcode_3":
             line = line.replace("_07c0", "_07C0")
             line = line.replace("_07e0", "_07E0")
+        if source_file == "a.tcode_2":
+            line = line.replace("EQUD 4500000", "EQUD 4000000")
 
         if line.endswith(".<\n"):
             continue
