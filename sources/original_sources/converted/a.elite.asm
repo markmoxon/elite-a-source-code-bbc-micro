@@ -1317,4 +1317,4 @@ dd00_len = P%-&DD00	\ length of code at DD00
 
 
 COPYBLOCK &DD00, P%, to_dd00
-SAVE "output/ELITE.bin", CODE%, to_dd00+dd00_len, LOAD%
+SAVE "output/ELITE", CODE%, to_dd00+dd00_len, LOAD%

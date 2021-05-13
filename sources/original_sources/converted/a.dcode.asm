@@ -1,6 +1,6 @@
  \ a.dcode - ELITE III in-flight code
 
-INCLUDE "sources/a.global.asm"
+INCLUDE "converted/a.global.asm"
 
 CODE% = &11E3
 ORG CODE%
@@ -25,10 +25,10 @@ EXEC% = &11E3
 
  JMP brkdst
 
-INCLUDE "sources/a.dcode_1.asm"
+INCLUDE "converted/a.dcode_1.asm"
 
-INCLUDE "sources/a.dcode_2.asm"
+INCLUDE "converted/a.dcode_2.asm"
 
-INCLUDE "sources/a.dcode_3.asm"
+INCLUDE "converted/a.dcode_3.asm"
 
-SAVE "output/1.F.bin", CODE%, P%, LOAD%
+SAVE "output/1.F", CODE%, P%, LOAD%

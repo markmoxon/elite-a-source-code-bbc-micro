@@ -1545,4 +1545,4 @@ rawrch = &FFBC
  PLA
  RTS
 
-SAVE "output/2.H.bin", CODE%, P%, LOAD%
+SAVE "output/2.H", CODE%, P%, LOAD%
