@@ -4721,7 +4721,7 @@
 
 .new_price
 
-IF _PATCHED
+IF _SOURCE_DISC
 
  EQUD 270000
 
@@ -4849,7 +4849,7 @@ ENDIF
  EQUB &07, &01,  42, &2B,  70, &00
  EQUB &EF	\, &11, &0A, &00
 
-IF _PATCHED
+IF _SOURCE_DISC
 
  EQUB &11, &90, &99, &32, &04, &04	\ ghavial
  EQUB &09, &01,  37, &38,  80, &00
@@ -4883,7 +4883,7 @@ ENDIF
  EQUB &0A, &01,  36, &85,  90, &00
  EQUB &BF	\, &41, &0A, &00
 
-IF _PATCHED
+IF _SOURCE_DISC
 
  EQUB &1C, &90, &7F, &32, &04, &11	\ anaconda
  EQUB &0D, &01,  21, &FE, 100, &4E

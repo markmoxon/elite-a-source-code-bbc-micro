@@ -1,16 +1,24 @@
 INCLUDE "sources/elite-header.h.asm"
 
 _RELEASED               = (_RELEASE = 1)
-_PATCHED                = (_RELEASE = 2)
+_SOURCE_DISC            = (_RELEASE = 2)
 
 ORG &11E3
 
 INCBIN "output/tcode.bin"
 
-INCBIN "extracted/patched/workspaces/1.D.bin"
+IF _RELEASED
+ INCBIN "extracted/released/workspaces/1.D.bin"
+ELIF _SOURCE_DISC
+ INCBIN "extracted/source-disc/workspaces/1.D.bin"
+ENDIF
 
 ORG &5600
 
-INCBIN "extracted/patched/S.T.bin"
+IF _RELEASED
+ INCBIN "extracted/released/S.T.bin"
+ELIF _SOURCE_DISC
+ INCBIN "extracted/source-disc/S.T.bin"
+ENDIF
 
 SAVE "output/1.D.bin", &11E3, &6000

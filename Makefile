@@ -14,10 +14,10 @@ PYTHON?=python
 # will build the patched version. If you omit the release parameter,
 # it will build the released version.
 
-ifeq ($(release), patched)
+ifeq ($(release), source-disc)
   rel-elite-a=2
-  folder-elite-a=/patched
-  suffix-elite-a=-patched
+  folder-elite-a=/source-disc
+  suffix-elite-a=-from-source-disc
 else
   rel-elite-a=1
   folder-elite-a=/released
@@ -26,21 +26,6 @@ endif
 
 .PHONY:build
 build:
-	echo _VERSION=6 > sources/elite-header.h.asm
-	echo _RELEASE=$(rel-elite-a) >> sources/elite-header.h.asm
-	echo _REMOVE_CHECKSUMS=TRUE >> sources/elite-header.h.asm
-	echo _MATCH_EXTRACTED_BINARIES=FALSE >> sources/elite-header.h.asm
-	$(BEEBASM) -i sources/a.tcode.asm -v > output/compile.txt
-	$(BEEBASM) -i sources/a.dcode.asm -v >> output/compile.txt
-	$(BEEBASM) -i sources/a.icode.asm -v >> output/compile.txt
-	$(BEEBASM) -i sources/1.d.asm -v >> output/compile.txt
-	$(BEEBASM) -i sources/a.qcode.asm -v >> output/compile.txt
-	$(BEEBASM) -i sources/a.qelite.asm -v >> output/compile.txt
-	$(BEEBASM) -i sources/a.elite.asm -v >> output/compile.txt
-	$(BEEBASM) -i sources/elite-disc.asm -do elite-elite-a$(suffix-elite-a).ssd -opt 3
-
-.PHONY:encrypt
-encrypt:
 	echo _VERSION=6 > sources/elite-header.h.asm
 	echo _RELEASE=$(rel-elite-a) >> sources/elite-header.h.asm
 	echo _REMOVE_CHECKSUMS=FALSE >> sources/elite-header.h.asm
@@ -52,7 +37,7 @@ encrypt:
 	$(BEEBASM) -i sources/a.qcode.asm -v >> output/compile.txt
 	$(BEEBASM) -i sources/a.qelite.asm -v >> output/compile.txt
 	$(BEEBASM) -i sources/a.elite.asm -v >> output/compile.txt
-	$(BEEBASM) -i sources/elite-disc.asm -do elite-elite-a$(suffix-elite-a).ssd -opt 3
+	$(BEEBASM) -i sources/elite-disc.asm -do elite-a$(suffix-elite-a).ssd -opt 3
 
 .PHONY:verify
 verify:

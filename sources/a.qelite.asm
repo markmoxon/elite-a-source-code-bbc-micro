@@ -1,7 +1,7 @@
 INCLUDE "sources/elite-header.h.asm"
 
 _RELEASED               = (_RELEASE = 1)
-_PATCHED                = (_RELEASE = 2)
+_SOURCE_DISC            = (_RELEASE = 2)
 
  \ a.qelite - tube elite startup file
 
