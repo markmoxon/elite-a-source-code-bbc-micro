@@ -2,7 +2,7 @@
 
 [BBC Micro (cassette)](https://github.com/markmoxon/cassette-elite-beebasm) | [BBC Micro (disc)](https://github.com/markmoxon/disc-elite-beebasm) | [6502 Second Processor](https://github.com/markmoxon/6502sp-elite-beebasm) | [BBC Master](https://github.com/markmoxon/master-elite-beebasm) | [Acorn Electron](https://github.com/markmoxon/electron-elite-beebasm) | **Elite-A**
 
-This repository contains the original source code for Angus Duggan's Elite-A on the BBC Micro with a disc drive. I am planning to document the source in full.
+This repository contains the original source code for Angus Duggan's Elite-A on the BBC Micro with a disc drive. I am planning to document the source in full, but for now the source is almost comment-free.
 
 It is a companion to the [bbcelite.com website](https://www.bbcelite.com).
 
@@ -40,13 +40,13 @@ See the [introduction](#introduction) for more information.
 
 This repository contains the original source code for Angus Duggan's Elite-A on the BBC Micro with a disc drive.
 
-You can build the fully functioning game from this source. [Two releases](#building-different-releases-of-elite) are currently supported: the released version from Angus's site, and the version produced by the original source discs (which was never released).
+You can build the fully functioning game from this source. [Two releases](#building-different-releases-of-elite) are currently supported: the officially released version from Angus's site, and the version produced by the original source discs (which was never released).
 
 Elite-A is legendary amongst BBC Elite fans, and remains a deeply impressive project that has achieved almost mythical status in the Acorn retro scene (and deservedly so). Ian Bell, co-author of the original Elite, has this to say on his website:
 
 > Also available here is Angus Duggan's Elite-A, a comprehensive enhancement of BBC Elite. He created this by disassembling the object code and then reprogramming the resultant source. A significant achievement for which respect is due.
 
-It's worth noting that Angus coded Elite-A back in the late 1980s, using a BBC Micro fitted with his own handwritten 6502 assembler ROM to disassemble the original, protected game binaries, and reassemble the enhanced version. He used Acornsoft's VIEW word processor as his IDE, and did the whole thing without the benefit of modern tooling: a significant achievement, indeed.
+It's worth noting that Angus coded Elite-A back in the late 1980s, using a BBC Micro fitted with his own handwritten 6502 assembler ROM, which he used to disassemble the original, protected game binaries, and reassemble the enhanced version. He used Acornsoft's VIEW word processor as his IDE, and built the whole thing without the benefit of modern tooling. A significant achievement, indeed.
 
 I am very grateful to Angus for giving me permission to analyse his work on Elite-A, and for providing me with the original source files.
 
