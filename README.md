@@ -2,7 +2,7 @@
 
 [BBC Micro (cassette)](https://github.com/markmoxon/elite-beebasm) | [BBC Micro (disc)](https://github.com/markmoxon/disc-elite-beebasm) | [6502 Second Processor](https://github.com/markmoxon/6502sp-elite-beebasm) | [BBC Master](https://github.com/markmoxon/master-elite-beebasm) | [Acorn Electron](https://github.com/markmoxon/electron-elite-beebasm) | **Elite-A**
 
-This repository contains the original source code for Angus Duggan's Elite-A on the BBC Micro.
+This repository contains the original source code for Angus Duggan's Elite-A on the BBC Micro. I am planning to document it fully.
 
 It is a companion to the [bbcelite.com website](https://www.bbcelite.com).
 
@@ -38,9 +38,17 @@ See the [introduction](#introduction) for more information.
 
 ## Introduction
 
-This repository contains the original source code for Angus Duggan's Elite-A on the BBC Micro. See the [Elite-A site](http://knackered.org/angus/beeb/elite.html) for more information on Elite-A.
+This repository contains the original source code for Angus Duggan's Elite-A on the BBC Micro.
 
-You can build the fully functioning game from this source. Two releases are currently supported ([see below](#building-different-releases-of-elite)): the released version from Angus's site, and the version produced by the original source discs (which has different ship prices).
+Elite-A is legendary amongst BBC Elite fans, and remains a deeply impressive project that has achieved almost mythical status in the Acorn retro scene (and deservedly so). Ian Bell, co-author of the original Elite, has this to say on his website:
+
+> Also available here is Angus Duggan's Elite-A, a comprehensive enhancement of BBC Elite. He created this by disassembling the object code and then reprograming the resultant source. A significant achievement for which respect is due.
+
+I am very grateful to Angus for giving me permission to analyse his work on Elite-A, and for providing me with the original source files. Thank you Angus.
+
+You can build the fully functioning game from this source. [Two releases](#building-different-releases-of-elite) are currently supported: the released version from Angus's site, and the version produced by the original source discs (which was never released).
+
+See [Angus's Elite-A site](http://knackered.org/angus/beeb/elite.html) for more information on playing Elite-A.
 
 My hope is that this repository and the [accompanying website](https://www.bbcelite.com) will be useful for those who want to learn more about Elite and what makes it tick. It is provided on an educational and non-profit basis, with the aim of helping people appreciate one of the most iconic games of the 8-bit era.
 
@@ -52,7 +60,7 @@ The code on this site is identical to Angus Duggan's source discs (it's just bee
 
 The commentary is copyright &copy; Mark Moxon. Any misunderstandings or mistakes in the documentation are entirely my fault.
 
-Huge thanks are due to Angus Duggan for giving me permission to document his astonishing work in extending Elite; to the original authors of Elite for not only creating such an important piece of my childhood, but also for releasing the source code for us to play with; to Paul Brink for his annotated disassembly; and to Kieran Connell for his [BeebAsm version](https://github.com/kieranhj/elite-beebasm), which I forked as the original basis for this project. You can find more information about this project in the [accompanying website's project page](https://www.bbcelite.com/about_site/about_this_project.html).
+Huge thanks are due to Angus Duggan for giving me permission to document his work in extending Elite; to the original authors of Elite for not only creating such an important piece of my childhood, but also for releasing the source code for us to play with; to Paul Brink for his annotated disassembly; and to Kieran Connell for his [BeebAsm version](https://github.com/kieranhj/elite-beebasm), which I forked as the original basis for this project. You can find more information about this project in the [accompanying website's project page](https://www.bbcelite.com/about_site/about_this_project.html).
 
 ### A note on licences, copyright etc.
 
@@ -140,7 +148,7 @@ or this on Mac/Linux:
 make build verify
 ```
 
-The Python script `crc32.py` does the actual verification, and shows the checksums and file sizes of both sets of files, alongside each other, and with a Match column that flags any discrepancies. If you are building an unencrypted set of files then there will be lots of differences, while the encrypted files should match.
+The Python script `crc32.py` does the actual verification, and shows the checksums and file sizes of both sets of files, alongside each other, and with a Match column that flags any discrepancies.
 
 The binaries in the `extracted` folder were taken straight from Angus Duggan's original source discs, while those in the `output` folder are produced by the build process. For example, if you don't make any changes to the code and build the project with `make build verify`, then this is the output of the verification process:
 
@@ -170,13 +178,13 @@ This repository contains the source code for two different releases of Elite-A:
 
 * The released version from Angus Duggan's site
 
-* The patched release produced by the source disc (which was never released)
+* The version produced by the source disc (which was never released)
 
 By default the build process builds the released version, but you can build the other release as follows.
 
-### Building the patched source disc release
+### Building the source disc release
 
-You can build the patched source disc release by appending `release=source-disc` to the `make` command, like this on Windows:
+You can build the source disc release by appending `release=source-disc` to the `make` command, like this on Windows:
 
 ```
 make.bat build verify release=source-disc
@@ -202,11 +210,11 @@ You can see the differences between the releases by searching the source code fo
 
 ### Converting the original build process to BeebAsm
 
-See [this section](sources/original_sources/README.md) for details about how Angus's original sources have been converted to assemble in BeebAsm, so Elite-A can be built on modern computers.
+See [the original source files](sources/original_sources) for details about how Angus's original sources have been converted to assemble in BeebAsm, so Elite-A can be built on modern computers.
 
 ### Producing byte-accurate binaries
 
-The `extracted/<release>/workspaces` folders (where `<release>` is the release version) contain binary files that match the workspaces in the original game binaries (a workspace being a block of memory). Instead of initialising workspaces with null values like BeebAsm, the original BBC Micro source code creates its workspaces by simply incrementing the `P%` and `O%` program counters, which means that the workspaces end up containing whatever contents the allocated memory had at the time. As the source files are broken into multiple BBC BASIC programs that run each other sequentially, this means the workspaces in the source code tend to contain either fragments of these BBC BASIC source programs, or assembled code from an earlier stage. This doesn't make any difference to the game code, which either intialises the workspaces at runtime or just ignores their initial contents, but if we want to be able to produce byte-accurate binaries from the modern BeebAsm assembly process, we need to include this "workspace noise" when building the project, and that's what the binaries in the `extracted/<release>/workspaces` folder are for.
+The `extracted/<release>/workspaces` folders (where `<release>` is the release version) contain binary files that match the workspaces in the original game binaries (a workspace being a block of memory). Instead of initialising workspaces with null values like BeebAsm, the original BBC Micro source code creates the `1.D` file by loading `tcode` and `S.T` into memory and then saving them out in one file. This saving process will also save out the bytes in the gap between the two files, which can contain anything, so if we want to be able to produce byte-accurate binaries from the modern BeebAsm assembly process, we need to include this "workspace noise" when building the project, and that's what the binaries in the `extracted/<release>/workspaces` folder are for.
 
 Here's an example of how these binaries are included:
 
@@ -217,6 +225,8 @@ ELIF _SOURCE_DISC
  INCBIN "extracted/source-disc/workspaces/1.D.bin"
 ENDIF
 ```
+
+This is where we load the correct workspace noise for the gap between `tcode` and `S.T` when creating the `1.D` binary.
 
 ---
 

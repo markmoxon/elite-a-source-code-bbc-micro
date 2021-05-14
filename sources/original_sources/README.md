@@ -1,66 +1,58 @@
 # Original source files for Elite-A
 
-This folder contains Angus Duggan's original source files for Elite-A. You can find them in the `sources` folder. They are VIEW-compatible text files (Angus used Acornsoft's VIEW word processor as his IDE).
+This folder contains a selection of Angus Duggan's [original source files for Elite-A](original_sources/sources). They are VIEW-compatible text files (Angus used Acornsoft's VIEW word processor as his IDE).
 
 # Building Elite-A from the original sources
 
-Elite-A was assembled from the source files using Angus's own handwritten assembler ROM. The file format for this assembler is pretty close to the BeebAsm format we need if we want to build the sources on a modern computer, but they do need converting first.
+Elite-A was assembled from the source files using Angus's own handwritten assembler ROM. The file format for this assembler is pretty close to the BeebAsm format we need for building the sources on a modern computer, but they do need to be converted first.
 
-The Python script in this folder converts these sources into a format that compiles in BeebAsm.
+The Python script in this folder converts these sources into a format that compiles in BeebAsm. These files form the basis of the main repository.
 
 ## Converting the original sources to BeebAsm
 
-To convert the files into a format that BeebAsm is happy with, `cd` into the folder containing this script, and do the following:
+To convert the files into a format that BeebAsm is happy with, `cd` into the folder containing these instructions and do the following:
 
 ```
 python convert-original-to-beebasm.py
 ```
 
-This will convert the source files in the `source` folder into BeebAsm-compatible format and save them into the `converted` folder.
+This will convert the original source files in the `source` folder into a BeebAsm-compatible format and save them into the `converted` folder.
 
 ## Assembling the converted source files in BeebAsm
 
-Once the files are converted, you can them assemble each of them using commands like this:
+Once the files are converted, you can use the following commands to assemble the game files into the `output` folder. These steps mirror the original multi-step assembly process, as follows:
+
+Assemble `a.tcode.asm` to produce `output/tcode`:
 
 ```
 beebasm -i converted/a.tcode.asm
 ```
 
-This saves the assembled binary (`tcode` in this case) into the `output` folder.
-
-To build the full game you need to mirror the original multi-step assembly process, as follows:
-
-Assemble `a.tcode` to produce `output/tcode`:
-
-```
-beebasm -i converted/a.tcode.asm
-```
-
-Assemble `a.dcode` to produce `output/1.F`:
+Assemble `a.dcode.asm` to produce `output/1.F`:
 
 ```
 beebasm -i converted/a.dcode.asm
 ```
 
-Assemble `a.icode` to produce `output/1.E`:
+Assemble `a.icode.asm` to produce `output/1.E`:
 
 ```
 beebasm -i converted/a.icode.asm
 ```
 
-Assemble `a.qcode` to produce `output/2.T`:
+Assemble `a.qcode.asm` to produce `output/2.T`:
 
 ```
 beebasm -i converted/a.qcode.asm
 ```
 
-Assemble `a.qelite` to produce `output/2.H`:
+Assemble `a.qelite.asm` to produce `output/2.H`:
 
 ```
 beebasm -i converted/a.qelite.asm
 ```
 
-Assemble `a.elite` to produce `output/ELITE`:
+Assemble `a.elite.asm` to produce `output/ELITE`:
 
 ```
 beebasm -i converted/a.elite.asm
@@ -72,7 +64,7 @@ Assemble `1.d.asm` to produce `output/1.D`:
 beebasm -i 1.d.asm
 ```
 
-This last step simply concatenates the `tcode` and `S.T` binaries into one file. (Note that `S.T` is currently provided as an assembled binary, as the ship files were produced by a BBC BASIC source, which hasn't been converted to BeebAsm yet).
+This last step simply concatenates the `tcode` and `S.T` binaries into one file. The `S.T` binary is currently provided as an assembled binary, as the ship files are created by a BBC BASIC source file that hasn't been converted to BeebAsm yet.
 
 Note that the `S.T` binary that is incorporated into `1.D` by the above step is not the same as the `S.T` ship file on the final game disc (though confusingly they have the same name). The `S.T` binary that's incorporated into `1.D` contains the ships to be shown in the hanger, while the `S.T` file on the final game disc is one of the in-flight ship files.
 
@@ -98,19 +90,23 @@ This will create the exact Elite-A disc as produced by the original source disc.
 
 ## Verifying the results
 
-The version produced by the original source disc is not the same as the generally available Elite-A. The source discs produce a patched version of the game that contains different ship prices - the same version that can be built from the main repository with this command:
+The version produced by the original source discs is not the same as the generally available version of Elite-A: the source discs produce a version of the game with different ship prices to the released version.
+
+There are two ways to build this different version. One is the above process of converting and asssmbling the original source files, and the other is by building a specific release in the main repository, with this command:
 
 ```
-make encrypt verify release=patched
+make build verify release=source-disc
 ```
 
-That said, there are two small differences in the version produced by the source discs when compared to the patched version. These differences mean that the crc32 checksums for the `1.D` and `tcode` files produced by the converted source files will not match those produced by the modern build process in this repository. This is because:
+This builds the version from the original source discs, just like the above process to assemble the converted sources, but there are two small differences:
 
-* The repository version incorporates "background noise" that the original BBC Micro assembly process includes in the binary, so we can produce byte-accurate binaries that exactly match the released game. Specifically, this noise occurs in the gap between the concatenated `tcode` and `S.T` binaries. In the BeebAsm process above (i.e. when assembling `1.d.asm`) that gap is filled with zeroes, while the original version included whatever random content was in memory at the time.
+* The `release=source-disc` build incorporates "background noise" that the original BBC Micro assembly process includes in the binary, so we can produce byte-accurate binaries that exactly match the released game. Specifically, this noise occurs in the gap between the concatenated `tcode` and `S.T` binaries. When assembling the converted sources above, and specifically when assembling `1.d.asm`, that gap is filled with zeroes by BeebAsm, while the original version includes whatever content was already in memory at the time of the original assembly (typically a snippet of the original source code).
 
-* The repository version fixes a bug in `a.tcode` that has the wrong price for the Anaconda (the `a.qcode` file contains the correct price).
+* The `release=source-disc` build fixes a bug in the original `a.tcode` source file, which contains the wrong price for the Anaconda (the `a.qcode` source file, meanwhile, contains the correct price).
 
-As a result, here are the checksums for the above build process:
+These differences mean that the crc32 checksums for the `1.D` and `tcode` files produced by the converted source files will not match those produced by building the `make` version in the main repository. 
+
+Here are the checksums we get when building the source discs from the converted sources:
 
 ```
 c80972e6        1.D
@@ -122,9 +118,9 @@ b1447e60        1.E
 0e2d62be        tcode
 ```
 
-If you get the above checksums following the assembly process above, then congratulations - you have successfully assembled Elite-A from the original source discs.
+If you get the above checksums after following the conversion process above, then congratulations - you have successfully assembled Elite-A from the original source discs.
 
-For comparison, here are the checksums for `1.D` and `tcode` that we get from a binary-compatible `release=patched` build:
+For comparison, here are the checksums for `1.D` and `tcode` that we get from the `release=source-disc` build:
 
 ```
 d1ca0224        1.D
