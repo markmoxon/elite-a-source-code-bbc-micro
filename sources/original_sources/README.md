@@ -16,7 +16,7 @@ To convert the files into a format that BeebAsm is happy with, `cd` into the fol
 python convert-original-to-beebasm.py
 ```
 
-This will convert the original source files in the `source` folder into a BeebAsm-compatible format and save them into the `converted` folder.
+This will convert the original source files in the `source_source_files` folder into a BeebAsm-compatible format and save them into the `converted_source_files` folder.
 
 ## Assembling the converted source files in BeebAsm
 
@@ -25,37 +25,37 @@ Once the files are converted, you can use the following commands to assemble the
 Assemble `a.tcode.asm` to produce `output/tcode`:
 
 ```
-beebasm -i converted/a.tcode.asm
+beebasm -i converted_source_files/a.tcode.asm
 ```
 
 Assemble `a.dcode.asm` to produce `output/1.F`:
 
 ```
-beebasm -i converted/a.dcode.asm
+beebasm -i converted_source_files/a.dcode.asm
 ```
 
 Assemble `a.icode.asm` to produce `output/1.E`:
 
 ```
-beebasm -i converted/a.icode.asm
+beebasm -i converted_source_files/a.icode.asm
 ```
 
 Assemble `a.qcode.asm` to produce `output/2.T`:
 
 ```
-beebasm -i converted/a.qcode.asm
+beebasm -i converted_source_files/a.qcode.asm
 ```
 
 Assemble `a.qelite.asm` to produce `output/2.H`:
 
 ```
-beebasm -i converted/a.qelite.asm
+beebasm -i converted_source_files/a.qelite.asm
 ```
 
 Assemble `a.elite.asm` to produce `output/ELITE`:
 
 ```
-beebasm -i converted/a.elite.asm
+beebasm -i converted_source_files/a.elite.asm
 ```
 
 Assemble `1.d.asm` to produce `output/1.D`:
@@ -76,7 +76,7 @@ Now that we have finished the assembly process, we can create the final game dis
 beebasm -i create-disc.asm -do elite-a-from-source-disc.ssd -opt 3
 ```
 
-This creates a disc image called `elite-a-from-source-disc.ssd` in the current folder, which can be loaded into an emulator, or a BBC Micro using a Gotek. (Ignore the error about the source file containing no SAVE command - it doesn't have to, as we're creating a disc image, not a binary.)
+This creates a disc image called `elite-a-from-source-disc.ssd` in the current folder, which can be loaded into an emulator, or a BBC Micro using a Gotek. (Ignore the warning about the source file containing no SAVE command - it doesn't have to, as we're creating a disc image, not a binary.)
 
 For reference, the above command does the following:
 
@@ -89,6 +89,28 @@ For reference, the above command does the following:
 This will create the exact Elite-A disc as produced by the original source disc.
 
 ## Verifying the results
+
+To verify that the build has worked, run a crc32 check, as follows:
+
+```
+crc32 output/*
+```
+
+If everything has worked, you should see the following checksums:
+
+```
+c80972e6        output/1.D
+b1447e60        output/1.E
+14ee8b20        output/1.F
+3d638042        output/2.H
+81d6d436        output/2.T
+171ccea5        output/ELITE
+0e2d62be        output/tcode
+```
+
+If you get the above checksums after following the conversion process above, then congratulations - you have successfully assembled Elite-A from the original source discs.
+
+## Comparing the results with the main repository
 
 The version produced by the original source discs is not the same as the generally available version of Elite-A: the source discs produce a version of the game with different ship prices to the released version.
 
@@ -104,28 +126,18 @@ This builds the version from the original source discs, just like the above proc
 
 * The `release=source-disc` build fixes a bug in the original `a.tcode` source file, which contains the wrong price for the Anaconda (the `a.qcode` source file, meanwhile, contains the correct price).
 
-These differences mean that the crc32 checksums for the `1.D` and `tcode` files produced by the converted source files will not match those produced by building the `make` version in the main repository. 
-
-Here are the checksums we get when building the source discs from the converted sources:
-
-```
-c80972e6        1.D
-b1447e60        1.E
-14ee8b20        1.F
-3d638042        2.H
-81d6d436        2.T
-171ccea5        ELITE
-0e2d62be        tcode
-```
-
-If you get the above checksums after following the conversion process above, then congratulations - you have successfully assembled Elite-A from the original source discs.
+These differences mean that the crc32 checksums for the `1.D` and `tcode` files produced by the converted source files will not match those produced by building the `make` version in the main repository.
 
 For comparison, here are the checksums for `1.D` and `tcode` that we get from the `release=source-disc` build:
 
 ```
-d1ca0224        1.D
-327d4a76        tcode
+Checksum   Size  Checksum   Size  Match  Filename
+-----------------------------------------------------------
+d1ca0224  19997  d1ca0224  19997   Yes   1.D.bin
+327d4a76  17422  327d4a76  17422   Yes   tcode.bin
 ```
+
+All other files should match the results from the converted sources.
 
 ---
 

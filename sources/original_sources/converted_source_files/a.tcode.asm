@@ -1,6 +1,6 @@
  \ a.tcode - ELITE III docked code
 
-INCLUDE "converted/a.global.asm"
+INCLUDE "converted_source_files/a.global.asm"
 
 CODE% = &11E3
 ORG CODE%
@@ -25,10 +25,10 @@ EXEC% = &11E3
 
  JMP brk_go
 
-INCLUDE "converted/a.tcode_1.asm"
+INCLUDE "converted_source_files/a.tcode_1.asm"
 
-INCLUDE "converted/a.tcode_2.asm"
+INCLUDE "converted_source_files/a.tcode_2.asm"
 
-INCLUDE "converted/a.tcode_3.asm"
+INCLUDE "converted_source_files/a.tcode_3.asm"
 
 SAVE "output/tcode", CODE%, P%, LOAD%

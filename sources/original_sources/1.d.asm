@@ -8,6 +8,6 @@ ORG &11E3
 INCBIN "output/tcode"
 
 ORG &5600
-INCBIN "sources/S.T"
+INCBIN "original_source_files/S.T"
 
 SAVE "output/1.D", &11E3, &6000

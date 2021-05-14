@@ -155,21 +155,21 @@ tube_r4d = &FEFF
  LDA tube_r2d
  RTS
 
-INCLUDE "converted/a.qcode_1.asm"
+INCLUDE "converted_source_files/a.qcode_1.asm"
 
-INCLUDE "converted/a.qcode_2.asm"
+INCLUDE "converted_source_files/a.qcode_2.asm"
 
-INCLUDE "converted/a.qcode_3.asm"
+INCLUDE "converted_source_files/a.qcode_3.asm"
 
-INCLUDE "converted/a.qcode_4.asm"
+INCLUDE "converted_source_files/a.qcode_4.asm"
 
-INCLUDE "converted/a.qcode_5.asm"
+INCLUDE "converted_source_files/a.qcode_5.asm"
 
-INCLUDE "converted/a.qcode_6.asm"
+INCLUDE "converted_source_files/a.qcode_6.asm"
 
-INCLUDE "converted/a.qship_1.asm"
+INCLUDE "converted_source_files/a.qship_1.asm"
 
-INCLUDE "converted/a.qship_2.asm"
+INCLUDE "converted_source_files/a.qship_2.asm"
 
 ship_total = 38
 

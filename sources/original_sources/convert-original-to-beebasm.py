@@ -16,8 +16,8 @@
 import re
 
 
-source_folder = "sources/"
-dest_folder = "converted/"
+source_folder = "original_source_files/"
+dest_folder = "converted_source_files/"
 
 source_files = ["a.global",
                 "a.tcode", "a.tcode_1", "a.tcode_2", "a.tcode_3",
@@ -81,7 +81,7 @@ def process_file(input_file, output_file, source_file):
             line = ' EQUS "' + convert_equa(n.group(1)) + '"\n'
             line = line.replace('EQUS "", ', 'EQUS ').replace(', ""', '')
         elif r:
-            line = 'INCLUDE "converted/' + r.group(1).replace(":0.", "").replace(":2.", "") + '.asm"\n'
+            line = 'INCLUDE "converted_source_files/' + r.group(1).replace(":0.", "").replace(":2.", "") + '.asm"\n'
         elif p:
             if p.group(1).startswith("LOAD"):
                 line = line.replace("$FFFF", "$").replace("\tLOAD $", "LOAD% = &")
