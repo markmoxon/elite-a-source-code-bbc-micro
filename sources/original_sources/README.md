@@ -1,6 +1,6 @@
 # Original source files for Elite-A
 
-This folder contains a selection of Angus Duggan's [original source files for Elite-A](original_sources/sources). They are VIEW-compatible text files (Angus used Acornsoft's VIEW word processor as his IDE).
+This folder contains a selection of Angus Duggan's original source files for Elite-A (see the [original_source_files](original_source_files) folder). They are VIEW-compatible text files, as Angus used Acornsoft's VIEW word processor as his IDE.
 
 # Building Elite-A from the original sources
 

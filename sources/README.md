@@ -2,7 +2,7 @@
 
 This folder contains the annotated source code for Elite-A.
 
-The original source code from can be found in the `original_sources` folder.
+The original source code from can be found in the [original_sources](original_sources) folder.
 
 ---
 
