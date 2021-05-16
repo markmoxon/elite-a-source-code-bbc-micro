@@ -25,7 +25,6 @@ osword = &FFF1
 osbyte = &FFF4
 oscli = &FFF7
 
-
 .l_1900
 
  EQUB &16, &04, &1C, &02, &11, &0F, &10, &17, &00, &06, &1F, &00
@@ -35,24 +34,20 @@ oscli = &FFF7
  EQUB &00, &02, &2D, &00, &00, &00, &00, &00, &00, &17, &00, &0A
  EQUB &20, &00, &00, &00, &00, &00, &00
 
-
 .envelope1
 
  EQUB &01, &01, &00, &6F, &F8, &04, &01, &08, &08, &FE, &00, &FF
  EQUB &7E, &2C
-
 
 .envelope2
 
  EQUB &02, &01, &0E, &EE, &FF, &2C, &20, &32, &06, &01, &00, &FE
  EQUB &78, &7E
 
-
 .envelope3
 
  EQUB &03, &01, &01, &FF, &FD, &11, &20, &80, &01, &00, &00, &FF
  EQUB &01, &01
-
 
 .envelope4
 
@@ -60,7 +55,6 @@ oscli = &FFF7
  EQUB &7E, &00
 
 \OPT NOCMOS
-
 
 .l_197b
 
@@ -299,7 +293,6 @@ oscli = &FFF7
  BPL copy_d7a
  JMP &0B00
 
-
 .tube_go
 
  LDA #&AC	\ keyboard translation table
@@ -336,7 +329,6 @@ oscli = &FFF7
  LDY #HI(tube_run)
  JMP oscli
 
-
 .tube_run
 
  EQUS "R.2.H", &0D
@@ -349,7 +341,6 @@ oscli = &FFF7
  \	JSR tube_wait3
  \tube_wait3
  \	RTS
-
 
 .tod7a
 
@@ -389,7 +380,6 @@ oscli = &FFF7
 
  RTS	\ X=0
 
-
 .tob00
 
  LDX #<(l_tcode-tob00+&B00)
@@ -397,11 +387,9 @@ oscli = &FFF7
  JSR oscli
  JMP &11E6
 
-
 .l_tcode
 
  EQUS "L.1.D", &0D
-
 
 .seed
 
@@ -538,7 +526,6 @@ oscli = &FFF7
  STX thi_inc
  RTS 
 
-
 .thi_copy
 
  EQUB &49
@@ -554,7 +541,6 @@ oscli = &FFF7
 .tlo_inc
 
  EQUB &34
-
 
 .abs
 
@@ -609,11 +595,9 @@ oscli = &FFF7
  STA (&70),Y
  RTS 
 
-
 .l_1cc7
 
  EQUB &80, &40, &20, &10, &08, &04, &02, &01
-
 
 .count
 
@@ -627,7 +611,6 @@ oscli = &FFF7
 
  EQUW &0333
 
-
 .or789
 
  LDA &78
@@ -636,7 +619,6 @@ oscli = &FFF7
  ASL A
  STA &78
  RTS 
-
 
 .l_1cef
 
@@ -686,12 +668,10 @@ oscli = &FFF7
  BNE l_1cfd
  RTS 
 
-
 .osb_set
 
  LDY #&00
  JMP osbyte
-
 
 .decode
 
@@ -705,7 +685,6 @@ oscli = &FFF7
  BNE l_1d2e
  RTS 
 
-
 .decodex
 
  JSR decode
@@ -715,11 +694,9 @@ oscli = &FFF7
  BNE decodex
  RTS 
 
-
 .l_1d44
 
  EQUS "DIR e", &0D
-
 
 .to7800
 
@@ -895,7 +872,6 @@ oscli = &FFF7
  EQUB &00, &00, &5F, &00, &20, &00, &9F, &20, &00, &00, &1F, &00
  EQUB &20, &00, &3F, &00, &00, &B0, &00, &00
 
-
 .to400
 
  EQUB &4C, &32, &24, &00, &03, &60, &6B, &A9, &77, &00, &64, &6C
@@ -985,7 +961,6 @@ oscli = &FFF7
  EQUB &05, &06, &08, &09, &0A, &0B, &0C, &0D, &0F, &10, &11, &12
  EQUB &13, &14, &15, &16, &17, &18, &19, &19, &1A, &1B, &1C, &1D
  EQUB &1D, &1E, &1F, &1F
-
 
 .to1100
 
@@ -1089,7 +1064,6 @@ oscli = &FFF7
 
  BEQ halt
 
-
 .to6300
 
  EQUB &00, &00, &00, &00, &00, &00, &07, &3F, &00, &00, &00, &03
@@ -1114,7 +1088,6 @@ oscli = &FFF7
  EQUB &FF, &00, &00, &FF, &00, &00, &00, &00, &80, &00, &00, &FF
  EQUB &00, &00, &00, &00, &00, &00, &00, &FE, &00, &00, &00, &00
  EQUB &00, &00, &00, &00
-
 
 .to6100
 
@@ -1141,7 +1114,6 @@ oscli = &FFF7
  EQUB &00, &00, &00, &00, &00, &00, &00, &00, &00, &00, &00, &00
  EQUB &00, &00, &00, &00
 
-
 .to7600
 
  EQUB &00, &00, &00, &00, &00, &00, &00, &00, &00, &00, &00, &00
@@ -1166,7 +1138,6 @@ oscli = &FFF7
  EQUB &00, &00, &00, &00, &00, &00, &00, &00, &00, &00, &00, &00
  EQUB &00, &00, &00, &00, &00, &00, &00, &00, &00, &00, &00, &00
  EQUB &00, &00, &00, &00
-
 
  \ BBC Master 128 code for save/restore characters
 CPU 1
@@ -1312,13 +1283,11 @@ ORG &DD00
  CLI
  RTS
 
-
 .old_bytev
 
  JMP &100	\ address modified by master set_up
 
 dd00_len = P%-&DD00	\ length of code at DD00
-
 
 COPYBLOCK &DD00, P%, to_dd00
 SAVE "output/ELITE.bin", CODE%, to_dd00+dd00_len, LOAD%

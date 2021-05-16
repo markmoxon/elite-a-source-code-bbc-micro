@@ -5,13 +5,112 @@ _SOURCE_DISC            = (_RELEASE = 2)
 
  \ a.icode - ELITE III encyclopedia
 
-INCLUDE "sources/a.global.asm"
+\OPT TABS=16
+
+key_table = &04
+ptr = &07
+font = &1C
+cursor_x = &2C
+cursor_y = &2D
+vdu_stat = &72
+brk_line = &FD
+last_key = &300
+ship_type = &311
+cabin_t = &342
+target = &344
+view_dirn = &345
+laser_t = &347
+adval_x = &34C
+adval_y = &34D
+cmdr_mission = &358
+cmdr_homex = &359
+cmdr_homey = &35A
+cmdr_gseed = &35B
+cmdr_money = &361
+cmdr_fuel = &365
+cmdr_galxy = &367
+cmdr_laser = &368
+cmdr_ship = &36D
+cmdr_hold = &36E
+cmdr_cargo = &36F
+cmdr_ecm = &380
+cmdr_scoop = &381
+cmdr_bomb = &382
+cmdr_eunit = &383
+cmdr_dock = &384
+cmdr_ghype = &385
+cmdr_escape = &386
+cmdr_cour = &387
+cmdr_courx = &389
+cmdr_coury = &38A
+cmdr_misl = &38B
+cmdr_legal = &38C
+cmdr_avail = &38D
+cmdr_price = &39E
+cmdr_kills = &39F
+f_shield = &3A5
+r_shield = &3A6
+energy = &3A7
+home_econ = &3AC
+home_govmt = &3AE
+home_tech = &3AF
+data_econ = &3B8
+data_govm = &3B9
+data_tech = &3BA
+data_popn = &3BB
+data_gnp = &3BD
+hype_dist = &3BF
+data_homex = &3C1
+data_homey = &3C2
+s_flag = &3C6
+cap_flag = &3C7
+a_flag = &3C8
+x_flag = &3C9
+f_flag = &3CA
+y_flag = &3CB
+j_flag = &3CC
+k_flag = &3CD
+b_flag = &3CE
+ \
+save_lock = &233
+new_file = &234
+new_posn = &235
+new_type = &36D
+new_pulse = &3D0
+new_beam = &3D1
+new_military = &3D2
+new_mining = &3D3
+new_mounts = &3D4
+new_missiles = &3D5
+new_shields = &3D6
+new_energy = &3D7
+new_speed = &3D8
+new_hold = &3D9
+new_range = &3DA
+new_costs = &3DB
+new_max = &3DC
+new_min = &3DD
+new_space = &3DE
+ \new_:	EQU &3DF
+new_name = &74D
+ \
+iff_index = &D7A
+altitude = &FD1
+irq1 = &114B
+commander = &1189
+brkdst = &11D5
+ship_data = &55FE
+l_563d = &563D
+osfile = &FFDD
+oswrch = &FFEE
+osword = &FFF1
+osbyte = &FFF4
+oscli = &FFF7
 
 CODE% = &11E3
 ORG CODE%
 LOAD% = &11E3
 EXEC% = &11E3
-
 
 .dcode_in
 
@@ -6201,7 +6300,6 @@ EXEC% = &11E3
  EOR &3D
  RTS
 
-
 .info_menu
 
  LDX #&00
@@ -6240,7 +6338,6 @@ EXEC% = &11E3
  JMP start_loop
 
 .ships_ag
-
 
 .ships_kw
 
@@ -6372,12 +6469,10 @@ EXEC% = &11E3
 
 .trading
 
-
 .l_restart
 
  JSR l_250e
  JMP start_loop
-
 
 .write_card
 
@@ -6472,11 +6567,9 @@ EXEC% = &11E3
 
  RTS
 
-
 .ship_load
 
  EQUS "L.S.0", &0D
-
 
 .ship_file
 
@@ -6485,7 +6578,6 @@ EXEC% = &11E3
  EQUB 'G', 'I', 'M', 'A', 'O', 'F', 'E'
  EQUB 'L', 'L', 'C', 'C', 'P', 'A', 'H'
 
-
 .ship_posn
 
  EQUB 19, 14, 27, 11, 20, 12, 17
@@ -6493,14 +6585,12 @@ EXEC% = &11E3
  EQUB 20, 17, 17, 11, 22, 21, 11
  EQUB  9, 17, 29, 30, 10, 16, 15
 
-
 .ship_dist
 
  EQUB &01, &02, &01, &02, &01, &01, &01
  EQUB &02, &04, &04, &01, &01, &01, &02
  EQUB &01, &02, &01, &02, &01, &01, &02
  EQUB &01, &01, &03, &01, &01, &01, &01
-
 
 .menu
 
@@ -6559,7 +6649,6 @@ EXEC% = &11E3
 
  JMP start_loop
 
-
 .menu_title
 
  EQUB &01, &02, &03, &05, &04
@@ -6579,7 +6668,6 @@ EXEC% = &11E3
 .menu_query
 
  EQUB &06, &43, &43, &05, &04
-
 
 \ a.icode_3
 
@@ -7067,7 +7155,6 @@ EXEC% = &11E3
  EQUB &00
  EQUB &00
 
-
 .msg_2
 
  EQUB &00
@@ -7451,7 +7538,6 @@ EXEC% = &11E3
  EQUS "AVA", &DC, &D8, &E5, " FROM TECH ", &E5, &FA, "L 12 UPW", &EE, "DS", &B1
  EQUB &00
 
-
 .l_55c0
 
  EQUB &10, &15, &1A, &1F, &9B, &A0, &2E, &A5, &24, &29, &3D, &33
@@ -7459,14 +7545,12 @@ EXEC% = &11E3
  EQUB &5B, &6A, &B4, &B9, &BE, &E1, &E6, &EB, &F0, &F5, &FA, &73
  EQUB &78, &7D
 
-
 .ship_centre
 
  EQUB &0D, &0C, &0C, &0B, &0D, &0C, &0B
  EQUB &0B, &08, &07, &09, &0A, &0D, &0C
  EQUB &0D, &0D, &0D, &0C, &0D, &0C, &0D
  EQUB &0C, &0B, &0C, &0C, &0A, &0D, &0E
-
 
 .card_pattern
 
@@ -7496,7 +7580,6 @@ EXEC% = &11E3
  EQUB  1, 20, &2D	\ space
  EQUB  1, 21, &00
 
-
 .card_addr
 
  EQUW adder, anaconda, asp_2, boa, bushmaster, chameleon, cobra_1
@@ -7505,7 +7588,6 @@ EXEC% = &11E3
  EQUW iguana, krait, mamba, monitor, moray, ophidian, python
  EQUW shuttle, sidewinder, thargoid, thargon
  EQUW transporter, viper, worm
-
 
 .adder
 
@@ -8092,6 +8174,5 @@ EXEC% = &11E3
  EQUB 0, 10
  EQUS &B6, &B7, " ", &01, "HV", &02, " ", &C2
  EQUB 0, 0
-
 
 SAVE "output/1.E.bin", CODE%, P%, LOAD%

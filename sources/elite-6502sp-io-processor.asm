@@ -64,7 +64,6 @@ print_bits = &94
 cursor_x = &9E
 cursor_y = &9F
 
-
 .tube_elite
 
  LDX #&FF
@@ -83,11 +82,9 @@ cursor_y = &9F
 
 tube_brk = &16	\ tube BRK vector
 
-
 .tube_run
 
  EQUS "R.2.T", &0D
-
 
 .tube_get
 
@@ -97,7 +94,6 @@ tube_brk = &16	\ tube BRK vector
  LDA tube_r1d
  RTS
 
-
 .tube_put
 
  BIT tube_r2s
@@ -105,7 +101,6 @@ tube_brk = &16	\ tube BRK vector
  BVC tube_put
  STA tube_r2d
  RTS
-
 
 .tube_func
 
@@ -126,7 +121,6 @@ tube_brk = &16	\ tube BRK vector
 
  RTS
 
-
 .tube_table
 
  EQUW draw_line, draw_hline, draw_pixel, clr_scrn
@@ -136,7 +130,6 @@ tube_brk = &16	\ tube BRK vector
  EQUW draw_blob, draw_tail, draw_S, draw_E
  EQUW draw_mode, write_crtc, scan_y, write_0346
  EQUW read_0346, return, picture_h, picture_v
-
 
 .write_xyc
 
@@ -257,7 +250,6 @@ tube_brk = &16	\ tube BRK vector
  ORA #&60
  STA ptr+&01
  RTS
-
 
 .pixel_1
 
@@ -596,7 +588,6 @@ tube_brk = &16	\ tube BRK vector
 
  RTS
 
-
 .draw_hline
 
  JSR tube_get
@@ -700,7 +691,6 @@ tube_brk = &16	\ tube BRK vector
  EQUB &80, &C0, &E0, &F0, &F8, &FC, &FE
  EQUB &FF, &7F, &3F, &1F, &0F, &07, &03, &01
 
-
 .l_19a8
 
  LDA pixel_1,X
@@ -754,7 +744,6 @@ tube_brk = &16	\ tube BRK vector
 
  RTS
 
-
 .clr_scrn
 
  LDX #&60
@@ -766,7 +755,6 @@ tube_brk = &16	\ tube BRK vector
  CPX #&78
  BNE l_254f
  RTS
-
 
 .clr_page
 
@@ -781,7 +769,6 @@ tube_brk = &16	\ tube BRK vector
  INY
  BNE l_3a07
  RTS
-
 
 .clr_line
 
@@ -806,12 +793,10 @@ tube_brk = &16	\ tube BRK vector
  BNE l_25c8
  RTS
 
-
 .sync_in
 
  JSR sync
  JMP tube_put
-
 
 .sync
 
@@ -823,7 +808,6 @@ tube_brk = &16	\ tube BRK vector
  LDA &8B
  BEQ sync_wait
  RTS
-
 
 .draw_bar
 
@@ -889,7 +873,6 @@ tube_brk = &16	\ tube BRK vector
 
  RTS
 
-
 .draw_angle
 
  JSR tube_get
@@ -935,7 +918,6 @@ tube_brk = &16	\ tube BRK vector
  BCC l_1f11
  RTS
 
-
 .put_missle
 
  JSR tube_get
@@ -958,7 +940,6 @@ tube_brk = &16	\ tube BRK vector
  BNE l_33ba
  RTS
 
-
 .scan_fire
 
  LDA #&51
@@ -967,13 +948,11 @@ tube_brk = &16	\ tube BRK vector
  AND #&10
  JMP tube_put
 
-
 .write_fe4e
 
  JSR tube_get
  STA &FE4E
  JMP tube_put
-
 
 .scan_xin
 
@@ -981,7 +960,6 @@ tube_brk = &16	\ tube BRK vector
  TAX
  JSR scan_x
  JMP tube_put
-
 
 .scan_x
 
@@ -998,12 +976,10 @@ tube_brk = &16	\ tube BRK vector
  TXA
  RTS
 
-
 .scan_10in
 
  JSR scan_10
  JMP tube_put
-
 
 .scan_10
 
@@ -1038,7 +1014,6 @@ tube_brk = &16	\ tube BRK vector
  TAX
  RTS
 
-
 .get_key
 
  JSR sync
@@ -1054,7 +1029,6 @@ tube_brk = &16	\ tube BRK vector
  LDA (key_tube),Y
  JMP tube_put
 
-
 .write_pod
 
  JSR tube_get
@@ -1062,7 +1036,6 @@ tube_brk = &16	\ tube BRK vector
  JSR tube_get
  STA &0348
  RTS
-
 
 .draw_blob
 
@@ -1108,7 +1081,6 @@ tube_brk = &16	\ tube BRK vector
  EOR (ptr),Y
  STA (ptr),Y
  RTS
-
 
 .draw_tail
 
@@ -1183,7 +1155,6 @@ tube_brk = &16	\ tube BRK vector
  BNE d_55e4
  RTS
 
-
 .draw_E
 
  LDA #&38
@@ -1215,11 +1186,9 @@ tube_brk = &16	\ tube BRK vector
  BPL draw_eor
  RTS
 
-
 .d_3832
 
  EQUB &E0, &E0, &80, &E0, &E0, &80, &E0, &E0, &20, &E0, &E0
-
 
 .draw_mode
 
@@ -1237,7 +1206,6 @@ tube_brk = &16	\ tube BRK vector
  STA change_4
  RTS
 
-
 .write_crtc
 
  JSR tube_get
@@ -1247,7 +1215,6 @@ tube_brk = &16	\ tube BRK vector
  STA &FE01
  CLI
  RTS
-
 
 .d_4419
 
@@ -1294,19 +1261,16 @@ tube_brk = &16	\ tube BRK vector
 
  JMP tube_put
 
-
 .write_0346
 
  JSR tube_get
  STA &0346
  RTS
 
-
 .read_0346
 
  LDA &0346
  JMP tube_put
-
 
 .picture_h
 
@@ -1341,7 +1305,6 @@ tube_brk = &16	\ tube BRK vector
 
  RTS
 
-
 .picture_v
 
  JSR tube_get
@@ -1370,7 +1333,6 @@ tube_brk = &16	\ tube BRK vector
 .l_2071
 
  RTS
-
 
 .l_20e8
 
@@ -1416,7 +1378,6 @@ tube_brk = &16	\ tube BRK vector
  RTS
 
 rawrch = &FFBC
-
 
 .printer
 
@@ -1513,11 +1474,9 @@ rawrch = &FFBC
  \	JSR print_safe
  \	JMP tube_put
 
-
 .print_tone
 
  EQUB &03, &0C, &30, &C0, &03, &0C, &30, &C0
-
 
 .print_esc
 

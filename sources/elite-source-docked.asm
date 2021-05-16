@@ -1,17 +1,118 @@
 INCLUDE "sources/elite-header.h.asm"
 
+_DISC_DOCKED            = FALSE
+_DISC_FLIGHT            = FALSE
 _RELEASED               = (_RELEASE = 1)
 _SOURCE_DISC            = (_RELEASE = 2)
 
  \ a.tcode - ELITE III docked code
 
-INCLUDE "sources/a.global.asm"
+\OPT TABS=16
+
+key_table = &04
+ptr = &07
+font = &1C
+cursor_x = &2C
+cursor_y = &2D
+vdu_stat = &72
+brk_line = &FD
+last_key = &300
+ship_type = &311
+cabin_t = &342
+target = &344
+view_dirn = &345
+laser_t = &347
+adval_x = &34C
+adval_y = &34D
+cmdr_mission = &358
+cmdr_homex = &359
+cmdr_homey = &35A
+cmdr_gseed = &35B
+cmdr_money = &361
+cmdr_fuel = &365
+cmdr_galxy = &367
+cmdr_laser = &368
+cmdr_ship = &36D
+cmdr_hold = &36E
+cmdr_cargo = &36F
+cmdr_ecm = &380
+cmdr_scoop = &381
+cmdr_bomb = &382
+cmdr_eunit = &383
+cmdr_dock = &384
+cmdr_ghype = &385
+cmdr_escape = &386
+cmdr_cour = &387
+cmdr_courx = &389
+cmdr_coury = &38A
+cmdr_misl = &38B
+cmdr_legal = &38C
+cmdr_avail = &38D
+cmdr_price = &39E
+cmdr_kills = &39F
+f_shield = &3A5
+r_shield = &3A6
+energy = &3A7
+home_econ = &3AC
+home_govmt = &3AE
+home_tech = &3AF
+data_econ = &3B8
+data_govm = &3B9
+data_tech = &3BA
+data_popn = &3BB
+data_gnp = &3BD
+hype_dist = &3BF
+data_homex = &3C1
+data_homey = &3C2
+s_flag = &3C6
+cap_flag = &3C7
+a_flag = &3C8
+x_flag = &3C9
+f_flag = &3CA
+y_flag = &3CB
+j_flag = &3CC
+k_flag = &3CD
+b_flag = &3CE
+ \
+save_lock = &233
+new_file = &234
+new_posn = &235
+new_type = &36D
+new_pulse = &3D0
+new_beam = &3D1
+new_military = &3D2
+new_mining = &3D3
+new_mounts = &3D4
+new_missiles = &3D5
+new_shields = &3D6
+new_energy = &3D7
+new_speed = &3D8
+new_hold = &3D9
+new_range = &3DA
+new_costs = &3DB
+new_max = &3DC
+new_min = &3DD
+new_space = &3DE
+ \new_:	EQU &3DF
+new_name = &74D
+ \
+iff_index = &D7A
+altitude = &FD1
+irq1 = &114B
+commander = &1189
+brkdst = &11D5
+ship_data = &55FE
+l_563d = &563D
+osfile = &FFDD
+oswrch = &FFEE
+osword = &FFF1
+osbyte = &FFF4
+oscli = &FFF7
 
 CODE% = &11E3
 ORG CODE%
 LOAD% = &11E3
 EXEC% = &11E3
-
 
 .dcode_in
 
@@ -8855,7 +8956,6 @@ EXEC% = &11E3
  JSR show_missle
  JMP start_loop
 
-
 .n_load
 
  LDY new_type
@@ -8900,7 +9000,6 @@ EXEC% = &11E3
 
  EQUB &00, &01, &02, &03, &06, &18, &19, &1A, &1B, &1C, &1D, &1E
 
-
 .n_name
 
  \ name ship in 0 <= Y <= &C
@@ -8919,7 +9018,6 @@ EXEC% = &11E3
  BNE n_lprint
  RTS
 
-
 .n_price
 
  \ put price 0 <= Y <= &C into 40-43
@@ -8934,7 +9032,6 @@ EXEC% = &11E3
  DEY
  BPL n_lprice
  RTS
-
 
 .cour_buy
 
@@ -9141,7 +9238,6 @@ EXEC% = &11E3
  STA &46
  JMP cour_loop
 
-
 .cour_dock
 
  LDA cmdr_cour
@@ -9185,7 +9281,6 @@ EXEC% = &11E3
 .cour_quit
 
  RTS
-
 
 .stay_here
 
@@ -9242,7 +9337,6 @@ EXEC% = &11E3
 
  JMP start_loop
 
-
 .new_offsets
 
  EQUB   0,  13,  26,  39,  52,  65,  78,  91
@@ -9255,7 +9349,6 @@ EXEC% = &11E3
  \ Manouvre-h, Manoevre-l	\, Spare, Spare
 
 .new_ships
-
 
 .new_adder
 
@@ -10074,4 +10167,20 @@ ENDIF
  EQUB &5B, &6A, &B4, &B9, &BE, &E1, &E6, &EB, &F0, &F5, &FA, &73
  EQUB &78, &7D
 
-SAVE "output/tcode.bin", CODE%, P%, LOAD%
+\SAVE "output/tcode.bin", CODE%, P%, LOAD%
+
+IF _RELEASED
+ INCBIN "extracted/released/workspaces/1.D.bin"
+ELIF _SOURCE_DISC
+ INCBIN "extracted/source-disc/workspaces/1.D.bin"
+ENDIF
+
+ORG &5600
+
+IF _RELEASED
+ INCBIN "extracted/released/S.T.bin"
+ELIF _SOURCE_DISC
+ INCBIN "extracted/source-disc/S.T.bin"
+ENDIF
+
+SAVE "output/1.D.bin", CODE%, &6000

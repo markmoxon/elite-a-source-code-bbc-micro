@@ -115,8 +115,6 @@ tube_r3d = &FEFD
 tube_r4s = &FEFE
 tube_r4d = &FEFF
 
-
-
 ._117C
 
  EQUS ":0.E"
@@ -142,7 +140,6 @@ tube_r4d = &FEFF
  EQUB &00, &00, &00, &00, &00, &00, &0F, &11, &00, &03, &1C, &0E
  EQUB &00, &00, &0A, &00, &11, &3A, &07, &09, &08, &00, &00, &00
  EQUB &00, &20, &F1, &58
-
 
 .tube_write
 
@@ -4014,8 +4011,6 @@ tube_r4d = &FEFF
  LDA &0348
  JMP tube_write
 
-
-
 \ a.qcode_2
 
 .equip
@@ -6139,7 +6134,6 @@ tube_r4d = &FEFF
 
 .get_keyy
 
-
 .get_key
 
  LDA #&8D
@@ -8067,7 +8061,6 @@ tube_r4d = &FEFF
  JSR update_pod
  JMP start_loop
 
-
 .n_load
 
  LDY new_type
@@ -8112,7 +8105,6 @@ tube_r4d = &FEFF
 
  EQUB &00, &01, &02, &03, &06, &18, &19, &1A, &1B, &1C, &1D, &1E
 
-
 .n_name
 
  \ name ship in 0 <= Y <= &C
@@ -8131,7 +8123,6 @@ tube_r4d = &FEFF
  BNE n_lprint
  RTS
 
-
 .n_price
 
  \ put price 0 <= Y <= &C into 40-43
@@ -8146,7 +8137,6 @@ tube_r4d = &FEFF
  DEY
  BPL n_lprice
  RTS
-
 
 .cour_buy
 
@@ -8352,7 +8342,6 @@ tube_r4d = &FEFF
  STA &46
  JMP cour_loop
 
-
 .cour_dock
 
  LDA cmdr_cour
@@ -8397,7 +8386,6 @@ tube_r4d = &FEFF
 
  RTS
 
-
 .stay_here
 
  LDX #&F4
@@ -8412,7 +8400,6 @@ tube_r4d = &FEFF
 .stay_quit
 
  JMP start_loop
-
 
 .mung_prices
 
@@ -8459,7 +8446,6 @@ tube_r4d = &FEFF
  BCC d_31d8
  RTS
 
-
 .new_offsets
 
  EQUB   0,  13,  26,  39,  52,  65,  78,  91
@@ -8472,7 +8458,6 @@ tube_r4d = &FEFF
  \ Manouvre-h, Manoevre-l	\, Spare, Spare
 
 .new_ships
-
 
 .new_adder
 
@@ -9291,7 +9276,6 @@ ENDIF
  EQUB &5B, &6A, &B4, &B9, &BE, &E1, &E6, &EB, &F0, &F5, &FA, &73
  EQUB &78, &7D
 
-
 .msg_3
 
  EQUB &00
@@ -9675,7 +9659,6 @@ ENDIF
  EQUS "AVA", &DC, &D8, &E5, " FROM TECH ", &E5, &FA, "L 12 UPW", &EE, "DS", &B1
  EQUB &00
 
-
 ._0400
 
  EQUB &4C, &32, &24, &00, &03, &60, &6B, &A9, &77, &00, &64, &6C
@@ -9776,7 +9759,6 @@ ENDIF
  EQUB &0F, &10, &11, &12, &13, &14, &15, &16, &17, &18, &19, &19
  EQUB &1A, &1B, &1C, &1D, &1D, &1E, &1F, &1F
 
-
 \ a.qcode_4
 
 .encyclopedia
@@ -9818,7 +9800,6 @@ ENDIF
  JMP beep_wait
 
 .ships_ag
-
 
 .ships_kw
 
@@ -9939,14 +9920,12 @@ ENDIF
 
 .trading
 
-
 .i_restart
 
  JSR check_keys
  TXA
  BEQ i_restart
  JMP start_loop
-
 
 .check_keys
 
@@ -9981,7 +9960,6 @@ ENDIF
 .not_freeze
 
  RTS
-
 
 .write_card
 
@@ -10076,7 +10054,6 @@ ENDIF
 
  RTS
 
-
 .ship_posn
 
  EQUB 20, 13, 23, 12, 33, 37, 22
@@ -10084,14 +10061,12 @@ ENDIF
  EQUB 35, 19, 18, 30, 25, 31, 11
  EQUB  8, 17, 26, 27,  9, 16, 14
 
-
 .ship_dist
 
  EQUB &01, &02, &01, &02, &01, &01, &01
  EQUB &02, &04, &04, &01, &01, &01, &02
  EQUB &01, &02, &01, &02, &01, &01, &02
  EQUB &01, &01, &03, &01, &01, &01, &01
-
 
 .menu
 
@@ -10150,7 +10125,6 @@ ENDIF
 
  JMP start_loop
 
-
 .menu_title
 
  EQUB &01, &02, &03, &05, &04
@@ -10171,14 +10145,12 @@ ENDIF
 
  EQUB &06, &43, &43, &05, &04
 
-
 .ship_centre
 
  EQUB &0D, &0C, &0C, &0B, &0D, &0C, &0B
  EQUB &0B, &08, &07, &09, &0A, &0D, &0C
  EQUB &0D, &0D, &0D, &0C, &0D, &0C, &0D
  EQUB &0C, &0B, &0C, &0C, &0A, &0D, &0E
-
 
 .card_pattern
 
@@ -10208,7 +10180,6 @@ ENDIF
  EQUB  1, 20, &2D	\ space
  EQUB  1, 21, &00
 
-
 .card_addr
 
  EQUW adder, anaconda, asp_2, boa, bushmaster, chameleon, cobra_1
@@ -10217,7 +10188,6 @@ ENDIF
  EQUW iguana, krait, mamba, monitor, moray, ophidian, python
  EQUW shuttle, sidewinder, thargoid, thargon
  EQUW transporter, viper, worm
-
 
 .adder
 
@@ -10805,7 +10775,6 @@ ENDIF
  EQUS &B6, &B7, " ", &01, "HV", &02, " ", &C2
  EQUB 0, 0
 
-
 .install_ship
 
  \ install ship X in position Y with flags A
@@ -10838,7 +10807,6 @@ ENDIF
  \	PLA
  \	TAX
  \	RTS
-
 
 \ a.qcode_5
 
@@ -11287,7 +11255,6 @@ ENDIF
  JSR d_43ce
 
 .d_14e6
-
 
 .d_14e8
 
@@ -17153,7 +17120,6 @@ ENDIF
  EQUB &3F, &00, &B0, &58, &3F, &A9, &37, &59, &7F, &67, &8E, &58
  EQUB &FF, &67, &8E, &58, &BF, &A9, &37, &59, &3F, &00, &00, &C4
 
-
 .s_coriolis
 
  EQUB &00, &00, &64, &74, &E4, &55, &00, &36, &60, &1C, &00, &00
@@ -17181,7 +17147,6 @@ ENDIF
  EQUB &FF, &6B, &6B, &6B, &7F, &6B, &6B, &6B, &3F, &6B, &6B, &6B
  EQUB &BF, &6B, &6B, &6B, &3F, &00, &00, &A0
 
-
 .s_escape
 
  EQUB &20, &00, &01, &2C, &44, &19, &00, &16, &18, &06, &00, &00
@@ -17192,7 +17157,6 @@ ENDIF
  EQUB &1F, &13, &00, &08, &1F, &02, &0C, &04, &3F, &34, &00, &7A
  EQUB &1F, &27, &67, &1E, &5F, &27, &67, &1E, &9F, &70, &00, &00
 
-
 .s_alloys
 
  EQUB &80, &64, &00, &2C, &3C, &11, &00, &0A, &18, &04, &01, &00
@@ -17201,7 +17165,6 @@ ENDIF
  EQUB &FF, &FF, &0A, &2E, &06, &54, &FF, &FF, &1F, &FF, &00, &04
  EQUB &10, &FF, &04, &08, &14, &FF, &08, &0C, &10, &FF, &0C, &00
  EQUB &00, &00, &00, &00
-
 
 .s_barrel
 
@@ -17219,7 +17182,6 @@ ENDIF
  EQUB &1F, &64, &20, &24, &1F, &65, &24, &14, &1F, &60, &00, &00
  EQUB &1F, &00, &29, &1E, &5F, &00, &12, &30, &5F, &00, &33, &00
  EQUB &7F, &00, &12, &30, &3F, &00, &29, &1E, &9F, &60, &00, &00
-
 
 .s_thargoid
 
@@ -17248,7 +17210,6 @@ ENDIF
  EQUB &3F, &67, &3C, &19, &1F, &67, &3C, &19, &1F, &67, &19, &3C
  EQUB &5F, &67, &19, &3C, &9F, &30, &00, &00
 
-
 .s_thargon
 
  EQUB &F0, &40, &06, &8C, &50, &41, &00, &12, &3C, &0F, &32, &00
@@ -17260,7 +17221,6 @@ ENDIF
  EQUB &34, &66, &09, &0A, &0F, &3F, &45, &66, &9F, &24, &00, &00
  EQUB &5F, &14, &05, &07, &7F, &2E, &2A, &0E, &3F, &24, &00, &68
  EQUB &3F, &2E, &2A, &0E, &1F, &14, &05, &07, &1F, &24, &00, &00
-
 
 .s_boulder
 
@@ -17278,7 +17238,6 @@ ENDIF
  EQUB &2F, &18, &FF, &03, &27, &07, &FF, &05, &04, &01, &1F, &31
  EQUB &54, &08, &3F, &70, &15, &15, &7F, &4C, &23, &52, &3F, &16
  EQUB &38, &89, &3F, &28, &6E, &26
-
 
 .s_asteroid
 
@@ -17301,7 +17260,6 @@ ENDIF
  EQUB &0F, &50, &7F, &42, &0E, &4B, &FF, &46, &50, &28, &7F, &3A
  EQUB &66, &33, &3F, &51, &09, &43, &3F, &2F, &5E, &3F
 
-
 .s_minerals
 
  EQUB &B0, &00, &01, &5A, &44, &19, &00, &16, &18, &06, &01, &00
@@ -17309,7 +17267,6 @@ ENDIF
  EQUB &12, &33, &00, &0C, &0A, &3F, &02, &33, &0B, &06, &02, &5F
  EQUB &01, &33, &0C, &2A, &07, &1F, &01, &22, &1F, &23, &00, &04
  EQUB &1F, &03, &04, &08, &1F, &01, &08, &0C, &1F, &12, &0C, &00
-
 
 .s_shuttle1
 
@@ -17339,7 +17296,6 @@ ENDIF
  EQUB &95, &07, &1F, &66, &66, &2E, &1F, &95, &00, &07, &5F, &66
  EQUB &66, &2E, &3F, &00, &00, &D5, &9F, &51, &51, &B1, &1F, &51
  EQUB &51, &B1, &5F, &6E, &6E, &50
-
 
 .s_transporter
 
@@ -17385,7 +17341,6 @@ ENDIF
  EQUB &20, &4F, &12, &08, &22, &0B, &1F, &00, &26, &11, &1F, &00
  EQUB &00, &79
 
-
 .s_cobra3
 
  EQUB &03, &41, &23, &BC, &54, &99, &54, &2A, &A8, &26, &C8, &00
@@ -17422,7 +17377,6 @@ ENDIF
  EQUB &1F, &3D, &66, &00, &3F, &00, &00, &50, &DF, &07, &2A, &09
  EQUB &5F, &00, &1E, &06, &5F, &07, &2A, &09
 
-
 .s_python
 
  EQUB &05, &00, &19, &56, &BE, &55, &00, &2A, &42, &1A, &2C, &01
@@ -17447,7 +17401,6 @@ ENDIF
  EQUB &25, &0B, &7E, &19, &25, &0B, &FE, &19, &25, &0B, &3E, &00
  EQUB &00, &70
 
-
 .s_boa
 
  EQUB &05, &24, &13, &62, &C2, &59, &00, &26, &4E, &18, &FA, &00
@@ -17471,7 +17424,6 @@ ENDIF
  EQUB &20, &14, &1F, &00, &17, &06, &DF, &17, &0F, &09, &5F, &17
  EQUB &0F, &09, &9F, &1A, &0D, &0A, &5F, &00, &1F, &0C, &1F, &1A
  EQUB &0D, &0A, &2E, &00, &00, &6B
-
 
 .s_anaconda
 
@@ -17498,7 +17450,6 @@ ENDIF
  EQUB &48, &18, &DF, &6C, &44, &22, &5F, &6C, &44, &22, &1F, &61
  EQUB &48, &18, &1F, &00, &5E, &12
 
-
 .s_worm
 
  EQUB &00, &49, &26, &50, &90, &49, &00, &12, &3C, &10, &00, &00
@@ -17516,7 +17467,6 @@ ENDIF
  EQUB &1F, &00, &58, &46, &1F, &00, &45, &0E, &1F, &46, &42, &23
  EQUB &9F, &46, &42, &23, &1F, &40, &31, &0E, &9F, &40, &31, &0E
  EQUB &3F, &00, &00, &C8, &5F, &00, &50, &00
-
 
 .s_missile
 
@@ -17566,7 +17516,6 @@ ENDIF
  EQUB &21, &0B, &5F, &16, &21, &0B, &5F, &00, &20, &00, &3F, &00
  EQUB &00, &30
 
-
 .s_sidewinder
 
  EQUB &00, &81, &10, &50, &8C, &3D, &00, &1E, &3C, &0F, &64, &00
@@ -17583,7 +17532,6 @@ ENDIF
  EQUB &0C, &33, &18, &24, &0C, &33, &20, &24, &1F, &00, &20, &08
  EQUB &9F, &0C, &2F, &06, &1F, &0C, &2F, &06, &3F, &00, &00, &70
  EQUB &DF, &0C, &2F, &06, &5F, &00, &20, &08, &5F, &0C, &2F, &06
-
 
 .s_mamba
 
@@ -17614,7 +17562,6 @@ ENDIF
  EQUB &18, &02, &9E, &20, &40, &10, &1E, &20, &40, &10, &3E, &00
  EQUB &00, &7F
 
-
 .s_krait
 
  EQUB &01, &10, &0E, &7A, &CE, &55, &00, &12, &66, &15, &64, &00
@@ -17637,7 +17584,6 @@ ENDIF
  EQUB &40, &38, &1F, &03, &18, &03, &5F, &03, &18, &03, &DF, &03
  EQUB &18, &03, &9F, &03, &18, &03, &3F, &26, &00, &4D, &BF, &26
  EQUB &00, &4D
-
 
 .s_adder
 
@@ -17668,7 +17614,6 @@ ENDIF
  EQUB &9F, &45, &32, &0D, &DF, &45, &32, &0D, &1F, &00, &1C, &00
  EQUB &5F, &00, &1C, &00
 
-
 .s_gecko
 
  EQUB &00, &49, &26, &5C, &A0, &41, &00, &1A, &48, &11, &37, &00
@@ -17689,7 +17634,6 @@ ENDIF
  EQUB &9F, &04, &2D, &08, &BF, &58, &10, &D6, &3F, &00, &00, &BB
  EQUB &3F, &58, &10, &D6
 
-
 .s_cobra1
 
  EQUB &03, &49, &26, &56, &9E, &45, &28, &1A, &42, &12, &4B, &00
@@ -17709,7 +17653,6 @@ ENDIF
  EQUB &2E, &08, &DF, &0C, &39, &0C, &1F, &08, &2E, &08, &5F, &0C
  EQUB &39, &0C, &1F, &00, &31, &00, &3F, &00, &00, &9A, &BF, &79
  EQUB &6F, &3E, &3F, &79, &6F, &3E
-
 
 .s_asp
 
@@ -17739,7 +17682,6 @@ ENDIF
  EQUB &40, &1F, &DF, &3B, &40, &1F, &1F, &50, &2E, &32, &9F, &50
  EQUB &2E, &32, &3F, &00, &00, &5A
 
-
 .s_ferdelance
 
  EQUB &00, &40, &06, &86, &F2, &69, &00, &1A, &72, &1B, &FA, &00
@@ -17767,7 +17709,6 @@ ENDIF
  EQUB &00, &18, &BC, &0C, &2E, &13, &3C, &00, &2D, &16, &3C, &0C
  EQUB &2E, &13, &5F, &00, &1C, &00
 
-
 .s_moray
 
  EQUB &01, &84, &03, &68, &B4, &45, &00, &1A, &54, &13, &32, &00
@@ -17788,7 +17729,6 @@ ENDIF
  EQUB &1F, &00, &2B, &07, &9F, &0A, &31, &07, &1F, &0A, &31, &07
  EQUB &F8, &3B, &1C, &65, &78, &00, &34, &4E, &78, &3B, &1C, &65
  EQUB &DF, &48, &63, &32, &5F, &00, &53, &1E, &5F, &48, &63, &32
-
 
 .s_constrictor
 
@@ -17815,7 +17755,6 @@ ENDIF
  EQUB &4B, &00, &1F, &00, &35, &00, &1F, &2C, &4B, &00, &3F, &00
  EQUB &00, &A0, &5F, &00, &1B, &00
 
-
 \ a.qship_2
 
 .s_dragon
@@ -17838,7 +17777,6 @@ ENDIF
  EQUB &5A, &1C, &5F, &10, &5A, &1C, &5F, &21, &5A, &00, &7F, &19
  EQUB &5B, &0E, &FF, &19, &5B, &0E, &DF, &21, &5A, &00, &DF, &10
  EQUB &5A, &1C, &3F, &30, &00, &52, &BF, &30, &00, &52
-
 
 .s_monitor
 
@@ -17864,7 +17802,6 @@ ENDIF
  EQUB &39, &1C, &BF, &36, &1C, &10, &9F, &2C, &2B, &0D, &DF, &26
  EQUB &2F, &12, &5F, &26, &2F, &12, &7F, &27, &30, &0D, &FF, &27
  EQUB &30, &0D, &3F, &00, &00, &40
-
 
 .s_ophidian
 
@@ -17895,7 +17832,6 @@ ENDIF
  EQUB &5F, &0A, &14, &02, &DF, &0A, &14, &02, &7F, &12, &20, &02
  EQUB &FF, &12, &20, &02, &3F, &00, &00, &25
 
-
 .s_ghavial
 
  EQUB &03, &00, &26, &5C, &B4, &61, &00, &22, &48, &16, &64, &00
@@ -17918,7 +17854,6 @@ ENDIF
  EQUB &5F, &00, &3E, &0F, &5F, &1C, &38, &07, &7F, &1B, &37, &0D
  EQUB &7F, &00, &33, &26, &FF, &1B, &37, &0D, &DF, &1C, &38, &07
 
-
 .s_bushmaster
 
  EQUB &00, &9A, &10, &5C, &A8, &51, &00, &1E, &48, &13, &96, &00
@@ -17938,7 +17873,6 @@ ENDIF
  EQUB &9F, &17, &58, &1D, &1F, &17, &58, &1D, &DF, &0E, &5D, &12
  EQUB &5F, &0E, &5D, &12, &BF, &1F, &59, &0D, &3F, &1F, &59, &0D
  EQUB &FF, &2A, &55, &07, &7F, &2A, &55, &07, &3F, &00, &00, &60
-
 
 .s_rattler
 
@@ -17966,7 +17900,6 @@ ENDIF
  EQUB &5D, &12, &5F, &17, &5C, &0B, &5F, &1A, &5C, &06, &3F, &00
  EQUB &00, &60
 
-
 .s_iguana
 
  EQUB &01, &AC, &0D, &6E, &CA, &51, &00, &1A, &5A, &17, &96, &00
@@ -17990,7 +17923,6 @@ ENDIF
  EQUB &4D, &19, &9F, &2A, &55, &00, &DF, &2A, &55, &00, &1F, &2A
  EQUB &55, &00, &5F, &2A, &55, &00, &BF, &17, &00, &5D, &3F, &17
  EQUB &00, &5D
-
 
 .s_shuttle2
 
@@ -18018,7 +17950,6 @@ ENDIF
  EQUB &60, &00, &9F, &60, &00, &00, &5F, &00, &60, &00, &1F, &60
  EQUB &00, &00, &BF, &42, &42, &16, &FF, &42, &42, &16, &7F, &42
  EQUB &42, &16, &3F, &42, &42, &16, &3F, &00, &00, &60
-
 
 .s_chameleon
 
@@ -18048,9 +17979,7 @@ ENDIF
  EQUB &BF, &39, &4C, &0B, &3F, &39, &4C, &0B, &7F, &39, &4C, &0B
  EQUB &FF, &39, &4C, &0B, &3F, &00, &00, &60
 
-
 ship_total = 38
-
 
 .ship_list
 
@@ -18066,7 +17995,6 @@ ship_total = 38
  EQUW	s_shuttle2,	s_chameleon
 
  EQUW &0000
-
 
 .ship_data
 
@@ -18090,7 +18018,6 @@ ship_total = 38
  EQUB	&0C,	&04,	&0C,	&04
  EQUB	&0C,	&02,	&22,	&02
  EQUB	&22,	&0C,	&04,	&8C
-
 
 .ship_bits
 
@@ -18134,7 +18061,6 @@ ship_total = 38
 	EQUD %00010001110000000011000000000000
 
 	EQUD %00011111111111100111111000000000
-
 
 .ship_bytes
 
