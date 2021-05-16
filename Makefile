@@ -39,6 +39,21 @@ build:
 	$(BEEBASM) -i sources/a.elite.asm -v >> output/compile.txt
 	$(BEEBASM) -i sources/elite-disc.asm -do elite-a$(suffix-elite-a).ssd -opt 3
 
+.PHONY:encrypt
+encrypt:
+	echo _VERSION=6 > sources/elite-header.h.asm
+	echo _RELEASE=$(rel-elite-a) >> sources/elite-header.h.asm
+	echo _REMOVE_CHECKSUMS=FALSE >> sources/elite-header.h.asm
+	echo _MATCH_EXTRACTED_BINARIES=TRUE >> sources/elite-header.h.asm
+	$(BEEBASM) -i sources/a.tcode.asm -v > output/compile.txt
+	$(BEEBASM) -i sources/a.dcode.asm -v >> output/compile.txt
+	$(BEEBASM) -i sources/a.icode.asm -v >> output/compile.txt
+	$(BEEBASM) -i sources/1.d.asm -v >> output/compile.txt
+	$(BEEBASM) -i sources/a.qcode.asm -v >> output/compile.txt
+	$(BEEBASM) -i sources/a.qelite.asm -v >> output/compile.txt
+	$(BEEBASM) -i sources/a.elite.asm -v >> output/compile.txt
+	$(BEEBASM) -i sources/elite-disc.asm -do elite-a$(suffix-elite-a).ssd -opt 3
+
 .PHONY:verify
 verify:
 	@$(PYTHON) sources/crc32.py extracted$(folder-elite-a) output
