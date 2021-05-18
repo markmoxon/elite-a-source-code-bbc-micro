@@ -1937,8 +1937,6 @@ ORG CODE%
 
 LOAD_A% = LOAD%
 
- \ a.tcode - ELITE III docked code
-
 \OPT TABS=16
 
 key_table = &04
@@ -2041,135 +2039,244 @@ osword = &FFF1
 osbyte = &FFF4
 oscli = &FFF7
 
-EXEC% = &11E3
+\ ******************************************************************************
+\
+\       Name: S%
+\       Type: Workspace
+\    Address: &11E3 to &11F0
+\   Category: Workspaces
+\    Summary: Entry points and vector addresses in the main docked code
+\
+\ ******************************************************************************
 
-.dcode_in
+.S%
 
- JMP dcode_2
+ JMP DOENTRY            \ Decrypt the main docked code and dock at the station
 
-.boot_in
+ JMP DOBEGIN            \ Decrypt the main docked code and start a new game
 
- JMP boot_2
+ JMP CHPR               \ WRCHV is set to point here by elite-loader3.asm
 
-.wrch_in
+ EQUW IRQ1              \ IRQ1V is set to point here by elite-loader3.asm
 
- JMP wrchdst
- EQUW &114B
+ JMP BRBR               \ AJD
 
-.brk_in
+BRKV = P% - 2           \ The address of the destination address in the above
+                        \ JMP BRBR1 instruction. This ensures that any code that
+                        \ updates BRKV will update this instruction instead of
+                        \ the actual vector
 
- JMP brk_go
+.INBAY
 
-\ a.tcode_1
-
-.icode_in
-
- JSR set_brk
+ JSR BRKBK
  JMP icode_set
  EQUB 0
  \ dead entry
  LDA #0
- JSR decode
- JSR clr_common
+ JSR scramble
+ JSR RES2
  JMP stack_init
 
-.boot_2
+\ ******************************************************************************
+\
+\       Name: DOBEGIN
+\       Type: Subroutine
+\   Category: Loader
+\    Summary: Decrypt the main docked code, initialise the configuration
+\             variables and start the game
+\
+\ ******************************************************************************
 
- LDA #0
- JSR decode
- JMP boot_go
+.DOBEGIN
 
-.dcode_2
+ LDA #0                 \ AJD
 
- LDA last_key+1
- BNE icode_in
+ JSR scramble           \ Decrypt the main docked code between &1300 and &5FFF
+
+ JMP BEGIN              \ Jump to BEGIN to initialise the configuration
+                        \ variables and start the game
+
+\ ******************************************************************************
+\
+\       Name: DOENTRY
+\       Type: Subroutine
+\   Category: Flight
+\    Summary: Dock at the space station, show the ship hanger and work out any
+\             mission progression
+\
+\ ******************************************************************************
+
+.DOENTRY
+
+ LDA KL+1               \ AJD
+ BNE INBAY
  LDA #&FF
- JSR decode
- JSR clr_common
- JSR pattern
- JSR picture
- LDY #&2C
- JSR y_sync
- JSR cour_dock
- LDA cmdr_mission
- AND #&03
- BNE l_1241
- LDA cmdr_kills+&01
- BEQ jmp_start
- LDA GCNT
- LSR A
- BNE jmp_start
- JMP mission_1
 
-.l_1241
+ JSR scramble           \ Decrypt the newly loaded code
 
- CMP #&03
- BNE l_1248
- JMP reward_1
+ JSR RES2               \ Reset a number of flight variables and workspaces
 
-.l_1248
+ JSR HFS1               \ Show the space station docking tunnel
 
- LDA cmdr_mission
- AND #&0F
- CMP #&02
- BNE l_1262
- LDA cmdr_kills+&01
- CMP #&05
- BCC jmp_start
- LDA GCNT
- CMP #&02
- BNE jmp_start
- JMP mission_2
+ JSR HALL               \ Show the ship hanger
 
-.l_1262
+ LDY #44                \ Wait for 44/50 of a second (0.88 seconds)
+ JSR DELAY
 
- CMP #&06
- BNE l_127e
- LDA GCNT
- CMP #&02
- BNE jmp_start
- LDA cmdr_homex
- CMP #&D7
- BNE jmp_start
- LDA cmdr_homey
- CMP #&54
- BNE jmp_start
- JMP constrictor
+ JSR cour_dock          \ AJD
 
-.l_127e
+ LDA TP                 \ Fetch bits 0 and 1 of TP, and if they are non-zero
+ AND #%00000011         \ (i.e. mission 1 is either in progress or has been
+ BNE EN1                \ completed), skip to EN1
 
- CMP #&0A
- BNE jmp_start
- LDA GCNT
- CMP #&02
- BNE jmp_start
- LDA cmdr_homex
- CMP #&3F
- BNE jmp_start
- LDA cmdr_homey
- CMP #&48
- BNE jmp_start
- JMP reward_2
+ LDA TALLY+1            \ If the high byte of TALLY is zero (so we have a combat
+ BEQ EN4                \ rank below Competent), jump to EN4 as we are not yet
+                        \ good enough to qualify for a mission
+
+ LDA GCNT               \ Fetch the galaxy number into A, and if any of bits 1-7
+ LSR A                  \ are set (i.e. A > 1), jump to EN4 as mission 1 can
+ BNE EN4                \ only be triggered in the first two galaxies
+
+ JMP BRIEF              \ If we get here, mission 1 hasn't started, we have
+                        \ reached a combat rank of Competent, and we are in
+                        \ galaxy 0 or 1 (shown in-game as galaxy 1 or 2), so
+                        \ it's time to start mission 1 by calling BRIEF
+
+.EN1
+
+                        \ If we get here then mission 1 is either in progress or
+                        \ has been completed
+
+ CMP #%00000011         \ If bits 0 and 1 are not both set, then jump to EN2
+ BNE EN2
+
+ JMP DEBRIEF            \ Bits 0 and 1 are both set, so mission 1 is both in
+                        \ progress and has been completed, which means we have
+                        \ only just completed it, so jump to DEBRIEF to end the
+                        \ mission get our reward
+
+.EN2
+
+                        \ Mission 1 has been completed, so now to check for
+                        \ mission 2
+
+ LDA TP                 \ Extract bits 0-3 of TP into A
+ AND #%00001111
+
+ CMP #%00000010         \ If mission 1 is complete and no longer in progress,
+ BNE EN3                \ and mission 2 is not yet started, then bits 0-3 of TP
+                        \ will be %0010, so this jumps to EN3 if this is not the
+                        \ case
+
+ LDA TALLY+1            \ If the high byte of TALLY is < 5 (so we have a combat
+ CMP #5                 \ rank that is less than 3/8 of the way from Dangerous
+ BCC EN4                \ to Deadly), jump to EN4 as our rank isn't high enough
+                        \ for mission 2
+
+ LDA GCNT               \ Fetch the galaxy number into A
+
+ CMP #2                 \ If this is not galaxy 2 (shown in-game as galaxy 3),
+ BNE EN4                \ jump to EN4 as we can only start mission 2 in the
+                        \ third galaxy
+
+ JMP BRIEF2             \ If we get here, mission 1 is complete and no longer in
+                        \ progress, mission 2 hasn't started, we have reached a
+                        \ combat rank of 3/8 of the way from Dangerous to
+                        \ Deadly, and we are in galaxy 2 (shown in-game as
+                        \ galaxy 3), so it's time to start mission 2 by calling
+                        \ BRIEF2
+
+.EN3
+
+ CMP #%00000110         \ If mission 1 is complete and no longer in progress,
+ BNE EN5                \ and mission 2 has started but we have not yet been
+                        \ briefed and picked up the plans, then bits 0-3 of TP
+                        \ will be %0110, so this jumps to EN5 if this is not the
+                        \ case
+
+ LDA GCNT               \ Fetch the galaxy number into A
+
+ CMP #2                 \ If this is not galaxy 2 (shown in-game as galaxy 3),
+ BNE EN4                \ jump to EN4 as we can only start mission 2 in the
+                        \ third galaxy
+
+ LDA QQ0                \ Set A = the current system's galactic x-coordinate
+
+ CMP #215               \ If A <> 215 then jump to EN4
+ BNE EN4
+
+ LDA QQ1                \ Set A = the current system's galactic y-coordinate
+
+ CMP #84                \ If A <> 84 then jump to EN4
+ BNE EN4
+
+ JMP BRIEF3             \ If we get here, mission 1 is complete and no longer in
+                        \ progress, mission 2 has started but we have not yet
+                        \ picked up the plans, and we have just arrived at
+                        \ Ceerdi at galactic coordinates (215, 84), so we jump
+                        \ to BRIEF3 to get a mission brief and pick up the plans
+                        \ that we need to carry to Birera
+
+.EN5
+
+ CMP #%00001010         \ If mission 1 is complete and no longer in progress,
+ BNE EN4                \ and mission 2 has started and we have picked up the
+                        \ plans, then bits 0-3 of TP will be %1010, so this
+                        \ jumps to EN5 if this is not the case
+
+ LDA GCNT               \ Fetch the galaxy number into A
+
+ CMP #2                 \ If this is not galaxy 2 (shown in-game as galaxy 3),
+ BNE EN4                \ jump to EN4 as we can only start mission 2 in the
+                        \ third galaxy
+
+ LDA QQ0                \ Set A = the current system's galactic x-coordinate
+
+ CMP #63                \ If A <> 63 then jump to EN4
+ BNE EN4
+
+ LDA QQ1                \ Set A = the current system's galactic y-coordinate
+
+ CMP #72
+ BNE EN4                \ If A <> 72 then jump to EN4
+
+ JMP DEBRIEF2           \ If we get here, mission 1 is complete and no longer in
+                        \ progress, mission 2 has started and we have picked up
+                        \ the plans, and we have just arrived at Birera at
+                        \ galactic coordinates (63, 72), so we jump to DEBRIEF2
+                        \ to end the mission and get our reward
 
 .icode_set
 
- JSR clr_common
+ JSR RES2               \ AJD
 
-.jmp_start
+.EN4
 
- JMP start_loop
+ JMP BAY                \ If we get here them we didn't start or any missions,
+                        \ so jump to BAY to go to the docking bay (i.e. show the
+                        \ Status Mode screen)
 
-.decode
+.scramble
 
  STA save_lock
 
-.set_brk
+\ ******************************************************************************
+\
+\       Name: BRKBK
+\       Type: Subroutine
+\   Category: Save and load
+\    Summary: Set the standard BRKV handler for the game
+\
+\ ******************************************************************************
 
- LDA #LO(brk_go)
- STA brk_in+&01
- LDA #HI(brk_go)
- STA brk_in+&02
- RTS
+.BRKBK
+
+ LDA #LO(BRBR)          \ Set BRKV to point to the BRBR routine
+ STA BRKV
+ LDA #HI(BRBR)
+ STA BRKV+1
+
+ RTS                    \ Return from the subroutine
 
 \ ******************************************************************************
 \
@@ -3199,204 +3306,524 @@ EXEC% = &11E3
  EQUS "RI"              \ Token 158
  EQUS "ON"              \ Token 159
 
-.l_14e1
+\ ******************************************************************************
+\
+\       Name: MVEIT (Part 1 of 9)
+\       Type: Subroutine
+\   Category: Moving
+\    Summary: Move current ship: Tidy the orientation vectors
+\  Deep dive: Program flow of the ship-moving routine
+\             Scheduling tasks with the main loop counter
+\
+\ ------------------------------------------------------------------------------
+\
+\ This routine has multiple stages. This stage does the following:
+\
+\   * Tidy the orientation vectors for one of the ship slots
+\
+\ Arguments:
+\
+\   INWK                The current ship/planet/sun's data block
+\
+\   XSAV                The slot number of the current ship/planet/sun
+\
+\   TYPE                The type of the current ship/planet/sun
+\
+\ ******************************************************************************
 
- LDA &65
- AND #&20
- BNE l_14f2
- LDA &8A
- EOR &84
- AND #&0F
- BNE l_14f2
- JSR l_3e06
+.MVEIT
 
-.l_14f2
+ LDA INWK+31            \ If bit 5 of ship byte #31 is set, jump to MV3 as the
+ AND #%00100000         \ ship is exploding, so we don't need to tidy its
+ BNE MV3                \ orientation vectors
 
- LDY #&09
- JSR l_1619
- LDY #&0F
- JSR l_1619
- LDY #&15
- JSR l_1619
- LDA &64
- AND #&80
- STA &9A
- LDA &64
- AND #&7F
- BEQ l_152a
- CMP #&7F
- SBC #&00
- ORA &9A
- STA &64
- LDX #&0F
- LDY #&09
- JSR l_1680
- LDX #&11
- LDY #&0B
- JSR l_1680
- LDX #&13
- LDY #&0D
- JSR l_1680
+ LDA MCNT               \ Fetch the main loop counter
 
-.l_152a
+ EOR XSAV               \ Fetch the slot number of the ship we are moving, EOR
+ AND #15                \ with the loop counter and apply mod 15 to the result.
+ BNE MV3                \ The result will be zero when "counter mod 15" matches
+                        \ the slot number, so this makes sure we call TIDY 12
+                        \ times every 16 main loop iterations, like this:
+                        \
+                        \   Iteration 0, tidy the ship in slot 0
+                        \   Iteration 1, tidy the ship in slot 1
+                        \   Iteration 2, tidy the ship in slot 2
+                        \     ...
+                        \   Iteration 11, tidy the ship in slot 11
+                        \   Iteration 12, do nothing
+                        \   Iteration 13, do nothing
+                        \   Iteration 14, do nothing
+                        \   Iteration 15, do nothing
+                        \   Iteration 16, tidy the ship in slot 0
+                        \     ...
+                        \
+                        \ and so on
 
- LDA &63
- AND #&80
- STA &9A
- LDA &63
- AND #&7F
- BEQ l_1553
- CMP #&7F
- SBC #&00
- ORA &9A
- STA &63
- LDX #&0F
- LDY #&15
- JSR l_1680
- LDX #&11
- LDY #&17
- JSR l_1680
- LDX #&13
- LDY #&19
- JSR l_1680
+ JSR TIDY               \ Call TIDY to tidy up the orientation vectors, to
+                        \ prevent the ship from getting elongated and out of
+                        \ shape due to the imprecise nature of trigonometry
+                        \ in assembly language
 
-.l_1553
+.MV3
 
- \	LDA &65
- \	AND #&20
- \	BNE l_155f
- \	LDA &65
- \	ORA #&10
- \	STA &65
- \l_155f
- \	LDA &65
- \	AND #&EF
- \	STA &65
- RTS
+                        \ Fall through into part 7 (parts 2-6 are not required
+                        \ when we are docked)
 
-.l_1619
+\ ******************************************************************************
+\
+\       Name: MVEIT (Part 7 of 9)
+\       Type: Subroutine
+\   Category: Moving
+\    Summary: Move current ship: Rotate ship's orientation vectors by pitch/roll
+\  Deep dive: Orientation vectors
+\             Pitching and rolling
+\
+\ ------------------------------------------------------------------------------
+\
+\ This routine has multiple stages. This stage does the following:
+\
+\   * Rotate the ship's orientation vectors according to our pitch and roll
+\
+\ As with the previous step, this is all about moving the other ships rather
+\ than us (even though we are the one doing the moving). So we rotate the
+\ current ship's orientation vectors (which defines its orientation in space),
+\ by the angles we are "moving" the rest of the sky through (alpha and beta, our
+\ roll and pitch), so the ship appears to us to be stationary while we rotate.
+\
+\ ******************************************************************************
 
- LDA &8D
- STA &81
- LDX &48,Y
- STX &82
- LDX &49,Y
- STX &83
- LDX &46,Y
- STX &1B
- LDA &47,Y
- EOR #&80
- JSR l_22ad
- STA &49,Y
- STX &48,Y
- STX &1B
- LDX &46,Y
- STX &82
- LDX &47,Y
- STX &83
- LDA &49,Y
- JSR l_22ad
- STA &47,Y
- STX &46,Y
- STX &1B
- LDA &2A
- STA &81
- LDX &48,Y
- STX &82
- LDX &49,Y
- STX &83
- LDX &4A,Y
- STX &1B
- LDA &4B,Y
- EOR #&80
- JSR l_22ad
- STA &49,Y
- STX &48,Y
- STX &1B
- LDX &4A,Y
- STX &82
- LDX &4B,Y
- STX &83
- LDA &49,Y
- JSR l_22ad
- STA &4B,Y
- STX &4A,Y
- RTS
+ LDY #9                 \ Apply our pitch and roll rotations to the current
+ JSR MVS4               \ ship's nosev vector
 
-.l_1680
+ LDY #15                \ Apply our pitch and roll rotations to the current
+ JSR MVS4               \ ship's roofv vector
 
- LDA &47,X
- AND #&7F
+ LDY #21                \ Apply our pitch and roll rotations to the current
+ JSR MVS4               \ ship's sidev vector
+
+\ ******************************************************************************
+\
+\       Name: MVEIT (Part 8 of 9)
+\       Type: Subroutine
+\   Category: Moving
+\    Summary: Move current ship: Rotate ship about itself by its own pitch/roll
+\  Deep dive: Orientation vectors
+\             Pitching and rolling by a fixed angle
+\
+\ ------------------------------------------------------------------------------
+\
+\ This routine has multiple stages. This stage does the following:
+\
+\   * If the ship we are processing is rolling or pitching itself, rotate it and
+\     apply damping if required
+\
+\ ******************************************************************************
+
+ LDA INWK+30            \ Fetch the ship's pitch counter and extract the sign
+ AND #%10000000         \ into RAT2
+ STA RAT2
+
+ LDA INWK+30            \ Fetch the ship's pitch counter and extract the value
+ AND #%01111111         \ without the sign bit into A
+
+ BEQ MV8                \ If the pitch counter is 0, then jump to MV8 to skip
+                        \ the following, as the ship is not pitching
+
+ CMP #%01111111         \ If bits 0-6 are set in the pitch counter (i.e. the
+                        \ ship's pitch is not damping down), then the C flag
+                        \ will be set by this instruction
+
+ SBC #0                 \ Set A = A - 0 - (1 - C), so if we are damping then we
+                        \ reduce A by 1, otherwise it is unchanged
+
+ ORA RAT2               \ Change bit 7 of A to the sign we saved in RAT2, so
+                        \ the updated pitch counter in A retains its sign
+
+ STA INWK+30            \ Store the updated pitch counter in byte #30
+
+ LDX #15                \ Rotate (roofv_x, nosev_x) by a small angle (pitch)
+ LDY #9
+ JSR MVS5
+
+ LDX #17                \ Rotate (roofv_y, nosev_y) by a small angle (pitch)
+ LDY #11
+ JSR MVS5
+
+ LDX #19                \ Rotate (roofv_z, nosev_z) by a small angle (pitch)
+ LDY #13
+ JSR MVS5
+
+.MV8
+
+ LDA INWK+29            \ Fetch the ship's roll counter and extract the sign
+ AND #%10000000         \ into RAT2
+ STA RAT2
+
+ LDA INWK+29            \ Fetch the ship's roll counter and extract the value
+ AND #%01111111         \ without the sign bit into A
+
+ BEQ MV5                \ If the roll counter is 0, then jump to MV5 to skip the
+                        \ following, as the ship is not rolling
+
+ CMP #%01111111         \ If bits 0-6 are set in the roll counter (i.e. the
+                        \ ship's roll is not damping down), then the C flag
+                        \ will be set by this instruction
+
+ SBC #0                 \ Set A = A - 0 - (1 - C), so if we are damping then we
+                        \ reduce A by 1, otherwise it is unchanged
+
+ ORA RAT2               \ Change bit 7 of A to the sign we saved in RAT2, so
+                        \ the updated roll counter in A retains its sign
+
+ STA INWK+29            \ Store the updated pitch counter in byte #29
+
+ LDX #15                \ Rotate (roofv_x, sidev_x) by a small angle (roll)
+ LDY #21
+ JSR MVS5
+
+ LDX #17                \ Rotate (roofv_y, sidev_y) by a small angle (roll)
+ LDY #23
+ JSR MVS5
+
+ LDX #19                \ Rotate (roofv_z, sidev_z) by a small angle (roll)
+ LDY #25
+ JSR MVS5
+
+\ ******************************************************************************
+\
+\       Name: MVEIT (Part 9 of 9)
+\       Type: Subroutine
+\   Category: Moving
+\    Summary: Move current ship: Redraw on scanner, if it hasn't been destroyed
+\
+\ ------------------------------------------------------------------------------
+\
+\ This routine has multiple stages. This stage does the following:
+\
+\   * If the ship is exploding or being removed, hide it on the scanner
+\
+\   * Otherwise redraw the ship on the scanner, now that it's been moved
+\
+\ ******************************************************************************
+
+.MV5
+
+ RTS                    \ Return from the subroutine
+
+\ ******************************************************************************
+\
+\       Name: MVS4
+\       Type: Subroutine
+\   Category: Moving
+\    Summary: Apply pitch and roll to an orientation vector
+\  Deep dive: Orientation vectors
+\             Pitching and rolling
+\
+\ ------------------------------------------------------------------------------
+\
+\ Apply pitch and roll angles alpha and beta to the orientation vector in Y.
+\
+\ Specifically, this routine rotates a point (x, y, z) around the origin by
+\ pitch alpha and roll beta, using the small angle approximation to make the
+\ maths easier, and incorporating the Minsky circle algorithm to make the
+\ rotation more stable (though more elliptic).
+\
+\ If that paragraph makes sense to you, then you should probably be writing
+\ this commentary! For the rest of us, there's a detailed explanation of all
+\ this in the deep dive on "Pitching and rolling".
+\
+\ Arguments:
+\
+\   Y                   Determines which of the INWK orientation vectors to
+\                       transform:
+\
+\                         * Y = 9 rotates nosev: (nosev_x, nosev_y, nosev_z)
+\
+\                         * Y = 15 rotates roofv: (roofv_x, roofv_y, roofv_z)
+\
+\                         * Y = 21 rotates sidev: (sidev_x, sidev_y, sidev_z)
+\
+\ ******************************************************************************
+
+.MVS4
+
+ LDA ALPHA              \ Set Q = alpha (the roll angle to rotate through)
+ STA Q
+
+ LDX INWK+2,Y           \ Set (S R) = nosev_y
+ STX R
+ LDX INWK+3,Y
+ STX S
+
+ LDX INWK,Y             \ These instructions have no effect as MAD overwrites
+ STX P                  \ X and P when called, but they set X = P = nosev_x_lo
+
+ LDA INWK+1,Y           \ Set A = -nosev_x_hi
+ EOR #%10000000
+
+ JSR MAD                \ Set (A X) = Q * A + (S R)
+ STA INWK+3,Y           \           = alpha * -nosev_x_hi + nosev_y
+ STX INWK+2,Y           \
+                        \ and store (A X) in nosev_y, so this does:
+                        \
+                        \ nosev_y = nosev_y - alpha * nosev_x_hi
+
+ STX P                  \ This instruction has no effect as MAD overwrites P,
+                        \ but it sets P = nosev_y_lo
+
+ LDX INWK,Y             \ Set (S R) = nosev_x
+ STX R
+ LDX INWK+1,Y
+ STX S
+
+ LDA INWK+3,Y           \ Set A = nosev_y_hi
+
+ JSR MAD                \ Set (A X) = Q * A + (S R)
+ STA INWK+1,Y           \           = alpha * nosev_y_hi + nosev_x
+ STX INWK,Y             \
+                        \ and store (A X) in nosev_x, so this does:
+                        \
+                        \ nosev_x = nosev_x + alpha * nosev_y_hi
+
+ STX P                  \ This instruction has no effect as MAD overwrites P,
+                        \ but it sets P = nosev_x_lo
+
+ LDA BETA               \ Set Q = beta (the pitch angle to rotate through)
+ STA Q
+
+ LDX INWK+2,Y           \ Set (S R) = nosev_y
+ STX R
+ LDX INWK+3,Y
+ STX S
+ LDX INWK+4,Y
+
+ STX P                  \ This instruction has no effect as MAD overwrites P,
+                        \ but it sets P = nosev_y
+
+ LDA INWK+5,Y           \ Set A = -nosev_z_hi
+ EOR #%10000000
+
+ JSR MAD                \ Set (A X) = Q * A + (S R)
+ STA INWK+3,Y           \           = beta * -nosev_z_hi + nosev_y
+ STX INWK+2,Y           \
+                        \ and store (A X) in nosev_y, so this does:
+                        \
+                        \ nosev_y = nosev_y - beta * nosev_z_hi
+
+ STX P                  \ This instruction has no effect as MAD overwrites P,
+                        \ but it sets P = nosev_y_lo
+
+ LDX INWK+4,Y           \ Set (S R) = nosev_z
+ STX R
+ LDX INWK+5,Y
+ STX S
+
+ LDA INWK+3,Y           \ Set A = nosev_y_hi
+
+ JSR MAD                \ Set (A X) = Q * A + (S R)
+ STA INWK+5,Y           \           = beta * nosev_y_hi + nosev_z
+ STX INWK+4,Y           \
+                        \ and store (A X) in nosev_z, so this does:
+                        \
+                        \ nosev_z = nosev_z + beta * nosev_y_hi
+
+ RTS                    \ Return from the subroutine
+
+\ ******************************************************************************
+\
+\       Name: MVS5
+\       Type: Subroutine
+\   Category: Moving
+\    Summary: Apply a 3.6 degree pitch or roll to an orientation vector
+\  Deep dive: Orientation vectors
+\             Pitching and rolling by a fixed angle
+\
+\ ------------------------------------------------------------------------------
+\
+\ Pitch or roll a ship by a small, fixed amount (1/16 radians, or 3.6 degrees),
+\ in a specified direction, by rotating the orientation vectors. The vectors to
+\ rotate are given in X and Y, and the direction of the rotation is given in
+\ RAT2. The calculation is as follows:
+\
+\   * If the direction is positive:
+\
+\     X = X * (1 - 1/512) + Y / 16
+\     Y = Y * (1 - 1/512) - X / 16
+\
+\   * If the direction is negative:
+\
+\     X = X * (1 - 1/512) - Y / 16
+\     Y = Y * (1 - 1/512) + X / 16
+\
+\ So if X = 15 (roofv_x), Y = 21 (sidev_x) and RAT2 is positive, it does this:
+\
+\   roofv_x = roofv_x * (1 - 1/512)  + sidev_x / 16
+\   sidev_x = sidev_x * (1 - 1/512)  - roofv_x / 16
+\
+\ Arguments:
+\
+\   X                   The first vector to rotate:
+\
+\                         * If X = 15, rotate roofv_x
+\
+\                         * If X = 17, rotate roofv_y
+\
+\                         * If X = 19, rotate roofv_z
+\
+\                         * If X = 21, rotate sidev_x
+\
+\                         * If X = 23, rotate sidev_y
+\
+\                         * If X = 25, rotate sidev_z
+\
+\   Y                   The second vector to rotate:
+\
+\                         * If Y = 9,  rotate nosev_x
+\
+\                         * If Y = 11, rotate nosev_y
+\
+\                         * If Y = 13, rotate nosev_z
+\
+\                         * If Y = 21, rotate sidev_x
+\
+\                         * If Y = 23, rotate sidev_y
+\
+\                         * If Y = 25, rotate sidev_z
+\
+\   RAT2                The direction of the pitch or roll to perform, positive
+\                       or negative (i.e. the sign of the roll or pitch counter
+\                       in bit 7)
+\
+\ ******************************************************************************
+
+.MVS5
+
+ LDA INWK+1,X           \ Fetch roofv_x_hi, clear the sign bit, divide by 2 and
+ AND #%01111111         \ store in T, so:
+ LSR A                  \
+ STA T                  \ T = |roofv_x_hi| / 2
+                        \   = |roofv_x| / 512
+                        \
+                        \ The above is true because:
+                        \
+                        \ |roofv_x| = |roofv_x_hi| * 256 + roofv_x_lo
+                        \
+                        \ so:
+                        \
+                        \ |roofv_x| / 512 = |roofv_x_hi| * 256 / 512
+                        \                    + roofv_x_lo / 512
+                        \                  = |roofv_x_hi| / 2
+
+ LDA INWK,X             \ Now we do the following subtraction:
+ SEC                    \
+ SBC T                  \ (S R) = (roofv_x_hi roofv_x_lo) - |roofv_x| / 512
+ STA R                  \       = (1 - 1/512) * roofv_x
+                        \
+                        \ by doing the low bytes first
+
+ LDA INWK+1,X           \ And then the high bytes (the high byte of the right
+ SBC #0                 \ side of the subtraction being 0)
+ STA S
+
+ LDA INWK,Y             \ Set P = nosev_x_lo
+ STA P
+
+ LDA INWK+1,Y           \ Fetch the sign of nosev_x_hi (bit 7) and store in T
+ AND #%10000000
+ STA T
+
+ LDA INWK+1,Y           \ Fetch nosev_x_hi into A and clear the sign bit, so
+ AND #%01111111         \ A = |nosev_x_hi|
+
+ LSR A                  \ Set (A P) = (A P) / 16
+ ROR P                  \           = |nosev_x_hi nosev_x_lo| / 16
+ LSR A                  \           = |nosev_x| / 16
+ ROR P
  LSR A
- STA &D1
- LDA &46,X
- SEC
- SBC &D1
- STA &82
- LDA &47,X
- SBC #&00
- STA &83
- LDA &46,Y
- STA &1B
- LDA &47,Y
- AND #&80
- STA &D1
- LDA &47,Y
- AND #&7F
+ ROR P
  LSR A
- ROR &1B
+ ROR P
+
+ ORA T                  \ Set the sign of A to the sign in T (i.e. the sign of
+                        \ the original nosev_x), so now:
+                        \
+                        \ (A P) = nosev_x / 16
+
+ EOR RAT2               \ Give it the sign as if we multiplied by the direction
+                        \ by the pitch or roll direction
+
+ STX Q                  \ Store the value of X so it can be restored after the
+                        \ call to ADD
+
+ JSR ADD                \ (A X) = (A P) + (S R)
+                        \       = +/-nosev_x / 16 + (1 - 1/512) * roofv_x
+
+ STA K+1                \ Set K(1 0) = (1 - 1/512) * roofv_x +/- nosev_x / 16
+ STX K
+
+ LDX Q                  \ Restore the value of X from before the call to ADD
+
+ LDA INWK+1,Y           \ Fetch nosev_x_hi, clear the sign bit, divide by 2 and
+ AND #%01111111         \ store in T, so:
+ LSR A                  \
+ STA T                  \ T = |nosev_x_hi| / 2
+                        \   = |nosev_x| / 512
+
+ LDA INWK,Y             \ Now we do the following subtraction:
+ SEC                    \
+ SBC T                  \ (S R) = (nosev_x_hi nosev_x_lo) - |nosev_x| / 512
+ STA R                  \       = (1 - 1/512) * nosev_x
+                        \
+                        \ by doing the low bytes first
+
+ LDA INWK+1,Y           \ And then the high bytes (the high byte of the right
+ SBC #0                 \ side of the subtraction being 0)
+ STA S
+
+ LDA INWK,X             \ Set P = roofv_x_lo
+ STA P
+
+ LDA INWK+1,X           \ Fetch the sign of roofv_x_hi (bit 7) and store in T
+ AND #%10000000
+ STA T
+
+ LDA INWK+1,X           \ Fetch roofv_x_hi into A and clear the sign bit, so
+ AND #%01111111         \ A = |roofv_x_hi|
+
+ LSR A                  \ Set (A P) = (A P) / 16
+ ROR P                  \           = |roofv_x_hi roofv_x_lo| / 16
+ LSR A                  \           = |roofv_x| / 16
+ ROR P
  LSR A
- ROR &1B
+ ROR P
  LSR A
- ROR &1B
- LSR A
- ROR &1B
- ORA &D1
- EOR &9A
- STX &81
- JSR scale_angle
- STA &41
- STX &40
- LDX &81
- LDA &47,Y
- AND #&7F
- LSR A
- STA &D1
- LDA &46,Y
- SEC
- SBC &D1
- STA &82
- LDA &47,Y
- SBC #&00
- STA &83
- LDA &46,X
- STA &1B
- LDA &47,X
- AND #&80
- STA &D1
- LDA &47,X
- AND #&7F
- LSR A
- ROR &1B
- LSR A
- ROR &1B
- LSR A
- ROR &1B
- LSR A
- ROR &1B
- ORA &D1
- EOR #&80
- EOR &9A
- STX &81
- JSR scale_angle
- STA &47,Y
- STX &46,Y
- LDX &81
- LDA &40
- STA &46,X
- LDA &41
- STA &47,X
- RTS
+ ROR P
+
+ ORA T                  \ Set the sign of A to the opposite sign to T (i.e. the
+ EOR #%10000000         \ sign of the original -roofv_x), so now:
+                        \
+                        \ (A P) = -roofv_x / 16
+
+ EOR RAT2               \ Give it the sign as if we multiplied by the direction
+                        \ by the pitch or roll direction
+
+ STX Q                  \ Store the value of X so it can be restored after the
+                        \ call to ADD
+
+ JSR ADD                \ (A X) = (A P) + (S R)
+                        \       = -/+roofv_x / 16 + (1 - 1/512) * nosev_x
+
+ STA INWK+1,Y           \ Set nosev_x = (1-1/512) * nosev_x -/+ roofv_x / 16
+ STX INWK,Y
+
+ LDX Q                  \ Restore the value of X from before the call to ADD
+
+ LDA K                  \ Set roofv_x = K(1 0)
+ STA INWK,X             \              = (1-1/512) * roofv_x +/- nosev_x / 16
+ LDA K+1
+ STA INWK+1,X
+
+ RTS                    \ Return from the subroutine
 
 .ship_addr
 
@@ -4068,10 +4495,10 @@ EXEC% = &11E3
  JSR de_tokln
  LDA #&10
  JSR spc_token
- LDA cmdr_kills+&01
+ LDA TALLY+&01
  BNE l_1aec
  TAX
- LDA cmdr_kills
+ LDA TALLY
  LSR A
  LSR A
 
@@ -4450,7 +4877,7 @@ EXEC% = &11E3
  LDX SC
  BIT DTW4
  BMI format
- JMP wrchdst
+ JMP CHPR
 
 .format
 
@@ -4530,7 +4957,7 @@ EXEC% = &11E3
  LDX #&1E
  JSR l_1d3a
  LDA #&0C
- JSR wrchdst
+ JSR CHPR
  LDA DTW5
  SBC #&1E
  STA DTW5
@@ -4555,7 +4982,7 @@ EXEC% = &11E3
 .l_1d3c
 
  LDA &0E01,Y
- JSR wrchdst
+ JSR CHPR
  INY
  DEX
  BNE l_1d3c
@@ -4582,7 +5009,7 @@ EXEC% = &11E3
 
  LDA #&07
 
-.wrchdst
+.CHPR
 
  STA &D2
  STY &034F
@@ -4719,7 +5146,7 @@ EXEC% = &11E3
  \	ORA &32
  \	EOR #&80
  LDA #&10
- \	JSR scale_angle
+ \	JSR ADD
  JSR draw_angle
  \	LDA &2A
  \	LDX &2B
@@ -4727,7 +5154,7 @@ EXEC% = &11E3
  \	SBC #&01
  LDA #&10
  \l_1e1d
- \	JSR scale_angle
+ \	JSR ADD
  JSR draw_angle
  LDA &8A
  AND #&03
@@ -5013,7 +5440,7 @@ EXEC% = &11E3
  EQUB &07, &60, &75
  EQUB &00, &00, &00
 
-.picture
+.HALL
 
  JSR draw_mode
  LDA #&00
@@ -5165,13 +5592,13 @@ EXEC% = &11E3
 
  LDX #&15
  LDY #&09
- JSR l_1680
+ JSR MVS5
  LDX #&17
  LDY #&0B
- JSR l_1680
+ JSR MVS5
  LDX #&19
  LDY #&0D
- JSR l_1680
+ JSR MVS5
  DEC &84
  BNE l_209d
  LDY &36
@@ -5200,7 +5627,7 @@ EXEC% = &11E3
  SBC &81
  LSR A
  STA &49
- JSR l_3e06
+ JSR TIDY
  JMP l_400f
 
 .l_20e8
@@ -5265,7 +5692,7 @@ EXEC% = &11E3
 
  RTS
 
-.pattern
+.HFS1
 
  LDX #&80
  STX &D2
@@ -5431,11 +5858,11 @@ EXEC% = &11E3
  STA &82
  RTS
 
-.l_22ad
+.MAD
 
  JSR l_2259
 
-.scale_angle
+.ADD
 
  STA &06
  AND #&80
@@ -5482,7 +5909,7 @@ EXEC% = &11E3
 
  STX &81
  EOR #&80
- JSR l_22ad
+ JSR MAD
  TAX
  AND #&80
  STA &D1
@@ -5550,7 +5977,7 @@ EXEC% = &11E3
  BNE l_2421
  LDA misn_data2,Y
  BMI l_2414
- LDA cmdr_mission
+ LDA TP
  LSR A
  BCC l_2424
  JSR MT14
@@ -5590,32 +6017,32 @@ EXEC% = &11E3
 
  JMP DETOK
 
-.mission_2
+.BRIEF2
 
- LDA cmdr_mission
+ LDA TP
  ORA #&04
- STA cmdr_mission
+ STA TP
  LDA #&0B
 
 .l_243c
 
  JSR DETOK
- JMP start_loop
+ JMP BAY
 
-.constrictor
+.BRIEF3
 
- LDA cmdr_mission
+ LDA TP
  AND #&F0
  ORA #&0A
- STA cmdr_mission
+ STA TP
  LDA #&DE
  BNE l_243c
 
-.reward_2
+.DEBRIEF2
 
- LDA cmdr_mission
+ LDA TP
  ORA #&04
- STA cmdr_mission
+ STA TP
  LDA cmdr_eunit	\**
  BNE rew_notgot	\**
  DEC new_hold	\** NOT TRAPPED FOR NO SPACE
@@ -5625,15 +6052,15 @@ EXEC% = &11E3
  \**
  LDA #&02
  STA cmdr_eunit
- INC cmdr_kills+&01
+ INC TALLY+&01
  LDA #&DF
  BNE l_243c
 
-.reward_1
+.DEBRIEF
 
- LSR cmdr_mission
- ASL cmdr_mission
- INC cmdr_kills+&01
+ LSR TP
+ ASL TP
+ INC TALLY+&01
  LDX #&50
  LDY #&C3
  JSR add_money
@@ -5643,11 +6070,11 @@ EXEC% = &11E3
 
  BNE l_243c
 
-.mission_1
+.BRIEF
 
- LSR cmdr_mission
+ LSR TP
  SEC
- ROL cmdr_mission
+ ROL TP
  JSR BRIS
  JSR init_ship
  LDA #&1F
@@ -5666,7 +6093,7 @@ EXEC% = &11E3
  STX &63
  STX &64
  JSR l_400f
- JSR l_14e1
+ JSR MVEIT
  DEC &8A
  BNE l_2499
 
@@ -5687,7 +6114,7 @@ EXEC% = &11E3
 
  STX &49
  JSR l_400f
- JSR l_14e1
+ JSR MVEIT
  JMP l_24a9
 
 .l_24c7
@@ -5701,7 +6128,7 @@ EXEC% = &11E3
  LDA #&D8
  JSR DETOK
  LDY #&64
- JMP y_sync
+ JMP DELAY
 
 .PAUSE
 
@@ -5742,7 +6169,7 @@ EXEC% = &11E3
  LDA #&02
  STA &4D
  JSR l_400f
- JSR l_14e1
+ JSR MVEIT
  JMP scan_10
 
 .PAUSE2
@@ -5816,11 +6243,11 @@ EXEC% = &11E3
  DEC &36
  JMP draw_line
 
-.y_sync
+.DELAY
 
  JSR sync
  DEY
- BNE y_sync
+ BNE DELAY
  RTS
 
 .CLYNS
@@ -6305,9 +6732,9 @@ EXEC% = &11E3
  LSR A
  LSR A
  STA &40
- LDA cmdr_homex
+ LDA QQ0
  STA &73
- LDA cmdr_homey
+ LDA QQ1
  LSR A
  STA &74
  LDA #&07
@@ -6518,7 +6945,7 @@ EXEC% = &11E3
 
 .sell_escape
 
- JMP start_loop
+ JMP BAY
 
 .l_2a08
 
@@ -6705,7 +7132,7 @@ EXEC% = &11E3
 
  LDA data_homex
  SEC
- SBC cmdr_homex
+ SBC QQ0
  CMP #&26
  BCC l_2b59
  CMP #&E6
@@ -6720,7 +7147,7 @@ EXEC% = &11E3
  STA &73
  LDA data_homey
  SEC
- SBC cmdr_homey
+ SBC QQ1
  CMP #&26
  BCC l_2b6f
  CMP #&DC
@@ -6761,7 +7188,7 @@ EXEC% = &11E3
 
  LDA &6F
  SEC
- SBC cmdr_homex
+ SBC QQ0
  STA &3A
  BCS l_2baa
  EOR #&FF
@@ -6773,7 +7200,7 @@ EXEC% = &11E3
  BCS l_2c1e
  LDA &6D
  SEC
- SBC cmdr_homey
+ SBC QQ1
  STA &E0
  BCS l_2bba
  EOR #&FF
@@ -6926,7 +7353,7 @@ EXEC% = &11E3
  LDA &6F
  STA data_homex
  SEC
- SBC cmdr_homex
+ SBC QQ0
  BCS l_2c94
  EOR #&FF
  ADC #&01
@@ -6939,7 +7366,7 @@ EXEC% = &11E3
  STA &40
  LDA data_homey
  SEC
- SBC cmdr_homey
+ SBC QQ1
  BCS l_2caa
  EOR #&FF
  ADC #&01
@@ -6970,9 +7397,9 @@ EXEC% = &11E3
 .data_home
 
  LDA data_homex
- STA cmdr_homex
+ STA QQ0
  LDA data_homey
- STA cmdr_homey
+ STA QQ1
  RTS
 
 .writed_5c
@@ -7265,7 +7692,7 @@ EXEC% = &11E3
 
 .jmp_start2
 
- JMP start_loop
+ JMP BAY
 
 .n_eqship
 
@@ -7424,7 +7851,7 @@ EXEC% = &11E3
 .equip_beep
 
  JSR beep_wait
- JMP start_loop
+ JMP BAY
 
 .l_3000
 
@@ -7530,7 +7957,7 @@ EXEC% = &11E3
 
  JSR sound_20
  LDY #&32
- JMP y_sync
+ JMP DELAY
 
 .equip_pay
 
@@ -8485,12 +8912,12 @@ EXEC% = &11E3
  CPY #&E0
  ADC #&00
  TAY
- LDA last_key
+ LDA KL
  RTS
 
 .keybd_dirn
 
- LDA last_key
+ LDA KL
  LDX #&00
  LDY #&00
  CMP #&19
@@ -8531,7 +8958,7 @@ EXEC% = &11E3
 .not_shift
 
  LDX &D1
- LDA last_key
+ LDA KL
  RTS
 
 .set_home
@@ -8540,7 +8967,7 @@ EXEC% = &11E3
 
 .l_3650
 
- LDA cmdr_homex,X
+ LDA QQ0,X
  STA data_homex,X
  DEX
  BPL l_3650
@@ -8579,7 +9006,7 @@ EXEC% = &11E3
  DEX
  BPL l_3691
 
-.clr_common
+.RES2
 
  LDA #&12
  STA &03C3
@@ -8709,7 +9136,7 @@ EXEC% = &11E3
  LDX #&FF
  TXS
  LDY #&02
- JSR y_sync
+ JSR DELAY
  JSR get_dirn
 
 .function
@@ -8790,7 +9217,7 @@ EXEC% = &11E3
 
 .not_loaded
 
- JMP start_loop
+ JMP BAY
 
 .not_disk
 
@@ -8872,19 +9299,19 @@ EXEC% = &11E3
  INC YC
  JMP show_nzdist
 
-.err_count
+.brkd
 
  EQUB &00
 
-.brk_go
+.BRBR
 
- DEC err_count
+ DEC brkd
  BNE escape
- JSR clr_common
+ JSR RES2
 
-.boot_go
+.BEGIN
 
- JSR set_brk
+ JSR BRKBK
  LDX #&0A
  LDA #&00
 
@@ -8924,7 +9351,7 @@ EXEC% = &11E3
  JSR set_home
  JSR home_setup
 
-.start_loop
+.BAY
 
  LDA #&FF
  STA &8E
@@ -8990,9 +9417,9 @@ EXEC% = &11E3
 
 .l_392b
 
- LDA err_count
+ LDA brkd
  BEQ l_3945
- INC err_count
+ INC brkd
  LDA #&07
  STA XC
  LDA #&0A
@@ -9027,7 +9454,7 @@ EXEC% = &11E3
 
 .l_3962
 
- JSR l_14e1
+ JSR MVEIT
  LDA #&80
  STA &4C
  ASL A
@@ -9089,7 +9516,7 @@ EXEC% = &11E3
 .get_fname
 
  LDY #&08
- JSR y_sync
+ JSR DELAY
  LDX #&04
 
 .l_39ae
@@ -9257,9 +9684,9 @@ EXEC% = &11E3
  TSX
  STX brk_new+&01	\STX l_3a6d
  LDA #LO(brk_new)
- STA brk_in+&01
+ STA BRKV
  LDA #HI(brk_new)
- STA brk_in+&02
+ STA BRKV+1
  LDA #&01
  JSR DETOK
  JSR get_key
@@ -9291,7 +9718,7 @@ EXEC% = &11E3
 
 .l_3acb
 
- LDA cmdr_mission,X
+ LDA TP,X
  STA &0B00,X
  STA commander,X
  DEX
@@ -9315,7 +9742,7 @@ EXEC% = &11E3
 
 .l_3b15
 
- JMP set_brk
+ JMP BRKBK
 
 .confirm
 
@@ -9324,7 +9751,7 @@ EXEC% = &11E3
  LDA #&03
  JSR DETOK
  JSR get_key
- JSR wrchdst
+ JSR CHPR
  ORA #&20
  PHA
  JSR new_line
@@ -9361,7 +9788,7 @@ EXEC% = &11E3
  JSR DETOK
  JSR get_key
  ORA #&10
- JSR wrchdst
+ JSR CHPR
  PHA
  JSR l_1c8a
  PLA
@@ -9542,7 +9969,7 @@ EXEC% = &11E3
  EOR #&FF
  STA &0387,X
  JSR bell
- JSR y_sync
+ JSR DELAY
  LDY &D1
 
 .tog_end
@@ -9565,7 +9992,7 @@ EXEC% = &11E3
 .spec_key
 
  JSR scan_10
- STX last_key
+ STX KL
  CPX #&69
  BNE no_freeze
 
@@ -9619,7 +10046,7 @@ EXEC% = &11E3
 .get_key
 
  LDY #&02
- JSR y_sync
+ JSR DELAY
  JSR scan_10
  BNE get_key
 
@@ -9704,7 +10131,7 @@ EXEC% = &11E3
  STA &58
  JMP l_3e32
 
-.l_3e06
+.TIDY
 
  LDA &50
  STA &34
@@ -9826,7 +10253,7 @@ EXEC% = &11E3
  LDX &50,Y
  STX &81
  LDA &56,Y
- JSR l_22ad
+ JSR MAD
  STX &1B
  LDY &1D
  LDX &50,Y
@@ -11546,7 +11973,7 @@ EXEC% = &11E3
 .jmp_start3
 
  JSR beep_wait
- JMP start_loop
+ JMP BAY
 
 .n_buy
 
@@ -11572,7 +11999,7 @@ EXEC% = &11E3
  LDA new_range
  STA cmdr_fuel
  JSR show_missle
- JMP start_loop
+ JMP BAY
 
 .n_load
 
@@ -11669,10 +12096,10 @@ EXEC% = &11E3
  \	STA QQ17
  JSR vdu_80
  LDA cmdr_price
- EOR cmdr_homex
- EOR cmdr_homey
+ EOR QQ0
+ EOR QQ1
  EOR cmdr_legal
- EOR cmdr_kills
+ EOR TALLY
  STA &46
  SEC
  LDA cmdr_legal
@@ -11748,10 +12175,10 @@ EXEC% = &11E3
  BNE cour_count	
  LDX &49
  LDA &6F
- CMP cmdr_homex
+ CMP QQ0
  BNE cour_star
  LDA &6D
- CMP cmdr_homey
+ CMP QQ1
  BNE cour_star
  JMP cour_next
 
@@ -11770,7 +12197,7 @@ EXEC% = &11E3
  LDA &6F
  STA &0C00,X
  SEC
- SBC cmdr_homex
+ SBC QQ0
  BCS cour_negx
  EOR #&FF
  ADC #&01
@@ -11785,7 +12212,7 @@ EXEC% = &11E3
  LDA &6D
  STA &0C10,X
  SEC
- SBC cmdr_homey
+ SBC QQ1
  BCS cour_negy
  EOR #&FF
  ADC #&01
@@ -11861,10 +12288,10 @@ EXEC% = &11E3
  LDA cmdr_cour
  ORA cmdr_cour+1
  BEQ cour_quit
- LDA cmdr_homex
+ LDA QQ0
  CMP cmdr_courx
  BNE cour_half
- LDA cmdr_homey
+ LDA QQ1
  CMP cmdr_coury
  BNE cour_half
  LDA #&02
@@ -11889,7 +12316,7 @@ EXEC% = &11E3
  STA cmdr_cour
  STA cmdr_cour+1
  LDY #&60
- JSR y_sync
+ JSR DELAY
 
 .cour_half
 
@@ -11953,7 +12380,7 @@ EXEC% = &11E3
 
 .stay_quit
 
- JMP start_loop
+ JMP BAY
 
 .new_offsets
 
