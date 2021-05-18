@@ -1,3 +1,32 @@
+\ ******************************************************************************
+\
+\ ELITE-A FLIGHT SOURCE
+\
+\ Elite-A was written by Angus Duggan, and is an extended version of the BBC
+\ Micro disc version of Elite; the extra code is copyright Angus Duggan
+\
+\ Elite was written by Ian Bell and David Braben and is copyright Acornsoft 1984
+\
+\ The code on this site is identical to Angus Duggan's source discs (it's just
+\ been reformatted and variable names changed to be more readable)
+\
+\ The commentary is copyright Mark Moxon, and any misunderstandings or mistakes
+\ in the documentation are entirely my fault
+\
+\ The terminology and notations used in this commentary are explained at
+\ https://www.bbcelite.com/about_site/terminology_used_in_this_commentary.html
+\
+\ The deep dive articles referred to in this commentary can be found at
+\ https://www.bbcelite.com/deep_dives
+\
+\ ------------------------------------------------------------------------------
+\
+\ This source file produces the following binary file:
+\
+\   * output/1.F.bin
+\
+\ ******************************************************************************
+
 INCLUDE "sources/elite-header.h.asm"
 
 _RELEASED               = (_RELEASE = 1)
@@ -171,6 +200,9 @@ ORG &0000
                         \ Elite draws on-screen by poking bytes directly into
                         \ screen memory, and SC(1 0) is typically set to the
                         \ address of the character block containing the pixel
+                        \ we want to draw (see the deep dives on "Drawing
+                        \ monochrome pixels in mode 4" and "Drawing colour
+                        \ pixels in mode 5" for more details)
 
 .SCH
 
@@ -441,6 +473,9 @@ ORG &0000
 
 .XX18
 
+ SKIP 0                 \ Temporary storage used to store coordinates in the
+                        \ LL9 ship-drawing routine
+
 .QQ17
 
  SKIP 1                 \ Contains a number of flags that affect how text tokens
@@ -472,6 +507,8 @@ ORG &0000
                         \   * QQ17 = %11111111 means printing is disabled
 
 .QQ19
+
+ SKIP 3                 \ Temporary storage, used in a number of places
 
 .K6
 
@@ -535,6 +572,18 @@ ORG &0000
                         \   1   = Title screen
                         \         Get commander name ("@", save/load commander)
                         \         In-system jump just arrived ("J")
+                        \         Data on System screen (red key f6)
+                        \         Buy Cargo screen (red key f1)
+                        \         Mis-jump just arrived (witchspace)
+                        \   4   = Sell Cargo screen (red key f2)
+                        \   6   = Death screen
+                        \   8   = Status Mode screen (red key f8)
+                        \         Inventory screen (red key f9)
+                        \   16  = Market Price screen (red key f7)
+                        \   32  = Equip Ship screen (red key f3)
+                        \   64  = Long-range Chart (red key f4)
+                        \   128 = Short-range Chart (red key f5)
+                        \   255 = Launch view
                         \
                         \ This value is typically set by calling routine TT66
 
@@ -657,6 +706,8 @@ ORG &0000
  SKIP 1                 \ Temporary storage, used in a number of places
 
 .XX14
+
+ SKIP 1                 \ This byte appears to be unused
 
 .RAT
 
@@ -794,6 +845,9 @@ ORG &0300
                         \   * 0 = no
                         \
                         \   * Non-zero = yes
+                        \
+                        \ This is also set when the joystick fire button has
+                        \ been pressed
 
 .KY12
 
@@ -873,6 +927,7 @@ ORG &0300
                         \
                         \ There are #NOSH + 1 slots, but the ship-spawning
                         \ routine at NWSHP only populates #NOSH of them, so
+                        \ there are 13 slots but only 12 are used for ships
                         \ (the last slot is effectively used as a null
                         \ terminator when shuffling the slots down in the
                         \ KILLSHP routine)
@@ -900,6 +955,7 @@ ORG &0300
                         \   * Non-zero if we are inside the space station's safe
                         \     zone
                         \
+                        \   * 0 if we aren't (in which case we can show the sun)
                         \
                         \ This flag is at MANY+SST, which is no coincidence, as
                         \ MANY+SST is a count of how many space stations there
@@ -919,6 +975,8 @@ ORG &0300
                         \   * Splinter
                         \   * Shuttle
                         \   * Transporter
+                        \
+                        \ Junk is the range of ship types from #JL to #JH - 1
 
 .auto
 
@@ -976,6 +1034,12 @@ ORG &0300
 
  SKIP 1                 \ The targeting state of our leftmost missile
                         \
+                        \   * 0 = missile is not looking for a target, or it
+                        \     already has a target lock (indicator is not
+                        \     yellow/white)
+                        \
+                        \   * Non-zero = missile is currently looking for a
+                        \     target (indicator is yellow/white)
 
 .VIEW
 
@@ -997,6 +1061,14 @@ ORG &0300
                         \
                         \   * 10 for a pulse laser
                         \
+                        \ It gets decremented every vertical sync (in the LINSCN
+                        \ routine, which is called 50 times a second) and is set
+                        \ to a non-zero value for pulse lasers only
+                        \
+                        \ The laser only fires when the value of LASCT hits
+                        \ zero, so for pulse lasers with a value of 10, that
+                        \ means the laser fires once every 10 vertical syncs (or
+                        \ 5 times a second)
                         \
                         \ In comparison, beam lasers fire continuously as the
                         \ value of LASCT is always 0
@@ -1080,6 +1152,12 @@ ORG &0300
                         \ maximum rate, 128 means roll is not changing, and
                         \ 255 means roll is increasing at the maximum rate
                         \
+                        \ This value is updated by "<" and ">" key presses, or
+                        \ if joysticks are enabled, from the joystick. If
+                        \ keyboard damping is enabled (which it is by default),
+                        \ the value is slowly moved towards the centre value of
+                        \ 128 (no roll) if there are no key presses or joystick
+                        \ movement
 
 .JSTY
 
@@ -1093,6 +1171,12 @@ ORG &0300
                         \ maximum rate, 128 means pitch is not changing, and
                         \ 255 means pitch is increasing at the maximum rate
                         \
+                        \ This value is updated by "S" and "X" key presses, or
+                        \ if joysticks are enabled, from the joystick. If
+                        \ keyboard damping is enabled (which it is by default),
+                        \ the value is slowly moved towards the centre value of
+                        \ 128 (no pitch) if there are no key presses or joystick
+                        \ movement
 .XSAV2
 
  SKIP 1                 \ Temporary storage, used for storing the value of the X
@@ -1197,6 +1281,10 @@ ORG &0300
  SKIP 4                 \ The specifications of the lasers fitted to each of the
                         \ four space views:
                         \
+                        \   * Byte #0 = front view (red key f0)
+                        \   * Byte #1 = rear view (red key f1)
+                        \   * Byte #2 = left view (red key f2)
+                        \   * Byte #3 = right view (red key f3)
                         \
                         \ For each of the views:
                         \
@@ -1208,6 +1296,8 @@ ORG &0300
                         \     * Bits 0-6 contain the laser's power
                         \
                         \     * Bit 7 determines whether or not the laser pulses
+                        \       (0 = pulse or mining laser) or is always on
+                        \       (1 = beam or military laser)
 
  SKIP 2                 \ These bytes appear to be unused (they were originally
                         \ used for up/down lasers, but they were dropped)
@@ -1386,6 +1476,10 @@ ORG &0300
                         \ copied from here to the last saved commander block at
                         \ NA%, CHK and CHK2 get overwritten
 
+NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
+                        \ commander data block, which starts at TP and ends at
+                        \ SVC+2 (inclusive)
+
 .MCH
 
  SKIP 1                 \ The text token number of the in-flight message that is
@@ -1462,6 +1556,7 @@ ORG &0300
  SKIP 2                 \ The address of the bottom of the ship line heap
                         \
                         \ The ship line heap is a descending block of memory
+                        \ that starts at WP and descends down to SLSP. It can be
                         \ extended downwards by the NWSHP routine when adding
                         \ new ships (and their associated ship line heaps), in
                         \ which case SLSP is lowered to provide more heap space,
@@ -1621,6 +1716,9 @@ ORG &0300
 
  SKIP 1                 \ Reverse joystick Y-channel configuration setting
                         \
+                        \   * 0 = standard Y-channel (default)
+                        \
+                        \   * &FF = reversed Y-channel
                         \
                         \ Toggled by pressing "Y" when paused, see the DKS3
                         \ routine for details
@@ -1726,6 +1824,8 @@ ORG &0E00
 
 .LSX
 
+ SKIP 0                 \ LSX is an alias that points to the first byte of the
+                        \ sun line heap at LSO
                         \
                         \   * &FF indicates the sun line heap is empty
                         \
@@ -1750,7 +1850,13 @@ ORG &0E00
 
 .LSX2
 
+ SKIP 78                \ The ball line heap for storing x-coordinates (see the
+                        \ deep dive on "The ball line heap" for details)
+
 .LSY2
+
+ SKIP 78                \ The ball line heap for storing y-coordinates (see the
+                        \ deep dive on "The ball line heap" for details)
 
 .SX
 
@@ -1796,6 +1902,7 @@ ORG &0E00
 
 .ALTIT
 
+ SKIP 1                 \ Our altitude above the surface of the planet or sun
                         \
                         \   * 255 = we are a long way above the surface
                         \
@@ -1804,6 +1911,8 @@ ORG &0E00
                         \       x_hi^2 + y_hi^2 + z_hi^2 - 6^2
                         \
                         \     where our ship is at the origin, the centre of the
+                        \     planet/sun is at (x_hi, y_hi, z_hi), and the
+                        \     radius of the planet/sun is 6
                         \
                         \   * 0 = we have crashed into the surface
 

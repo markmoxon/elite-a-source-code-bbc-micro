@@ -1,3 +1,32 @@
+\ ******************************************************************************
+\
+\ ELITE-A LOADER SOURCE
+\
+\ Elite-A was written by Angus Duggan, and is an extended version of the BBC
+\ Micro disc version of Elite; the extra code is copyright Angus Duggan
+\
+\ Elite was written by Ian Bell and David Braben and is copyright Acornsoft 1984
+\
+\ The code on this site is identical to Angus Duggan's source discs (it's just
+\ been reformatted and variable names changed to be more readable)
+\
+\ The commentary is copyright Mark Moxon, and any misunderstandings or mistakes
+\ in the documentation are entirely my fault
+\
+\ The terminology and notations used in this commentary are explained at
+\ https://www.bbcelite.com/about_site/terminology_used_in_this_commentary.html
+\
+\ The deep dive articles referred to in this commentary can be found at
+\ https://www.bbcelite.com/deep_dives
+\
+\ ------------------------------------------------------------------------------
+\
+\ This source file produces the following binary file:
+\
+\   * output/ELITE.bin
+\
+\ ******************************************************************************
+
 INCLUDE "sources/elite-header.h.asm"
 
 _RELEASED               = (_RELEASE = 1)
