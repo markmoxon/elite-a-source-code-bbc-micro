@@ -2053,7 +2053,7 @@ EXEC% = &11E3
 
 .wrch_in
 
- JMP CHPR
+ JMP TT26
  EQUW IRQ1
 
 .brk_in
@@ -2312,7 +2312,7 @@ BRKV = P% - 2
  BNE l_1374
  LDA &0307
  BEQ l_1374
- LDA laser_t
+ LDA GNTMP
  CMP #&F2
  BCS l_1374
  LDX VIEW
@@ -2503,7 +2503,7 @@ BRKV = P% - 2
  BCC l_14ed
  LDA target
  BEQ l_149a
- JSR l_43ba
+ JSR BEEP
  LDX &84
  LDY #&0E
  JSR l_3807
@@ -2665,22 +2665,22 @@ BRKV = P% - 2
  LDA &8A
  AND #&07
  BNE l_15c2
- LDX energy
+ LDX ENERGY
  BPL l_156c
- LDX r_shield
+ LDX ASH
  JSR l_3626
- STX r_shield
- LDX f_shield
+ STX ASH
+ LDX FSH
  JSR l_3626
- STX f_shield
+ STX FSH
 
 .l_156c
 
  SEC
  LDA cmdr_eunit
- ADC energy
+ ADC ENERGY
  BCS l_1578
- STA energy
+ STA ENERGY
 
 .l_1578
 
@@ -2736,7 +2736,7 @@ BRKV = P% - 2
  CMP #&0A
  BNE l_15fd
  LDA #&32
- CMP energy
+ CMP ENERGY
  BCC l_15da
  ASL A
  JSR l_45c6
@@ -2744,7 +2744,7 @@ BRKV = P% - 2
 .l_15da
 
  LDY #&FF
- STY altitude
+ STY ALTIT
  INY
  JSR m
  BNE l_1648
@@ -2755,7 +2755,7 @@ BRKV = P% - 2
  STA &82
  JSR l_47b8
  LDA &81
- STA altitude
+ STA ALTIT
  BNE l_1648
 
 .l_15fa
@@ -2776,7 +2776,7 @@ BRKV = P% - 2
  CMP #&14
  BNE l_1648
  LDA #&1E
- STA cabin_t
+ STA CABTMP
  LDA &0320
  BNE l_1648
  LDY #&25
@@ -2785,7 +2785,7 @@ BRKV = P% - 2
  JSR MAS3
  EOR #&FF
  ADC #&1E
- STA cabin_t
+ STA CABTMP
  BCS l_15fa
  CMP #&E0
  BCC l_1648
@@ -2793,14 +2793,14 @@ BRKV = P% - 2
  BEQ l_1648
  LDA &7F
  LSR A
- ADC cmdr_fuel
+ ADC QQ14
  CMP new_range
  BCC l_1640
  LDA new_range
 
 .l_1640
 
- STA cmdr_fuel
+ STA QQ14
  LDA #&A0
 
 .l_1645
@@ -5831,139 +5831,341 @@ NEXT
  STX XC
  RTS
 
+\ ******************************************************************************
+\
+\       Name: MVT3
+\       Type: Subroutine
+\   Category: Moving
+\    Summary: Calculate K(3 2 1) = (x_sign x_hi x_lo) + K(3 2 1)
+\
+\ ------------------------------------------------------------------------------
+\
+\ Add an INWK position coordinate - i.e. x, y or z - to K(3 2 1), like this:
+\
+\   K(3 2 1) = (x_sign x_hi x_lo) + K(3 2 1)
+\
+\ The INWK coordinate to add to K(3 2 1) is specified by X.
+\
+\ Arguments:
+\
+\   X                   The coordinate to add to K(3 2 1), as follows:
+\
+\                         * If X = 0, add (x_sign x_hi x_lo)
+\
+\                         * If X = 3, add (y_sign y_hi y_lo)
+\
+\                         * If X = 6, add (z_sign z_hi z_lo)
+\
+\ Returns:
+\
+\   A                   Contains a copy of the high byte of the result, K+3
+\
+\   X                   X is preserved
+\
+\ ******************************************************************************
+
 .MVT3
 
- LDA &43
- STA &83
- AND #&80
- STA &D1
- EOR &48,X
- BMI l_1d70
- LDA &41
- CLC
- ADC &46,X
- STA &41
- LDA &42
- ADC &47,X
- STA &42
- LDA &43
- ADC &48,X
- AND #&7F
- ORA &D1
- STA &43
- RTS
+ LDA K+3                \ Set S = K+3
+ STA S
 
-.l_1d70
+ AND #%10000000         \ Set T = sign bit of K(3 2 1)
+ STA T
 
- LDA &83
- AND #&7F
- STA &83
- LDA &46,X
- SEC
- SBC &41
- STA &41
- LDA &47,X
- SBC &42
- STA &42
- LDA &48,X
- AND #&7F
- SBC &83
- ORA #&80
- EOR &D1
- STA &43
- BCS l_1da7
- LDA #&01
- SBC &41
- STA &41
- LDA #&00
- SBC &42
- STA &42
- LDA #&00
- SBC &43
- AND #&7F
- ORA &D1
- STA &43
+ EOR INWK+2,X           \ If x_sign has a different sign to K(3 2 1), jump to
+ BMI MV13               \ MV13 to process the addition as a subtraction
 
-.l_1da7
+ LDA K+1                \ Set K(3 2 1) = K(3 2 1) + (x_sign x_hi x_lo)
+ CLC                    \ starting with the low bytes
+ ADC INWK,X
+ STA K+1
 
- RTS
+ LDA K+2                \ Then the middle bytes
+ ADC INWK+1,X
+ STA K+2
+
+ LDA K+3                \ And finally the high bytes
+ ADC INWK+2,X
+
+ AND #%01111111         \ Setting the sign bit of K+3 to T, the original sign
+ ORA T                  \ of K(3 2 1)
+ STA K+3
+
+ RTS                    \ Return from the subroutine
+
+.MV13
+
+ LDA S                  \ Set S = |K+3| (i.e. K+3 with the sign bit cleared)
+ AND #%01111111
+ STA S
+
+ LDA INWK,X             \ Set K(3 2 1) = (x_sign x_hi x_lo) - K(3 2 1)
+ SEC                    \ starting with the low bytes
+ SBC K+1
+ STA K+1
+
+ LDA INWK+1,X           \ Then the middle bytes
+ SBC K+2
+ STA K+2
+
+ LDA INWK+2,X           \ And finally the high bytes, doing A = |x_sign| - |K+3|
+ AND #%01111111         \ and setting the C flag for testing below
+ SBC S
+
+ ORA #%10000000         \ Set the sign bit of K+3 to the opposite sign of T,
+ EOR T                  \ i.e. the opposite sign to the original K(3 2 1)
+ STA K+3
+
+ BCS MV14               \ If the C flag is set, i.e. |x_sign| >= |K+3|, then
+                        \ the sign of K(3 2 1). In this case, we want the
+                        \ result to have the same sign as the largest argument,
+                        \ which is (x_sign x_hi x_lo), which we know has the
+                        \ opposite sign to K(3 2 1), and that's what we just set
+                        \ the sign of K(3 2 1) to... so we can jump to MV14 to
+                        \ return from the subroutine
+
+ LDA #1                 \ We need to swap the sign of the result in K(3 2 1),
+ SBC K+1                \ which we do by calculating 0 - K(3 2 1), which we can
+ STA K+1                \ do with 1 - C - K(3 2 1), as we know the C flag is
+                        \ clear. We start with the low bytes
+
+ LDA #0                 \ Then the middle bytes
+ SBC K+2
+ STA K+2
+
+ LDA #0                 \ And finally the high bytes
+ SBC K+3
+
+ AND #%01111111         \ Set the sign bit of K+3 to the same sign as T,
+ ORA T                  \ i.e. the same sign as the original K(3 2 1), as
+ STA K+3                \ that's the largest argument
+
+.MV14
+
+ RTS                    \ Return from the subroutine
+
+\ ******************************************************************************
+\
+\       Name: MVS5
+\       Type: Subroutine
+\   Category: Moving
+\    Summary: Apply a 3.6 degree pitch or roll to an orientation vector
+\  Deep dive: Orientation vectors
+\             Pitching and rolling by a fixed angle
+\
+\ ------------------------------------------------------------------------------
+\
+\ Pitch or roll a ship by a small, fixed amount (1/16 radians, or 3.6 degrees),
+\ in a specified direction, by rotating the orientation vectors. The vectors to
+\ rotate are given in X and Y, and the direction of the rotation is given in
+\ RAT2. The calculation is as follows:
+\
+\   * If the direction is positive:
+\
+\     X = X * (1 - 1/512) + Y / 16
+\     Y = Y * (1 - 1/512) - X / 16
+\
+\   * If the direction is negative:
+\
+\     X = X * (1 - 1/512) - Y / 16
+\     Y = Y * (1 - 1/512) + X / 16
+\
+\ So if X = 15 (roofv_x), Y = 21 (sidev_x) and RAT2 is positive, it does this:
+\
+\   roofv_x = roofv_x * (1 - 1/512)  + sidev_x / 16
+\   sidev_x = sidev_x * (1 - 1/512)  - roofv_x / 16
+\
+\ Arguments:
+\
+\   X                   The first vector to rotate:
+\
+\                         * If X = 15, rotate roofv_x
+\
+\                         * If X = 17, rotate roofv_y
+\
+\                         * If X = 19, rotate roofv_z
+\
+\                         * If X = 21, rotate sidev_x
+\
+\                         * If X = 23, rotate sidev_y
+\
+\                         * If X = 25, rotate sidev_z
+\
+\   Y                   The second vector to rotate:
+\
+\                         * If Y = 9,  rotate nosev_x
+\
+\                         * If Y = 11, rotate nosev_y
+\
+\                         * If Y = 13, rotate nosev_z
+\
+\                         * If Y = 21, rotate sidev_x
+\
+\                         * If Y = 23, rotate sidev_y
+\
+\                         * If Y = 25, rotate sidev_z
+\
+\   RAT2                The direction of the pitch or roll to perform, positive
+\                       or negative (i.e. the sign of the roll or pitch counter
+\                       in bit 7)
+\
+\ ******************************************************************************
 
 .MVS5
 
- LDA &47,X
- AND #&7F
- LSR A
- STA &D1
- LDA &46,X
- SEC
- SBC &D1
- STA &82
- LDA &47,X
- SBC #&00
- STA &83
- LDA &46,Y
- STA &1B
- LDA &47,Y
- AND #&80
- STA &D1
- LDA &47,Y
- AND #&7F
- LSR A
- ROR &1B
- LSR A
- ROR &1B
- LSR A
- ROR &1B
- LSR A
- ROR &1B
- ORA &D1
- EOR &9A
- STX &81
- JSR ADD
- STA &41
- STX &40
- LDX &81
- LDA &47,Y
- AND #&7F
- LSR A
- STA &D1
- LDA &46,Y
- SEC
- SBC &D1
- STA &82
- LDA &47,Y
- SBC #&00
- STA &83
- LDA &46,X
- STA &1B
- LDA &47,X
- AND #&80
- STA &D1
- LDA &47,X
- AND #&7F
- LSR A
- ROR &1B
- LSR A
- ROR &1B
- LSR A
- ROR &1B
- LSR A
- ROR &1B
- ORA &D1
- EOR #&80
- EOR &9A
- STX &81
- JSR ADD
- STA &47,Y
- STX &46,Y
- LDX &81
- LDA &40
- STA &46,X
- LDA &41
- STA &47,X
- RTS
+ LDA INWK+1,X           \ Fetch roofv_x_hi, clear the sign bit, divide by 2 and
+ AND #%01111111         \ store in T, so:
+ LSR A                  \
+ STA T                  \ T = |roofv_x_hi| / 2
+                        \   = |roofv_x| / 512
+                        \
+                        \ The above is true because:
+                        \
+                        \ |roofv_x| = |roofv_x_hi| * 256 + roofv_x_lo
+                        \
+                        \ so:
+                        \
+                        \ |roofv_x| / 512 = |roofv_x_hi| * 256 / 512
+                        \                    + roofv_x_lo / 512
+                        \                  = |roofv_x_hi| / 2
 
-.l_1e34
+ LDA INWK,X             \ Now we do the following subtraction:
+ SEC                    \
+ SBC T                  \ (S R) = (roofv_x_hi roofv_x_lo) - |roofv_x| / 512
+ STA R                  \       = (1 - 1/512) * roofv_x
+                        \
+                        \ by doing the low bytes first
+
+ LDA INWK+1,X           \ And then the high bytes (the high byte of the right
+ SBC #0                 \ side of the subtraction being 0)
+ STA S
+
+ LDA INWK,Y             \ Set P = nosev_x_lo
+ STA P
+
+ LDA INWK+1,Y           \ Fetch the sign of nosev_x_hi (bit 7) and store in T
+ AND #%10000000
+ STA T
+
+ LDA INWK+1,Y           \ Fetch nosev_x_hi into A and clear the sign bit, so
+ AND #%01111111         \ A = |nosev_x_hi|
+
+ LSR A                  \ Set (A P) = (A P) / 16
+ ROR P                  \           = |nosev_x_hi nosev_x_lo| / 16
+ LSR A                  \           = |nosev_x| / 16
+ ROR P
+ LSR A
+ ROR P
+ LSR A
+ ROR P
+
+ ORA T                  \ Set the sign of A to the sign in T (i.e. the sign of
+                        \ the original nosev_x), so now:
+                        \
+                        \ (A P) = nosev_x / 16
+
+ EOR RAT2               \ Give it the sign as if we multiplied by the direction
+                        \ by the pitch or roll direction
+
+ STX Q                  \ Store the value of X so it can be restored after the
+                        \ call to ADD
+
+ JSR ADD                \ (A X) = (A P) + (S R)
+                        \       = +/-nosev_x / 16 + (1 - 1/512) * roofv_x
+
+ STA K+1                \ Set K(1 0) = (1 - 1/512) * roofv_x +/- nosev_x / 16
+ STX K
+
+ LDX Q                  \ Restore the value of X from before the call to ADD
+
+ LDA INWK+1,Y           \ Fetch nosev_x_hi, clear the sign bit, divide by 2 and
+ AND #%01111111         \ store in T, so:
+ LSR A                  \
+ STA T                  \ T = |nosev_x_hi| / 2
+                        \   = |nosev_x| / 512
+
+ LDA INWK,Y             \ Now we do the following subtraction:
+ SEC                    \
+ SBC T                  \ (S R) = (nosev_x_hi nosev_x_lo) - |nosev_x| / 512
+ STA R                  \       = (1 - 1/512) * nosev_x
+                        \
+                        \ by doing the low bytes first
+
+ LDA INWK+1,Y           \ And then the high bytes (the high byte of the right
+ SBC #0                 \ side of the subtraction being 0)
+ STA S
+
+ LDA INWK,X             \ Set P = roofv_x_lo
+ STA P
+
+ LDA INWK+1,X           \ Fetch the sign of roofv_x_hi (bit 7) and store in T
+ AND #%10000000
+ STA T
+
+ LDA INWK+1,X           \ Fetch roofv_x_hi into A and clear the sign bit, so
+ AND #%01111111         \ A = |roofv_x_hi|
+
+ LSR A                  \ Set (A P) = (A P) / 16
+ ROR P                  \           = |roofv_x_hi roofv_x_lo| / 16
+ LSR A                  \           = |roofv_x| / 16
+ ROR P
+ LSR A
+ ROR P
+ LSR A
+ ROR P
+
+ ORA T                  \ Set the sign of A to the opposite sign to T (i.e. the
+ EOR #%10000000         \ sign of the original -roofv_x), so now:
+                        \
+                        \ (A P) = -roofv_x / 16
+
+ EOR RAT2               \ Give it the sign as if we multiplied by the direction
+                        \ by the pitch or roll direction
+
+ STX Q                  \ Store the value of X so it can be restored after the
+                        \ call to ADD
+
+ JSR ADD                \ (A X) = (A P) + (S R)
+                        \       = -/+roofv_x / 16 + (1 - 1/512) * nosev_x
+
+ STA INWK+1,Y           \ Set nosev_x = (1-1/512) * nosev_x -/+ roofv_x / 16
+ STX INWK,Y
+
+ LDX Q                  \ Restore the value of X from before the call to ADD
+
+ LDA K                  \ Set roofv_x = K(1 0)
+ STA INWK,X             \              = (1-1/512) * roofv_x +/- nosev_x / 16
+ LDA K+1
+ STA INWK+1,X
+
+ RTS                    \ Return from the subroutine
+
+\ ******************************************************************************
+\
+\       Name: TENS
+\       Type: Variable
+\   Category: Text
+\    Summary: A constant used when printing large numbers in BPRNT
+\  Deep dive: Printing decimal numbers
+\
+\ ------------------------------------------------------------------------------
+\
+\ Contains the four low bytes of the value 100,000,000,000 (100 billion).
+\
+\ The maximum number of digits that we can print with the BPRNT routine is 11,
+\ so the biggest number we can print is 99,999,999,999. This maximum number
+\ plus 1 is 100,000,000,000, which in hexadecimal is:
+\
+\   & 17 48 76 E8 00
+\
+\ The TENS variable contains the lowest four bytes in this number, with the
+\ most significant byte first, i.e. 48 76 E8 00. This value is used in the
+\ BPRNT routine when working out which decimal digits to print when printing a
+\ number.
+\
+\ ******************************************************************************
+
+.TENS
 
  EQUD &00E87648
 
@@ -5971,355 +6173,1036 @@ NEXT
 
  CLC
 
-.l_1e38
+\ ******************************************************************************
+\
+\       Name: pr2
+\       Type: Subroutine
+\   Category: Text
+\    Summary: Print an 8-bit number, left-padded to 3 digits, and optional point
+\
+\ ------------------------------------------------------------------------------
+\
+\ Print the 8-bit number in X to 3 digits, left-padding with spaces for numbers
+\ with fewer than 3 digits (so numbers < 100 are right-aligned). Optionally
+\ include a decimal point.
+\
+\ Arguments:
+\
+\   X                   The number to print
+\
+\   C flag              If set, include a decimal point
+\
+\ Other entry points:
+\
+\   pr2+2               Print the 8-bit number in X to the number of digits in A
+\
+\ ******************************************************************************
 
- LDA #&03
+.pr2
 
-.l_1e3a
+ LDA #3                 \ Set A to the number of digits (3)
 
- LDY #&00
+ LDY #0                 \ Zero the Y register, so we can fall through into TT11
+                        \ to print the 16-bit number (Y X) to 3 digits, which
+                        \ effectively prints X to 3 digits as the high byte is
+                        \ zero
 
-.l_1e3c
+\ ******************************************************************************
+\
+\       Name: TT11
+\       Type: Subroutine
+\   Category: Text
+\    Summary: Print a 16-bit number, left-padded to n digits, and optional point
+\
+\ ------------------------------------------------------------------------------
+\
+\ Print the 16-bit number in (Y X) to a specific number of digits, left-padding
+\ with spaces for numbers with fewer digits (so lower numbers will be right-
+\ aligned). Optionally include a decimal point.
+\
+\ Arguments:
+\
+\   X                   The low byte of the number to print
+\
+\   Y                   The high byte of the number to print
+\
+\   A                   The number of digits
+\
+\   C flag              If set, include a decimal point
+\
+\ ******************************************************************************
 
- STA &80
- LDA #&00
- STA &40
- STA &41
- STY &42
- STX &43
+.TT11
 
-.l_1e48
+ STA U                  \ We are going to use the BPRNT routine (below) to
+                        \ print this number, so we store the number of digits
+                        \ in U, as that's what BPRNT takes as an argument
 
- LDX #&0B
- STX &D1
- PHP
- BCC l_1e53
- DEC &D1
- DEC &80
+ LDA #0                 \ BPRNT takes a 32-bit number in K to K+3, with the
+ STA K                  \ most significant byte first (big-endian), so we set
+ STA K+1                \ the two most significant bytes to zero (K and K+1)
+ STY K+2                \ and store (Y X) in the least two significant bytes
+ STX K+3                \ (K+2 and K+3), so we are going to print the 32-bit
+                        \ number (0 0 Y X)
 
-.l_1e53
+                        \ Finally we fall through into BPRNT to print out the
+                        \ number in K to K+3, which now contains (Y X), to 3
+                        \ digits (as U = 3), using the same C flag as when pr2
+                        \ was called to control the decimal point
 
- LDA #&0B
- SEC
- STA &86
- SBC &80
- STA &80
- INC &80
- LDY #&00
- STY &83
- JMP l_1ea4
+\ ******************************************************************************
+\
+\       Name: BPRNT
+\       Type: Subroutine
+\   Category: Text
+\    Summary: Print a 32-bit number, left-padded to a specific number of digits,
+\             with an optional decimal point
+\  Deep dive: Printing decimal numbers
+\
+\ ------------------------------------------------------------------------------
+\
+\ Print the 32-bit number stored in K(0 1 2 3) to a specific number of digits,
+\ left-padding with spaces for numbers with fewer digits (so lower numbers are
+\ right-aligned). Optionally include a decimal point.
+\
+\ See the deep dive on "Printing decimal numbers" for details of the algorithm
+\ used in this routine.
+\
+\ Arguments:
+\
+\   K(0 1 2 3)          The number to print, stored with the most significant
+\                       byte in K and the least significant in K+3 (i.e. as a
+\                       big-endian number, which is the opposite way to how the
+\                       6502 assembler stores addresses, for example)
+\
+\   U                   The maximum number of digits to print, including the
+\                       decimal point (spaces will be used on the left to pad
+\                       out the result to this width, so the number is right-
+\                       aligned to this width). U must be 11 or less
+\
+\   C flag              If set, include a decimal point followed by one
+\                       fractional digit (i.e. show the number to 1 decimal
+\                       place). In this case, the number in K(0 1 2 3) contains
+\                       10 * the number we end up printing, so to print 123.4,
+\                       we would pass 1234 in K(0 1 2 3) and would set the C
+\                       flag to include the decimal point
+\
+\ ******************************************************************************
 
-.l_1e65
+.BPRNT
 
- ASL &43
- ROL &42
- ROL &41
- ROL &40
- ROL &83
- LDX #&03
+ LDX #11                \ Set T to the maximum number of digits allowed (11
+ STX T                  \ characters, which is the number of digits in 10
+                        \ billion). We will use this as a flag when printing
+                        \ characters in TT37 below
 
-.l_1e71
+ PHP                    \ Make a copy of the status register (in particular
+                        \ the C flag) so we can retrieve it later
 
- LDA &40,X
- STA &34,X
- DEX
- BPL l_1e71
- LDA &83
- STA &38
- ASL &43
- ROL &42
- ROL &41
- ROL &40
- ROL &83
- ASL &43
- ROL &42
- ROL &41
- ROL &40
- ROL &83
+ BCC TT30               \ If the C flag is clear, we do not want to print a
+                        \ decimal point, so skip the next two instructions
+
+ DEC T                  \ As we are going to show a decimal point, decrement
+ DEC U                  \ both the number of characters and the number of
+                        \ digits (as one of them is now a decimal point)
+
+.TT30
+
+ LDA #11                \ Set A to 11, the maximum number of digits allowed
+
+ SEC                    \ Set the C flag so we can do subtraction without the
+                        \ C flag affecting the result
+
+ STA XX17               \ Store the maximum number of digits allowed (11) in
+                        \ XX17
+
+ SBC U                  \ Set U = 11 - U + 1, so U now contains the maximum
+ STA U                  \ number of digits minus the number of digits we want
+ INC U                  \ to display, plus 1 (so this is the number of digits
+                        \ we should skip before starting to print the number
+                        \ itself, and the plus 1 is there to ensure we print at
+                        \ least one digit)
+
+ LDY #0                 \ In the main loop below, we use Y to count the number
+                        \ of times we subtract 10 billion to get the leftmost
+                        \ digit, so set this to zero
+
+ STY S                  \ In the main loop below, we use location S as an
+                        \ 8-bit overflow for the 32-bit calculations, so
+                        \ we need to set this to 0 before joining the loop
+
+ JMP TT36               \ Jump to TT36 to start the process of printing this
+                        \ number's digits
+
+.TT35
+
+                        \ This subroutine multiplies K(S 0 1 2 3) by 10 and
+                        \ stores the result back in K(S 0 1 2 3), using the fact
+                        \ that K * 10 = (K * 2) + (K * 2 * 2 * 2)
+
+ ASL K+3                \ Set K(S 0 1 2 3) = K(S 0 1 2 3) * 2 by rotating left
+ ROL K+2
+ ROL K+1
+ ROL K
+ ROL S
+
+ LDX #3                 \ Now we want to make a copy of the newly doubled K in
+                        \ XX15, so we can use it for the first (K * 2) in the
+                        \ equation above, so set up a counter in X for copying
+                        \ four bytes, starting with the last byte in memory
+                        \ (i.e. the least significant)
+
+.tt35
+
+ LDA K,X                \ Copy the X-th byte of K(0 1 2 3) to the X-th byte of
+ STA XX15,X             \ XX15(0 1 2 3), so that XX15 will contain a copy of
+                        \ K(0 1 2 3) once we've copied all four bytes
+
+ DEX                    \ Decrement the loop counter
+
+ BPL tt35               \ Loop back to copy the next byte until we have copied
+                        \ all four
+
+ LDA S                  \ Store the value of location S, our overflow byte, in
+ STA XX15+4             \ XX15+4, so now XX15(4 0 1 2 3) contains a copy of
+                        \ K(S 0 1 2 3), which is the value of (K * 2) that we
+                        \ want to use in our calculation
+
+ ASL K+3                \ Now to calculate the (K * 2 * 2 * 2) part. We still
+ ROL K+2                \ have (K * 2) in K(S 0 1 2 3), so we just need to shift
+ ROL K+1                \ it twice. This is the first one, so we do this:
+ ROL K                  \
+ ROL S                  \   K(S 0 1 2 3) = K(S 0 1 2 3) * 2 = K * 4
+
+ ASL K+3                \ And then we do it again, so that means:
+ ROL K+2                \
+ ROL K+1                \   K(S 0 1 2 3) = K(S 0 1 2 3) * 2 = K * 8
+ ROL K
+ ROL S
+
+ CLC                    \ Clear the C flag so we can do addition without the
+                        \ C flag affecting the result
+
+ LDX #3                 \ By now we've got (K * 2) in XX15(4 0 1 2 3) and
+                        \ (K * 8) in K(S 0 1 2 3), so the final step is to add
+                        \ these two 32-bit numbers together to get K * 10.
+                        \ So we set a counter in X for four bytes, starting
+                        \ with the last byte in memory (i.e. the least
+                        \ significant)
+
+.tt36
+
+ LDA K,X                \ Fetch the X-th byte of K into A
+
+ ADC XX15,X             \ Add the X-th byte of XX15 to A, with carry
+
+ STA K,X                \ Store the result in the X-th byte of K
+
+ DEX                    \ Decrement the loop counter
+
+ BPL tt36               \ Loop back to add the next byte, moving from the least
+                        \ significant byte to the most significant, until we
+                        \ have added all four
+
+ LDA XX15+4             \ Finally, fetch the overflow byte from XX15(4 0 1 2 3)
+
+ ADC S                  \ And add it to the overflow byte from K(S 0 1 2 3),
+                        \ with carry
+
+ STA S                  \ And store the result in the overflow byte from
+                        \ K(S 0 1 2 3), so now we have our desired result, i.e.
+                        \
+                        \   K(S 0 1 2 3) = K(S 0 1 2 3) * 10
+
+ LDY #0                 \ In the main loop below, we use Y to count the number
+                        \ of times we subtract 10 billion to get the leftmost
+                        \ digit, so set this to zero so we can rejoin the main
+                        \ loop for another subtraction process
+
+.TT36
+
+                        \ This is the main loop of our digit-printing routine.
+                        \ In the following loop, we are going to count the
+                        \ number of times that we can subtract 10 million and
+                        \ store that count in Y, which we have already set to 0
+
+ LDX #3                 \ Our first calculation concerns 32-bit numbers, so
+                        \ set up a counter for a four-byte loop
+
+ SEC                    \ Set the C flag so we can do subtraction without the
+                        \ C flag affecting the result
+
+.tt37
+
+                        \ We now loop through each byte in turn to do this:
+                        \
+                        \   XX15(4 0 1 2 3) = K(S 0 1 2 3) - 100,000,000,000
+
+ LDA K,X                \ Subtract the X-th byte of TENS (i.e. 10 billion) from
+ SBC TENS,X             \ the X-th byte of K
+
+ STA XX15,X             \ Store the result in the X-th byte of XX15
+
+ DEX                    \ Decrement the loop counter
+
+ BPL tt37               \ Loop back to subtract the next byte, moving from the
+                        \ least significant byte to the most significant, until
+                        \ we have subtracted all four
+
+ LDA S                  \ Subtract the fifth byte of 10 billion (i.e. &17) from
+ SBC #&17               \ the fifth (overflow) byte of K, which is S
+
+ STA XX15+4             \ Store the result in the overflow byte of XX15
+
+ BCC TT37               \ If subtracting 10 billion took us below zero, jump to
+                        \ TT37 to print out this digit, which is now in Y
+
+ LDX #3                 \ We now want to copy XX15(4 0 1 2 3) back into
+                        \ K(S 0 1 2 3), so we can loop back up to do the next
+                        \ subtraction, so set up a counter for a four-byte loop
+
+.tt38
+
+ LDA XX15,X             \ Copy the X-th byte of XX15(0 1 2 3) to the X-th byte
+ STA K,X                \ of K(0 1 2 3), so that K(0 1 2 3) will contain a copy
+                        \ of XX15(0 1 2 3) once we've copied all four bytes
+
+ DEX                    \ Decrement the loop counter
+
+ BPL tt38               \ Loop back to copy the next byte, until we have copied
+                        \ all four
+
+ LDA XX15+4             \ Store the value of location XX15+4, our overflow
+ STA S                  \ byte in S, so now K(S 0 1 2 3) contains a copy of
+                        \ XX15(4 0 1 2 3)
+
+ INY                    \ We have now managed to subtract 10 billion from our
+                        \ number, so increment Y, which is where we are keeping
+                        \ a count of the number of subtractions so far
+
+ JMP TT36               \ Jump back to TT36 to subtract the next 10 billion
+
+.TT37
+
+ TYA                    \ If we get here then Y contains the digit that we want
+                        \ to print (as Y has now counted the total number of
+                        \ subtractions of 10 billion), so transfer Y into A
+
+ BNE TT32               \ If the digit is non-zero, jump to TT32 to print it
+
+ LDA T                  \ Otherwise the digit is zero. If we are already
+                        \ printing the number then we will want to print a 0,
+                        \ but if we haven't started printing the number yet,
+                        \ then we probably don't, as we don't want to print
+                        \ leading zeroes unless this is the only digit before
+                        \ the decimal point
+                        \
+                        \ To help with this, we are going to use T as a flag
+                        \ that tells us whether we have already started
+                        \ printing digits:
+                        \
+                        \   * If T <> 0 we haven't printed anything yet
+                        \
+                        \   * If T = 0 then we have started printing digits
+                        \
+                        \ We initially set T above to the maximum number of
+                        \ characters allowed, less 1 if we are printing a
+                        \ decimal point, so the first time we enter the digit
+                        \ printing routine at TT37, it is definitely non-zero
+
+ BEQ TT32               \ If T = 0, jump straight to the print routine at TT32,
+                        \ as we have already started printing the number, so we
+                        \ definitely want to print this digit too
+
+ DEC U                  \ We initially set U to the number of digits we want to
+ BPL TT34               \ skip before starting to print the number. If we get
+                        \ here then we haven't printed any digits yet, so
+                        \ decrement U to see if we have reached the point where
+                        \ we should start printing the number, and if not, jump
+                        \ to TT34 to set up things for the next digit
+
+ LDA #' '               \ We haven't started printing any digits yet, but we
+ BNE tt34               \ have reached the point where we should start printing
+                        \ our number, so call TT26 (via tt34) to print a space
+                        \ so that the number is left-padded with spaces (this
+                        \ BNE is effectively a JMP as A will never be zero)
+
+.TT32
+
+ LDY #0                 \ We are printing an actual digit, so first set T to 0,
+ STY T                  \ to denote that we have now started printing digits as
+                        \ opposed to spaces
+
+ CLC                    \ The digit value is in A, so add ASCII "0" to get the
+ ADC #'0'               \ ASCII character number to print
+
+.tt34
+
+ JSR TT26               \ Call TT26 to print the character in A and fall through
+                        \ into TT34 to get things ready for the next digit
+
+.TT34
+
+ DEC T                  \ Decrement T but keep T >= 0 (by incrementing it
+ BPL P%+4               \ again if the above decrement made T negative)
+ INC T
+
+ DEC XX17               \ Decrement the total number of characters left to
+                        \ print, which we stored in XX17
+
+ BMI rT9                \ If the result is negative, we have printed all the
+                        \ characters, so jump down to rT9 to return from the
+                        \ subroutine
+
+ BNE P%+10              \ If the result is positive (> 0) then we still have
+                        \ characters left to print, so loop back to TT35 (via
+                        \ the JMP TT35 instruction below) to print the next
+                        \ digit
+
+ PLP                    \ If we get here then we have printed the exact number
+                        \ of digits that we wanted to, so restore the C flag
+                        \ that we stored at the start of the routine
+
+ BCC P%+7               \ If the C flag is clear, we don't want a decimal point,
+                        \ so loop back to TT35 (via the JMP TT35 instruction
+                        \ below) to print the next digit
+
+ LDA #'.'               \ Otherwise the C flag is set, so print the decimal
+ JSR TT26               \ point
+
+ JMP TT35               \ Loop back to TT35 to print the next digit
+
+\ ******************************************************************************
+\
+\       Name: BELL
+\       Type: Subroutine
+\   Category: Sound
+\    Summary: Make a standard system beep
+\
+\ ------------------------------------------------------------------------------
+\
+\ This is the standard system beep as made by the VDU 7 statement in BBC BASIC.
+\
+\ ******************************************************************************
+
+.BELL
+
+ LDA #7                 \ Control code 7 makes a beep, so load this into A
+
+                        \ Fall through into the TT26 print routine to
+                        \ actually make the sound
+
+\ ******************************************************************************
+\
+\       Name: TT26
+\       Type: Subroutine
+\   Category: Text
+\    Summary: Print a character at the text cursor by poking into screen memory
+\  Deep dive: Drawing text
+\
+\ ------------------------------------------------------------------------------
+\
+\ Print a character at the text cursor (XC, YC), do a beep, print a newline,
+\ or delete left (backspace).
+\
+\ WRCHV is set to point here by the loading process.
+\
+\ Arguments:
+\
+\   A                   The character to be printed. Can be one of the
+\                       following:
+\
+\                         * 7 (beep)
+\
+\                         * 10-13 (line feeds and carriage returns)
+\
+\                         * 32-95 (ASCII capital letters, numbers and
+\                           punctuation)
+\
+\                         * 127 (delete the character to the left of the text
+\                           cursor and move the cursor to the left)
+\
+\   XC                  Contains the text column to print at (the x-coordinate)
+\
+\   YC                  Contains the line number to print on (the y-coordinate)
+\
+\ Returns:
+\
+\   A                   A is preserved
+\
+\   X                   X is preserved
+\
+\   Y                   Y is preserved
+\
+\   C flag              The C flag is cleared
+\
+\ Other entry points:
+\
+\   RR3+1               Contains an RTS
+\
+\   RREN                Prints the character definition pointed to by P(2 1) at
+\                       the screen address pointed to by (A SC). Used by the
+\                       BULB routine
+\
+\   rT9                 Contains an RTS
+\
+\ ******************************************************************************
+
+.TT26
+
+ STA K3                 \ Store the A, X and Y registers, so we can restore
+ STY YSAV2              \ them at the end (so they don't get changed by this
+ STX XSAV2              \ routine)
+
+ LDY QQ17               \ Load the QQ17 flag, which contains the text printing
+                        \ flags
+
+ CPY #255               \ If QQ17 = 255 then printing is disabled, so jump to
+ BEQ RR4                \ RR4, which doesn't print anything, it just restores
+                        \ the registers and returns from the subroutine
+
+ CMP #7                 \ If this is a beep character (A = 7), jump to R5,
+ BEQ R5                 \ which will emit the beep, restore the registers and
+                        \ return from the subroutine
+
+ CMP #32                \ If this is an ASCII character (A >= 32), jump to RR1
+ BCS RR1                \ below, which will print the character, restore the
+                        \ registers and return from the subroutine
+
+ CMP #10                \ If this is control code 10 (line feed) then jump to
+ BEQ RRX1               \ RRX1, which will move down a line, restore the
+                        \ registers and return from the subroutine
+
+ LDX #1                 \ If we get here, then this is control code 11-13, of
+ STX XC                 \ which only 13 is used. This code prints a newline,
+                        \ which we can achieve by moving the text cursor
+                        \ to the start of the line (carriage return) and down
+                        \ one line (line feed). These two lines do the first
+                        \ bit by setting XC = 1, and we then fall through into
+                        \ the line feed routine that's used by control code 10
+
+.RRX1
+
+ INC YC                 \ Print a line feed, simply by incrementing the row
+                        \ number (y-coordinate) of the text cursor, which is
+                        \ stored in YC
+
+ BNE RR4                \ Jump to RR4 to restore the registers and return from
+                        \ the subroutine (this BNE is effectively a JMP as Y
+                        \ will never be zero)
+
+.RR1
+
+                        \ If we get here, then the character to print is an
+                        \ ASCII character in the range 32-95. The quickest way
+                        \ to display text on-screen is to poke the character
+                        \ pixel by pixel, directly into screen memory, so
+                        \ that's what the rest of this routine does
+                        \
+                        \ The first step, then, is to get hold of the bitmap
+                        \ definition for the character we want to draw on the
+                        \ screen (i.e. we need the pixel shape of this
+                        \ character). The MOS ROM contains bitmap definitions
+                        \ of the system's ASCII characters, starting from &C000
+                        \ for space (ASCII 32) and ending with the £ symbol
+                        \ (ASCII 126)
+                        \
+                        \ There are definitions for 32 characters in each of the
+                        \ three pages of MOS memory, as each definition takes up
+                        \ 8 bytes (8 rows of 8 pixels) and 32 * 8 = 256 bytes =
+                        \ 1 page. So:
+                        \
+                        \   ASCII 32-63  are defined in &C000-&C0FF (page 0)
+                        \   ASCII 64-95  are defined in &C100-&C1FF (page 1)
+                        \   ASCII 96-126 are defined in &C200-&C2F0 (page 2)
+                        \
+                        \ The following code reads the relevant character
+                        \ bitmap from the above locations in ROM and pokes
+                        \ those values into the correct position in screen
+                        \ memory, thus printing the character on-screen
+                        \
+                        \ It's a long way from 10 PRINT "Hello world!":GOTO 10
+
+                        \ Now we want to set X to point to the relevant page
+                        \ number for this character - i.e. &C0, &C1 or &C2.
+
+                        \ The following logic is easier to follow if we look
+                        \ at the three character number ranges in binary:
+                        \
+                        \   Bit #  76543210
+                        \
+                        \   32  = %00100000     Page 0 of bitmap definitions
+                        \   63  = %00111111
+                        \
+                        \   64  = %01000000     Page 1 of bitmap definitions
+                        \   95  = %01011111
+                        \
+                        \   96  = %01100000     Page 2 of bitmap definitions
+                        \   125 = %01111101
+                        \
+                        \ We'll refer to this below
+
+ LDX #&BF               \ Set X to point to the first font page in ROM minus 1,
+                        \ which is &C0 - 1, or &BF
+
+ ASL A                  \ If bit 6 of the character is clear (A is 32-63)
+ ASL A                  \ then skip the following instruction
+ BCC P%+4
+
+ LDX #&C1               \ A is 64-126, so set X to point to page &C1
+
+ ASL A                  \ If bit 5 of the character is clear (A is 64-95)
+ BCC P%+3               \ then skip the following instruction
+
+ INX                    \ Increment X
+                        \
+                        \ By this point, we started with X = &BF, and then
+                        \ we did the following:
+                        \
+                        \   If A = 32-63:   skip    then INX  so X = &C0
+                        \   If A = 64-95:   X = &C1 then skip so X = &C1
+                        \   If A = 96-126:  X = &C1 then INX  so X = &C2
+                        \
+
+                        \ In other words, X points to the relevant page. But
+                        \ what about the value of A? That gets shifted to the
+                        \ left three times during the above code, which
+                        \ multiplies the number by 8 but also drops bits 7, 6
+                        \ and 5 in the process. Look at the above binary
+                        \ figures and you can see that if we cleared bits 5-7,
+                        \ then that would change 32-53 to 0-31... but it would
+                        \ do exactly the same to 64-95 and 96-125. And because
+                        \ we also multiply this figure by 8, A now points to
+                        \ the start of the character's definition within its
+                        \ page (because there are 8 bytes per character
+                        \ definition)
+                        \
+                        \ Or, to put it another way, X contains the high byte
+                        \ (the page) of the address of the definition that we
+                        \ want, while A contains the low byte (the offset into
+                        \ the page) of the address
+
+ STA P+1                \ Store the address of this character's definition in
+ STX P+2                \ P(2 1)
+
+ LDA XC                 \ Fetch XC, the x-coordinate (column) of the text cursor
+                        \ into A
+
+ ASL A                  \ Multiply A by 8, and store in SC. As each character is
+ ASL A                  \ 8 pixels wide, and the special screen mode Elite uses
+ ASL A                  \ for the top part of the screen is 256 pixels across
+ STA SC                 \ with one bit per pixel, this value is not only the
+                        \ screen address offset of the text cursor from the left
+                        \ side of the screen, it's also the least significant
+                        \ byte of the screen address where we want to print this
+                        \ character, as each row of on-screen pixels corresponds
+                        \ to one page. To put this more explicitly, the screen
+                        \ starts at &6000, so the text rows are stored in screen
+                        \ memory like this:
+                        \
+                        \   Row 1: &6000 - &60FF    YC = 1, XC = 0 to 31
+                        \   Row 2: &6100 - &61FF    YC = 2, XC = 0 to 31
+                        \   Row 3: &6200 - &62FF    YC = 3, XC = 0 to 31
+                        \
+                        \ and so on
+
+ INC XC                 \ Move the text cursor to the right by 1 column
+
+ LDA YC                 \ Fetch YC, the y-coordinate (row) of the text cursor
+
+ CMP #24                \ If the text cursor is on the screen (i.e. YC < 24, so
+ BCC RR3                \ we are on rows 1-23), then jump to RR3 to print the
+                        \ character
+
+ JSR TT66               \ Otherwise we are off the bottom of the screen, so
+                        \ clear the screen and draw a white border
+
+ JMP RR4                \ And restore the registers and return from the
+                        \ subroutine
+
+.RR3
+
+                        \ A contains the value of YC - the screen row where we
+                        \ want to print this character - so now we need to
+                        \ convert this into a screen address, so we can poke
+                        \ the character data to the right place in screen
+                        \ memory
+
+ ORA #&60               \ We already stored the least significant byte
+                        \ of this screen address in SC above (see the STA SC
+                        \ instruction above), so all we need is the most
+                        \ significant byte. As mentioned above, in Elite's
+                        \ square mode 4 screen, each row of text on-screen
+                        \ takes up exactly one page, so the first row is page
+                        \ &60xx, the second row is page &61xx, so we can get
+                        \ the page for character (XC, YC) by OR'ing with &60.
+                        \ To see this in action, consider that our two values
+                        \ are, in binary:
+                        \
+                        \   YC is between:  %00000000
+                        \             and:  %00010111
+                        \          &60 is:  %01100000
+                        \
+                        \ so YC OR &60 effectively adds &60 to YC, giving us
+                        \ the page number that we want
+
+.RREN
+
+ STA SC+1               \ Store the page number of the destination screen
+                        \ location in SC+1, so SC now points to the full screen
+                        \ location where this character should go
+
+ LDY #7                 \ We want to print the 8 bytes of character data to the
+                        \ screen (one byte per row), so set up a counter in Y
+                        \ to count these bytes
+
+.RRL1
+
+ LDA (P+1),Y            \ The character definition is at P(2 1) - we set this up
+                        \ above - so load the Y-th byte from P(2 1), which will
+                        \ contain the bitmap for the Y-th row of the character
+
+ EOR (SC),Y             \ If we EOR this value with the existing screen
+                        \ contents, then it's reversible (so reprinting the
+                        \ same character in the same place will revert the
+                        \ screen to what it looked like before we printed
+                        \ anything); this means that printing a white pixel on
+                        \ onto a white background results in a black pixel, but
+                        \ that's a small price to pay for easily erasable text
+
+ STA (SC),Y             \ Store the Y-th byte at the screen address for this
+                        \ character location
+
+ DEY                    \ Decrement the loop counter
+
+ BPL RRL1               \ Loop back for the next byte to print to the screen
+
+.RR4
+
+ LDY YSAV2              \ We're done printing, so restore the values of the
+ LDX XSAV2              \ A, X and Y registers that we saved above and clear
+ LDA K3                 \ the C flag, so everything is back to how it was
  CLC
- LDX #&03
 
-.l_1e93
+.rT9
 
- LDA &40,X
- ADC &34,X
- STA &40,X
- DEX
- BPL l_1e93
- LDA &38
- ADC &83
- STA &83
- LDY #&00
+ RTS                    \ Return from the subroutine
 
-.l_1ea4
+.R5
 
- LDX #&03
- SEC
+ JSR BEEP               \ Call the BEEP subroutine to make a short, high beep
 
-.l_1ea7
+ JMP RR4                \ Jump to RR4 to restore the registers and return from
+                        \ the subroutine using a tail call
 
- LDA &40,X
- SBC l_1e34,X
- STA &34,X
- DEX
- BPL l_1ea7
- LDA &83
- SBC #&17
- STA &38
- BCC l_1eca
- LDX #&03
+\ ******************************************************************************
+\
+\       Name: DIALS (Part 1 of 4)
+\       Type: Subroutine
+\   Category: Dashboard
+\    Summary: Update the dashboard: speed indicator
+\  Deep dive: The dashboard indicators
+\
+\ ------------------------------------------------------------------------------
+\
+\ This routine updates the dashboard. First we draw all the indicators in the
+\ right part of the dashboard, from top (speed) to bottom (energy banks), and
+\ then we move on to the left part, again drawing from top (forward shield) to
+\ bottom (altitude).
+\
+\ This first section starts us off with the speedometer in the top right.
+\
+\ ******************************************************************************
 
-.l_1ebb
+.DIALS
 
- LDA &34,X
- STA &40,X
- DEX
- BPL l_1ebb
- LDA &38
- STA &83
- INY
- JMP l_1ea4
+ LDA #&D0               \ Set SC(1 0) = &78D0, which is the screen address for
+ STA SC                 \ the character block containing the left end of the
+ LDA #&78               \ top indicator in the right part of the dashboard, the
+ STA SC+1               \ one showing our speed
 
-.l_1eca
+ JSR PZW                \ Call PZW to set A to the colour for dangerous values
+                        \ and X to the colour for safe values
 
- TYA
- BNE l_1ed9
- LDA &D1
- BEQ l_1ed9
- DEC &80
- BPL l_1ee3
- LDA #&20
- BNE l_1ee0
+ STX K+1                \ Set K+1 (the colour we should show for low values) to
+                        \ X (the colour to use for safe values)
 
-.l_1ed9
+ STA K                  \ Set K (the colour we should show for high values) to
+                        \ A (the colour to use for dangerous values)
 
- LDY #&00
- STY &D1
- CLC
- ADC #&30
+                        \ The above sets the following indicators to show red
+                        \ for high values and yellow/white for low values
 
-.l_1ee0
+ LDA #14                \ Set T1 to 14, the threshold at which we change the
+ STA T1                 \ indicator's colour
 
- JSR CHPR
+ LDA DELTA              \ Fetch our ship's speed into A, in the range 0-40
 
-.l_1ee3
+\LSR A                  \ Draw the speed indicator using a range of 0-31, and
+ JSR DIL-1              \ increment SC to point to the next indicator (the roll
+                        \ indicator). The LSR is commented out as it isn't
+                        \ required with a call to DIL-1, so perhaps this was
+                        \ originally a call to DIL that got optimised
 
- DEC &D1
- BPL l_1ee9
- INC &D1
+\ ******************************************************************************
+\
+\       Name: DIALS (Part 2 of 4)
+\       Type: Subroutine
+\   Category: Dashboard
+\    Summary: Update the dashboard: pitch and roll indicators
+\  Deep dive: The dashboard indicators
+\
+\ ******************************************************************************
 
-.l_1ee9
+ LDA #0                 \ Set R = P = 0 for the low bytes in the call to the ADD
+ STA R                  \ routine below
+ STA P
 
- DEC &86
- BMI l_1f5b
- BNE l_1ef7
- PLP
- BCC l_1ef7
- LDA #&2E
- JSR CHPR
+ LDA #8                 \ Set S = 8, which is the value of the centre of the
+ STA S                  \ roll indicator
 
-.l_1ef7
-
- JMP l_1e65
-
-.l_1efa
-
- LDA #&07
-
-.CHPR
-
- STA &D2
- STY &034F
- STX &034E
- LDY QQ17
- CPY #&FF
- BEQ l_1f52
- CMP #&07
- BEQ l_1f5c
- CMP #&20
- BCS l_1f1e
- CMP #&0A
- BEQ l_1f1a
- LDX #&01
- STX XC
-
-.l_1f1a
-
- INC YC
- BNE l_1f52
-
-.l_1f1e
-
- LDX #&BF
- ASL A
- ASL A
- BCC l_1f26
- LDX #&C1
-
-.l_1f26
-
- ASL A
- BCC l_1f2a
- INX
-
-.l_1f2a
-
- STA font
- STX font+&01
- LDA XC
- ASL A
- ASL A
- ASL A
- STA SC
- INC XC
- LDA YC
- CMP #&18
- BCC l_1f43
- JSR TT66
- JMP l_1f52
-
-.l_1f43
-
- ORA #&60
-
-.l_1f45
-
- STA SC+&01
- LDY #&07
-
-.l_1f49
-
- LDA (font),Y
- EOR (SC),Y
- STA (SC),Y
- DEY
- BPL l_1f49
-
-.l_1f52
-
- LDY &034F
- LDX &034E
- LDA &D2
- CLC
-
-.l_1f5b
-
- RTS
-
-.l_1f5c
-
- JSR l_43ba
- JMP l_1f52
-
-.l_1f62
-
- LDA #&D0
- STA SC
- LDA #&78
- STA SC+&01
- JSR l_2026
- STX &41
- STA &40
- LDA #&0E
- STA &06
- LDA &7D
- JSR l_2039
- LDA #&00
- STA &82
- STA &1B
- LDA #&08
- STA &83
- LDA &31
+ LDA ALP1               \ Fetch the roll angle alpha as a value between 0 and
+ LSR A                  \ 31, and divide by 4 to get a value of 0 to 7
  LSR A
- LSR A
- ORA &32
- EOR #&80
- JSR ADD
- JSR l_208d
- LDA &2A
- LDX &2B
- BEQ l_1f9a
- SBC #&01
 
-.l_1f9a
+ ORA ALP2               \ Apply the roll sign to the value, and flip the sign,
+ EOR #%10000000         \ so it's now in the range -7 to +7, with a positive
+                        \ roll angle alpha giving a negative value in A
 
- JSR ADD
- JSR l_208d
- LDA &8A
- AND #&03
- BNE l_1f5b
- LDY #&00
- JSR l_2026
- STX &40
- STA &41
- LDX #&03
- STX &06
+ JSR ADD                \ We now add A to S to give us a value in the range 1 to
+                        \ 15, which we can pass to DIL2 to draw the vertical
+                        \ bar on the indicator at this position. We use the ADD
+                        \ routine like this:
+                        \
+                        \ (A X) = (A 0) + (S 0)
+                        \
+                        \ and just take the high byte of the result. We use ADD
+                        \ rather than a normal ADC because ADD separates out the
+                        \ sign bit and does the arithmetic using absolute values
+                        \ and separate sign bits, which we want here rather than
+                        \ the two's complement that ADC uses
 
-.l_1fb3
+ JSR DIL2               \ Draw a vertical bar on the roll indicator at offset A
+                        \ and increment SC to point to the next indicator (the
+                        \ pitch indicator)
 
- STY &3A,X
- DEX
- BPL l_1fb3
- LDX #&03
- LDA energy
- LSR A
- LSR A
- STA &81
+ LDA BETA               \ Fetch the pitch angle beta as a value between -8 and
+                        \ +8
 
-.l_1fc1
+ LDX BET1               \ Fetch the magnitude of the pitch angle beta, and if it
+ BEQ P%+4               \ is 0 (i.e. we are not pitching), skip the next
+                        \ instruction
 
- SEC
- SBC #&10
- BCC l_1fd3
- STA &81
- LDA #&10
- STA &3A,X
- LDA &81
- DEX
- BPL l_1fc1
- BMI l_1fd7
+ SBC #1                 \ The pitch angle beta is non-zero, so set A = A - 1
+                        \ (the C flag is set by the call to DIL2 above, so we
+                        \ don't need to do a SEC). This gives us a value of A
+                        \ from -7 to +7 because these are magnitude-based
+                        \ numbers with sign bits, rather than two's complement
+                        \ numbers
 
-.l_1fd3
+ JSR ADD                \ We now add A to S to give us a value in the range 1 to
+                        \ 15, which we can pass to DIL2 to draw the vertical
+                        \ bar on the indicator at this position (see the JSR ADD
+                        \ above for more on this)
 
- LDA &81
- STA &3A,X
+ JSR DIL2               \ Draw a vertical bar on the pitch indicator at offset A
+                        \ and increment SC to point to the next indicator (the
+                        \ four energy banks)
 
-.l_1fd7
+\ ******************************************************************************
+\
+\       Name: DIALS (Part 3 of 4)
+\       Type: Subroutine
+\   Category: Dashboard
+\    Summary: Update the dashboard: four energy banks
+\  Deep dive: The dashboard indicators
+\
+\ ------------------------------------------------------------------------------
+\
+\ This and the next section only run once every four iterations of the main
+\ loop, so while the speed, pitch and roll indicators update every iteration,
+\ the other indicators update less often.
+\
+\ ******************************************************************************
 
- LDA &3A,Y
- STY &1B
- JSR l_203a
- LDY &1B
- INY
- CPY #&04
- BNE l_1fd7
- LDA #&78
- STA SC+&01
- LDA #&10
- STA SC
- LDA f_shield
- JSR l_2036
- LDA r_shield
- JSR l_2036
- LDA cmdr_fuel
- JSR l_2038
- JSR l_2026
- STX &41
- STA &40
- LDX #&0B
- STX &06
- LDA cabin_t
- JSR l_2036
- LDA laser_t
- JSR l_2036
- LDA #&F0
- STA &06
- STA &41
- LDA altitude
- JSR l_2036
- JMP l_3634
+ LDA MCNT               \ Fetch the main loop counter and calculate MCNT mod 4,
+ AND #3                 \ jumping to rT9 if it is non-zero. rT9 contains an RTS,
+ BNE rT9                \ so the following code only runs every 4 iterations of
+                        \ the main loop, otherwise we return from the subroutine
 
-.l_2026
+ LDY #0                 \ Set Y = 0, for use in various places below
+
+ JSR PZW                \ Call PZW to set A to the colour for dangerous values
+                        \ and X to the colour for safe values
+
+ STX K                  \ Set K (the colour we should show for high values) to X
+                        \ (the colour to use for safe values)
+
+ STA K+1                \ Set K+1 (the colour we should show for low values) to
+                        \ A (the colour to use for dangerous values)
+
+                        \ The above sets the following indicators to show red
+                        \ for low values and yellow/white for high values, which
+                        \ we use not only for the energy banks, but also for the
+                        \ shield levels and current fuel
+
+ LDX #3                 \ Set up a counter in X so we can zero the four bytes at
+                        \ XX12, so we can then calculate each of the four energy
+                        \ banks' values before drawing them later
+
+ STX T1                 \ Set T1 to 3, the threshold at which we change the
+                        \ indicator's colour
+
+.DLL23
+
+ STY XX12,X             \ Set the X-th byte of XX12 to 0
+
+ DEX                    \ Decrement the counter
+
+ BPL DLL23              \ Loop back for the next byte until the four bytes at
+                        \ XX12 are all zeroed
+
+ LDX #3                 \ Set up a counter in X to loop through the 4 energy
+                        \ bank indicators, so we can calculate each of the four
+                        \ energy banks' values and store them in XX12
+
+ LDA ENERGY             \ Set A = Q = ENERGY / 4, so they are both now in the
+ LSR A                  \ range 0-63 (so that's a maximum of 16 in each of the
+ LSR A                  \ banks, and a maximum of 15 in the top bank)
+
+ STA Q                  \ Set Q to A, so we can use Q to hold the remaining
+                        \ energy as we work our way through each bank, from the
+                        \ full ones at the bottom to the empty ones at the top
+
+.DLL24
+
+ SEC                    \ Set A = A - 16 to reduce the energy count by a full
+ SBC #16                \ bank
+
+ BCC DLL26              \ If the C flag is clear then A < 16, so this bank is
+                        \ not full to the brim, and is therefore the last one
+                        \ with any energy in it, so jump to DLL26
+
+ STA Q                  \ This bank is full, so update Q with the energy of the
+                        \ remaining banks
+
+ LDA #16                \ Store this bank's level in XX12 as 16, as it is full,
+ STA XX12,X             \ with XX12+3 for the bottom bank and XX12+0 for the top
+
+ LDA Q                  \ Set A to the remaining energy level again
+
+ DEX                    \ Decrement X to point to the next bank, i.e. the one
+                        \ above the bank we just processed
+
+ BPL DLL24              \ Loop back to DLL24 until we have either processed all
+                        \ four banks, or jumped out early to DLL26 if the top
+                        \ banks have no charge
+
+ BMI DLL9               \ Jump to DLL9 as we have processed all four banks (this
+                        \ BMI is effectively a JMP as A will never be positive)
+
+.DLL26
+
+ LDA Q                  \ If we get here then the bank we just checked is not
+ STA XX12,X             \ fully charged, so store its value in XX12 (using Q,
+                        \ which contains the energy of the remaining banks -
+                        \ i.e. this one)
+
+                        \ Now that we have the four energy bank values in XX12,
+                        \ we can draw them, starting with the top bank in XX12
+                        \ and looping down to the bottom bank in XX12+3, using Y
+                        \ as a loop counter, which was set to 0 above
+
+.DLL9
+
+ LDA XX12,Y             \ Fetch the value of the Y-th indicator, starting from
+                        \ the top
+
+ STY P                  \ Store the indicator number in P for retrieval later
+
+ JSR DIL                \ Draw the energy bank using a range of 0-15, and
+                        \ increment SC to point to the next indicator (the
+                        \ next energy bank down)
+
+ LDY P                  \ Restore the indicator number into Y
+
+ INY                    \ Increment the indicator number
+
+ CPY #4                 \ Check to see if we have drawn the last energy bank
+
+ BNE DLL9               \ Loop back to DLL9 if we have more banks to draw,
+                        \ otherwise we are done
+
+\ ******************************************************************************
+\
+\       Name: DIALS (Part 4 of 4)
+\       Type: Subroutine
+\   Category: Dashboard
+\    Summary: Update the dashboard: shields, fuel, laser & cabin temp, altitude
+\  Deep dive: The dashboard indicators
+\
+\ ******************************************************************************
+
+ LDA #&78               \ Set SC(1 0) = &7810, which is the screen address for
+ STA SC+1               \ the character block containing the left end of the
+ LDA #&10               \ top indicator in the left part of the dashboard, the
+ STA SC                 \ one showing the forward shield
+
+ LDA FSH                \ Draw the forward shield indicator using a range of
+ JSR DILX               \ 0-255, and increment SC to point to the next indicator
+                        \ (the aft shield)
+
+ LDA ASH                \ Draw the aft shield indicator using a range of 0-255,
+ JSR DILX               \ and increment SC to point to the next indicator (the
+                        \ fuel level)
+
+ LDA QQ14               \ Draw the fuel level indicator using a range of 0-63,
+ JSR DILX+2             \ and increment SC to point to the next indicator (the
+                        \ cabin temperature)
+
+ JSR PZW                \ Call PZW to set A to the colour for dangerous values
+                        \ and X to the colour for safe values
+
+ STX K+1                \ Set K+1 (the colour we should show for low values) to
+                        \ X (the colour to use for safe values)
+
+ STA K                  \ Set K (the colour we should show for high values) to
+                        \ A (the colour to use for dangerous values)
+
+                        \ The above sets the following indicators to show red
+                        \ for high values and yellow/white for low values, which
+                        \ we use for the cabin and laser temperature bars
+
+ LDX #11                \ Set T1 to 11, the threshold at which we change the
+ STX T1                 \ cabin and laser temperature indicators' colours
+
+ LDA CABTMP             \ Draw the cabin temperature indicator using a range of
+ JSR DILX               \ 0-255, and increment SC to point to the next indicator
+                        \ (the laser temperature)
+
+ LDA GNTMP              \ Draw the laser temperature indicator using a range of
+ JSR DILX               \ 0-255, and increment SC to point to the next indicator
+                        \ (the altitude)
+
+ LDA #240               \ Set T1 to 240, the threshold at which we change the
+ STA T1                 \ altitude indicator's colour. As the altitude has a
+                        \ range of 0-255, pixel 16 will not be filled in, and
+                        \ 240 would change the colour when moving between pixels
+                        \ 15 and 16, so this effectively switches off the colour
+                        \ change for the altitude indicator
+
+ STA K+1                \ Set K+1 (the colour we should show for low values) to
+                        \ 240, or &F0 (dashboard colour 2, yellow/white), so the
+                        \ altitude indicator always shows in this colour
+
+ LDA ALTIT              \ Draw the altitude indicator using a range of 0-255
+ JSR DILX
+
+ JMP COMPAS             \ We have now drawn all the indicators, so jump to
+                        \ COMPAS to draw the compass, returning from the
+                        \ subroutine using a tail call
+
+.PZW
 
  LDX #&F0
  LDA &8A
@@ -6334,7 +7217,7 @@ NEXT
  LDA #&0F
  RTS
 
-.l_2036
+.DILX
 
  LSR A
  LSR A
@@ -6347,7 +7230,7 @@ NEXT
 
  LSR A
 
-.l_203a
+.DIL
 
  STA &81
  LDX #&FF
@@ -6417,7 +7300,7 @@ NEXT
  INC SC+&01
  RTS
 
-.l_208d
+.DIL2
 
  LDY #&01
  STA &81
@@ -6491,7 +7374,7 @@ NEXT
  STA cmdr_escape
  INC new_hold	\**
  LDA new_range
- STA cmdr_fuel
+ STA QQ14
  JSR l_3d68
  JSR TT111
  JSR l_309f
@@ -8300,9 +9183,9 @@ NEXT
  AND #&07
  ADC #&7C
  STA &0FCE
- LDA laser_t
+ LDA GNTMP
  ADC #&08
- STA laser_t
+ STA GNTMP
  JSR l_3629
 
 .l_2aa1
@@ -8499,7 +9382,7 @@ NEXT
  JSR l_3395
  SEC
  LDX data_popn
- JSR l_1e38
+ JSR pr2
  LDA #&C6
  JSR l_2b57
  LDA #&28
@@ -8582,9 +9465,9 @@ NEXT
  JSR l_30b4
  JSR TT162
  LDA #&6B
- JSR CHPR
+ JSR TT26
  LDA #&6D
- JMP CHPR
+ JMP TT26
 
 .l_2c78
 
@@ -8757,7 +9640,7 @@ NEXT
  LDA #&10
  STA &75
  JSR TT15
- LDA cmdr_fuel
+ LDA QQ14
  STA &40
  JMP l_2dc5
 
@@ -8765,7 +9648,7 @@ NEXT
 
  LDA &87
  BMI l_2d8a
- LDA cmdr_fuel
+ LDA QQ14
  LSR A
  LSR A
  STA &40
@@ -9206,7 +10089,7 @@ NEXT
  JSR TT27
  LDA hype_dist+&01
  BNE l_30b9
- LDA cmdr_fuel
+ LDA QQ14
  CMP hype_dist
  BCC l_30b9
  LDA #&2D
@@ -9282,7 +10165,7 @@ NEXT
 .l_30b4
 
  LDA #&05
- JMP l_1e3c
+ JMP TT11
 
 .l_30b9
 
@@ -9341,7 +10224,7 @@ NEXT
  STX &03AB
  CLC
  BEQ l_312b
- JSR l_1e3a
+ JSR pr2+2
  JMP l_3135
 
 .l_312b
@@ -9372,18 +10255,18 @@ NEXT
 .l_3147
 
  LDA #&74
- JSR CHPR
+ JSR TT26
  BCC TT162
 
 .l_314e
 
  LDA #&6B
- JSR CHPR
+ JSR TT26
 
 .l_3153
 
  LDA #&67
- JMP CHPR
+ JMP TT26
 
 .l_3158
 
@@ -9544,10 +10427,10 @@ NEXT
 
 .l_3254
 
- LDA cmdr_fuel
+ LDA QQ14
  SEC
  SBC hype_dist
- STA cmdr_fuel
+ STA QQ14
 
 .hyper_snap
 
@@ -9705,7 +10588,7 @@ NEXT
  LDA &0350,Y
  CMP #&0D
  BEQ l_3347
- JSR CHPR
+ JSR TT26
  INY
  BNE l_333a
 
@@ -9742,9 +10625,9 @@ NEXT
 
  LDA #&69
  JSR l_3395
- LDX cmdr_fuel
+ LDX QQ14
  SEC
- JSR l_1e38
+ JSR pr2
  LDA #&C3
  JSR plf
  LDA #&77
@@ -9763,7 +10646,7 @@ NEXT
  LDA #&09
  STA &80
  SEC
- JSR l_1e48
+ JSR BPRNT
  LDA #&E2
 
 .plf
@@ -9844,7 +10727,7 @@ NEXT
 
 .l_33e3
 
- JMP CHPR
+ JMP TT26
 
 .l_33e6
 
@@ -9887,7 +10770,7 @@ NEXT
 
 .l_3410
 
- JMP CHPR
+ JMP TT26
 
 .l_3413
 
@@ -10314,10 +11197,10 @@ NEXT
 
 .l_3629
 
- DEC energy
+ DEC ENERGY
  PHP
  BNE l_3632
- INC energy
+ INC ENERGY
 
 .l_3632
 
@@ -10350,7 +11233,7 @@ NEXT
  INX
  RTS
 
-.l_3634
+.COMPAS
 
  JSR l_3694
  LDY #&25
@@ -10447,10 +11330,10 @@ NEXT
  LDY #&08
  LDA (&20),Y
  BMI l_36fe
- LDA f_shield
+ LDA FSH
  SBC &D1
  BCC l_36f9
- STA f_shield
+ STA FSH
 
 .n_shok
 
@@ -10458,25 +11341,25 @@ NEXT
 
 .l_36f9
 
- STX f_shield
+ STX FSH
  BCC l_370c
 
 .l_36fe
 
- LDA r_shield
+ LDA ASH
  SBC &D1
  BCC l_3709
- STA r_shield
+ STA ASH
  RTS
 
 .l_3709
 
- STX r_shield
+ STX ASH
 
 .l_370c
 
- ADC energy
- STA energy
+ ADC ENERGY
+ STA ENERGY
  BEQ l_3716
  BCS l_3719
 
@@ -10697,7 +11580,7 @@ NEXT
  LDA #&7D
  STX font
  STY font+&01
- JMP l_1f45
+ JMP RREN
 
 .l_3832
 
@@ -11876,7 +12759,7 @@ NEXT
 
 .l_3edb
 
- STA f_shield,X
+ STA FSH,X
  DEX
  BPL l_3edb
 
@@ -11914,7 +12797,7 @@ NEXT
  STA &03B0
  LDA #&0C
  STA &03B1
- JSR l_1f62
+ JSR DIALS
  JSR l_44a4
 
 .l_3f26
@@ -12236,13 +13119,13 @@ NEXT
 
  LDX #&FF
  TXS
- LDX laser_t
+ LDX GNTMP
  BEQ l_40e6
- DEC laser_t
+ DEC GNTMP
 
 .l_40e6
 
- JSR l_1f62
+ JSR DIALS
  LDA &87
  BEQ l_40f8
  \	AND x_flag
@@ -12755,7 +13638,7 @@ NEXT
  LDA #&18
  BNE l_43f3
 
-.l_43ba
+.BEEP
 
  LDA #&20
  BNE l_43f3
@@ -12917,7 +13800,7 @@ NEXT
  LDA &0387,X
  EOR #&FF
  STA &0387,X
- JSR l_1efa
+ JSR BELL
  JSR DELAY
  LDY &D1
 

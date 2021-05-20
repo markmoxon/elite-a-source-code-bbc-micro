@@ -5287,469 +5287,1457 @@ LOAD_B% = LOAD% + P% - CODE%
 
  RTS                    \ Return from the subroutine
 
-.l_1bbc
+\ ******************************************************************************
+\
+\       Name: TENS
+\       Type: Variable
+\   Category: Text
+\    Summary: A constant used when printing large numbers in BPRNT
+\  Deep dive: Printing decimal numbers
+\
+\ ------------------------------------------------------------------------------
+\
+\ Contains the four low bytes of the value 100,000,000,000 (100 billion).
+\
+\ The maximum number of digits that we can print with the BPRNT routine is 11,
+\ so the biggest number we can print is 99,999,999,999. This maximum number
+\ plus 1 is 100,000,000,000, which in hexadecimal is:
+\
+\   & 17 48 76 E8 00
+\
+\ The TENS variable contains the lowest four bytes in this number, with the
+\ most significant byte first, i.e. 48 76 E8 00. This value is used in the
+\ BPRNT routine when working out which decimal digits to print when printing a
+\ number.
+\
+\ ******************************************************************************
+
+.TENS
 
  EQUD &00E87648
 
-.writed_3
+\ ******************************************************************************
+\
+\       Name: pr2
+\       Type: Subroutine
+\   Category: Text
+\    Summary: Print an 8-bit number, left-padded to 3 digits, and optional point
+\
+\ ------------------------------------------------------------------------------
+\
+\ Print the 8-bit number in X to 3 digits, left-padding with spaces for numbers
+\ with fewer than 3 digits (so numbers < 100 are right-aligned). Optionally
+\ include a decimal point.
+\
+\ Arguments:
+\
+\   X                   The number to print
+\
+\   C flag              If set, include a decimal point
+\
+\ Other entry points:
+\
+\   pr2+2               Print the 8-bit number in X to the number of digits in A
+\
+\ ******************************************************************************
 
- LDA #&03
+.pr2
 
-.writed_byte
+ LDA #3                 \ Set A to the number of digits (3)
 
- LDY #&00
+ LDY #0                 \ Zero the Y register, so we can fall through into TT11
+                        \ to print the 16-bit number (Y X) to 3 digits, which
+                        \ effectively prints X to 3 digits as the high byte is
+                        \ zero
 
-.writed_word
+\ ******************************************************************************
+\
+\       Name: TT11
+\       Type: Subroutine
+\   Category: Text
+\    Summary: Print a 16-bit number, left-padded to n digits, and optional point
+\
+\ ------------------------------------------------------------------------------
+\
+\ Print the 16-bit number in (Y X) to a specific number of digits, left-padding
+\ with spaces for numbers with fewer digits (so lower numbers will be right-
+\ aligned). Optionally include a decimal point.
+\
+\ Arguments:
+\
+\   X                   The low byte of the number to print
+\
+\   Y                   The high byte of the number to print
+\
+\   A                   The number of digits
+\
+\   C flag              If set, include a decimal point
+\
+\ ******************************************************************************
 
- STA &80
- LDA #&00
- STA &40
- STA &41
- STY &42
- STX &43
+.TT11
 
-.l_1bd0
+ STA U                  \ We are going to use the BPRNT routine (below) to
+                        \ print this number, so we store the number of digits
+                        \ in U, as that's what BPRNT takes as an argument
 
- LDX #&0B
- STX &D1
- PHP
- BCC l_1bdb
- DEC &D1
- DEC &80
+ LDA #0                 \ BPRNT takes a 32-bit number in K to K+3, with the
+ STA K                  \ most significant byte first (big-endian), so we set
+ STA K+1                \ the two most significant bytes to zero (K and K+1)
+ STY K+2                \ and store (Y X) in the least two significant bytes
+ STX K+3                \ (K+2 and K+3), so we are going to print the 32-bit
+                        \ number (0 0 Y X)
 
-.l_1bdb
+                        \ Finally we fall through into BPRNT to print out the
+                        \ number in K to K+3, which now contains (Y X), to 3
+                        \ digits (as U = 3), using the same C flag as when pr2
+                        \ was called to control the decimal point
 
- LDA #&0B
- SEC
- STA &86
- SBC &80
- STA &80
- INC &80
- LDY #&00
- STY &83
- JMP l_1c2c
+\ ******************************************************************************
+\
+\       Name: BPRNT
+\       Type: Subroutine
+\   Category: Text
+\    Summary: Print a 32-bit number, left-padded to a specific number of digits,
+\             with an optional decimal point
+\  Deep dive: Printing decimal numbers
+\
+\ ------------------------------------------------------------------------------
+\
+\ Print the 32-bit number stored in K(0 1 2 3) to a specific number of digits,
+\ left-padding with spaces for numbers with fewer digits (so lower numbers are
+\ right-aligned). Optionally include a decimal point.
+\
+\ See the deep dive on "Printing decimal numbers" for details of the algorithm
+\ used in this routine.
+\
+\ Arguments:
+\
+\   K(0 1 2 3)          The number to print, stored with the most significant
+\                       byte in K and the least significant in K+3 (i.e. as a
+\                       big-endian number, which is the opposite way to how the
+\                       6502 assembler stores addresses, for example)
+\
+\   U                   The maximum number of digits to print, including the
+\                       decimal point (spaces will be used on the left to pad
+\                       out the result to this width, so the number is right-
+\                       aligned to this width). U must be 11 or less
+\
+\   C flag              If set, include a decimal point followed by one
+\                       fractional digit (i.e. show the number to 1 decimal
+\                       place). In this case, the number in K(0 1 2 3) contains
+\                       10 * the number we end up printing, so to print 123.4,
+\                       we would pass 1234 in K(0 1 2 3) and would set the C
+\                       flag to include the decimal point
+\
+\ ******************************************************************************
 
-.l_1bed
+.BPRNT
 
- ASL &43
- ROL &42
- ROL &41
- ROL &40
- ROL &83
- LDX #&03
+ LDX #11                \ Set T to the maximum number of digits allowed (11
+ STX T                  \ characters, which is the number of digits in 10
+                        \ billion). We will use this as a flag when printing
+                        \ characters in TT37 below
 
-.l_1bf9
+ PHP                    \ Make a copy of the status register (in particular
+                        \ the C flag) so we can retrieve it later
 
- LDA &40,X
- STA &34,X
- DEX
- BPL l_1bf9
- LDA &83
- STA &38
- ASL &43
- ROL &42
- ROL &41
- ROL &40
- ROL &83
- ASL &43
- ROL &42
- ROL &41
- ROL &40
- ROL &83
- CLC
- LDX #&03
+ BCC TT30               \ If the C flag is clear, we do not want to print a
+                        \ decimal point, so skip the next two instructions
 
-.l_1c1b
+ DEC T                  \ As we are going to show a decimal point, decrement
+ DEC U                  \ both the number of characters and the number of
+                        \ digits (as one of them is now a decimal point)
 
- LDA &40,X
- ADC &34,X
- STA &40,X
- DEX
- BPL l_1c1b
- LDA &38
- ADC &83
- STA &83
- LDY #&00
+.TT30
 
-.l_1c2c
+ LDA #11                \ Set A to 11, the maximum number of digits allowed
 
- LDX #&03
- SEC
+ SEC                    \ Set the C flag so we can do subtraction without the
+                        \ C flag affecting the result
 
-.l_1c2f
+ STA XX17               \ Store the maximum number of digits allowed (11) in
+                        \ XX17
 
- LDA &40,X
- SBC l_1bbc,X
- STA &34,X
- DEX
- BPL l_1c2f
- LDA &83
- SBC #&17
- STA &38
- BCC l_1c52
- LDX #&03
+ SBC U                  \ Set U = 11 - U + 1, so U now contains the maximum
+ STA U                  \ number of digits minus the number of digits we want
+ INC U                  \ to display, plus 1 (so this is the number of digits
+                        \ we should skip before starting to print the number
+                        \ itself, and the plus 1 is there to ensure we print at
+                        \ least one digit)
 
-.l_1c43
+ LDY #0                 \ In the main loop below, we use Y to count the number
+                        \ of times we subtract 10 billion to get the leftmost
+                        \ digit, so set this to zero
 
- LDA &34,X
- STA &40,X
- DEX
- BPL l_1c43
- LDA &38
- STA &83
- INY
- JMP l_1c2c
+ STY S                  \ In the main loop below, we use location S as an
+                        \ 8-bit overflow for the 32-bit calculations, so
+                        \ we need to set this to 0 before joining the loop
 
-.l_1c52
+ JMP TT36               \ Jump to TT36 to start the process of printing this
+                        \ number's digits
 
- TYA
- BNE l_1c61
- LDA &D1
- BEQ l_1c61
- DEC &80
- BPL l_1c6b
- LDA #&20
- BNE l_1c68
+.TT35
 
-.l_1c61
+                        \ This subroutine multiplies K(S 0 1 2 3) by 10 and
+                        \ stores the result back in K(S 0 1 2 3), using the fact
+                        \ that K * 10 = (K * 2) + (K * 2 * 2 * 2)
 
- LDY #&00
- STY &D1
- CLC
- ADC #&30
+ ASL K+3                \ Set K(S 0 1 2 3) = K(S 0 1 2 3) * 2 by rotating left
+ ROL K+2
+ ROL K+1
+ ROL K
+ ROL S
 
-.l_1c68
+ LDX #3                 \ Now we want to make a copy of the newly doubled K in
+                        \ XX15, so we can use it for the first (K * 2) in the
+                        \ equation above, so set up a counter in X for copying
+                        \ four bytes, starting with the last byte in memory
+                        \ (i.e. the least significant)
 
- JSR DASC
+.tt35
 
-.l_1c6b
+ LDA K,X                \ Copy the X-th byte of K(0 1 2 3) to the X-th byte of
+ STA XX15,X             \ XX15(0 1 2 3), so that XX15 will contain a copy of
+                        \ K(0 1 2 3) once we've copied all four bytes
 
- DEC &D1
- BPL l_1c71
- INC &D1
+ DEX                    \ Decrement the loop counter
 
-.l_1c71
+ BPL tt35               \ Loop back to copy the next byte until we have copied
+                        \ all four
 
- DEC &86
- BMI l_1c82
- BNE l_1c7f
- PLP
- BCC l_1c7f
- LDA #&2E
- JSR DASC
+ LDA S                  \ Store the value of location S, our overflow byte, in
+ STA XX15+4             \ XX15+4, so now XX15(4 0 1 2 3) contains a copy of
+                        \ K(S 0 1 2 3), which is the value of (K * 2) that we
+                        \ want to use in our calculation
 
-.l_1c7f
+ ASL K+3                \ Now to calculate the (K * 2 * 2 * 2) part. We still
+ ROL K+2                \ have (K * 2) in K(S 0 1 2 3), so we just need to shift
+ ROL K+1                \ it twice. This is the first one, so we do this:
+ ROL K                  \
+ ROL S                  \   K(S 0 1 2 3) = K(S 0 1 2 3) * 2 = K * 4
 
- JMP l_1bed
+ ASL K+3                \ And then we do it again, so that means:
+ ROL K+2                \
+ ROL K+1                \   K(S 0 1 2 3) = K(S 0 1 2 3) * 2 = K * 8
+ ROL K
+ ROL S
 
-.l_1c82
+ CLC                    \ Clear the C flag so we can do addition without the
+                        \ C flag affecting the result
 
- RTS
+ LDX #3                 \ By now we've got (K * 2) in XX15(4 0 1 2 3) and
+                        \ (K * 8) in K(S 0 1 2 3), so the final step is to add
+                        \ these two 32-bit numbers together to get K * 10.
+                        \ So we set a counter in X for four bytes, starting
+                        \ with the last byte in memory (i.e. the least
+                        \ significant)
+
+.tt36
+
+ LDA K,X                \ Fetch the X-th byte of K into A
+
+ ADC XX15,X             \ Add the X-th byte of XX15 to A, with carry
+
+ STA K,X                \ Store the result in the X-th byte of K
+
+ DEX                    \ Decrement the loop counter
+
+ BPL tt36               \ Loop back to add the next byte, moving from the least
+                        \ significant byte to the most significant, until we
+                        \ have added all four
+
+ LDA XX15+4             \ Finally, fetch the overflow byte from XX15(4 0 1 2 3)
+
+ ADC S                  \ And add it to the overflow byte from K(S 0 1 2 3),
+                        \ with carry
+
+ STA S                  \ And store the result in the overflow byte from
+                        \ K(S 0 1 2 3), so now we have our desired result, i.e.
+                        \
+                        \   K(S 0 1 2 3) = K(S 0 1 2 3) * 10
+
+ LDY #0                 \ In the main loop below, we use Y to count the number
+                        \ of times we subtract 10 billion to get the leftmost
+                        \ digit, so set this to zero so we can rejoin the main
+                        \ loop for another subtraction process
+
+.TT36
+
+                        \ This is the main loop of our digit-printing routine.
+                        \ In the following loop, we are going to count the
+                        \ number of times that we can subtract 10 million and
+                        \ store that count in Y, which we have already set to 0
+
+ LDX #3                 \ Our first calculation concerns 32-bit numbers, so
+                        \ set up a counter for a four-byte loop
+
+ SEC                    \ Set the C flag so we can do subtraction without the
+                        \ C flag affecting the result
+
+.tt37
+
+                        \ We now loop through each byte in turn to do this:
+                        \
+                        \   XX15(4 0 1 2 3) = K(S 0 1 2 3) - 100,000,000,000
+
+ LDA K,X                \ Subtract the X-th byte of TENS (i.e. 10 billion) from
+ SBC TENS,X             \ the X-th byte of K
+
+ STA XX15,X             \ Store the result in the X-th byte of XX15
+
+ DEX                    \ Decrement the loop counter
+
+ BPL tt37               \ Loop back to subtract the next byte, moving from the
+                        \ least significant byte to the most significant, until
+                        \ we have subtracted all four
+
+ LDA S                  \ Subtract the fifth byte of 10 billion (i.e. &17) from
+ SBC #&17               \ the fifth (overflow) byte of K, which is S
+
+ STA XX15+4             \ Store the result in the overflow byte of XX15
+
+ BCC TT37               \ If subtracting 10 billion took us below zero, jump to
+                        \ TT37 to print out this digit, which is now in Y
+
+ LDX #3                 \ We now want to copy XX15(4 0 1 2 3) back into
+                        \ K(S 0 1 2 3), so we can loop back up to do the next
+                        \ subtraction, so set up a counter for a four-byte loop
+
+.tt38
+
+ LDA XX15,X             \ Copy the X-th byte of XX15(0 1 2 3) to the X-th byte
+ STA K,X                \ of K(0 1 2 3), so that K(0 1 2 3) will contain a copy
+                        \ of XX15(0 1 2 3) once we've copied all four bytes
+
+ DEX                    \ Decrement the loop counter
+
+ BPL tt38               \ Loop back to copy the next byte, until we have copied
+                        \ all four
+
+ LDA XX15+4             \ Store the value of location XX15+4, our overflow
+ STA S                  \ byte in S, so now K(S 0 1 2 3) contains a copy of
+                        \ XX15(4 0 1 2 3)
+
+ INY                    \ We have now managed to subtract 10 billion from our
+                        \ number, so increment Y, which is where we are keeping
+                        \ a count of the number of subtractions so far
+
+ JMP TT36               \ Jump back to TT36 to subtract the next 10 billion
+
+.TT37
+
+ TYA                    \ If we get here then Y contains the digit that we want
+                        \ to print (as Y has now counted the total number of
+                        \ subtractions of 10 billion), so transfer Y into A
+
+ BNE TT32               \ If the digit is non-zero, jump to TT32 to print it
+
+ LDA T                  \ Otherwise the digit is zero. If we are already
+                        \ printing the number then we will want to print a 0,
+                        \ but if we haven't started printing the number yet,
+                        \ then we probably don't, as we don't want to print
+                        \ leading zeroes unless this is the only digit before
+                        \ the decimal point
+                        \
+                        \ To help with this, we are going to use T as a flag
+                        \ that tells us whether we have already started
+                        \ printing digits:
+                        \
+                        \   * If T <> 0 we haven't printed anything yet
+                        \
+                        \   * If T = 0 then we have started printing digits
+                        \
+                        \ We initially set T above to the maximum number of
+                        \ characters allowed, less 1 if we are printing a
+                        \ decimal point, so the first time we enter the digit
+                        \ printing routine at TT37, it is definitely non-zero
+
+ BEQ TT32               \ If T = 0, jump straight to the print routine at TT32,
+                        \ as we have already started printing the number, so we
+                        \ definitely want to print this digit too
+
+ DEC U                  \ We initially set U to the number of digits we want to
+ BPL TT34               \ skip before starting to print the number. If we get
+                        \ here then we haven't printed any digits yet, so
+                        \ decrement U to see if we have reached the point where
+                        \ we should start printing the number, and if not, jump
+                        \ to TT34 to set up things for the next digit
+
+ LDA #' '               \ We haven't started printing any digits yet, but we
+ BNE tt34               \ have reached the point where we should start printing
+                        \ our number, so call TT26 (via tt34) to print a space
+                        \ so that the number is left-padded with spaces (this
+                        \ BNE is effectively a JMP as A will never be zero)
+
+.TT32
+
+ LDY #0                 \ We are printing an actual digit, so first set T to 0,
+ STY T                  \ to denote that we have now started printing digits as
+                        \ opposed to spaces
+
+ CLC                    \ The digit value is in A, so add ASCII "0" to get the
+ ADC #'0'               \ ASCII character number to print
+
+.tt34
+
+ JSR TT26               \ Call TT26 to print the character in A and fall through
+                        \ into TT34 to get things ready for the next digit
+
+.TT34
+
+ DEC T                  \ Decrement T but keep T >= 0 (by incrementing it
+ BPL P%+4               \ again if the above decrement made T negative)
+ INC T
+
+ DEC XX17               \ Decrement the total number of characters left to
+                        \ print, which we stored in XX17
+
+ BMI rT10               \ If the result is negative, we have printed all the
+                        \ characters, so jump down to rT10 to return from the
+                        \ subroutine
+
+ BNE P%+10              \ If the result is positive (> 0) then we still have
+                        \ characters left to print, so loop back to TT35 (via
+                        \ the JMP TT35 instruction below) to print the next
+                        \ digit
+
+ PLP                    \ If we get here then we have printed the exact number
+                        \ of digits that we wanted to, so restore the C flag
+                        \ that we stored at the start of the routine
+
+ BCC P%+7               \ If the C flag is clear, we don't want a decimal point,
+                        \ so loop back to TT35 (via the JMP TT35 instruction
+                        \ below) to print the next digit
+
+ LDA #'.'               \ Otherwise the C flag is set, so print the decimal
+ JSR TT26               \ point
+
+ JMP TT35               \ Loop back to TT35 to print the next digit
+
+.rT10
+
+ RTS                    \ Return from the subroutine
+
+\ ******************************************************************************
+\
+\       Name: DTW1
+\       Type: Variable
+\   Category: Text
+\    Summary: A mask for applying the lower case part of Sentence Case to
+\             extended text tokens
+\  Deep dive: Extended text tokens
+\
+\ ------------------------------------------------------------------------------
+\
+\ This variable is used to change characters to lower case as part of applying
+\ Sentence Case to extended text tokens. It has two values:
+\
+\   * %00100000 = apply lower case to the second letter of a word onwards
+\
+\   * %00000000 = do not change case to lower case
+\
+\ The default value is %00100000 (apply lower case).
+\
+\ The flag is set to %00100000 (apply lower case) by jump token 2, {sentence
+\ case}, which calls routine MT2 to change the value of DTW1.
+\
+\ The flag is set to %00000000 (do not change case to lower case) by jump token
+\ 1, {all caps}, which calls routine MT1 to change the value of DTW1.
+\
+\ The letter to print is OR'd with DTW1 in DETOK2, which lower-cases the letter
+\ by setting bit 5 (if DTW1 is %00100000). However, this OR is only done if bit
+\ 7 of DTW2 is clear, i.e. we are printing a word, so this doesn't affect the
+\ first letter of the word, which remains capitalised.
+\
+\ ******************************************************************************
 
 .DTW1
 
- EQUB &20
+ EQUB %00100000
+
+\ ******************************************************************************
+\
+\       Name: DTW2
+\       Type: Variable
+\   Category: Text
+\    Summary: A flag that indicates whether we are currently printing a word
+\  Deep dive: Extended text tokens
+\
+\ ------------------------------------------------------------------------------
+\
+\ This variable is used to indicate whether we are currently printing a word. It
+\ has two values:
+\
+\   * 0 = we are currently printing a word
+\
+\   * Non-zero = we are not currently printing a word
+\
+\ The default value is %11111111 (we are not currently printing a word).
+\
+\ The flag is set to %00000000 (we are currently printing a word) whenever a
+\ non-terminator character is passed to DASC for printing.
+\
+\ The flag is set to %11111111 (we are not currently printing a word) whenever a
+\ terminator character (full stop, colon, carriage return, line feed, space) is
+\ passed to DASC for printing. It is also set to %11111111 by jump token 8,
+\ {tab 6}, which calls routine MT8 to change the value of DTW2, and to %10000000
+\ by TTX66 when we clear the screen.
+\
+\ ******************************************************************************
 
 .DTW2
 
- EQUB &FF
+ EQUB %11111111
+
+\ ******************************************************************************
+\
+\       Name: DTW3
+\       Type: Variable
+\   Category: Text
+\    Summary: A flag for switching between standard and extended text tokens
+\  Deep dive: Extended text tokens
+\
+\ ------------------------------------------------------------------------------
+\
+\ This variable is used to indicate whether standard or extended text tokens
+\ should be printed by calls to DETOK. It allows us to mix standard tokens in
+\ with extended tokens. It has two values:
+\
+\   * %00000000 = print extended tokens (i.e. those in TKN1 and RUTOK)
+\
+\   * %11111111 = print standard tokens (i.e. those in QQ18)
+\
+\ The default value is %00000000 (extended tokens).
+\
+\ Standard tokens are set by jump token {6}, which calls routine MT6 to change
+\ the value of DTW3 to %11111111.
+\
+\ Extended tokens are set by jump token {5}, which calls routine MT5 to change
+\ the value of DTW3 to %00000000.
+\
+\ ******************************************************************************
 
 .DTW3
 
- EQUB &00
+ EQUB %00000000
+
+\ ******************************************************************************
+\
+\       Name: DTW4
+\       Type: Variable
+\   Category: Text
+\    Summary: Flags that govern how justified extended text tokens are printed
+\  Deep dive: Extended text tokens
+\
+\ ------------------------------------------------------------------------------
+\
+\ This variable is used to control how justified text tokens are printed as part
+\ of the extended text token system. There are two bits that affect justified
+\ text:
+\
+\   * Bit 7: 1 = justify text
+\            0 = do not justify text
+\
+\   * Bit 6: 1 = buffer the entire token before printing, including carriage
+\                returns (used for in-flight messages only)
+\            0 = print the contents of the buffer whenever a carriage return
+\                appears in the token
+\
+\ The default value is %00000000 (do not justify text, print buffer on carriage
+\ return).
+\
+\ The flag is set to %10000000 (justify text, print buffer on carriage return)
+\ by jump token 14, {justify}, which calls routine MT14 to change the value of
+\ DTW4.
+\
+\ The flag is set to %11000000 (justify text, buffer entire token) by routine
+\ MESS, which printe in-flight messages.
+\
+\ The flag is set to %00000000 (do not justify text, print buffer on carriage
+\ return) by jump token 15, {left align}, which calls routine MT1 to change the
+\ value of DTW4.
+\
+\ ******************************************************************************
 
 .DTW4
 
- EQUB &00
+ EQUB 0
+
+\ ******************************************************************************
+\
+\       Name: DTW5
+\       Type: Variable
+\   Category: Text
+\    Summary: The size of the justified text buffer at BUF
+\  Deep dive: Extended text tokens
+\
+\ ------------------------------------------------------------------------------
+\
+\ When justified text is enabled by jump token 14, {justify}, during printing of
+\ extended text tokens, text is fed into a buffer at BUF instead of being
+\ printed straight away, so it can be padded out with spaces to justify the
+\ text. DTW5 contains the size of the buffer, so BUF + DTW5 points to the first
+\ free byte after the end of the buffer.
+\
+\ ******************************************************************************
 
 .DTW5
 
- EQUB &00
+ EQUB 0
+
+\ ******************************************************************************
+\
+\       Name: DTW6
+\       Type: Variable
+\   Category: Text
+\    Summary: A flag to denote whether printing in lower case is enabled for
+\             extended text tokens
+\  Deep dive: Extended text tokens
+\
+\ ------------------------------------------------------------------------------
+\
+\ This variable is used to indicate whether lower case is currently enabled. It
+\ has two values:
+\
+\   * %10000000 = lower case is enabled
+\
+\   * %00000000 = lower case is not enabled
+\
+\ The default value is %00000000 (lower case is not enabled).
+\
+\ The flag is set to %10000000 (lower case is enabled) by jump token 13 {lower
+\ case}, which calls routine MT10 to change the value of DTW6.
+\
+\ The flag is set to %00000000 (lower case is not enabled) by jump token 1, {all
+\ caps}, and jump token 1, {sentence case}, which call routines MT1 and MT2 to
+\ change the value of DTW6.
+\
+\ ******************************************************************************
 
 .DTW6
 
- EQUB &00
+ EQUB %00000000
+
+\ ******************************************************************************
+\
+\       Name: DTW8
+\       Type: Variable
+\   Category: Text
+\    Summary: A mask for capitalising the next letter in an extended text token
+\  Deep dive: Extended text tokens
+\
+\ ------------------------------------------------------------------------------
+\
+\ This variable is only used by one specific extended token, the {single cap}
+\ jump token, which capitalises the next letter only. It has two values:
+\
+\   * %11011111 = capitalise the next letter
+\
+\   * %11111111 = do not change case
+\
+\ The default value is %11111111 (do not change case).
+\
+\ The flag is set to %11011111 (capitalise the next letter) by jump token 19,
+\ {single cap}, which calls routine MT19 to change the value of DTW.
+\
+\ The flag is set to %11111111 (do not change case) at the start of DASC, after
+\ the letter has been capitalised in DETOK2, so the effect is to capitalise one
+\ letter only.
+\
+\ The letter to print is AND'd with DTW8 in DETOK2, which capitalises the letter
+\ by clearing bit 5 (if DTW8 is %11011111). However, this AND is only done if at
+\ least one of the following is true:
+\
+\   * Bit 7 of DTW2 is set (we are not currently printing a word)
+\
+\   * Bit 7 of DTW6 is set (lower case has been enabled by jump token 13, {lower
+\     case}
+\
+\ In other words, we only capitalise the next letter if it's the first letter in
+\ a word, or we are printing in lower case.
+\
+\ ******************************************************************************
 
 .DTW8
 
- EQUB &FF
+ EQUB %11111111
 
-.l_1c8a
+\ ******************************************************************************
+\
+\       Name: FEED
+\       Type: Subroutine
+\   Category: Text
+\    Summary: Print a newline
+\
+\ ******************************************************************************
 
- LDA #&0C
+.FEED
 
-.bit13
+ LDA #12                \ Set A = 12, so when we skip MT16 and fall through into
+                        \ TT26, we print character 12, which is a newline
 
- EQUB &2C
+ EQUB &2C               \ Skip the next instruction by turning it into
+                        \ &2C &A9 &41, or BIT &41A9, which does nothing apart
+                        \ from affect the flags
+
+                        \ Fall through into TT26 (skipping MT16) to print the
+                        \ newline character
+
+\ ******************************************************************************
+\
+\       Name: MT16
+\       Type: Subroutine
+\   Category: Text
+\    Summary: Print the character in variable DTW7
+\  Deep dive: Extended text tokens
+\
+\ ******************************************************************************
 
 .MT16
 
- LDA #&41
+ LDA #'A'               \ Set A to the contents of DTW7, as DTW7 points to the
+                        \ second byte of this instruction, so updating DTW7 will
+                        \ modify this instruction (the default value of DTW7 is
+                        \ an "A")
+
+DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
+                        \ so that modifying DTW7 changes the value loaded into A
+
+                        \ Fall through into TT26 to print the character in A
+
+\ ******************************************************************************
+\
+\       Name: TT26
+\       Type: Subroutine
+\   Category: Text
+\    Summary: Print a character at the text cursor, with support for verified
+\             text in extended tokens
+\  Deep dive: Extended text tokens
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   A                   The character to print
+\
+\ Returns:
+\
+\   X                   X is preserved
+\
+\   C flag              The C flag is cleared
+\
+\ Other entry points:
+\
+\   DASC                DASC does exactly the same as TT26 and prints a
+\                       character at the text cursor, with support for verified
+\                       text in extended tokens
+\
+\   rT9                 Contains an RTS
+\
+\ ******************************************************************************
 
 .DASC
 
- STX SC
- LDX #&FF
- STX DTW8
- CMP #&2E
- BEQ is_punct
- CMP #&3A
- BEQ is_punct
- CMP #&0A
- BEQ is_punct
- CMP #&0C
- BEQ is_punct
- CMP #&20
- BEQ is_punct
- INX
+.TT26
 
-.is_punct
+ STX SC                 \ Store X in SC, so we can retrieve it below
 
- STX DTW2
- LDX SC
- BIT DTW4
- BMI format
- JMP CHPR
+ LDX #%11111111         \ Set DTW8 = %11111111, to disable the effect of {19} if
+ STX DTW8               \ it was set (as {19} capitalises one character only)
 
-.format
+ CMP #'.'               \ If the character in A is a word terminator:
+ BEQ DA8                \
+ CMP #':'               \   * Full stop
+ BEQ DA8                \   * Colon
+ CMP #10                \   * Line feed
+ BEQ DA8                \   * Carriage return
+ CMP #12                \   * Space
+ BEQ DA8                \
+ CMP #' '               \ then skip the following instruction
+ BEQ DA8
 
- CMP #&0C
- BEQ l_1cc9
- LDX DTW5
- STA &0E01,X
- LDX SC
- INC DTW5
- CLC
- RTS
+ INX                    \ Increment X to 0, so DTW2 gets set to %00000000 below
 
-.l_1cc9
+.DA8
 
- TXA
+ STX DTW2               \ Store X in DTW2, so DTW2 is now:
+                        \
+                        \   * %00000000 if this character is a word terminator
+                        \
+                        \   * %11111111 if it isn't
+                        \
+                        \ so DTW2 indicates whether or not we are currently
+                        \ printing a word
+
+ LDX SC                 \ Retrieve the original value of X from SC
+
+ BIT DTW4               \ If bit 7 of DTW4 is set then we are currently printing
+ BMI P%+5               \ justified text, so skip the next instruction
+
+ JMP CHPR               \ Bit 7 of DTW4 is clear, so jump down to CHPR to print
+                        \ this character, as we are not printing justified text
+
+                        \ If we get here then we are printing justified text, so
+                        \ we need to buffer the text until we reach the end of
+                        \ the paragraph, so we can then pad it out with spaces
+
+ CMP #12                \ If the character in A is a carriage return, then we
+ BEQ DA1                \ have reached the end of the paragraph, so jump down to
+                        \ DA1 to print out the contents of the buffer,
+                        \ justifying it as we go
+
+                        \ If we get here then we need to buffer this character
+                        \ in the line buffer at BUF
+
+ LDX DTW5               \ DTW5 contains the current size of the buffer, so this
+ STA BUF,X              \ stores the character in A at BUF + DTW5, the next free
+                        \ space in the buffer
+
+ LDX SC                 \ Retrieve the original value of X from SC so we can
+                        \ preserve it through this subroutine call
+
+ INC DTW5               \ Increment the size of the BUF buffer that is stored in
+                        \ DTW5
+
+ CLC                    \ Clear the C flag
+
+ RTS                    \ Return from the subroutine
+
+.DA1
+
+                        \ If we get here then we are justifying text and we have
+                        \ reached the end of the paragraph, so we need to print
+                        \ out the contents of the buffer, justifying it as we go
+
+ TXA                    \ Store X and Y on the stack
  PHA
  TYA
  PHA
 
-.l_1ccd
+.DA5
 
- LDX DTW5
- BEQ l_1d4a
- CPX #&1F
- BCC l_1d47
- LSR SC+&01
+ LDX DTW5               \ Set X = DTW5, which contains the size of the buffer
 
-.l_1cd8
+ BEQ DA6+3              \ If X = 0 then the buffer is empty, so jump down to
+                        \ DA6+3 to print a newline
 
- LDA SC+&01
- BMI l_1ce0
- LDA #&40
- STA SC+&01
+ CPX #(LL+1)            \ If X < LL+1, i.e. X <= LL, then the buffer contains
+ BCC DA6                \ fewer than LL characters, which is less then a line
+                        \ length, so jump down to DA6 to print the contents of
+                        \ BUF followed by a newline, as we don't justify the
+                        \ last line of the paragraph
 
-.l_1ce0
+                        \ Otherwise X > LL, so the buffer does not fit into one
+                        \ line, and we therefore need to justify the text, which
+                        \ we do one line at a time
 
- LDY #&1D
+ LSR SC+1               \ Shift SC+1 to the right, which clears bit 7 of SC+1,
+                        \ so we pass through the following comparison on the
+                        \ first iteration of the loop and set SC+1 to %01000000
 
-.l_1ce2
+.DA11
 
- LDA &0E1F
- CMP #&20
- BEQ l_1d16
+ LDA SC+1               \ If bit 7 of SC+1 is set, skip the following two
+ BMI P%+6               \ instructions
 
-.l_1ce9
+ LDA #%01000000         \ Set SC+1 = %01000000
+ STA SC+1
 
- DEY
- BMI l_1cd8
- BEQ l_1cd8
- LDA &0E01,Y
- CMP #&20
- BNE l_1ce9
- ASL SC+&01
- BMI l_1ce9
- STY SC
- LDY DTW5
+ LDY #(LL-1)            \ Set Y = line length, so we can loop backwards from the
+                        \ end of the first line in the buffer using Y as the
+                        \ loop counter
 
-.l_1cfe
+.DAL1
 
- LDA &0E01,Y
- STA &0E02,Y
- DEY
- CPY SC
- BCS l_1cfe
- INC DTW5
+ LDA BUF+LL             \ If the LL-th byte in BUF is a space, jump down to DA2
+ CMP #' '               \ to print out the first line from the buffer, as it
+ BEQ DA2                \ fits the line width exactly (i.e. it's justified)
 
-.l_1d0c
+                        \ We now want to find the last space character in the
+                        \ first line in the buffer, so we loop through the line
+                        \ using Y as a counter
 
- CMP &0E01,Y
- BNE l_1ce2
- DEY
- BPL l_1d0c
- BMI l_1cd8
+.DAL2
 
-.l_1d16
+ DEY                    \ Decrement the loop counter in Y
 
- LDX #&1E
- JSR l_1d3a
- LDA #&0C
+ BMI DA11               \ If Y <= 0, loop back to DA11, as we have now looped
+ BEQ DA11               \ through the whole line
+
+ LDA BUF,Y              \ If the Y-th byte in BUF is not a space, loop back up
+ CMP #' '               \ to DAL2 to check the next character
+ BNE DAL2
+
+                        \ Y now points to a space character in the line buffer
+
+ ASL SC+1               \ Shift SC+1 to the left
+
+ BMI DAL2               \ If bit 7 of SC+1 is set, jump to DAL2 to find the next
+                        \ space character
+
+                        \ We now want to insert a space into the line buffer at
+                        \ position Y, which we do by shifting every character
+                        \ after position Y along by 1, and then inserting the
+                        \ space
+
+ STY SC                 \ Store Y in SC, so we want to insert the space at
+                        \ position SC
+
+ LDY DTW5               \ Fetch the buffer size from DTW5 into Y, to act as a
+                        \ loop counter for moving the line buffer along by 1
+
+.DAL6
+
+ LDA BUF,Y              \ Copy the Y-th character from BUF into the Y+1-th
+ STA BUF+1,Y            \ position
+
+ DEY                    \ Decrement the loop counter in Y
+
+ CPY SC                 \ Loop back to shift the next character along, until we
+ BCS DAL6               \ have moved the SC-th character (i.e. Y < SC)
+
+ INC DTW5               \ Increment the buffer size in DTW5
+
+\LDA #' '               \ This instruction is commented out in the original
+                        \ source, as it has no effect because A already contains
+                        \ ASCII " ". This is because the last character that is
+                        \ tested in the above loop is at position SC, which we
+                        \ know contains a space, so we know A contains a space
+                        \ character when the loop finishes
+
+                        \ We've now shifted the line to the right by 1 from
+                        \ position SC onwards, so SC and SC+1 both contain
+                        \ spaces, and Y is now SC-1 as we did a DEY just before
+                        \ the end of the loop - in other words, we have inserted
+                        \ a space at position SC, and Y points to the character
+                        \ before the newly inserted space
+
+                        \ We now want to move the pointer Y left to find the
+                        \ next space in the line buffer, before looping back to
+                        \ check whether we are done, and if not, insert another
+                        \ space
+
+.DAL3
+
+ CMP BUF,Y              \ If the character at position Y is not a space, jump to
+ BNE DAL1               \ DAL1 to see whether we have now justified the line
+
+ DEY                    \ Decrement the loop counter in Y
+
+ BPL DAL3               \ Loop back to check the next character to the left,
+                        \ until we have found a space
+
+ BMI DA11               \ Jump back to DA11 (this BMI is effectively a JMP as
+                        \ we already passed through a BPL to get here)
+
+.DA2
+
+                        \ This subroutine prints out a full line of characters
+                        \ from the start of the line buffer in BUF, followed by
+                        \ a newline. It then removes that line from the buffer,
+                        \ shuffling the rest of the buffer contents down
+
+ LDX #LL                \ Call DAS1 to print out the first LL characters from
+ JSR DAS1               \ the line buffer in BUF
+
+ LDA #12                \ Print a newline
  JSR CHPR
- LDA DTW5
- SBC #&1E
- STA DTW5
- TAX
- BEQ l_1d4a
- LDY #&00
- INX
 
-.l_1d2e
+ LDA DTW5               \ Subtract #LL from the end-of-buffer pointer in DTW5
+\CLC                    \
+ SBC #LL                \ The CLC instruction is commented out in the original
+ STA DTW5               \ source. It isn't needed as CHPR clears the C flag
 
- LDA &0E20,Y
- STA &0E01,Y
- INY
- DEX
- BNE l_1d2e
- BEQ l_1ccd
+ TAX                    \ Copy the new value of DTW5 into X
 
-.l_1d3a
+ BEQ DA6+3              \ If DTW5 = 0 then jump down to DA6+3 to print a newline
+                        \ as the buffer is now empty
 
- LDY #&00
+                        \ If we get here then we have printed our line but there
+                        \ is more in the buffer, so we now want to remove the
+                        \ line we just printed from the start of BUF
 
-.l_1d3c
+ LDY #0                 \ Set Y = 0 to count through the characters in BUF
 
- LDA &0E01,Y
- JSR CHPR
- INY
- DEX
- BNE l_1d3c
- RTS
+ INX                    \ Increment X, so it now contains the number of
+                        \ characters in the buffer (as DTW5 is a zero-based
+                        \ pointer and is therefore equal to the number of
+                        \ characters minus 1)
 
-.l_1d47
+.DAL4
 
- JSR l_1d3a
+ LDA BUF+LL+1,Y         \ Copy the Y-th character from BUF+LL to BUF
+ STA BUF,Y
 
-.l_1d4a
+ INY                    \ Increment the character pointer
 
- STX DTW5
- PLA
+ DEX                    \ Decrement the character count
+
+ BNE DAL4               \ Loop back to copy the next character until we have
+                        \ shuffled down the whole buffer
+
+ BEQ DA5                \ Jump back to DA5 (this BEQ is effectively a JMP as we
+                        \ have already passed through the BNE above)
+
+.DAS1
+
+                        \ This subroutine prints out X characters from BUF,
+                        \ returning with X = 0
+
+ LDY #0                 \ Set Y = 0 to point to the first character in BUF
+
+.DAL5
+
+ LDA BUF,Y              \ Print the Y-th character in BUF using CHPR, which also
+ JSR CHPR               \ clears the C flag for when we return from the
+                        \ subroutine below
+
+ INY                    \ Increment Y to point to the next character
+
+ DEX                    \ Decrement the loop counter
+
+ BNE DAL5               \ Loop back for the next character until we have printed
+                        \ X characters from BUF
+
+.rT9
+
+ RTS                    \ Return from the subroutine
+
+.DA6
+
+ JSR DAS1               \ Call DAS1 to print X characters from BUF, returning
+                        \ with X = 0
+
+ STX DTW5               \ Set the buffer size in DTW5 to 0, as the buffer is now
+                        \ empty
+
+ PLA                    \ Restore Y and X from the stack
  TAY
  PLA
  TAX
- LDA #&0C
 
-.bit
+ LDA #12                \ Set A = 12, so when we skip BELL and fall through into
+                        \ CHPR, we print character 12, which is a newline
 
- EQUB &2C
+.DA7
 
-.bell
+ EQUB &2C               \ Skip the next instruction by turning it into
+                        \ &2C &A9 &07, or BIT &07A9, which does nothing apart
+                        \ from affect the flags
 
- LDA #&07
+                        \ Fall through into CHPR (skipping BELL) to print the
+                        \ character and return with the C flag cleared
+
+\ ******************************************************************************
+\
+\       Name: BELL
+\       Type: Subroutine
+\   Category: Sound
+\    Summary: Make a standard system beep
+\
+\ ------------------------------------------------------------------------------
+\
+\ This is the standard system beep as made by the VDU 7 statement in BBC BASIC.
+\
+\ ******************************************************************************
+
+.BELL
+
+ LDA #7                 \ Control code 7 makes a beep, so load this into A
+
+                        \ Fall through into the TT26 print routine to
+                        \ actually make the sound
+
+\ ******************************************************************************
+\
+\       Name: CHPR
+\       Type: Subroutine
+\   Category: Text
+\    Summary: Print a character at the text cursor by poking into screen memory
+\  Deep dive: Drawing text
+\
+\ ------------------------------------------------------------------------------
+\
+\ Print a character at the text cursor (XC, YC), do a beep, print a newline,
+\ or delete left (backspace).
+\
+\ WRCHV is set to point here by the loading process.
+\
+\ Arguments:
+\
+\   A                   The character to be printed. Can be one of the
+\                       following:
+\
+\                         * 7 (beep)
+\
+\                         * 10-13 (line feeds and carriage returns)
+\
+\                         * 32-95 (ASCII capital letters, numbers and
+\                           punctuation)
+\
+\                         * 127 (delete the character to the left of the text
+\                           cursor and move the cursor to the left)
+\
+\   XC                  Contains the text column to print at (the x-coordinate)
+\
+\   YC                  Contains the line number to print on (the y-coordinate)
+\
+\ Returns:
+\
+\   A                   A is preserved
+\
+\   X                   X is preserved
+\
+\   Y                   Y is preserved
+\
+\   C flag              The C flag is cleared
+\
+\ Other entry points:
+\
+\   RR3+1               Contains an RTS
+\
+\   RREN                Prints the character definition pointed to by P(2 1) at
+\                       the screen address pointed to by (A SC). Used by the
+\                       BULB routine
+\
+\ ******************************************************************************
 
 .CHPR
 
- STA &D2
- STY &034F
- STX &034E
+ STA K3                 \ Store the A, X and Y registers, so we can restore
+ STY YSAV2              \ them at the end (so they don't get changed by this
+ STX XSAV2              \ routine)
 
-.l_1d5e
+.RRNEW
 
- LDY QQ17
- INY
- BEQ wrch_quit
- TAY
- BEQ wrch_quit
- BMI wrch_quit
- CMP #&07
- BEQ wrch_bell
- CMP #&20
- BCS wrch_hard
- CMP #&0A
- BEQ next_line
- LDX #&01
- STX XC
- CMP #&0D
- BEQ wrch_quit
+ LDY QQ17               \ Load the QQ17 flag, which contains the text printing
+                        \ flags
 
-.next_line
+ INY                    \ If QQ17 = 255 then printing is disabled, so jump to
+ BEQ RR4                \ RR4, which doesn't print anything, it just restores
+                        \ the registers and returns from the subroutine
 
- INC YC
- BNE wrch_quit
+ TAY                    \ Set Y = the character to be printed
 
-.wrch_hard
+ BEQ RR4                \ If the character is zero, which is typically a string
+                        \ terminator character, jump down to RR4 to restore the
+                        \ registers and return from the subroutine
 
- LDX #&BF
- ASL A
- ASL A
- BCC font_c0
- LDX #&C1
+ BMI RR4                \ If A > 127 then there is nothing to print, so jump to
+                        \ RR4 to restore the registers and return from the
+                        \ subroutine
 
-.font_c0
+ CMP #7                 \ If this is a beep character (A = 7), jump to R5,
+ BEQ R5                 \ which will emit the beep, restore the registers and
+                        \ return from the subroutine
 
- ASL A
- BCC font_cl
- INX
+ CMP #32                \ If this is an ASCII character (A >= 32), jump to RR1
+ BCS RR1                \ below, which will print the character, restore the
+                        \ registers and return from the subroutine
 
-.font_cl
+ CMP #10                \ If this is control code 10 (line feed) then jump to
+ BEQ RRX1               \ RRX1, which will move down a line, restore the
+                        \ registers and return from the subroutine
 
- STA &1C
- STX &1D
- LDA XC
- LDX &03CF
- BEQ wrch_addr
- CPY #&20
- BNE wrch_addr
- CMP #&11
- BEQ wrch_quit
+ LDX #1                 \ If we get here, then this is control code 11-13, of
+ STX XC                 \ which only 13 is used. This code prints a newline,
+                        \ which we can achieve by moving the text cursor
+                        \ to the start of the line (carriage return) and down
+                        \ one line (line feed). These two lines do the first
+                        \ bit by setting XC = 1, and we then fall through into
+                        \ the line feed routine that's used by control code 10
 
-.wrch_addr
+ CMP #13                \ If this is control code 13 (carriage return) then jump
+ BEQ RR4                \ RR4 to restore the registers and return from the
+                        \ subroutine
 
- ASL A
- ASL A
- ASL A
- STA SC
- LDA YC
- CPY #&7F
- BNE not_del
- DEC XC
- ADC #&5E
- TAX
- LDY #&F8
- JSR l_3a03
- BEQ wrch_quit
+.RRX1
 
-.not_del
+ INC YC                 \ Print a line feed, simply by incrementing the row
+                        \ number (y-coordinate) of the text cursor, which is
+                        \ stored in YC
 
- INC XC
- CMP #&18
- BCC wrch_or
- PHA
- JSR l_2539
- PLA
- LDA &D2
- JMP l_1d5e
+ BNE RR4                \ Jump to RR4 to restore the registers and return from
+                        \ the subroutine (this BNE is effectively a JMP as Y
+                        \ will never be zero)
 
-.wrch_or
+.RR1
 
- ORA #&60
- STA SC+&01
- LDY #&07
+                        \ If we get here, then the character to print is an
+                        \ ASCII character in the range 32-95. The quickest way
+                        \ to display text on-screen is to poke the character
+                        \ pixel by pixel, directly into screen memory, so
+                        \ that's what the rest of this routine does
+                        \
+                        \ The first step, then, is to get hold of the bitmap
+                        \ definition for the character we want to draw on the
+                        \ screen (i.e. we need the pixel shape of this
+                        \ character). The MOS ROM contains bitmap definitions
+                        \ of the system's ASCII characters, starting from &C000
+                        \ for space (ASCII 32) and ending with the £ symbol
+                        \ (ASCII 126)
+                        \
+                        \ There are definitions for 32 characters in each of the
+                        \ three pages of MOS memory, as each definition takes up
+                        \ 8 bytes (8 rows of 8 pixels) and 32 * 8 = 256 bytes =
+                        \ 1 page. So:
+                        \
+                        \   ASCII 32-63  are defined in &C000-&C0FF (page 0)
+                        \   ASCII 64-95  are defined in &C100-&C1FF (page 1)
+                        \   ASCII 96-126 are defined in &C200-&C2F0 (page 2)
+                        \
+                        \ The following code reads the relevant character
+                        \ bitmap from the above locations in ROM and pokes
+                        \ those values into the correct position in screen
+                        \ memory, thus printing the character on-screen
+                        \
+                        \ It's a long way from 10 PRINT "Hello world!":GOTO 10
 
-.wrch_matrix
+                        \ Now we want to set X to point to the relevant page
+                        \ number for this character - i.e. &C0, &C1 or &C2.
 
- LDA (&1C),Y
- ORA (SC),Y
- STA (SC),Y
- DEY
- BPL wrch_matrix
+                        \ The following logic is easier to follow if we look
+                        \ at the three character number ranges in binary:
+                        \
+                        \   Bit #  76543210
+                        \
+                        \   32  = %00100000     Page 0 of bitmap definitions
+                        \   63  = %00111111
+                        \
+                        \   64  = %01000000     Page 1 of bitmap definitions
+                        \   95  = %01011111
+                        \
+                        \   96  = %01100000     Page 2 of bitmap definitions
+                        \   125 = %01111101
+                        \
+                        \ We'll refer to this below
 
-.wrch_quit
+ LDX #&BF               \ Set X to point to the first font page in ROM minus 1,
+                        \ which is &C0 - 1, or &BF
 
- LDY &034F
- LDX &034E
- LDA &D2
+ ASL A                  \ If bit 6 of the character is clear (A is 32-63)
+ ASL A                  \ then skip the following instruction
+ BCC P%+4
+
+ LDX #&C1               \ A is 64-126, so set X to point to page &C1
+
+ ASL A                  \ If bit 5 of the character is clear (A is 64-95)
+ BCC P%+3               \ then skip the following instruction
+
+ INX                    \ Increment X
+                        \
+                        \ By this point, we started with X = &BF, and then
+                        \ we did the following:
+                        \
+                        \   If A = 32-63:   skip    then INX  so X = &C0
+                        \   If A = 64-95:   X = &C1 then skip so X = &C1
+                        \   If A = 96-126:  X = &C1 then INX  so X = &C2
+                        \
+
+                        \ In other words, X points to the relevant page. But
+                        \ what about the value of A? That gets shifted to the
+                        \ left three times during the above code, which
+                        \ multiplies the number by 8 but also drops bits 7, 6
+                        \ and 5 in the process. Look at the above binary
+                        \ figures and you can see that if we cleared bits 5-7,
+                        \ then that would change 32-53 to 0-31... but it would
+                        \ do exactly the same to 64-95 and 96-125. And because
+                        \ we also multiply this figure by 8, A now points to
+                        \ the start of the character's definition within its
+                        \ page (because there are 8 bytes per character
+                        \ definition)
+                        \
+                        \ Or, to put it another way, X contains the high byte
+                        \ (the page) of the address of the definition that we
+                        \ want, while A contains the low byte (the offset into
+                        \ the page) of the address
+
+ STA P+1                \ Store the address of this character's definition in
+ STX P+2                \ P(2 1)
+
+ LDA XC                 \ Fetch XC, the x-coordinate (column) of the text cursor
+                        \ into A
+
+ LDX CATF               \ If CATF = 0, jump to RR5, otherwise we are printing a
+ BEQ RR5                \ disc catalogue
+
+ CPY #' '               \ If the character we want to print in Y is a space,
+ BNE RR5                \ jump to RR5
+
+                        \ If we get here, then CATF is non-zero, so we are
+                        \ printing a disc catalogue and we are not printing a
+                        \ space, so we drop column 17 from the output so the
+                        \ catalogue will fit on-screen (column 17 is a blank
+                        \ column in the middle of the catalogue, between the
+                        \ two lists of filenames, so it can be dropped without
+                        \ affecting the layout). Without this, the catalogue
+                        \ would be one character too wide for the square screen
+                        \ mode (it's 34 characters wide, while the screen mode
+                        \ is only 33 characters across)
+
+ CMP #17                \ If A = 17, i.e. the text cursor is in column 17, jump
+ BEQ RR4                \ to RR4 to restore the registers and return from the
+                        \ subroutine, thus omitting this column
+
+.RR5
+
+ ASL A                  \ Multiply A by 8, and store in SC. As each character is
+ ASL A                  \ 8 pixels wide, and the special screen mode Elite uses
+ ASL A                  \ for the top part of the screen is 256 pixels across
+ STA SC                 \ with one bit per pixel, this value is not only the
+                        \ screen address offset of the text cursor from the left
+                        \ side of the screen, it's also the least significant
+                        \ byte of the screen address where we want to print this
+                        \ character, as each row of on-screen pixels corresponds
+                        \ to one page. To put this more explicitly, the screen
+                        \ starts at &6000, so the text rows are stored in screen
+                        \ memory like this:
+                        \
+                        \   Row 1: &6000 - &60FF    YC = 1, XC = 0 to 31
+                        \   Row 2: &6100 - &61FF    YC = 2, XC = 0 to 31
+                        \   Row 3: &6200 - &62FF    YC = 3, XC = 0 to 31
+                        \
+                        \ and so on
+
+ LDA YC                 \ Fetch YC, the y-coordinate (row) of the text cursor
+
+ CPY #127               \ If the character number (which is in Y) <> 127, then
+ BNE RR2                \ skip to RR2 to print that character, otherwise this is
+                        \ the delete character, so continue on
+
+ DEC XC                 \ We want to delete the character to the left of the
+                        \ text cursor and move the cursor back one, so let's
+                        \ do that by decrementing YC. Note that this doesn't
+                        \ have anything to do with the actual deletion below,
+                        \ we're just updating the cursor so it's in the right
+                        \ position following the deletion
+
+ ADC #&5E               \ A contains YC (from above) and the C flag is set (from
+ TAX                    \ the CPY #127 above), so these instructions do this:
+                        \
+                        \   X = YC + &5E + 1
+                        \     = YC + &5F
+
+                        \ Because YC starts at 0 for the first text row, this
+                        \ means that X will be &5F for row 0, &60 for row 1 and
+                        \ so on. In other words, X is now set to the page number
+                        \ for the row before the one containing the text cursor,
+                        \ and given that we set SC above to point to the offset
+                        \ in memory of the text cursor within the row's page,
+                        \ this means that (X SC) now points to the character
+                        \ above the text cursor
+
+ LDY #&F8               \ Set Y = &F8, so the following call to ZES2 will count
+                        \ Y upwards from &F8 to &FF
+
+ JSR ZES2               \ Call ZES2, which zero-fills from address (X SC) + Y to
+                        \ (X SC) + &FF. (X SC) points to the character above the
+                        \ text cursor, and adding &FF to this would point to the
+                        \ cursor, so adding &F8 points to the character before
+                        \ the cursor, which is the one we want to delete. So
+                        \ this call zero-fills the character to the left of the
+                        \ cursor, which erases it from the screen
+
+ BEQ RR4                \ We are done deleting, so restore the registers and
+                        \ return from the subroutine (this BNE is effectively
+                        \ a JMP as ZES2 always returns with the Z flag set)
+
+.RR2
+
+                        \ Now to actually print the character
+
+ INC XC                 \ Once we print the character, we want to move the text
+                        \ cursor to the right, so we do this by incrementing
+                        \ XC. Note that this doesn't have anything to do
+                        \ with the actual printing below, we're just updating
+                        \ the cursor so it's in the right position following
+                        \ the print
+
+ CMP #24                \ If the text cursor is on the screen (i.e. YC < 24, so
+ BCC RR3                \ we are on rows 1-23), then jump to RR3 to print the
+                        \ character
+
+ PHA                    \ Store A on the stack so we can retrieve it below
+
+ JSR TTX66              \ Otherwise we are off the bottom of the screen, so
+                        \ clear the screen and draw a white border
+
+ PLA                    \ Retrieve A from the stack... only to overwrite it with
+                        \ the next instruction, so presumably we didn't need to
+                        \ preserve it and this and the PHA above have no effect
+
+ LDA K3                 \ Set A to the character to be printed
+
+ JMP RRNEW              \ Jump back to RRNEW to print the character
+
+.RR3
+
+                        \ A contains the value of YC - the screen row where we
+                        \ want to print this character - so now we need to
+                        \ convert this into a screen address, so we can poke
+                        \ the character data to the right place in screen
+                        \ memory
+
+ ORA #&60               \ We already stored the least significant byte
+                        \ of this screen address in SC above (see the STA SC
+                        \ instruction above), so all we need is the most
+                        \ significant byte. As mentioned above, in Elite's
+                        \ square mode 4 screen, each row of text on-screen
+                        \ takes up exactly one page, so the first row is page
+                        \ &60xx, the second row is page &61xx, so we can get
+                        \ the page for character (XC, YC) by OR'ing with &60.
+                        \ To see this in action, consider that our two values
+                        \ are, in binary:
+                        \
+                        \   YC is between:  %00000000
+                        \             and:  %00010111
+                        \          &60 is:  %01100000
+                        \
+                        \ so YC OR &60 effectively adds &60 to YC, giving us
+                        \ the page number that we want
+
+.RREN
+
+ STA SC+1               \ Store the page number of the destination screen
+                        \ location in SC+1, so SC now points to the full screen
+                        \ location where this character should go
+
+ LDY #7                 \ We want to print the 8 bytes of character data to the
+                        \ screen (one byte per row), so set up a counter in Y
+                        \ to count these bytes
+
+.RRL1
+
+ LDA (P+1),Y            \ The character definition is at P(2 1) - we set this up
+                        \ above - so load the Y-th byte from P(2 1), which will
+                        \ contain the bitmap for the Y-th row of the character
+
+ ORA (SC),Y             \ OR this value with the current contents of screen
+                        \ memory, so the pixels we want to draw are set
+
+ STA (SC),Y             \ Store the Y-th byte at the screen address for this
+                        \ character location
+
+ DEY                    \ Decrement the loop counter
+
+ BPL RRL1               \ Loop back for the next byte to print to the screen
+
+.RR4
+
+ LDY YSAV2              \ We're done printing, so restore the values of the
+ LDX XSAV2              \ A, X and Y registers that we saved above and clear
+ LDA K3                 \ the C flag, so everything is back to how it was
  CLC
- RTS
 
-.wrch_bell
+ RTS                    \ Return from the subroutine
 
- JSR sound_20
- JMP wrch_quit
+.R5
+
+ JSR BEEP               \ Call the BEEP subroutine to make a short, high beep
+
+ JMP RR4                \ Jump to RR4 to restore the registers and return from
+                        \ the subroutine using a tail call
 
 .find_plant
 
@@ -6042,7 +7030,7 @@ LOAD_B% = LOAD% + P% - CODE%
 
  STA &87
 
-.l_2539
+.TTX66
 
  JSR MT2
  LDA #&80
@@ -6275,13 +7263,13 @@ LOAD_B% = LOAD% + P% - CODE%
  LDX data_tech
  INX
  CLC
- JSR writed_3
+ JSR pr2
  JSR next_par
  LDA #&C0
  JSR pre_colon
  SEC
  LDX data_popn
- JSR writed_3
+ JSR pr2
  LDA #&C6
  JSR tok_nxtpar
  LDA #&28
@@ -6916,7 +7904,7 @@ LOAD_B% = LOAD% + P% - CODE%
 .writed_5
 
  LDA #&05
- JMP writed_word
+ JMP TT11
  \token_query:
  \	JSR TT27
  \	LDA #&3F
@@ -7000,7 +7988,7 @@ LOAD_B% = LOAD% + P% - CODE%
 
 .beep_wait
 
- JSR sound_20
+ JSR BEEP
  LDY #&32
  JMP DELAY
 
@@ -7095,7 +8083,7 @@ LOAD_B% = LOAD% + P% - CODE%
  CLC
  LDX GCNT
  INX
- JMP writed_3
+ JMP pr2
 
 .show_fuel
 
@@ -7103,7 +8091,7 @@ LOAD_B% = LOAD% + P% - CODE%
  JSR pre_colon
  LDX cmdr_fuel
  SEC
- JSR writed_3
+ JSR pr2
  LDA #&C3
  JSR plf
  LDA #&77
@@ -7122,7 +8110,7 @@ LOAD_B% = LOAD% + P% - CODE%
  LDA #&09
  STA &80
  SEC
- JSR l_1bd0
+ JSR BPRNT
  LDA #&E2
 
 .plf
@@ -8201,7 +9189,7 @@ LOAD_B% = LOAD% + P% - CODE%
 
  LDA #&01
  STA &FE4E
- JMP l_1c8a
+ JMP FEED
 
 .word_0
 
@@ -8225,7 +9213,7 @@ LOAD_B% = LOAD% + P% - CODE%
  LDY #&00
  STY SC
 
-.l_3a03
+.ZES2
 
  LDA #&00
  STX SC+&01
@@ -8303,7 +9291,7 @@ LOAD_B% = LOAD% + P% - CODE%
  LDA #&48
  BNE sound
 
-.sound_20
+.BEEP
 
  LDA #&20
 
@@ -8370,7 +9358,7 @@ LOAD_B% = LOAD% + P% - CODE%
  LDA &0387,X
  EOR #&FF
  STA &0387,X
- JSR bell
+ JSR BELL
  JSR DELAY
  LDY &D1
 
@@ -10595,7 +11583,7 @@ LOAD_B% = LOAD% + P% - CODE%
  LDX &89
  INX
  CLC
- JSR writed_3
+ JSR pr2
  JSR price_spc
  CLC
  LDA &89
