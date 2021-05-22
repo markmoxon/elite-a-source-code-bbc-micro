@@ -6534,7 +6534,6 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
                         \   If A = 64-95:   X = &C1 then skip so X = &C1
                         \   If A = 96-126:  X = &C1 then INX  so X = &C2
                         \
-
                         \ In other words, X points to the relevant page. But
                         \ what about the value of A? That gets shifted to the
                         \ left three times during the above code, which
@@ -6739,80 +6738,202 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  JMP RR4                \ Jump to RR4 to restore the registers and return from
                         \ the subroutine using a tail call
 
-.find_plant
+\ ******************************************************************************
+\
+\       Name: HME2
+\       Type: Subroutine
+\   Category: Charts
+\    Summary: Search the galaxy for a system
+\
+\ ******************************************************************************
 
- LDA #&0E
- JSR DETOK
- JSR map_cursor
- JSR copy_xy
- LDA #&00
- STA &97
+.HME2
 
-.find_loop
+ LDA #14                \ Print extended token 14 ("{clear bottom of screen}
+ JSR DETOK              \ PLANET NAME?{fetch line input from keyboard}"). The
+                        \ last token calls MT26, which puts the entered search
+                        \ term in INWK+5 and the term length in Y
 
- JSR MT14
- JSR write_planet
- LDX DTW5
- LDA &4B,X
- CMP #&0D
- BNE l_1f6c
+ JSR TT103              \ Draw small crosshairs at coordinates (QQ9, QQ10),
+                        \ which will erase the crosshairs currently there
 
-.l_1f5f
+ JSR TT81               \ Set the seeds in QQ15 (the selected system) to those
+                        \ of system 0 in the current galaxy (i.e. copy the seeds
+                        \ from QQ21 to QQ15)
 
- DEX
- LDA &4B,X
- ORA #&20
- CMP &0E01,X
- BEQ l_1f5f
- TXA
- BMI found_plant
+ LDA #0                 \ We now loop through the galaxy's systems in order,
+ STA XX20               \ until we find a match, so set XX20 to act as a system
+                        \ counter, starting with system 0
 
-.l_1f6c
+.HME3
 
- JSR permute_4
- INC &97
- BNE find_loop
- JSR TT111
- JSR map_cursor
- LDA #&28
- JSR sound
- LDA #&D7
- JMP DETOK
+ JSR MT14               \ Switch to justified text when printing extended
+                        \ tokens, so the call to cpl prints into the justified
+                        \ text buffer at BUF instead of the screen, and DTW5
+                        \ gets set to the length of the system name
 
-.found_plant
+ JSR cpl                \ Print the selected system name into the justified text
+                        \ buffer
 
- LDA &6F
- STA data_homex
- LDA &6D
- STA data_homey
- JSR TT111
- JSR map_cursor
- JSR MT15
- JMP distance
+ LDX DTW5               \ Fetch DTW5 into X, so X is now equal to the length of
+                        \ the selected system name
 
-.l_21be
+ LDA INWK+5,X           \ Fetch the X-th character from the entered search term
 
- AND #&7F
+ CMP #13                \ If the X-th character is not a carriage return, then
+ BNE HME6               \ the selected system name and the entered search term
+                        \ are different lengths, so jump to HME6 to move on to
+                        \ the next system
 
-.square
+.HME4
 
- STA &1B
+ DEX                    \ Decrement X so it points to the last letter of the
+                        \ selected system name (and, when we loop back here, it
+                        \ points to the next letter to the left)
+
+ LDA INWK+5,X           \ Set A to the X-th character of the entered search term
+
+ ORA #%00100000         \ Set bit 5 of the character to make it lower case
+
+ CMP BUF,X              \ If the character in A matches the X-th character of
+ BEQ HME4               \ the selected system name in BUF, loop back to HME4 to
+                        \ check the next letter to the left
+
+ TXA                    \ The last comparison didn't match, so copy the letter
+ BMI HME5               \ number into A, and if it's negative, that means we
+                        \ managed to go past the first letters of each term
+                        \ before we failed to get a match, so the terms are the
+                        \ same, so jump to HME5 to process a successful search
+
+.HME6
+
+                        \ If we get here then the selected system name and the
+                        \ entered search term did not match
+
+ JSR TT20               \ We want to move on to the next system, so call TT20
+                        \ to twist the three 16-bit seeds in QQ15
+
+ INC XX20               \ Incrememt the system counter in XX20
+
+ BNE HME3               \ If we haven't yet checked all 256 systems in the
+                        \ current galaxy, loop back to HME3 to check the next
+                        \ system
+
+                        \ If we get here then the entered search term did not
+                        \ match any systems in the current galaxy
+
+ JSR TT111              \ Select the system closest to galactic coordinates
+                        \ (QQ9, QQ10), so we can put the crosshairs back where
+                        \ they were before the search
+
+ JSR TT103              \ Draw small crosshairs at coordinates (QQ9, QQ10)
+
+ LDA #40                \ Call the NOISE routine with A = 40 to make a low,
+ JSR NOISE              \ long beep to indicate a failed search
+
+ LDA #215               \ Print extended token 215 ("{left align} UNKNOWN
+ JMP DETOK              \ PLANET"), which will print on-screem as the left align
+                        \ code disables justified text, and return from the
+                        \ subroutine using a tail call
+
+.HME5
+
+                        \ If we get here then we have found a match for the
+                        \ entered search
+
+ LDA QQ15+3             \ The x-coordinate of the system described by the seeds
+ STA QQ9                \ in QQ15 is in QQ15+3 (s1_hi), so we copy this to QQ9
+                        \ as the x-coordinate of the search result
+
+ LDA QQ15+1             \ The y-coordinate of the system described by the seeds
+ STA QQ10               \ in QQ15 is in QQ15+1 (s0_hi), so we copy this to QQ10
+                        \ as the y-coordinate of the search result
+
+ JSR TT111              \ Select the system closest to galactic coordinates
+                        \ (QQ9, QQ10)
+
+ JSR TT103              \ Draw small crosshairs at coordinates (QQ9, QQ10)
+
+ JSR MT15               \ Switch to left-aligned text when printing extended
+                        \ tokens so future tokens will print to the screen (as
+                        \ this disables justified text)
+
+ JMP T95                \ Jump to T95 to print the distance to the selected
+                        \ system and return from the subroutine using a tail
+                        \ call
+
+\ ******************************************************************************
+\
+\       Name: SQUA
+\       Type: Subroutine
+\   Category: Maths (Arithmetic)
+\    Summary: Clear bit 7 of A and calculate (A P) = A * A
+\
+\ ------------------------------------------------------------------------------
+\
+\ Do the following multiplication of unsigned 8-bit numbers, after first
+\ clearing bit 7 of A:
+\
+\   (A P) = A * A
+\
+\ ******************************************************************************
+
+.SQUA
+
+ AND #%01111111         \ Clear bit 7 of A and fall through into SQUA2 to set
+                        \ (A P) = A * A
+
+\ ******************************************************************************
+\
+\       Name: SQUA2
+\       Type: Subroutine
+\   Category: Maths (Arithmetic)
+\    Summary: Calculate (A P) = A * A
+\
+\ ------------------------------------------------------------------------------
+\
+\ Do the following multiplication of unsigned 8-bit numbers:
+\
+\   (A P) = A * A
+\
+\ ******************************************************************************
+
+.SQUA2
+
+ STA P                  \ Copy A into P and X
  TAX
- BNE l_21d7
 
-.l_21c5
+ BNE MU11               \ If X = 0 fall through into MU1 to return a 0,
+                        \ otherwise jump to MU11 to return P * X
 
- CLC
- STX &1B
+\ ******************************************************************************
+\
+\       Name: MU1
+\       Type: Subroutine
+\   Category: Maths (Arithmetic)
+\    Summary: Copy X into P and A, and clear the C flag
+\
+\ ------------------------------------------------------------------------------
+\
+\ Used to return a 0 result quickly from MULTU below.
+\
+\ ******************************************************************************
+
+.MU1
+
+ CLC                    \ Clear the C flag
+
+ STX P                  \ Copy X into P and A
  TXA
- RTS
+
+ RTS                    \ Return from the subroutine
 
 .price_mult
 
  LDX &81
- BEQ l_21c5
+ BEQ MU1
 
-.l_21d7
+.MU11
 
  DEX
  STX &D1
@@ -7137,7 +7258,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  BEQ sync_wait
  RTS
 
-.permute_4
+.TT20
 
  JSR permute_2
 
@@ -7424,7 +7545,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  JSR TT66
  LDA #&07
  STA XC
- JSR copy_xy
+ JSR TT81
  LDA #&C7
  JSR TT27
  JSR NLIN
@@ -7447,13 +7568,13 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  ADC #&18
  STA &35
  JSR PIXEL
- JSR permute_4
+ JSR TT20
  LDX &84
  INX
  BNE l_2830
- LDA data_homex
+ LDA QQ9
  STA &73
- LDA data_homey
+ LDA QQ10
  LSR A
  STA &74
  LDA #&04
@@ -7579,29 +7700,29 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  EOR #&FF
  PHA
  JSR sync
- JSR map_cursor
+ JSR TT103
  PLA
  STA &76
- LDA data_homey
+ LDA QQ10
  JSR incdec_dirn
  LDA &77
- STA data_homey
+ STA QQ10
  STA &74
  PLA
  STA &76
- LDA data_homex
+ LDA QQ9
  JSR incdec_dirn
  LDA &77
- STA data_homex
+ STA QQ9
  STA &73
 
-.map_cursor
+.TT103
 
  LDA &87
  BMI map_shcurs
- LDA data_homex
+ LDA QQ9
  STA &73
- LDA data_homey
+ LDA QQ10
  LSR A
  STA &74
  LDA #&04
@@ -7632,7 +7753,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
 .map_shcurs
 
- LDA data_homex
+ LDA QQ9
  SEC
  SBC QQ0
  CMP #&26
@@ -7647,7 +7768,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  CLC
  ADC #&68
  STA &73
- LDA data_homey
+ LDA QQ10
  SEC
  SBC QQ1
  CMP #&26
@@ -7674,8 +7795,8 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  LDA #&BE
  JSR NLIN3
  JSR map_range
- JSR map_cursor
- JSR copy_xy
+ JSR TT103
+ JSR TT81
  LDA #&00
  STA &97
  LDX #&18
@@ -7751,7 +7872,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  STA &46,Y
  LDA #&80
  STA QQ17
- JSR write_planet
+ JSR cpl
 
 .l_2c01
 
@@ -7771,12 +7892,12 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
 .l_2c1e
 
- JSR permute_4
+ JSR TT20
  INC &97
  BEQ l_2c32
  JMP short_loop
 
-.copy_xy
+.TT81
 
  LDX #&05
 
@@ -7793,7 +7914,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
 .TT111
 
- JSR copy_xy
+ JSR TT81
  LDY #&7F
  STY &D1
  LDA #&00
@@ -7803,7 +7924,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
  LDA &6F
  SEC
- SBC data_homex
+ SBC QQ9
  BCS l_2c4a
  EOR #&FF
  ADC #&01
@@ -7814,7 +7935,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  STA &83
  LDA &6D
  SEC
- SBC data_homey
+ SBC QQ10
  BCS l_2c59
  EOR #&FF
  ADC #&01
@@ -7840,7 +7961,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
 .l_2c70
 
- JSR permute_4
+ JSR TT20
  INC &80
  BNE snap_loop
  LDX #&05
@@ -7852,9 +7973,9 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  DEX
  BPL l_2c79
  LDA &6D
- STA data_homey
+ STA QQ10
  LDA &6F
- STA data_homex
+ STA QQ9
  SEC
  SBC QQ0
  BCS l_2c94
@@ -7863,11 +7984,11 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
 .l_2c94
 
- JSR square
+ JSR SQUA2
  STA &41
  LDA &1B
  STA &40
- LDA data_homey
+ LDA QQ10
  SEC
  SBC QQ1
  BCS l_2caa
@@ -7877,7 +7998,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 .l_2caa
 
  LSR A
- JSR square
+ JSR SQUA2
  PHA
  LDA &1B
  CLC
@@ -7994,12 +8115,12 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
 .snap_cursor
 
- JSR map_cursor
+ JSR TT103
  JSR TT111
- JSR map_cursor
+ JSR TT103
  JMP CLYNS
 
-.write_planet
+.cpl
 
  LDX #&05
 
@@ -8062,7 +8183,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 .l_315a
 
  JSR l_3160
- JSR write_planet
+ JSR cpl
 
 .l_3160
 
@@ -8137,7 +8258,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  BEQ l_315a
  DEX
  BNE l_31bd
- JMP write_planet
+ JMP cpl
 
 .l_31bd
 
@@ -8516,7 +8637,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  STX &22
  STA &23
  LDA &40
- JSR square
+ JSR SQUA2
  STA &9C
  LDA &1B
  STA &9B
@@ -8542,7 +8663,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 .l_3436
 
  LDA &22
- JSR square
+ JSR SQUA2
  STA &D1
  LDA &9B
  SEC
@@ -8888,7 +9009,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 .l_3650
 
  LDA QQ0,X
- STA data_homex,X
+ STA QQ9,X
  DEX
  BPL l_3650
  RTS
@@ -9092,13 +9213,13 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 .not_hype
 
  CMP #&32
- BEQ distance
+ BEQ T95
  CMP #&43
  BNE not_find
  LDA &87
  AND #&C0
  BEQ not_map
- JMP find_plant
+ JMP HME2
 
 .not_find
 
@@ -9111,9 +9232,9 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  LDA &06
  CMP #&36
  BNE not_home
- JSR map_cursor
+ JSR TT103
  JSR set_home
- JSR map_cursor
+ JSR TT103
 
 .not_cour
 
@@ -9130,21 +9251,21 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  LDA cmdr_cour
  ORA cmdr_cour+1
  BEQ not_cour
- JSR map_cursor
+ JSR TT103
  LDA cmdr_courx
- STA data_homex
+ STA QQ9
  LDA cmdr_coury
- STA data_homey
- JSR map_cursor
+ STA QQ10
+ JSR TT103
 
-.distance
+.T95
 
  LDA &87
  AND #&C0
  BEQ not_map
  JSR snap_cursor
  STA QQ17
- JSR write_planet
+ JSR cpl
  LDA #&80
  STA QQ17
  LDA #&01
@@ -9228,12 +9349,12 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 .l_3bd6
 
  LDA &34
- JSR l_21be
+ JSR SQUA
  STA &82
  LDA &1B
  STA &81
  LDA &35
- JSR l_21be
+ JSR SQUA
  STA &D1
  LDA &1B
  ADC &81
@@ -9242,7 +9363,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  ADC &82
  STA &82
  LDA &36
- JSR l_21be
+ JSR SQUA
  STA &D1
  LDA &1B
  ADC &81
@@ -9289,13 +9410,13 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  STA &30
  STA &0340
  LDA #&48
- BNE sound
+ BNE NOISE
 
 .BEEP
 
  LDA #&20
 
-.sound
+.NOISE
 
  JSR pp_sound
  LDX s_flag

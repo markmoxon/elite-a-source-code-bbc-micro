@@ -7039,7 +7039,6 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
                         \   If A = 64-95:   X = &C1 then skip so X = &C1
                         \   If A = 96-126:  X = &C1 then INX  so X = &C2
                         \
-
                         \ In other words, X points to the relevant page. But
                         \ what about the value of A? That gets shifted to the
                         \ left three times during the above code, which
@@ -7503,450 +7502,1321 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  LDA ALTIT              \ Draw the altitude indicator using a range of 0-255,
  JMP DILX               \ returning from the subroutine using a tail call
 
+\ ******************************************************************************
+\
+\       Name: PZW
+\       Type: Subroutine
+\   Category: Dashboard
+\    Summary: Fetch the current dashboard colours, to support flashing
+\
+\ ------------------------------------------------------------------------------
+\
+\ Set A and X to the colours we should use for indicators showing dangerous and
+\ safe values respectively. This enables us to implement flashing indicators,
+\ which is one of the game's configurable options.
+\
+\ If flashing is enabled, the colour returned in A (dangerous values) will be
+\ red for 8 iterations of the main loop, and yellow/white for the next 8, before
+\ going back to red. If we always use PZW to decide which colours we should use
+\ when updating indicators, flashing colours will be automatically taken care of
+\ for us.
+\
+\ The values returned are &F0 for yellow/white and &0F for red. These are mode 5
+\ bytes that contain 4 pixels, with the colour of each pixel given in two bits,
+\ the high bit from the first nibble (bits 4-7) and the low bit from the second
+\ nibble (bits 0-3). So in &F0 each pixel is %10, or colour 2 (yellow or white,
+\ depending on the dashboard palette), while in &0F each pixel is %01, or colour
+\ 1 (red).
+\
+\ Returns:
+\
+\   A                   The colour to use for indicators with dangerous values
+\
+\   X                   The colour to use for indicators with safe values
+\
+\ ******************************************************************************
+
 .PZW
 
- LDX #&F0
- \	LDA &8A
- \	AND #&08
- \	AND f_flag
- \	BEQ l_1eb3
- \	TXA
- \bit8
- \	EQUB &2C
- \l_1eb3
- LDA #&0F
- RTS
+ LDX #&F0               \ Set X to dashboard colour 2 (yellow/white)
+
+ LDA #&0F               \ Set A to dashboard colour 1 (red)
+
+ RTS                    \ Return from the subroutine
+
+\ ******************************************************************************
+\
+\       Name: DILX
+\       Type: Subroutine
+\   Category: Dashboard
+\    Summary: Update a bar-based indicator on the dashboard
+\  Deep dive: The dashboard indicators
+\
+\ ------------------------------------------------------------------------------
+\
+\ The range of values shown on the indicator depends on which entry point is
+\ called. For the default entry point of DILX, the range is 0-255 (as the value
+\ passed in A is one byte). The other entry points are shown below.
+\
+\ Arguments:
+\
+\   A                   The value to be shown on the indicator (so the larger
+\                       the value, the longer the bar)
+\
+\   T1                  The threshold at which we change the indicator's colour
+\                       from the low value colour to the high value colour. The
+\                       threshold is in pixels, so it should have a value from
+\                       0-16, as each bar indicator is 16 pixels wide
+\
+\   K                   The colour to use when A is a high value, as a 4-pixel
+\                       mode 5 character row byte
+\
+\   K+1                 The colour to use when A is a low value, as a 4-pixel
+\                       mode 5 character row byte
+\
+\   SC(1 0)             The screen address of the first character block in the
+\                       indicator
+\
+\ Other entry points:
+\
+\   DILX+2              The range of the indicator is 0-64 (for the fuel
+\                       indicator)
+\
+\   DIL-1               The range of the indicator is 0-32 (for the speed
+\                       indicator)
+\
+\   DIL                 The range of the indicator is 0-16 (for the energy
+\                       banks)
+\
+\ ******************************************************************************
 
 .DILX
 
+ LSR A                  \ If we call DILX, we set A = A / 16, so A is 0-15
  LSR A
 
-.bar_eighth
+ LSR A                  \ If we call DILX+2, we set A = A / 4, so A is 0-15
 
- LSR A
-
-.bar_fourth
-
- LSR A
-
-.bar_half
-
- LSR A
+ LSR A                  \ If we call DIL-1, we set A = A / 2, so A is 0-15
 
 .DIL
 
- STA &81
- LDX #&FF
- STX &82
- CMP &06
- BCS flash_gr
- LDA &41
- \	BNE flash_le
- EQUB &2C
+                        \ If we call DIL, we leave A alone, so A is 0-15
 
-.flash_gr
+ STA Q                  \ Store the indicator value in Q, now reduced to 0-15,
+                        \ which is the length of the indicator to draw in pixels
 
- LDA &40
+ LDX #&FF               \ Set R = &FF, to use as a mask for drawing each row of
+ STX R                  \ each character block of the bar, starting with a full
+                        \ character's width of 4 pixels
 
-.flash_le
+ CMP T1                 \ If A >= T1 then we have passed the threshold where we
+ BCS DL30               \ change bar colour, so jump to DL30 to set A to the
+                        \ "high value" colour
 
- STA &91
- LDY #&02
- LDX #&03
+ LDA K+1                \ Set A to K+1, the "low value" colour to use
 
-.bar_byte
+ EQUB &2C               \ AJD
 
- LDA &81
- CMP #&04
- BCC bar_part
- SBC #&04
- STA &81
- LDA &82
+.DL30
 
-.l_1edc
+ LDA K                  \ Set A to K, the "high value" colour to use
 
- AND &91
+.DL31
+
+ STA COL                \ Store the colour of the indicator in COL
+
+ LDY #2                 \ We want to start drawing the indicator on the third
+                        \ line in this character row, so set Y to point to that
+                        \ row's offset
+
+ LDX #3                 \ Set up a counter in X for the width of the indicator,
+                        \ which is 4 characters (each of which is 4 pixels wide,
+                        \ to give a total width of 16 pixels)
+
+.DL1
+
+ LDA Q                  \ Fetch the indicator value (0-15) from Q into A
+
+ CMP #4                 \ If Q < 4, then we need to draw the end cap of the
+ BCC DL2                \ indicator, which is less than a full character's
+                        \ width, so jump down to DL2 to do this
+
+ SBC #4                 \ Otherwise we can draw a 4-pixel wide block, so
+ STA Q                  \ subtract 4 from Q so it contains the amount of the
+                        \ indicator that's left to draw after this character
+
+ LDA R                  \ Fetch the shape of the indicator row that we need to
+                        \ display from R, so we can use it as a mask when
+                        \ painting the indicator. It will be &FF at this point
+                        \ (i.e. a full 4-pixel row)
+
+.DL5
+
+ AND COL                \ Fetch the 4-pixel mode 5 colour byte from COL, and
+                        \ only keep pixels that have their equivalent bits set
+                        \ in the mask byte in A
+
+ STA (SC),Y             \ Draw the shape of the mask on pixel row Y of the
+                        \ character block we are processing
+
+ INY                    \ Draw the next pixel row, incrementing Y
  STA (SC),Y
- INY
+
+ INY                    \ And draw the third pixel row, incrementing Y
  STA (SC),Y
- INY
- STA (SC),Y
- TYA
- CLC
- ADC #&06
- TAY
- DEX
- BMI l_1f0a
- BPL bar_byte
 
-.bar_part
+ TYA                    \ Add 6 to Y, so Y is now 8 more than when we started
+ CLC                    \ this loop iteration, so Y now points to the address
+ ADC #6                 \ of the first line of the indicator bar in the next
+ TAY                    \ character block (as each character is 8 bytes of
+                        \ screen memory)
 
- EOR #&03
- STA &81
- LDA &82
+ DEX                    \ Decrement the loop counter for the next character
+                        \ block along in the indicator
 
-.l_1ef6
+ BMI DL6                \ If we just drew the last character block then we are
+                        \ done drawing, so jump down to DL6 to finish off
 
- ASL A
- AND #&EF
- DEC &81
- BPL l_1ef6
- PHA
- LDA #&00
- STA &82
- LDA #&63
- STA &81
- PLA
- JMP l_1edc
+ BPL DL1                \ Loop back to DL1 to draw the next character block of
+                        \ the indicator (this BPL is effectively a JMP as A will
+                        \ never be negative following the previous BMI)
 
-.l_1f0a
+.DL2
 
- INC SC+&01
- RTS
+ EOR #3                 \ If we get here then we are drawing the indicator's
+ STA Q                  \ end cap, so Q is < 4, and this EOR flips the bits, so
+                        \ instead of containing the number of indicator columns
+                        \ we need to fill in on the left side of the cap's
+                        \ character block, Q now contains the number of blank
+                        \ columns there should be on the right side of the cap's
+                        \ character block
+
+ LDA R                  \ Fetch the current mask from R, which will be &FF at
+                        \ this point, so we need to turn Q of the columns on the
+                        \ right side of the mask to black to get the correct end
+                        \ cap shape for the indicator
+
+.DL3
+
+ ASL A                  \ Shift the mask left so bit 0 is cleared, and then
+ AND #%11101111         \ clear bit 4, which has the effect of shifting zeroes
+                        \ from the left into each nibble (i.e. xxxx xxxx becomes
+                        \ xxx0 xxx0, which blanks out the last column in the
+                        \ 4-pixel mode 5 character block)
+
+ DEC Q                  \ Decrement the counter for the number of columns to
+                        \ blank out
+
+ BPL DL3                \ If we still have columns to blank out in the mask,
+                        \ loop back to DL3 until the mask is correct for the
+                        \ end cap
+
+ PHA                    \ Store the mask byte on the stack while we use the
+                        \ accumulator for a bit
+
+ LDA #0                 \ Change the mask so no bits are set, so the characters
+ STA R                  \ after the one we're about to draw will be all blank
+
+ LDA #99                \ Set Q to a high number (99, why not) so we will keep
+ STA Q                  \ drawing blank characters until we reach the end of
+                        \ the indicator row
+
+ PLA                    \ Restore the mask byte from the stack so we can use it
+                        \ to draw the end cap of the indicator
+
+ JMP DL5                \ Jump back up to DL5 to draw the mask byte on-screen
+
+.DL6
+
+ INC SC+1               \ Increment the high byte of SC to point to the next
+                        \ character row on-screen (as each row takes up exactly
+                        \ one page of 256 bytes) - so this sets up SC to point
+                        \ to the next indicator, i.e. the one below the one we
+                        \ just drew
+
+.DL9                    \ This label is not used but is in the original source
+
+ RTS                    \ Return from the subroutine
+
+\ ******************************************************************************
+\
+\       Name: DIL2
+\       Type: Subroutine
+\   Category: Dashboard
+\    Summary: Update the roll or pitch indicator on the dashboard
+\  Deep dive: The dashboard indicators
+\
+\ ------------------------------------------------------------------------------
+\
+\ The indicator can show a vertical bar in 16 positions, with a value of 8
+\ showing the bar in the middle of the indicator.
+\
+\ In practice this routine is only ever called with A in the range 1 to 15, so
+\ the vertical bar never appears in the leftmost position (though it does appear
+\ in the rightmost).
+\
+\ Arguments:
+\
+\   A                   The offset of the vertical bar to show in the indicator,
+\                       from 0 at the far left, to 8 in the middle, and 15 at
+\                       the far right
+\
+\ Returns:
+\
+\   C flag              The C flag is set
+\
+\ ******************************************************************************
 
 .DIL2
 
- LDY #&01
- STA &81
+ LDY #1                 \ We want to start drawing the vertical indicator bar on
+                        \ the second line in the indicator's character block, so
+                        \ set Y to point to that row's offset
 
-.l_1f11
+ STA Q                  \ Store the offset of the vertical bar to draw in Q
 
- SEC
- LDA &81
- SBC #&04
- BCS l_1f26
- LDA #&FF
- LDX &81
- STA &81
- LDA CTWOS,X
- AND #&F0
- JMP l_1f2a
+                        \ We are now going to work our way along the indicator
+                        \ on the dashboard, from left to right, working our way
+                        \ along one character block at a time. Y will be used as
+                        \ a pixel row counter to work our way through the
+                        \ character blocks, so each time we draw a character
+                        \ block, we will increment Y by 8 to move on to the next
+                        \ block (as each character block contains 8 rows)
 
-.l_1f26
+.DLL10
 
- STA &81
- LDA #&00
+ SEC                    \ Set A = Q - 4, so that A contains the offset of the
+ LDA Q                  \ vertical bar from the start of this character block
+ SBC #4
 
-.l_1f2a
+ BCS DLL11              \ If Q >= 4 then the character block we are drawing does
+                        \ not contain the vertical indicator bar, so jump to
+                        \ DLL11 to draw a blank character block
 
+ LDA #&FF               \ Set A to a high number (and &FF is as high as they go)
+
+ LDX Q                  \ Set X to the offset of the vertical bar, which we know
+                        \ is within this character block
+
+ STA Q                  \ Set Q to a high number (&FF, why not) so we will keep
+                        \ drawing blank characters after this one until we reach
+                        \ the end of the indicator row
+
+ LDA CTWOS,X            \ CTWOS is a table of ready-made 1-pixel mode 5 bytes,
+                        \ just like the TWOS and TWOS2 tables for mode 4 (see
+                        \ the PIXEL routine for details of how they work). This
+                        \ fetches a mode 5 1-pixel byte with the pixel position
+                        \ at X, so the pixel is at the offset that we want for
+                        \ our vertical bar
+
+ AND #&F0               \ The 4-pixel mode 5 colour byte &F0 represents four
+                        \ pixels of colour %10 (3), which is yellow in the
+                        \ normal dashboard palette and white if we have an
+                        \ escape pod fitted. We AND this with A so that we only
+                        \ keep the pixel that matches the position of the
+                        \ vertical bar (i.e. A is acting as a mask on the
+                        \ 4-pixel colour byte)
+
+ JMP DLL12              \ Jump to DLL12 to skip the code for drawing a blank,
+                        \ and move on to drawing the indicator
+
+.DLL11
+
+                        \ If we get here then we want to draw a blank for this
+                        \ character block
+
+ STA Q                  \ Update Q with the new offset of the vertical bar, so
+                        \ it becomes the offset after the character block we
+                        \ are about to draw
+
+ LDA #0                 \ Change the mask so no bits are set, so all of the
+                        \ character blocks we display from now on will be blank
+.DLL12
+
+ STA (SC),Y             \ Draw the shape of the mask on pixel row Y of the
+                        \ character block we are processing
+
+ INY                    \ Draw the next pixel row, incrementing Y
  STA (SC),Y
- INY
+
+ INY                    \ And draw the third pixel row, incrementing Y
  STA (SC),Y
- INY
+
+ INY                    \ And draw the fourth pixel row, incrementing Y
  STA (SC),Y
- INY
- STA (SC),Y
- TYA
- CLC
- ADC #&05
- TAY
- CPY #&1E
- BCC l_1f11
- INC SC+&01
- RTS
 
-.find_plant
+ TYA                    \ Add 5 to Y, so Y is now 8 more than when we started
+ CLC                    \ this loop iteration, so Y now points to the address
+ ADC #5                 \ of the first line of the indicator bar in the next
+ TAY                    \ character block (as each character is 8 bytes of
+                        \ screen memory)
 
- LDA #&0E
- JSR DETOK
- JSR map_cursor
- JSR copy_xy
- LDA #&00
- STA &97
+ CPY #30                \ If Y < 30 then we still have some more character
+ BCC DLL10              \ blocks to draw, so loop back to DLL10 to display the
+                        \ next one along
 
-.find_loop
+ INC SC+1               \ Increment the high byte of SC to point to the next
+                        \ character row on-screen (as each row takes up exactly
+                        \ one page of 256 bytes) - so this sets up SC to point
+                        \ to the next indicator, i.e. the one below the one we
+                        \ just drew
 
- JSR MT14
- JSR write_planet
- LDX DTW5
- LDA &4B,X
- CMP #&0D
- BNE l_1f6c
+ RTS                    \ Return from the subroutine
 
-.l_1f5f
+\ ******************************************************************************
+\
+\       Name: HME2
+\       Type: Subroutine
+\   Category: Charts
+\    Summary: Search the galaxy for a system
+\
+\ ******************************************************************************
 
- DEX
- LDA &4B,X
- ORA #&20
- CMP &0E01,X
- BEQ l_1f5f
- TXA
- BMI found_plant
+.HME2
 
-.l_1f6c
+ LDA #14                \ Print extended token 14 ("{clear bottom of screen}
+ JSR DETOK              \ PLANET NAME?{fetch line input from keyboard}"). The
+                        \ last token calls MT26, which puts the entered search
+                        \ term in INWK+5 and the term length in Y
 
- JSR permute_4
- INC &97
- BNE find_loop
- JSR TT111
- JSR map_cursor
- LDA #&28
- JSR sound
- LDA #&D7
- JMP DETOK
+ JSR TT103              \ Draw small crosshairs at coordinates (QQ9, QQ10),
+                        \ which will erase the crosshairs currently there
 
-.found_plant
+ JSR TT81               \ Set the seeds in QQ15 (the selected system) to those
+                        \ of system 0 in the current galaxy (i.e. copy the seeds
+                        \ from QQ21 to QQ15)
 
- LDA &6F
- STA data_homex
- LDA &6D
- STA data_homey
- JSR TT111
- JSR map_cursor
- JSR MT15
- JMP distance
+ LDA #0                 \ We now loop through the galaxy's systems in order,
+ STA XX20               \ until we find a match, so set XX20 to act as a system
+                        \ counter, starting with system 0
 
-.l_1f99
+.HME3
 
- EQUB &02, &54, &3B
- EQUB &03, &82, &B0
- EQUB &00, &00, &00
- EQUB &01, &50, &11
- EQUB &01, &D1, &28
- EQUB &01, &40, &06
- EQUB &03, &60, &90
- EQUB &04, &10, &D1
- EQUB &00, &00, &00
- EQUB &06, &51, &F8
- EQUB &07, &60, &75
- EQUB &00, &00, &00
+ JSR MT14               \ Switch to justified text when printing extended
+                        \ tokens, so the call to cpl prints into the justified
+                        \ text buffer at BUF instead of the screen, and DTW5
+                        \ gets set to the length of the system name
+
+ JSR cpl                \ Print the selected system name into the justified text
+                        \ buffer
+
+ LDX DTW5               \ Fetch DTW5 into X, so X is now equal to the length of
+                        \ the selected system name
+
+ LDA INWK+5,X           \ Fetch the X-th character from the entered search term
+
+ CMP #13                \ If the X-th character is not a carriage return, then
+ BNE HME6               \ the selected system name and the entered search term
+                        \ are different lengths, so jump to HME6 to move on to
+                        \ the next system
+
+.HME4
+
+ DEX                    \ Decrement X so it points to the last letter of the
+                        \ selected system name (and, when we loop back here, it
+                        \ points to the next letter to the left)
+
+ LDA INWK+5,X           \ Set A to the X-th character of the entered search term
+
+ ORA #%00100000         \ Set bit 5 of the character to make it lower case
+
+ CMP BUF,X              \ If the character in A matches the X-th character of
+ BEQ HME4               \ the selected system name in BUF, loop back to HME4 to
+                        \ check the next letter to the left
+
+ TXA                    \ The last comparison didn't match, so copy the letter
+ BMI HME5               \ number into A, and if it's negative, that means we
+                        \ managed to go past the first letters of each term
+                        \ before we failed to get a match, so the terms are the
+                        \ same, so jump to HME5 to process a successful search
+
+.HME6
+
+                        \ If we get here then the selected system name and the
+                        \ entered search term did not match
+
+ JSR TT20               \ We want to move on to the next system, so call TT20
+                        \ to twist the three 16-bit seeds in QQ15
+
+ INC XX20               \ Incrememt the system counter in XX20
+
+ BNE HME3               \ If we haven't yet checked all 256 systems in the
+                        \ current galaxy, loop back to HME3 to check the next
+                        \ system
+
+                        \ If we get here then the entered search term did not
+                        \ match any systems in the current galaxy
+
+ JSR TT111              \ Select the system closest to galactic coordinates
+                        \ (QQ9, QQ10), so we can put the crosshairs back where
+                        \ they were before the search
+
+ JSR TT103              \ Draw small crosshairs at coordinates (QQ9, QQ10)
+
+ LDA #40                \ Call the NOISE routine with A = 40 to make a low,
+ JSR NOISE              \ long beep to indicate a failed search
+
+ LDA #215               \ Print extended token 215 ("{left align} UNKNOWN
+ JMP DETOK              \ PLANET"), which will print on-screem as the left align
+                        \ code disables justified text, and return from the
+                        \ subroutine using a tail call
+
+.HME5
+
+                        \ If we get here then we have found a match for the
+                        \ entered search
+
+ LDA QQ15+3             \ The x-coordinate of the system described by the seeds
+ STA QQ9                \ in QQ15 is in QQ15+3 (s1_hi), so we copy this to QQ9
+                        \ as the x-coordinate of the search result
+
+ LDA QQ15+1             \ The y-coordinate of the system described by the seeds
+ STA QQ10               \ in QQ15 is in QQ15+1 (s0_hi), so we copy this to QQ10
+                        \ as the y-coordinate of the search result
+
+ JSR TT111              \ Select the system closest to galactic coordinates
+                        \ (QQ9, QQ10)
+
+ JSR TT103              \ Draw small crosshairs at coordinates (QQ9, QQ10)
+
+ JSR MT15               \ Switch to left-aligned text when printing extended
+                        \ tokens so future tokens will print to the screen (as
+                        \ this disables justified text)
+
+ JMP T95                \ Jump to T95 to print the distance to the selected
+                        \ system and return from the subroutine using a tail
+                        \ call
+
+\ ******************************************************************************
+\
+\ Save output/ELTB.bin
+\
+\ ******************************************************************************
+
+PRINT "ELITE B"
+PRINT "Assembled at ", ~CODE_B%
+PRINT "Ends at ", ~P%
+PRINT "Code size is ", ~(P% - CODE_B%)
+PRINT "Execute at ", ~LOAD%
+PRINT "Reload at ", ~LOAD_B%
+
+PRINT "S.ELTB ", ~CODE_B%, " ", ~P%, " ", ~LOAD%, " ", ~LOAD_B%
+\SAVE "elite-a/T.ELTB.bin", CODE_B%, P%, LOAD%
+
+\ ******************************************************************************
+\
+\ ELITE C FILE
+\
+\ ******************************************************************************
+
+CODE_C% = P%
+LOAD_C% = LOAD% +P% - CODE%
+
+\ ******************************************************************************
+\
+\       Name: HATB
+\       Type: Variable
+\   Category: Ship hanger
+\    Summary: Ship hanger group table
+\
+\ ------------------------------------------------------------------------------
+\
+\ This table contains groups of ships to show in the ship hanger. A group of
+\ ships is shown half the time (the other half shows a solo ship), and each of
+\ the four groups is equally likely.
+\
+\ The bytes for each ship in the group contain the following information:
+\
+\   Byte #0             Non-zero = Ship type to draw
+\                       0        = don't draw anything
+\
+\   Byte #1             Bits 0-7 = Ship's x_hi
+\                       Bit 0    = Ship's z_hi (1 if clear, or 2 if set)
+\
+\   Byte #2             Bits 0-7 = Ship's z_lo
+\                       Bit 0    = Ship's x_sign
+\
+\ Ths ship's y-coordinate is calculated in the has1 routine from the size of
+\ its targetable area. Ships of type 0 are not shown.
+\
+\ Note that ship numbers are for the ship hanger blueprints at XX21 in the
+\ docked code, rather than the full set of ships in the flight code. They are:
+\
+\   1 = Cargo canister
+\   2 = Shuttle
+\   3 = Transporter
+\   4 = Cobra Mk III
+\   5 = Python
+\   6 = Viper
+\   7 = Krait
+\   8 = Constrictor
+\
+\ ******************************************************************************
+
+.HATB
+
+                        \ Hanger group for X = 0
+                        \
+                        \ Shuttle (left) and Transporter (right)
+
+ EQUB 2                 \ Ship type in the hanger = 2 = Shuttle
+ EQUB %01010100         \ x_hi = %01010100 = 84, z_hi   = 1     -> x = -84
+ EQUB %00111011         \ z_lo = %00111011 = 59, x_sign = 1        z = +315
+
+ EQUB 3                 \ Ship type in the hanger = 3 = Transporter
+ EQUB %10000010         \ x_hi = %10000010 = 130, z_hi   = 1    -> x = +130
+ EQUB %10110000         \ z_lo = %10110000 = 176, x_sign = 0       z = +432
+
+ EQUB 0                 \ No third ship
+ EQUB 0
+ EQUB 0
+
+                        \ Hanger group for X = 9
+                        \
+                        \ Three cargo canisters (left, far right and forward,
+                        \ right)
+
+ EQUB 1                 \ Ship type in the hanger = 1 = Cargo canister
+ EQUB %01010000         \ x_hi = %01010000 = 80, z_hi   = 1     -> x = -80
+ EQUB %00010001         \ z_lo = %00010001 = 17, x_sign = 1        z = +273
+
+ EQUB 1                 \ Ship type in the hanger = 1 = Cargo canister
+ EQUB %11010001         \ x_hi = %11010001 = 209, z_hi = 2      -> x = +209
+ EQUB %00101000         \ z_lo = %00101000 =  40, x_sign = 0       z = +552
+
+ EQUB 1                 \ Ship type in the hanger = 1 = Cargo canister
+ EQUB %01000000         \ x_hi = %01000000 = 64, z_hi   = 1     -> x = +64
+ EQUB %00000110         \ z_lo = %00000110 = 6,  x_sign = 0        z = +262
+
+                        \ Hanger group for X = 18
+                        \
+                        \ Transporter (right) and Cobra Mk III (left)
+
+ EQUB 3                 \ Ship type in the hanger = 3 = Transporter
+ EQUB %01100000         \ x_hi = %01100000 =  96, z_hi   = 1    -> x = +96
+ EQUB %10010000         \ z_lo = %10010000 = 144, x_sign = 0       z = +400
+
+ EQUB 4                 \ Ship type in the hanger = 4 = Cobra Mk III
+ EQUB %00010000         \ x_hi = %00010000 =  16, z_hi   = 1    -> x = -16
+ EQUB %11010001         \ z_lo = %11010001 = 209, x_sign = 1       z = +465
+
+ EQUB 0                 \ No third ship
+ EQUB 0
+ EQUB 0
+
+                        \ Hanger group for X = 27
+                        \
+                        \ Viper (right and forward) and Krait (left)
+
+ EQUB 6                 \ Ship type in the hanger = 6 = Viper
+ EQUB %01010001         \ x_hi = %01010001 =  81, z_hi  = 2     -> x = +81
+ EQUB %11111000         \ z_lo = %11111000 = 248, x_sign = 0       z = +760
+
+ EQUB 7                 \ Ship type in the hanger = 7 = Krait
+ EQUB %01100000         \ x_hi = %01100000 = 96,  z_hi   = 1    -> x = -96
+ EQUB %01110101         \ z_lo = %01110101 = 117, x_sign = 1       z = +373
+
+ EQUB 0                 \ No third ship
+ EQUB 0
+ EQUB 0
+
+\ ******************************************************************************
+\
+\       Name: HALL
+\       Type: Subroutine
+\   Category: Ship hanger
+\    Summary: Draw the ships in the ship hanger, then draw the hanger
+\
+\ ------------------------------------------------------------------------------
+\
+\ Half the time this will draw one of the four pre-defined ship hanger groups in
+\ HATB, and half the time this will draw a solitary Sidewinder, Mamba, Krait or
+\ Adder on a random position. In all cases, the ships will be randomly spun
+\ around on the ground so they can face in any dirction, and larger ships are
+\ drawn higher up off the ground than smaller ships.
+\
+\ The ships are drawn by the HAS1 routine, which uses the normal ship-drawing
+\ routine in LL9, and then the hanger background is drawn by sending an OSWORD
+\ 248 command to the I/O processor.
+\
+\ ******************************************************************************
 
 .HALL
 
- JSR draw_mode
- LDA #&00
- JSR TT66
- JSR DORND
- BPL l_1ff3
- AND #&03
- STA &D1
- ASL A
- ASL A
- ASL A
- ADC &D1
+ JSR UNWISE             \ Call UNWISE to switch the main line-drawing routine
+                        \ between EOR and OR logic (in this case, switching it
+                        \ to OR logic so that it overwrites anything that's
+                        \ on-screen)
+
+ LDA #0                 \ Clear the top part of the screen, draw a white border,
+ JSR TT66               \ and set the current view type in QQ11 to 0 (space
+                        \ view)
+
+ JSR DORND              \ Set A and X to random numbers
+
+ BPL HA7                \ Jump to HA7 if A is positive (50% chance)
+
+ AND #3                 \ Reduce A to a random number in the range 0-3
+
+ STA T                  \ Set X = A * 8 + A
+ ASL A                  \       = 9 * A
+ ASL A                  \
+ ASL A                  \ so X is a random number, either 0, 9, 18 or 27
+ ADC T
  TAX
- LDY #&03
- STY &94
 
-.l_1fd8
+                        \ The following double loop calls the HAS1 routine three
+                        \ times to display three ships on screen. For each call,
+                        \ the values passed to HAS1 in XX15+2 to XX15 are taken
+                        \ from the HATB table, depending on the value in X, as
+                        \ follows:
+                        \
+                        \   * If X = 0,  pass bytes #0 to #2 of HATB to HAS1
+                        \                then bytes #3 to #5
+                        \                then bytes #6 to #8
+                        \
+                        \   * If X = 9,  pass bytes  #9 to #11 of HATB to HAS1
+                        \                then bytes #12 to #14
+                        \                then bytes #15 to #17
+                        \
+                        \   * If X = 18, pass bytes #18 to #20 of HATB to HAS1
+                        \                then bytes #21 to #23
+                        \                then bytes #24 to #26
+                        \
+                        \   * If X = 27, pass bytes #27 to #29 of HATB to HAS1
+                        \                then bytes #30 to #32
+                        \                then bytes #33 to #35
+                        \
+                        \ Note that the values are passed in reverse, so for the
+                        \ first call, for example, where we pass bytes #0 to #2
+                        \ of HATB to HAS1, we call HAS1 with:
+                        \
+                        \   XX15   = HATB+2
+                        \   XX15+1 = HATB+1
+                        \   XX15+2 = HATB
 
- LDY #&02
+ LDY #3                 \ Set CNT2 = 3 to act as an outer loop counter going
+ STY CNT2               \ from 3 to 1, so the HAL8 loop is run 3 times
 
-.l_1fda
+.HAL8
 
- LDA l_1f99,X
- STA &34,Y
+ LDY #2                 \ Set Y = 2 to act as an inner loop counter going from
+                        \ 2 to 0
+
+.HAL9
+
+ LDA HATB,X             \ Copy the X-th byte of HATB to the Y-th byte of XX15,
+ STA XX15,Y             \ as described above
+
+ INX                    \ Increment X to point to the next byte in HATB
+
+ DEY                    \ Decrement Y to point to the previous byte in XX15
+
+ BPL HAL9               \ Loop back to copy the next byte until we have copied
+                        \ three of them (i.e. Y was 3 before the DEY)
+
+ TXA                    \ Store X on the stack so we can retrieve it after the
+ PHA                    \ call to HAS1 (as it contains the index of the next
+                        \ byte in HATB
+
+ JSR HAS1               \ Call HAS1 to draw this ship in the hanger
+
+ PLA                    \ Restore the value of X, so X points to the next byte
+ TAX                    \ in HATB after the three bytes we copied into XX15
+
+ DEC CNT2               \ Decrement the outer loop counter in CNT2
+
+ BNE HAL8               \ Loop back to HAL8 to do it 3 times, once for each ship
+                        \ in the HATB table
+
+ LDY #128               \ Set Y = 128 to send as byte #2 of the parameter block
+                        \ to the OSWORD 248 command below, to tell the I/O
+                        \ processor that there are multiple ships in the hanger
+
+ BNE HA9                \ Jump to HA9 to display the ship hanger (this BNE is
+                        \ effectively a JMP as Y is never zero)
+
+.HA7
+
+                        \ If we get here, A is a positive random number in the
+                        \ range 0-127
+
+ LSR A                  \ Set XX15+1 = A / 2 (random number 0-63)
+ STA XX15+1
+
+ JSR DORND              \ Set XX15 = random number 0-255
+ STA XX15
+
+ JSR DORND              \ Set XX15+2 = random number 0-7
+ AND #7                 \
+ STA XX15+2             \ which is either 0 (no ships in the hanger) or one of
+                        \ the first 7 ship types in the ship hanger blueprints
+                        \ table, i.e. a cargo canister, Shuttle, Transporter,
+                        \ Cobra Mk III, Python, Viper or Krait
+
+ JSR HAS1               \ Call HAS1 to draw this ship in the hanger, with the
+                        \ the following properties:
+                        \
+                        \   * Random x-coordinate from -63 to +63
+                        \
+                        \   * Randomly chosen cargo canister, Shuttle,
+                        \     Transporter, Cobra Mk III, Python, Viper or Krait
+                        \
+                        \   * Random z-coordinate from +256 to +639
+
+ LDY #0                 \ Set Y = 0 to use in the following instruction, to tell
+                        \ the hanger-drawing routine that there is just one ship
+                        \ in the hanger, so it knows not to draw between the
+                        \ ships
+
+.HA9
+
+ STY YSAV               \ Store Y in YSAV to specify whether there are multiple
+                        \ ships in the hanger
+
+ JSR UNWISE             \ Call UNWISE to switch the main line-drawing routine
+                        \ between EOR and OR logic (in this case, switching it
+                        \ back to EOR logic so that we can erase anything we
+                        \ draw on-screen)
+
+                        \ Fall through into HANGER to draw the hanger background
+
+\ ******************************************************************************
+\
+\       Name: HANGER
+\       Type: Subroutine
+\   Category: Ship hanger
+\    Summary: Display the ship hanger
+\
+\ ------------------------------------------------------------------------------
+\
+\ This routine is called after the ships in the hanger have been drawn, so all
+\ it has to do is draw the hanger's background.
+\
+\ The hanger background is made up of two parts:
+\
+\   * The hanger floor consists of 11 screen-wide horizontal lines, which start
+\     out quite spaced out near the bottom of the screen, and bunch ever closer
+\     together as the eye moves up towards the horizon, where they merge to give
+\     a sense of perspective
+\
+\   * The back wall of the hanger consists of 15 equally spaced vertical lines
+\     that join the horizon to the top of the screen
+\
+\ The ships in the hangar have already been drawn by this point, so the lines
+\ are drawn so they don't overlap anything that's already there, which makes
+\ them look like they are behind and below the ships. This is achieved by
+\ drawing the lines in from the screen edges until they bump into something
+\ already on-screen. For the horizontal lines, when there are multiple ships in
+\ the hanger, this also means drawing lines between the ships, as well as in
+\ from each side.
+\
+\ ******************************************************************************
+
+.HANGER
+
+                        \ We start by drawing the floor
+
+ LDX #2                 \ We start with a loop using a counter in T that goes
+                        \ from 2 to 12, one for each of the 11 horizontal lines
+                        \ in the floor, so set the initial value in X
+
+.HAL1
+
+ STX XSAV               \ Store the loop counter in XSAV
+
+ LDA #130               \ Set A = 130
+
+ LDX XSAV               \ Retrieve the loop counter from XSAV
+
+ STX Q                  \ Set Q = T
+
+ JSR DVID4              \ Calculate the following:
+                        \
+                        \   (P R) = 256 * A / Q
+                        \         = 256 * 130 / T
+                        \
+                        \ so P = 130 / T, and as the counter T goes from 2 to
+                        \ 12, P goes 65, 43, 32 ... 13, 11, 10, with the
+                        \ difference between two consecutive numbers getting
+                        \ smaller as P gets smaller
+                        \
+                        \ We can use this value as a y-coordinate to draw a set
+                        \ of horizontal lines, spaced out near the bottom of the
+                        \ screen (high value of P, high y-coordinate, lower down
+                        \ the screen) and bunching up towards the horizon (low
+                        \ value of P, low y-coordinate, higher up the screen)
+
+ LDA P                  \ Set Y = #Y + P
+ CLC                    \
+ ADC #Y                 \ where #Y is the y-coordinate of the centre of the
+                        \ screen, so Y is now the horizontal pixel row of the
+                        \ line we want to draw to display the hanger floor
+
+ LSR A                  \ Set A = A >> 3
+ LSR A
+ LSR A
+
+ ORA #&60               \ Each character row in Elite's screen mode takes up one
+                        \ page in memory (256 bytes), so we now OR with &60 to
+                        \ get the page containing the line
+
+ STA SCH                \ Store the screen page in the high byte of SC(1 0)
+
+ LDA P                  \ Set the low byte of SC(1 0) to the y-coordinate mod 7,
+ AND #7                 \ which determines the pixel row in the character block
+ STA SC                 \ we need to draw in (as each character row is 8 pixels
+                        \ high), so SC(1 0) now points to the address of the
+                        \ start of the horizontal line we want to draw
+
+ LDY #0                 \ Set Y = 0 so the call to HAS2 starts drawing the line
+                        \ in the first byte of the screen row, at the left edge
+                        \ of the screen
+
+ JSR HAS2               \ Draw a horizontal line from the left edge of the
+                        \ screen, going right until we bump into something
+                        \ already on-screen, at which point stop drawing
+
+ LDA #%00000100         \ Now to draw the same line but from the right edge of
+                        \ the screen, so set a pixel mask in A to check the
+                        \ sixth pixel of the last byte, so we skip the 2-pixel
+                        \ scren border at the right edge of the screen
+
+ LDY #248               \ Set Y = 248 so the call to HAS3 starts drawing the
+                        \ line in the last byte of the screen row, at the right
+                        \ edge of the screen
+
+ JSR HAS3               \ Draw a horizontal line from the right edge of the
+                        \ screen, going left until we bump into something
+                        \ already on-screen, at which point stop drawing
+
+ LDY YSAV               \ Fetch the value of YSAV, which gets set to 0 in the
+                        \ HALL routine above if there is only one ship
+
+ BEQ HA2                \ If YSAV is zero, jump to HA2 to skip the following
+                        \ as there is only one ship in the hanger
+
+                        \ If we get here then there are multiple ships in the
+                        \ hanger, so we also need to draw the horizontal line in
+                        \ the gap between the ships
+
+ JSR HAS2               \ Call HAS2 to a line to the right, starting with the
+                        \ third pixel of the pixel row at screen address SC(1 0)
+
+ LDY #128               \ We now draw the line from the centre of the screen
+                        \ to the left. SC(1 0) points to the start address of
+                        \ the screen row, so we set Y to 128 so the call to
+                        \ HAS3 starts drawing from halfway along the row (i.e.
+                        \ from the centre of the screen)
+
+ LDA #%01000000         \ We want to start drawing from the second pixel, to
+                        \ avoid the border, so we set a pixel mask accordingly
+
+ JSR HAS3               \ Call HAS3, which draws a line from the halfway point
+                        \ across the left half of the screen, going left until
+                        \ we bump into something already on-screen, at which
+                        \ point it stops drawing
+
+.HA2
+
+                        \ We have finished threading our horizontal line behind
+                        \ the ships already on-screen, so now for the next line
+
+ LDX XSAV               \ Fetch the loop counter from XSAV and increment it
  INX
- DEY
- BPL l_1fda
- TXA
- PHA
- JSR l_2079
- PLA
- TAX
- DEC &94
- BNE l_1fd8
- LDY #&80
- BNE l_2007
 
-.l_1ff3
+ CPX #13                \ If the loop counter is less than 13 (i.e. T = 2 to 12)
+ BCC HAL1               \ then loop back to HAL1 to draw the next line
 
- LSR A
- STA &35
- JSR DORND
- STA &34
- JSR DORND
- AND #&07
- STA &36
- JSR l_2079
- LDY #&00
+                        \ The floor is done, so now we move on to the back wall
 
-.l_2007
+ LDA #16                \ We want to draw 15 vertical lines, one every 16 pixels
+                        \ across the screen, with the first at x-coordinate 16,
+                        \ so set this in A to act as the x-coordinate of each
+                        \ line as we work our way through them from left to
+                        \ right, incrementing by 16 for each new line
 
- STY &85
- JSR draw_mode
- LDX #&02
+.HAL6
 
-.l_200e
+ LDX #&60               \ Set the high byte of SC(1 0) to &60, the high byte of
+ STX SCH                \ the start of screen
 
- STX &84
- LDA #&82
- LDX &84
- STX &81
- JSR l_2316
- LDA &1B
- CLC
- ADC #&60
- LSR A
- LSR A
- LSR A
- ORA #&60
- STA SC+&01
- LDA &1B
- AND #&07
- STA SC
- LDY #&00
- JSR l_20e8
- LDA #&04
- LDY #&F8
- JSR l_2101
- LDY &85
- BEQ l_2045
- JSR l_20e8
- LDY #&80
- LDA #&40
- JSR l_2101
+ STA XSAV               \ Store this value in XSAV, so we can retrieve it later
 
-.l_2045
+ AND #%11111000         \ Each character block contains 8 pixel rows, so to get
+                        \ the address of the first byte in the character block
+                        \ that we need to draw into, as an offset from the start
+                        \ of the row, we clear bits 0-2
 
- LDX &84
- INX
- CPX #&0D
- BCC l_200e
- LDA #&10
+ STA SC                 \ Set the low byte of SC(1 0) to this value, so SC(1 0)
+                        \ now points to the address where the line starts
 
-.l_204e
+ LDX #%10000000         \ Set a mask in X to the first pixel the 8-pixel byte
 
- LDX #&60
- STX SC+&01
- STA &84
- AND #&F8
- STA SC
- LDX #&80
- LDY #&01
+ LDY #1                 \ We are going to start drawing the line from the second
+                        \ pixel from the top (to avoid drawing on the 1-pixel
+                        \ border), so set Y to 1 to point to the second row in
+                        \ the first character block
 
-.l_205c
+.HAL7
 
- TXA
- AND (SC),Y
- BNE l_2071
- TXA
- ORA (SC),Y
- STA (SC),Y
- INY
- CPY #&08
- BNE l_205c
- INC SC+&01
- LDY #&00
- BEQ l_205c
+ TXA                    \ Copy the pixel mask to A
 
-.l_2071
+ AND (SC),Y             \ If the pixel we want to draw is non-zero (using A as a
+ BNE HA6                \ mask), then this means it already contains something,
+                        \ so jump to HA6 to stop drawing this line
 
- LDA &84
- CLC
- ADC #&10
- BNE l_204e
- RTS
+ TXA                    \ Copy the pixel mask to A again
 
-.l_2079
+ ORA (SC),Y             \ OR the byte with the current contents of screen
+                        \ memory, so the pixel we want is set
 
- JSR init_ship
- LDA &34
- STA &4C
- LSR A
- ROR &48
- LDA &35
- STA &46
- LSR A
- LDA #&01
- ADC #&00
- STA &4D
- LDA #&80
- STA &4B
- STA &9A
- LDA #&0B
- STA &68
- JSR DORND
- STA &84
+ STA (SC),Y             \ Store the updated pixel in screen memory
 
-.l_209d
+ INY                    \ Increment Y to point to the next row in the character
+                        \ block, i.e. the next pixel down
 
- LDX #&15
- LDY #&09
+ CPY #8                 \ Loop back to HAL7 to draw this next pixel until we
+ BNE HAL7               \ have drawn all 8 in the character block
+
+ INC SC+1               \ Point SC(1 0) to the next page in memory, i.e. the
+                        \ next character row
+
+ LDY #0                 \ Set Y = 0 to point to the first row in this character
+                        \ block
+
+ BEQ HAL7               \ Loop back up to HAL7 to keep drawing the line (this
+                        \ BEQ is effectively a JMP as Y is always zero)
+
+.HA6
+
+ LDA XSAV               \ Fetch the x-coordinate of the line we just drew from
+ CLC                    \ XSAV into A, and add 16 so that A contains the
+ ADC #16                \ x-coordinate of the next line to draw
+
+ BNE HAL6               \ Loop back to HAL6 until we have run through the loop
+                        \ 60 times, by which point we are most definitely done
+
+ RTS                    \ Return from the subroutine
+
+\ ******************************************************************************
+\
+\       Name: HAS1
+\       Type: Subroutine
+\   Category: Ship hanger
+\    Summary: Draw a ship in the ship hanger
+\
+\ ------------------------------------------------------------------------------
+\
+\ The ship's position within the hanger is determined by the arguments and the
+\ size of the ship's targetable area, as follows:
+\
+\   * The x-coordinate is (x_sign x_hi 0) from the arguments, so the ship can be
+\     left of centre or right of centre
+\
+\   * The y-coordinate is negative and is lower down the screen for smaller
+\     ships, so smaller ships are drawn closer to the ground (because they are)
+\
+\   * The z-coordinate is positive, with both z_hi (which is 1 or 2) and z_lo
+\     coming from the arguments
+\
+\ Arguments:
+\
+\   XX15                Bits 0-7 = Ship's z_lo
+\                       Bit 0    = Ship's x_sign
+\
+\   XX15+1              Bits 0-7 = Ship's x_hi
+\                       Bit 0    = Ship's z_hi (1 if clear, or 2 if set)
+\
+\   XX15+2              Non-zero = Ship type to draw
+\                       0        = Don't draw anything
+\
+\ ******************************************************************************
+
+.HAS1
+
+ JSR ZINF               \ Call ZINF to reset the INWK ship workspace and reset
+                        \ the orientation vectors, with nosev pointing out of
+                        \ the screen, so this puts the ship flat on the
+                        \ horizontal deck (the y = 0 plane) with its nose
+                        \ pointing towards us
+
+ LDA XX15               \ Set z_lo = XX15
+ STA INWK+6
+
+ LSR A                  \ Set the sign bit of x_sign to bit 0 of A
+ ROR INWK+2
+
+ LDA XX15+1             \ Set x_hi = XX15+1
+ STA INWK
+
+ LSR A                  \ Set z_hi = 1 + bit 0 of XX15+1
+ LDA #1
+ ADC #0
+ STA INWK+7
+
+ LDA #%10000000         \ Set bit 7 of y_sign, so y is negative
+ STA INWK+5
+
+ STA RAT2               \ Set RAT2 = %10000000, so the yaw calls in HAL5 below
+                        \ are negative
+
+ LDA #&B                \ Set the ship line heap pointer in INWK(35 34) to point
+ STA INWK+34            \ to &0B00
+
+ JSR DORND              \ We now perform a random number of small angle (3.6
+ STA XSAV               \ degree) rotations to spin the ship on the deck while
+                        \ keeping it flat on the deck (a bit like spinning a
+                        \ bottle), so we set XSAV to a random number between 0
+                        \ and 255 for the number of small yaw rotations to
+                        \ perform, so the ship could be pointing in any
+                        \ direction by the time we're done
+
+.HAL5
+
+ LDX #21                \ Rotate (sidev_x, nosev_x) by a small angle (yaw)
+ LDY #9
  JSR MVS5
- LDX #&17
- LDY #&0B
+
+ LDX #23                \ Rotate (sidev_y, nosev_y) by a small angle (yaw)
+ LDY #11
  JSR MVS5
- LDX #&19
- LDY #&0D
+
+ LDX #25                \ Rotate (sidev_z, nosev_z) by a small angle (yaw)
+ LDY #13
  JSR MVS5
- DEC &84
- BNE l_209d
- LDY &36
- BEQ l_2138
- LDX #&04
 
-.l_20bc
+ DEC XSAV               \ Decrement the yaw counter in XSAV
 
- INX
- INX
- LDA ship_data,X
- STA &1E
- LDA ship_data+&01,X
- STA &1F
- BEQ l_20bc
- DEY
- BNE l_20bc
- LDY #&01
- LDA (&1E),Y
- STA &81
- INY
- LDA (&1E),Y
- STA &82
- JSR sqr_root
- LDA #&64
- SBC &81
- LSR A
- STA &49
- JSR TIDY
- JMP l_400f
+ BNE HAL5               \ Loop back to yaw a little more until we have yawed
+                        \ by the number of times in XSAV
 
-.l_20e8
+ LDY XX15+2             \ Set Y = XX15+2, the ship type of the ship we need to
+                        \ draw
 
- LDA #&20
+ BEQ HA1                \ If Y = 0, return from the subroutine (as HA1 contains
+                        \ an RTS)
 
-.l_20ea
+                        \ We now work our way through the ship blueprints table
+                        \ for the hanger, counting valid blueprints until we
+                        \ have found the Y-th valid blueprint (we do this as the
+                        \ hanger blueprint table at XX21 is not fully populated,
+                        \ so the Y-th ship is not necessarily at position Y)
 
- TAX
- AND (SC),Y
- BNE l_2100
- TXA
- ORA (SC),Y
- STA (SC),Y
- TXA
- LSR A
- BCC l_20ea
- TYA
- ADC #&07
+ LDX #4                 \ We can start looking from ship blueprint 3, because we
+                        \ don't show ship 1 (missile) or ship 2 (space station)
+                        \ in the hanger. Setting X to 4, which then gets
+                        \ incremented to 6, will start us at XX21(5 4), which is
+                        \ the address of ship blueprint 3 (escape pod)
+
+.hloop
+
+ INX                    \ Increment X by 2 to point to the next blueprint in the
+ INX                    \ table
+
+ LDA XX21-2,X           \ Set XX0(1 0) to the X-th address in the ship blueprint
+ STA XX0                \ address lookup table at XX21, so XX0(1 0) now points
+ LDA XX21-1,X           \ to the blueprint for the ship we need to draw
+ STA XX0+1
+
+ BEQ hloop              \ If the high byte of the blueprint address is 0, then
+                        \ the blueprint for this ship is not available, so jump
+                        \ back to hloop to try the next ship along in the table
+
+ DEY                    \ We have found a valid blueprint, so decrement the ship
+                        \ number that we are looking for in Y
+
+ BNE hloop              \ If Y is not yet zero, we still haven't found the Y-th
+                        \ valid blueprint, so loop back to hloop to try the next
+                        \ ship along in the table
+
+ LDY #1                 \ Set Q = ship byte #1
+ LDA (XX0),Y
+ STA Q
+
+ INY                    \ Set R = ship byte #2
+ LDA (XX0),Y            \
+ STA R                  \ so (R Q) contains the ship's targetable area, which is
+                        \ a square number
+
+ JSR LL5                \ Set Q = SQRT(R Q)
+
+ LDA #100               \ Set y_lo = (100 - Q) / 2
+ SBC Q                  \
+ LSR A                  \ so the bigger the ship's targetable area, the smaller
+ STA INWK+3             \ the magnitude of the y-coordinate, so because we set
+                        \ y_sign to be negative above, this means smaller ships
+                        \ are drawn lower down, i.e. closer to the ground, while
+                        \ larger ships are drawn higher up, as you would expect
+
+ JSR TIDY               \ Call TIDY to tidy up the orientation vectors, to
+                        \ prevent the ship from getting elongated and out of
+                        \ shape due to the imprecise nature of trigonometry
+                        \ in assembly language
+
+ JMP LL9                \ Jump to LL9 to display the ship and return from the
+                        \ subroutine using a tail call
+
+\ ******************************************************************************
+\
+\       Name: HAS2
+\       Type: Subroutine
+\   Category: Ship hanger
+\    Summary: Draw a hanger background line from left to right
+\
+\ ------------------------------------------------------------------------------
+\
+\ This routine draws a line to the right, starting with the third pixel of the
+\ pixel row at screen address SC(1 0), and aborting if we bump into something
+\ that's already on-screen. HAL2 draws from the left edge of the screen to the
+\ halfway point, and then HAL3 takes over to draw from the halfway point across
+\ the right half of the screen.
+\
+\ Other entry points:
+\
+\   HA3                 Contains an RTS
+\
+\ ******************************************************************************
+
+.HAS2
+
+ LDA #%00100000         \ Set A to the pixel pattern for a mode 4 character row
+                        \ byte with the third pixel set, so we start drawing the
+                        \ horizontal line just to the right of the 2-pixel
+                        \ border along the edge of the screen
+
+.HAL2
+
+ TAX                    \ Store A in X so we can retrieve it after the following
+                        \ check and again after updating screen memory
+
+ AND (SC),Y             \ If the pixel we want to draw is non-zero (using A as a
+ BNE HA3                \ mask), then this means it already contains something,
+                        \ so we stop drawing because we have run into something
+                        \ that's already on-screen, and return from the
+                        \ subroutine (as HA3 contains an RTS)
+
+ TXA                    \ Retrieve the value of A we stored above, so A now
+                        \ contains the pixel mask again
+
+ ORA (SC),Y             \ OR the byte with the current contents of screen
+                        \ memory, so the pixel we want is set to red (because
+                        \ we know the bits are already 0 from the above test)
+
+ STA (SC),Y             \ Store the updated pixel in screen memory
+
+ TXA                    \ Retrieve the value of A we stored above, so A now
+                        \ contains the pixel mask again
+
+ LSR A                  \ Shift A to the right to move on to the next pixel
+
+ BCC HAL2               \ If bit 0 before the shift was clear (i.e. we didn't
+                        \ just do the fourth pixel in this block), loop back to
+                        \ HAL2 to check and draw the next pixel
+
+ TYA                    \ Set Y = Y + 8 (as we know the C flag is set) to point
+ ADC #7                 \ to the next character block along
  TAY
- LDA #&80
- BCC l_20ea
 
-.l_2100
+ LDA #%10000000         \ Reset the pixel mask in A to the first pixel in the
+                        \ new 8-pixel character block
 
- RTS
+ BCC HAL2               \ If the above addition didn't overflow, jump back to
+                        \ HAL2 to keep drawing the line in the next character
+                        \ block
 
-.l_2101
+.HA3
 
- TAX
- AND (SC),Y
- BNE l_2100
- TXA
- ORA (SC),Y
- STA (SC),Y
- TXA
- ASL A
- BCC l_2101
- TYA
- SBC #&08
+ RTS                    \ The addition overflowed, so we have reached the last
+                        \ character block in this page of memory, which is the
+                        \ end of the line, so we return from the subroutine
+
+\ ******************************************************************************
+\
+\       Name: HAS3
+\       Type: Subroutine
+\   Category: Ship hanger
+\    Summary: Draw a hanger background line from right to left
+\
+\ ------------------------------------------------------------------------------
+\
+\ This routine draws a line to the left, starting with the pixel mask in A at
+\ screen address SC(1 0) and character block offset Y, and aborting if we bump
+\ into something that's already on-screen.
+\
+\ ******************************************************************************
+
+.HAS3
+
+ TAX                    \ Store A in X so we can retrieve it after the following
+                        \ check and again after updating screen memory
+
+ AND (SC),Y             \ If the pixel we want to draw is non-zero (using A as a
+ BNE HA3                \ mask), then this means it already contains something,
+                        \ so we stop drawing because we have run into something
+                        \ that's already on-screen, and return from the
+                        \ subroutine (as HA3 contains an RTS)
+
+ TXA                    \ Retrieve the value of A we stored above, so A now
+                        \ contains the pixel mask again
+
+ ORA (SC),Y             \ OR the byte with the current contents of screen
+                        \ memory, so the pixel we want is set to red (because
+                        \ we know the bits are already 0 from the above test)
+
+ STA (SC),Y             \ Store the updated pixel in screen memory
+
+ TXA                    \ Retrieve the value of A we stored above, so A now
+                        \ contains the pixel mask again
+
+ ASL A                  \ Shift A to the left to move to the next pixel to the
+                        \ left
+
+ BCC HAS3               \ If bit 7 before the shift was clear (i.e. we didn't
+                        \ just do the first pixel in this block), loop back to
+                        \ HAS3 to check and draw the next pixel to the left
+
+ TYA                    \ Set Y = Y - 8 (as we know the C flag is set) to point
+ SBC #8                 \ to the next character block to the left
  TAY
- LDA #&01
- BCS l_2101
- RTS
 
-.draw_mode
+ LDA #%00000001         \ Set a mask in A to the last pixel in the 8-pixel byte
 
- LDA LIL2+2
+ BCS HAS3               \ If the above subtraction didn't underflow, jump back
+                        \ to HAS3 to keep drawing the line in the next character
+                        \ block to the left
+
+ RTS                    \ Return from the subroutine
+
+\ ******************************************************************************
+\
+\       Name: UNWISE
+\       Type: Subroutine
+\   Category: Ship hanger
+\    Summary: Switch the main line-drawing routine between EOR and OR logic
+\
+\ ------------------------------------------------------------------------------
+\
+\ This routine modifies the instructions in the main line-drawing routine at
+\ LOIN/LL30, flipping the drawing logic between the default EOR logic (which
+\ merges with whatever is already on screen, allowing us to erase anything we
+\ draw for animation purposes) and OR logic (which overwrites the screen,
+\ ignoring anything that's already there). We want to use OR logic for drawing
+\ the ship hanger, as it looks better and we don't need to animate it).
+\
+\ The routine name, UNWISE, sums up this approach - if anything goes wrong, the
+\ results would be messy.
+\
+\ Other entry points:
+\
+\   HA1                 Contains an RTS
+\
+\ ******************************************************************************
+
+.UNWISE
+
+ LDA LIL2+2             \ AJD
  EOR #&40
  STA LIL2+2
  \	LDA LIL3+2
@@ -7959,76 +8829,175 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  \	EOR #&40
  STA LIL6+2
 
-.l_2138
+.HA1
 
- RTS
+ RTS                    \ Return from the subroutine
+
+\ ******************************************************************************
+\
+\       Name: HFS2
+\       Type: Subroutine
+\   Category: Drawing circles
+\    Summary: Draw the launch or hyperspace tunnel
+\
+\ ------------------------------------------------------------------------------
+\
+\ The animation gets drawn like this. First, we draw a circle of radius 8 at the
+\ centre, and then double the radius, draw another circle, double the radius
+\ again and draw a circle, and we keep doing this until the radius is bigger
+\ than 160 (which goes beyond the edge of the screen, which is 256 pixels wide,
+\ equivalent to a radius of 128). We then repeat this whole process for an
+\ initial circle of radius 9, then radius 10, all the way up to radius 15.
+\
+\ This has the effect of making the tunnel appear to be racing towards us as we
+\ hurtle out into hyperspace or through the space station's docking tunnel.
+\
+\ The hyperspace effect is done in a full mode 5 screen, which makes the rings
+\ all coloured and zig-zaggy, while the launch screen is in the normal
+\ monochrome mode 4 screen.
+\
+\ Arguments:
+\
+\   A                   The step size of the straight lines making up the rings
+\                       (4 for launch, 8 for hyperspace)
+\
+\ ******************************************************************************
+
+.HFS2
 
 .HFS1
 
- LDX #&80
- STX &D2
- LDX #&60
- STX &E0
- LDX #&00
- STX &96
- STX &D3
- STX &E1
+ LDX #X                 \ Set K3 = #X (the x-coordinate of the centre of the
+ STX K3                 \ screen)
 
-.l_216b
+ LDX #Y                 \ Set K4 = #Y (the y-coordinate of the centre of the
+ STX K4                 \ screen)
 
- JSR l_2177
- INC &96
- LDX &96
- CPX #&08
- BNE l_216b
- RTS
+ LDX #0                 \ Set X = 0
 
-.l_2177
+ STX XX4                \ Set XX4 = 0, which we will use as a counter for
+                        \ drawing 8 concentric rings
 
- LDA &96
- AND #&07
- CLC
- ADC #&08
- STA &40
+ STX K3+1               \ Set the high bytes of K3(1 0) and K4(1 0) to 0
+ STX K4+1
 
-.l_2180
+.HFL5
 
- LDA #&01
- STA &6B
- JSR circle
- ASL &40
- BCS l_2191
- LDA &40
- CMP #&A0
- BCC l_2180
+ JSR HFL1               \ Call HFL1 below to draw a set of rings, with each one
+                        \ twice the radius of the previous one, until they won't
+                        \ fit on-screen
 
-.l_2191
+ INC XX4                \ Increment the counter and fetch it into X
+ LDX XX4
 
- RTS
+ CPX #8                 \ If we haven't drawn 8 sets of rings yet, loop back to
+ BNE HFL5               \ HFL5 to draw the next ring
 
-.l_21be
+ RTS                    \ Return from the subroutine
 
- AND #&7F
+.HFL1
 
-.square
+ LDA XX4                \ Set K to the ring number in XX4 (0-7) + 8, so K has
+ AND #7                 \ a value of 8 to 15, which we will use as the starting
+ CLC                    \ radius for our next set of rings
+ ADC #8
+ STA K
 
- STA &1B
+.HFL2
+
+ LDA #1                 \ Set LSP = 1 to reset the ball line heap
+ STA LSP
+
+ JSR CIRCLE2            \ Call CIRCLE2 to draw a circle with the centre at
+                        \ (K3(1 0), K4(1 0)) and radius K
+
+ ASL K                  \ Double the radius in K
+
+ BCS HF8                \ If the radius had a 1 in bit 7 before the above shift,
+                        \ then doubling K will means the circle will no longer
+                        \ fit on the screen (which is width 256), so jump to
+                        \ HF8 to stop drawing circles
+
+ LDA K                  \ If the radius in K <= 160, loop back to HFL2 to draw
+ CMP #160               \ another one
+ BCC HFL2
+
+.HF8
+
+ RTS                    \ Return from the subroutine
+
+\ ******************************************************************************
+\
+\       Name: SQUA
+\       Type: Subroutine
+\   Category: Maths (Arithmetic)
+\    Summary: Clear bit 7 of A and calculate (A P) = A * A
+\
+\ ------------------------------------------------------------------------------
+\
+\ Do the following multiplication of unsigned 8-bit numbers, after first
+\ clearing bit 7 of A:
+\
+\   (A P) = A * A
+\
+\ ******************************************************************************
+
+.SQUA
+
+ AND #%01111111         \ Clear bit 7 of A and fall through into SQUA2 to set
+                        \ (A P) = A * A
+
+\ ******************************************************************************
+\
+\       Name: SQUA2
+\       Type: Subroutine
+\   Category: Maths (Arithmetic)
+\    Summary: Calculate (A P) = A * A
+\
+\ ------------------------------------------------------------------------------
+\
+\ Do the following multiplication of unsigned 8-bit numbers:
+\
+\   (A P) = A * A
+\
+\ ******************************************************************************
+
+.SQUA2
+
+ STA P                  \ Copy A into P and X
  TAX
- BNE l_21d7
 
-.l_21c5
+ BNE MU11               \ If X = 0 fall through into MU1 to return a 0,
+                        \ otherwise jump to MU11 to return P * X
 
- CLC
- STX &1B
+\ ******************************************************************************
+\
+\       Name: MU1
+\       Type: Subroutine
+\   Category: Maths (Arithmetic)
+\    Summary: Copy X into P and A, and clear the C flag
+\
+\ ------------------------------------------------------------------------------
+\
+\ Used to return a 0 result quickly from MULTU below.
+\
+\ ******************************************************************************
+
+.MU1
+
+ CLC                    \ Clear the C flag
+
+ STX P                  \ Copy X into P and A
  TXA
- RTS
+
+ RTS                    \ Return from the subroutine
 
 .price_mult
 
  LDX &81
- BEQ l_21c5
+ BEQ MU1
 
-.l_21d7
+.MU11
 
  DEX
  STX &D1
@@ -8204,7 +9173,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  ORA &D1
  RTS
 
-.l_2316
+.DVID4
 
  LDX #&08
  ASL A
@@ -8347,7 +9316,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  SEC
  ROL TP
  JSR BRIS
- JSR init_ship
+ JSR ZINF
  LDA #&1F
  STA &8C
  JSR ins_ship
@@ -8363,7 +9332,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  LDX #&7F
  STX &63
  STX &64
- JSR l_400f
+ JSR LL9
  JSR MVEIT
  DEC &8A
  BNE l_2499
@@ -8384,7 +9353,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 .l_24bc
 
  STX &49
- JSR l_400f
+ JSR LL9
  JSR MVEIT
  JMP l_24a9
 
@@ -8414,7 +9383,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  STA &65
  LDA #&01
  JSR TT66
- JSR l_400f
+ JSR LL9
 
 .MT23
 
@@ -8439,7 +9408,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  STA &4C
  LDA #&02
  STA &4D
- JSR l_400f
+ JSR LL9
  JSR MVEIT
  JMP scan_10
 
@@ -8572,7 +9541,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
 .tot_cargo
 
- ADC cmdr_cargo,X
+ ADC QQ20,X
  BCS n_over
  DEX
  BPL tot_cargo
@@ -8586,11 +9555,11 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 .chk_quant
 
  LDY &03AD
- ADC cmdr_cargo,Y
+ ADC QQ20,Y
  \	PLA
  RTS
 
-.permute_4
+.TT20
 
  JSR permute_2
 
@@ -8885,7 +9854,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  JSR TT66
  LDA #&07
  STA XC
- JSR copy_xy
+ JSR TT81
  LDA #&C7
  JSR TT27
  JSR NLIN
@@ -8908,13 +9877,13 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  ADC #&18
  STA &35
  JSR PIXEL
- JSR permute_4
+ JSR TT20
  LDX &84
  INX
  BNE l_2830
- LDA data_homex
+ LDA QQ9
  STA &73
- LDA data_homey
+ LDA QQ10
  LSR A
  STA &74
  LDA #&04
@@ -8993,7 +9962,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  JSR map_cross
  LDA QQ14
  STA &40
- JMP map_circle
+ JMP map_CIRCLE2
 
 .map_range
 
@@ -9016,7 +9985,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  ADC #&18
  STA &74
 
-.map_circle
+.map_CIRCLE2
 
  LDA &73
  STA &D2
@@ -9029,7 +9998,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  STX &6B
  INX
  STX &95
- JMP circle
+ JMP CIRCLE2
 
 .buy_cargo
 
@@ -9098,8 +10067,8 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  LDA &82
  PHA
  CLC
- ADC cmdr_cargo,Y
- STA cmdr_cargo,Y
+ ADC QQ20,Y
+ STA QQ20,Y
  LDA cmdr_avail,Y
  SEC
  SBC &82
@@ -9208,7 +10177,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  JSR new_pgph
  JSR TT67
  JSR sell_equip
- LDA cmdr_escape
+ LDA ESCP
  BEQ sell_escape
  LDA #&70
  LDX #&1E
@@ -9252,7 +10221,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
 .l_2a37
 
- LDX cmdr_cargo,Y
+ LDX QQ20,Y
  BEQ l_2aa3
  TYA
  ASL A
@@ -9286,10 +10255,10 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  STX QQ17
  JSR price_a
  LDY &03AD
- LDA cmdr_cargo,Y
+ LDA QQ20,Y
  SEC
  SBC &82
- STA cmdr_cargo,Y
+ STA QQ20,Y
  LDA &82
  STA &1B
  LDA &03AA
@@ -9348,29 +10317,29 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  EOR #&FF
  PHA
  JSR sync
- JSR map_cursor
+ JSR TT103
  PLA
  STA &76
- LDA data_homey
+ LDA QQ10
  JSR incdec_dirn
  LDA &77
- STA data_homey
+ STA QQ10
  STA &74
  PLA
  STA &76
- LDA data_homex
+ LDA QQ9
  JSR incdec_dirn
  LDA &77
- STA data_homex
+ STA QQ9
  STA &73
 
-.map_cursor
+.TT103
 
  LDA &87
  BMI map_shcurs
- LDA data_homex
+ LDA QQ9
  STA &73
- LDA data_homey
+ LDA QQ10
  LSR A
  STA &74
  LDA #&04
@@ -9401,7 +10370,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
 .map_shcurs
 
- LDA data_homex
+ LDA QQ9
  SEC
  SBC QQ0
  CMP #&26
@@ -9416,7 +10385,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  CLC
  ADC #&68
  STA &73
- LDA data_homey
+ LDA QQ10
  SEC
  SBC QQ1
  CMP #&26
@@ -9443,8 +10412,8 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  LDA #&BE
  JSR NLIN3
  JSR map_range
- JSR map_cursor
- JSR copy_xy
+ JSR TT103
+ JSR TT81
  LDA #&00
  STA &97
  LDX #&18
@@ -9519,7 +10488,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  \	LDA #&80
  \	STA QQ17
  JSR vdu_80
- JSR write_planet
+ JSR cpl
 
 .l_2c01
 
@@ -9539,12 +10508,12 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
 .l_2c1e
 
- JSR permute_4
+ JSR TT20
  INC &97
  BEQ l_2c32
  JMP short_loop
 
-.copy_xy
+.TT81
 
  LDX #&05
 
@@ -9561,7 +10530,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
 .TT111
 
- JSR copy_xy
+ JSR TT81
  LDY #&7F
  STY &D1
  LDA #&00
@@ -9571,7 +10540,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
  LDA &6F
  SEC
- SBC data_homex
+ SBC QQ9
  BCS l_2c4a
  EOR #&FF
  ADC #&01
@@ -9582,7 +10551,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  STA &83
  LDA &6D
  SEC
- SBC data_homey
+ SBC QQ10
  BCS l_2c59
  EOR #&FF
  ADC #&01
@@ -9608,7 +10577,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
 .l_2c70
 
- JSR permute_4
+ JSR TT20
  INC &80
  BNE snap_loop
  LDX #&05
@@ -9620,9 +10589,9 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  DEX
  BPL l_2c79
  LDA &6D
- STA data_homey
+ STA QQ10
  LDA &6F
- STA data_homex
+ STA QQ9
  SEC
  SBC QQ0
  BCS l_2c94
@@ -9631,11 +10600,11 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
 .l_2c94
 
- JSR square
+ JSR SQUA2
  STA &41
  LDA &1B
  STA &40
- LDA data_homey
+ LDA QQ10
  SEC
  SBC QQ1
  BCS l_2caa
@@ -9645,7 +10614,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 .l_2caa
 
  LSR A
- JSR square
+ JSR SQUA2
  PHA
  LDA &1B
  CLC
@@ -9654,7 +10623,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  PLA
  ADC &41
  STA &82
- JSR sqr_root
+ JSR LL5
  LDA &81
  ASL A
  LDX #&00
@@ -9667,9 +10636,9 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
 .data_home
 
- LDA data_homex
+ LDA QQ9
  STA QQ0
- LDA data_homey
+ LDA QQ10
  STA QQ1
  RTS
 
@@ -10025,7 +10994,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  PHA
  CMP #&02
  BCC equip_space
- LDA cmdr_cargo+&10
+ LDA QQ20+&10
  SEC
  LDX #&C
  JSR tot_cargo
@@ -10133,9 +11102,9 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  INY
  CMP #&07
  BNE equip_nescape
- LDX cmdr_escape
+ LDX ESCP
  BNE equip_gotit
- DEC cmdr_escape
+ DEC ESCP
 
 .equip_nescape
 
@@ -10315,12 +11284,12 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
 .snap_cursor
 
- JSR map_cursor
+ JSR TT103
  JSR TT111
- JSR map_cursor
+ JSR TT103
  JMP CLYNS
 
-.write_planet
+.cpl
 
  LDX #&05
 
@@ -10383,7 +11352,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 .l_315a
 
  JSR l_3160
- JSR write_planet
+ JSR cpl
 
 .l_3160
 
@@ -10458,7 +11427,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  BEQ l_315a
  DEX
  BNE l_31bd
- JMP write_planet
+ JMP cpl
 
 .l_31bd
 
@@ -10718,9 +11687,9 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  BMI l_3362
  ASL A
  TAY
- LDA ship_data,Y
+ LDA XX21-2,Y
  STA &1E
- LDA ship_data+&01,Y
+ LDA XX21-1,Y
  STA &1F
  CPY #&04
  BEQ l_3352
@@ -10867,7 +11836,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  STX &22
  STA &23
  LDA &40
- JSR square
+ JSR SQUA2
  STA &9C
  LDA &1B
  STA &9B
@@ -10893,7 +11862,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 .l_3436
 
  LDA &22
- JSR square
+ JSR SQUA2
  STA &D1
  LDA &9B
  SEC
@@ -10903,7 +11872,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  SBC &D1
  STA &82
  STY &35
- JSR sqr_root
+ JSR LL5
  LDY &35
  JSR DORND
  AND &93
@@ -11010,7 +11979,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  STA &29
  RTS
 
-.circle
+.CIRCLE2
 
  LDX #&FF
  STX &92
@@ -11239,7 +12208,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 .l_3650
 
  LDA QQ0,X
- STA data_homex,X
+ STA QQ9,X
  DEX
  BPL l_3650
  RTS
@@ -11311,7 +12280,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  STA &03B1
  JSR DIALS
 
-.init_ship
+.ZINF
 
  LDY #&24
  LDA #&00
@@ -11509,13 +12478,13 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 .not_hype
 
  CMP #&32
- BEQ distance
+ BEQ T95
  CMP #&43
  BNE not_find
  LDA &87
  AND #&C0
  BEQ not_map
- JMP find_plant
+ JMP HME2
 
 .not_find
 
@@ -11528,9 +12497,9 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  LDA &06
  CMP #&36
  BNE not_home
- JSR map_cursor
+ JSR TT103
  JSR set_home
- JSR map_cursor
+ JSR TT103
 
 .not_cour
 
@@ -11547,21 +12516,21 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  LDA cmdr_cour
  ORA cmdr_cour+1
  BEQ not_cour
- JSR map_cursor
+ JSR TT103
  LDA cmdr_courx
- STA data_homex
+ STA QQ9
  LDA cmdr_coury
- STA data_homey
- JSR map_cursor
+ STA QQ10
+ JSR TT103
 
-.distance
+.T95
 
  LDA &87
  AND #&C0
  BEQ not_map
  JSR snap_cursor
  STA QQ17
- JSR write_planet
+ JSR cpl
  \	LDA #&80
  \	STA QQ17
  JSR vdu_80
@@ -11731,7 +12700,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  ASL A
  STA &46
  STA &49
- JSR l_400f
+ JSR LL9
  DEC &8A
  LDA #&51
  STA &FE60
@@ -12109,12 +13078,12 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 .l_3bd6
 
  LDA &34
- JSR l_21be
+ JSR SQUA
  STA &82
  LDA &1B
  STA &81
  LDA &35
- JSR l_21be
+ JSR SQUA
  STA &D1
  LDA &1B
  ADC &81
@@ -12123,7 +13092,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  ADC &82
  STA &82
  LDA &36
- JSR l_21be
+ JSR SQUA
  STA &D1
  LDA &1B
  ADC &81
@@ -12131,7 +13100,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  LDA &D1
  ADC &82
  STA &82
- JSR sqr_root
+ JSR LL5
  LDA &34
  JSR l_3e8c
  STA &34
@@ -12170,13 +13139,13 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  STA &30
  STA &0340
  LDA #&48
- BNE sound
+ BNE NOISE
 
 .BEEP
 
  LDA #&20
 
-.sound
+.NOISE
 
  JSR pp_sound
  LDX s_flag
@@ -12604,7 +13573,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  STA (&67),Y
  RTS
 
-.sqr_root
+.LL5
 
  LDY &82
  LDA &81
@@ -12768,7 +13737,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  BCC l_3fbc
  RTS
 
-.l_400f
+.LL9
 
  LDA #&1F
  STA &96
@@ -14386,7 +15355,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  LDA #&00
  STA &49
  STA &4C
- JSR copy_xy
+ JSR TT81
 
 .cour_loop
 
@@ -14439,7 +15408,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
 .cour_count
 
- JSR permute_4
+ JSR TT20
  INC &4C
  BEQ cour_menu
  DEC &46
@@ -14475,7 +15444,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
 .cour_negx
 
- JSR square
+ JSR SQUA2
  STA &41
  LDA &1B
  STA &40
@@ -14491,7 +15460,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 .cour_negy
 
  LSR A
- JSR square
+ JSR SQUA2
  PHA
  LDA &1B
  CLC
@@ -14500,7 +15469,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  PLA
  ADC &41
  STA &82
- JSR sqr_root
+ JSR LL5
  LDX &49
  LDA &6D
  EOR &71
@@ -14538,7 +15507,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  CLC
  JSR pr2
  JSR price_spc
- JSR write_planet
+ JSR cpl
  LDX &4A
  LDY &4B
  SEC
@@ -15492,6 +16461,8 @@ ELIF _SOURCE_DISC
 ENDIF
 
 ORG &5600
+
+.XX21
 
 IF _RELEASED
  INCBIN "extracted/released/S.T.bin"

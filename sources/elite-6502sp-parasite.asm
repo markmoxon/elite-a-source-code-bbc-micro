@@ -1950,12 +1950,10 @@ adval_y = &34D
 cmdr_gseed = &35B
 cmdr_money = &361
 cmdr_ship = &36D
-cmdr_cargo = &36F
 cmdr_bomb = &382
 cmdr_eunit = &383
 cmdr_dock = &384
 cmdr_ghype = &385
-cmdr_escape = &386
 cmdr_cour = &387
 cmdr_courx = &389
 cmdr_coury = &38A
@@ -1971,13 +1969,10 @@ data_tech = &3BA
 data_popn = &3BB
 data_gnp = &3BD
 hype_dist = &3BF
-data_homex = &3C1
-data_homey = &3C2
 s_flag = &3C6
 cap_flag = &3C7
 a_flag = &3C8
 x_flag = &3C9
-f_flag = &3CA
 y_flag = &3CB
 j_flag = &3CC
 k_flag = &3CD
@@ -4331,7 +4326,7 @@ tube_r4d = &FEFF
                         \ and draw a horizontal line at pixel row 19 to box
                         \ in the title
 
- BIT dockedp               \ AJD
+ BIT dockedp            \ AJD
  BPL stat_dock
 
  LDA #230               \ Otherwise we are in space, so start off by setting A
@@ -5849,8 +5844,6 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
                         \
                         \ We'll refer to this below
 
-                        \
-
  LDA YC                 \ Fetch YC, the y-coordinate (row) of the text cursor
 
  CMP #24                \ If the text cursor is on the screen (i.e. YC < 24, so
@@ -6204,67 +6197,158 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  LDA ALTIT              \ Draw the altitude indicator using a range of 0-255,
  JMP DILX               \ returning from the subroutine using a tail call
 
+\ ******************************************************************************
+\
+\       Name: PZW
+\       Type: Subroutine
+\   Category: Dashboard
+\    Summary: Fetch the current dashboard colours, to support flashing
+\
+\ ------------------------------------------------------------------------------
+\
+\ Set A and X to the colours we should use for indicators showing dangerous and
+\ safe values respectively. This enables us to implement flashing indicators,
+\ which is one of the game's configurable options.
+\
+\ If flashing is enabled, the colour returned in A (dangerous values) will be
+\ red for 8 iterations of the main loop, and yellow/white for the next 8, before
+\ going back to red. If we always use PZW to decide which colours we should use
+\ when updating indicators, flashing colours will be automatically taken care of
+\ for us.
+\
+\ The values returned are &F0 for yellow/white and &0F for red. These are mode 5
+\ bytes that contain 4 pixels, with the colour of each pixel given in two bits,
+\ the high bit from the first nibble (bits 4-7) and the low bit from the second
+\ nibble (bits 0-3). So in &F0 each pixel is %10, or colour 2 (yellow or white,
+\ depending on the dashboard palette), while in &0F each pixel is %01, or colour
+\ 1 (red).
+\
+\ Returns:
+\
+\   A                   The colour to use for indicators with dangerous values
+\
+\   X                   The colour to use for indicators with safe values
+\
+\ ******************************************************************************
+
 .PZW
 
- LDX #&F0
- LDA &8A
- AND #&08
- AND f_flag
- BEQ l_1eb3
- TXA
+ LDX #&F0               \ Set X to dashboard colour 2 (yellow/white)
 
-.bit8
+ LDA MCNT               \ A will be non-zero for 8 out of every 16 main loop
+ AND #%00001000         \ counts, when bit 4 is set, so this is what we use to
+                        \ flash the "danger" colour
 
- EQUB &2C
+ AND FLH                \ A will be zeroed if flashing colours are disabled
 
-.l_1eb3
+ BEQ P%+4               \ If A is zero, skip to the LDA instruction below
 
- LDA #&0F
- RTS
+ TXA                    \ Otherwise flashing colours are enabled and it's the
+                        \ main loop iteration where we flash them, so set A to
+                        \ colour 2 (yellow/white) and use the BIT trick below to
+                        \ return from the subroutine
+
+ EQUB &2C               \ Skip the next instruction by turning it into
+                        \ &2C &A9 &0F, or BIT &0FA9, which does nothing apart
+                        \ from affect the flags
+
+ LDA #&0F               \ Set A to dashboard colour 1 (red)
+
+ RTS                    \ Return from the subroutine
+
+\ ******************************************************************************
+\
+\       Name: DILX
+\       Type: Subroutine
+\   Category: Dashboard
+\    Summary: Update a bar-based indicator on the dashboard
+\  Deep dive: The dashboard indicators
+\
+\ ------------------------------------------------------------------------------
+\
+\ The range of values shown on the indicator depends on which entry point is
+\ called. For the default entry point of DILX, the range is 0-255 (as the value
+\ passed in A is one byte). The other entry points are shown below.
+\
+\ Arguments:
+\
+\   A                   The value to be shown on the indicator (so the larger
+\                       the value, the longer the bar)
+\
+\   T1                  The threshold at which we change the indicator's colour
+\                       from the low value colour to the high value colour. The
+\                       threshold is in pixels, so it should have a value from
+\                       0-16, as each bar indicator is 16 pixels wide
+\
+\   K                   The colour to use when A is a high value, as a 4-pixel
+\                       mode 5 character row byte
+\
+\   K+1                 The colour to use when A is a low value, as a 4-pixel
+\                       mode 5 character row byte
+\
+\   SC(1 0)             The screen address of the first character block in the
+\                       indicator
+\
+\ Other entry points:
+\
+\   DILX+2              The range of the indicator is 0-64 (for the fuel
+\                       indicator)
+\
+\   DIL-1               The range of the indicator is 0-32 (for the speed
+\                       indicator)
+\
+\   DIL                 The range of the indicator is 0-16 (for the energy
+\                       banks)
+\
+\ ******************************************************************************
 
 .DILX
 
+ LSR A                  \ If we call DILX, we set A = A / 16, so A is 0-15
  LSR A
 
-.bar_eighth
+ LSR A                  \ If we call DILX+2, we set A = A / 4, so A is 0-15
 
- LSR A
-
-.bar_fourth
-
- LSR A
-
-.bar_half
-
- LSR A
+ LSR A                  \ If we call DIL-1, we set A = A / 2, so A is 0-15
 
 .DIL
 
- PHA
+                        \ If we call DIL, we leave A alone, so A is 0-15
+
+ PHA                    \ AJD
  LDA #&86
  JSR tube_write
  PLA
  JSR tube_write
- LDX #&FF
- STX &82
- CMP &06
- BCS flash_gr
- LDA &41
- EQUB &2C
 
-.flash_gr
+ LDX #&FF               \ Set R = &FF, to use as a mask for drawing each row of
+ STX R                  \ each character block of the bar, starting with a full
+                        \ character's width of 4 pixels
 
- LDA &40
+ CMP T1                 \ If A >= T1 then we have passed the threshold where we
+ BCS DL30               \ change bar colour, so jump to DL30 to set A to the
+                        \ "high value" colour
 
-.flash_le
+ LDA K+1                \ Set A to K+1, the "low value" colour to use
+
+ EQUB &2C               \ AJD
+
+.DL30
+
+ LDA K                  \ Set A to K, the "high value" colour to use
+
+.DL31
 
  JSR tube_write
  LDA SC
  JSR tube_write
  LDA SC+1
  JSR tube_write
- INC SC+&01
- RTS
+ INC SC+1
+
+.DL9                    \ This label is not used but is in the original source
+
+ RTS                    \ Return from the subroutine
 
 .DIL2
 
@@ -6280,126 +6364,401 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  INC SC+&01
  RTS
 
-.find_plant
+\ ******************************************************************************
+\
+\       Name: HME2
+\       Type: Subroutine
+\   Category: Charts
+\    Summary: Search the galaxy for a system
+\
+\ ******************************************************************************
 
- LDA #&0E
- JSR DETOK
- JSR map_cursor
- JSR copy_xy
- LDA #&00
- STA &97
+.HME2
 
-.find_loop
+ LDA #14                \ Print extended token 14 ("{clear bottom of screen}
+ JSR DETOK              \ PLANET NAME?{fetch line input from keyboard}"). The
+                        \ last token calls MT26, which puts the entered search
+                        \ term in INWK+5 and the term length in Y
 
- JSR MT14
- JSR write_planet
- LDX DTW5
- LDA &4B,X
- CMP #&0D
- BNE l_1f6c
+ JSR TT103              \ Draw small crosshairs at coordinates (QQ9, QQ10),
+                        \ which will erase the crosshairs currently there
 
-.l_1f5f
+ JSR TT81               \ Set the seeds in QQ15 (the selected system) to those
+                        \ of system 0 in the current galaxy (i.e. copy the seeds
+                        \ from QQ21 to QQ15)
 
- DEX
- LDA &4B,X
- ORA #&20
- CMP &0E01,X
- BEQ l_1f5f
- TXA
- BMI found_plant
+ LDA #0                 \ We now loop through the galaxy's systems in order,
+ STA XX20               \ until we find a match, so set XX20 to act as a system
+                        \ counter, starting with system 0
 
-.l_1f6c
+.HME3
 
- JSR permute_4
- INC &97
- BNE find_loop
- JSR TT111
- JSR map_cursor
- LDA #&28
- JSR sound
- LDA #&D7
- JMP DETOK
+ JSR MT14               \ Switch to justified text when printing extended
+                        \ tokens, so the call to cpl prints into the justified
+                        \ text buffer at BUF instead of the screen, and DTW5
+                        \ gets set to the length of the system name
 
-.found_plant
+ JSR cpl                \ Print the selected system name into the justified text
+                        \ buffer
 
- LDA &6F
- STA data_homex
- LDA &6D
- STA data_homey
- JSR TT111
- JSR map_cursor
- JSR MT15
- JMP distance
+ LDX DTW5               \ Fetch DTW5 into X, so X is now equal to the length of
+                        \ the selected system name
 
-.l_1f99
+ LDA INWK+5,X           \ Fetch the X-th character from the entered search term
 
- EQUB &02, &54, &3B
- EQUB &03, &82, &B0
- EQUB &00, &00, &00
- EQUB &01, &50, &11
- EQUB &01, &D1, &28
- EQUB &01, &40, &06
- EQUB &03, &60, &90
- EQUB &04, &10, &D1
- EQUB &00, &00, &00
- EQUB &06, &51, &F8
- EQUB &07, &60, &75
- EQUB &00, &00, &00
+ CMP #13                \ If the X-th character is not a carriage return, then
+ BNE HME6               \ the selected system name and the entered search term
+                        \ are different lengths, so jump to HME6 to move on to
+                        \ the next system
+
+.HME4
+
+ DEX                    \ Decrement X so it points to the last letter of the
+                        \ selected system name (and, when we loop back here, it
+                        \ points to the next letter to the left)
+
+ LDA INWK+5,X           \ Set A to the X-th character of the entered search term
+
+ ORA #%00100000         \ Set bit 5 of the character to make it lower case
+
+ CMP BUF,X              \ If the character in A matches the X-th character of
+ BEQ HME4               \ the selected system name in BUF, loop back to HME4 to
+                        \ check the next letter to the left
+
+ TXA                    \ The last comparison didn't match, so copy the letter
+ BMI HME5               \ number into A, and if it's negative, that means we
+                        \ managed to go past the first letters of each term
+                        \ before we failed to get a match, so the terms are the
+                        \ same, so jump to HME5 to process a successful search
+
+.HME6
+
+                        \ If we get here then the selected system name and the
+                        \ entered search term did not match
+
+ JSR TT20               \ We want to move on to the next system, so call TT20
+                        \ to twist the three 16-bit seeds in QQ15
+
+ INC XX20               \ Incrememt the system counter in XX20
+
+ BNE HME3               \ If we haven't yet checked all 256 systems in the
+                        \ current galaxy, loop back to HME3 to check the next
+                        \ system
+
+                        \ If we get here then the entered search term did not
+                        \ match any systems in the current galaxy
+
+ JSR TT111              \ Select the system closest to galactic coordinates
+                        \ (QQ9, QQ10), so we can put the crosshairs back where
+                        \ they were before the search
+
+ JSR TT103              \ Draw small crosshairs at coordinates (QQ9, QQ10)
+
+ LDA #40                \ Call the NOISE routine with A = 40 to make a low,
+ JSR NOISE              \ long beep to indicate a failed search
+
+ LDA #215               \ Print extended token 215 ("{left align} UNKNOWN
+ JMP DETOK              \ PLANET"), which will print on-screem as the left align
+                        \ code disables justified text, and return from the
+                        \ subroutine using a tail call
+
+.HME5
+
+                        \ If we get here then we have found a match for the
+                        \ entered search
+
+ LDA QQ15+3             \ The x-coordinate of the system described by the seeds
+ STA QQ9                \ in QQ15 is in QQ15+3 (s1_hi), so we copy this to QQ9
+                        \ as the x-coordinate of the search result
+
+ LDA QQ15+1             \ The y-coordinate of the system described by the seeds
+ STA QQ10               \ in QQ15 is in QQ15+1 (s0_hi), so we copy this to QQ10
+                        \ as the y-coordinate of the search result
+
+ JSR TT111              \ Select the system closest to galactic coordinates
+                        \ (QQ9, QQ10)
+
+ JSR TT103              \ Draw small crosshairs at coordinates (QQ9, QQ10)
+
+ JSR MT15               \ Switch to left-aligned text when printing extended
+                        \ tokens so future tokens will print to the screen (as
+                        \ this disables justified text)
+
+ JMP T95                \ Jump to T95 to print the distance to the selected
+                        \ system and return from the subroutine using a tail
+                        \ call
+
+\ ******************************************************************************
+\
+\       Name: HATB
+\       Type: Variable
+\   Category: Ship hanger
+\    Summary: Ship hanger group table
+\
+\ ------------------------------------------------------------------------------
+\
+\ This table contains groups of ships to show in the ship hanger. A group of
+\ ships is shown half the time (the other half shows a solo ship), and each of
+\ the four groups is equally likely.
+\
+\ The bytes for each ship in the group contain the following information:
+\
+\   Byte #0             Non-zero = Ship type to draw
+\                       0        = don't draw anything
+\
+\   Byte #1             Bits 0-7 = Ship's x_hi
+\                       Bit 0    = Ship's z_hi (1 if clear, or 2 if set)
+\
+\   Byte #2             Bits 0-7 = Ship's z_lo
+\                       Bit 0    = Ship's x_sign
+\
+\ Ths ship's y-coordinate is calculated in the has1 routine from the size of
+\ its targetable area. Ships of type 0 are not shown.
+\
+\ Note that ship numbers are for the ship hanger blueprints at XX21 in the
+\ docked code, rather than the full set of ships in the flight code. They are:
+\
+\   1 = Cargo canister
+\   2 = Shuttle
+\   3 = Transporter
+\   4 = Cobra Mk III
+\   5 = Python
+\   6 = Viper
+\   7 = Krait
+\   8 = Constrictor
+\
+\ ******************************************************************************
+
+.HATB
+
+                        \ Hanger group for X = 0
+                        \
+                        \ Shuttle (left) and Transporter (right)
+
+ EQUB 2                 \ Ship type in the hanger = 2 = Shuttle
+ EQUB %01010100         \ x_hi = %01010100 = 84, z_hi   = 1     -> x = -84
+ EQUB %00111011         \ z_lo = %00111011 = 59, x_sign = 1        z = +315
+
+ EQUB 3                 \ Ship type in the hanger = 3 = Transporter
+ EQUB %10000010         \ x_hi = %10000010 = 130, z_hi   = 1    -> x = +130
+ EQUB %10110000         \ z_lo = %10110000 = 176, x_sign = 0       z = +432
+
+ EQUB 0                 \ No third ship
+ EQUB 0
+ EQUB 0
+
+                        \ Hanger group for X = 9
+                        \
+                        \ Three cargo canisters (left, far right and forward,
+                        \ right)
+
+ EQUB 1                 \ Ship type in the hanger = 1 = Cargo canister
+ EQUB %01010000         \ x_hi = %01010000 = 80, z_hi   = 1     -> x = -80
+ EQUB %00010001         \ z_lo = %00010001 = 17, x_sign = 1        z = +273
+
+ EQUB 1                 \ Ship type in the hanger = 1 = Cargo canister
+ EQUB %11010001         \ x_hi = %11010001 = 209, z_hi = 2      -> x = +209
+ EQUB %00101000         \ z_lo = %00101000 =  40, x_sign = 0       z = +552
+
+ EQUB 1                 \ Ship type in the hanger = 1 = Cargo canister
+ EQUB %01000000         \ x_hi = %01000000 = 64, z_hi   = 1     -> x = +64
+ EQUB %00000110         \ z_lo = %00000110 = 6,  x_sign = 0        z = +262
+
+                        \ Hanger group for X = 18
+                        \
+                        \ Transporter (right) and Cobra Mk III (left)
+
+ EQUB 3                 \ Ship type in the hanger = 3 = Transporter
+ EQUB %01100000         \ x_hi = %01100000 =  96, z_hi   = 1    -> x = +96
+ EQUB %10010000         \ z_lo = %10010000 = 144, x_sign = 0       z = +400
+
+ EQUB 4                 \ Ship type in the hanger = 4 = Cobra Mk III
+ EQUB %00010000         \ x_hi = %00010000 =  16, z_hi   = 1    -> x = -16
+ EQUB %11010001         \ z_lo = %11010001 = 209, x_sign = 1       z = +465
+
+ EQUB 0                 \ No third ship
+ EQUB 0
+ EQUB 0
+
+                        \ Hanger group for X = 27
+                        \
+                        \ Viper (right and forward) and Krait (left)
+
+ EQUB 6                 \ Ship type in the hanger = 6 = Viper
+ EQUB %01010001         \ x_hi = %01010001 =  81, z_hi  = 2     -> x = +81
+ EQUB %11111000         \ z_lo = %11111000 = 248, x_sign = 0       z = +760
+
+ EQUB 7                 \ Ship type in the hanger = 7 = Krait
+ EQUB %01100000         \ x_hi = %01100000 = 96,  z_hi   = 1    -> x = -96
+ EQUB %01110101         \ z_lo = %01110101 = 117, x_sign = 1       z = +373
+
+ EQUB 0                 \ No third ship
+ EQUB 0
+ EQUB 0
+
+\ ******************************************************************************
+\
+\       Name: HALL
+\       Type: Subroutine
+\   Category: Ship hanger
+\    Summary: Draw the ships in the ship hanger, then draw the hanger
+\
+\ ------------------------------------------------------------------------------
+\
+\ Half the time this will draw one of the four pre-defined ship hanger groups in
+\ HATB, and half the time this will draw a solitary Sidewinder, Mamba, Krait or
+\ Adder on a random position. In all cases, the ships will be randomly spun
+\ around on the ground so they can face in any dirction, and larger ships are
+\ drawn higher up off the ground than smaller ships.
+\
+\ The ships are drawn by the HAS1 routine, which uses the normal ship-drawing
+\ routine in LL9, and then the hanger background is drawn by sending an OSWORD
+\ 248 command to the I/O processor.
+\
+\ ******************************************************************************
 
 .HALL
 
- JSR draw_mode
- LDA #&00
- JSR TT66
- JSR DORND
- BPL l_1ff3
- AND #&03
- STA &D1
- ASL A
- ASL A
- ASL A
- ADC &D1
+ JSR UNWISE             \ Call UNWISE to switch the main line-drawing routine
+                        \ between EOR and OR logic (in this case, switching it
+                        \ to OR logic so that it overwrites anything that's
+                        \ on-screen)
+
+ LDA #0                 \ Clear the top part of the screen, draw a white border,
+ JSR TT66               \ and set the current view type in QQ11 to 0 (space
+                        \ view)
+
+ JSR DORND              \ Set A and X to random numbers
+
+ BPL HA7                \ Jump to HA7 if A is positive (50% chance)
+
+ AND #3                 \ Reduce A to a random number in the range 0-3
+
+ STA T                  \ Set X = A * 8 + A
+ ASL A                  \       = 9 * A
+ ASL A                  \
+ ASL A                  \ so X is a random number, either 0, 9, 18 or 27
+ ADC T
  TAX
- LDY #&03
- STY &94
 
-.l_1fd8
+                        \ The following double loop calls the HAS1 routine three
+                        \ times to display three ships on screen. For each call,
+                        \ the values passed to HAS1 in XX15+2 to XX15 are taken
+                        \ from the HATB table, depending on the value in X, as
+                        \ follows:
+                        \
+                        \   * If X = 0,  pass bytes #0 to #2 of HATB to HAS1
+                        \                then bytes #3 to #5
+                        \                then bytes #6 to #8
+                        \
+                        \   * If X = 9,  pass bytes  #9 to #11 of HATB to HAS1
+                        \                then bytes #12 to #14
+                        \                then bytes #15 to #17
+                        \
+                        \   * If X = 18, pass bytes #18 to #20 of HATB to HAS1
+                        \                then bytes #21 to #23
+                        \                then bytes #24 to #26
+                        \
+                        \   * If X = 27, pass bytes #27 to #29 of HATB to HAS1
+                        \                then bytes #30 to #32
+                        \                then bytes #33 to #35
+                        \
+                        \ Note that the values are passed in reverse, so for the
+                        \ first call, for example, where we pass bytes #0 to #2
+                        \ of HATB to HAS1, we call HAS1 with:
+                        \
+                        \   XX15   = HATB+2
+                        \   XX15+1 = HATB+1
+                        \   XX15+2 = HATB
 
- LDY #&02
+ LDY #3                 \ Set CNT2 = 3 to act as an outer loop counter going
+ STY CNT2               \ from 3 to 1, so the HAL8 loop is run 3 times
 
-.l_1fda
+.HAL8
 
- LDA l_1f99,X
- STA &34,Y
- INX
- DEY
- BPL l_1fda
- TXA
- PHA
- JSR l_2079
- PLA
- TAX
- DEC &94
- BNE l_1fd8
- LDY #&80
- BNE l_2007
+ LDY #2                 \ Set Y = 2 to act as an inner loop counter going from
+                        \ 2 to 0
 
-.l_1ff3
+.HAL9
 
- LSR A
- STA &35
- JSR DORND
- STA &34
- JSR DORND
- AND #&07
- STA &36
- JSR l_2079
- LDY #&00
+ LDA HATB,X             \ Copy the X-th byte of HATB to the Y-th byte of XX15,
+ STA XX15,Y             \ as described above
 
-.l_2007
+ INX                    \ Increment X to point to the next byte in HATB
 
- STY &85
- JSR draw_mode
+ DEY                    \ Decrement Y to point to the previous byte in XX15
+
+ BPL HAL9               \ Loop back to copy the next byte until we have copied
+                        \ three of them (i.e. Y was 3 before the DEY)
+
+ TXA                    \ Store X on the stack so we can retrieve it after the
+ PHA                    \ call to HAS1 (as it contains the index of the next
+                        \ byte in HATB
+
+ JSR HAS1               \ Call HAS1 to draw this ship in the hanger
+
+ PLA                    \ Restore the value of X, so X points to the next byte
+ TAX                    \ in HATB after the three bytes we copied into XX15
+
+ DEC CNT2               \ Decrement the outer loop counter in CNT2
+
+ BNE HAL8               \ Loop back to HAL8 to do it 3 times, once for each ship
+                        \ in the HATB table
+
+ LDY #128               \ Set Y = 128 to send as byte #2 of the parameter block
+                        \ to the OSWORD 248 command below, to tell the I/O
+                        \ processor that there are multiple ships in the hanger
+
+ BNE HA9                \ Jump to HA9 to display the ship hanger (this BNE is
+                        \ effectively a JMP as Y is never zero)
+
+.HA7
+
+                        \ If we get here, A is a positive random number in the
+                        \ range 0-127
+
+ LSR A                  \ Set XX15+1 = A / 2 (random number 0-63)
+ STA XX15+1
+
+ JSR DORND              \ Set XX15 = random number 0-255
+ STA XX15
+
+ JSR DORND              \ Set XX15+2 = random number 0-7
+ AND #7                 \
+ STA XX15+2             \ which is either 0 (no ships in the hanger) or one of
+                        \ the first 7 ship types in the ship hanger blueprints
+                        \ table, i.e. a cargo canister, Shuttle, Transporter,
+                        \ Cobra Mk III, Python, Viper or Krait
+
+ JSR HAS1               \ Call HAS1 to draw this ship in the hanger, with the
+                        \ the following properties:
+                        \
+                        \   * Random x-coordinate from -63 to +63
+                        \
+                        \   * Randomly chosen cargo canister, Shuttle,
+                        \     Transporter, Cobra Mk III, Python, Viper or Krait
+                        \
+                        \   * Random z-coordinate from +256 to +639
+
+ LDY #0                 \ Set Y = 0 to use in the following instruction, to tell
+                        \ the hanger-drawing routine that there is just one ship
+                        \ in the hanger, so it knows not to draw between the
+                        \ ships
+
+.HA9
+
+ STY YSAV               \ Store Y in YSAV to specify whether there are multiple
+                        \ ships in the hanger
+
+ JSR UNWISE             \ Call UNWISE to switch the main line-drawing routine
+                        \ between EOR and OR logic (in this case, switching it
+                        \ back to EOR logic so that we can erase anything we
+                        \ draw on-screen)
+
+                        \ Fall through into HANGER to draw the hanger background
+
+.HANGER
+
  LDX #&02
 
 .l_200e
@@ -6408,7 +6767,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  LDA #&82
  LDX &84
  STX &81
- JSR l_2316
+ JSR DVID4
  LDA #&9A
  JSR tube_write
  LDA &1B
@@ -6434,9 +6793,9 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  BNE l_204e
  RTS
 
-.l_2079
+.HAS1
 
- JSR init_ship
+ JSR ZINF
  LDA &34
  STA &4C
  LSR A
@@ -6455,7 +6814,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  JSR DORND
  STA &84
 
-.l_209d
+.HAL5
 
  LDX #&15
  LDY #&09
@@ -6467,111 +6826,210 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  LDY #&0D
  JSR MVS5
  DEC &84
- BNE l_209d
+ BNE HAL5
  LDY &36
- BEQ l_2138
+ BEQ HA1
  LDX #&04
 
-.l_20bc
+.hloop
 
  INX
  INX
- LDA ship_data,X
+ LDA XX21-2,X
  STA &1E
- LDA ship_data+&01,X
+ LDA XX21-1,X
  STA &1F
- BEQ l_20bc
+ BEQ hloop
  DEY
- BNE l_20bc
+ BNE hloop
  LDY #&01
  LDA (&1E),Y
  STA &81
  INY
  LDA (&1E),Y
  STA &82
- JSR sqr_root
+ JSR LL5
  LDA #&64
  SBC &81
  LSR A
  STA &49
  JSR TIDY
- JMP l_400f
+ JMP l_400f         \ Same as LL9
 
-.l_2138
+.HA1
 
  RTS
 
-.draw_mode
+.UNWISE
 
  LDA #&94
  JMP tube_write
 
+\ ******************************************************************************
+\
+\       Name: HFS2
+\       Type: Subroutine
+\   Category: Drawing circles
+\    Summary: Draw the launch or hyperspace tunnel
+\
+\ ------------------------------------------------------------------------------
+\
+\ The animation gets drawn like this. First, we draw a circle of radius 8 at the
+\ centre, and then double the radius, draw another circle, double the radius
+\ again and draw a circle, and we keep doing this until the radius is bigger
+\ than 160 (which goes beyond the edge of the screen, which is 256 pixels wide,
+\ equivalent to a radius of 128). We then repeat this whole process for an
+\ initial circle of radius 9, then radius 10, all the way up to radius 15.
+\
+\ This has the effect of making the tunnel appear to be racing towards us as we
+\ hurtle out into hyperspace or through the space station's docking tunnel.
+\
+\ The hyperspace effect is done in a full mode 5 screen, which makes the rings
+\ all coloured and zig-zaggy, while the launch screen is in the normal
+\ monochrome mode 4 screen.
+\
+\ Arguments:
+\
+\   A                   The step size of the straight lines making up the rings
+\                       (4 for launch, 8 for hyperspace)
+\
+\ ******************************************************************************
+
+.HFS2
+
 .HFS1
 
- LDX #&80
- STX &D2
- LDX #&60
- STX &E0
- LDX #&00
- STX &96
- STX &D3
- STX &E1
+ LDX #X                 \ Set K3 = #X (the x-coordinate of the centre of the
+ STX K3                 \ screen)
 
-.l_216b
+ LDX #Y                 \ Set K4 = #Y (the y-coordinate of the centre of the
+ STX K4                 \ screen)
 
- JSR l_2177
- INC &96
- LDX &96
- CPX #&08
- BNE l_216b
- RTS
+ LDX #0                 \ Set X = 0
 
-.l_2177
+ STX XX4                \ Set XX4 = 0, which we will use as a counter for
+                        \ drawing 8 concentric rings
 
- LDA &96
- AND #&07
- CLC
- ADC #&08
- STA &40
+ STX K3+1               \ Set the high bytes of K3(1 0) and K4(1 0) to 0
+ STX K4+1
 
-.l_2180
+.HFL5
 
- LDA #&01
- STA &6B
- JSR circle
- ASL &40
- BCS l_2191
- LDA &40
- CMP #&A0
- BCC l_2180
+ JSR HFL1               \ Call HFL1 below to draw a set of rings, with each one
+                        \ twice the radius of the previous one, until they won't
+                        \ fit on-screen
 
-.l_2191
+ INC XX4                \ Increment the counter and fetch it into X
+ LDX XX4
 
- RTS
+ CPX #8                 \ If we haven't drawn 8 sets of rings yet, loop back to
+ BNE HFL5               \ HFL5 to draw the next ring
 
-.l_21be
+ RTS                    \ Return from the subroutine
 
- AND #&7F
+.HFL1
+
+ LDA XX4                \ Set K to the ring number in XX4 (0-7) + 8, so K has
+ AND #7                 \ a value of 8 to 15, which we will use as the starting
+ CLC                    \ radius for our next set of rings
+ ADC #8
+ STA K
+
+.HFL2
+
+ LDA #1                 \ Set LSP = 1 to reset the ball line heap
+ STA LSP
+
+ JSR CIRCLE2            \ Call CIRCLE2 to draw a circle with the centre at
+                        \ (K3(1 0), K4(1 0)) and radius K
+
+ ASL K                  \ Double the radius in K
+
+ BCS HF8                \ If the radius had a 1 in bit 7 before the above shift,
+                        \ then doubling K will means the circle will no longer
+                        \ fit on the screen (which is width 256), so jump to
+                        \ HF8 to stop drawing circles
+
+ LDA K                  \ If the radius in K <= 160, loop back to HFL2 to draw
+ CMP #160               \ another one
+ BCC HFL2
+
+.HF8
+
+ RTS                    \ Return from the subroutine
+
+\ ******************************************************************************
+\
+\       Name: SQUA
+\       Type: Subroutine
+\   Category: Maths (Arithmetic)
+\    Summary: Clear bit 7 of A and calculate (A P) = A * A
+\
+\ ------------------------------------------------------------------------------
+\
+\ Do the following multiplication of unsigned 8-bit numbers, after first
+\ clearing bit 7 of A:
+\
+\   (A P) = A * A
+\
+\ ******************************************************************************
+
+.SQUA
+
+ AND #%01111111         \ Clear bit 7 of A and fall through into SQUA2 to set
+                        \ (A P) = A * A
+
+\ ******************************************************************************
+\
+\       Name: SQUA2
+\       Type: Subroutine
+\   Category: Maths (Arithmetic)
+\    Summary: Calculate (A P) = A * A
+\
+\ ------------------------------------------------------------------------------
+\
+\ Do the following multiplication of unsigned 8-bit numbers:
+\
+\   (A P) = A * A
+\
+\ ******************************************************************************
 
 .SQUA2
 
- STA &1B
+ STA P                  \ Copy A into P and X
  TAX
- BNE l_21d7
 
-.l_21c5
+ BNE MU11               \ If X = 0 fall through into MU1 to return a 0,
+                        \ otherwise jump to MU11 to return P * X
 
- CLC
- STX &1B
+\ ******************************************************************************
+\
+\       Name: MU1
+\       Type: Subroutine
+\   Category: Maths (Arithmetic)
+\    Summary: Copy X into P and A, and clear the C flag
+\
+\ ------------------------------------------------------------------------------
+\
+\ Used to return a 0 result quickly from MULTU below.
+\
+\ ******************************************************************************
+
+.MU1
+
+ CLC                    \ Clear the C flag
+
+ STX P                  \ Copy X into P and A
  TXA
- RTS
+
+ RTS                    \ Return from the subroutine
 
 .price_mult
 
  LDX &81
- BEQ l_21c5
+ BEQ MU1
 
-.l_21d7
+.MU11
 
  DEX
  STX &D1
@@ -6747,7 +7205,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  ORA &D1
  RTS
 
-.l_2316
+.DVID4
 
  LDX #&08
  ASL A
@@ -6890,7 +7348,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  SEC
  ROL TP
  JSR BRIS
- JSR init_ship
+ JSR ZINF
  LDA #&1F
  STA &8C
  JSR ins_ship
@@ -7093,7 +7551,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
 .tot_cargo
 
- ADC cmdr_cargo,X
+ ADC QQ20,X
  BCS n_over
  DEX
  BPL tot_cargo
@@ -7107,11 +7565,11 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 .chk_quant
 
  LDY &03AD
- ADC cmdr_cargo,Y
+ ADC QQ20,Y
  \	PLA
  RTS
 
-.permute_4
+.TT20
 
  JSR permute_2
 
@@ -7408,7 +7866,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  JSR TT66
  LDA #&07
  STA XC
- JSR copy_xy
+ JSR TT81
  LDA #&C7
  JSR TT27
  JSR NLIN
@@ -7431,13 +7889,13 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  ADC #&18
  STA &35
  JSR PIXEL
- JSR permute_4
+ JSR TT20
  LDX &84
  INX
  BNE l_2830
- LDA data_homex
+ LDA QQ9
  STA &73
- LDA data_homey
+ LDA QQ10
  LSR A
  STA &74
  LDA #&04
@@ -7516,7 +7974,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  JSR TT15
  LDA QQ14
  STA &40
- JMP map_circle
+ JMP map_CIRCLE2
 
 .map_range
 
@@ -7539,7 +7997,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  ADC #&18
  STA &74
 
-.map_circle
+.map_CIRCLE2
 
  LDA &73
  STA &D2
@@ -7552,7 +8010,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  STX &6B
  INX
  STX &95
- JMP circle
+ JMP CIRCLE2
 
 .buy_cargo
 
@@ -7620,8 +8078,8 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  LDA &82
  PHA
  CLC
- ADC cmdr_cargo,Y
- STA cmdr_cargo,Y
+ ADC QQ20,Y
+ STA QQ20,Y
  LDA cmdr_avail,Y
  SEC
  SBC &82
@@ -7730,7 +8188,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  JSR new_pgph
  JSR TT67
  JSR sell_equip
- LDA cmdr_escape
+ LDA ESCP
  BEQ sell_escape
  LDA #&70
  LDX #&1E
@@ -7774,7 +8232,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
 .l_2a37
 
- LDX cmdr_cargo,Y
+ LDX QQ20,Y
  BEQ l_2aa3
  TYA
  ASL A
@@ -7808,10 +8266,10 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  STX QQ17
  JSR price_a
  LDY &03AD
- LDA cmdr_cargo,Y
+ LDA QQ20,Y
  SEC
  SBC &82
- STA cmdr_cargo,Y
+ STA QQ20,Y
  LDA &82
  STA &1B
  LDA &03AA
@@ -7869,29 +8327,29 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  TYA
  EOR #&FF
  PHA
- JSR map_cursor
+ JSR TT103
  PLA
  STA &76
- LDA data_homey
+ LDA QQ10
  JSR incdec_dirn
  LDA &77
- STA data_homey
+ STA QQ10
  STA &74
  PLA
  STA &76
- LDA data_homex
+ LDA QQ9
  JSR incdec_dirn
  LDA &77
- STA data_homex
+ STA QQ9
  STA &73
 
-.map_cursor
+.TT103
 
  LDA &87
  BMI map_shcurs
- LDA data_homex
+ LDA QQ9
  STA &73
- LDA data_homey
+ LDA QQ10
  LSR A
  STA &74
  LDA #&04
@@ -7922,7 +8380,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
 .map_shcurs
 
- LDA data_homex
+ LDA QQ9
  SEC
  SBC QQ0
  CMP #&26
@@ -7937,7 +8395,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  CLC
  ADC #&68
  STA &73
- LDA data_homey
+ LDA QQ10
  SEC
  SBC QQ1
  CMP #&26
@@ -7964,8 +8422,8 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  LDA #&BE
  JSR NLIN3
  JSR map_range
- JSR map_cursor
- JSR copy_xy
+ JSR TT103
+ JSR TT81
  LDA #&00
  STA &97
  LDX #&18
@@ -8039,7 +8497,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  STA &46,Y
  LDA #&80
  STA QQ17
- JSR write_planet
+ JSR cpl
 
 .l_2c01
 
@@ -8059,12 +8517,12 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
 .l_2c1e
 
- JSR permute_4
+ JSR TT20
  INC &97
  BEQ l_2c32
  JMP short_loop
 
-.copy_xy
+.TT81
 
  LDX #&05
 
@@ -8081,7 +8539,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
 .TT111
 
- JSR copy_xy
+ JSR TT81
  LDY #&7F
  STY &D1
  LDA #&00
@@ -8091,7 +8549,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
  LDA &6F
  SEC
- SBC data_homex
+ SBC QQ9
  BCS l_2c4a
  EOR #&FF
  ADC #&01
@@ -8102,7 +8560,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  STA &83
  LDA &6D
  SEC
- SBC data_homey
+ SBC QQ10
  BCS l_2c59
  EOR #&FF
  ADC #&01
@@ -8128,7 +8586,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
 .l_2c70
 
- JSR permute_4
+ JSR TT20
  INC &80
  BNE snap_loop
  LDX #&05
@@ -8140,9 +8598,9 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  DEX
  BPL l_2c79
  LDA &6D
- STA data_homey
+ STA QQ10
  LDA &6F
- STA data_homex
+ STA QQ9
  SEC
  SBC QQ0
  BCS l_2c94
@@ -8155,7 +8613,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  STA &41
  LDA &1B
  STA &40
- LDA data_homey
+ LDA QQ10
  SEC
  SBC QQ1
  BCS l_2caa
@@ -8174,7 +8632,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  PLA
  ADC &41
  STA &82
- JSR sqr_root
+ JSR LL5
  LDA &81
  ASL A
  LDX #&00
@@ -8185,11 +8643,11 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  STA hype_dist
  JMP setup_data
 
-.data_home
+.jmp
 
- LDA data_homex
+ LDA QQ9
  STA QQ0
- LDA data_homey
+ LDA QQ10
  STA QQ1
  RTS
 
@@ -8360,7 +8818,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 .home_setup
 
  JSR TT111
- JSR data_home
+ JSR jmp
  LDX #&05
 
 .l_2e73
@@ -8440,7 +8898,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
  LDA #&8F
  JSR tube_write
- LDA cmdr_escape
+ LDA ESCP
  JSR tube_write
  LDA &0348
  JMP tube_write
@@ -8529,7 +8987,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  PHA
  CMP #&02
  BCC equip_space
- LDA cmdr_cargo+&10
+ LDA QQ20+&10
  SEC
  LDX #&C
  JSR tot_cargo
@@ -8637,9 +9095,9 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  INY
  CMP #&07
  BNE equip_nescape
- LDX cmdr_escape
+ LDX ESCP
  BNE equip_gotit
- DEC cmdr_escape
+ DEC ESCP
  JSR update_pod
 
 .equip_nescape
@@ -8820,12 +9278,12 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
 .snap_cursor
 
- JSR map_cursor
+ JSR TT103
  JSR TT111
- JSR map_cursor
+ JSR TT103
  JMP CLYNS
 
-.write_planet
+.cpl
 
  LDX #&05
 
@@ -8888,7 +9346,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 .l_315a
 
  JSR l_3160
- JSR write_planet
+ JSR cpl
 
 .l_3160
 
@@ -8963,7 +9421,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  BEQ l_315a
  DEX
  BNE l_31bd
- JMP write_planet
+ JMP cpl
 
 .l_31bd
 
@@ -9305,7 +9763,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  SBC &D1
  STA &82
  STY &35
- JSR sqr_root
+ JSR LL5
  LDY &35
  JSR DORND
  AND &93
@@ -9412,7 +9870,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  STA &29
  RTS
 
-.circle
+.CIRCLE2
 
  LDX #&FF
  STX &92
@@ -9637,14 +10095,14 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  LDA KL
  RTS
 
-.set_home
+.ping
 
  LDX #&01
 
 .l_3650
 
  LDA QQ0,X
- STA data_homex,X
+ STA QQ9,X
  DEX
  BPL l_3650
  RTS
@@ -9725,7 +10183,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  JSR DIALS
  JSR d_44a4	\D++
 
-.init_ship
+.ZINF
 
  LDY #&24
  LDA #&00
@@ -9897,7 +10355,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  LDA #&07
  LDX #&13
  JSR rotate
- JSR set_home
+ JSR ping
  JSR home_setup
 
 .BAY
@@ -10386,12 +10844,12 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 .l_3bd6
 
  LDA &34
- JSR l_21be
+ JSR SQUA
  STA &82
  LDA &1B
  STA &81
  LDA &35
- JSR l_21be
+ JSR SQUA
  STA &D1
  LDA &1B
  ADC &81
@@ -10400,7 +10858,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  ADC &82
  STA &82
  LDA &36
- JSR l_21be
+ JSR SQUA
  STA &D1
  LDA &1B
  ADC &81
@@ -10408,7 +10866,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  LDA &D1
  ADC &82
  STA &82
- JSR sqr_root
+ JSR LL5
  LDA &34
  JSR l_3e8c
  STA &34
@@ -10444,13 +10902,13 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  STA &0340
  JSR draw_ecm
  LDA #&48
- BNE sound
+ BNE NOISE
 
 .BEEP
 
  LDA #&20
 
-.sound
+.NOISE
 
  JSR pp_sound
 
@@ -10839,7 +11297,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  STA (&67),Y
  RTS
 
-.sqr_root
+.LL5
 
  LDY &82
  LDA &81
@@ -12624,7 +13082,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  LDA #&00
  STA &49
  STA &4C
- JSR copy_xy
+ JSR TT81
 
 .cour_loop
 
@@ -12677,7 +13135,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
 .cour_count
 
- JSR permute_4
+ JSR TT20
  INC &4C
  BEQ cour_menu
  DEC &46
@@ -12738,7 +13196,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  PLA
  ADC &41
  STA &82
- JSR sqr_root
+ JSR LL5
  LDX &49
  LDA &6D
  EOR &71
@@ -12776,7 +13234,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  CLC
  JSR pr2
  JSR price_spc
- JSR write_planet
+ JSR cpl
  LDX &4A
  LDY &4B
  SEC
@@ -14281,7 +14739,7 @@ ENDIF
  PLA
  JSR write_msg3
  JSR NLIN4
- JSR init_ship
+ JSR ZINF
  LDA #&60
  STA &54
  LDA #&B0
@@ -15243,9 +15701,9 @@ ENDIF
  PLA
  TAX
  LDA ship_list,X
- STA ship_data,Y
+ STA XX21-2,Y
  LDA ship_list+1,X
- STA ship_data+1,Y
+ STA XX21-1,Y
  RTS
 
  \printer:
@@ -15415,8 +15873,8 @@ ENDIF
  INC cmdr_bomb
  INC new_hold	\***
  JSR DORND
- STA data_homex	\QQ0
- STX data_homey	\QQ1
+ STA QQ9	\QQ0
+ STX QQ10	\QQ1
  JSR TT111
  JSR hyper_snap
 
@@ -15436,9 +15894,9 @@ ENDIF
 .d_1301
 
  LDA &0309
- AND cmdr_escape
+ AND ESCP
  BEQ d_130c
- JMP d_20c1
+ JMP ESCAPE
 
 .d_130c
 
@@ -15482,7 +15940,7 @@ ENDIF
  STA &0343
  STA &44
  LDA #&00
- JSR sound
+ JSR NOISE
  JSR d_2a82
  PLA
  BPL d_136f
@@ -15519,14 +15977,14 @@ ENDIF
  BMI d_13b6
  ASL A
  TAY
- LDA ship_data,Y
+ LDA XX21-2,Y
  STA &1E
- LDA ship_data+1,Y
+ LDA XX21-1,Y
  STA &1F
 
 .d_13b6
 
- JSR d_50a0
+ JSR MVEIT_FLIGHT
  LDY #&24
 
 .d_13bb
@@ -15577,7 +16035,7 @@ ENDIF
  TAX
  JSR d_2aec
  BCS d_1464
- INC cmdr_cargo,X
+ INC QQ20,X
  TXA
  ADC #&D0
  JSR d_45c6
@@ -15605,7 +16063,7 @@ ENDIF
  CMP #&50
  BCC d_1449
 
-.d_143e
+.GOIN
 
  JSR RES2
  LDA #&08
@@ -15712,7 +16170,7 @@ ENDIF
 
 .d_14ed
 
- JSR d_488c
+ JSR LL9
 
 .d_14f0
 
@@ -15897,7 +16355,7 @@ ENDIF
  SBC #&24
  BCC d_15fa
  STA &82
- JSR sqr_root
+ JSR LL5
  LDA &81
  STA ALTIT
  BNE d_1648
@@ -17148,45 +17606,83 @@ ENDIF
 
  RTS                    \ Return from the subroutine
 
-.d_20c1
+\ ******************************************************************************
+\
+\       Name: ESCAPE
+\       Type: Subroutine
+\   Category: Flight
+\    Summary: Launch our escape pod
+\
+\ ------------------------------------------------------------------------------
+\
+\ This routine displays our doomed Cobra Mk III disappearing off into the ether
+\ before arranging our replacement ship. Called when we press ESCAPE during
+\ flight and have an escape pod fitted.
+\
+\ ******************************************************************************
 
- JSR RES2
- LDX #&03	\ escape capsule
+.ESCAPE
+
+ JSR RES2               \ Reset a number of flight variables and workspaces
+
+ LDX #ESC	            \ AJD
  STX &8C
- JSR d_2508
- LDA #&10
+ JSR FRS1
+
+ LDA #&10               \ AJD
  STA &61
  LDA #&C2
  STA &64
  LSR A
  STA &66
 
-.d_20dd
+.ESL1
 
- JSR d_50a0
- JSR d_488c
- DEC &66
- BNE d_20dd
- JSR SCAN
- LDA #&00
- STA cmdr_cargo+&10
+ JSR MVEIT_FLIGHT       \ Duplicate of MVEIT? AJD
+
+ JSR LL9                \ Call LL9 to draw the Cobra on-screen
+
+ DEC INWK+32            \ Decrement the counter in byte #32
+
+ BNE ESL1               \ Loop back to keep moving the Cobra until the AI flag
+                        \ is 0, which gives it time to drift away from our pod
+
+ JSR SCAN               \ Call SCAN to remove the Cobra from the scanner (by
+                        \ redrawing it)
+
+ LDA #0                 \ Set A = 0 so we can use it to zero the contents of
+                        \ the cargo hold
+
+ STA QQ20+&10
  LDX #&0C	\LDX #&10	\ save gold/plat/gems
 
-.d_20ee
+.ESL2
 
- STA cmdr_cargo,X
- DEX
- BPL d_20ee
- STA FIST
- STA cmdr_escape
- INC new_hold	\**
+ STA QQ20,X             \ Set the X-th byte of QQ20 to zero, so we no longer
+                        \ have any of item type X in the cargo hold
+
+ DEX                    \ Decrement the counter
+
+ BPL ESL2               \ Loop back to ESL2 until we have emptied the entire
+                        \ cargo hold
+
+ STA FIST               \ Launching an escape pod also clears our criminal
+                        \ record, so set our legal status in FIST to 0 ("clean")
+
+ STA ESCP               \ The escape pod is a one-use item, so set ESCP to 0 so
+                        \ we no longer have one fitted
+
+ INC new_hold           \ AJD
  LDA new_range
  STA QQ14
  JSR update_pod
- JSR set_home
+ JSR ping
  JSR TT111
- JSR data_home
- JMP d_143e
+ JSR jmp
+
+ JMP GOIN               \ Go to the docking bay (i.e. show the ship hanger
+                        \ screen) and return from the subroutine with a tail
+                        \ call
 
 .d_2102
 
@@ -17506,7 +18002,7 @@ ENDIF
  LDA &30
  BNE d_2311
  LDA #&08
- JMP sound
+ JMP NOISE
 
 .d_22c6
 
@@ -17911,9 +18407,9 @@ ENDIF
  CLC
  RTS
 
-.d_2508
+.FRS1
 
- JSR init_ship
+ JSR ZINF
  LDA #&1C
  STA &49
  LSR A
@@ -17940,7 +18436,7 @@ ENDIF
 .d_252e
 
  LDX #&01
- JSR d_2508
+ JSR FRS1
  BCC d_2589
  LDX &45
  JSR ship_ptr
@@ -18113,7 +18609,7 @@ ENDIF
 .d_2623
 
  LDA #&38
- JSR sound
+ JSR NOISE
  LDA #&01
  STA &0348
  JSR update_pod
@@ -18495,7 +18991,7 @@ ENDIF
 
  STA &81
  LDA &7D
- JMP l_2316
+ JMP DVID4
 
 .d_297e
 
@@ -18772,11 +19268,11 @@ ENDIF
 
  LDY #&0C
  SEC
- LDA cmdr_cargo+&10
+ LDA QQ20+&10
 
 .d_2af9
 
- ADC cmdr_cargo,Y
+ ADC QQ20,Y
  BCS n_cargo
  DEY
  BPL d_2af9
@@ -18788,7 +19284,7 @@ ENDIF
 
 .d_2b04
 
- LDA cmdr_cargo,X
+ LDA QQ20,X
  ADC #&00
  RTS
 
@@ -18828,7 +19324,7 @@ ENDIF
  BCC d_30b9
  LDA #&2D
  JSR TT27
- JSR write_planet
+ JSR cpl
 
 .d_3054
 
@@ -18867,8 +19363,8 @@ ENDIF
 .d_3084
 
  LDA #&60
- STA data_homex
- STA data_homey
+ STA QQ9
+ STA QQ10
  JSR d_3292
  JSR TT111
  LDX #&00
@@ -18876,7 +19372,7 @@ ENDIF
  STX hype_dist+&01
  LDA #&74
  JSR d_45c6
- JMP data_home
+ JMP jmp
 
 .d_30ac
 
@@ -18893,7 +19389,7 @@ ENDIF
 
 .d_31ab
 
- JSR data_home
+ JSR jmp
  LDX #&05
 
 .d_31b0
@@ -19084,7 +19580,7 @@ ENDIF
  ADC #&04
  BCS d_3469
  STA (&67),Y
- JSR l_2316
+ JSR DVID4
  LDA &1B
  CMP #&1C
  BCC d_34a8
@@ -19273,7 +19769,7 @@ ENDIF
 
  EOR #&FF
  STA FIST
- JSR init_ship
+ JSR ZINF
  LDA &6D
  AND #&03
  ADC #&03
@@ -19364,7 +19860,7 @@ ENDIF
  LDA #&14
  STA &81
  TXA
- JSR l_2316
+ JSR DVID4
  LDX &1B
  TYA
  BMI d_3658
@@ -19579,10 +20075,10 @@ ENDIF
  BMI d_37d1
  ASL A
  TAY
- LDA ship_data+1,Y
+ LDA XX21-1,Y
  BEQ d_3776
  STA &1F
- LDA ship_data,Y
+ LDA XX21-2,Y
  STA &1E
  CPY #&04
  BEQ d_37c1
@@ -19684,7 +20180,7 @@ ENDIF
  LDA #&20
  STA &30
  ASL A
- JSR sound
+ JSR NOISE
 
 .draw_ecm
 
@@ -20028,7 +20524,7 @@ ENDIF
 .d_3b8e
 
  STA &95
- JMP circle
+ JMP CIRCLE2
 
 .d_3bed
 
@@ -20196,7 +20692,7 @@ ENDIF
 
 .d_3d89
 
- JSR init_ship
+ JSR ZINF
  JSR l_32b0
  STA FRIN+&01
  STA &0320
@@ -20301,9 +20797,9 @@ ENDIF
 
  ASL A
  TAY
- LDA ship_data,Y
+ LDA XX21-2,Y
  STA SC
- LDA ship_data+1,Y
+ LDA XX21-1,Y
  STA SC+&01
  LDY #&05
  LDA (SC),Y
@@ -20363,7 +20859,7 @@ ENDIF
 
 .rand_posn
 
- JSR init_ship
+ JSR ZINF
  JSR DORND
  STA &46
  STX &49
@@ -20724,7 +21220,7 @@ ENDIF
 .not_price
 
  CMP #&32
- BEQ distance
+ BEQ T95
  CMP #&43
  BNE not_find
  LDA &87
@@ -20732,7 +21228,7 @@ ENDIF
  BEQ n_finder
  LDA dockedp
  BNE not_map
- JMP find_plant
+ JMP HME2
 
 .n_finder
 
@@ -20758,10 +21254,10 @@ ENDIF
  \	LDA &2F
  \	BNE not_map
  \	LDA &06
- JSR map_cursor
- JSR set_home
- \	JSR map_cursor
- JMP map_cursor
+ JSR TT103
+ JSR ping
+ \	JSR TT103
+ JMP TT103
 
 .not_home
 
@@ -20773,21 +21269,21 @@ ENDIF
  LDA cmdr_cour
  ORA cmdr_cour+1
  BEQ not_map
- JSR map_cursor
+ JSR TT103
  LDA cmdr_courx
- STA data_homex
+ STA QQ9
  LDA cmdr_coury
- STA data_homey
- JSR map_cursor
+ STA QQ10
+ JSR TT103
 
-.distance
+.T95
 
  LDA &87
  AND #&C0
  BEQ not_map
  JSR snap_cursor
  STA QQ17
- JSR write_planet
+ JSR cpl
  LDA #&80
  STA QQ17
  LDA #&01
@@ -20890,11 +21386,11 @@ ENDIF
 
 .d_41a6
 
- LDA cmdr_cargo+&03
+ LDA QQ20+&03
  CLC
- ADC cmdr_cargo+&06
+ ADC QQ20+&06
  ASL A
- ADC cmdr_cargo+&0A
+ ADC QQ20+&0A
 
 .d_418a
 
@@ -21225,13 +21721,13 @@ ENDIF
 .d_439f
 
  LDA #&28
- JMP sound
+ JMP NOISE
 
 .d_43b1
 
  JSR sound_10
  LDA #&18
- JMP sound
+ JMP NOISE
 
 .d_43be
 
@@ -21244,7 +21740,7 @@ ENDIF
 .n_sound30
 
  LDA #&30
- JMP sound
+ JMP NOISE
 
 .d_4418
 
@@ -21278,7 +21774,7 @@ ENDIF
 .sound_10
 
  LDA #&10
- JMP sound
+ JMP NOISE
 
 .d_4429
 
@@ -21352,7 +21848,7 @@ ENDIF
 
 .d_44c7
 
- JSR init_ship
+ JSR ZINF
  LDA #&60
  STA &54
  ORA #&80
@@ -21557,14 +22053,14 @@ ENDIF
  \	CPX #&17
  CPX #&18
  BCS d_45b4
- \	LDA cmdr_cargo,X
+ \	LDA QQ20,X
  LDA CRGO,X
  BEQ d_45b4
  LDA &034A
  BNE d_45b4
  LDY #&03
  STY &034B
- \	STA cmdr_cargo,X
+ \	STA QQ20,X
  STA CRGO,X
  DEX
  BMI d_45c1
@@ -21597,13 +22093,13 @@ ENDIF
 
  JMP d_3899
 
-.d_488c
+.LL9
 
  LDA &8C
  BMI d_4889
  JMP l_400f
 
-.d_50a0
+.MVEIT_FLIGHT
 
  LDA &65
  AND #&A0
@@ -23859,7 +24355,11 @@ ship_total = 38
 
 .ship_data
 
- EQUW	0,	s_missile,	0,	s_escape
+ EQUW	0
+
+.XX21
+
+ EQUW	s_missile,	0,	s_escape
  EQUW	s_alloys,	s_barrel,	s_boulder,	s_asteroid
  EQUW	s_minerals,	0,	s_transporter,	0
  EQUW	0,	0,	0,	0

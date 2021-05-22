@@ -2081,7 +2081,7 @@ BRKV = P% - 2
 
 .l_1220
 
- JSR l_3ee1
+ JSR RES2
  \	JMP l_11f1
  BMI l_11f1
 
@@ -2247,14 +2247,14 @@ BRKV = P% - 2
  \	LDA #&03
  \	JSR TT66
  \	JSR l_2623
- \	JSR l_3ee1
+ \	JSR RES2
  \	STY &0341
  INC cmdr_bomb
  INC new_hold	\***
  \	JSR l_32c1
  JSR DORND
- STA data_homex	\QQ0
- STX data_homey	\QQ1
+ STA QQ9	\QQ0
+ STX QQ10	\QQ1
  JSR TT111
  JSR hyper_snap
 
@@ -2277,9 +2277,9 @@ BRKV = P% - 2
 .l_1301
 
  LDA &0309
- AND cmdr_escape
+ AND ESCP
  BEQ l_130c
- JMP l_20c1
+ JMP ESCAPE
 
 .l_130c
 
@@ -2418,7 +2418,7 @@ BRKV = P% - 2
  TAX
  JSR l_2aec
  BCS l_1464
- INC cmdr_cargo,X
+ INC QQ20,X
  TXA
  ADC #&D0
  JSR l_45c6
@@ -2446,9 +2446,9 @@ BRKV = P% - 2
  CMP #&50
  BCC l_1449
 
-.l_143e
+.GOIN
 
- JSR l_3ee1
+ JSR RES2
  LDA #&08
  JSR l_263d
  JMP run_tcode
@@ -2554,7 +2554,7 @@ BRKV = P% - 2
 
 .l_14ed
 
- JSR l_488c
+ JSR LL9
 
 .l_14f0
 
@@ -6763,7 +6763,6 @@ NEXT
                         \   If A = 64-95:   X = &C1 then skip so X = &C1
                         \   If A = 96-126:  X = &C1 then INX  so X = &C2
                         \
-
                         \ In other words, X points to the relevant page. But
                         \ what about the value of A? That gets shifted to the
                         \ left three times during the above code, which
@@ -7202,183 +7201,462 @@ NEXT
                         \ COMPAS to draw the compass, returning from the
                         \ subroutine using a tail call
 
+\ ******************************************************************************
+\
+\       Name: PZW
+\       Type: Subroutine
+\   Category: Dashboard
+\    Summary: Fetch the current dashboard colours, to support flashing
+\
+\ ------------------------------------------------------------------------------
+\
+\ Set A and X to the colours we should use for indicators showing dangerous and
+\ safe values respectively. This enables us to implement flashing indicators,
+\ which is one of the game's configurable options.
+\
+\ If flashing is enabled, the colour returned in A (dangerous values) will be
+\ red for 8 iterations of the main loop, and yellow/white for the next 8, before
+\ going back to red. If we always use PZW to decide which colours we should use
+\ when updating indicators, flashing colours will be automatically taken care of
+\ for us.
+\
+\ The values returned are &F0 for yellow/white and &0F for red. These are mode 5
+\ bytes that contain 4 pixels, with the colour of each pixel given in two bits,
+\ the high bit from the first nibble (bits 4-7) and the low bit from the second
+\ nibble (bits 0-3). So in &F0 each pixel is %10, or colour 2 (yellow or white,
+\ depending on the dashboard palette), while in &0F each pixel is %01, or colour
+\ 1 (red).
+\
+\ Returns:
+\
+\   A                   The colour to use for indicators with dangerous values
+\
+\   X                   The colour to use for indicators with safe values
+\
+\ ******************************************************************************
+
 .PZW
 
- LDX #&F0
- LDA &8A
- AND #&08
- AND f_flag
- BEQ l_2033
- TXA
- EQUB &2C
+ LDX #&F0               \ Set X to dashboard colour 2 (yellow/white)
 
-.l_2033
+ LDA MCNT               \ A will be non-zero for 8 out of every 16 main loop
+ AND #%00001000         \ counts, when bit 4 is set, so this is what we use to
+                        \ flash the "danger" colour
 
- LDA #&0F
- RTS
+ AND FLH                \ A will be zeroed if flashing colours are disabled
+
+ BEQ P%+4               \ If A is zero, skip to the LDA instruction below
+
+ TXA                    \ Otherwise flashing colours are enabled and it's the
+                        \ main loop iteration where we flash them, so set A to
+                        \ colour 2 (yellow/white) and use the BIT trick below to
+                        \ return from the subroutine
+
+ EQUB &2C               \ Skip the next instruction by turning it into
+                        \ &2C &A9 &0F, or BIT &0FA9, which does nothing apart
+                        \ from affect the flags
+
+ LDA #&0F               \ Set A to dashboard colour 1 (red)
+
+ RTS                    \ Return from the subroutine
+
+\ ******************************************************************************
+\
+\       Name: DILX
+\       Type: Subroutine
+\   Category: Dashboard
+\    Summary: Update a bar-based indicator on the dashboard
+\  Deep dive: The dashboard indicators
+\
+\ ------------------------------------------------------------------------------
+\
+\ The range of values shown on the indicator depends on which entry point is
+\ called. For the default entry point of DILX, the range is 0-255 (as the value
+\ passed in A is one byte). The other entry points are shown below.
+\
+\ Arguments:
+\
+\   A                   The value to be shown on the indicator (so the larger
+\                       the value, the longer the bar)
+\
+\   T1                  The threshold at which we change the indicator's colour
+\                       from the low value colour to the high value colour. The
+\                       threshold is in pixels, so it should have a value from
+\                       0-16, as each bar indicator is 16 pixels wide
+\
+\   K                   The colour to use when A is a high value, as a 4-pixel
+\                       mode 5 character row byte
+\
+\   K+1                 The colour to use when A is a low value, as a 4-pixel
+\                       mode 5 character row byte
+\
+\   SC(1 0)             The screen address of the first character block in the
+\                       indicator
+\
+\ Other entry points:
+\
+\   DILX+2              The range of the indicator is 0-64 (for the fuel
+\                       indicator)
+\
+\   DIL-1               The range of the indicator is 0-32 (for the speed
+\                       indicator)
+\
+\   DIL                 The range of the indicator is 0-16 (for the energy
+\                       banks)
+\
+\ ******************************************************************************
 
 .DILX
 
- LSR A
- LSR A
-
-.l_2038
-
+ LSR A                  \ If we call DILX, we set A = A / 16, so A is 0-15
  LSR A
 
-.l_2039
+ LSR A                  \ If we call DILX+2, we set A = A / 4, so A is 0-15
 
- LSR A
+ LSR A                  \ If we call DIL-1, we set A = A / 2, so A is 0-15
 
 .DIL
 
- STA &81
- LDX #&FF
- STX &82
- CMP &06
- BCS l_2048
- LDA &41
- BNE l_204a
+                        \ If we call DIL, we leave A alone, so A is 0-15
 
-.l_2048
+ STA Q                  \ Store the indicator value in Q, now reduced to 0-15,
+                        \ which is the length of the indicator to draw in pixels
 
- LDA &40
+ LDX #&FF               \ Set R = &FF, to use as a mask for drawing each row of
+ STX R                  \ each character block of the bar, starting with a full
+                        \ character's width of 4 pixels
 
-.l_204a
+ CMP T1                 \ If A >= T1 then we have passed the threshold where we
+ BCS DL30               \ change bar colour, so jump to DL30 to set A to the
+                        \ "high value" colour
 
- STA &91
- LDY #&02
- LDX #&03
+ LDA K+1                \ Set A to K+1, the "low value" colour to use
 
-.l_2050
+ BNE DL31               \ Jump down to DL31 (this BNE is effectively a JMP as A
+                        \ will never be zero)
 
- LDA &81
- CMP #&04
- BCC l_2070
- SBC #&04
- STA &81
- LDA &82
+.DL30
 
-.l_205c
+ LDA K                  \ Set A to K, the "high value" colour to use
 
- AND &91
+.DL31
+
+ STA COL                \ Store the colour of the indicator in COL
+
+ LDY #2                 \ We want to start drawing the indicator on the third
+                        \ line in this character row, so set Y to point to that
+                        \ row's offset
+
+ LDX #3                 \ Set up a counter in X for the width of the indicator,
+                        \ which is 4 characters (each of which is 4 pixels wide,
+                        \ to give a total width of 16 pixels)
+
+.DL1
+
+ LDA Q                  \ Fetch the indicator value (0-15) from Q into A
+
+ CMP #4                 \ If Q < 4, then we need to draw the end cap of the
+ BCC DL2                \ indicator, which is less than a full character's
+                        \ width, so jump down to DL2 to do this
+
+ SBC #4                 \ Otherwise we can draw a 4-pixel wide block, so
+ STA Q                  \ subtract 4 from Q so it contains the amount of the
+                        \ indicator that's left to draw after this character
+
+ LDA R                  \ Fetch the shape of the indicator row that we need to
+                        \ display from R, so we can use it as a mask when
+                        \ painting the indicator. It will be &FF at this point
+                        \ (i.e. a full 4-pixel row)
+
+.DL5
+
+ AND COL                \ Fetch the 4-pixel mode 5 colour byte from COL, and
+                        \ only keep pixels that have their equivalent bits set
+                        \ in the mask byte in A
+
+ STA (SC),Y             \ Draw the shape of the mask on pixel row Y of the
+                        \ character block we are processing
+
+ INY                    \ Draw the next pixel row, incrementing Y
  STA (SC),Y
- INY
+
+ INY                    \ And draw the third pixel row, incrementing Y
  STA (SC),Y
- INY
- STA (SC),Y
- TYA
- CLC
- ADC #&06
- TAY
- DEX
- BMI l_208a
- BPL l_2050
 
-.l_2070
+ TYA                    \ Add 6 to Y, so Y is now 8 more than when we started
+ CLC                    \ this loop iteration, so Y now points to the address
+ ADC #6                 \ of the first line of the indicator bar in the next
+ TAY                    \ character block (as each character is 8 bytes of
+                        \ screen memory)
 
- EOR #&03
- STA &81
- LDA &82
+ DEX                    \ Decrement the loop counter for the next character
+                        \ block along in the indicator
 
-.l_2076
+ BMI DL6                \ If we just drew the last character block then we are
+                        \ done drawing, so jump down to DL6 to finish off
 
- ASL A
- AND #&EF
- DEC &81
- BPL l_2076
- PHA
- LDA #&00
- STA &82
- LDA #&63
- STA &81
- PLA
- JMP l_205c
+ BPL DL1                \ Loop back to DL1 to draw the next character block of
+                        \ the indicator (this BPL is effectively a JMP as A will
+                        \ never be negative following the previous BMI)
 
-.l_208a
+.DL2
 
- INC SC+&01
- RTS
+ EOR #3                 \ If we get here then we are drawing the indicator's
+ STA Q                  \ end cap, so Q is < 4, and this EOR flips the bits, so
+                        \ instead of containing the number of indicator columns
+                        \ we need to fill in on the left side of the cap's
+                        \ character block, Q now contains the number of blank
+                        \ columns there should be on the right side of the cap's
+                        \ character block
+
+ LDA R                  \ Fetch the current mask from R, which will be &FF at
+                        \ this point, so we need to turn Q of the columns on the
+                        \ right side of the mask to black to get the correct end
+                        \ cap shape for the indicator
+
+.DL3
+
+ ASL A                  \ Shift the mask left so bit 0 is cleared, and then
+ AND #%11101111         \ clear bit 4, which has the effect of shifting zeroes
+                        \ from the left into each nibble (i.e. xxxx xxxx becomes
+                        \ xxx0 xxx0, which blanks out the last column in the
+                        \ 4-pixel mode 5 character block)
+
+ DEC Q                  \ Decrement the counter for the number of columns to
+                        \ blank out
+
+ BPL DL3                \ If we still have columns to blank out in the mask,
+                        \ loop back to DL3 until the mask is correct for the
+                        \ end cap
+
+ PHA                    \ Store the mask byte on the stack while we use the
+                        \ accumulator for a bit
+
+ LDA #0                 \ Change the mask so no bits are set, so the characters
+ STA R                  \ after the one we're about to draw will be all blank
+
+ LDA #99                \ Set Q to a high number (99, why not) so we will keep
+ STA Q                  \ drawing blank characters until we reach the end of
+                        \ the indicator row
+
+ PLA                    \ Restore the mask byte from the stack so we can use it
+                        \ to draw the end cap of the indicator
+
+ JMP DL5                \ Jump back up to DL5 to draw the mask byte on-screen
+
+.DL6
+
+ INC SC+1               \ Increment the high byte of SC to point to the next
+                        \ character row on-screen (as each row takes up exactly
+                        \ one page of 256 bytes) - so this sets up SC to point
+                        \ to the next indicator, i.e. the one below the one we
+                        \ just drew
+
+.DL9                    \ This label is not used but is in the original source
+
+ RTS                    \ Return from the subroutine
+
+\ ******************************************************************************
+\
+\       Name: DIL2
+\       Type: Subroutine
+\   Category: Dashboard
+\    Summary: Update the roll or pitch indicator on the dashboard
+\  Deep dive: The dashboard indicators
+\
+\ ------------------------------------------------------------------------------
+\
+\ The indicator can show a vertical bar in 16 positions, with a value of 8
+\ showing the bar in the middle of the indicator.
+\
+\ In practice this routine is only ever called with A in the range 1 to 15, so
+\ the vertical bar never appears in the leftmost position (though it does appear
+\ in the rightmost).
+\
+\ Arguments:
+\
+\   A                   The offset of the vertical bar to show in the indicator,
+\                       from 0 at the far left, to 8 in the middle, and 15 at
+\                       the far right
+\
+\ Returns:
+\
+\   C flag              The C flag is set
+\
+\ ******************************************************************************
 
 .DIL2
 
- LDY #&01
- STA &81
+ LDY #1                 \ We want to start drawing the vertical indicator bar on
+                        \ the second line in the indicator's character block, so
+                        \ set Y to point to that row's offset
 
-.l_2091
+ STA Q                  \ Store the offset of the vertical bar to draw in Q
 
- SEC
- LDA &81
- SBC #&04
- BCS l_20a6
- LDA #&FF
- LDX &81
- STA &81
- LDA TWOS+&10,X
- AND #&F0
- JMP l_20aa
+                        \ We are now going to work our way along the indicator
+                        \ on the dashboard, from left to right, working our way
+                        \ along one character block at a time. Y will be used as
+                        \ a pixel row counter to work our way through the
+                        \ character blocks, so each time we draw a character
+                        \ block, we will increment Y by 8 to move on to the next
+                        \ block (as each character block contains 8 rows)
 
-.l_20a6
+.DLL10
 
- STA &81
- LDA #&00
+ SEC                    \ Set A = Q - 4, so that A contains the offset of the
+ LDA Q                  \ vertical bar from the start of this character block
+ SBC #4
 
-.l_20aa
+ BCS DLL11              \ If Q >= 4 then the character block we are drawing does
+                        \ not contain the vertical indicator bar, so jump to
+                        \ DLL11 to draw a blank character block
 
+ LDA #&FF               \ Set A to a high number (and &FF is as high as they go)
+
+ LDX Q                  \ Set X to the offset of the vertical bar, which we know
+                        \ is within this character block
+
+ STA Q                  \ Set Q to a high number (&FF, why not) so we will keep
+                        \ drawing blank characters after this one until we reach
+                        \ the end of the indicator row
+
+ LDA CTWOS,X            \ CTWOS is a table of ready-made 1-pixel mode 5 bytes,
+                        \ just like the TWOS and TWOS2 tables for mode 4 (see
+                        \ the PIXEL routine for details of how they work). This
+                        \ fetches a mode 5 1-pixel byte with the pixel position
+                        \ at X, so the pixel is at the offset that we want for
+                        \ our vertical bar
+
+ AND #&F0               \ The 4-pixel mode 5 colour byte &F0 represents four
+                        \ pixels of colour %10 (3), which is yellow in the
+                        \ normal dashboard palette and white if we have an
+                        \ escape pod fitted. We AND this with A so that we only
+                        \ keep the pixel that matches the position of the
+                        \ vertical bar (i.e. A is acting as a mask on the
+                        \ 4-pixel colour byte)
+
+ JMP DLL12              \ Jump to DLL12 to skip the code for drawing a blank,
+                        \ and move on to drawing the indicator
+
+.DLL11
+
+                        \ If we get here then we want to draw a blank for this
+                        \ character block
+
+ STA Q                  \ Update Q with the new offset of the vertical bar, so
+                        \ it becomes the offset after the character block we
+                        \ are about to draw
+
+ LDA #0                 \ Change the mask so no bits are set, so all of the
+                        \ character blocks we display from now on will be blank
+.DLL12
+
+ STA (SC),Y             \ Draw the shape of the mask on pixel row Y of the
+                        \ character block we are processing
+
+ INY                    \ Draw the next pixel row, incrementing Y
  STA (SC),Y
- INY
- STA (SC),Y
- INY
- STA (SC),Y
- INY
- STA (SC),Y
- TYA
- CLC
- ADC #&05
- TAY
- CPY #&1E
- BCC l_2091
- INC SC+&01
- RTS
 
-.l_20c1
+ INY                    \ And draw the third pixel row, incrementing Y
+ STA (SC),Y
 
- JSR l_3ee1
- LDX #&03	\ escape capsule
+ INY                    \ And draw the fourth pixel row, incrementing Y
+ STA (SC),Y
+
+ TYA                    \ Add 5 to Y, so Y is now 8 more than when we started
+ CLC                    \ this loop iteration, so Y now points to the address
+ ADC #5                 \ of the first line of the indicator bar in the next
+ TAY                    \ character block (as each character is 8 bytes of
+                        \ screen memory)
+
+ CPY #30                \ If Y < 30 then we still have some more character
+ BCC DLL10              \ blocks to draw, so loop back to DLL10 to display the
+                        \ next one along
+
+ INC SC+1               \ Increment the high byte of SC to point to the next
+                        \ character row on-screen (as each row takes up exactly
+                        \ one page of 256 bytes) - so this sets up SC to point
+                        \ to the next indicator, i.e. the one below the one we
+                        \ just drew
+
+ RTS                    \ Return from the subroutine
+
+\ ******************************************************************************
+\
+\       Name: ESCAPE
+\       Type: Subroutine
+\   Category: Flight
+\    Summary: Launch our escape pod
+\
+\ ------------------------------------------------------------------------------
+\
+\ This routine displays our doomed Cobra Mk III disappearing off into the ether
+\ before arranging our replacement ship. Called when we press ESCAPE during
+\ flight and have an escape pod fitted.
+\
+\ ******************************************************************************
+
+.ESCAPE
+
+ JSR RES2               \ Reset a number of flight variables and workspaces
+
+ LDX #ESC	            \ AJD
  STX &8C
- JSR l_2508
- LDA #&10
+ JSR FRS1
+
+ LDA #&10               \ AJD
  STA &61
  LDA #&C2
  STA &64
  LSR A
  STA &66
 
-.l_20dd
+.ESL1
 
- JSR MVEIT
- JSR l_488c
- DEC &66
- BNE l_20dd
- JSR SCAN
- LDA #&00
- STA cmdr_cargo+&10
+ JSR MVEIT              \ Call MVEIT to move the escape pod in space AJD
+
+ JSR LL9                \ Call LL9 to draw the Cobra on-screen
+
+ DEC INWK+32            \ Decrement the counter in byte #32
+
+ BNE ESL1               \ Loop back to keep moving the Cobra until the AI flag
+                        \ is 0, which gives it time to drift away from our pod
+
+ JSR SCAN               \ Call SCAN to remove the Cobra from the scanner (by
+                        \ redrawing it)
+
+ LDA #0                 \ Set A = 0 so we can use it to zero the contents of
+                        \ the cargo hold
+
+ STA QQ20+&10
  LDX #&0C	\LDX #&10	\ save gold/plat/gems
 
-.l_20ee
+.ESL2
 
- STA cmdr_cargo,X
- DEX
- BPL l_20ee
- STA FIST
- STA cmdr_escape
- INC new_hold	\**
+ STA QQ20,X             \ Set the X-th byte of QQ20 to zero, so we no longer
+                        \ have any of item type X in the cargo hold
+
+ DEX                    \ Decrement the counter
+
+ BPL ESL2               \ Loop back to ESL2 until we have emptied the entire
+                        \ cargo hold
+
+ STA FIST               \ Launching an escape pod also clears our criminal
+                        \ record, so set our legal status in FIST to 0 ("clean")
+
+ STA ESCP               \ The escape pod is a one-use item, so set ESCP to 0 so
+                        \ we no longer have one fitted
+
+ INC new_hold           \ AJD
  LDA new_range
  STA QQ14
- JSR l_3d68
+ JSR ping
  JSR TT111
- JSR l_309f
- JMP l_143e
+ JSR jmp
+
+ JMP GOIN               \ Go to the docking bay (i.e. show the ship hanger
+                        \ screen) and return from the subroutine with a tail
+                        \ call
 
 .l_2102
 
@@ -8103,7 +8381,7 @@ NEXT
  CLC
  RTS
 
-.l_2508
+.FRS1
 
  JSR l_3f26
  LDA #&1C
@@ -8132,7 +8410,7 @@ NEXT
 .l_252e
 
  LDX #&01
- JSR l_2508
+ JSR FRS1
  BCC l_2589
  LDX &45
  JSR ship_SC
@@ -8323,7 +8601,7 @@ NEXT
  STA &95
  JSR TTX66
 
-.l_2642
+.HFS1
 
  LDX #&80
  STX &D2
@@ -8355,7 +8633,7 @@ NEXT
 
  LDA #&01
  STA &6B
- JSR l_3b90
+ JSR CIRCLE2
  ASL &40
  BCS l_2678
  LDA &40
@@ -8627,22 +8905,71 @@ NEXT
  ORA &D1
  RTS
 
-.l_280b
+\ ******************************************************************************
+\
+\       Name: SQUA
+\       Type: Subroutine
+\   Category: Maths (Arithmetic)
+\    Summary: Clear bit 7 of A and calculate (A P) = A * A
+\
+\ ------------------------------------------------------------------------------
+\
+\ Do the following multiplication of unsigned 8-bit numbers, after first
+\ clearing bit 7 of A:
+\
+\   (A P) = A * A
+\
+\ ******************************************************************************
 
- AND #&7F
+.SQUA
+
+ AND #%01111111         \ Clear bit 7 of A and fall through into SQUA2 to set
+                        \ (A P) = A * A
+
+\ ******************************************************************************
+\
+\       Name: SQUA2
+\       Type: Subroutine
+\   Category: Maths (Arithmetic)
+\    Summary: Calculate (A P) = A * A
+\
+\ ------------------------------------------------------------------------------
+\
+\ Do the following multiplication of unsigned 8-bit numbers:
+\
+\   (A P) = A * A
+\
+\ ******************************************************************************
 
 .SQUA2
 
- STA &1B
+ STA P                  \ Copy A into P and X
  TAX
- BNE l_2824
 
-.l_2812
+ BNE MU11               \ If X = 0 fall through into MU1 to return a 0,
+                        \ otherwise jump to MU11 to return P * X
 
- CLC
- STX &1B
+\ ******************************************************************************
+\
+\       Name: MU1
+\       Type: Subroutine
+\   Category: Maths (Arithmetic)
+\    Summary: Copy X into P and A, and clear the C flag
+\
+\ ------------------------------------------------------------------------------
+\
+\ Used to return a 0 result quickly from MULTU below.
+\
+\ ******************************************************************************
+
+.MU1
+
+ CLC                    \ Clear the C flag
+
+ STX P                  \ Copy X into P and A
  TXA
- RTS
+
+ RTS                    \ Return from the subroutine
 
 .MLU1
 
@@ -8657,9 +8984,9 @@ NEXT
 .l_2820
 
  LDX &81
- BEQ l_2812
+ BEQ MU1
 
-.l_2824
+.MU11
 
  DEX
  STX &D1
@@ -9228,11 +9555,11 @@ NEXT
 
  LDY #&0C
  SEC
- LDA cmdr_cargo+&10
+ LDA QQ20+&10
 
 .l_2af9
 
- ADC cmdr_cargo,Y
+ ADC QQ20,Y
  BCS n_cargo
  DEY
  BPL l_2af9
@@ -9244,7 +9571,7 @@ NEXT
 
 .l_2b04
 
- LDA cmdr_cargo,X
+ LDA QQ20,X
  ADC #&00
  RTS
 
@@ -9561,9 +9888,9 @@ NEXT
  LDX &84
  INX
  BNE l_2d09
- LDA data_homex
+ LDA QQ9
  STA &73
- LDA data_homey
+ LDA QQ10
  LSR A
  STA &74
  LDA #&04
@@ -9678,7 +10005,7 @@ NEXT
  STX &6B
  INX
  STX &95
- JMP l_3b90
+ JMP CIRCLE2
 
 .l_2dde
 
@@ -9687,7 +10014,7 @@ NEXT
 .l_2de0
 
  STY &03AD
- LDX cmdr_cargo,Y
+ LDX QQ20,Y
  BEQ l_2e0c
  TYA
  ASL A
@@ -9747,26 +10074,26 @@ NEXT
  JSR l_2e65
  PLA
  STA &76
- LDA data_homey
+ LDA QQ10
  JSR l_2e7b
  LDA &77
- STA data_homey
+ STA QQ10
  STA &74
  PLA
  STA &76
- LDA data_homex
+ LDA QQ9
  JSR l_2e7b
  LDA &77
- STA data_homex
+ STA QQ9
  STA &73
 
 .l_2e65
 
  LDA &87
  BMI l_2e8c
- LDA data_homex
+ LDA QQ9
  STA &73
- LDA data_homey
+ LDA QQ10
  LSR A
  STA &74
  LDA #&04
@@ -9797,7 +10124,7 @@ NEXT
 
 .l_2e8c
 
- LDA data_homex
+ LDA QQ9
  SEC
  SBC QQ0
  CMP #&26
@@ -9812,7 +10139,7 @@ NEXT
  CLC
  ADC #&68
  STA &73
- LDA data_homey
+ LDA QQ10
  SEC
  SBC QQ1
  CMP #&26
@@ -9965,7 +10292,7 @@ NEXT
 
  LDA &6F
  SEC
- SBC data_homex
+ SBC QQ9
  BCS l_2f8c
  EOR #&FF
  ADC #&01
@@ -9976,7 +10303,7 @@ NEXT
  STA &83
  LDA &6D
  SEC
- SBC data_homey
+ SBC QQ10
  BCS l_2f9b
  EOR #&FF
  ADC #&01
@@ -10012,9 +10339,9 @@ NEXT
  DEX
  BPL l_2fb7
  LDA &6D
- STA data_homey
+ STA QQ10
  LDA &6F
- STA data_homex
+ STA QQ9
  SEC
  SBC QQ0
  BCS l_2fd2
@@ -10027,7 +10354,7 @@ NEXT
  STA &41
  LDA &1B
  STA &40
- LDA data_homey
+ LDA QQ10
  SEC
  SBC QQ1
  BCS l_2fe8
@@ -10133,8 +10460,8 @@ NEXT
 .l_3084
 
  LDA #&60
- STA data_homex
- STA data_homey
+ STA QQ9
+ STA QQ10
  JSR l_3292
  JSR TT111
  LDX #&00
@@ -10143,12 +10470,15 @@ NEXT
  LDA #&74
  JSR l_45c6
 
-.l_309f
+.jmp
 
- LDA data_homex
+ LDA QQ9
  STA QQ0
- LDA data_homey
+ LDA QQ10
  STA QQ1
+
+.hy5
+
  RTS
 
 .ee3
@@ -10326,7 +10656,7 @@ NEXT
 
 .l_31ab
 
- JSR l_309f
+ JSR jmp
  LDX #&05
 
 .l_31b0
@@ -10405,7 +10735,7 @@ NEXT
  LDA #&03
  JSR TT66
  JSR l_2623
- JSR l_3ee1
+ JSR RES2
  STY &0341
 
 .l_3239
@@ -10448,7 +10778,7 @@ NEXT
  CMP #&FD
  BCS l_3226
  JSR l_31ab
- JSR l_3ee1
+ JSR RES2
  JSR l_3580
  JSR l_4255
  LDA &87
@@ -10464,7 +10794,7 @@ NEXT
  LDX &8E
  BEQ l_32c1
  JSR l_2636
- JSR l_3ee1
+ JSR RES2
  JSR TT111
  INC &4E
  JSR l_356d
@@ -10479,7 +10809,7 @@ NEXT
  STA FIST
  LDA #&FF
  STA &87
- JSR l_2642
+ JSR HFS1
 
 .l_32c1
 
@@ -12150,7 +12480,7 @@ NEXT
 
  STA &95
 
-.l_3b90
+.CIRCLE2
 
  LDX #&FF
  STX &92
@@ -12501,14 +12831,14 @@ NEXT
 
  RTS
 
-.l_3d68
+.ping
 
  LDX #&01
 
 .l_3d6a
 
  LDA QQ0,X
- STA data_homex,X
+ STA QQ9,X
  DEX
  BPL l_3d6a
  RTS
@@ -12763,7 +13093,7 @@ NEXT
  DEX
  BPL l_3edb
 
-.l_3ee1
+.RES2
 
  LDA #&12
  STA &03C3
@@ -13233,7 +13563,7 @@ NEXT
  CMP #&36
  BNE l_notdist
  JSR l_2e65
- JSR l_3d68
+ JSR ping
  JMP l_2e65	\JSR l_2e65
 
 .l_4169
@@ -13259,11 +13589,11 @@ NEXT
 
 .l_41a6
 
- LDA cmdr_cargo+&03
+ LDA QQ20+&03
  CLC
- ADC cmdr_cargo+&06
+ ADC QQ20+&06
  ASL A
- ADC cmdr_cargo+&0A
+ ADC QQ20+&0A
  \	RTS
 
 .l_418a
@@ -13279,9 +13609,9 @@ NEXT
  BEQ l_4169
  JSR l_2e65
  LDA cmdr_courx
- STA data_homex
+ STA QQ9
  LDA cmdr_coury
- STA data_homey
+ STA QQ10
  JSR l_2e65
 
 .l_418b
@@ -13324,7 +13654,7 @@ NEXT
 .l_41c6
 
  JSR l_43b1
- JSR l_3ee1
+ JSR RES2
  ASL &7D
  ASL &7D
  LDX #&18
@@ -13518,12 +13848,12 @@ NEXT
 .l_42f5
 
  LDA &34
- JSR l_280b
+ JSR SQUA
  STA &82
  LDA &1B
  STA &81
  LDA &35
- JSR l_280b
+ JSR SQUA
  \	STA &D1
  TAY
  LDA &1B
@@ -13534,7 +13864,7 @@ NEXT
  ADC &82
  STA &82
  LDA &36
- JSR l_280b
+ JSR SQUA
  \	STA &D1
  TAY
  LDA &1B
@@ -14078,14 +14408,14 @@ NEXT
  \	CPX #&16
  CPX #&18
  BCS l_45b4
- \	LDA cmdr_cargo,X
+ \	LDA QQ20,X
  LDA CRGO,X
  BEQ l_45b4
  LDA &034A
  BNE l_45b4
  LDY #&03
  STY &034B
- \	STA cmdr_cargo,X
+ \	STA QQ20,X
  STA CRGO,X
  DEX
  BMI l_45c1
@@ -14515,7 +14845,7 @@ NEXT
 
  JMP l_3899
 
-.l_488c
+.LL9
 
  LDA &8C
  BMI l_4889
