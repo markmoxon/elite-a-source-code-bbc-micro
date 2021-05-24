@@ -294,7 +294,7 @@ tube_brk = &16	\ tube BRK vector
 .tube_table
 
  EQUW LL30, HLOIN, PIXEL, clr_scrn
- EQUW clr_line, sync_in, draw_bar, draw_angle
+ EQUW CLYNS, sync_in, draw_bar, draw_angle
  EQUW put_missle, scan_fire, write_fe4e, scan_xin
  EQUW scan_10in, get_key, write_xyc, write_pod
  EQUW draw_blob, draw_tail, draw_S, draw_E
@@ -1632,13 +1632,13 @@ tube_brk = &16	\ tube BRK vector
 
 .l_254f
 
- JSR clr_page
+ JSR ZES1
  INX
  CPX #&78
  BNE l_254f
  RTS
 
-.clr_page
+.ZES1
 
  LDY #&00
  STY SC
@@ -1652,19 +1652,19 @@ tube_brk = &16	\ tube BRK vector
  BNE l_3a07
  RTS
 
-.clr_line
+.CLYNS
 
  LDA #&75
  STA SC+&01
  LDA #&07
  STA SC
  LDA #&00
- JSR clr_e9
+ JSR LYN
  INC SC+&01
- JSR clr_e9
+ JSR LYN
  INC SC+&01
 
-.clr_e9
+.LYN
 
  LDY #&E9
 
@@ -1860,10 +1860,10 @@ tube_brk = &16	\ tube BRK vector
 
 .scan_10in
 
- JSR scan_10
+ JSR RDKEY
  JMP tube_put
 
-.scan_10
+.RDKEY
 
  LDX #&10
 
@@ -1900,12 +1900,12 @@ tube_brk = &16	\ tube BRK vector
 
  JSR sync
  JSR sync
- JSR scan_10
+ JSR RDKEY
  BNE get_key
 
 .press
 
- JSR scan_10
+ JSR RDKEY
  BEQ press
  TAY
  LDA (key_tube),Y
@@ -2391,4 +2391,11 @@ rawrch = &FFBC
  PLA
  RTS
 
+\ ******************************************************************************
+\
+\ Save output/2.H.bin
+\
+\ ******************************************************************************
+
+PRINT "S.2.H ", ~CODE%, " ", ~P%, " ", ~LOAD%, " ", ~LOAD%
 SAVE "output/2.H.bin", CODE%, P%, LOAD%

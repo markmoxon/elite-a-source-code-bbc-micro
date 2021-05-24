@@ -2102,8 +2102,8 @@ BRKV = P% - 2
 
 .n_lowx
 
- JSR l_29ff
- JSR l_29ff
+ JSR cntr
+ JSR cntr
  TXA
  EOR #&80
  TAY
@@ -2144,7 +2144,7 @@ BRKV = P% - 2
 
 .n_lowy
 
- JSR l_29ff
+ JSR cntr
  TXA
  EOR #&80
  TAY
@@ -2324,7 +2324,7 @@ BRKV = P% - 2
  STA &44
  LDA #&00
  JSR l_43f3
- JSR l_2a82
+ JSR LASLI
  PLA
  BPL l_136f
  LDA #&00
@@ -2814,7 +2814,7 @@ BRKV = P% - 2
  LDA &0346
  CMP #&08
  BCS l_165c
- JSR l_2aa1
+ JSR LASLI2
  LDA #&00
  STA &0343
 
@@ -2822,7 +2822,7 @@ BRKV = P% - 2
 
  LDA &0340
  BEQ l_1666
- JSR l_3629
+ JSR DENGY
  BEQ l_166e
 
 .l_1666
@@ -6169,10 +6169,6 @@ NEXT
 
  EQUD &00E87648
 
-.c_1e38
-
- CLC
-
 \ ******************************************************************************
 \
 \       Name: pr2
@@ -6196,7 +6192,11 @@ NEXT
 \
 \   pr2+2               Print the 8-bit number in X to the number of digits in A
 \
+\   pr2-1               Print X without a decimal point
+\
 \ ******************************************************************************
+
+ CLC
 
 .pr2
 
@@ -7658,7 +7658,32 @@ NEXT
                         \ screen) and return from the subroutine with a tail
                         \ call
 
-.l_2102
+\ ******************************************************************************
+\
+\ Save output/ELTB.bin
+\
+\ ******************************************************************************
+
+PRINT "ELITE B"
+PRINT "Assembled at ", ~CODE_B%
+PRINT "Ends at ", ~P%
+PRINT "Code size is ", ~(P% - CODE_B%)
+PRINT "Execute at ", ~LOAD%
+PRINT "Reload at ", ~LOAD_B%
+
+PRINT "S.ELTB ", ~CODE_B%, " ", ~P%, " ", ~LOAD%, " ", ~LOAD_B%
+\SAVE "output/D.ELTB.bin", CODE_B%, P%, LOAD%
+
+\ ******************************************************************************
+\
+\ ELITE C FILE
+\
+\ ******************************************************************************
+
+CODE_C% = P%
+LOAD_C% = LOAD% +P% - CODE%
+
+.TA34
 
  LDA #&00
  JSR l_41bf
@@ -7678,7 +7703,7 @@ NEXT
  BNE l_2150
  LDA &66
  ASL A
- BMI l_2102
+ BMI TA34
  LSR A
  TAX
  LDA UNIV,X
@@ -7879,7 +7904,7 @@ NEXT
 .l_221a
 
  JSR l_42bd
- JSR l_28de
+ JSR TAS3-2
  STA &93
  LDA &8C
  CMP #&01
@@ -8008,7 +8033,7 @@ NEXT
 .l_22e6
 
  LDY #&10
- JSR l_28e0
+ JSR TAS3
  TAX
  JSR l_2332
  STA &64
@@ -8017,7 +8042,7 @@ NEXT
  CMP #&20
  BCS l_2305
  LDY #&16
- JSR l_28e0
+ JSR TAS3
  TAX
  EOR &64
  JSR l_2332
@@ -8057,7 +8082,7 @@ NEXT
 
 .l_2324
 
- JSR l_28de
+ JSR TAS3-2
  CMP #&98
  BCC l_232f
  LDX #&00
@@ -8117,7 +8142,7 @@ NEXT
  BMI l_239a
  CMP #&23
  BCC l_239a
- JSR l_28de
+ JSR TAS3-2
  CMP #&A2
  BCS l_23b4
  LDA &40
@@ -8255,7 +8280,7 @@ NEXT
  LDX &0925,Y
  STX &81
  LDA &34
- JSR l_28d4
+ JSR MULT12
  LDX &0927,Y
  STX &81
  LDA &35
@@ -8662,7 +8687,7 @@ NEXT
  LSR A
  LSR A
  LSR A
- JSR l_2961
+ JSR DV41
  LDA &1B
  EOR &9A
  STA &83
@@ -8855,7 +8880,7 @@ NEXT
  STA &D1
  TXA
  AND #&7F
- BEQ l_2838
+ BEQ MU6
  TAX
  DEX
  STX &06
@@ -8971,79 +8996,282 @@ NEXT
 
  RTS                    \ Return from the subroutine
 
+\ ******************************************************************************
+\
+\       Name: MLU1
+\       Type: Subroutine
+\   Category: Maths (Arithmetic)
+\    Summary: Calculate Y1 = y_hi and (A P) = |y_hi| * Q for Y-th stardust
+\
+\ ------------------------------------------------------------------------------
+\
+\ Do the following assignment, and multiply the Y-th stardust particle's
+\ y-coordinate with an unsigned number Q:
+\
+\   Y1 = y_hi
+\
+\   (A P) = |y_hi| * Q
+\
+\ ******************************************************************************
+
 .MLU1
 
- LDA &0F82,Y
- STA &35
+ LDA SY,Y               \ Set Y1 the Y-th byte of SY
+ STA Y1
+
+                        \ Fall through into MLU2 to calculate:
+                        \
+                        \   (A P) = |A| * Q
+
+\ ******************************************************************************
+\
+\       Name: MLU2
+\       Type: Subroutine
+\   Category: Maths (Arithmetic)
+\    Summary: Calculate (A P) = |A| * Q
+\
+\ ------------------------------------------------------------------------------
+\
+\ Do the following multiplication of a sign-magnitude 8-bit number P with an
+\ unsigned number Q:
+\
+\   (A P) = |A| * Q
+\
+\ ******************************************************************************
 
 .MLU2
 
- AND #&7F
- STA &1B
+ AND #%01111111         \ Clear the sign bit in P, so P = |A|
+ STA P
 
-.l_2820
+                        \ Fall through into MULTU to calculate:
+                        \
+                        \   (A P) = P * Q
+                        \         = |A| * Q
 
- LDX &81
- BEQ MU1
+\ ******************************************************************************
+\
+\       Name: MULTU
+\       Type: Subroutine
+\   Category: Maths (Arithmetic)
+\    Summary: Calculate (A P) = P * Q
+\
+\ ------------------------------------------------------------------------------
+\
+\ Do the following multiplication of unsigned 8-bit numbers:
+\
+\   (A P) = P * Q
+\
+\ ******************************************************************************
+
+.MULTU
+
+ LDX Q                  \ Set X = Q
+
+ BEQ MU1                \ If X = Q = 0, jump to MU1 to copy X into P and A,
+                        \ clear the C flag and return from the subroutine using
+                        \ a tail call
+
+                        \ Otherwise fall through into MU11 to set (A P) = P * X
+
+\ ******************************************************************************
+\
+\       Name: MU11
+\       Type: Subroutine
+\   Category: Maths (Arithmetic)
+\    Summary: Calculate (A P) = P * X
+\  Deep dive: Shift-and-add multiplication
+\
+\ ------------------------------------------------------------------------------
+\
+\ Do the following multiplication of two unsigned 8-bit numbers:
+\
+\   (A P) = P * X
+\
+\ This uses the same shift-and-add approach as MULT1, but it's simpler as we
+\ are dealing with unsigned numbers in P and X. See the deep dive on
+\ "Shift-and-add multiplication" for a discussion of how this algorithm works.
+\
+\ ******************************************************************************
 
 .MU11
 
- DEX
- STX &D1
- LDA #&00
- LDX #&08
- LSR &1B
+ DEX                    \ Set T = X - 1
+ STX T                  \
+                        \ We subtract 1 as the C flag will be set when we want
+                        \ to do an addition in the loop below
 
-.l_282d
+ LDA #0                 \ Set A = 0 so we can start building the answer in A
 
- BCC l_2831
- ADC &D1
+ LDX #8                 \ Set up a counter in X to count the 8 bits in P
 
-.l_2831
+ LSR P                  \ Set P = P >> 1
+                        \ and C flag = bit 0 of P
 
- ROR A
- ROR &1B
- DEX
- BNE l_282d
- RTS
+                        \ We are now going to work our way through the bits of
+                        \ P, and do a shift-add for any bits that are set,
+                        \ keeping the running total in A. We just did the first
+                        \ shift right, so we now need to do the first add and
+                        \ loop through the other bits in P
 
-.l_2838
+.MUL6
 
- STA font
- STA &1B
- RTS
+ BCC P%+4               \ If C (i.e. the next bit from P) is set, do the
+ ADC T                  \ addition for this bit of P:
+                        \
+                        \   A = A + T + C
+                        \     = A + X - 1 + 1
+                        \     = A + X
 
-.l_283d
+ ROR A                  \ Shift A right to catch the next digit of our result,
+                        \ which the next ROR sticks into the left end of P while
+                        \ also extracting the next bit of P
 
- AND #&1F
- TAX
- LDA &07C0,X
- STA &81
- LDA &40
+ ROR P                  \ Add the overspill from shifting A to the right onto
+                        \ the start of P, and shift P right to fetch the next
+                        \ bit for the calculation into the C flag
+
+ DEX                    \ Decrement the loop counter
+
+ BNE MUL6               \ Loop back for the next bit until P has been rotated
+                        \ all the way
+
+ RTS                    \ Return from the subroutine
+
+\ ******************************************************************************
+\
+\       Name: MU6
+\       Type: Subroutine
+\   Category: Maths (Arithmetic)
+\    Summary: Set P(1 0) = (A A)
+\
+\ ------------------------------------------------------------------------------
+\
+\ In practice this is only called via a BEQ following an AND instruction, in
+\ which case A = 0, so this routine effectively does this:
+\
+\   P(1 0) = 0
+\
+\ ******************************************************************************
+
+.MU6
+
+ STA P+1                \ Set P(1 0) = (A A)
+ STA P
+
+ RTS                    \ Return from the subroutine
+
+\ ******************************************************************************
+\
+\       Name: FMLTU2
+\       Type: Subroutine
+\   Category: Maths (Arithmetic)
+\    Summary: Calculate A = K * sin(A)
+\  Deep dive: The sine, cosine and arctan tables
+\
+\ ------------------------------------------------------------------------------
+\
+\ Calculate the following:
+\
+\   A = K * sin(A)
+\
+\ Because this routine uses the sine lookup table SNE, we can also call this
+\ routine to calculate cosine multiplication. To calculate the following:
+\
+\   A = K * cos(B)
+\
+\ call this routine with B + 16 in the accumulator, as sin(B + 16) = cos(B).
+\
+\ ******************************************************************************
+
+.FMLTU2
+
+ AND #%00011111         \ Restrict A to bits 0-5 (so it's in the range 0-31)
+
+ TAX                    \ Set Q = sin(A) * 256
+ LDA SNE,X
+ STA Q
+
+ LDA K                  \ Set A to the radius in K
+
+                        \ Fall through into FMLTU to do the following:
+                        \
+                        \   (A ?) = A * Q
+                        \         = K * sin(A) * 256
+                        \ which is equivalent to:
+                        \
+                        \   A = K * sin(A)
+
+\ ******************************************************************************
+\
+\       Name: FMLTU
+\       Type: Subroutine
+\   Category: Maths (Arithmetic)
+\    Summary: Calculate A = A * Q / 256
+\
+\ ------------------------------------------------------------------------------
+\
+\ Do the following multiplication of two unsigned 8-bit numbers, returning only
+\ the high byte of the result:
+\
+\   (A ?) = A * Q
+\
+\ or, to put it another way:
+\
+\   A = A * Q / 256
+\
+\ ******************************************************************************
 
 .FMLTU
 
- EOR #&FF
- SEC
- ROR A
- STA &1B
- LDA #&00
+ EOR #%11111111         \ Flip the bits in A, set the C flag and rotate right,
+ SEC                    \ so the C flag now contains bit 0 of A inverted, and P
+ ROR A                  \ contains A inverted and shifted right by one, with bit
+ STA P                  \ 7 set to a 1. We can now use P as our source of bits
+                        \ to shift right, just as in MU11, just with the logic
+                        \ reversed
 
-.l_284f
+ LDA #0                 \ Set A = 0 so we can start building the answer in A
 
- BCS l_2859
- ADC &81
- ROR A
- LSR &1B
- BNE l_284f
- RTS
+.MUL3
 
-.l_2859
+ BCS MU7                \ If C (i.e. the next bit from P) is set, do not do the
+                        \ addition for this bit of P, and instead skip to MU7
+                        \ to just do the shifts
 
- LSR A
- LSR &1B
- BNE l_284f
- RTS
+ ADC Q                  \ Do the addition for this bit of P:
+                        \
+                        \   A = A + Q + C
+                        \     = A + Q
+
+ ROR A                  \ Shift A right to catch the next digit of our result.
+                        \ If we were interested in the low byte of the result we
+                        \ would want to save the bit that falls off the end, but
+                        \ we aren't, so we can ignore it
+
+ LSR P                  \ Shift P right to fetch the next bit for the
+                        \ calculation into the C flag
+
+ BNE MUL3               \ Loop back to MUL3 if P still contains some set bits
+                        \ (so we loop through the bits of P until we get to the
+                        \ 1 we inserted before the loop, and then we stop)
+
+ RTS                    \ Return from the subroutine
+
+.MU7
+
+ LSR A                  \ Shift A right to catch the next digit of our result,
+                        \ pushing a 0 into bit 7 as we aren't adding anything
+                        \ here (we can't use a ROR here as the C flag is set, so
+                        \ a ROR would push a 1 into bit 7)
+
+ LSR P                  \ Fetch the next bit from P into the C flag
+
+ BNE MUL3               \ Loop back to MUL3 if P still contains some set bits
+                        \ (so we loop through the bits of P until we get to the
+                        \ 1 we inserted before the loop, and then we stop)
+
+ RTS                    \ Return from the subroutine
 
 .l_286c
 
@@ -9058,491 +9286,1383 @@ NEXT
  BNE l_286c
  RTS
 
-.l_2877
+\ ******************************************************************************
+\
+\       Name: MLTU2
+\       Type: Subroutine
+\   Category: Maths (Arithmetic)
+\    Summary: Calculate (A P+1 P) = (A ~P) * Q
+\  Deep dive: Shift-and-add multiplication
+\
+\ ------------------------------------------------------------------------------
+\
+\ Do the following multiplication of an unsigned 16-bit number and an unsigned
+\ 8-bit number:
+\
+\   (A P+1 P) = (A ~P) * Q
+\
+\ where ~P means P EOR %11111111 (i.e. P with all its bits flipped). In other
+\ words, if you wanted to calculate &1234 * &56, you would:
+\
+\   * Set A to &12
+\   * Set P to &34 EOR %11111111 = &CB
+\   * Set Q to &56
+\
+\ before calling MLTU2.
+\
+\ This routine is like a mash-up of MU11 and FMLTU. It uses part of FMLTU's
+\ inverted argument trick to work out whether or not to do an addition, and like
+\ MU11 it sets up a counter in X to extract bits from (P+1 P). But this time we
+\ extract 16 bits from (P+1 P), so the result is a 24-bit number. The core of
+\ the algorithm is still the shift-and-add approach explained in MULT1, just
+\ with more bits.
+\
+\ Returns:
+\
+\   Q                   Q is preserved
+\
+\ Other entry points:
+\
+\   MLTU2-2             Set Q to X, so this calculates (A P+1 P) = (A ~P) * X
+\
+\ ******************************************************************************
 
- STX &81
+ STX Q                  \ Store X in Q
 
 .MLTU2
 
- EOR #&FF
- LSR A
- STA font
- LDA #&00
- LDX #&10
- ROR &1B
+ EOR #%11111111         \ Flip the bits in A and rotate right, storing the
+ LSR A                  \ result in P+1, so we now calculate (P+1 P) * Q
+ STA P+1
 
-.l_2884
+ LDA #0                 \ Set A = 0 so we can start building the answer in A
 
- BCS l_2891
- ADC &81
- ROR A
- ROR font
- ROR &1B
- DEX
- BNE l_2884
- RTS
+ LDX #16                \ Set up a counter in X to count the 16 bits in (P+1 P)
 
-.l_2891
+ ROR P                  \ Set P = P >> 1 with bit 7 = bit 0 of A
+                        \ and C flag = bit 0 of P
 
- LSR A
- ROR font
- ROR &1B
- DEX
- BNE l_2884
- RTS
+.MUL7
+
+ BCS MU21               \ If C (i.e. the next bit from P) is set, do not do the
+                        \ addition for this bit of P, and instead skip to MU21
+                        \ to just do the shifts
+
+ ADC Q                  \ Do the addition for this bit of P:
+                        \
+                        \   A = A + Q + C
+                        \     = A + Q
+
+ ROR A                  \ Rotate (A P+1 P) to the right, so we capture the next
+ ROR P+1                \ digit of the result in P+1, and extract the next digit
+ ROR P                  \ of (P+1 P) in the C flag
+
+ DEX                    \ Decrement the loop counter
+
+ BNE MUL7               \ Loop back for the next bit until P has been rotated
+                        \ all the way
+
+ RTS                    \ Return from the subroutine
+
+.MU21
+
+ LSR A                  \ Shift (A P+1 P) to the right, so we capture the next
+ ROR P+1                \ digit of the result in P+1, and extract the next digit
+ ROR P                  \ of (P+1 P) in the C flag
+
+ DEX                    \ Decrement the loop counter
+
+ BNE MUL7               \ Loop back for the next bit until P has been rotated
+                        \ all the way
+
+ RTS                    \ Return from the subroutine
+
+\ ******************************************************************************
+\
+\       Name: MUT2
+\       Type: Subroutine
+\   Category: Maths (Arithmetic)
+\    Summary: Calculate (S R) = XX(1 0) and (A P) = Q * A
+\
+\ ------------------------------------------------------------------------------
+\
+\ Do the following assignment, and multiplication of two signed 8-bit numbers:
+\
+\   (S R) = XX(1 0)
+\   (A P) = Q * A
+\
+\ ******************************************************************************
 
 .MUT2
 
- LDX &25
- STX &83
+ LDX XX+1               \ Set S = XX+1
+ STX S
+
+                        \ Fall through into MUT1 to do the following:
+                        \
+                        \   R = XX
+                        \   (A P) = Q * A
+
+\ ******************************************************************************
+\
+\       Name: MUT1
+\       Type: Subroutine
+\   Category: Maths (Arithmetic)
+\    Summary: Calculate R = XX and (A P) = Q * A
+\
+\ ------------------------------------------------------------------------------
+\
+\ Do the following assignment, and multiplication of two signed 8-bit numbers:
+\
+\   R = XX
+\   (A P) = Q * A
+\
+\ ******************************************************************************
 
 .MUT1
 
- LDX &24
- STX &82
+ LDX XX                 \ Set R = XX
+ STX R
 
-.l_28a6
+                        \ Fall through into MULT1 to do the following:
+                        \
+                        \   (A P) = Q * A
 
- TAX
- AND #&7F
- LSR A
- \	LSR A	\ manoevre
- STA &1B
- TXA
- EOR &81
- AND #&80
- STA &D1
- LDA &81
- AND #&7F
- BEQ l_28d1
- TAX
- DEX
- STX &06
- LDA #&00
- LDX #&07
+\ ******************************************************************************
+\
+\       Name: MULT1
+\       Type: Subroutine
+\   Category: Maths (Arithmetic)
+\    Summary: Calculate (A P) = Q * A
+\  Deep dive: Shift-and-add multiplication
+\
+\ ------------------------------------------------------------------------------
+\
+\ Do the following multiplication of two 8-bit sign-magnitude numbers:
+\
+\   (A P) = Q * A
+\
+\ ******************************************************************************
 
-.l_28c1
+.MULT1
 
- BCC l_28c5
- ADC &06
+ TAX                    \ Store A in X
 
-.l_28c5
+ AND #%01111111         \ Set P = |A| >> 1
+ LSR A                  \ and C flag = bit 0 of A
+ STA P
 
- ROR A
- ROR &1B
- DEX
- BNE l_28c1
- LSR A
- ROR &1B
- ORA &D1
- RTS
+ TXA                    \ Restore argument A
 
-.l_28d1
+ EOR Q                  \ Set bit 7 of A and T if Q and A have different signs,
+ AND #%10000000         \ clear bit 7 if they have the same signs, 0 all other
+ STA T                  \ bits, i.e. T contains the sign bit of Q * A
 
- STA &1B
- RTS
+ LDA Q                  \ Set A = |Q|
+ AND #%01111111
 
-.l_28d4
+ BEQ mu10               \ If |Q| = 0 jump to mu10 (with A set to 0)
 
- JSR l_28a6
- STA &83
- LDA &1B
- STA &82
- RTS
+ TAX                    \ Set T1 = |Q| - 1
+ DEX                    \
+ STX T1                 \ We subtract 1 as the C flag will be set when we want
+                        \ to do an addition in the loop below
 
-.l_28de
+                        \ We are now going to work our way through the bits of
+                        \ P, and do a shift-add for any bits that are set,
+                        \ keeping the running total in A. We already set up
+                        \ the first shift at the start of this routine, as
+                        \ P = |A| >> 1 and C = bit 0 of A, so we now need to set
+                        \ up a loop to sift through the other 7 bits in P
 
- LDY #&0A
+ LDA #0                 \ Set A = 0 so we can start building the answer in A
 
-.l_28e0
+ LDX #7                 \ Set up a counter in X to count the 7 bits remaining
+                        \ in P
 
- LDX &46,Y
- STX &81
- LDA &34
- JSR l_28d4
- LDX &48,Y
- STX &81
- LDA &35
- JSR MAD
- STA &83
- STX &82
- LDX &4A,Y
- STX &81
- LDA &36
+.MUL4
+
+ BCC P%+4               \ If C (i.e. the next bit from P) is set, do the
+ ADC T1                 \ addition for this bit of P:
+                        \
+                        \   A = A + T1 + C
+                        \     = A + |Q| - 1 + 1
+                        \     = A + |Q|
+
+ ROR A                  \ As mentioned above, this ROR shifts A right and
+                        \ catches bit 0 in C - giving another digit for our
+                        \ result - and the next ROR sticks that bit into the
+                        \ left end of P while also extracting the next bit of P
+                        \ for the next addition
+
+ ROR P                  \ Add the overspill from shifting A to the right onto
+                        \ the start of P, and shift P right to fetch the next
+                        \ bit for the calculation
+
+ DEX                    \ Decrement the loop counter
+
+ BNE MUL4               \ Loop back for the next bit until P has been rotated
+                        \ all the way
+
+ LSR A                  \ Rotate (A P) once more to get the final result, as
+ ROR P                  \ we only pushed 7 bits through the above process
+
+ ORA T                  \ Set the sign bit of the result that we stored in T
+
+ RTS                    \ Return from the subroutine
+
+.mu10
+
+ STA P                  \ If we get here, the result is 0 and A = 0, so set
+                        \ P = 0 so (A P) = 0
+
+ RTS                    \ Return from the subroutine
+
+\ ******************************************************************************
+\
+\       Name: MULT12
+\       Type: Subroutine
+\   Category: Maths (Arithmetic)
+\    Summary: Calculate (S R) = Q * A
+\
+\ ------------------------------------------------------------------------------
+\
+\ Calculate:
+\
+\   (S R) = Q * A
+\
+\ ******************************************************************************
+
+.MULT12
+
+ JSR MULT1              \ Set (A P) = Q * A
+
+ STA S                  \ Set (S R) = (A P)
+ LDA P
+ STA R
+
+ RTS                    \ Return from the subroutine
+
+\ ******************************************************************************
+\
+\       Name: TAS3
+\       Type: Subroutine
+\   Category: Maths (Geometry)
+\    Summary: Calculate the dot product of XX15 and an orientation vector
+\
+\ ------------------------------------------------------------------------------
+\
+\ Calculate the dot product of the vector in XX15 and one of the orientation
+\ vectors, as determined by the value of Y. If vect is the orientation vector,
+\ we calculate this:
+\
+\   (A X) = vect . XX15
+\         = vect_x * XX15 + vect_y * XX15+1 + vect_z * XX15+2
+\
+\ Arguments:
+\
+\   Y                   The orientation vector:
+\
+\                         * If Y = 10, calculate nosev . XX15
+\
+\                         * If Y = 16, calculate roofv . XX15
+\
+\                         * If Y = 22, calculate sidev . XX15
+\
+\ Returns:
+\
+\   (A X)               The result of the dot product
+\
+\ Other entry points:
+\
+\   TAS3-2              Calculate nosev . XX15
+\
+\ ******************************************************************************
+
+ LDY #10                \ Set Y = 10 so we calculate nosev . XX15
+
+.TAS3
+
+ LDX INWK,Y             \ Set Q = the Y-th byte of INWK, i.e. vect_x
+ STX Q
+
+ LDA XX15               \ Set A = XX15
+
+ JSR MULT12             \ Set (S R) = Q * A
+                        \           = vect_x * XX15
+
+ LDX INWK+2,Y           \ Set Q = the Y+2-th byte of INWK, i.e. vect_y
+ STX Q
+
+ LDA XX15+1             \ Set A = XX15+1
+
+ JSR MAD                \ Set (A X) = Q * A + (S R)
+                        \           = vect_y * XX15+1 + vect_x * XX15
+
+ STA S                  \ Set (S R) = (A X)
+ STX R
+
+ LDX INWK+4,Y           \ Set Q = the Y+2-th byte of INWK, i.e. vect_z
+ STX Q
+
+ LDA XX15+2             \ Set A = XX15+2
+
+                        \ Fall through into MAD to set:
+                        \
+                        \   (A X) = Q * A + (S R)
+                        \           = vect_z * XX15+2 + vect_y * XX15+1 +
+                        \             vect_x * XX15
+
+\ ******************************************************************************
+\
+\       Name: MAD
+\       Type: Subroutine
+\   Category: Maths (Arithmetic)
+\    Summary: Calculate (A X) = Q * A + (S R)
+\
+\ ------------------------------------------------------------------------------
+\
+\ Calculate
+\
+\   (A X) = Q * A + (S R)
+\
+\ ******************************************************************************
 
 .MAD
 
- JSR l_28a6
+ JSR MULT1              \ Call MULT1 to set (A P) = Q * A
+
+                        \ Fall through into ADD to do:
+                        \
+                        \   (A X) = (A P) + (S R)
+                        \         = Q * A + (S R)
+
+\ ******************************************************************************
+\
+\       Name: ADD
+\       Type: Subroutine
+\   Category: Maths (Arithmetic)
+\    Summary: Calculate (A X) = (A P) + (S R)
+\  Deep dive: Adding sign-magnitude numbers
+\
+\ ------------------------------------------------------------------------------
+\
+\ Add two 16-bit sign-magnitude numbers together, calculating:
+\
+\   (A X) = (A P) + (S R)
+\
+\ ******************************************************************************
 
 .ADD
 
- STA &06
- AND #&80
- STA &D1
- EOR &83
- BMI l_2916
- LDA &82
- CLC
- ADC &1B
+ STA T1                 \ Store argument A in T1
+
+ AND #%10000000         \ Extract the sign (bit 7) of A and store it in T
+ STA T
+
+ EOR S                  \ EOR bit 7 of A with S. If they have different bit 7s
+ BMI MU8                \ (i.e. they have different signs) then bit 7 in the
+                        \ EOR result will be 1, which means the EOR result is
+                        \ negative. So the AND, EOR and BMI together mean "jump
+                        \ to MU8 if A and S have different signs"
+
+                        \ If we reach here, then A and S have the same sign, so
+                        \ we can add them and set the sign to get the result
+
+ LDA R                  \ Add the least significant bytes together into X:
+ CLC                    \
+ ADC P                  \   X = P + R
  TAX
- LDA &83
- ADC &06
- ORA &D1
- RTS
 
-.l_2916
+ LDA S                  \ Add the most significant bytes together into A. We
+ ADC T1                 \ stored the original argument A in T1 earlier, so we
+                        \ can do this with:
+                        \
+                        \   A = A  + S + C
+                        \     = T1 + S + C
 
- LDA &83
- AND #&7F
- STA &80
- LDA &1B
- SEC
- SBC &82
+ ORA T                  \ If argument A was negative (and therefore S was also
+                        \ negative) then make sure result A is negative by
+                        \ OR-ing the result with the sign bit from argument A
+                        \ (which we stored in T)
+
+ RTS                    \ Return from the subroutine
+
+.MU8
+
+                        \ If we reach here, then A and S have different signs,
+                        \ so we can subtract their absolute values and set the
+                        \ sign to get the result
+
+ LDA S                  \ Clear the sign (bit 7) in S and store the result in
+ AND #%01111111         \ U, so U now contains |S|
+ STA U
+
+ LDA P                  \ Subtract the least significant bytes into X:
+ SEC                    \
+ SBC R                  \   X = P - R
  TAX
- LDA &06
- AND #&7F
- SBC &80
- BCS l_2938
- STA &80
- TXA
- EOR #&FF
- ADC #&01
- TAX
- LDA #&00
- SBC &80
- ORA #&80
 
-.l_2938
+ LDA T1                 \ Restore the A of the argument (A P) from T1 and
+ AND #%01111111         \ clear the sign (bit 7), so A now contains |A|
 
- EOR &D1
- RTS
+ SBC U                  \ Set A = |A| - |S|
 
-.l_293b
+                        \ At this point we have |A P| - |S R| in (A X), so we
+                        \ need to check whether the subtraction above was the
+                        \ the right way round (i.e. that we subtracted the
+                        \ smaller absolute value from the larger absolute
+                        \ value)
 
- STX &81
- EOR #&80
- JSR MAD
- TAX
- AND #&80
- STA &D1
- TXA
- AND #&7F
- LDX #&FE
- STX &06
+ BCS MU9                \ If |A| >= |S|, our subtraction was the right way
+                        \ round, so jump to MU9 to set the sign
 
-.l_294e
+                        \ If we get here, then |A| < |S|, so our subtraction
+                        \ above was the wrong way round (we actually subtracted
+                        \ the larger absolute value from the smaller absolute
+                        \ value). So let's subtract the result we have in (A X)
+                        \ from zero, so that the subtraction is the right way
+                        \ round
 
- ASL A
- CMP #&60
- BCC l_2955
- SBC #&60
+ STA U                  \ Store A in U
 
-.l_2955
+ TXA                    \ Set X = 0 - X using two's complement (to negate a
+ EOR #&FF               \ number in two's complement, you can invert the bits
+ ADC #1                 \ and add one - and we know the C flag is clear as we
+ TAX                    \ didn't take the BCS branch above, so the ADC will do
+                        \ the correct addition)
 
- ROL &06
- BCS l_294e
- LDA &06
- ORA &D1
- RTS
+ LDA #0                 \ Set A = 0 - A, which we can do this time using a
+ SBC U                  \ a subtraction with the C flag clear
+
+ ORA #%10000000         \ We now set the sign bit of A, so that the EOR on the
+                        \ next line will give the result the opposite sign to
+                        \ argument A (as T contains the sign bit of argument
+                        \ A). This is the same as giving the result the same
+                        \ sign as argument S (as A and S have different signs),
+                        \ which is what we want, as S has the larger absolute
+                        \ value
+
+.MU9
+
+ EOR T                  \ If we get here from the BCS above, then |A| >= |S|,
+                        \ so we want to give the result the same sign as
+                        \ argument A, so if argument A was negative, we flip
+                        \ the sign of the result with an EOR (to make it
+                        \ negative)
+
+ RTS                    \ Return from the subroutine
+
+\ ******************************************************************************
+\
+\       Name: TIS1
+\       Type: Subroutine
+\   Category: Maths (Arithmetic)
+\    Summary: Calculate (A ?) = (-X * A + (S R)) / 96
+\  Deep dive: Shift-and-subtract division
+\
+\ ------------------------------------------------------------------------------
+\
+\ Calculate the following expression between sign-magnitude numbers, ignoring
+\ the low byte of the result:
+\
+\   (A ?) = (-X * A + (S R)) / 96
+\
+\ This uses the same shift-and-subtract algorithm as TIS2, just with the
+\ quotient A hard-coded to 96.
+\
+\ Returns:
+\
+\   Q                   Gets set to the value of argument X
+\
+\ ******************************************************************************
+
+.TIS1
+
+ STX Q                  \ Set Q = X
+
+ EOR #%10000000         \ Flip the sign bit in A
+
+ JSR MAD                \ Set (A X) = Q * A + (S R)
+                        \           = X * -A + (S R)
+
+.DVID96
+
+ TAX                    \ Set T to the sign bit of the result
+ AND #%10000000
+ STA T
+
+ TXA                    \ Set A to the high byte of the result with the sign bit
+ AND #%01111111         \ cleared, so (A ?) = |X * A + (S R)|
+
+                        \ The following is identical to TIS2, except Q is
+                        \ hard-coded to 96, so this does A = A / 96
+
+ LDX #254               \ Set T1 to have bits 1-7 set, so we can rotate through
+ STX T1                 \ 7 loop iterations, getting a 1 each time, and then
+                        \ getting a 0 on the 8th iteration... and we can also
+                        \ use T1 to catch our result bits into bit 0 each time
+
+.DVL3
+
+ ASL A                  \ Shift A to the left
+
+ CMP #96                \ If A < 96 skip the following subtraction
+ BCC DV4
+
+ SBC #96                \ Set A = A - 96
+                        \
+                        \ Going into this subtraction we know the C flag is
+                        \ set as we passed through the BCC above, and we also
+                        \ know that A >= 96, so the C flag will still be set
+                        \ once we are done
+
+.DV4
+
+ ROL T1                 \ Rotate the counter in T1 to the left, and catch the
+                        \ result bit into bit 0 (which will be a 0 if we didn't
+                        \ do the subtraction, or 1 if we did)
+
+ BCS DVL3               \ If we still have set bits in T1, loop back to DVL3 to
+                        \ do the next iteration of 7
+
+ LDA T1                 \ Fetch the result from T1 into A
+
+ ORA T                  \ Give A the sign of the result that we stored above
+
+ RTS                    \ Return from the subroutine
+
+\ ******************************************************************************
+\
+\       Name: DV42
+\       Type: Subroutine
+\   Category: Maths (Arithmetic)
+\    Summary: Calculate (P R) = 256 * DELTA / z_hi
+\
+\ ------------------------------------------------------------------------------
+\
+\ Calculate the following division and remainder:
+\
+\   P = DELTA / (the Y-th stardust particle's z_hi coordinate)
+\
+\   R = remainder as a fraction of A, where 1.0 = 255
+\
+\ Another way of saying the above is this:
+\
+\   (P R) = 256 * DELTA / z_hi
+\
+\ DELTA is a value between 1 and 40, and the minimum z_hi is 16 (dust particles
+\ are removed at lower values than this), so this means P is between 0 and 2
+\ (as 40 / 16 = 2.5, so the maximum result is P = 2 and R = 128.
+\
+\ This uses the same shift-and-subtract algorithm as TIS2, but this time we
+\ keep the remainder.
+\
+\ Arguments:
+\
+\   Y                   The number of the stardust particle to process
+\
+\ Returns:
+\
+\   C flag              The C flag is cleared
+\
+\ ******************************************************************************
 
 .DV42
 
- LDA &0FA8,Y
+ LDA SZ,Y               \ Fetch the Y-th dust particle's z_hi coordinate into A
 
-.l_2961
+                        \ Fall through into DV41 to do:
+                        \
+                        \   (P R) = 256 * DELTA / A
+                        \         = 256 * DELTA / Y-th stardust particle's z_hi
 
- STA &81
- LDA &7D
+\ ******************************************************************************
+\
+\       Name: DV41
+\       Type: Subroutine
+\   Category: Maths (Arithmetic)
+\    Summary: Calculate (P R) = 256 * DELTA / A
+\
+\ ------------------------------------------------------------------------------
+\
+\ Calculate the following division and remainder:
+\
+\   P = DELTA / A
+\
+\   R = remainder as a fraction of A, where 1.0 = 255
+\
+\ Another way of saying the above is this:
+\
+\   (P R) = 256 * DELTA / A
+\
+\ This uses the same shift-and-subtract algorithm as TIS2, but this time we
+\ keep the remainder.
+\
+\ Returns:
+\
+\   C flag              The C flag is cleared
+\
+\ ******************************************************************************
 
-.l_2965
+.DV41
 
- LDX #&08
- ASL A
- STA &1B
- LDA #&00
+ STA Q                  \ Store A in Q
 
-.l_296c
+ LDA DELTA              \ Fetch the speed from DELTA into A
 
+                        \ Fall through into DVID4 to do:
+                        \
+                        \   (P R) = 256 * A / Q
+                        \         = 256 * DELTA / A
+
+\ ******************************************************************************
+\
+\       Name: DVID4
+\       Type: Subroutine
+\   Category: Maths (Arithmetic)
+\    Summary: Calculate (P R) = 256 * A / Q
+\  Deep dive: Shift-and-subtract division
+\
+\ ------------------------------------------------------------------------------
+\
+\ Calculate the following division and remainder:
+\
+\   P = A / Q
+\
+\   R = remainder as a fraction of Q, where 1.0 = 255
+\
+\ Another way of saying the above is this:
+\
+\   (P R) = 256 * A / Q
+\
+\ This uses the same shift-and-subtract algorithm as TIS2, but this time we
+\ keep the remainder.
+\
+\ Returns:
+\
+\   C flag              The C flag is cleared
+\
+\ ******************************************************************************
+
+.DVID4
+
+ LDX #8                 \ Set a counter in X to count the 8 bits in A
+
+ ASL A                  \ Shift A left and store in P (we will build the result
+ STA P                  \ in P)
+
+ LDA #0                 \ Set A = 0 for us to build a remainder
+
+.DVL4
+
+ ROL A                  \ Shift A to the left
+
+ BCS DV8                \ If the C flag is set (i.e. bit 7 of A was set) then
+                        \ skip straight to the subtraction
+
+ CMP Q                  \ If A < Q skip the following subtraction
+ BCC DV5
+
+.DV8
+
+ SBC Q                  \ A >= Q, so set A = A - Q
+
+ SEC                    \ Set the C flag, so that P gets a 1 shifted into bit 0
+
+.DV5
+
+ ROL P                  \ Shift P to the left, pulling the C flag into bit 0
+
+ DEX                    \ Decrement the loop counter
+
+ BNE DVL4               \ Loop back for the next bit until we have done all 8
+                        \ bits of P
+
+ JMP LL28+4             \ Jump to LL28+4 to convert the remainder in A into an
+                        \ integer representation of the fractional value A / Q,
+                        \ in R, where 1.0 = 255. LL28+4 always returns with the
+                        \ C flag cleared, and we return from the subroutine
+                        \ using a tail call
+
+\ ******************************************************************************
+\
+\       Name: DVID3B2
+\       Type: Subroutine
+\   Category: Maths (Arithmetic)
+\    Summary: Calculate K(3 2 1 0) = (A P+1 P) / (z_sign z_hi z_lo)
+\  Deep dive: Shift-and-subtract division
+\
+\ ------------------------------------------------------------------------------
+\
+\ Calculate the following:
+\
+\   K(3 2 1 0) = (A P+1 P) / (z_sign z_hi z_lo)
+\
+\ The actual division here is done as an 8-bit calculation using LL31, but this
+\ routine shifts both the numerator (the top part of the division) and the
+\ denominator (the bottom part of the division) around to get the multi-byte
+\ result we want.
+\
+\ Specifically, it shifts both of them to the left as far as possible, keeping a
+\ tally of how many shifts get done in each one - and specifically, the
+\ difference in the number of shifts between the top and bottom (as shifting
+\ both of them once in the same direction won't change the result). It then
+\ divides the two highest bytes with the simple 8-bit routine in LL31, and
+\ shifts the result by the difference in the number of shifts, which acts as a
+\ scale factor to get the correct result.
+\
+\ Returns:
+\
+\   K(3 2 1 0)          The result of the division
+\
+\   X                   X is preserved
+\
+\ ******************************************************************************
+
+.DVID3B2
+
+ STA P+2                \ Set P+2 = A
+
+ LDA INWK+6             \ Set Q = z_lo
+ STA Q
+
+ LDA INWK+7             \ Set R = z_hi
+ STA R
+
+ LDA INWK+8             \ Set S = z_sign
+ STA S
+
+.DVID3B
+
+                        \ Given the above assignments, we now want to calculate
+                        \ the following to get the result we want:
+                        \
+                        \   K(3 2 1 0) = P(2 1 0) / (S R Q)
+
+ LDA P                  \ Make sure P(2 1 0) is at least 1
+ ORA #1
+ STA P
+
+ LDA P+2                \ Set T to the sign of P+2 * S (i.e. the sign of the
+ EOR S                  \ result) and store it in T
+ AND #%10000000
+ STA T
+
+ LDY #0                 \ Set Y = 0 to store the scale factor
+
+ LDA P+2                \ Clear the sign bit of P+2, so the division can be done
+ AND #%01111111         \ with positive numbers and we'll set the correct sign
+                        \ below, once all the maths is done
+                        \
+                        \ This also leaves A = P+2, which we use below
+
+.DVL9
+
+                        \ We now shift (A P+1 P) left until A >= 64, counting
+                        \ the number of shifts in Y. This makes the top part of
+                        \ the division as large as possible, thus retaining as
+                        \ much accuracy as we can.  When we come to return the
+                        \ final result, we shift the result by the number of
+                        \ places in Y, and in the correct direction
+
+ CMP #64                \ If A >= 64, jump down to DV14
+ BCS DV14
+
+ ASL P                  \ Shift (A P+1 P) to the left
+ ROL P+1
  ROL A
- BCS l_2973
- CMP &81
- BCC l_2976
 
-.l_2973
+ INY                    \ Increment the scale factor in Y
 
- SBC &81
- SEC
+ BNE DVL9               \ Loop up to DVL9 (this BNE is effectively a JMP, as Y
+                        \ will never be zero)
 
-.l_2976
+.DV14
 
- ROL &1B
- DEX
- BNE l_296c
- JMP l_47f3
+                        \ If we get here, A >= 64 and contains the highest byte
+                        \ of the numerator, scaled up by the number of left
+                        \ shifts in Y
 
-.l_297e
+ STA P+2                \ Store A in P+2, so we now have the scaled value of
+                        \ the numerator in P(2 1 0)
 
- STA font+&01
- LDA &4C
- STA &81
- LDA &4D
- STA &82
- LDA &4E
- STA &83
- LDA &1B
- ORA #&01
- STA &1B
- LDA font+&01
- EOR &83
- AND #&80
- STA &D1
- LDY #&00
- LDA font+&01
- AND #&7F
+ LDA S                  \ Set A = |S|
+ AND #%01111111
 
-.l_29a0
+ BMI DV9                \ If bit 7 of A is set, jump down to DV9 to skip the
+                        \ left-shifting of the denominator (though this branch
+                        \ instruction has no effect as bit 7 of the above AND
+                        \ can never be set, which is why this instruction was
+                        \ removed from later versions)
 
- CMP #&40
- BCS l_29ac
- ASL &1B
- ROL font
+.DVL6
+
+                        \ We now shift (S R Q) left until bit 7 of S is set,
+                        \ reducing Y by the number of shifts. This makes the
+                        \ bottom part of the division as large as possible, thus
+                        \ retaining as much accuracy as we can. When we come to
+                        \ return the final result, we shift the result by the
+                        \ total number of places in Y, and in the correct
+                        \ direction, to give us the correct result
+                        \
+                        \ We set A to |S| above, so the following actually
+                        \ shifts (A R Q)
+
+ DEY                    \ Decrement the scale factor in Y
+
+ ASL Q                  \ Shift (A R Q) to the left
+ ROL R
  ROL A
- INY
- BNE l_29a0
 
-.l_29ac
+ BPL DVL6               \ Loop up to DVL6 to do another shift, until bit 7 of A
+                        \ is set and we can't shift left any further
 
- STA font+&01
- LDA &83
- AND #&7F
- BMI l_29bc
+.DV9
 
-.l_29b4
+                        \ We have now shifted both the numerator and denominator
+                        \ left as far as they will go, keeping a tally of the
+                        \ overall scale factor of the various shifts in Y. We
+                        \ can now divide just the two highest bytes to get our
+                        \ result
 
- DEY
- ASL &81
- ROL &82
- ROL A
- BPL l_29b4
+ STA Q                  \ Set Q = A, the highest byte of the denominator
 
-.l_29bc
+ LDA #254               \ Set R to have bits 1-7 set, so we can pass this to
+ STA R                  \ LL31 to act as the bit counter in the division
 
- STA &81
- LDA #&FE
- STA &82
- LDA font+&01
- JSR l_47f7
- LDA #&00
- JSR n_store	\ swapped
- TYA
- BPL l_29f0
- LDA &82
+ LDA P+2                \ Set A to the highest byte of the numerator
 
-.l_29d4
+ JSR LL31               \ Call LL31 to calculate:
+                        \
+                        \   R = 256 * A / Q
+                        \     = 256 * numerator / denominator
 
- ASL A
- ROL &41
- ROL &42
- ROL &43
- INY
- BNE l_29d4
- STA &40
- LDA &43
- ORA &D1
- STA &43
- RTS
+                        \ The result of our division is now in R, so we just
+                        \ need to shift it back by the scale factor in Y
 
-.l_29e7
+ LDA #0                 \ AJD
+ JSR n_store
 
- LDA &82
- STA &40
- LDA &D1
- STA &43
- RTS
+ TYA                    \ If Y is positive, jump to DV12
+ BPL DV12
 
-.l_29f0
+                        \ If we get here then Y is negative, so we need to shift
+                        \ the result R to the left by Y places, and then set the
+                        \ correct sign for the result
 
- BEQ l_29e7
- LDA &82
+ LDA R                  \ Set A = R
 
-.l_29f4
+.DVL8
 
- LSR A
- DEY
- BNE l_29f4
- STA &40
- LDA &D1
- STA &43
- RTS
+ ASL A                  \ Shift (K+3 K+2 K+1 A) left
+ ROL K+1
+ ROL K+2
+ ROL K+3
 
-.l_29ff
+ INY                    \ Increment the scale factor in Y
 
- LDA &033F
- BNE l_2a09
- LDA cap_flag
- BNE l_2a15
+ BNE DVL8               \ Loop back to DVL8 until we have shifted left by Y
+                        \ places
 
-.l_2a09
+ STA K                  \ Store A in K so the result is now in K(3 2 1 0)
 
- TXA
- BPL l_2a0f
- DEX
- BMI l_2a15
+ LDA K+3                \ Set K+3 to the sign in T, which we set above to the
+ ORA T                  \ correct sign for the result
+ STA K+3
 
-.l_2a0f
+ RTS                    \ Return from the subroutine
 
- INX
- BNE l_2a15
- DEX
- BEQ l_2a0f
+.DV13
 
-.l_2a15
+                        \ If we get here then Y is zero, so we don't need to
+                        \ shift the result R, we just need to set the correct
+                        \ sign for the result
 
- RTS
+ LDA R                  \ Store R in K so the result is now in K(3 2 1 0)
+ STA K
 
-.l_2a16
+ LDA T                  \ Set K+3 to the sign in T, which we set above to the
+ STA K+3                \ correct sign for the result
 
- STA &D1
- TXA
- CLC
- ADC &D1
+ RTS                    \ Return from the subroutine
+
+.DV12
+
+ BEQ DV13               \ We jumped here having set A to the scale factor in Y,
+                        \ so this jumps up to DV13 if Y = 0
+
+                        \ If we get here then Y is positive and non-zero, so we
+                        \ need to shift the result R to the right by Y places
+                        \ and then set the correct sign for the result. We also
+                        \ know that K(3 2 1) will stay 0, as we are shifting the
+                        \ lowest byte to the right, so no set bits will make
+                        \ their way into the top three bytes
+
+ LDA R                  \ Set A = R
+
+.DVL10
+
+ LSR A                  \ Shift A right
+
+ DEY                    \ Decrement the scale factor in Y
+
+ BNE DVL10              \ Loop back to DVL10 until we have shifted right by Y
+                        \ places
+
+ STA K                  \ Store the shifted A in K so the result is now in
+                        \ K(3 2 1 0)
+
+ LDA T                  \ Set K+3 to the sign in T, which we set above to the
+ STA K+3                \ correct sign for the result
+
+ RTS                    \ Return from the subroutine
+
+\ ******************************************************************************
+\
+\       Name: cntr
+\       Type: Subroutine
+\   Category: Dashboard
+\    Summary: Apply damping to the pitch or roll dashboard indicator
+\
+\ ------------------------------------------------------------------------------
+\
+\ Apply damping to the value in X, where X ranges from 1 to 255 with 128 as the
+\ centre point (so X represents a position on a centre-based dashboard slider,
+\ such as pitch or roll). If the value is in the left-hand side of the slider
+\ (1-127) then it bumps the value up by 1 so it moves towards the centre, and
+\ if it's in the right-hand side, it reduces it by 1, also moving it towards the
+\ centre.
+\
+\ ******************************************************************************
+
+.cntr
+
+ LDA auto               \ If the docking computer is currently activated, jump
+ BNE cnt2               \ to cnt2 to skip the following as we always want to
+                        \ enable damping for the docking computer
+
+ LDA DAMP               \ If DAMP is non-zero, then keyboard damping is not
+ BNE RE1                \ enabled, so jump to RE1 to return from the subroutine
+
+.cnt2
+
+ TXA                    \ If X < 128, then it's in the left-hand side of the
+ BPL BUMP               \ dashboard slider, so jump to BUMP to bump it up by 1,
+                        \ to move it closer to the centre
+
+ DEX                    \ Otherwise X >= 128, so it's in the right-hand side
+ BMI RE1                \ of the dashboard slider, so decrement X by 1, and if
+                        \ it's still >= 128, jump to RE1 to return from the
+                        \ subroutine, otherwise fall through to BUMP to undo
+                        \ the bump and then return
+
+.BUMP
+
+ INX                    \ Bump X up by 1, and if it hasn't overshot the end of
+ BNE RE1                \ the dashboard slider, jump to RE1 to return from the
+                        \ subroutine, otherwise fall through to REDU to drop
+                        \ it down by 1 again
+
+.REDU
+
+ DEX                    \ Reduce X by 1, and if we have reached 0 jump up to
+ BEQ BUMP               \ BUMP to add 1, because we need the value to be in the
+                        \ range 1 to 255
+
+.RE1
+
+ RTS                    \ Return from the subroutine
+
+\ ******************************************************************************
+\
+\       Name: BUMP2
+\       Type: Subroutine
+\   Category: Dashboard
+\    Summary: Bump up the value of the pitch or roll dashboard indicator
+\
+\ ------------------------------------------------------------------------------
+\
+\ Increase ("bump up") X by A, where X is either the current rate of pitch or
+\ the current rate of roll.
+\
+\ The rate of pitch or roll ranges from 1 to 255 with 128 as the centre point.
+\ This is the amount by which the pitch or roll is currently changing, so 1
+\ means it is decreasing at the maximum rate, 128 means it is not changing,
+\ and 255 means it is increasing at the maximum rate. These values correspond
+\ to the line on the DC or RL indicators on the dashboard, with 1 meaning full
+\ left, 128 meaning the middle, and 255 meaning full right.
+\
+\ If bumping up X would push it past 255, then X is set to 255.
+\
+\ If keyboard auto-recentre is configured and the result is less than 128, we
+\ bump X up to the mid-point, 128. This is the equivalent of having a roll or
+\ pitch in the left half of the indicator, when increasing the roll or pitch
+\ should jump us straight to the mid-point.
+\
+\ Other entry points:
+\
+\   RE2+2               Restore A from T and return from the subroutine
+\
+\ ******************************************************************************
+
+.BUMP2
+
+ STA T                  \ Store argument A in T so we can restore it later
+
+ TXA                    \ Copy argument X into A
+
+ CLC                    \ Clear the C flag so we can do addition without the
+                        \ C flag affecting the result
+
+ ADC T                  \ Set X = A = argument X + argument A
  TAX
- BCC l_2a21
- LDX #&FF
 
-.l_2a21
+ BCC RE2                \ If the C flag is clear, then we didn't overflow, so
+                        \ jump to RE2 to auto-recentre and return the result
 
- BPL l_2a33
+ LDX #255               \ We have an overflow, so set X to the maximum possible
+                        \ value of 255
 
-.l_2a23
+.RE2
 
- LDA &D1
- RTS
+ BPL RE3+2              \ If X has bit 7 clear (i.e. the result < 128), then
+                        \ jump to RE3+2 in routine REDU2 to do an auto-recentre,
+                        \ if configured, because the result is on the left side
+                        \ of the centre point of 128
 
-.l_2a26
+                        \ Jumps to RE2+2 end up here
 
- STA &D1
- TXA
- SEC
- SBC &D1
+ LDA T                  \ Restore the original argument A from T into A
+
+ RTS                    \ Return from the subroutine
+
+\ ******************************************************************************
+\
+\       Name: REDU2
+\       Type: Subroutine
+\   Category: Dashboard
+\    Summary: Reduce the value of the pitch or roll dashboard indicator
+\
+\ ------------------------------------------------------------------------------
+\
+\ Reduce X by A, where X is either the current rate of pitch or the current
+\ rate of roll.
+\
+\ The rate of pitch or roll ranges from 1 to 255 with 128 as the centre point.
+\ This is the amount by which the pitch or roll is currently changing, so 1
+\ means it is decreasing at the maximum rate, 128 means it is not changing,
+\ and 255 means it is increasing at the maximum rate. These values correspond
+\ to the line on the DC or RL indicators on the dashboard, with 1 meaning full
+\ left, 128 meaning the middle, and 255 meaning full right.
+\
+\ If reducing X would bring it below 1, then X is set to 1.
+\
+\ If keyboard auto-recentre is configured and the result is greater than 128, we
+\ reduce X down to the mid-point, 128. This is the equivalent of having a roll
+\ or pitch in the right half of the indicator, when decreasing the roll or pitch
+\ should jump us straight to the mid-point.
+\
+\ Other entry points:
+\
+\   RE3+2               Auto-recentre the value in X, if keyboard auto-recentre
+\                       is configured
+\
+\ ******************************************************************************
+
+.REDU2
+
+ STA T                  \ Store argument A in T so we can restore it later
+
+ TXA                    \ Copy argument X into A
+
+ SEC                    \ Set the C flag so we can do subtraction without the
+                        \ C flag affecting the result
+
+ SBC T                  \ Set X = A = argument X - argument A
  TAX
- BCS l_2a31
- LDX #&01
 
-.l_2a31
+ BCS RE3                \ If the C flag is set, then we didn't underflow, so
+                        \ jump to RE3 to auto-recentre and return the result
 
- BPL l_2a23
+ LDX #1                 \ We have an underflow, so set X to the minimum possible
+                        \ value, 1
 
-.l_2a33
+.RE3
 
- LDA a_flag
- BNE l_2a23
- LDX #&80
- BMI l_2a23
+ BPL RE2+2              \ If X has bit 7 clear (i.e. the result < 128), then
+                        \ jump to RE2+2 above to return the result as is,
+                        \ because the result is on the left side of the centre
+                        \ point of 128, so we don't need to auto-centre
 
-.l_2a3c
+                        \ Jumps to RE3+2 end up here
 
- LDA &1B
- EOR &81
- STA &06
- LDA &81
- BEQ l_2a6b
+                        \ If we get here, then we need to apply auto-recentre,
+                        \ if it is configured
+
+ LDA DJD                \ If keyboard auto-recentre is disabled, then
+ BNE RE2+2              \ jump to RE2+2 to restore A and return
+
+ LDX #128               \ If keyboard auto-recentre is enabled, set X to 128
+ BMI RE2+2              \ (the middle of our range) and jump to RE2+2 to
+                        \ restore A and return
+
+\ ******************************************************************************
+\
+\       Name: ARCTAN
+\       Type: Subroutine
+\   Category: Maths (Geometry)
+\    Summary: Calculate A = arctan(P / Q)
+\  Deep dive: The sine, cosine and arctan tables
+\
+\ ------------------------------------------------------------------------------
+\
+\ Calculate the following:
+\
+\   A = arctan(P / Q)
+\
+\ In other words, this finds the angle in the right-angled triangle where the
+\ opposite side to angle A is length P and the adjacent side to angle A has
+\ length Q, so:
+\
+\   tan(A) = P / Q
+\
+\ ******************************************************************************
+
+.ARCTAN
+
+ LDA P                  \ Set T1 = P EOR Q, which will have the sign of P * Q
+ EOR Q
+ STA T1
+
+ LDA Q                  \ If Q = 0, jump to AR2 to return a right angle
+ BEQ AR2
+
+ ASL A                  \ Set Q = |Q| * 2 (this is a quick way of clearing the
+ STA Q                  \ sign bit, and we don't need to shift right again as we
+                        \ only ever use this value in the division with |P| * 2,
+                        \ which we set next)
+
+ LDA P                  \ Set A = |P| * 2
  ASL A
- STA &81
- LDA &1B
- ASL A
- CMP &81
- BCS l_2a59
- JSR l_2a75
- SEC
 
-.l_2a54
+ CMP Q                  \ If A >= Q, i.e. |P| > |Q|, jump to AR1 to swap P
+ BCS AR1                \ and Q around, so we can still use the lookup table
 
- LDX &06
- BMI l_2a6e
- RTS
+ JSR ARS1               \ Call ARS1 to set the following from the lookup table:
+                        \
+                        \   A = arctan(A / Q)
+                        \     = arctan(|P / Q|)
 
-.l_2a59
+ SEC                    \ Set the C flag so the SBC instruction in AR3 will be
+                        \ correct, should we jump there
 
- LDX &81
- STA &81
- STX &1B
- TXA
- JSR l_2a75
- STA &D1
- LDA #&40
- SBC &D1
- BCS l_2a54
+.AR4
 
-.l_2a6b
+ LDX T1                 \ If T1 is negative, i.e. P and Q have different signs,
+ BMI AR3                \ jump down to AR3 to return arctan(-|P / Q|)
 
- LDA #&3F
- RTS
+ RTS                    \ Otherwise P and Q have the same sign, so our result is
+                        \ correct and we can return from the subroutine
 
-.l_2a6e
+.AR1
 
- STA &D1
- LDA #&80
- SBC &D1
- RTS
+                        \ We want to calculate arctan(t) where |t| > 1, so we
+                        \ can use the calculation described in the documentation
+                        \ for the ACT table, i.e. 64 - arctan(1 / t)
 
-.l_2a75
+ LDX Q                  \ Swap the values in Q and P, using the fact that we
+ STA Q                  \ called AR1 with A = P
+ STX P                  \
+ TXA                    \ This also sets A = P (which now contains the original
+                        \ argument |Q|)
 
- JSR l_47ef
- LDA &82
- LSR A
- LSR A
- LSR A
- TAX
- LDA &07E0,X
+ JSR ARS1               \ Call ARS1 to set the following from the lookup table:
+                        \
+                        \   A = arctan(A / Q)
+                        \     = arctan(|Q / P|)
+                        \     = arctan(1 / |P / Q|)
 
-.l_2a81
+ STA T                  \ Set T = 64 - T
+ LDA #64
+ SBC T
 
- RTS
+ BCS AR4                \ Jump to AR4 to continue the calculation (this BCS is
+                        \ effectively a JMP as the subtraction will never
+                        \ underflow, as ARS1 returns values in the range 0-31)
 
-.l_2a82
+.AR2
 
- JSR DORND
- AND #&07
- ADC #&5C
- STA &0FCF
- JSR DORND
- AND #&07
- ADC #&7C
- STA &0FCE
- LDA GNTMP
- ADC #&08
+                        \ If we get here then Q = 0, so tan(A) = infinity and
+                        \ A is a right angle, or 0.25 of a circle. We allocate
+                        \ 255 to a full circle, so we should return 63 for a
+                        \ right angle
+
+ LDA #63                \ Set A to 63, to represent a right angle
+
+ RTS                    \ Return from the subroutine
+
+.AR3
+
+                        \ A contains arctan(|P / Q|) but P and Q have different
+                        \ signs, so we need to return arctan(-|P / Q|), using
+                        \ the calculation described in the documentation for the
+                        \ ACT table, i.e. 128 - A
+
+ STA T                  \ Set A = 128 - A
+ LDA #128               \
+\SEC                    \ The SEC instruction is commented out in the original
+ SBC T                  \ source, and isn't required as we did a SEC before
+                        \ calling AR3
+
+ RTS                    \ Return from the subroutine
+
+.ARS1
+
+                        \ This routine fetches arctan(A / Q) from the ACT table
+
+ JSR LL28               \ Call LL28 to calculate:
+                        \
+                        \   R = 256 * A / Q
+
+ LDA R                  \ Set X = R / 8
+ LSR A                  \       = 32 * A / Q
+ LSR A                  \
+ LSR A                  \ so X has the value t * 32 where t = A / Q, which is
+ TAX                    \ what we need to look up values in the ACT table
+
+ LDA ACT,X              \ Fetch ACT+X from the ACT table into A, so now:
+                        \
+                        \   A = value in ACT + X
+                        \     = value in ACT + (32 * A / Q)
+                        \     = arctan(A / Q)
+
+ RTS                    \ Return from the subroutine
+
+\ ******************************************************************************
+\
+\       Name: LASLI
+\       Type: Subroutine
+\   Category: Drawing lines
+\    Summary: Draw the laser lines for when we fire our lasers
+\
+\ ------------------------------------------------------------------------------
+\
+\ Draw the laser lines, aiming them to slightly different place each time so
+\ they appear to flicker and dance. Also heat up the laser temperature and drain
+\ some energy.
+\
+\ Other entry points:
+\
+\   LASLI2              Just draw the current laser lines without moving the
+\                       centre point, draining energy or heating up. This has
+\                       the effect of removing the lines from the screen
+\
+\   LASLI-1             Contains an RTS
+\
+\ ******************************************************************************
+
+.LASLI
+
+ JSR DORND              \ Set A and X to random numbers
+
+ AND #7                 \ Restrict A to a random value in the range 0 to 7
+
+ ADC #Y-4               \ Set LASY to four pixels above the centre of the
+ STA LASY               \ screen (#Y), plus our random number, so the laser
+                        \ dances above and below the centre point
+
+ JSR DORND              \ Set A and X to random numbers
+
+ AND #7                 \ Restrict A to a random value in the range 0 to 7
+
+ ADC #X-4               \ Set LASX to four pixels left of the centre of the
+ STA LASX               \ screen (#X), plus our random number, so the laser
+                        \ dances to the left and right of the centre point
+
+ LDA GNTMP              \ Add 8 to the laser temperature in GNTMP
+ ADC #8
  STA GNTMP
- JSR l_3629
 
-.l_2aa1
+ JSR DENGY              \ Call DENGY to deplete our energy banks by 1
 
- LDA &87
- BNE l_2a81
- LDA #&20
- LDY #&E0
- JSR l_2ab0
- LDA #&30
- LDY #&D0
+.LASLI2
 
-.l_2ab0
+ LDA QQ11               \ If this is not a space view (i.e. QQ11 is non-zero)
+ BNE LASLI-1            \ then jump to MA9 to return from the main flight loop
+                        \ (as LASLI-1 is an RTS)
 
- STA &36
- LDA &0FCE
- STA &34
- LDA &0FCF
- STA &35
- LDA #&BF
- STA &37
- JSR LOIN
- LDA &0FCE
- STA &34
- LDA &0FCF
- STA &35
- STY &36
- LDA #&BF
- STA &37
- JMP LOIN
+ LDA #32                \ Set A = 32 and Y = 224 for the first set of laser
+ LDY #224               \ lines (the wider pair of lines)
+
+ JSR las                \ Call las below to draw the first set of laser lines
+
+ LDA #48                \ Fall through into las with A = 48 and Y = 208 to draw
+ LDY #208               \ a second set of lines (the narrower pair)
+
+                        \ The following routine draws two laser lines, one from
+                        \ the centre point down to point A on the bottom row,
+                        \ and the other from the centre point down to point Y
+                        \ on the bottom row. We therefore get lines from the
+                        \ centre point to points 32, 48, 208 and 224 along the
+                        \ bottom row, giving us the triangular laser effect
+                        \ we're after
+
+.las
+
+ STA X2                 \ Set X2 = A
+
+ LDA LASX               \ Set (X1, Y1) to the random centre point we set above
+ STA X1
+ LDA LASY
+ STA Y1
+
+ LDA #2*Y-1             \ Set Y2 = 2 * #Y - 1. The constant #Y is 96, the
+ STA Y2                 \ y-coordinate of the mid-point of the space view, so
+                        \ this sets Y2 to 191, the y-coordinate of the bottom
+                        \ pixel row of the space view
+
+ JSR LOIN               \ Draw a line from (X1, Y1) to (X2, Y2), so that's from
+                        \ the centre point to (A, 191)
+
+ LDA LASX               \ Set (X1, Y1) to the random centre point we set above
+ STA X1
+ LDA LASY
+ STA Y1
+
+ STY X2                 \ Set X2 = Y
+
+ LDA #2*Y-1             \ Set Y2 = 2 * #Y - 1, the y-coordinate of the bottom
+ STA Y2                 \ pixel row of the space view (as before)
+
+ JMP LOIN               \ Draw a line from (X1, Y1) to (X2, Y2), so that's from
+                        \ the centre point to (Y, 191), and return from
+                        \ the subroutine using a tail call
+
+\ ******************************************************************************
+\
+\ Save output/ELTC.bin
+\
+\ ******************************************************************************
+
+PRINT "ELITE C"
+PRINT "Assembled at ", ~CODE_C%
+PRINT "Ends at ", ~P%
+PRINT "Code size is ", ~(P% - CODE_C%)
+PRINT "Execute at ", ~LOAD%
+PRINT "Reload at ", ~LOAD_C%
+
+PRINT "S.ELTC ", ~CODE_C%, " ", ~P%, " ", ~LOAD%, " ", ~LOAD_C%
+\SAVE "output/D.ELTC.bin", CODE_C%, P%, LOAD%
+
+\ ******************************************************************************
+\
+\ ELITE D FILE
+\
+\ ******************************************************************************
+
+CODE_D% = P%
+LOAD_D% = LOAD% + P% - CODE%
 
 .l_2aec
 
@@ -9553,7 +10673,7 @@ NEXT
 
 .n_aliens
 
- LDY #&0C
+ LDY #&0C               \ Similar to tnpr
  SEC
  LDA QQ20+&10
 
@@ -9575,284 +10695,603 @@ NEXT
  ADC #&00
  RTS
 
-.l_2b0e
+\ ******************************************************************************
+\
+\       Name: TT20
+\       Type: Subroutine
+\   Category: Universe
+\    Summary: Twist the selected system's seeds four times
+\  Deep dive: Twisting the system seeds
+\             Galaxy and system seeds
+\
+\ ------------------------------------------------------------------------------
+\
+\ Twist the three 16-bit seeds in QQ15 (selected system) four times, to
+\ generate the next system.
+\
+\ ******************************************************************************
 
- JSR l_2b11
+.TT20
 
-.l_2b11
+ JSR P%+3               \ This line calls the line below as a subroutine, which
+                        \ does two twists before returning here, and then we
+                        \ fall through to the line below for another two
+                        \ twists, so the net effect of these two consecutive
+                        \ JSR calls is four twists, not counting the ones
+                        \ inside your head as you try to follow this process
 
- JSR l_2b14
+ JSR P%+3               \ This line calls TT54 as a subroutine to do a twist,
+                        \ and then falls through into TT54 to do another twist
+                        \ before returning from the subroutine
 
-.l_2b14
+\ ******************************************************************************
+\
+\       Name: TT54
+\       Type: Subroutine
+\   Category: Universe
+\    Summary: Twist the selected system's seeds
+\  Deep dive: Twisting the system seeds
+\             Galaxy and system seeds
+\
+\ ------------------------------------------------------------------------------
+\
+\ This routine twists the three 16-bit seeds in QQ15 once.
+\
+\ ******************************************************************************
 
- LDA &6C
+.TT54
+
+ LDA QQ15               \ X = tmp_lo = s0_lo + s1_lo
  CLC
- ADC &6E
+ ADC QQ15+2
  TAX
- LDA &6D
- ADC &6F
+
+ LDA QQ15+1             \ Y = tmp_hi = s1_hi + s1_hi + C
+ ADC QQ15+3
  TAY
- LDA &6E
- STA &6C
- LDA &6F
- STA &6D
- LDA &71
- STA &6F
- LDA &70
- STA &6E
- CLC
+
+ LDA QQ15+2             \ s0_lo = s1_lo
+ STA QQ15
+
+ LDA QQ15+3             \ s0_hi = s1_hi
+ STA QQ15+1
+
+ LDA QQ15+5             \ s1_hi = s2_hi
+ STA QQ15+3
+
+ LDA QQ15+4             \ s1_lo = s2_lo
+ STA QQ15+2
+
+ CLC                    \ s2_lo = X + s1_lo
  TXA
- ADC &6E
- STA &70
- TYA
- ADC &6F
- STA &71
- RTS
+ ADC QQ15+2
+ STA QQ15+4
 
-.l_2b3b
+ TYA                    \ s2_hi = Y + s1_hi + C
+ ADC QQ15+3
+ STA QQ15+5
 
- LDA hype_dist
- ORA hype_dist+&01
- BNE l_2b46
- INC YC
- RTS
+ RTS                    \ The twist is complete so return from the subroutine
 
-.l_2b46
+\ ******************************************************************************
+\
+\       Name: TT146
+\       Type: Subroutine
+\   Category: Text
+\    Summary: Print the distance to the selected system in light years
+\
+\ ------------------------------------------------------------------------------
+\
+\ If it is non-zero, print the distance to the selected system in light years.
+\ If it is zero, just move the text cursor down a line.
+\
+\ Specifically, if the distance in QQ8 is non-zero, print token 31 ("DISTANCE"),
+\ then a colon, then the distance to one decimal place, then token 35 ("LIGHT
+\ YEARS"). If the distance is zero, move the cursor down one line.
+\
+\ ******************************************************************************
 
- LDA #&BF
- JSR l_3395
- LDX hype_dist
- LDY hype_dist+&01
- SEC
- JSR l_30b4
- LDA #&C3
+.TT146
 
-.l_2b57
+ LDA QQ8                \ Take the two bytes of the 16-bit value in QQ8 and
+ ORA QQ8+1              \ OR them together to check whether there are any
+ BNE TT63               \ non-zero bits, and if so, jump to TT63 to print the
+                        \ distance
 
- JSR TT27
+ INC YC                 \ The distance is zero, so we just move the text cursor
+ RTS                    \ in YC down by one line and return from the subroutine
 
-.l_2b5a
+.TT63
 
- INC YC
+ LDA #191               \ Print recursive token 31 ("DISTANCE") followed by
+ JSR TT68               \ a colon
 
-.l_2b5c
+ LDX QQ8                \ Load (Y X) from QQ8, which contains the 16-bit
+ LDY QQ8+1              \ distance we want to show
 
- JSR vdu_80
+ SEC                    \ Set the C flag so that the call to pr5 will include a
+                        \ decimal point, and display the value as (Y X) / 10
+
+ JSR pr5                \ Print (Y X) to 5 digits, including a decimal point
+
+ LDA #195               \ Set A to the recursive token 35 (" LIGHT YEARS") and
+                        \ fall through into TT60 to print the token followed
+                        \ by a paragraph break
+
+\ ******************************************************************************
+\
+\       Name: TT60
+\       Type: Subroutine
+\   Category: Text
+\    Summary: Print a text token and a paragraph break
+\
+\ ------------------------------------------------------------------------------
+\
+\ Print a text token (i.e. a character, control code, two-letter token or
+\ recursive token). Then print a paragraph break (a blank line between
+\ paragraphs) by moving the cursor down a line, setting Sentence Case, and then
+\ printing a newline.
+\
+\ Arguments:
+\
+\   A                   The text token to be printed
+\
+\ ******************************************************************************
+
+.TT60
+
+ JSR TT27               \ Print the text token in A and fall through into TTX69
+                        \ to print the paragraph break
+
+\ ******************************************************************************
+\
+\       Name: TTX69
+\       Type: Subroutine
+\   Category: Text
+\    Summary: Print a paragraph break
+\
+\ ------------------------------------------------------------------------------
+\
+\ Print a paragraph break (a blank line between paragraphs) by moving the cursor
+\ down a line, setting Sentence Case, and then printing a newline.
+\
+\ ******************************************************************************
+
+.TTX69
+
+ INC YC                 \ Move the text cursor down a line
+
+                        \ Fall through into TT69 to set Sentence Case and print
+                        \ a newline
+
+\ ******************************************************************************
+\
+\       Name: TT69
+\       Type: Subroutine
+\   Category: Text
+\    Summary: Set Sentence Case and print a newline
+\
+\ ******************************************************************************
+
+.TT69
+
+ JSR vdu_80             \ AJD
+
+                        \ Fall through into TT67 to print a newline
+
+\ ******************************************************************************
+\
+\       Name: TT67
+\       Type: Subroutine
+\   Category: Text
+\    Summary: Print a newline
+\
+\ ******************************************************************************
 
 .TT67
 
- LDA #&0C
- JMP TT27
+ LDA #12                \ Load a newline character into A
 
-.l_2b65
+ JMP TT27               \ Print the text token in A and return from the
+                        \ subroutine using a tail call
 
- LDA #&AD
+\ ******************************************************************************
+\
+\       Name: TT70
+\       Type: Subroutine
+\   Category: Text
+\    Summary: Display "MAINLY " and jump to TT72
+\
+\ ------------------------------------------------------------------------------
+\
+\ This subroutine is called by TT25 when displaying a system's economy.
+\
+\ ******************************************************************************
+
+.TT70
+
+ LDA #173               \ Print recursive token 13 ("MAINLY ")
  JSR TT27
- JMP l_2ba9
+
+ JMP TT72               \ Jump to TT72 to continue printing system data as part
+                        \ of routine TT25
+
+\ ******************************************************************************
+\
+\       Name: spc
+\       Type: Subroutine
+\   Category: Text
+\    Summary: Print a text token followed by a space
+\
+\ ------------------------------------------------------------------------------
+\
+\ Print a text token (i.e. a character, control code, two-letter token or
+\ recursive token) followed by a space.
+\
+\ Arguments:
+\
+\   A                   The text token to be printed
+\
+\ ******************************************************************************
 
 .spc
 
- JSR TT27
- JMP TT162
+ JSR TT27               \ Print the text token in A
 
-.l_2b73
+ JMP TT162              \ Print a space and return from the subroutine using a
+                        \ tail call
 
- LDA #&01
- JSR TT66
- LDA #&09
+\ ******************************************************************************
+\
+\       Name: TT25
+\       Type: Subroutine
+\   Category: Universe
+\    Summary: Show the Data on System screen (red key f6)
+\  Deep dive: Generating system data
+\             Galaxy and system seeds
+\
+\ ------------------------------------------------------------------------------
+\
+\ Other entry points:
+\
+\   TT72                Used by TT70 to re-enter the routine after displaying
+\                       "MAINLY" for the economy type
+\
+\ ******************************************************************************
+
+.TT25
+
+ LDA #1                 \ Clear the top part of the screen, draw a white border,
+ JSR TT66               \ and set the current view type in QQ11 to 1
+
+ LDA #9                 \ Move the text cursor to column 9
  STA XC
- LDA #&A3
+
+ LDA #163               \ Print recursive token 3 as a title in capitals at
+ JSR TT27               \ the top ("DATA ON {selected system name}")
+
+ JSR NLIN               \ Draw a horizontal line underneath the title
+
+ JSR TTX69              \ Print a paragraph break and set Sentence Case
+
+ INC YC                 \ Move the text cursor down one more line
+
+ JSR TT146              \ If the distance to this system is non-zero, print
+                        \ "DISTANCE", then the distance, "LIGHT YEARS" and a
+                        \ paragraph break, otherwise just move the cursor down
+                        \ a line
+
+ LDA #194               \ Print recursive token 34 ("ECONOMY") followed by
+ JSR TT68               \ a colon
+
+ LDA QQ3                \ The system economy is determined by the value in QQ3,
+                        \ so fetch it into A. First we work out the system's
+                        \ prosperity as follows:
+                        \
+                        \   QQ3 = 0 or 5 = %000 or %101 = Rich
+                        \   QQ3 = 1 or 6 = %001 or %110 = Average
+                        \   QQ3 = 2 or 7 = %010 or %111 = Poor
+                        \   QQ3 = 3 or 4 = %011 or %100 = Mainly
+
+ CLC                    \ If (QQ3 + 1) >> 1 = %10, i.e. if QQ3 = %011 or %100
+ ADC #1                 \ (3 or 4), then call TT70, which prints "MAINLY " and
+ LSR A                  \ jumps down to TT72 to print the type of economy
+ CMP #%00000010
+ BEQ TT70
+
+ LDA QQ3                \ The LSR A above shifted bit 0 of QQ3 into the C flag,
+ BCC TT71               \ so this jumps to TT71 if bit 0 of QQ3 is 0, in other
+                        \ words if QQ3 = %000, %001 or %010 (0, 1 or 2)
+
+ SBC #5                 \ Here QQ3 = %101, %110 or %111 (5, 6 or 7), so subtract
+ CLC                    \ 5 to bring it down to 0, 1 or 2 (the C flag is already
+                        \ set so the SBC will be correct)
+
+.TT71
+
+ ADC #170               \ A is now 0, 1 or 2, so print recursive token 10 + A.
+ JSR TT27               \ This means that:
+                        \
+                        \   QQ3 = 0 or 5 prints token 10 ("RICH ")
+                        \   QQ3 = 1 or 6 prints token 11 ("AVERAGE ")
+                        \   QQ3 = 2 or 7 prints token 12 ("POOR ")
+
+.TT72
+
+ LDA QQ3                \ Now to work out the type of economy, which is
+ LSR A                  \ determined by bit 2 of QQ3, as follows:
+ LSR A                  \
+                        \   QQ3 bit 2 = 0 = Industrial
+                        \   QQ3 bit 2 = 1 = Agricultural
+                        \
+                        \ So we fetch QQ3 into A and set A = bit 2 of QQ3 using
+                        \ two right shifts (which will work as QQ3 is only a
+                        \ 3-bit number)
+
+ CLC                    \ Print recursive token 8 + A, followed by a paragraph
+ ADC #168               \ break and Sentence Case, so:
+ JSR TT60               \
+                        \   QQ3 bit 2 = 0 prints token 8 ("INDUSTRIAL")
+                        \   QQ3 bit 2 = 1 prints token 9 ("AGRICULTURAL")
+
+ LDA #162               \ Print recursive token 2 ("GOVERNMENT") followed by
+ JSR TT68               \ a colon
+
+ LDA QQ4                \ The system economy is determined by the value in QQ4,
+                        \ so fetch it into A
+
+ CLC                    \ Print recursive token 17 + A, followed by a paragraph
+ ADC #177               \ break and Sentence Case, so:
+ JSR TT60               \
+                        \   QQ4 = 0 prints token 17 ("ANARCHY")
+                        \   QQ4 = 1 prints token 18 ("FEUDAL")
+                        \   QQ4 = 2 prints token 19 ("MULTI-GOVERNMENT")
+                        \   QQ4 = 3 prints token 20 ("DICTATORSHIP")
+                        \   QQ4 = 4 prints token 21 ("COMMUNIST")
+                        \   QQ4 = 5 prints token 22 ("CONFEDERACY")
+                        \   QQ4 = 6 prints token 23 ("DEMOCRACY")
+                        \   QQ4 = 7 prints token 24 ("CORPORATE STATE")
+
+ LDA #196               \ Print recursive token 36 ("TECH.LEVEL") followed by a
+ JSR TT68               \ colon
+
+ LDX QQ5                \ Fetch the tech level from QQ5 and increment it, as it
+ INX                    \ is stored in the range 0-14 but the displayed range
+                        \ should be 1-15
+
+ JSR pr2-1              \ AJD
+
+ JSR TTX69              \ Print a paragraph break and set Sentence Case
+
+ LDA #192               \ Print recursive token 32 ("POPULATION") followed by a
+ JSR TT68               \ colon
+
+ SEC                    \ Call pr2 to print the population as a 3-digit number
+ LDX QQ6                \ with a decimal point (by setting the C flag), so the
+ JSR pr2                \ number printed will be population / 10
+
+ LDA #198               \ Print recursive token 38 (" BILLION"), followed by a
+ JSR TT60               \ paragraph break and Sentence Case
+
+ LDA #'('               \ Print an opening bracket
  JSR TT27
- JSR NLIN
- JSR l_2b5a
- INC YC
- JSR l_2b3b
- LDA #&C2
- JSR l_3395
- LDA data_econ
- CLC
- ADC #&01
- LSR A
- CMP #&02
- BEQ l_2b65
- LDA data_econ
- BCC l_2ba4
- SBC #&05
- CLC
 
-.l_2ba4
+ LDA QQ15+4             \ Now to calculate the species, so first check bit 7 of
+ BMI TT75               \ s2_lo, and if it is set, jump to TT75 as this is an
+                        \ alien species
 
- ADC #&AA
- JSR TT27
+ LDA #188               \ Bit 7 of s2_lo is clear, so print recursive token 28
+ JSR TT27               \ ("HUMAN COLONIAL")
 
-.l_2ba9
+ JMP TT76               \ Jump to TT76 to print "S)" and a paragraph break, so
+                        \ the whole species string is "(HUMAN COLONIALS)"
 
- LDA data_econ
- LSR A
- LSR A
- CLC
- ADC #&A8
- JSR l_2b57
- LDA #&A2
- JSR l_3395
- LDA data_govm
- CLC
- ADC #&B1
- JSR l_2b57
- LDA #&C4
- JSR l_3395
- LDX data_tech
- INX
- JSR c_1e38
- JSR l_2b5a
- LDA #&C0
- JSR l_3395
- SEC
- LDX data_popn
- JSR pr2
- LDA #&C6
- JSR l_2b57
- LDA #&28
- JSR TT27
- LDA &70
- BMI l_2bf4
- LDA #&BC
- JSR TT27
- JMP l_2c30
+.TT75
 
-.l_2bf4
-
- LDA &71
- LSR A
- LSR A
+ LDA QQ15+5             \ This is an alien species, and we start with the first
+ LSR A                  \ adjective, so fetch bits 2-7 of s2_hi into A and push
+ LSR A                  \ onto the stack so we can use this later
  PHA
- AND #&07
- CMP #&03
- BCS l_2c04
- ADC #&E3
- JSR spc
 
-.l_2c04
+ AND #%00000111         \ Set A = bits 0-2 of A (so that's bits 2-4 of s2_hi)
 
- PLA
+ CMP #3                 \ If A >= 3, jump to TT205 to skip the first adjective,
+ BCS TT205
+
+ ADC #227               \ Otherwise A = 0, 1 or 2, so print recursive token
+ JSR spc                \ 67 + A, followed by a space, so:
+                        \
+                        \   A = 0 prints token 67 ("LARGE") and a space
+                        \   A = 1 prints token 67 ("FIERCE") and a space
+                        \   A = 2 prints token 67 ("SMALL") and a space
+
+.TT205
+
+ PLA                    \ Now for the second adjective, so restore A to bits
+ LSR A                  \ 2-7 of s2_hi, and throw away bits 2-4 to leave
+ LSR A                  \ A = bits 5-7 of s2_hi
  LSR A
- LSR A
- LSR A
- CMP #&06
- BCS l_2c11
- ADC #&E6
- JSR spc
 
-.l_2c11
+ CMP #6                 \ If A >= 6, jump to TT206 to skip the second adjective
+ BCS TT206
 
- LDA &6F
- EOR &6D
- AND #&07
- STA &73
- CMP #&06
- BCS l_2c22
- ADC #&EC
- JSR spc
+ ADC #230               \ Otherwise A = 0 to 5, so print recursive token
+ JSR spc                \ 70 + A, followed by a space, so:
+                        \
+                        \   A = 0 prints token 70 ("GREEN") and a space
+                        \   A = 1 prints token 71 ("RED") and a space
+                        \   A = 2 prints token 72 ("YELLOW") and a space
+                        \   A = 3 prints token 73 ("BLUE") and a space
+                        \   A = 4 prints token 74 ("BLACK") and a space
+                        \   A = 5 prints token 75 ("HARMLESS") and a space
 
-.l_2c22
+.TT206
 
- LDA &71
- AND #&03
+ LDA QQ15+3             \ Now for the third adjective, so EOR the high bytes of
+ EOR QQ15+1             \ s0 and s1 and extract bits 0-2 of the result:
+ AND #%00000111         \
+ STA QQ19               \   A = (s0_hi EOR s1_hi) AND %111
+                        \
+                        \ storing the result in QQ19 so we can use it later
+
+ CMP #6                 \ If A >= 6, jump to TT207 to skip the third adjective
+ BCS TT207
+
+ ADC #236               \ Otherwise A = 0 to 5, so print recursive token
+ JSR spc                \ 76 + A, followed by a space, so:
+                        \
+                        \   A = 0 prints token 76 ("SLIMY") and a space
+                        \   A = 1 prints token 77 ("BUG-EYED") and a space
+                        \   A = 2 prints token 78 ("HORNED") and a space
+                        \   A = 3 prints token 79 ("BONY") and a space
+                        \   A = 4 prints token 80 ("FAT") and a space
+                        \   A = 5 prints token 81 ("FURRY") and a space
+
+.TT207
+
+ LDA QQ15+5             \ Now for the actual species, so take bits 0-1 of
+ AND #%00000011         \ s2_hi, add this to the value of A that we used for
+ CLC                    \ the third adjective, and take bits 0-2 of the result
+ ADC QQ19
+ AND #%00000111
+
+ ADC #242               \ A = 0 to 7, so print recursive token 82 + A, so:
+ JSR TT27               \
+                        \   A = 0 prints token 76 ("RODENT")
+                        \   A = 1 prints token 76 ("FROG")
+                        \   A = 2 prints token 76 ("LIZARD")
+                        \   A = 3 prints token 76 ("LOBSTER")
+                        \   A = 4 prints token 76 ("BIRD")
+                        \   A = 5 prints token 76 ("HUMANOID")
+                        \   A = 6 prints token 76 ("FELINE")
+                        \   A = 7 prints token 76 ("INSECT")
+
+.TT76
+
+ LDA #'S'               \ Print an "S" to pluralise the species
+ JSR TT27
+
+ LDA #')'               \ And finally, print a closing bracket, followed by a
+ JSR TT60               \ paragraph break and Sentence Case, to end the species
+                        \ section
+
+ LDA #193               \ Print recursive token 33 ("GROSS PRODUCTIVITY"),
+ JSR TT68               \ followed by colon
+
+ LDX QQ7                \ Fetch the 16-bit productivity value from QQ7 into
+ LDY QQ7+1              \ (Y X)
+
+ JSR pr6                \ Print (Y X) to 5 digits with no decimal point
+
+ JSR TT162              \ Print a space
+
+ JSR vdu_00             \ AJD
+
+ LDA #'M'               \ Print "M"
+ JSR TT27
+
+ LDA #226               \ Print recursive token 66 (" CR"), followed by a
+ JSR TT60               \ paragraph break and Sentence Case
+
+ LDA #250               \ Print recursive token 90 ("AVERAGE RADIUS"), followed
+ JSR TT68               \ by a colon
+
+                        \ The average radius is calculated like this:
+                        \
+                        \   ((s2_hi AND %1111) + 11) * 256 + s1_hi
+                        \
+                        \ or, in terms of memory locations:
+                        \
+                        \   ((QQ15+5 AND %1111) + 11) * 256 + QQ15+3
+                        \
+                        \ Because the multiplication is by 256, this is the
+                        \ same as saying a 16-bit number, with high byte:
+                        \
+                        \   (QQ15+5 AND %1111) + 11
+                        \
+                        \ and low byte:
+                        \
+                        \   QQ15+3
+                        \
+                        \ so we can set this up in (Y X) and call the pr5
+                        \ routine to print it out
+
+ LDA QQ15+5             \ Set A = QQ15+5
+ LDX QQ15+3             \ Set X = QQ15+3
+
+ AND #%00001111         \ Set Y = (A AND %1111) + 11
  CLC
- ADC &73
- AND #&07
- ADC #&F2
- JSR TT27
-
-.l_2c30
-
- LDA #&53
- JSR TT27
- LDA #&29
- JSR l_2b57
- LDA #&C1
- JSR l_3395
- LDX data_gnp
- LDY data_gnp+&01
- JSR l_30b3
- JSR TT162
- JSR vdu_00
- LDA #&4D
- JSR TT27
- LDA #&E2
- JSR l_2b57
- LDA #&FA
- JSR l_3395
- LDA &71
- LDX &6F
- AND #&0F
- CLC
- ADC #&0B
+ ADC #11
  TAY
- JSR l_30b4
- JSR TT162
- LDA #&6B
- JSR TT26
- LDA #&6D
+
+ JSR pr5                \ Print (Y X) to 5 digits, not including a decimal
+                        \ point, as the C flag will be clear (as the maximum
+                        \ radius will always fit into 16 bits)
+
+ JSR TT162              \ Print a space
+
+ LDA #'k'               \ Print "km", returning from the subroutine using a
+ JSR TT26               \ tail call
+ LDA #'m'
  JMP TT26
 
-.l_2c78
+.TT24
 
  LDA &6D
  AND #&07
- STA data_econ
+ STA QQ3
  LDA &6E
  LSR A
  LSR A
  LSR A
  AND #&07
- STA data_govm
+ STA QQ4
  LSR A
  BNE l_2c94
- LDA data_econ
+ LDA QQ3
  ORA #&02
- STA data_econ
+ STA QQ3
 
 .l_2c94
 
- LDA data_econ
+ LDA QQ3
  EOR #&07
  CLC
- STA data_tech
+ STA QQ5
  LDA &6F
  AND #&03
- ADC data_tech
- STA data_tech
- LDA data_govm
+ ADC QQ5
+ STA QQ5
+ LDA QQ4
  LSR A
- ADC data_tech
- STA data_tech
+ ADC QQ5
+ STA QQ5
  ASL A
  ASL A
- ADC data_econ
- ADC data_govm
+ ADC QQ3
+ ADC QQ4
  ADC #&01
- STA data_popn
- LDA data_econ
+ STA QQ6
+ LDA QQ3
  EOR #&07
  ADC #&03
  STA &1B
- LDA data_govm
+ LDA QQ4
  ADC #&04
  STA &81
- JSR l_2820
- LDA data_popn
+ JSR MULTU
+ LDA QQ6
  STA &81
- JSR l_2820
+ JSR MULTU
  ASL &1B
  ROL A
  ASL &1B
  ROL A
  ASL &1B
  ROL A
- STA data_gnp+&01
+ STA QQ7+&01
  LDA &1B
- STA data_gnp
+ STA QQ7
  RTS
 
 .l_2ceb
@@ -9884,7 +11323,7 @@ NEXT
  ADC #&18
  STA &35
  JSR PIXEL
- JSR l_2b0e
+ JSR TT20
  LDX &84
  INX
  BNE l_2d09
@@ -10024,7 +11463,7 @@ NEXT
  STA &74
  TXA
  PHA
- JSR l_2b5c
+ JSR TT69
  CLC
  LDA &03AD
  ADC #&D0
@@ -10033,7 +11472,7 @@ NEXT
  STA XC
  PLA
  TAX
- JSR c_1e38
+ JSR pr2-1
  JSR l_3135
 
 .l_2e0c
@@ -10051,14 +11490,14 @@ NEXT
  LDA #&0B
  STA XC
  LDA #&A4
- JSR l_2b57
+ JSR TT60
  JSR NLIN4
  JSR l_3366
  LDA #&0E
- JSR l_3395
+ JSR TT68
  LDX new_hold
  DEX
- JSR c_1e38
+ JSR pr2-1
  JSR l_3147
  JMP l_2dde
 
@@ -10260,7 +11699,7 @@ NEXT
 
 .l_2f60
 
- JSR l_2b0e
+ JSR TT20
  INC &97
  BEQ l_2f74
  JMP l_2ee0
@@ -10327,7 +11766,7 @@ NEXT
 
 .l_2fae
 
- JSR l_2b0e
+ JSR TT20
  INC &80
  BNE l_2f80
  LDX #&05
@@ -10377,19 +11816,19 @@ NEXT
  LDA &81
  ASL A
  LDX #&00
- STX hype_dist+&01
- ROL hype_dist+&01
+ STX QQ8+&01
+ ROL QQ8+&01
  ASL A
- ROL hype_dist+&01
- STA hype_dist
- JMP l_2c78
+ ROL QQ8+&01
+ STA QQ8
+ JMP TT24
 
 .l_3011
 
  LDA &2F
  ORA &8E
  BNE l_3084+&01
- JSR l_4437
+ JSR CTRL
  BMI l_305e
  LDA &87
  BNE l_3023
@@ -10404,8 +11843,8 @@ NEXT
 
 .l_3026
 
- LDA hype_dist
- ORA hype_dist+&01
+ LDA QQ8
+ ORA QQ8+&01
  BEQ l_3084+&01
  LDA #&07
  STA XC
@@ -10414,10 +11853,10 @@ NEXT
  JSR vdu_00
  LDA #&BD
  JSR TT27
- LDA hype_dist+&01
+ LDA QQ8+&01
  BNE l_30b9
  LDA QQ14
- CMP hype_dist
+ CMP QQ8
  BCC l_30b9
  LDA #&2D
  JSR TT27
@@ -10465,8 +11904,8 @@ NEXT
  JSR l_3292
  JSR TT111
  LDX #&00
- STX hype_dist
- STX hype_dist+&01
+ STX QQ8
+ STX QQ8+&01
  LDA #&74
  JSR l_45c6
 
@@ -10488,11 +11927,11 @@ NEXT
  STY YC
  DEY
 
-.l_30b3
+.pr6
 
  CLC
 
-.l_30b4
+.pr5
 
  LDA #&05
  JMP TT11
@@ -10547,7 +11986,7 @@ NEXT
  LDA #&00
  JSR l_32f4
  SEC
- JSR l_30b4
+ JSR pr5
  LDY &77
  LDA #&05
  LDX cmdr_avail,Y
@@ -10667,11 +12106,11 @@ NEXT
  BPL l_31b0
  INX
  STX &0349
- LDA data_econ
+ LDA QQ3
  STA home_econ
- LDA data_tech
+ LDA QQ5
  STA home_tech
- LDA data_govm
+ LDA QQ4
  STA home_govmt
  JSR DORND
  STA cmdr_price
@@ -10759,7 +12198,7 @@ NEXT
 
  LDA QQ14
  SEC
- SBC hype_dist
+ SBC QQ8
  STA QQ14
 
 .hyper_snap
@@ -10771,7 +12210,7 @@ NEXT
 
 .l_3268
 
- \	JSR l_4437
+ \	JSR CTRL
  \	AND x_flag
  \	BMI l_321f
  JSR DORND
@@ -10896,7 +12335,7 @@ NEXT
 
 .l_3327
 
- JSR l_2b14
+ JSR TT54
  DEC &D1
  BPL l_331c
  LDX #&05
@@ -10949,12 +12388,12 @@ NEXT
 
  LDX GCNT
  INX
- JMP c_1e38
+ JMP pr2-1
 
 .l_3366
 
  LDA #&69
- JSR l_3395
+ JSR TT68
  LDX QQ14
  SEC
  JSR pr2
@@ -10984,7 +12423,7 @@ NEXT
  JSR TT27
  JMP TT67
 
-.l_3395
+.TT68
 
  JSR TT27
 
@@ -11217,7 +12656,7 @@ NEXT
  ADC #&04
  BCS l_3469
  STA (&67),Y
- JSR l_2965
+ JSR DVID4
  LDA &1B
  CMP #&1C
  BCC l_34a8
@@ -11380,12 +12819,12 @@ NEXT
 
 .l_3580
 
- LDA hype_dist
+ LDA QQ8
  LDY #3
 
 .legal_div
 
- LSR hype_dist+1
+ LSR QQ8+1
  ROR A
  DEY
  BNE legal_div
@@ -11525,7 +12964,7 @@ NEXT
  INX
  BEQ l_3624
 
-.l_3629
+.DENGY
 
  DEC ENERGY
  PHP
@@ -11547,7 +12986,7 @@ NEXT
  LDA #&14
  STA &81
  TXA
- JSR l_2965
+ JSR DVID4
  LDX &1B
  TYA
  BMI l_3658
@@ -12004,7 +13443,7 @@ NEXT
  STA font
  LDA #&00
  STA &1B
- JSR l_297e
+ JSR DVID3B2
  LDA &41
  BEQ l_38bd
  LDA #&F8
@@ -12116,7 +13555,7 @@ NEXT
  STA font
  LDA &47,X
  AND #&80
- JSR l_297e
+ JSR DVID3B2
  LDA &40
  LDY &41
  BEQ l_3982
@@ -12490,7 +13929,7 @@ NEXT
 .l_3b97
 
  LDA &93
- JSR l_283d
+ JSR FMLTU2
  LDX #&00
  STX &D1
  LDX &93
@@ -12515,7 +13954,7 @@ NEXT
  LDA &93
  CLC
  ADC #&10
- JSR l_283d
+ JSR FMLTU2
  TAX
  LDA #&00
  STA &D1
@@ -12702,7 +14141,7 @@ NEXT
  LDA #&DE
  STA &81
  STX &80
- JSR l_2820
+ JSR MULTU
  LDX &80
  LDY &43
  BPL l_3cd8
@@ -12721,7 +14160,7 @@ NEXT
 .l_3cdb
 
  STA &81
- JSR l_2a3c
+ JSR ARCTAN
  LDX &54
  BMI l_3ce6
  EOR #&80
@@ -12745,7 +14184,7 @@ NEXT
 
 .l_3cfa
 
- JSR l_297e
+ JSR DVID3B2
  LDA &43
  AND #&7F
  ORA &42
@@ -13506,7 +14945,7 @@ NEXT
  CMP #&75
  BNE l_4120
  JSR TT111
- JMP l_2b73
+ JMP TT25
 
 .l_4120
 
@@ -13626,7 +15065,7 @@ NEXT
  LDA #&01
  STA XC
  INC YC
- JMP l_2b3b
+ JMP TT146
 
 .l_41b2
 
@@ -13892,7 +15331,7 @@ NEXT
 
 .l_4341
 
- JSR l_4439
+ JSR DKS4
  BMI l_434a
  INX
  BPL l_4341
@@ -14083,7 +15522,7 @@ NEXT
  LDA b_flag
  BMI b_14
  LDX l_4419-1,Y
- JSR l_4439
+ JSR DKS4
  BPL b_quit
 
 .b_pressed
@@ -14095,11 +15534,11 @@ NEXT
 
  RTS
 
-.l_4437
+.CTRL
 
  LDX #&01
 
-.l_4439
+.DKS4
 
  LDA #&03
  SEI
@@ -14274,13 +15713,13 @@ NEXT
  LDA #&07
  LDY &0303
  BEQ l_4533
- JSR l_2a16
+ JSR BUMP2
 
 .l_4533
 
  LDY &0304
  BEQ l_453b
- JSR l_2a26
+ JSR REDU2
 
 .l_453b
 
@@ -14289,13 +15728,13 @@ NEXT
  LDX adval_y
  LDY &0305
  BEQ l_454a
- JSR l_2a26
+ JSR REDU2
 
 .l_454a
 
  LDY &0306
  BEQ l_4552
- JSR l_2a16
+ JSR BUMP2
 
 .l_4552
 
@@ -14514,24 +15953,24 @@ NEXT
  LDA &52
  STA &81
  LDA &5A
- JSR l_28d4
+ JSR MULT12
  LDX &54
  LDA &58
- JSR l_293b
+ JSR TIS1
  EOR #&80
  STA &5C
  LDA &56
- JSR l_28d4
+ JSR MULT12
  LDX &50
  LDA &5A
- JSR l_293b
+ JSR TIS1
  EOR #&80
  STA &5E
  LDA &58
- JSR l_28d4
+ JSR MULT12
  LDX &52
  LDA &56
- JSR l_293b
+ JSR TIS1
  EOR #&80
  STA &60
  LDA #&00
@@ -14590,7 +16029,7 @@ NEXT
  LDA &50,X
  STA &81
  LDA &56,X
- JSR l_28d4
+ JSR MULT12
  LDX &50,Y
  STX &81
  LDA &56,Y
@@ -14725,17 +16164,15 @@ NEXT
  BNE l_47c6
  RTS
 
-.l_47ef
+.LL28
 
  CMP &81
  BCS l_480d
 
-.l_47f3
-
  LDX #&FE
  STX &82
 
-.l_47f7
+.LL31
 
  ASL A
  BCS l_4805
@@ -14746,7 +16183,7 @@ NEXT
 .l_4800
 
  ROL &82
- BCS l_47f7
+ BCS LL31
  RTS
 
 .l_4805
@@ -14754,7 +16191,7 @@ NEXT
  SBC &81
  SEC
  ROL &82
- BCS l_47f7
+ BCS LL31
  RTS
 
 .l_480d
@@ -14985,7 +16422,7 @@ NEXT
  ASL A
  LDA &0A,Y
  ROL A
- JSR l_47ef
+ JSR LL28
  LDX &82
  STX &09,Y
  DEY
@@ -15452,7 +16889,7 @@ NEXT
  CMP &81
  BCS l_4c36
  STX &83
- JSR l_47ef
+ JSR LL28
  LDX &83
  LDA &82
 
@@ -15533,7 +16970,7 @@ NEXT
 
 .l_4cb0
 
- JSR l_47ef
+ JSR LL28
 
 .l_4cb3
 
@@ -15577,7 +17014,7 @@ NEXT
 
 .l_4cf2
 
- JSR l_47ef
+ JSR LL28
 
 .l_4cf5
 
@@ -15898,7 +17335,7 @@ NEXT
  BCC l_4ee5
  STA &81
  LDA &3E
- JSR l_47ef
+ JSR LL28
  JMP l_4ef0
 
 .l_4ee5
@@ -15906,7 +17343,7 @@ NEXT
  LDA &3E
  STA &81
  LDA &3C
- JSR l_47ef
+ JSR LL28
  DEC &D1
 
 .l_4ef0
@@ -17827,6 +19264,10 @@ NEXT
 \                       view name. This can be used to remove the border and
 \                       view name, as it is drawn using EOR logic
 \
+\ Other entry points:
+\
+\   BOL1-1              Contains an RTS
+\
 \ ******************************************************************************
 
 .TTX66
@@ -18228,15 +19669,39 @@ NEXT
  BNE l_55e4
  RTS
 
+\ ******************************************************************************
+\
+\       Name: WSCAN
+\       Type: Subroutine
+\   Category: Screen mode
+\    Summary: Wait for the vertical sync
+\
+\ ------------------------------------------------------------------------------
+\
+\ Wait for vertical sync to occur on the video system - in other words, wait
+\ for the screen to start its refresh cycle, which it does 50 times a second
+\ (50Hz).
+\
+\ ******************************************************************************
+
 .WSCAN
 
- LDA #&00
- STA &8B
+ LDA #0                 \ Set DL to 0
+ STA DL
 
-.l_55fb
+ LDA DL                 \ Loop round these two instructions until DL is no
+ BEQ P%-2               \ longer 0 (DL gets set to 30 in the LINSCN routine,
+                        \ which is run when vertical sync has occurred on the
+                        \ video system, so DL will change to a non-zero value
+                        \ at the start of each screen refresh)
 
- LDA &8B
- BEQ l_55fb
- RTS 
+ RTS                    \ Return from the subroutine
 
+\ ******************************************************************************
+\
+\ Save output/1.F.bin
+\
+\ ******************************************************************************
+
+PRINT "S.1.F ", ~CODE%, " ", ~P%, " ", ~LOAD%, " ", ~LOAD%
 SAVE "output/1.F.bin", CODE%, P%, LOAD%
