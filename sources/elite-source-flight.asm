@@ -2421,7 +2421,7 @@ BRKV = P% - 2
  INC QQ20,X
  TXA
  ADC #&D0
- JSR l_45c6
+ JSR MESS
  JSR top_6a
 
 .l_141d
@@ -2614,7 +2614,7 @@ BRKV = P% - 2
  TAY
  JSR l_32d0
  LDA #&00
- JSR l_45c6
+ JSR MESS
 
 .l_1527
 
@@ -2739,7 +2739,7 @@ BRKV = P% - 2
  CMP ENERGY
  BCC l_15da
  ASL A
- JSR l_45c6
+ JSR MESS
 
 .l_15da
 
@@ -2753,7 +2753,7 @@ BRKV = P% - 2
  SBC #&24
  BCC l_15fa
  STA &82
- JSR l_47b8
+ JSR LL5
  LDA &81
  STA ALTIT
  BNE l_1648
@@ -2805,7 +2805,7 @@ BRKV = P% - 2
 
 .l_1645
 
- JSR l_45c6
+ JSR MESS
 
 .l_1648
 
@@ -8496,7 +8496,7 @@ LOAD_C% = LOAD% +P% - CODE%
 .l_2589
 
  LDA #&C9
- JMP l_45c6
+ JMP MESS
 
 .l_258e
 
@@ -11236,697 +11236,1664 @@ LOAD_D% = LOAD% + P% - CODE%
  LDA #'m'
  JMP TT26
 
+\ ******************************************************************************
+\
+\       Name: TT24
+\       Type: Subroutine
+\   Category: Universe
+\    Summary: Calculate system data from the system seeds
+\  Deep dive: Generating system data
+\             Galaxy and system seeds
+\
+\ ------------------------------------------------------------------------------
+\
+\ Calculate system data from the seeds in QQ15 and store them in the relevant
+\ locations. Specifically, this routine calculates the following from the three
+\ 16-bit seeds in QQ15 (using only s0_hi, s1_hi and s1_lo):
+\
+\   QQ3 = economy (0-7)
+\   QQ4 = government (0-7)
+\   QQ5 = technology level (0-14)
+\   QQ6 = population * 10 (1-71)
+\   QQ7 = productivity (96-62480)
+\
+\ The ranges of the various values are shown in brackets. Note that the radius
+\ and type of inhabitant are calculated on-the-fly in the TT25 routine when
+\ the system data gets displayed, so they aren't calculated here.
+\
+\ ******************************************************************************
+
 .TT24
 
- LDA &6D
- AND #&07
+ LDA QQ15+1             \ Fetch s0_hi and extract bits 0-2 to determine the
+ AND #%00000111         \ system's economy, and store in QQ3
  STA QQ3
- LDA &6E
+
+ LDA QQ15+2             \ Fetch s1_lo and extract bits 3-5 to determine the
+ LSR A                  \ system's government, and store in QQ4
  LSR A
  LSR A
- LSR A
- AND #&07
+ AND #%00000111
  STA QQ4
- LSR A
- BNE l_2c94
- LDA QQ3
- ORA #&02
+
+ LSR A                  \ If government isn't anarchy or feudal, skip to TT77,
+ BNE TT77               \ as we need to fix the economy of anarchy and feudal
+                        \ systems so they can't be rich
+
+ LDA QQ3                \ Set bit 1 of the economy in QQ3 to fix the economy
+ ORA #%00000010         \ for anarchy and feudal governments
  STA QQ3
 
-.l_2c94
+.TT77
 
- LDA QQ3
- EOR #&07
- CLC
- STA QQ5
- LDA &6F
- AND #&03
+ LDA QQ3                \ Now to work out the tech level, which we do like this:
+ EOR #%00000111         \
+ CLC                    \   flipped_economy + (s1_hi AND %11) + (government / 2)
+ STA QQ5                \
+                        \ or, in terms of memory locations:
+                        \
+                        \   QQ5 = (QQ3 EOR %111) + (QQ15+3 AND %11) + (QQ4 / 2)
+                        \
+                        \ We start by setting QQ5 = QQ3 EOR %111
+
+ LDA QQ15+3             \ We then take the first 2 bits of s1_hi (QQ15+3) and
+ AND #%00000011         \ add it into QQ5
  ADC QQ5
  STA QQ5
- LDA QQ4
- LSR A
- ADC QQ5
+
+ LDA QQ4                \ And finally we add QQ4 / 2 and store the result in
+ LSR A                  \ QQ5, using LSR then ADC to divide by 2, which rounds
+ ADC QQ5                \ up the result for odd-numbered government types
  STA QQ5
- ASL A
- ASL A
- ADC QQ3
- ADC QQ4
- ADC #&01
- STA QQ6
- LDA QQ3
- EOR #&07
- ADC #&03
- STA &1B
- LDA QQ4
- ADC #&04
- STA &81
- JSR MULTU
- LDA QQ6
- STA &81
- JSR MULTU
- ASL &1B
+
+ ASL A                  \ Now to work out the population, like so:
+ ASL A                  \
+ ADC QQ3                \   (tech level * 4) + economy + government + 1
+ ADC QQ4                \
+ ADC #1                 \ or, in terms of memory locations:
+ STA QQ6                \
+                        \   QQ6 = (QQ5 * 4) + QQ3 + QQ4 + 1
+
+ LDA QQ3                \ Finally, we work out productivity, like this:
+ EOR #%00000111         \
+ ADC #3                 \  (flipped_economy + 3) * (government + 4)
+ STA P                  \                        * population
+ LDA QQ4                \                        * 8
+ ADC #4                 \
+ STA Q                  \ or, in terms of memory locations:
+ JSR MULTU              \
+                        \   QQ7 = (QQ3 EOR %111 + 3) * (QQ4 + 4) * QQ6 * 8
+                        \
+                        \ We do the first step by setting P to the first
+                        \ expression in brackets and Q to the second, and
+                        \ calling MULTU, so now (A P) = P * Q. The highest this
+                        \ can be is 10 * 11 (as the maximum values of economy
+                        \ and government are 7), so the high byte of the result
+                        \ will always be 0, so we actually have:
+                        \
+                        \   P = P * Q
+                        \     = (flipped_economy + 3) * (government + 4)
+
+ LDA QQ6                \ We now take the result in P and multiply by the
+ STA Q                  \ population to get the productivity, by setting Q to
+ JSR MULTU              \ the population from QQ6 and calling MULTU again, so
+                        \ now we have:
+                        \
+                        \   (A P) = P * population
+
+ ASL P                  \ Next we multiply the result by 8, as a 16-bit number,
+ ROL A                  \ so we shift both bytes to the left three times, using
+ ASL P                  \ the C flag to carry bits from bit 7 of the low byte
+ ROL A                  \ into bit 0 of the high byte
+ ASL P
  ROL A
- ASL &1B
- ROL A
- ASL &1B
- ROL A
- STA QQ7+&01
- LDA &1B
+
+ STA QQ7+1              \ Finally, we store the productivity in two bytes, with
+ LDA P                  \ the low byte in QQ7 and the high byte in QQ7+1
  STA QQ7
- RTS
 
-.l_2ceb
+ RTS                    \ Return from the subroutine
 
- LDA #&40
- JSR TT66
- LDA #&07
+\ ******************************************************************************
+\
+\       Name: TT22
+\       Type: Subroutine
+\   Category: Charts
+\    Summary: Show the Long-range Chart (red key f4)
+\
+\ ******************************************************************************
+
+.TT22
+
+ LDA #64                \ Clear the top part of the screen, draw a white border,
+ JSR TT66               \ and set the current view type in QQ11 to 32 (Long-
+                        \ range Chart)
+
+ LDA #7                 \ Move the text cursor to column 7
  STA XC
- JSR l_2f6a
- LDA #&C7
- JSR TT27
- JSR NLIN
- LDA #&98
- JSR NLIN2
- JSR l_2da1
- LDX #&00
 
-.l_2d09
+ JSR TT81               \ Set the seeds in QQ15 to those of system 0 in the
+                        \ current galaxy (i.e. copy the seeds from QQ21 to QQ15)
 
- STX &84
- LDX &6F
- LDY &70
- TYA
- ORA #&50
- STA &88
- LDA &6D
- LSR A
- CLC
- ADC #&18
- STA &35
- JSR PIXEL
- JSR TT20
- LDX &84
- INX
- BNE l_2d09
- LDA QQ9
- STA &73
- LDA QQ10
- LSR A
- STA &74
- LDA #&04
- STA &75
+ LDA #199               \ Print recursive token 39 ("GALACTIC CHART{galaxy
+ JSR TT27               \ number right-aligned to width 3}")
+
+ JSR NLIN               \ Draw a horizontal line at pixel row 23 to box in the
+                        \ title and act as the top frame of the chart, and move
+                        \ the text cursor down one line
+
+ LDA #152               \ Draw a screen-wide horizontal line at pixel row 152
+ JSR NLIN2              \ for the bottom edge of the chart, so the chart itself
+                        \ is 128 pixels high, starting on row 24 and ending on
+                        \ row 151
+
+ JSR TT14               \ Call TT14 to draw a circle with crosshairs at the
+                        \ current system's galactic coordinates
+
+ LDX #0                 \ We're now going to plot each of the galaxy's systems,
+                        \ so set up a counter in X for each system, starting at
+                        \ 0 and looping through to 255
+
+.TT83
+
+ STX XSAV               \ Store the counter in XSAV
+
+ LDX QQ15+3             \ Fetch the s1_hi seed into X, which gives us the
+                        \ galactic x-coordinate of this system
+
+ LDY QQ15+4             \ Fetch the s2_lo seed and set bits 4 and 6, storing the
+ TYA                    \ result in ZZ to give a random number between 80 and
+ ORA #%01010000         \ (but which will always be the same for this system).
+ STA ZZ                 \ We use this value to determine the size of the point
+                        \ for this system on the chart by passing it as the
+                        \ distance argument to the PIXEL routine below
+
+ LDA QQ15+1             \ Fetch the s0_hi seed into A, which gives us the
+                        \ galactic y-coordinate of this system
+
+ LSR A                  \ We halve the y-coordinate because the galaxy in
+                        \ in Elite is rectangular rather than square, and is
+                        \ twice as wide (x-axis) as it is high (y-axis), so the
+                        \ chart is 256 pixels wide and 128 high
+
+ CLC                    \ Add 24 to the halved y-coordinate and store in XX15+1
+ ADC #24                \ (as the top of the chart is on pixel row 24, just
+ STA XX15+1             \ below the line we drew on row 23 above)
+
+ JSR PIXEL              \ Call PIXEL to draw a point at (X, A), with the size of
+                        \ the point dependent on the distance specified in ZZ
+                        \ (so a high value of ZZ will produce a 1-pixel point,
+                        \ a medium value will produce a 2-pixel dash, and a
+                        \ small value will produce a 4-pixel square)
+
+ JSR TT20               \ We want to move on to the next system, so call TT20
+                        \ to twist the three 16-bit seeds in QQ15
+
+ LDX XSAV               \ Restore the loop counter from XSAV
+
+ INX                    \ Increment the counter
+
+ BNE TT83               \ If X > 0 then we haven't done all 256 systems yet, so
+                        \ loop back up to TT83
+
+ LDA QQ9                \ Set QQ19 to the selected system's x-coordinate
+ STA QQ19
+
+ LDA QQ10               \ Set QQ19+1 to the selected system's y-coordinate,
+ LSR A                  \ halved to fit it into the chart
+ STA QQ19+1
+
+ LDA #4                 \ Set QQ19+2 to size 4 for the crosshairs size
+ STA QQ19+2
+
+                        \ Fall through into TT15 to draw crosshairs of size 4 at
+                        \ the selected system's coordinates
+
+\ ******************************************************************************
+\
+\       Name: TT15
+\       Type: Subroutine
+\   Category: Drawing lines
+\    Summary: Draw a set of crosshairs
+\
+\ ------------------------------------------------------------------------------
+\
+\ For all views except the Short-range Chart, the centre is drawn 24 pixels to
+\ the right of the y-coordinate given.
+\
+\ Arguments:
+\
+\   QQ19                The pixel x-coordinate of the centre of the crosshairs
+\
+\   QQ19+1              The pixel y-coordinate of the centre of the crosshairs
+\
+\   QQ19+2              The size of the crosshairs
+\
+\ ******************************************************************************
 
 .TT15
 
- LDA #&18
- LDX &87
- BPL l_2d3e
- LDA #&00
+ LDA #24                \ Set A to 24, which we will use as the minimum
+                        \ screen indent for the crosshairs (i.e. the minimum
+                        \ distance from the top-left corner of the screen)
 
-.l_2d3e
+ LDX QQ11               \ If the current view is not the Short-range Chart,
+ BPL P%+4               \ which is the only view with bit 7 set, then skip the
+                        \ following instruction
 
- STA &78
- LDA &73
- SEC
- SBC &75
- BCS l_2d49
- LDA #&00
+ LDA #0                 \ This is the Short-range Chart, so set A to 0, so the
+                        \ crosshairs can go right up against the screen edges
 
-.l_2d49
+ STA QQ19+5             \ Set QQ19+5 to A, which now contains the correct indent
+                        \ for this view
 
- STA &34
- LDA &73
- CLC
- ADC &75
- BCC l_2d54
- LDA #&FF
+ LDA QQ19               \ Set A = crosshairs x-coordinate - crosshairs size
+ SEC                    \ to get the x-coordinate of the left edge of the
+ SBC QQ19+2             \ crosshairs
 
-.l_2d54
+ BCS TT84               \ If the above subtraction didn't underflow, then A is
+                        \ positive, so skip the next instruction
 
- STA &36
- LDA &74
- CLC
- ADC &78
- STA &35
- JSR HLOIN
- LDA &74
- SEC
- SBC &75
- BCS l_2d69
- LDA #&00
+ LDA #0                 \ The subtraction underflowed, so set A to 0 so the
+                        \ crosshairs don't spill out of the left of the screen
 
-.l_2d69
+.TT84
 
- CLC
- ADC &78
- STA &35
- LDA &74
- CLC
- ADC &75
- ADC &78
- CMP #&98
- BCC l_2d7f
- LDX &87
- BMI l_2d7f
- LDA #&97
+                        \ In the following, the authors have used XX15 for
+                        \ temporary storage. XX15 shares location with X1, Y1,
+                        \ X2 and Y2, so in the following, you can consider
+                        \ the variables like this:
+                        \
+                        \   XX15   is the same as X1
+                        \   XX15+1 is the same as Y1
+                        \   XX15+2 is the same as X2
+                        \   XX15+3 is the same as Y2
+                        \
+                        \ Presumably this routine was written at a different
+                        \ time to the line-drawing routine, before the two
+                        \ workspaces were merged to save space
 
-.l_2d7f
+ STA XX15               \ Set XX15 (X1) = A (the x-coordinate of the left edge
+                        \ of the crosshairs)
 
- STA &37
- LDA &73
- STA &34
- STA &36
- JMP LOIN
+ LDA QQ19               \ Set A = crosshairs x-coordinate + crosshairs size
+ CLC                    \ to get the x-coordinate of the right edge of the
+ ADC QQ19+2             \ crosshairs
 
-.l_2d8a
+ BCC P%+4               \ If the above addition didn't overflow, then A is
+                        \ correct, so skip the next instruction
 
- LDA #&68
- STA &73
- LDA #&5A
- STA &74
- LDA #&10
- STA &75
- JSR TT15
- LDA QQ14
- STA &40
- JMP l_2dc5
+ LDA #255               \ The addition overflowed, so set A to 255 so the
+                        \ crosshairs don't spill out of the right of the screen
+                        \ (as 255 is the x-coordinate of the rightmost pixel
+                        \ on-screen)
 
-.l_2da1
+ STA XX15+2             \ Set XX15+2 (X2) = A (the x-coordinate of the right
+                        \ edge of the crosshairs)
 
- LDA &87
- BMI l_2d8a
- LDA QQ14
- LSR A
- LSR A
- STA &40
- LDA QQ0
- STA &73
- LDA QQ1
- LSR A
- STA &74
- LDA #&07
- STA &75
- JSR TT15
- LDA &74
- CLC
- ADC #&18
- STA &74
+ LDA QQ19+1             \ Set XX15+1 (Y1) = crosshairs y-coordinate + indent
+ CLC                    \ to get the y-coordinate of the centre of the
+ ADC QQ19+5             \ crosshairs
+ STA XX15+1
 
-.l_2dc5
+ JSR HLOIN              \ Draw a horizontal line from (X1, Y1) to (X2, Y1),
+                        \ which will draw from the left edge of the crosshairs
+                        \ to the right edge, through the centre of the
+                        \ crosshairs
 
- LDA &73
- STA &D2
- LDA &74
- STA &E0
- LDX #&00
- STX &E1
- STX &D3
- INX
- STX &6B
- INX
- STX &95
- JMP CIRCLE2
+ LDA QQ19+1             \ Set A = crosshairs y-coordinate - crosshairs size
+ SEC                    \ to get the y-coordinate of the top edge of the
+ SBC QQ19+2             \ crosshairs
 
-.l_2dde
+ BCS TT86               \ If the above subtraction didn't underflow, then A is
+                        \ correct, so skip the next instruction
 
- LDY #&00
+ LDA #0                 \ The subtraction underflowed, so set A to 0 so the
+                        \ crosshairs don't spill out of the top of the screen
 
-.l_2de0
+.TT86
 
- STY &03AD
- LDX QQ20,Y
- BEQ l_2e0c
- TYA
- ASL A
- ASL A
+ CLC                    \ Set XX15+1 (Y1) = A + indent to get the y-coordinate
+ ADC QQ19+5             \ of the top edge of the indented crosshairs
+ STA XX15+1
+
+ LDA QQ19+1             \ Set A = crosshairs y-coordinate + crosshairs size
+ CLC                    \ + indent to get the y-coordinate of the bottom edge
+ ADC QQ19+2             \ of the indented crosshairs
+ ADC QQ19+5
+
+ CMP #152               \ If A < 152 then skip the following, as the crosshairs
+ BCC TT87               \ won't spill out of the bottom of the screen
+
+ LDX QQ11               \ A >= 152, so we need to check whether this will fit in
+                        \ this view, so fetch the view number
+
+ BMI TT87               \ If this is the Short-range Chart then the y-coordinate
+                        \ is fine, so skip to TT87
+
+ LDA #151               \ Otherwise this is the Long-range Chart, so we need to
+                        \ clip the crosshairs at a maximum y-coordinate of 151
+
+.TT87
+
+ STA XX15+3             \ Set XX15+3 (Y2) = A (the y-coordinate of the bottom
+                        \ edge of the crosshairs)
+
+ LDA QQ19               \ Set XX15 (X1) = the x-coordinate of the centre of the
+ STA XX15               \ crosshairs
+
+ STA XX15+2             \ Set XX15+2 (X2) = the x-coordinate of the centre of
+                        \ the crosshairs
+
+ JMP LL30               \ Draw a vertical line (X1, Y1) to (X2, Y2), which will
+                        \ draw from the top edge of the crosshairs to the bottom
+                        \ edge, through the centre of the crosshairs, returning
+                        \ from the subroutine using a tail call
+
+\ ******************************************************************************
+\
+\       Name: TT14
+\       Type: Subroutine
+\   Category: Drawing circles
+\    Summary: Draw a circle with crosshairs on a chart
+\
+\ ------------------------------------------------------------------------------
+\
+\ Draw a circle with crosshairs at the current system's galactic coordinates.
+\
+\ ******************************************************************************
+
+.TT126
+
+ LDA #104               \ Set QQ19 = 104, for the x-coordinate of the centre of
+ STA QQ19               \ the fixed circle on the Short-range Chart
+
+ LDA #90                \ Set QQ19+1 = 90, for the y-coordinate of the centre of
+ STA QQ19+1             \ the fixed circle on the Short-range Chart
+
+ LDA #16                \ Set QQ19+2 = 16, the size of the crosshairs on the
+ STA QQ19+2             \ Short-range Chart
+
+ JSR TT15               \ Draw the set of crosshairs defined in QQ19, at the
+                        \ exact coordinates as this is the Short-range Chart
+
+ LDA QQ14               \ Set K to the fuel level from QQ14, so this can act as
+ STA K                  \ the circle's radius (70 being a full tank)
+
+ JMP TT128              \ Jump to TT128 to draw a circle with the centre at the
+                        \ same coordinates as the crosshairs, (QQ19, QQ19+1),
+                        \ and radius K that reflects the current fuel levels,
+                        \ returning from the subroutine using a tail call
+
+.TT14
+
+ LDA QQ11               \ If the current view is the Short-range Chart, which
+ BMI TT126              \ is the only view with bit 7 set, then jump up to TT126
+                        \ to draw the crosshairs and circle for that view
+
+                        \ Otherwise this is the Long-range Chart, so we draw the
+                        \ crosshairs and circle for that view instead
+
+ LDA QQ14               \ Set K to the fuel level from QQ14 divided by 4, so
+ LSR A                  \ this can act as the circle's radius (70 being a full
+ LSR A                  \ tank, which divides down to a radius of 17)
+ STA K
+
+ LDA QQ0                \ Set QQ19 to the x-coordinate of the current system,
+ STA QQ19               \ which will be the centre of the circle and crosshairs
+                        \ we draw
+
+ LDA QQ1                \ Set QQ19+1 to the y-coordinate of the current system,
+ LSR A                  \ halved because the galactic chart is half as high as
+ STA QQ19+1             \ it is wide, which will again be the centre of the
+                        \ circle and crosshairs we draw
+
+ LDA #7                 \ Set QQ19+2 = 7, the size of the crosshairs on the
+ STA QQ19+2             \ Long-range Chart
+
+ JSR TT15               \ Draw the set of crosshairs defined in QQ19, which will
+                        \ be drawn 24 pixels to the right of QQ19+1
+
+ LDA QQ19+1             \ Add 24 to the y-coordinate of the crosshairs in QQ19+1
+ CLC                    \ so that the centre of the circle matches the centre
+ ADC #24                \ of the crosshairs
+ STA QQ19+1
+
+                        \ Fall through into TT128 to draw a circle with the
+                        \ centre at the same coordinates as the crosshairs,
+                        \ (QQ19, QQ19+1), and radius K that reflects the
+                        \ current fuel levels
+
+\ ******************************************************************************
+\
+\       Name: TT128
+\       Type: Subroutine
+\   Category: Drawing circles
+\    Summary: Draw a circle on a chart
+\  Deep dive: Drawing circles
+\
+\ ------------------------------------------------------------------------------
+\
+\ Draw a circle with the centre at (QQ19, QQ19+1) and radius K.
+\
+\ Arguments:
+\
+\   QQ19                The x-coordinate of the centre of the circle
+\
+\   QQ19+1              The y-coordinate of the centre of the circle
+\
+\   K                   The radius of the circle
+\
+\ ******************************************************************************
+
+.TT128
+
+ LDA QQ19               \ Set K3 = the x-coordinate of the centre
+ STA K3
+
+ LDA QQ19+1             \ Set K4 = the y-coordinate of the centre
+ STA K4
+
+ LDX #0                 \ Set the high bytes of K3(1 0) and K4(1 0) to 0
+ STX K4+1
+ STX K3+1
+
+ INX                    \ Set LSP = 1 to reset the ball line heap
+ STX LSP
+
+ INX                    \ Set STP = 2, the step size for the circle
+ STX STP
+
+ JMP CIRCLE2            \ Jump to CIRCLE2 to draw a circle with the centre at
+                        \ (K3(1 0), K4(1 0)) and radius K, returning from the
+                        \ subroutine using a tail call
+
+\ ******************************************************************************
+\
+\       Name: TT210
+\       Type: Subroutine
+\   Category: Inventory
+\    Summary: Show a list of current cargo in our hold, optionally to sell
+\
+\ ------------------------------------------------------------------------------
+\
+\ Show a list of current cargo in our hold, either with the ability to sell (the
+\ Sell Cargo screen) or without (the Inventory screen), depending on the current
+\ view.
+\
+\ Arguments:
+\
+\   QQ11                The current view:
+\
+\                           * 4 = Sell Cargo
+\
+\                           * 8 = Inventory
+\
+\ ******************************************************************************
+
+.TT210
+
+ LDY #0                 \ We're going to loop through all the available market
+                        \ items and check whether we have any in the hold (and,
+                        \ if we are in the Sell Cargo screen, whether we want
+                        \ to sell any items), so we set up a counter in Y to
+                        \ denote the current item and start it at 0
+
+.TT211
+
+ STY QQ29               \ Store the current item number in QQ29
+
+ LDX QQ20,Y             \ Fetch into X the amount of the current item that we
+ BEQ TT212              \ have in our cargo hold, which is stored in QQ20+Y,
+                        \ and if there are no items of this type in the hold,
+                        \ jump down to TT212 to skip to the next item
+
+ TYA                    \ Set Y = Y * 4, so this will act as an index into the
+ ASL A                  \ market prices table at QQ23 for this item (as there
+ ASL A                  \ are four bytes per item in the table)
  TAY
- LDA l_4619+&01,Y
- STA &74
- TXA
- PHA
- JSR TT69
- CLC
- LDA &03AD
- ADC #&D0
+
+ LDA QQ23+1,Y           \ Fetch byte #1 from the market prices table for the
+ STA QQ19+1             \ current item and store it in QQ19+1, for use by the
+                        \ call to TT152 below
+
+ TXA                    \ Store the amount of item in the hold (in X) on the
+ PHA                    \ stack
+
+ JSR TT69               \ Call TT69 to set Sentence Case and print a newline
+
+ CLC                    \ Print recursive token 48 + QQ29, which will be in the
+ LDA QQ29               \ range 48 ("FOOD") to 64 ("ALIEN ITEMS"), so this
+ ADC #208               \ prints the current item's name
  JSR TT27
- LDA #&0E
- STA XC
- PLA
+
+ LDA #14                \ Move the text cursor to column 14, for the item's
+ STA XC                 \ quantity
+
+ PLA                    \ Restore the amount of item in the hold into X
  TAX
- JSR pr2-1
- JSR l_3135
 
-.l_2e0c
+ JSR pr2-1              \ Print the 8-bit number in X to 3 digits, without a
+                        \ decimal point
 
- LDY &03AD
- INY
- CPY #&11
- BCC l_2de0
- RTS
+ JSR TT152              \ Print the unit ("t", "kg" or "g") for the market item
+                        \ whose byte #1 from the market prices table is in
+                        \ QQ19+1 (which we set up above)
 
-.l_2e15
+.TT212
 
- LDA #&08
- JSR TT66
- LDA #&0B
- STA XC
- LDA #&A4
- JSR TT60
- JSR NLIN4
- JSR l_3366
- LDA #&0E
+ LDY QQ29               \ Fetch the item number from QQ29 into Y, and increment
+ INY                    \ Y to point to the next item
+
+ CPY #17                \ If Y < 17 then loop back to TT211 to print the next
+ BCC TT211              \ item in the hold
+
+ RTS                    \ Otherwise return from the subroutine
+
+\ ******************************************************************************
+\
+\       Name: TT213
+\       Type: Subroutine
+\   Category: Inventory
+\    Summary: Show the Inventory screen (red key f9)
+\
+\ ******************************************************************************
+
+.TT213
+
+ LDA #8                 \ Clear the top part of the screen, draw a white border,
+ JSR TT66               \ and set the current view type in QQ11 to 8 (Inventory
+                        \ screen)
+
+ LDA #11                \ Move the text cursor to column 11 to print the screen
+ STA XC                 \ title
+
+ LDA #164               \ Print recursive token 4 ("INVENTORY{crlf}") followed
+ JSR TT60               \ by a paragraph break and Sentence Case
+
+ JSR NLIN4              \ Draw a horizontal line at pixel row 19 to box in the
+                        \ title. The authors could have used a call to NLIN3
+                        \ instead and saved the above call to TT60, but you
+                        \ just can't optimise everything
+
+ JSR fwl                \ Call fwl to print the fuel and cash levels on two
+                        \ separate lines
+
+ LDA #&0E               \ AJD
  JSR TT68
  LDX new_hold
  DEX
  JSR pr2-1
- JSR l_3147
- JMP l_2dde
+ JSR TT160
 
-.l_2e38
+ JMP TT210              \ Jump to TT210 to print the contents of our cargo bay
+                        \ and return from the subroutine using a tail call
 
- TXA
- PHA
- DEY
- TYA
+\ ******************************************************************************
+\
+\       Name: TT16
+\       Type: Subroutine
+\   Category: Charts
+\    Summary: Move the crosshairs on a chart
+\
+\ ------------------------------------------------------------------------------
+\
+\ Move the chart crosshairs by the amount in X and Y.
+\
+\ Arguments:
+\
+\   X                   The amount to move the crosshairs in the x-axis
+\
+\   Y                   The amount to move the crosshairs in the y-axis
+\
+\ ******************************************************************************
+
+.TT16
+
+ TXA                    \ Push the change in X onto the stack (let's call this
+ PHA                    \ the x-delta)
+
+ DEY                    \ Negate the change in Y and push it onto the stack
+ TYA                    \ (let's call this the y-delta)
  EOR #&FF
  PHA
- \	JSR WSCAN
- JSR l_2e65
- PLA
- STA &76
- LDA QQ10
- JSR l_2e7b
- LDA &77
- STA QQ10
- STA &74
- PLA
- STA &76
- LDA QQ9
- JSR l_2e7b
- LDA &77
- STA QQ9
- STA &73
 
-.l_2e65
+ JSR TT103              \ Draw small crosshairs at coordinates (QQ9, QQ10),
+                        \ which will erase the crosshairs currently there
 
- LDA &87
- BMI l_2e8c
- LDA QQ9
- STA &73
- LDA QQ10
- LSR A
- STA &74
- LDA #&04
- STA &75
- JMP TT15
+ PLA                    \ Store the y-delta in QQ19+3 and fetch the current
+ STA QQ19+3             \ y-coordinate of the crosshairs from QQ10 into A, ready
+ LDA QQ10               \ for the call to TT123
 
-.l_2e7b
+ JSR TT123              \ Call TT123 to move the selected system's galactic
+                        \ y-coordinate by the y-delta, putting the new value in
+                        \ QQ19+4
 
- STA &77
- CLC
- ADC &76
- LDX &76
- BMI l_2e87
- BCC l_2e89
- RTS
+ LDA QQ19+4             \ Store the updated y-coordinate in QQ10 (the current
+ STA QQ10               \ y-coordinate of the crosshairs)
 
-.l_2e87
+ STA QQ19+1             \ This instruction has no effect, as QQ19+1 is
+                        \ overwritten below, both in TT103 and TT105
 
- BCC l_2e8b
+ PLA                    \ Store the x-delta in QQ19+3 and fetch the current
+ STA QQ19+3             \ x-coordinate of the crosshairs from QQ10 into A, ready
+ LDA QQ9                \ for the call to TT123
 
-.l_2e89
+ JSR TT123              \ Call TT123 to move the selected system's galactic
+                        \ x-coordinate by the x-delta, putting the new value in
+                        \ QQ19+4
 
- STA &77
+ LDA QQ19+4             \ Store the updated x-coordinate in QQ9 (the current
+ STA QQ9                \ x-coordinate of the crosshairs)
 
-.l_2e8b
+ STA QQ19               \ This instruction has no effect, as QQ19 is overwritten
+                        \ below, both in TT103 and TT105
 
- RTS
+                        \ Now we've updated the coordinates of the crosshairs,
+                        \ fall through into TT103 to redraw them at their new
+                        \ location
 
-.l_2e8c
+\ ******************************************************************************
+\
+\       Name: TT103
+\       Type: Subroutine
+\   Category: Charts
+\    Summary: Draw a small set of crosshairs on a chart
+\
+\ ------------------------------------------------------------------------------
+\
+\ Draw a small set of crosshairs on a galactic chart at the coordinates in
+\ (QQ9, QQ10).
+\
+\ ******************************************************************************
 
- LDA QQ9
- SEC
+.TT103
+
+ LDA QQ11               \ Fetch the current view type into A
+
+ BMI TT105              \ If this is the Short-range Chart screen, jump to TT105
+
+ LDA QQ9                \ Store the crosshairs x-coordinate in QQ19
+ STA QQ19
+
+ LDA QQ10               \ Halve the crosshairs y-coordinate and store it in QQ19
+ LSR A                  \ (we halve it because the Long-range Chart is half as
+ STA QQ19+1             \ high as it is wide)
+
+ LDA #4                 \ Set QQ19+2 to 4 denote crosshairs of size 4
+ STA QQ19+2
+
+ JMP TT15               \ Jump to TT15 to draw crosshairs of size 4 at the
+                        \ crosshairs coordinates, returning from the subroutine
+                        \ using a tail call
+
+\ ******************************************************************************
+\
+\       Name: TT123
+\       Type: Subroutine
+\   Category: Charts
+\    Summary: Move galactic coordinates by a signed delta
+\
+\ ------------------------------------------------------------------------------
+\
+\ Move an 8-bit galactic coordinate by a certain distance in either direction
+\ (i.e. a signed 8-bit delta), but only if it doesn't cause the coordinate to
+\ overflow. The coordinate is in a single axis, so it's either an x-coordinate
+\ or a y-coordinate.
+\
+\ Arguments:
+\
+\   A                   The galactic coordinate to update
+\
+\   QQ19+3              The delta (can be positive or negative)
+\
+\ Returns:
+\
+\   QQ19+4              The updated coordinate after moving by the delta (this
+\                       will be the same as A if moving by the delta overflows)
+\
+\ Other entry points:
+\
+\   TT180               Contains an RTS
+\
+\ ******************************************************************************
+
+.TT123
+
+ STA QQ19+4             \ Store the original coordinate in temporary storage at
+                        \ QQ19+4
+
+ CLC                    \ Set A = A + QQ19+3, so A now contains the original
+ ADC QQ19+3             \ coordinate, moved by the delta
+
+ LDX QQ19+3             \ If the delta is negative, jump to TT124
+ BMI TT124
+
+ BCC TT125              \ If the C flag is clear, then the above addition didn't
+                        \ overflow, so jump to TT125 to return the updated value
+
+ RTS                    \ Otherwise the C flag is set and the above addition
+                        \ overflowed, so do not update the return value
+
+.TT124
+
+ BCC TT180              \ If the C flag is clear, then because the delta is
+                        \ negative, this indicates the addition (which is
+                        \ effectively a subtraction) underflowed, so jump to
+                        \ TT180 to return from the subroutine without updating
+                        \ the return value
+
+.TT125
+
+ STA QQ19+4             \ Store the updated coordinate in QQ19+4
+
+.TT180
+
+ RTS                    \ Return from the subroutine
+
+\ ******************************************************************************
+\
+\       Name: TT105
+\       Type: Subroutine
+\   Category: Charts
+\    Summary: Draw crosshairs on the Short-range Chart, with clipping
+\
+\ ------------------------------------------------------------------------------
+\
+\ Check whether the crosshairs are close enough to the current system to appear
+\ on the Short-range Chart, and if so, draw them.
+\
+\ ******************************************************************************
+
+.TT105
+
+ LDA QQ9                \ Set A = QQ9 - QQ0, the horizontal distance between the
+ SEC                    \ crosshairs (QQ9) and the current system (QQ0)
  SBC QQ0
- CMP #&26
- BCC l_2e9b
- CMP #&E6
- BCC l_2e8b
 
-.l_2e9b
+ CMP #38                \ If the horizontal distance in A < 38, then the
+ BCC TT179              \ crosshairs are close enough to the current system to
+                        \ appear in the Short-range Chart, so jump to TT179 to
+                        \ check the vertical distance
 
- ASL A
- ASL A
- CLC
- ADC #&68
- STA &73
- LDA QQ10
- SEC
+ CMP #230               \ If the horizontal distance in A < -26, then the
+ BCC TT180              \ crosshairs are too far from the current system to
+                        \ appear in the Short-range Chart, so jump to TT180 to
+                        \ return from the subroutine (as TT180 contains an RTS)
+
+.TT179
+
+ ASL A                  \ Set QQ19 = 104 + A * 4
+ ASL A                  \
+ CLC                    \ 104 is the x-coordinate of the centre of the chart,
+ ADC #104               \ so this sets QQ19 to the screen pixel x-coordinate
+ STA QQ19               \ of the crosshairs
+
+ LDA QQ10               \ Set A = QQ10 - QQ1, the vertical distance between the
+ SEC                    \ crosshairs (QQ10) and the current system (QQ1)
  SBC QQ1
- CMP #&26
- BCC l_2eb1
- CMP #&DC
- BCC l_2e8b
 
-.l_2eb1
+ CMP #38                \ If the vertical distance in A is < 38, then the
+ BCC P%+6               \ crosshairs are close enough to the current system to
+                        \ appear in the Short-range Chart, so skip the next two
+                        \ instructions
 
- ASL A
- CLC
- ADC #&5A
- STA &74
- LDA #&08
- STA &75
- JMP TT15
+ CMP #220               \ If the horizontal distance in A is < -36, then the
+ BCC TT180              \ crosshairs are too far from the current system to
+                        \ appear in the Short-range Chart, so jump to TT180 to
+                        \ return from the subroutine (as TT180 contains an RTS)
 
-.l_2ebe
+ ASL A                  \ Set QQ19+1 = 90 + A * 2
+ CLC                    \
+ ADC #90                \ 90 is the y-coordinate of the centre of the chart,
+ STA QQ19+1             \ so this sets QQ19+1 to the screen pixel x-coordinate
+                        \ of the crosshairs
 
- LDA #&80
- JSR TT66
- LDA #&07
+ LDA #8                 \ Set QQ19+2 to 8 denote crosshairs of size 8
+ STA QQ19+2
+
+ JMP TT15               \ Jump to TT15 to draw crosshairs of size 8 at the
+                        \ crosshairs coordinates, returning from the subroutine
+                        \ using a tail call
+
+\ ******************************************************************************
+\
+\       Name: TT23
+\       Type: Subroutine
+\   Category: Charts
+\    Summary: Show the Short-range Chart (red key f5)
+\
+\ ******************************************************************************
+
+.TT23
+
+ LDA #128               \ Clear the top part of the screen, draw a white border,
+ JSR TT66               \ and set the current view type in QQ11 to 128 (Short-
+                        \ range Chart)
+
+ LDA #7                 \ Move the text cursor to column 7
  STA XC
- LDA #&BE
- JSR NLIN3
- JSR l_2da1
- JSR l_2e65
- JSR l_2f6a
- LDA #&00
- STA &97
- LDX #&18
 
-.l_2edb
+ LDA #190               \ Print recursive token 30 ("SHORT RANGE CHART") and
+ JSR NLIN3              \ draw a horizontal line at pixel row 19 to box in the
+                        \ title
 
- STA &46,X
- DEX
- BPL l_2edb
+ JSR TT14               \ Call TT14 to draw a circle with crosshairs at the
+                        \ current system's galactic coordinates
 
-.l_2ee0
+ JSR TT103              \ Draw small crosshairs at coordinates (QQ9, QQ10),
+                        \ i.e. at the selected system
 
- LDA &6F
- SEC
+ JSR TT81               \ Set the seeds in QQ15 to those of system 0 in the
+                        \ current galaxy (i.e. copy the seeds from QQ21 to QQ15)
+
+ LDA #0                 \ Set A = 0, which we'll use below to zero out the INWK
+                        \ workspace
+
+ STA XX20               \ We're about to start working our way through each of
+                        \ the galaxy's systems, so set up a counter in XX20 for
+                        \ each system, starting at 0 and looping through to 255
+
+ LDX #24                \ First, though, we need to zero out the 25 bytes at
+                        \ INWK so we can use them to work out which systems have
+                        \ room for a label, so set a counter in X for 25 bytes
+
+.EE3
+
+ STA INWK,X             \ Set the X-th byte of INWK to zero
+
+ DEX                    \ Decrement the counter
+
+ BPL EE3                \ Loop back to EE3 for the next byte until we've zeroed
+                        \ all 25 bytes
+
+                        \ We now loop through every single system in the galaxy
+                        \ and check the distance from the current system whose
+                        \ coordinates are in (QQ0, QQ1). We get the galactic
+                        \ coordinates of each system from the system's seeds,
+                        \ like this:
+                        \
+                        \   x = s1_hi (which is stored in QQ15+3)
+                        \   y = s0_hi (which is stored in QQ15+1)
+                        \
+                        \ so the following loops through each system in the
+                        \ galaxy in turn and calculates the distance between
+                        \ (QQ0, QQ1) and (s1_hi, s0_hi) to find the closest one
+
+.TT182
+
+ LDA QQ15+3             \ Set A = s1_hi - QQ0, the horizontal distance between
+ SEC                    \ (s1_hi, s0_hi) and (QQ0, QQ1)
  SBC QQ0
- STA &3A
- BCS l_2eec
- EOR #&FF
- ADC #&01
 
-.l_2eec
+ STA &3A                \ AJD
 
- CMP #&14
- BCS l_2f60
- LDA &6D
- SEC
+ BCS TT184              \ If a borrow didn't occur, i.e. s1_hi >= QQ0, then the
+                        \ result is positive, so jump to TT184 and skip the
+                        \ following two instructions
+
+ EOR #&FF               \ Otherwise negate the result in A, so A is always
+ ADC #1                 \ positive (i.e. A = |s1_hi - QQ0|)
+
+.TT184
+
+ CMP #20                \ If the horizontal distance in A is >= 20, then this
+ BCS TT187              \ system is too far away from the current system to
+                        \ appear in the Short-range Chart, so jump to TT187 to
+                        \ move on to the next system
+
+ LDA QQ15+1             \ Set A = s0_hi - QQ1, the vertical distance between
+ SEC                    \ (s1_hi, s0_hi) and (QQ0, QQ1)
  SBC QQ1
- STA &E0
- BCS l_2efc
- EOR #&FF
- ADC #&01
 
-.l_2efc
+ STA &E0                \ AJD
 
- CMP #&26
- BCS l_2f60
- LDA &3A
- ASL A
- ASL A
- ADC #&68
- STA &3A
- LSR A
- LSR A
+ BCS TT186              \ If a borrow didn't occur, i.e. s0_hi >= QQ1, then the
+                        \ result is positive, so jump to TT186 and skip the
+                        \ following two instructions
+
+ EOR #&FF               \ Otherwise negate the result in A, so A is always
+ ADC #1                 \ positive (i.e. A = |s0_hi - QQ1|)
+
+.TT186
+
+ CMP #38                \ If the vertical distance in A is >= 38, then this
+ BCS TT187              \ system is too far away from the current system to
+                        \ appear in the Short-range Chart, so jump to TT187 to
+                        \ move on to the next system
+
+                        \ This system should be shown on the Short-range Chart,
+                        \ so now we need to work out where the label should go,
+                        \ and set up the various variables we need to draw the
+                        \ system's filled circle on the chart
+
+ LDA &3A                \ AJD
+
+ ASL A                  \ Set XX12 = 104 + x-delta * 4
+ ASL A                  \
+ ADC #104               \ 104 is the x-coordinate of the centre of the chart,
+ STA XX12               \ so this sets XX12 to the centre 104 +/- 76, the pixel
+                        \ x-coordinate of this system
+
+ LSR A                  \ Move the text cursor to column x-delta / 2 + 1
+ LSR A                  \ which will be in the range 1-10
  LSR A
  STA XC
  INC XC
+
  LDA &E0
- ASL A
- ADC #&5A
- STA &E0
- LSR A
- LSR A
+
+ ASL A                  \ Set K4 = 90 + y-delta * 2
+ ADC #90                \
+ STA K4                 \ 90 is the y-coordinate of the centre of the chart,
+                        \ so this sets K4 to the centre 90 +/- 74, the pixel
+                        \ y-coordinate of this system
+
+ LSR A                  \ Set Y = K4 / 8, so Y contains the number of the text
+ LSR A                  \ row that contains this system
  LSR A
  TAY
- LDX &46,Y
- BEQ l_2f31
- INY
- LDX &46,Y
- BEQ l_2f31
- DEY
- DEY
- LDX &46,Y
- BNE l_2f43
 
-.l_2f31
+                        \ Now to see if there is room for this system's label.
+                        \ Ideally we would print the system name on the same
+                        \ text row as the system, but we only want to print one
+                        \ label per row, to prevent overlap, so now we check
+                        \ this system's row, and if that's already occupied,
+                        \ the row above, and if that's already occupied, the
+                        \ row below... and if that's already occupied, we give
+                        \ up and don't print a label for this system
 
- STY YC
- CPY #&03
- BCC l_2f60
- LDA #&FF
- STA &46,Y
- JSR vdu_80
- JSR l_330a
+ LDX INWK,Y             \ If the value in INWK+Y is 0 (i.e. the text row
+ BEQ EE4                \ containing this system does not already have another
+                        \ system's label on it), jump to EE4 to store this
+                        \ system's label on this row
 
-.l_2f43
+ INY                    \ If the value in INWK+Y+1 is 0 (i.e. the text row below
+ LDX INWK,Y             \ the one containing this system does not already have
+ BEQ EE4                \ another system's label on it), jump to EE4 to store
+                        \ this system's label on this row
 
- LDA #&00
- STA &D3
- STA &E1
- STA &41
- LDA &3A
- STA &D2
- LDA &71
- AND #&01
- ADC #&02
- STA &40
- JSR FLFLLS
- JSR l_3a54
- JSR FLFLLS
+ DEY                    \ If the value in INWK+Y-1 is 0 (i.e. the text row above
+ DEY                    \ the one containing this system does not already have
+ LDX INWK,Y             \ another system's label on it), fall through into to
+ BNE ee1                \ EE4 to store this system's label on this row,
+                        \ otherwise jump to ee1 to skip printing a label for
+                        \ this system (as there simply isn't room)
 
-.l_2f60
+.EE4
 
- JSR TT20
- INC &97
- BEQ l_2f74
- JMP l_2ee0
+ STY YC                 \ Now to print the label, so move the text cursor to row
+                        \ Y (which contains the row where we can print this
+                        \ system's label)
 
-.l_2f6a
+ CPY #3                 \ If Y < 3, then the system would clash with the chart
+ BCC TT187              \ title, so jump to TT187 to skip showing the system
 
- LDX #&05
+ LDA #&FF               \ Store &FF in INWK+Y, to denote that this row is now
+ STA INWK,Y             \ occupied so we don't try to print another system's
+                        \ label on this row
 
-.l_2f6c
+ JSR vdu_80             \ AJD
 
- LDA cmdr_gseed,X
- STA &6C,X
- DEX
- BPL l_2f6c
+ JSR cpl                \ Call cpl to print out the system name for the seeds
+                        \ in QQ15 (which now contains the seeds for the current
+                        \ system)
 
-.l_2f74
+.ee1
 
- RTS
+ LDA #0                 \ Now to plot the star, so set the high bytes of K, K3
+ STA K3+1               \ and K4 to 0
+ STA K4+1
+ STA K+1
+
+ LDA XX12               \ Set the low byte of K3 to XX12, the pixel x-coordinate
+ STA K3                 \ of this system
+
+ LDA QQ15+5             \ Fetch s2_hi for this system from QQ15+5, extract bit 0
+ AND #1                 \ and add 2 to get the size of the star, which we store
+ ADC #2                 \ in K. This will be either 2, 3 or 4, depending on the
+ STA K                  \ value of bit 0, and whether the C flag is set (which
+                        \ will vary depending on what happens in the above call
+                        \ to cpl). Incidentally, the planet's average radius
+                        \ also uses s2_hi, bits 0-3 to be precise, but that
+                        \ doesn't mean the two sizes affect each other
+
+                        \ We now have the following:
+                        \
+                        \   K(1 0)  = radius of star (2, 3 or 4)
+                        \
+                        \   K3(1 0) = pixel x-coordinate of system
+                        \
+                        \   K4(1 0) = pixel y-coordinate of system
+                        \
+                        \ which we can now pass to the SUN routine to draw a
+                        \ small "sun" on the Short-range Chart for this system
+
+ JSR FLFLLS             \ Call FLFLLS to reset the LSO block
+
+ JSR SUN                \ Call SUN to plot a sun with radius K at pixel
+                        \ coordinate (K3, K4)
+
+ JSR FLFLLS             \ Call FLFLLS to reset the LSO block
+
+.TT187
+
+ JSR TT20               \ We want to move on to the next system, so call TT20
+                        \ to twist the three 16-bit seeds in QQ15
+
+ INC XX20               \ Increment the counter
+
+ BEQ TT111-1            \ If X = 0 then we have done all 256 systems, so return
+                        \ from the subroutine (as TT111-1 contains an RTS)
+
+ JMP TT182              \ Otherwise jump back up to TT182 to process the next
+                        \ system
+
+\ ******************************************************************************
+\
+\       Name: TT81
+\       Type: Subroutine
+\   Category: Universe
+\    Summary: Set the selected system's seeds to those of system 0
+\
+\ ------------------------------------------------------------------------------
+\
+\ Copy the three 16-bit seeds for the current galaxy's system 0 (QQ21) into the
+\ seeds for the selected system (QQ15) - in other words, set the selected
+\ system's seeds to those of system 0.
+\
+\ ******************************************************************************
+
+.TT81
+
+ LDX #5                 \ Set up a counter in X to copy six bytes (for three
+                        \ 16-bit numbers)
+
+ LDA QQ21,X             \ Copy the X-th byte in QQ21 to the X-th byte in QQ15
+ STA QQ15,X
+
+ DEX                    \ Decrement the counter
+
+ BPL TT81+2             \ Loop back up to the LDA instruction if we still have
+                        \ more bytes to copy
+
+ RTS                    \ Return from the subroutine
+
+\ ******************************************************************************
+\
+\       Name: TT111
+\       Type: Subroutine
+\   Category: Universe
+\    Summary: Set the current system to the nearest system to a point
+\
+\ ------------------------------------------------------------------------------
+\
+\ Given a set of galactic coordinates in (QQ9, QQ10), find the nearest system
+\ to this point in the galaxy, and set this as the currently selected system.
+\
+\ Arguments:
+\
+\   QQ9                 The x-coordinate near which we want to find a system
+\
+\   QQ10                The y-coordinate near which we want to find a system
+\
+\ Returns:
+\
+\   QQ8(1 0)            The distance from the current system to the nearest
+\                       system to the original coordinates
+\
+\   QQ9                 The x-coordinate of the nearest system to the original
+\                       coordinates
+\
+\   QQ10                The y-coordinate of the nearest system to the original
+\                       coordinates
+\
+\   QQ15 to QQ15+5      The three 16-bit seeds of the nearest system to the
+\                       original coordinates
+\
+\ Other entry points:
+\
+\   TT111-1             Contains an RTS
+\
+\ ******************************************************************************
 
 .TT111
 
- JSR l_2f6a
- LDY #&7F
- STY &D1
- LDA #&00
- STA &80
+ JSR TT81               \ Set the seeds in QQ15 to those of system 0 in the
+                        \ current galaxy (i.e. copy the seeds from QQ21 to QQ15)
 
-.l_2f80
+                        \ We now loop through every single system in the galaxy
+                        \ and check the distance from (QQ9, QQ10). We get the
+                        \ galactic coordinates of each system from the system's
+                        \ seeds, like this:
+                        \
+                        \   x = s1_hi (which is stored in QQ15+3)
+                        \   y = s0_hi (which is stored in QQ15+1)
+                        \
+                        \ so the following loops through each system in the
+                        \ galaxy in turn and calculates the distance between
+                        \ (QQ9, QQ10) and (s1_hi, s0_hi) to find the closest one
 
- LDA &6F
- SEC
+ LDY #127               \ Set Y = T = 127 to hold the shortest distance we've
+ STY T                  \ found so far, which we initially set to half the
+                        \ distance across the galaxy, or 127, as our coordinate
+                        \ system ranges from (0,0) to (255, 255)
+
+ LDA #0                 \ Set A = U = 0 to act as a counter for each system in
+ STA U                  \ the current galaxy, which we start at system 0 and
+                        \ loop through to 255, the last system
+
+.TT130
+
+ LDA QQ15+3             \ Set A = s1_hi - QQ9, the horizontal distance between
+ SEC                    \ (s1_hi, s0_hi) and (QQ9, QQ10)
  SBC QQ9
- BCS l_2f8c
- EOR #&FF
- ADC #&01
 
-.l_2f8c
+ BCS TT132              \ If a borrow didn't occur, i.e. s1_hi >= QQ9, then the
+                        \ result is positive, so jump to TT132 and skip the
+                        \ following two instructions
 
- LSR A
- STA &83
- LDA &6D
- SEC
+ EOR #&FF               \ Otherwise negate the result in A, so A is always
+ ADC #1                 \ positive (i.e. A = |s1_hi - QQ9|)
+
+.TT132
+
+ LSR A                  \ Set S = A / 2
+ STA S                  \       = |s1_hi - QQ9| / 2
+
+ LDA QQ15+1             \ Set A = s0_hi - QQ10, the vertical distance between
+ SEC                    \ (s1_hi, s0_hi) and (QQ9, QQ10)
  SBC QQ10
- BCS l_2f9b
- EOR #&FF
- ADC #&01
 
-.l_2f9b
+ BCS TT134              \ If a borrow didn't occur, i.e. s0_hi >= QQ10, then the
+                        \ result is positive, so jump to TT134 and skip the
+                        \ following two instructions
 
- LSR A
- CLC
- ADC &83
- CMP &D1
- BCS l_2fae
- STA &D1
- LDX #&05
+ EOR #&FF               \ Otherwise negate the result in A, so A is always
+ ADC #1                 \ positive (i.e. A = |s0_hi - QQ10|)
 
-.l_2fa7
+.TT134
 
- LDA &6C,X
- STA &73,X
- DEX
- BPL l_2fa7
+ LSR A                  \ Set A = S + A / 2
+ CLC                    \       = |s1_hi - QQ9| / 2 + |s0_hi - QQ10| / 2
+ ADC S                  \
+                        \ So A now contains the sum of the horizontal and
+                        \ vertical distances, both divided by 2 so the result
+                        \ fits into one byte, and although this doesn't contain
+                        \ the actual distance between the systems, it's a good
+                        \ enough approximation to use for comparing distances
 
-.l_2fae
+ CMP T                  \ If A >= T, then this system's distance is bigger than
+ BCS TT135              \ our "minimum distance so far" stored in T, so it's no
+                        \ closer than the systems we have already found, so
+                        \ skip to TT135 to move on to the next system
 
- JSR TT20
- INC &80
- BNE l_2f80
- LDX #&05
+ STA T                  \ This system is the closest to (QQ9, QQ10) so far, so
+                        \ update T with the new "distance" approximation
 
-.l_2fb7
+ LDX #5                 \ As this system is the closest we have found yet, we
+                        \ want to store the system's seeds in case it ends up
+                        \ being the closest of all, so we set up a counter in X
+                        \ to copy six bytes (for three 16-bit numbers)
 
- LDA &73,X
- STA &6C,X
- DEX
- BPL l_2fb7
- LDA &6D
- STA QQ10
- LDA &6F
- STA QQ9
- SEC
- SBC QQ0
- BCS l_2fd2
- EOR #&FF
- ADC #&01
+.TT136
 
-.l_2fd2
+ LDA QQ15,X             \ Copy the X-th byte in QQ15 to the X-th byte in QQ19,
+ STA QQ19,X             \ where QQ15 contains the seeds for the system we just
+                        \ found to be the closest so far, and QQ19 is temporary
+                        \ storage
 
- JSR SQUA2
- STA &41
- LDA &1B
- STA &40
- LDA QQ10
- SEC
- SBC QQ1
- BCS l_2fe8
- EOR #&FF
- ADC #&01
+ DEX                    \ Decrement the counter
 
-.l_2fe8
+ BPL TT136              \ Loop back to TT136 if we still have more bytes to
+                        \ copy
 
- LSR A
- JSR SQUA2
- PHA
- LDA &1B
- CLC
- ADC &40
- STA &81
- PLA
- ADC &41
- STA &82
- JSR l_47b8
- LDA &81
- ASL A
- LDX #&00
- STX QQ8+&01
- ROL QQ8+&01
- ASL A
- ROL QQ8+&01
- STA QQ8
- JMP TT24
+.TT135
 
-.l_3011
+ JSR TT20               \ We want to move on to the next system, so call TT20
+                        \ to twist the three 16-bit seeds in QQ15
 
- LDA &2F
- ORA &8E
- BNE l_3084+&01
- JSR CTRL
- BMI l_305e
- LDA &87
- BNE l_3023
- \	JMP l_30c3
- \l_30c3
+ INC U                  \ Increment the system counter in U
+
+ BNE TT130              \ If U > 0 then we haven't done all 256 systems yet, so
+                        \ loop back up to TT130
+
+                        \ We have now finished checking all the systems in the
+                        \ galaxy, and the seeds for the closest system are in
+                        \ QQ19, so now we want to copy these seeds to QQ15,
+                        \ to set the selected system to this closest system
+
+ LDX #5                 \ So we set up a counter in X to copy six bytes (for
+                        \ three 16-bit numbers)
+
+.TT137
+
+ LDA QQ19,X             \ Copy the X-th byte in QQ19 to the X-th byte in QQ15,
+ STA QQ15,X
+
+ DEX                    \ Decrement the counter
+
+ BPL TT137              \ Loop back to TT137 if we still have more bytes to
+                        \ copy
+
+ LDA QQ15+1             \ The y-coordinate of the system described by the seeds
+ STA QQ10               \ in QQ15 is in QQ15+1 (s0_hi), so we copy this to QQ10
+                        \ as this is where we store the selected system's
+                        \ y-coordinate
+
+ LDA QQ15+3             \ The x-coordinate of the system described by the seeds
+ STA QQ9                \ in QQ15 is in QQ15+3 (s1_hi), so we copy this to QQ9
+                        \ as this is where we store the selected system's
+                        \ x-coordinate
+
+                        \ We have now found the closest system to (QQ9, QQ10)
+                        \ and have set it as the selected system, so now we
+                        \ need to work out the distance between the selected
+                        \ system and the current system
+
+ SEC                    \ Set A = QQ9 - QQ0, the horizontal distance between
+ SBC QQ0                \ the selected system's x-coordinate (QQ9) and the
+                        \ current system's x-coordinate (QQ0)
+
+ BCS TT139              \ If a borrow didn't occur, i.e. QQ9 >= QQ0, then the
+                        \ result is positive, so jump to TT139 and skip the
+                        \ following two instructions
+
+ EOR #&FF               \ Otherwise negate the result in A, so A is always
+ ADC #1                 \ positive (i.e. A = |QQ9 - QQ0|)
+
+                        \ A now contains the difference between the two
+                        \ systems' x-coordinates, with the sign removed. We
+                        \ will refer to this as the x-delta ("delta" means
+                        \ change or difference in maths)
+
+.TT139
+
+ JSR SQUA2              \ Set (A P) = A * A
+                        \           = |QQ9 - QQ0| ^ 2
+                        \           = x_delta ^ 2
+
+ STA K+1                \ Store (A P) in K(1 0)
+ LDA P
+ STA K
+
+ LDA QQ10               \ Set A = QQ10 - QQ1, the vertical distance between the
+ SEC                    \ selected system's y-coordinate (QQ10) and the current
+ SBC QQ1                \ system's y-coordinate (QQ1)
+
+ BCS TT141              \ If a borrow didn't occur, i.e. QQ10 >= QQ1, then the
+                        \ result is positive, so jump to TT141 and skip the
+                        \ following two instructions
+
+ EOR #&FF               \ Otherwise negate the result in A, so A is always
+ ADC #1                 \ positive (i.e. A = |QQ10 - QQ1|)
+
+.TT141
+
+ LSR A                  \ Set A = A / 2
+
+                        \ A now contains the difference between the two
+                        \ systems' y-coordinates, with the sign removed, and
+                        \ halved. We halve the value because the galaxy in
+                        \ in Elite is rectangular rather than square, and is
+                        \ twice as wide (x-axis) as it is high (y-axis), so to
+                        \ get a distance that matches the shape of the
+                        \ long-range galaxy chart, we need to halve the
+                        \ distance between the vertical y-coordinates. We will
+                        \ refer to this as the y-delta
+
+ JSR SQUA2              \ Set (A P) = A * A
+                        \           = (|QQ10 - QQ1| / 2) ^ 2
+                        \           = y_delta ^ 2
+
+                        \ By this point we have the following results:
+                        \
+                        \   K(1 0) = x_delta ^ 2
+                        \    (A P) = y_delta ^ 2
+                        \
+                        \ so to find the distance between the two points, we
+                        \ can use Pythagoras - so first we need to add the two
+                        \ results together, and then take the square root
+
+ PHA                    \ Store the high byte of the y-axis value on the stack,
+                        \ so we can use A for another purpose
+
+ LDA P                  \ Set Q = P + K, which adds the low bytes of the two
+ CLC                    \ calculated values
+ ADC K
+ STA Q
+
+ PLA                    \ Restore the high byte of the y-axis value from the
+                        \ stack into A again
+
+ ADC K+1                \ Set R = A + K+1, which adds the high bytes of the two
+ STA R                  \ calculated values, so we now have:
+                        \
+                        \   (R Q) = K(1 0) + (A P)
+                        \         = (x_delta ^ 2) + (y_delta ^ 2)
+
+ JSR LL5                \ Set Q = SQRT(R Q), so Q now contains the distance
+                        \ between the two systems, in terms of coordinates
+
+                        \ We now store the distance to the selected system * 4
+                        \ in the two-byte location QQ8, by taking (0 Q) and
+                        \ shifting it left twice, storing it in QQ8(1 0)
+
+ LDA Q                  \ First we shift the low byte left by setting
+ ASL A                  \ A = Q * 2, with bit 7 of A going into the C flag
+
+ LDX #0                 \ Now we set the high byte in QQ8+1 to 0 and rotate
+ STX QQ8+1              \ the C flag into bit 0 of QQ8+1
+ ROL QQ8+1
+
+ ASL A                  \ And then we repeat the shift left of (QQ8+1 A)
+ ROL QQ8+1
+
+ STA QQ8                \ And store A in the low byte, QQ8, so QQ8(1 0) now
+                        \ contains Q * 4. Given that the width of the galaxy is
+                        \ 256 in coordinate terms, the width of the galaxy
+                        \ would be 1024 in the units we store in QQ8
+
+ JMP TT24               \ Call TT24 to calculate system data from the seeds in
+                        \ QQ15 and store them in the relevant locations, so our
+                        \ new selected system is fully set up, and return from
+                        \ the subroutine using a tail call
+
+\ ******************************************************************************
+\
+\       Name: hyp
+\       Type: Subroutine
+\   Category: Flight
+\    Summary: Start the hyperspace process
+\
+\ ------------------------------------------------------------------------------
+\
+\ Called when "H" or CTRL-H is pressed during flight. Checks the following:
+\
+\   * We are in space
+\
+\   * We are not already in a hyperspace countdown
+\
+\ If CTRL is being held down, we jump to Ghy to engage the galactic hyperdrive,
+\ otherwise we check that:
+\
+\   * The selected system is not the current system
+\
+\   * We have enough fuel to make the jump
+\
+\ and if all the pre-jump checks are passed, we print the destination on-screen
+\ and start the countdown.
+\
+\ Other entry points:
+\
+\   TTX111              Used to rejoin this routine from the call to TTX110
+\
+\ ******************************************************************************
+
+.hyp
+
+ LDA QQ22+1             \ Fetch QQ22+1, which contains the number that's shown
+                        \ on-screen during hyperspace countdown
+
+ ORA QQ12               \ If we are docked (QQ12 = &FF) or there is already a
+ BNE zZ+1               \ countdown in progress, then return from the subroutine
+                        \ using a tail call (as zZ+1 contains an RTS), as we
+                        \ can't hyperspace when docked, or there is already a
+                        \ countdown in progress
+
+ JSR CTRL               \ Scan the keyboard to see if CTRL is currently pressed
+
+ BMI Ghy                \ If it is, then the galactic hyperdrive has been
+                        \ activated, so jump to Ghy to process it
+
+ LDA QQ11               \ AJD
+ BNE P%+8
  JSR TT111
- JMP l_3026
+ JMP TTX111
 
-.l_3023
+ JSR hm                 \ This is a chart view, so call hm to redraw the chart
+                        \ crosshairs
 
- JSR l_32fe
+.TTX111
 
-.l_3026
+                        \ If we get here then the current view is either the
+                        \ space view or a chart
 
- LDA QQ8
- ORA QQ8+&01
- BEQ l_3084+&01
- LDA #&07
- STA XC
- LDA #&17
+ LDA QQ8                \ If both bytes of the distance to the selected system
+ ORA QQ8+1              \ in QQ8 are zero, return from the subroutine (as zZ+1
+ BEQ zZ+1               \ contains an RTS), as the selected system is the
+                        \ current system
+
+ LDA #7                 \ Move the text cursor to column 7, row 23 (in the
+ STA XC                 \ middle of the bottom text row)
+ LDA #23
  STA YC
- JSR vdu_00
- LDA #&BD
+
+ JSR vdu_00             \ AJD
+
+ LDA #189               \ Print recursive token 29 ("HYPERSPACE ")
  JSR TT27
- LDA QQ8+&01
- BNE l_30b9
- LDA QQ14
- CMP QQ8
- BCC l_30b9
- LDA #&2D
+
+ LDA QQ8+1              \ If the high byte of the distance to the selected
+ BNE TT147              \ system in QQ8 is > 0, then it is definitely too far to
+                        \ jump (as our maximum range is 7.0 light years, or a
+                        \ value of 70 in QQ8(1 0)), so jump to TT147 to print
+                        \ "RANGE?" and return from the subroutine using a tail
+                        \ call
+
+ LDA QQ14               \ Fetch our current fuel level from Q114 into A
+
+ CMP QQ8                \ If our fuel reserves are less than the distance to the
+ BCC TT147              \ selected system, then we don't have enough fuel for
+                        \ this jump, so jump to TT147 to print "RANGE?" and
+                        \ return from the subroutine using a tail call
+
+ LDA #'-'               \ Print a hyphen
  JSR TT27
- JSR l_330a
 
-.l_3054
+ JSR cpl                \ Call cpl to print the name of the selected system
 
- LDA #&0F
- STA &2F
- STA &2E
- TAX
- \	JMP ee3
- BNE ee3
+                        \ Fall through into wW to start the hyperspace countdown
 
-.l_305e
+\ ******************************************************************************
+\
+\       Name: wW
+\       Type: Subroutine
+\   Category: Flight
+\    Summary: Start a hyperspace countdown
+\
+\ ------------------------------------------------------------------------------
+\
+\ Start the hyperspace countdown (for both inter-system hyperspace and the
+\ galactic hyperdrive).
+\
+\ ******************************************************************************
 
- LDX cmdr_ghype
- BEQ l_3084+&01
- INC new_hold	\**
- INX
- STX cmdr_ghype
- STX FIST
- STX cmdr_cour
+.wW
+
+ LDA #15                \ The hyperspace countdown starts from 15, so set A to
+                        \ to 15 so we can set the two hyperspace counters
+
+ STA QQ22+1             \ Set the number in QQ22+1 to 15, which is the number
+                        \ that's shown on-screen during the hyperspace countdown
+
+ STA QQ22               \ Set the number in QQ22 to 15, which is the internal
+                        \ counter that counts down by 1 each iteration of the
+                        \ main game loop, and each time it reaches zero, the
+                        \ on-screen counter gets decremented, and QQ22 gets set
+                        \ to 5, so setting QQ22 to 15 here makes the first tick
+                        \ of the hyperspace counter longer than subsequent ticks
+
+ TAX                    \ Print the 8-bit number in X (i.e. 15) at text location
+ BNE ee3                \ (0, 1), padded to 5 digits, so it appears in the top
+                        \ left corner of the screen, and return from the
+                        \ subroutine using a tail call AJD
+
+\ ******************************************************************************
+\
+\       Name: Ghy
+\       Type: Subroutine
+\   Category: Flight
+\    Summary: Perform a galactic hyperspace jump
+\  Deep dive: Twisting the system seeds
+\             Galaxy and system seeds
+\
+\ ------------------------------------------------------------------------------
+\
+\ Engage the galactic hyperdrive. Called from the hyp routine above if CTRL-H is
+\ being pressed.
+\
+\ This routine also updates the galaxy seeds to point to the next galaxy. Using
+\ a galactic hyperdrive rotates each seed byte to the left, rolling each byte
+\ left within itself like this:
+\
+\   01234567 -> 12345670
+\
+\ to get the seeds for the next galaxy. So after 8 galactic jumps, the seeds
+\ roll round to those of the first galaxy again.
+\
+\ We always arrive in a new galaxy at galactic coordinates (96, 96), and then
+\ find the nearest system and set that as our location.
+\
+\ Other entry points:
+\
+\   zZ+1                Contains an RTS
+\
+\ ******************************************************************************
+
+.Ghy
+
+ LDX GHYP               \ Fetch GHYP, which tells us whether we own a galactic
+ BEQ zZ+1               \ hyperdrive, and if it is zero, which means we don't,
+                        \ return from the subroutine (as zZ+1 contains an RTS)
+
+ INC new_hold           \ AJD
+
+ INX                    \ We own a galactic hyperdrive, so X is &FF, so this
+                        \ instruction sets X = 0
+
+ STX GHYP               \ The galactic hyperdrive is a one-use item, so set GHYP
+                        \ to 0 so we no longer have one fitted
+
+ STX FIST               \ Changing galaxy also clears our criminal record, so
+                        \ set our legal status in FIST to 0 ("clean")
+
+ STX cmdr_cour          \ AJD
  STX cmdr_cour+1
- JSR l_3054
- LDX #&05
- INC GCNT
- LDA GCNT
- AND #&07
- STA GCNT
 
-.l_307a
+ JSR wW                 \ Call wW to start the hyperspace countdown
 
- LDA cmdr_gseed,X
- ASL A
- ROL cmdr_gseed,X
- DEX
- BPL l_307a
+ LDX #5                 \ To move galaxy, we rotate the galaxy's seeds left, so
+                        \ set a counter in X for the 6 seed bytes
 
-.l_3084
+ INC GCNT               \ Increment the current galaxy number in GCNT
 
- LDA #&60
- STA QQ9
- STA QQ10
- JSR l_3292
- JSR TT111
- LDX #&00
- STX QQ8
- STX QQ8+&01
- LDA #&74
- JSR l_45c6
+ LDA GCNT               \ Set GCNT = GCNT mod 8, so we jump from galaxy 7 back
+ AND #7                 \ to galaxy 0 (shown in-game as going from galaxy 8 back
+ STA GCNT               \ to the starting point in galaxy 1)
+
+.G1
+
+ LDA QQ21,X             \ Load the X-th seed byte into A
+
+ ASL A                  \ Set the C flag to bit 7 of the seed
+
+ ROL QQ21,X             \ Rotate the seed in memory, which will add bit 7 back
+                        \ in as bit 0, so this rolls the seed around on itself
+
+ DEX                    \ Decrement the counter
+
+ BPL G1                 \ Loop back for the next seed byte, until we have
+                        \ rotated them all
+
+\JSR DORND              \ This instruction is commented out in the original
+                        \ source, and would set A and X to random numbers, so
+                        \ perhaps the original plan was to arrive in each new
+                        \ galaxy in a random place?
+
+.zZ
+
+ LDA #&60               \ Set (QQ9, QQ10) to (96, 96), which is where we always
+ STA QQ9                \ arrive in a new galaxy (the selected system will be
+ STA QQ10               \ set to the nearest actual system later on)
+
+ JSR TT110              \ Call TT110 to show the front space view
+
+ JSR TT111              \ Call TT111 to set the current system to the nearest
+                        \ system to (QQ9, QQ10), and put the seeds of the
+                        \ nearest system into QQ15 to QQ15+5
+
+ LDX #0                 \ Set the distance to the selected system in QQ8(1 0)
+ STX QQ8                \ to 0
+ STX QQ8+1
+
+ LDA #116               \ Print recursive token 116 (GALACTIC HYPERSPACE ")
+ JSR MESS               \ as an in-flight message
+
+                        \ Fall through into jmp to set the system to the
+                        \ current system and return from the subroutine there
+
+\ ******************************************************************************
+\
+\       Name: jmp
+\       Type: Subroutine
+\   Category: Universe
+\    Summary: Set the current system to the selected system
+\
+\ ------------------------------------------------------------------------------
+\
+\ Returns:
+\
+\   (QQ0, QQ1)          The galactic coordinates of the new system
+\
+\ Other entry points:
+\
+\   hy5                 Contains an RTS
+\
+\ ******************************************************************************
 
 .jmp
 
- LDA QQ9
- STA QQ0
- LDA QQ10
- STA QQ1
+ LDA QQ9                \ Set the current system's galactic x-coordinate to the
+ STA QQ0                \ x-coordinate of the selected system
+
+ LDA QQ10               \ Set the current system's galactic y-coordinate to the
+ STA QQ1                \ y-coordinate of the selected system
 
 .hy5
 
- RTS
+ RTS                    \ Return from the subroutine
+
+\ ******************************************************************************
+\
+\       Name: ee3
+\       Type: Subroutine
+\   Category: Text
+\    Summary: Print the hyperspace countdown in the top-left of the screen
+\
+\ ------------------------------------------------------------------------------
+\
+\ Print the 8-bit number in X at text location (1, 1). Print the number to
+\ 5 digits, left-padding with spaces for numbers with fewer than 3 digits (so
+\ numbers < 10000 are right-aligned), with no decimal point.
+\
+\ Arguments:
+\
+\   X                   The number to print
+\
+\ ******************************************************************************
 
 .ee3
 
- LDY #&01
+ LDY #1                 \ Move the text cursor to column 1
  STY XC
- STY YC
- DEY
+
+ STY YC                 \ Move the text cursor to row 1
+
+ DEY                    \ Decrement Y to 0 for the high byte in pr6
+
+                        \ Fall through into pr6 to print X to 5 digits, as the
+                        \ high byte in Y is 0
 
 .pr6
 
@@ -11937,7 +12904,7 @@ LOAD_D% = LOAD% + P% - CODE%
  LDA #&05
  JMP TT11
 
-.l_30b9
+.TT147
 
  LDA #&CA
  JSR TT27
@@ -11959,14 +12926,14 @@ LOAD_D% = LOAD% + P% - CODE%
  LDA #&0E
  STA XC
  LDX &73
- LDA l_4619+&01,X
+ LDA QQ23+&01,X
  STA &74
  LDA cmdr_price
- AND l_4619+&03,X
+ AND QQ23+&03,X
  CLC
- ADC l_4619,X
+ ADC QQ23,X
  STA &03AA
- JSR l_3135
+ JSR TT152
  JSR l_318e
  LDA &74
  BMI l_3104
@@ -11990,12 +12957,12 @@ LOAD_D% = LOAD% + P% - CODE%
  JSR pr5
  LDY &77
  LDA #&05
- LDX cmdr_avail,Y
+ LDX AVL,Y
  STX &03AB
  CLC
  BEQ l_312b
  JSR pr2+2
- JMP l_3135
+ JMP TT152
 
 .l_312b
 
@@ -12005,11 +12972,11 @@ LOAD_D% = LOAD% + P% - CODE%
  LDA #&2D
  BNE l_3144
 
-.l_3135
+.TT152
 
  LDA &74
  AND #&60
- BEQ l_3147
+ BEQ TT160
  CMP #&20
  BEQ l_314e
  JSR l_3153
@@ -12022,7 +12989,7 @@ LOAD_D% = LOAD% + P% - CODE%
 
  JMP TT27
 
-.l_3147
+.TT160
 
  LDA #&74
  JSR TT26
@@ -12080,7 +13047,7 @@ LOAD_D% = LOAD% + P% - CODE%
  STA &75
  CLC
  LDA #&00
- STA cmdr_avail+&10
+ STA AVL+&10
 
 .l_319d
 
@@ -12120,13 +13087,13 @@ LOAD_D% = LOAD% + P% - CODE%
 
 .l_31d8
 
- LDA l_4619+&01,X
+ LDA QQ23+&01,X
  STA &74
  JSR l_318e
- LDA l_4619+&03,X
+ LDA QQ23+&03,X
  AND cmdr_price
  CLC
- ADC l_4619+&02,X
+ ADC QQ23+&02,X
  LDY &74
  BMI l_31f4
  SEC
@@ -12147,7 +13114,7 @@ LOAD_D% = LOAD% + P% - CODE%
 
  LDY &96
  AND #&3F
- STA cmdr_avail,Y
+ STA AVL,Y
  INY
  TYA
  STA &96
@@ -12229,7 +13196,7 @@ LOAD_D% = LOAD% + P% - CODE%
  BNE l_32c8
  INC &87
 
-.l_3292
+.TT110
 
  LDX &8E
  BEQ l_32c1
@@ -12260,11 +13227,11 @@ LOAD_D% = LOAD% + P% - CODE%
 .l_32c8
 
  BMI l_32cd
- JMP l_2ceb
+ JMP TT22
 
 .l_32cd
 
- JMP l_2ebe
+ JMP TT23
 
 \ a.DOENTRY
 
@@ -12300,14 +13267,14 @@ LOAD_D% = LOAD% + P% - CODE%
  LDX &1B
  RTS
 
-.l_32fe
+.hm
 
- JSR l_2e65
+ JSR TT103
  JSR TT111
- JSR l_2e65
+ JSR TT103
  JMP CLYNS
 
-.l_330a
+.cpl
 
  LDX #&05
 
@@ -12369,7 +13336,7 @@ LOAD_D% = LOAD% + P% - CODE%
 .l_3348
 
  JSR l_334e
- JSR l_330a
+ JSR cpl
 
 .l_334e
 
@@ -12391,7 +13358,7 @@ LOAD_D% = LOAD% + P% - CODE%
  INX
  JMP pr2-1
 
-.l_3366
+.fwl
 
  LDA #&69
  JSR TT68
@@ -12443,14 +13410,14 @@ LOAD_D% = LOAD% + P% - CODE%
  BEQ l_3348
  DEX
  BNE l_33ab
- JMP l_330a
+ JMP cpl
 
 .l_33ab
 
  DEX
  BEQ l_3338
  DEX
- BEQ l_3366
+ BEQ fwl
  DEX
  BNE l_33b9
 
@@ -13455,7 +14422,7 @@ LOAD_D% = LOAD% + P% - CODE%
  LDA &8C
  LSR A
  BCC l_38c5
- JMP l_3a54
+ JMP SUN
 
 .l_38c5
 
@@ -13704,7 +14671,7 @@ LOAD_D% = LOAD% + P% - CODE%
  LDA #&FF
  BNE l_3a99
 
-.l_3a54
+.SUN
 
  LDA #&01
  STA &0E00
@@ -13791,7 +14758,7 @@ LOAD_D% = LOAD% + P% - CODE%
  SBC &D1
  STA &82
  STY &35
- JSR l_47b8
+ JSR LL5
  LDY &35
  JSR DORND
  AND &93
@@ -14356,7 +15323,7 @@ LOAD_D% = LOAD% + P% - CODE%
  LDY #&EE
  JSR l_3805
  LDA #&C8
- JSR l_45c6
+ JSR MESS
 
 .l_3de8
 
@@ -14614,7 +15581,7 @@ LOAD_D% = LOAD% + P% - CODE%
 .l_3f54
 
  LDA &03A4
- JSR l_45c6
+ JSR MESS
  LDA #&00
  STA &034A
  JMP l_3fcd
@@ -14933,13 +15900,13 @@ LOAD_D% = LOAD% + P% - CODE%
 
  CMP #&14
  BNE l_410f
- JMP l_2ceb
+ JMP TT22
 
 .l_410f
 
  CMP #&74
  BNE l_4116
- JMP l_2ebe
+ JMP TT23
 
 .l_4116
 
@@ -14952,7 +15919,7 @@ LOAD_D% = LOAD% + P% - CODE%
 
  CMP #&77
  BNE l_4127
- JMP l_2e15
+ JMP TT213
 
 .l_4127
 
@@ -14964,7 +15931,7 @@ LOAD_D% = LOAD% + P% - CODE%
 
  CMP #&20
  BNE l_4135
- JMP l_3292
+ JMP TT110
 
 .l_4135
 
@@ -14980,7 +15947,7 @@ LOAD_D% = LOAD% + P% - CODE%
 
  CMP #&54
  BNE l_414a
- JMP l_3011
+ JMP hyp
 
 .l_414a
 
@@ -15002,13 +15969,13 @@ LOAD_D% = LOAD% + P% - CODE%
  LDA &06
  CMP #&36
  BNE l_notdist
- JSR l_2e65
+ JSR TT103
  JSR ping
- JMP l_2e65	\JSR l_2e65
+ JMP TT103	\JSR TT103
 
 .l_4169
 
- JSR l_2e38
+ JSR TT16
 
 .l_416c
 
@@ -15047,21 +16014,21 @@ LOAD_D% = LOAD% + P% - CODE%
  LDA cmdr_cour
  ORA cmdr_cour+1
  BEQ l_4169
- JSR l_2e65
+ JSR TT103
  LDA cmdr_courx
  STA QQ9
  LDA cmdr_coury
  STA QQ10
- JSR l_2e65
+ JSR TT103
 
 .l_418b
 
  LDA &87
  AND #&C0
  BEQ l_418a
- JSR l_32fe
+ JSR hm
  STA QQ17
- JSR l_330a
+ JSR cpl
  JSR vdu_80
  LDA #&01
  STA XC
@@ -15314,7 +16281,7 @@ LOAD_D% = LOAD% + P% - CODE%
  TYA
  ADC &82
  STA &82
- JSR l_47b8
+ JSR LL5
  LDA &34
  JSR l_46ff
  STA &34
@@ -15419,7 +16386,7 @@ LOAD_D% = LOAD% + P% - CODE%
  JSR l_2590
  BCC l_4418
  LDA #&78
- JSR l_45c6
+ JSR MESS
 
 .n_sound30
 
@@ -15432,7 +16399,7 @@ LOAD_D% = LOAD% + P% - CODE%
  BNE l_43db
  INC TALLY+&01
  LDA #&65
- JSR l_45c6
+ JSR MESS
 
 .l_43db
 
@@ -15819,7 +16786,7 @@ LOAD_D% = LOAD% + P% - CODE%
 
  ADC #&D0
 
-.l_45c6
+.MESS
 
  \	LDX #&00
  \	STX QQ17
@@ -15882,9 +16849,9 @@ LOAD_D% = LOAD% + P% - CODE%
 
  ADC #&5D
  INC new_hold	\**
- BNE l_45c6
+ BNE MESS
 
-.l_4619
+.QQ23
 
  EQUB &13, &82, &06, &01, &14, &81, &0A, &03, &41, &83, &02, &07
  EQUB &28, &85, &E2, &1F, &53, &85, &FB, &0F, &C4, &08, &36, &03
@@ -16117,7 +17084,7 @@ LOAD_D% = LOAD% + P% - CODE%
  STA (&67),Y
  RTS
 
-.l_47b8
+.LL5
 
  LDY &82
  LDA &81
