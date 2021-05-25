@@ -9111,6 +9111,7 @@ LOAD_C% = LOAD% +P% - CODE%
                         \
                         \   (A ?) = A * Q
                         \         = K * sin(A) * 256
+                        \
                         \ which is equivalent to:
                         \
                         \   A = K * sin(A)

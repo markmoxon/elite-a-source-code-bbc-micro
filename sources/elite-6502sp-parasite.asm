@@ -4352,9 +4352,10 @@ tube_r4d = &FEFF
 
 .stat_dock
 
- LDA #&CD
+ LDA #205               \ Print extended token 205 ("DOCKED")
  JSR DETOK
- JSR TT67
+
+ JSR TT67               \ Print a newline
 
 .stat_legal
 
@@ -7130,6 +7131,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
                         \
                         \   (A ?) = A * Q
                         \         = K * sin(A) * 256
+                        \
                         \ which is equivalent to:
                         \
                         \   A = K * sin(A)

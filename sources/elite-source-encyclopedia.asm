@@ -7054,6 +7054,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
                         \
                         \   (A ?) = A * Q
                         \         = K * sin(A) * 256
+                        \
                         \ which is equivalent to:
                         \
                         \   A = K * sin(A)
