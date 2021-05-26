@@ -38,7 +38,7 @@ _SOURCE_DISC            = (_RELEASE = 2)
 \
 \ ******************************************************************************
 
-LS% = &0CFF             \ The start of the descending ship line heap
+LS% = &0CFF             \ The RSHIPS of the descending ship line heap
 
 NOST = 18               \ The number of stardust particles in normal space (this
                         \ goes down to 3 in witchspace)
@@ -137,7 +137,7 @@ ACT = &07E0             \ The address of the arctan lookup table, as set in
 
 QQ16_FLIGHT = &0880     \ The address of the two-letter text token table in the
                         \ flight code (this gets populated by the docked code at
-                        \ the start of the game)
+                        \ the RSHIPS of the game)
 
 CATD = &0D7A            \ The address of the CATD routine that is put in place
                         \ by the third loader, as set in elite-loader3.asm
@@ -2045,11 +2045,11 @@ EXEC% = &11E3
 
 .S%
 
- JMP start
+ JMP RSHIPS
 
 .boot_in
 
- JMP start
+ JMP RSHIPS
 
 .wrch_in
 
@@ -2246,12 +2246,12 @@ BRKV = P% - 2
  BEQ l_12f7
  \	LDA #&03
  \	JSR TT66
- \	JSR l_2623
+ \	JSR LL164
  \	JSR RES2
  \	STY &0341
  INC cmdr_bomb
  INC new_hold	\***
- \	JSR l_32c1
+ \	JSR NLUNCH
  JSR DORND
  STA QQ9	\QQ0
  STX QQ10	\QQ1
@@ -2718,7 +2718,7 @@ BRKV = P% - 2
  JSR l_41b4
  BCC l_15bf
  JSR l_3c30
- JSR l_3740
+ JSR NWSPS
 
 .l_15bf
 
@@ -8430,7 +8430,7 @@ LOAD_C% = LOAD% +P% - CODE%
  ROL A
  STA &61
  TXA
- JMP l_3768
+ JMP NWSHP
 
 .l_252e
 
@@ -8576,7 +8576,7 @@ LOAD_C% = LOAD% +P% - CODE%
 
 .l_25fe
 
- JSR l_3768
+ JSR NWSHP
  PLA
  STA &21
  PLA
@@ -8605,7 +8605,7 @@ LOAD_C% = LOAD% +P% - CODE%
  ROR A
  JMP MVT1
 
-.l_2623
+.LL164
 
  LDA #&38
  JSR l_43f3
@@ -8616,7 +8616,7 @@ LOAD_C% = LOAD% +P% - CODE%
  DEC &0348
  RTS
 
-.l_2636
+.LAUN
 
  JSR n_sound30
  LDA #&08
@@ -12895,343 +12895,933 @@ LOAD_D% = LOAD% + P% - CODE%
                         \ Fall through into pr6 to print X to 5 digits, as the
                         \ high byte in Y is 0
 
+\ ******************************************************************************
+\
+\       Name: pr6
+\       Type: Subroutine
+\   Category: Text
+\    Summary: Print 16-bit number, left-padded to 5 digits, no point
+\
+\ ------------------------------------------------------------------------------
+\
+\ Print the 16-bit number in (Y X) to 5 digits, left-padding with spaces for
+\ numbers with fewer than 3 digits (so numbers < 10000 are right-aligned),
+\ with no decimal point.
+\
+\ Arguments:
+\
+\   X                   The low byte of the number to print
+\
+\   Y                   The high byte of the number to print
+\
+\ ******************************************************************************
+
 .pr6
 
- CLC
+ CLC                    \ Do not display a decimal point when printing
+
+                        \ Fall through into pr5 to print X to 5 digits
+
+\ ******************************************************************************
+\
+\       Name: pr5
+\       Type: Subroutine
+\   Category: Text
+\    Summary: Print a 16-bit number, left-padded to 5 digits, and optional point
+\
+\ ------------------------------------------------------------------------------
+\
+\ Print the 16-bit number in (Y X) to 5 digits, left-padding with spaces for
+\ numbers with fewer than 3 digits (so numbers < 10000 are right-aligned).
+\ Optionally include a decimal point.
+\
+\ Arguments:
+\
+\   X                   The low byte of the number to print
+\
+\   Y                   The high byte of the number to print
+\
+\   C flag              If set, include a decimal point
+\
+\ ******************************************************************************
 
 .pr5
 
- LDA #&05
- JMP TT11
+ LDA #5                 \ Set the number of digits to print to 5
+
+ JMP TT11               \ Call TT11 to print (Y X) to 5 digits and return from
+                        \ the subroutine using a tail call
+
+\ ******************************************************************************
+\
+\       Name: TT147
+\       Type: Subroutine
+\   Category: Text
+\    Summary: Print an error when a system is out of hyperspace range
+\
+\ ------------------------------------------------------------------------------
+\
+\ Print "RANGE?" for when the hyperspace distance is too far
+\
+\ ******************************************************************************
 
 .TT147
 
- LDA #&CA
- JSR TT27
- LDA #&3F
- JMP TT27
+ LDA #202               \ Load A with token 42 ("RANGE") and fall through into
+                        \ prq to print it, followed by a question mark
 
-.l_30c9
+\ ******************************************************************************
+\
+\       Name: prq
+\       Type: Subroutine
+\   Category: Text
+\    Summary: Print a text token followed by a question mark
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   A                   The text token to be printed
+\
+\ ******************************************************************************
 
- PHA
- STA &77
- ASL A
- ASL A
- STA &73
- LDA #&01
+.prq
+
+ JSR TT27               \ Print the text token in A
+
+ LDA #'?'               \ Print a question mark and return from the
+ JMP TT27               \ subroutine using a tail call
+
+\ ******************************************************************************
+\
+\       Name: TT151
+\       Type: Subroutine
+\   Category: Market
+\    Summary: Print the name, price and availability of a market item
+\  Deep dive: Market item prices and availability
+\             Galaxy and system seeds
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   A                   The number of the market item to print, 0-16 (see QQ23
+\                       for details of item numbers)
+\
+\ Returns:
+\
+\   QQ19+1              Byte #1 from the market prices table for this item
+\
+\   QQ24                The item's price / 4
+\
+\   QQ25                The item's availability
+\
+\ ******************************************************************************
+
+.TT151
+
+ PHA                    \ Store the item number on the stack and in QQ14+4
+ STA QQ19+4
+
+ ASL A                  \ Store the item number * 4 in QQ19, so this will act as
+ ASL A                  \ an index into the market prices table at QQ23 for this
+ STA QQ19               \ item (as there are four bytes per item in the table)
+
+ LDA #1                 \ Move the text cursor to column 1, for the item's name
  STA XC
- PLA
- ADC #&D0
- JSR TT27
- LDA #&0E
+
+ PLA                    \ Restore the item number
+
+ ADC #208               \ Print recursive token 48 + A, which will be in the
+ JSR TT27               \ range 48 ("FOOD") to 64 ("ALIEN ITEMS"), so this
+                        \ prints the item's name
+
+ LDA #14                \ Move the text cursor to column 14, for the price
  STA XC
- LDX &73
- LDA QQ23+&01,X
- STA &74
- LDA cmdr_price
- AND QQ23+&03,X
- CLC
- ADC QQ23,X
- STA &03AA
- JSR TT152
- JSR l_318e
- LDA &74
- BMI l_3104
- LDA &03AA
- ADC &76
- JMP l_310a
 
-.l_3104
+ LDX QQ19               \ Fetch byte #1 from the market prices table (units and
+ LDA QQ23+1,X           \ economic_factor) for this item and store in QQ19+1
+ STA QQ19+1
 
- LDA &03AA
- SEC
- SBC &76
+ LDA QQ26               \ Fetch the random number for this system visit and
+ AND QQ23+3,X           \ AND with byte #3 from the market prices table (mask)
+                        \ to give:
+                        \
+                        \   A = random AND mask
 
-.l_310a
+ CLC                    \ Add byte #0 from the market prices table (base_price),
+ ADC QQ23,X             \ so we now have:
+ STA QQ24               \
+                        \   A = base_price + (random AND mask)
 
- STA &03AA
- STA &1B
- LDA #&00
- JSR l_32f4
- SEC
- JSR pr5
- LDY &77
- LDA #&05
- LDX AVL,Y
- STX &03AB
- CLC
- BEQ l_312b
- JSR pr2+2
- JMP TT152
+ JSR TT152              \ Call TT152 to print the item's unit ("t", "kg" or
+                        \ "g"), padded to a width of two characters
 
-.l_312b
+ JSR var                \ Call var to set QQ19+3 = economy * |economic_factor|
+                        \ (and set the availability of Alien Items to 0)
 
- LDA XC
- ADC #&04
- STA XC
- LDA #&2D
- BNE l_3144
+ LDA QQ19+1             \ Fetch the byte #1 that we stored above and jump to
+ BMI TT155              \ TT155 if it is negative (i.e. if the economic_factor
+                        \ is negative)
+
+ LDA QQ24               \ Set A = QQ24 + QQ19+3
+ ADC QQ19+3             \
+                        \       = base_price + (random AND mask)
+                        \         + (economy * |economic_factor|)
+                        \
+                        \ which is the result we want, as the economic_factor
+                        \ is positive
+
+ JMP TT156              \ Jump to TT156 to multiply the result by 4
+
+.TT155
+
+ LDA QQ24               \ Set A = QQ24 - QQ19+3
+ SEC                    \
+ SBC QQ19+3             \       = base_price + (random AND mask)
+                        \         - (economy * |economic_factor|)
+                        \
+                        \ which is the result we want, as economic_factor
+                        \ is negative
+
+.TT156
+
+ STA QQ24               \ Store the result in QQ24 and P
+ STA P
+
+ LDA #0                 \ Set A = 0 and call GC2 to calculate (Y X) = (A P) * 4,
+ JSR GC2                \ which is the same as (Y X) = P * 4 because A = 0
+
+ SEC                    \ We now have our final price, * 10, so we can call pr5
+ JSR pr5                \ to print (Y X) to 5 digits, including a decimal
+                        \ point, as the C flag is set
+
+ LDY QQ19+4             \ We now move on to availability, so fetch the market
+                        \ item number that we stored in QQ19+4 at the start
+
+ LDA #5                 \ Set A to 5 so we can print the availability to 5
+                        \ digits (right-padded with spaces)
+
+ LDX AVL,Y              \ Set X to the item's availability, which is given in
+                        \ the AVL table
+
+ STX QQ25               \ Store the availability in QQ25
+
+ CLC                    \ Clear the C flag
+
+ BEQ TT172              \ If none are available, jump to TT172 to print a tab
+                        \ and a "-"
+
+ JSR pr2+2              \ Otherwise print the 8-bit number in X to 5 digits,
+                        \ right-aligned with spaces. This works because we set
+                        \ A to 5 above, and we jump into the pr2 routine just
+                        \ after the first instruction, which would normally
+                        \ set the number of digits to 3
+
+ JMP TT152              \ Print the unit ("t", "kg" or "g") for the market item,
+                        \ with a following space if required to make it two
+                        \ characters long
+
+.TT172
+
+ LDA XC                 \ Move the text cursor in XC to the right by 4 columns,
+ ADC #4                 \ so the cursor is where the last digit would be if we
+ STA XC                 \ were printing a 5-digit availability number
+
+ LDA #'-'               \ Print a "-" character by jumping to TT162+2, which
+ BNE TT162+2            \ contains JMP TT27 (this BNE is effectively a JMP as A
+                        \ will never be zero), and return from the subroutine
+                        \ using a tail call
+
+\ ******************************************************************************
+\
+\       Name: TT152
+\       Type: Subroutine
+\   Category: Market
+\    Summary: Print the unit ("t", "kg" or "g") for a market item
+\
+\ ------------------------------------------------------------------------------
+\
+\ Print the unit ("t", "kg" or "g") for the market item whose byte #1 from the
+\ market prices table is in QQ19+1, right-padded with spaces to a width of two
+\ characters (so that's "t ", "kg" or "g ").
+\
+\ ******************************************************************************
 
 .TT152
 
- LDA &74
- AND #&60
- BEQ TT160
- CMP #&20
- BEQ l_314e
- JSR l_3153
+ LDA QQ19+1             \ Fetch the economic_factor from QQ19+1
+
+ AND #96                \ If bits 5 and 6 are both clear, jump to TT160 to
+ BEQ TT160              \ print "t" for tonne, followed by a space, and return
+                        \ from the subroutine using a tail call
+
+ CMP #32                \ If bit 5 is set, jump to TT161 to print "kg" for
+ BEQ TT161              \ kilograms, and return from the subroutine using a tail
+                        \ call
+
+ JSR TT16a              \ Otherwise call TT16a to print "g" for grams, and fall
+                        \ through into TT162 to print a space and return from
+                        \ the subroutine
+
+\ ******************************************************************************
+\
+\       Name: TT162
+\       Type: Subroutine
+\   Category: Text
+\    Summary: Print a space
+\
+\ Other entry points:
+\
+\   TT162+2             Jump to TT27 to print the text token in A
+\
+\ ******************************************************************************
 
 .TT162
 
- LDA #&20
+ LDA #' '               \ Load a space character into A
 
-.l_3144
+ JMP TT27               \ Print the text token in A and return from the
+                        \ subroutine using a tail call
 
- JMP TT27
+\ ******************************************************************************
+\
+\       Name: TT160
+\       Type: Subroutine
+\   Category: Market
+\    Summary: Print "t" (for tonne) and a space
+\
+\ ******************************************************************************
 
 .TT160
 
- LDA #&74
- JSR TT26
- BCC TT162
+ LDA #'t'               \ Load a "t" character into A
 
-.l_314e
+ JSR TT26               \ Print the character, using TT216 so that it doesn't
+                        \ change the character case
 
- LDA #&6B
- JSR TT26
+ BCC TT162              \ Jump to TT162 to print a space and return from the
+                        \ subroutine using a tail call (this BCC is effectively
+                        \ a JMP as the C flag is cleared by TT26)
 
-.l_3153
+\ ******************************************************************************
+\
+\       Name: TT161
+\       Type: Subroutine
+\   Category: Market
+\    Summary: Print "kg" (for kilograms)
+\
+\ ******************************************************************************
 
- LDA #&67
- JMP TT26
+.TT161
 
-.l_3158
+ LDA #'k'               \ Load a "k" character into A
 
- LDA #&11
+ JSR TT26               \ Print the character, using TT216 so that it doesn't
+                        \ change the character case, and fall through into
+                        \ TT16a to print a "g" character
+
+\ ******************************************************************************
+\
+\       Name: TT16a
+\       Type: Subroutine
+\   Category: Market
+\    Summary: Print "g" (for grams)
+\
+\ ******************************************************************************
+
+.TT16a
+
+ LDA #'g'               \ Load a "g" character into A
+
+ JMP TT26               \ Print the character, using TT216 so that it doesn't
+                        \ change the character case, and return from the
+                        \ subroutine using a tail call
+
+\ ******************************************************************************
+\
+\       Name: TT163
+\       Type: Subroutine
+\   Category: Market
+\    Summary: Print the headers for the table of market prices
+\
+\ ------------------------------------------------------------------------------
+\
+\ Print the column headers for the prices table in the Buy Cargo and Market
+\ Price screens.
+\
+\ ******************************************************************************
+
+.TT163
+
+ LDA #17                \ Move the text cursor in XC to column 17
  STA XC
- LDA #&FF
- BNE l_3144
 
-.l_3160
+ LDA #255               \ Print recursive token 95 token ("UNIT  QUANTITY
+ BNE TT162+2            \ {crlf} PRODUCT   UNIT PRICE FOR SALE{crlf}{lf}") by
+                        \ jumping to TT162+2, which contains JMP TT27 (this BNE
+                        \ is effectively a JMP as A will never be zero), and
+                        \ return from the subroutine using a tail call
 
- LDA #&10
- JSR TT66
- LDA #&05
+\ ******************************************************************************
+\
+\       Name: TT167
+\       Type: Subroutine
+\   Category: Market
+\    Summary: Show the Market Price screen (red key f7)
+\
+\ ******************************************************************************
+
+.TT167
+
+ LDA #16                \ Clear the top part of the screen, draw a white border,
+ JSR TT66               \ and set the current view type in QQ11 to 16 (Market
+                        \ Price screen)
+
+ LDA #5                 \ Move the text cursor to column 4
  STA XC
- LDA #&A7
- JSR NLIN3
- LDA #&03
+
+ LDA #167               \ Print recursive token 7 ("{current system name} MARKET
+ JSR NLIN3              \ PRICES") and draw a horizontal line at pixel row 19
+                        \ to box in the title
+
+ LDA #3                 \ Move the text cursor to row 3
  STA YC
- JSR l_3158
- LDA #&00
- STA &03AD
 
-.l_317a
+ JSR TT163              \ Print the column headers for the prices table
 
- \	LDX #&80
- \	STX QQ17
- JSR vdu_80
- JSR l_30c9
- INC YC
- INC &03AD
- LDA &03AD
- CMP #&11
- BCC l_317a
- RTS
+ LDA #0                 \ We're going to loop through all the available market
+ STA QQ29               \ items, so we set up a counter in QQ29 to denote the
+                        \ current item and start it at 0
 
-.l_318e
+.TT168
 
- LDA &74
- AND #&1F
- LDY home_econ
- STA &75
- CLC
- LDA #&00
- STA AVL+&10
+ JSR vdu_80             \ AJD
 
-.l_319d
+ JSR TT151              \ Call TT151 to print the item name, market price and
+                        \ availability of the current item, and set QQ24 to the
+                        \ item's price / 4, QQ25 to the quantity available and
+                        \ QQ19+1 to byte #1 from the market prices table for
+                        \ this item
 
- DEY
- BMI l_31a5
- ADC &75
- JMP l_319d
+ INC YC                 \ Move the text cursor down one row
 
-.l_31a5
+ INC QQ29               \ Increment QQ29 to point to the next item
 
- STA &76
- RTS
+ LDA QQ29               \ If QQ29 >= 17 then jump to TT168 as we have done the
+ CMP #17                \ last item
+ BCC TT168
 
-.l_31ab
+ RTS                    \ Return from the subroutine
 
- JSR jmp
- LDX #&05
+\ ******************************************************************************
+\
+\       Name: var
+\       Type: Subroutine
+\   Category: Market
+\    Summary: Calculate QQ19+3 = economy * |economic_factor|
+\
+\ ------------------------------------------------------------------------------
+\
+\ Set QQ19+3 = economy * |economic_factor|, given byte #1 of the market prices
+\ table for an item. Also sets the availability of Alien Items to 0.
+\
+\ This routine forms part of the calculations for market item prices (TT151)
+\ and availability (GVL).
+\
+\ Arguments:
+\
+\   QQ19+1              Byte #1 of the market prices table for this market item
+\                       (which contains the economic_factor in bits 0-5, and the
+\                       sign of the economic_factor in bit 7)
+\
+\ ******************************************************************************
 
-.l_31b0
+.var
 
- LDA &6C,X
- STA &03B2,X
- DEX
- BPL l_31b0
- INX
- STX &0349
- LDA QQ3
- STA home_econ
- LDA QQ5
- STA home_tech
- LDA QQ4
- STA home_govmt
- JSR DORND
- STA cmdr_price
- LDX #&00
- STX &96
+ LDA QQ19+1             \ Extract bits 0-5 from QQ19+1 into A, to get the
+ AND #31                \ economic_factor without its sign, in other words:
+                        \
+                        \   A = |economic_factor|
 
-.l_31d8
+ LDY QQ28               \ Set Y to the economy byte of the current system
 
- LDA QQ23+&01,X
- STA &74
- JSR l_318e
- LDA QQ23+&03,X
- AND cmdr_price
- CLC
- ADC QQ23+&02,X
- LDY &74
- BMI l_31f4
- SEC
- SBC &76
- JMP l_31f7
+ STA QQ19+2             \ Store A in QQ19+2
 
-.l_31f4
+ CLC                    \ Clear the C flag so we can do additions below
 
- CLC
- ADC &76
+ LDA #0                 \ Set AVL+16 (availability of Alien Items) to 0,
+ STA AVL+16             \ setting A to 0 in the process
 
-.l_31f7
+.TT153
 
- BPL l_31fb
- LDA #&00
+                        \ We now do the multiplication by doing a series of
+                        \ additions in a loop, building the result in A. Each
+                        \ loop adds QQ19+2 (|economic_factor|) to A, and it
+                        \ loops the number of times given by the economy byte;
+                        \ in other words, because A starts at 0, this sets:
+                        \
+                        \   A = economy * |economic_factor|
 
-.l_31fb
+ DEY                    \ Decrement the economy in Y, exiting the loop when it
+ BMI TT154              \ becomes negative
 
- LDY &96
- AND #&3F
- STA AVL,Y
- INY
+ ADC QQ19+2             \ Add QQ19+2 to A
+
+ JMP TT153              \ Loop back to TT153 to do another addition
+
+.TT154
+
+ STA QQ19+3             \ Store the result in QQ19+3
+
+ RTS                    \ Return from the subroutine
+
+\ ******************************************************************************
+\
+\       Name: hyp1
+\       Type: Subroutine
+\   Category: Universe
+\    Summary: Process a jump to the system closest to (QQ9, QQ10)
+\
+\ ------------------------------------------------------------------------------
+\
+\ Do a hyperspace jump to the system closest to galactic coordinates
+\ (QQ9, QQ10), and set up the current system's state to those of the new system.
+\
+\ Returns:
+\
+\   (QQ0, QQ1)          The galactic coordinates of the new system
+\
+\   QQ2 to QQ2+6        The seeds of the new system
+\
+\   EV                  Set to 0
+\
+\   QQ28                The new system's economy
+\
+\   tek                 The new system's tech level
+\
+\   gov                 The new system's government
+\
+\ Other entry points:
+\
+\   hyp1+3              Jump straight to the system at (QQ9, QQ10) without
+\                       first calculating which system is closest. We do this
+\                       if we already know that (QQ9, QQ10) points to a system
+\
+\ ******************************************************************************
+
+.hyp1
+
+ JSR jmp                \ Set the current system to the selected system
+
+ LDX #5                 \ We now want to copy the seeds for the selected system
+                        \ in QQ15 into QQ2, where we store the seeds for the
+                        \ current system, so set up a counter in X for copying
+                        \ 6 bytes (for three 16-bit seeds)
+
+.TT112
+
+ LDA QQ15,X             \ Copy the X-th byte in QQ15 to the X-th byte in QQ2, to
+ STA QQ2,X              \ update the selected system to the new one. Note that
+                        \ this approach has a minor bug associated with it: if
+                        \ your hyperspace counter hits 0 just as you're docking,
+                        \ then you will magically appear in the station in your
+                        \ hyperspace destination, without having to go to the
+                        \ effort of actually flying there. This bug was fixed in
+                        \ later versions by saving the destination seeds in a
+                        \ separate location called safehouse, and using those
+                        \ instead... but that isn't the case in this version
+
+ DEX                    \ Decrement the counter
+
+ BPL TT112              \ Loop back to TT112 if we still have more bytes to
+                        \ copy
+
+ INX                    \ Set X = 0 (as we ended the above loop with X = &FF)
+
+ STX EV                 \ Set EV, the extra vessels spawning counter, to 0, as
+                        \ we are entering a new system with no extra vessels
+                        \ spawned
+
+ LDA QQ3                \ Set the current system's economy in QQ28 to the
+ STA QQ28               \ selected system's economy from QQ3
+
+ LDA QQ5                \ Set the current system's tech level in tek to the
+ STA tek                \ selected system's economy from QQ5
+
+ LDA QQ4                \ Set the current system's government in gov to the
+ STA gov                \ selected system's government from QQ4
+
+                        \ Fall through into GVL to calculate the availability of
+                        \ market items in the new system
+
+\ ******************************************************************************
+\
+\       Name: GVL
+\       Type: Subroutine
+\   Category: Universe
+\    Summary: Calculate the availability of market items
+\  Deep dive: Market item prices and availability
+\             Galaxy and system seeds
+\
+\ ------------------------------------------------------------------------------
+\
+\ Calculate the availability for each market item and store it in AVL. This is
+\ called on arrival in a new system.
+\
+\ Other entry points:
+\
+\   hyR                 Contains an RTS
+\
+\ ******************************************************************************
+
+.GVL
+
+ JSR DORND              \ Set A and X to random numbers
+
+ STA QQ26               \ Set QQ26 to the random byte that's used in the market
+                        \ calculations
+
+ LDX #0                 \ We are now going to loop through the market item
+ STX XX4                \ availability table in AVL, so set a counter in XX4
+                        \ (and X) for the market item number, starting with 0
+
+.hy9
+
+ LDA QQ23+1,X           \ Fetch byte #1 from the market prices table (units and
+ STA QQ19+1             \ economic_factor) for item number X and store it in
+                        \ QQ19+1
+
+ JSR var                \ Call var to set QQ19+3 = economy * |economic_factor|
+                        \ (and set the availability of Alien Items to 0)
+
+ LDA QQ23+3,X           \ Fetch byte #3 from the market prices table (mask) and
+ AND QQ26               \ AND with the random number for this system visit
+                        \ to give:
+                        \
+                        \   A = random AND mask
+
+ CLC                    \ Add byte #2 from the market prices table
+ ADC QQ23+2,X           \ (base_quantity) so we now have:
+                        \
+                        \   A = base_quantity + (random AND mask)
+
+ LDY QQ19+1             \ Fetch the byte #1 that we stored above and jump to
+ BMI TT157              \ TT157 if it is negative (i.e. if the economic_factor
+                        \ is negative)
+
+ SEC                    \ Set A = A - QQ19+3
+ SBC QQ19+3             \
+                        \       = base_quantity + (random AND mask)
+                        \         - (economy * |economic_factor|)
+                        \
+                        \ which is the result we want, as the economic_factor
+                        \ is positive
+
+ JMP TT158              \ Jump to TT158 to skip TT157
+
+.TT157
+
+ CLC                    \ Set A = A + QQ19+3
+ ADC QQ19+3             \
+                        \       = base_quantity + (random AND mask)
+                        \         + (economy * |economic_factor|)
+                        \
+                        \ which is the result we want, as the economic_factor
+                        \ is negative
+
+.TT158
+
+ BPL TT159              \ If A < 0, then set A = 0, so we don't have negative
+ LDA #0                 \ availability
+
+.TT159
+
+ LDY XX4                \ Fetch the counter (the market item number) into Y
+
+ AND #%00111111         \ Take bits 0-5 of A, i.e. A mod 64, and store this as
+ STA AVL,Y              \ this item's availability in the Y=th byte of AVL, so
+                        \ each item has a maximum availability of 63t
+
+ INY                    \ Increment the counter into XX44, Y and A
  TYA
- STA &96
- ASL A
- ASL A
- TAX
- CMP #&3F
- BCC l_31d8
- RTS
+ STA XX4
 
-.l_320e
+ ASL A                  \ Set X = counter * 4, so that X points to the next
+ ASL A                  \ item's entry in the four-byte market prices table,
+ TAX                    \ ready for the next loop
 
- JSR l_3f62
- LDA #&FF
- STA &66
- LDA #&1D
- JSR l_3768
- LDA #&1E
- JMP l_3768
+ CMP #63                \ If A < 63, jump back up to hy9 to set the availability
+ BCC hy9                \ for the next market item
 
-.l_3226
+.hyR
 
- LDA #&03
- JSR l_427e
- LDA #&03
- JSR TT66
- JSR l_2623
- JSR RES2
- STY &0341
+ RTS                    \ Return from the subroutine
 
-.l_3239
+\ ******************************************************************************
+\
+\       Name: GTHG
+\       Type: Subroutine
+\   Category: Universe
+\    Summary: Spawn a Thargoid ship and a Thargon companion
+\
+\ ******************************************************************************
 
- JSR l_320e
- LDA #&03
- CMP &033B
- BCS l_3239
- STA &03C3
- LDX #&00
+.GTHG
+
+ JSR Ze                 \ Call Ze to initialise INWK
+
+ LDA #%11111111         \ Set the AI flag in byte #32 so that the ship has AI,
+ STA INWK+32            \ is extremely and aggressively hostile, and has E.C.M.
+
+ LDA #THG               \ Call NWSHP to add a new Thargoid ship to our local
+ JSR NWSHP              \ bubble of universe
+
+ LDA #TGL               \ Call NWSHP to add a new Thargon ship to our local
+ JMP NWSHP              \ bubble of universe, and return from the subroutine
+                        \ using a tail call
+
+\ ******************************************************************************
+\
+\       Name: MJP
+\       Type: Subroutine
+\   Category: Flight
+\    Summary: Process a mis-jump into witchspace
+\
+\ ------------------------------------------------------------------------------
+\
+\ Process a mis-jump into witchspace (which happens very rarely). Witchspace has
+\ a strange, almost dust-free aspect to it, and it is populated by hostile
+\ Thargoids. Using our escape pod will be fatal, and our position on the
+\ galactic chart is in-between systems. It is a scary place...
+\
+\ There is a 1% chance that this routine is called from TT18 instead of doing
+\ a normal hyperspace, or we can manually trigger a mis-jump by holding down
+\ CTRL after first enabling the "author display" configuration option ("X") when
+\ paused.
+\
+\ Other entry points:
+\
+\   RTS111              Contains an RTS
+\
+\ ******************************************************************************
+
+.MJP
+
+ LDA #3                 \ Call SHIPinA to load ship blueprints file D, which is
+ JSR SHIPinA            \ one of the two files that contain Thargoids
+
+ LDA #3                 \ Clear the top part of the screen, draw a white border,
+ JSR TT66               \ and set the current view type in QQ11 to 3
+
+ JSR LL164              \ Call LL164 to show the hyperspace tunnel and make the
+                        \ hyperspace sound for a second time (as we already
+                        \ called LL164 in TT18)
+
+ JSR RES2               \ Reset a number of flight variables and workspaces, as
+                        \ well as setting Y to &FF
+
+ STY MJ                 \ Set the mis-jump flag in MJ to &FF, to indicate that
+                        \ we are now in witchspace
+
+.MJP1
+
+ JSR GTHG               \ Call GTHG to spawn a Thargoid ship
+
+ LDA #3                 \ Fetch the number of Thargoid ships from MANY+THG, and
+ CMP MANY+THG           \ if it is less than or equal to 3, loop back to MJP1 to
+ BCS MJP1               \ spawn another one, until we have four Thargoids
+
+ STA NOSTM              \ Set NOSTM (the maximum number of stardust particles)
+                        \ to 3, so there are fewer bits of stardust in
+                        \ witchspace (normal space has a maximum of 18)
+
+ LDX #0                 \ Initialise the front space view
  JSR LOOK1
- LDA QQ1
- EOR #&1F
- STA QQ1
 
-.r_rts
+ LDA QQ1                \ Fetch the current system's galactic y-coordinate in
+ EOR #%00011111         \ QQ1 and flip bits 0-5, so we end up somewhere in the
+ STA QQ1                \ vicinity of our original destination, but above or
+                        \ below it in the galactic chart
 
- RTS
+.RTS111
 
-.l_3254
+ RTS                    \ Return from the subroutine
 
- LDA QQ14
- SEC
+\ ******************************************************************************
+\
+\       Name: TT18
+\       Type: Subroutine
+\   Category: Flight
+\    Summary: Try to initiate a jump into hyperspace
+\
+\ ------------------------------------------------------------------------------
+\
+\ Try to go through hyperspace. Called from TT102 in the main loop when the
+\ hyperspace countdown has finished.
+\
+\ Other entry points:
+\
+\   hyper_snap          AJD
+\
+\ ******************************************************************************
+
+.TT18
+
+ LDA QQ14               \ Subtract the distance to the selected system (in QQ8)
+ SEC                    \ from the amount of fuel in our tank (in QQ14) into A
  SBC QQ8
- STA QQ14
+
+ STA QQ14               \ Store the updated fuel amount in QQ14
 
 .hyper_snap
 
- LDA &87
- BNE l_3268
- JSR TT66
- JSR l_2623
+ LDA QQ11               \ If the current view is not a space view, jump to ee5
+ BNE ee5                \ to skip the following
 
-.l_3268
+ JSR TT66               \ Clear the top part of the screen, draw a white border,
+                        \ and set the current view type in QQ11 to 0 (space
+                        \ view)
 
- \	JSR CTRL
- \	AND x_flag
- \	BMI l_321f
- JSR DORND
- CMP #&FD
- BCS l_3226
- JSR l_31ab
- JSR RES2
- JSR l_3580
- JSR l_4255
- LDA &87
- AND #&3F
- BNE r_rts
- JSR TTX66
- LDA &87
- BNE l_32c8
- INC &87
+ JSR LL164              \ Call LL164 to show the hyperspace tunnel and make the
+                        \ hyperspace sound
+
+.ee5
+
+ JSR DORND              \ Set A and X to random numbers
+
+ CMP #253               \ If A >= 253 (1% chance) then jump to MJP to trigger a
+ BCS MJP                \ mis-jump into witchspace
+
+ JSR hyp1               \ AJD
+
+ JSR RES2               \ Reset a number of flight variables and workspaces
+
+ JSR SOLAR              \ Halve our legal status, update the missile indicators,
+                        \ and set up data blocks and slots for the planet and
+                        \ sun
+
+ JSR LSHIPS             \ Call LSHIPS to load a new ship blueprints file
+
+ LDA QQ11               \ If the current view in QQ11 is not a space view (0) or
+ AND #%00111111         \ one of the charts (64 or 128), return from the
+ BNE RTS111             \ subroutine (as RTS111 contains an RTS)
+
+ JSR TTX66              \ Otherwise clear the screen and draw a white border
+
+ LDA QQ11               \ If the current view is one of the charts, jump to
+ BNE TT114              \ TT114 (from which we jump to the correct routine to
+                        \ display the chart)
+
+ INC QQ11               \ This is a space view, so increment QQ11 to 1
+
+                        \ Fall through into TT110 to show the front space view
+
+\ ******************************************************************************
+\
+\       Name: TT110
+\       Type: Subroutine
+\   Category: Flight
+\    Summary: Launch from a station or show the front space view
+\
+\ ------------------------------------------------------------------------------
+\
+\ Launch the ship (if we are docked), or show the front space view (if we are
+\ already in space).
+\
+\ Called when red key f0 is pressed while docked (launch), after we arrive in a
+\ new galaxy, or after a hyperspace if the current view is a space view.
+\
+\ ******************************************************************************
 
 .TT110
 
- LDX &8E
- BEQ l_32c1
- JSR l_2636
- JSR RES2
- JSR TT111
- INC &4E
- JSR l_356d
- LDA #&80
- STA &4E
- INC &4D
- JSR l_3740
- LDA #&0C
- STA &7D
- JSR l_41a6
- ORA FIST
- STA FIST
- LDA #&FF
- STA &87
- JSR HFS1
+ LDX QQ12               \ If we are not docked (QQ12 = 0) then jump to NLUNCH
+ BEQ NLUNCH             \ to skip the launch tunnel and setup process
 
-.l_32c1
+ JSR LAUN               \ Show the space station launch tunnel
 
- LDX #&00
- STX &8E
- JMP LOOK1
+ JSR RES2               \ Reset a number of flight variables and workspaces
 
-.l_32c8
+ JSR TT111              \ Select the system closest to galactic coordinates
+                        \ (QQ9, QQ10)
 
- BMI l_32cd
- JMP TT22
+ INC INWK+8             \ Increment z_sign ready for the call to SOS, so the
+                        \ planet appears at a z_sign of 1 in front of us when
+                        \ we launch
 
-.l_32cd
+ JSR SOS1               \ Call SOS1 to set up the planet's data block and add it
+                        \ to FRIN, where it will get put in the first slot as
+                        \ it's the first one to be added to our local bubble of
+                        \ universe following the call to RES2 above
 
- JMP TT23
+ LDA #128               \ For the space station, set z_sign to &80, so it's
+ STA INWK+8             \ behind us (&80 is negative)
+
+ INC INWK+7             \ And increment z_hi, so it's only just behind us
+
+ JSR NWSPS              \ Add a new space station to our local bubble of
+                        \ universe
+
+ LDA #12                \ Set our launch speed in DELTA to 12
+ STA DELTA
+
+ JSR BAD                \ Call BAD to work out how much illegal contraband we
+                        \ are carrying in our hold (A is up to 40 for a
+                        \ standard hold crammed with contraband, up to 70 for
+                        \ an extended cargo hold full of narcotics and slaves)
+
+ ORA FIST               \ OR the value in A with our legal status in FIST to
+                        \ get a new value that is at least as high as both
+                        \ values, to reflect the fact that launching with a
+                        \ hold full of contraband can only make matters worse
+
+ STA FIST               \ Update our legal status with the new value
+
+ LDA #255               \ Set the view number in QQ11 to 255
+ STA QQ11
+
+ JSR HFS1               \ Call HFS1 to draw 8 concentric rings
+
+.NLUNCH
+
+ LDX #0                 \ Set QQ12 to 0 to indicate we are not docked
+ STX QQ12
+
+ JMP LOOK1              \ Jump to LOOK1 to switch to the front view (X = 0),
+                        \ returning from the subroutine using a tail call
+
+\ ******************************************************************************
+\
+\       Name: TT114
+\       Type: Subroutine
+\   Category: Charts
+\    Summary: Display either the Long-range or Short-range Chart
+\
+\ ------------------------------------------------------------------------------
+\
+\ Display either the Long-range or Short-range Chart, depending on the current
+\ view setting. Called from TT18 once we know the current view is one of the
+\ charts.
+\
+\ Arguments:
+\
+\   A                   The current view, loaded from QQ11
+\
+\ ******************************************************************************
+
+.TT114
+
+ BMI TT115              \ If bit 7 of the current view is set (i.e. the view is
+                        \ the Short-range Chart, 128), skip to TT115 below to
+                        \ jump to TT23 to display the chart
+
+ JMP TT22               \ Otherwise the current view is the Long-range Chart, so
+                        \ jump to TT22 to display it
+
+.TT115
+
+ JMP TT23               \ Jump to TT23 to display the Short-range Chart
 
 \ a.DOENTRY
 
@@ -13257,7 +13847,7 @@ LOAD_D% = LOAD% + P% - CODE%
 
  RTS
 
-.l_32f4
+.GC2
 
  ASL &1B
  ROL A
@@ -13774,18 +14364,18 @@ LOAD_D% = LOAD% + P% - CODE%
  SBC #&00
  RTS
 
-.l_356d
+.SOS1
 
  JSR l_3f3b
  LDA #&7F
  STA &63
  STA &64
- LDA home_tech
+ LDA tek
  AND #&02
  ORA #&80
- JMP l_3768
+ JMP NWSHP
 
-.l_3580
+.SOLAR
 
  LDA QQ8
  LDY #3
@@ -13821,7 +14411,7 @@ LOAD_D% = LOAD% + P% - CODE%
  ROR A
  STA &48
  STA &4B
- JSR l_356d
+ JSR SOS1
  LDA &6F
  AND #&07
  ORA #&81
@@ -13834,7 +14424,7 @@ LOAD_D% = LOAD% + P% - CODE%
  STA &63
  STA &64
  LDA #&81
- JSR l_3768
+ JSR NWSHP
 
 .NWSTARS
 
@@ -14139,7 +14729,7 @@ LOAD_D% = LOAD% + P% - CODE%
  STA &21
  RTS
 
-.l_3740
+.NWSPS
 
  JSR l_3821
  LDX #&81
@@ -14164,7 +14754,7 @@ LOAD_D% = LOAD% + P% - CODE%
  JSR l_37fc
  LDA #&02
 
-.l_3768
+.NWSHP
 
  STA &D1
  LDX #&00
@@ -15275,7 +15865,7 @@ LOAD_D% = LOAD% + P% - CODE%
  LDA #&06
  STA &4B
  LDA #&81
- JMP l_3768
+ JMP NWSHP
 
 .l_3da1
 
@@ -15586,7 +16176,7 @@ LOAD_D% = LOAD% + P% - CODE%
  STA &034A
  JMP l_3fcd
 
-.l_3f62
+.Ze
 
  JSR rand_posn	\ IN
  CMP #&F5
@@ -15719,7 +16309,7 @@ LOAD_D% = LOAD% + P% - CODE%
 
 .l_4036
 
- JSR l_41a6
+ JSR BAD
  ASL A
  LDX &032E
  BEQ l_4042
@@ -15728,7 +16318,7 @@ LOAD_D% = LOAD% + P% - CODE%
 .l_4042
 
  STA &D1
- JSR l_3f62
+ JSR Ze
  CMP &D1
  BCS l_4050
  LDA #&10
@@ -15752,17 +16342,17 @@ LOAD_D% = LOAD% + P% - CODE%
  JSR DORND
  CMP #&C8
  BCC l_4070
- JSR l_320e
+ JSR GTHG
 
 .l_4070
 
  JSR DORND
- LDY home_govmt
+ LDY gov
  BEQ l_4083
  CMP #&78
  BCS l_4033
  AND #&07
- CMP home_govmt
+ CMP gov
  BCC l_4033
 
 .l_4083
@@ -15792,7 +16382,7 @@ LOAD_D% = LOAD% + P% - CODE%
 .l_40aa
 
  LDA #&1F
- JSR l_3768
+ JSR NWSHP
  JMP l_40db
 
 .l_40b2
@@ -15841,7 +16431,7 @@ LOAD_D% = LOAD% + P% - CODE%
  INC &61	\ space out horde
  INC &47
  INC &4A
- JSR l_3768
+ JSR NWSHP
  CMP #&18
  BCS l_40d7
  DEC &0FD2
@@ -15925,7 +16515,7 @@ LOAD_D% = LOAD% + P% - CODE%
 
  CMP #&16
  BNE l_412e
- JMP l_3160
+ JMP TT167
 
 .l_412e
 
@@ -15992,9 +16582,9 @@ LOAD_D% = LOAD% + P% - CODE%
  JSR ee3
  DEC &2F
  BNE l_418a
- JMP l_3254
+ JMP TT18
 
-.l_41a6
+.BAD
 
  LDA QQ20+&03
  CLC
@@ -16077,7 +16667,7 @@ LOAD_D% = LOAD% + P% - CODE%
 
 .l_41e9
 
- JSR l_3f62
+ JSR Ze
  LSR A
  LSR A
  STA &46
@@ -16127,9 +16717,9 @@ LOAD_D% = LOAD% + P% - CODE%
  JSR l_3619
  JMP l_1220
 
-.start
+.RSHIPS
 
- JSR l_4255
+ JSR LSHIPS
  JSR l_3ece
  LDA #&FF
  STA &8E
@@ -16137,19 +16727,19 @@ LOAD_D% = LOAD% + P% - CODE%
  LDA #&20
  JMP l_40fb
 
-.l_4255
+.LSHIPS
 
  LDA #0
  STA &9F	\ reset finder
  JSR l_3eb8
  LDA #&06
- BCS l_427e
+ BCS SHIPinA
  JSR DORND
  AND #&03
- LDX home_govmt
+ LDX gov
  CPX #&03
  ROL A
- LDX home_tech
+ LDX tek
  CPX #&0A
  ROL A
  ADC GCNT	\ 16+7 -> 23 files !
@@ -16167,7 +16757,7 @@ LOAD_D% = LOAD% + P% - CODE%
 
  TXA
 
-.l_427e
+.SHIPinA
 
  CLC
  ADC #&41
