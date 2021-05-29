@@ -13089,59 +13089,187 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  LDA #f3                \ AJD
  JMP FRCE
 
+\ ******************************************************************************
+\
+\       Name: MT26
+\       Type: Subroutine
+\   Category: Text
+\    Summary: Fetch a line of text from the keyboard
+\  Deep dive: Extended text tokens
+\
+\ ------------------------------------------------------------------------------
+\
+\ If ESCAPE is pressed or a blank name is entered, then an empty string is
+\ returned.
+\
+\ Returns:
+\
+\   Y                   The size of the entered text, or 0 if none was entered
+\                       or if ESCAPE was pressed
+\
+\   INWK+5              The entered text, terminated by a carriage return
+\
+\   C flag              Set if ESCAPE was pressed
+\
+\ ******************************************************************************
+
 .MT26
 
- LDA #&81
- STA &FE4E
- JSR FLKB
- LDX #LO(word_0)
- LDY #HI(word_0)
- LDA #&00
- JSR osword
- BCC l_39e1
- LDY #&00
+ LDA #%10000001         \ Clear 6522 System VIA interrupt enable register IER
+ STA VIA+&4E            \ (SHEILA &4E) bit 1 (i.e. enable the CA2 interrupt,
+                        \ which comes from the keyboard)
 
-.l_39e1
+ JSR FLKB               \ Call FLKB to flush the keyboard buffer
 
- LDA #&01
- STA &FE4E
- JMP FEED
+ LDX #LO(RLINE)         \ Set (Y X) to point to the RLINE parameter block
+ LDY #HI(RLINE)
 
-.word_0
+ LDA #0                 \ Call OSWORD with A = 0 to read a line from the current
+ JSR OSWORD             \ input stream (i.e. the keyboard)
 
- EQUW &004B
- EQUB &09, &21, &7B
+ BCC P%+4               \ The C flag will be set if we pressed ESCAPE when
+                        \ entering the name, otherwise it will be clear, so
+                        \ skip the next instruction if ESCAPE is not pressed
+
+ LDY #0                 \ ESCAPE was pressed, so set Y = 0 (as the OSWORD call
+                        \ returns the length of the entered string in Y)
+
+ LDA #%00000001         \ Set 6522 System VIA interrupt enable register IER
+ STA VIA+&4E            \ (SHEILA &4E) bit 1 (i.e. disable the CA2 interrupt,
+                        \ which comes from the keyboard)
+
+ JMP FEED               \ Jump to FEED to print a newline, returning from the
+                        \ subroutine using a tail call
+
+\ ******************************************************************************
+\
+\       Name: RLINE
+\       Type: Variable
+\   Category: Text
+\    Summary: The OSWORD configuration block used to fetch a line of text from
+\             the keyboard
+\
+\ ******************************************************************************
+
+.RLINE
+
+ EQUW INWK+5            \ The address to store the input, so the text entered
+                        \ will be stored in INWK+5 as it is typed
+
+ EQUB 9                 \ Maximum line length = 9, as that's the maximum size
+                        \ for a commander's name including a directory name
+
+ EQUB '!'               \ Allow ASCII characters from "!" through to "{" in
+ EQUB '{'               \ the input
+
+\ ******************************************************************************
+\
+\       Name: ZERO
+\       Type: Subroutine
+\   Category: Utility routines
+\    Summary: Zero-fill pages &9, &A, &B, &C and &D
+\
+\ ------------------------------------------------------------------------------
+\
+\ This resets the following workspaces to zero:
+\
+\   * The ship data blocks ascending from K% at &0900
+\
+\   * The ship line heap descending from WP at &0D40
+\
+\   * WP workspace variables from FRIN to de, which include the ship slots for
+\     the local bubble of universe, and various flight and ship status variables
+\     (only a portion of the LSX/LSO sun line heap is cleared)
+\
+\ ******************************************************************************
 
 .ZERO
 
- LDX #&3A
- LDA #&00
+ LDX #(de-FRIN)         \ We're going to zero the UP workspace variables from
+                        \ FRIN to de, so set a counter in X for the correct
+                        \ number of bytes
 
-.l_39f2
+ LDA #0                 \ Set A = 0 so we can zero the variables
 
- STA FRIN,X
- DEX
- BPL l_39f2
- RTS
+.ZEL2
+
+ STA FRIN,X             \ Zero the X-th byte of FRIN to de
+
+ DEX                    \ Decrement the loop counter
+
+ BPL ZEL2               \ Loop back to zero the next variable until we have done
+                        \ them all
+
+ RTS                    \ Return from the subroutine
+
+\ ******************************************************************************
+\
+\       Name: ZES1
+\       Type: Subroutine
+\   Category: Utility routines
+\    Summary: Zero-fill the page whose number is in X
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   X                   The page we want to zero-fill
+\
+\ ******************************************************************************
 
 .ZES1
 
- LDY #&00
- STY SC
+ LDY #0                 \ If we set Y = SC = 0 and fall through into ZES2
+ STY SC                 \ below, then we will zero-fill 255 bytes starting from
+                        \ SC - in other words, we will zero-fill the whole of
+                        \ page X
+
+\ ******************************************************************************
+\
+\       Name: ZES2
+\       Type: Subroutine
+\   Category: Utility routines
+\    Summary: Zero-fill a specific page
+\
+\ ------------------------------------------------------------------------------
+\
+\ Zero-fill from address (X SC) + Y to (X SC) + &FF.
+\
+\ Arguments:
+\
+\   Y                   The offset from (X SC) where we start zeroing, counting
+\                       up to to &FF
+\
+\   SC                  The low byte (i.e. the offset into the page) of the
+\                       starting point of the zero-fill
+\
+\ Returns:
+\
+\   Z flag              Z flag is set
+\
+\ ******************************************************************************
 
 .ZES2
 
- LDA #&00
- STX SC+&01
+ LDA #0                 \ Load A with the byte we want to fill the memory block
+                        \ with - i.e. zero
 
-.l_3a07
+ STX SC+1               \ We want to zero-fill page X, so store this in the
+                        \ high byte of SC, so the 16-bit address in SC and
+                        \ SC+1 is now pointing to the SC-th byte of page X
 
- STA (SC),Y
- INY
- BNE l_3a07
- RTS
+.ZEL1
 
-.l_3bd6
+ STA (SC),Y             \ Zero the Y-th byte of the block pointed to by SC,
+                        \ so that's effectively the Y-th byte before SC
+
+ INY                    \ Increment the loop counter
+
+ BNE ZEL1               \ Loop back to zero the next byte
+
+ RTS                    \ Return from the subroutine
+
+.NORM
 
  LDA &34
  JSR SQUA
@@ -13424,7 +13552,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  STA &35
  LDA &54
  STA &36
- JSR l_3bd6
+ JSR NORM
  LDA &34
  STA &50
  LDA &35
@@ -13448,7 +13576,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  STA &35
  LDA &5A
  STA &36
- JSR l_3bd6
+ JSR NORM
  LDA &34
  STA &56
  LDA &35

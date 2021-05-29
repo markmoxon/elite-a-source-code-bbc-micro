@@ -18977,31 +18977,108 @@ LOAD_E% = LOAD% + P% - CODE%
 
  EQUS "L.S.0", &0D
 
+\ ******************************************************************************
+\
+\       Name: ZERO
+\       Type: Subroutine
+\   Category: Utility routines
+\    Summary: Zero-fill pages &9, &A, &B, &C and &D
+\
+\ ------------------------------------------------------------------------------
+\
+\ This resets the following workspaces to zero:
+\
+\   * The ship data blocks ascending from K% at &0900
+\
+\   * The ship line heap descending from WP at &0D40
+\
+\   * WP workspace variables from FRIN to de, which include the ship slots for
+\     the local bubble of universe, and various flight and ship status variables
+\     (only a portion of the LSX/LSO sun line heap is cleared)
+\
+\ ******************************************************************************
+
 .ZERO
 
- LDX #&3A
- LDA #&00
+ LDX #(de-FRIN)         \ We're going to zero the UP workspace variables from
+                        \ FRIN to de, so set a counter in X for the correct
+                        \ number of bytes
 
-.l_429a
+ LDA #0                 \ Set A = 0 so we can zero the variables
 
- STA FRIN,X
- DEX
- BPL l_429a
- RTS
+.ZEL2
+
+ STA FRIN,X             \ Zero the X-th byte of FRIN to de
+
+ DEX                    \ Decrement the loop counter
+
+ BPL ZEL2               \ Loop back to zero the next variable until we have done
+                        \ them all
+
+ RTS                    \ Return from the subroutine
+
+\ ******************************************************************************
+\
+\       Name: ZES1
+\       Type: Subroutine
+\   Category: Utility routines
+\    Summary: Zero-fill the page whose number is in X
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   X                   The page we want to zero-fill
+\
+\ ******************************************************************************
 
 .ZES1
 
- STX SC+&01
- LDA #&00
- STA SC
- TAY
+ STX SC+1               \ We want to zero-fill page X, so store this in the
+                        \ high byte of SC, so SC(1 0) is now pointing to page X
 
-.l_42a8
+ LDA #0                 \ If we set Y = SC = 0 and fall through into ZES2
+ STA SC                 \ below, then we will zero-fill 255 bytes starting from
+ TAY                    \ SC, then SC + 255, and then the rest of the page - in
+                        \ other words, we will zero-fill the whole of page X
 
- STA (SC),Y
- DEY
- BNE l_42a8
- RTS
+\ ******************************************************************************
+\
+\       Name: ZES2
+\       Type: Subroutine
+\   Category: Utility routines
+\    Summary: Zero-fill a specific page
+\
+\ ------------------------------------------------------------------------------
+\
+\ Zero-fill from address (X SC) to (X SC) + Y.
+\
+\ Arguments:
+\
+\   Y                   The offset from (X SC) where we start zeroing, counting
+\                       down to 0
+\
+\   SC                  The low byte (i.e. the offset into the page) of the
+\                       starting point of the zero-fill
+\
+\ Returns:
+\
+\   Z flag              Z flag is set
+\
+\ ******************************************************************************
+
+.ZES2
+
+.ZEL1
+
+ STA (SC),Y             \ Zero the Y-th byte of the block pointed to by SC,
+                        \ so that's effectively the Y-th byte before SC
+
+ DEY                    \ Decrement the loop counter
+
+ BNE ZEL1               \ Loop back to zero the next byte
+
+ RTS                    \ Return from the subroutine
 
 .l_42ae
 
@@ -19049,7 +19126,7 @@ LOAD_E% = LOAD% + P% - CODE%
  ORA &DA
  STA &36
 
-.l_42f5
+.NORM
 
  LDA &34
  JSR SQUA
@@ -19684,7 +19761,7 @@ LOAD_E% = LOAD% + P% - CODE%
  STA &35
  LDA &54
  STA &36
- JSR l_42f5
+ JSR NORM
  LDA &34
  STA &50
  LDA &35
@@ -19708,7 +19785,7 @@ LOAD_E% = LOAD% + P% - CODE%
  STA &35
  LDA &5A
  STA &36
- JSR l_42f5
+ JSR NORM
  LDA &34
  STA &56
  LDA &35
