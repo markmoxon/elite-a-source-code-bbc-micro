@@ -1931,12 +1931,9 @@ cmdr_cour = &387
 cmdr_courx = &389
 cmdr_coury = &38A
 
-s_flag = &3C6
 a_flag = &3C8
-y_flag = &3CB
-j_flag = &3CC
 b_flag = &3CE
- \
+
 save_lock = &233
 new_file = &234
 new_posn = &235
@@ -16449,45 +16446,113 @@ ENDIF
  LDA #200               \ X, and return from the subroutine using a tail call
  JMP OSBYTE
 
+\ ******************************************************************************
+\
+\       Name: NORM
+\       Type: Subroutine
+\   Category: Maths (Geometry)
+\    Summary: Normalise the three-coordinate vector in XX15
+\  Deep dive: Tidying orthonormal vectors
+\             Orientation vectors
+\
+\ ------------------------------------------------------------------------------
+\
+\ We do this by dividing each of the three coordinates by the length of the
+\ vector, which we can calculate using Pythagoras. Once normalised, 96 (&E0) is
+\ used to represent a value of 1, and 96 with bit 7 set (&E0) is used to
+\ represent -1. This enables us to represent fractional values of less than 1
+\ using integers.
+\
+\ Arguments:
+\
+\   XX15                The vector to normalise, with:
+\
+\                         * The x-coordinate in XX15
+\
+\                         * The y-coordinate in XX15+1
+\
+\                         * The z-coordinate in XX15+2
+\
+\ Returns:
+\
+\   XX15                The normalised vector
+\
+\   Q                   The length of the original XX15 vector
+\
+\ Other entry points:
+\
+\   NO1                 Contains an RTS
+\
+\ ******************************************************************************
+
 .NORM
 
- LDA &34
- JSR SQUA
- STA &82
- LDA &1B
- STA &81
- LDA &35
- JSR SQUA
- STA &D1
- LDA &1B
- ADC &81
- STA &81
- LDA &D1
- ADC &82
- STA &82
- LDA &36
- JSR SQUA
- STA &D1
- LDA &1B
- ADC &81
- STA &81
- LDA &D1
- ADC &82
- STA &82
- JSR LL5
- LDA &34
- JSR l_3e8c
- STA &34
- LDA &35
- JSR l_3e8c
- STA &35
- LDA &36
- JSR l_3e8c
- STA &36
+ LDA XX15               \ Fetch the x-coordinate into A
 
-.l_3c1f
+ JSR SQUA               \ Set (A P) = A * A = x^2
 
- RTS
+ STA R                  \ Set (R Q) = (A P) = x^2
+ LDA P
+ STA Q
+
+ LDA XX15+1             \ Fetch the y-coordinate into A
+
+ JSR SQUA               \ Set (A P) = A * A = y^2
+
+ STA T                  \ Set (T P) = (A P) = y^2
+
+ LDA P                  \ Set (R Q) = (R Q) + (T P) = x^2 + y^2
+ ADC Q                  \
+ STA Q                  \ First, doing the low bytes, Q = Q + P
+
+ LDA T                  \ And then the high bytes, R = R + T
+ ADC R
+ STA R
+
+ LDA XX15+2             \ Fetch the z-coordinate into A
+
+ JSR SQUA               \ Set (A P) = A * A = z^2
+
+ STA T                  \ Set (T P) = (A P) = z^2
+
+ LDA P                  \ Set (R Q) = (R Q) + (T P) = x^2 + y^2 + z^2
+ ADC Q                  \
+ STA Q                  \ First, doing the low bytes, Q = Q + P
+
+ LDA T                  \ And then the high bytes, R = R + T
+ ADC R
+ STA R
+
+ JSR LL5                \ We now have the following:
+                        \
+                        \ (R Q) = x^2 + y^2 + z^2
+                        \
+                        \ so we can call LL5 to use Pythagoras to get:
+                        \
+                        \ Q = SQRT(R Q)
+                        \   = SQRT(x^2 + y^2 + z^2)
+                        \
+                        \ So Q now contains the length of the vector (x, y, z),
+                        \ and we can normalise the vector by dividing each of
+                        \ the coordinates by this value, which we do by calling
+                        \ routine TIS2. TIS2 returns the divided figure, using
+                        \ 96 to represent 1 and 96 with bit 7 set for -1
+
+ LDA XX15               \ Call TIS2 to divide the x-coordinate in XX15 by Q,
+ JSR TIS2               \ with 1 being represented by 96
+ STA XX15
+
+ LDA XX15+1             \ Call TIS2 to divide the y-coordinate in XX15+1 by Q,
+ JSR TIS2               \ with 1 being represented by 96
+ STA XX15+1
+
+ LDA XX15+2             \ Call TIS2 to divide the z-coordinate in XX15+2 by Q,
+ JSR TIS2               \ with 1 being represented by 96
+ STA XX15+2
+
+.NO1
+
+ RTS                    \ Return from the subroutine
 
 .scan_fire
 
@@ -16503,54 +16568,182 @@ ENDIF
  TAX
  RTS
 
+\ ******************************************************************************
+\
+\       Name: ECMOF
+\       Type: Subroutine
+\   Category: Sound
+\    Summary: Switch off the E.C.M.
+\
+\ ------------------------------------------------------------------------------
+\
+\ Switch the E.C.M. off, turn off the dashboard bulb and make the sound of the
+\ E.C.M. switching off).
+\
+\ ******************************************************************************
+
 .ECMOF
 
- LDA #&00
- STA &30
- STA &0340
- JSR draw_ecm
- LDA #&48
- BNE NOISE
+ LDA #0                 \ Set ECMA and ECMB to 0 to indicate that no E.C.M. is
+ STA ECMA               \ currently running
+ STA ECMP
+
+ JSR ECBLB              \ Update the E.C.M. indicator bulb on the dashboard
+
+ LDA #72                \ Call the NOISE routine with A = 72 to make the sound
+ BNE NOISE              \ of the E.C.M. being turned off and return from the
+                        \ subroutine using a tail call (this BNE is effectively
+                        \ a JMP as A will never be zero)
+
+\ ******************************************************************************
+\
+\       Name: BEEP
+\       Type: Subroutine
+\   Category: Sound
+\    Summary: Make a short, high beep
+\
+\ ******************************************************************************
 
 .BEEP
 
- LDA #&20
+ LDA #32                \ Set A = 32 to denote a short, high beep, and fall
+                        \ through into the NOISE routine to make the sound
+
+\ ******************************************************************************
+\
+\       Name: NOISE
+\       Type: Subroutine
+\   Category: Sound
+\    Summary: Make the sound whose number is in A
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   A                   The number of the sound to be made. See the
+\                       documentation for variable SFX for a list of sound
+\                       numbers
+\
+\ ******************************************************************************
 
 .NOISE
 
- JSR pp_sound
+ JSR NOS1               \ Set up the sound block in XX16 for the sound in A and
+                        \ fall through into NO3 to make the sound
 
-.sound_rdy
+\ ******************************************************************************
+\
+\       Name: NO3
+\       Type: Subroutine
+\   Category: Sound
+\    Summary: Make a sound from a prepared sound block
+\
+\ ------------------------------------------------------------------------------
+\
+\ Make a sound from a prepared sound block in XX16 (if sound is enabled). See
+\ routine NOS1 for details of preparing the XX16 sound block.
+\
+\ ******************************************************************************
 
- LDX s_flag
- BNE l_3c1f
- LDX #&09
- LDY #&00
- LDA #&07
- JMP osword
+.NO3
 
-.pp_sound
+ LDX DNOIZ              \ Set X to the DNOIZ configuration setting
 
- LSR A
- ADC #&03
- TAY
- LDX #&07
+ BNE NO1                \ If DNOIZ is non-zero, then sound is disabled, so
+                        \ return from the subroutine (as NO1 contains an RTS)
 
-.l_3c83
+ LDX #LO(XX16)          \ Otherwise set (Y X) to point to the sound block in
+ LDY #HI(XX16)          \ XX16
 
- LDA #&00
- STA &09,X
- DEX
- LDA SFX,Y
- STA &09,X
- DEY
- DEX
- BPL l_3c83
- RTS	\++
+ LDA #7                 \ Call OSWORD 7 to makes the sound, as described in the
+ JMP OSWORD             \ documentation for variable SFX, and return from the
+                        \ subroutine using a tail call
+
+\ ******************************************************************************
+\
+\       Name: NOS1
+\       Type: Subroutine
+\   Category: Sound
+\    Summary: Prepare a sound block
+\
+\ ------------------------------------------------------------------------------
+\
+\ Copy four sound bytes from SFX into XX16, interspersing them with null bytes,
+\ with Y indicating the sound number to copy (from the values in the sound
+\ table at SFX). So, for example, if we call this routine with A = 40 (long,
+\ low beep), the following bytes will be set in XX16 to XX16+7:
+\
+\   &13 &00 &F4 &00 &0C &00 &08 &00
+\
+\ This block will be passed to OSWORD 7 to make the sound, which expects the
+\ four sound attributes as 16-bit big-endian values - in other words, with the
+\ low byte first. So the above block would pass the values &0013, &00F4, &000C
+\ and &0008 to the SOUND statement when used with OSWORD 7, or:
+\
+\   SOUND &13, &F4, &0C, &08
+\
+\ as the high bytes are always zero.
+\
+\ Arguments:
+\
+\   A                   The sound number to copy from SFX to XX16, which is
+\                       always a multiple of 8
+\
+\ ******************************************************************************
+
+.NOS1
+
+ LSR A                  \ Divide A by 2, and also clear the C flag, as bit 0 of
+                        \ A is always zero (as A is a multiple of 8)
+
+ ADC #3                 \ Set Y = A + 3, so Y now points to the last byte of
+ TAY                    \ four within the block of four-byte values
+
+ LDX #7                 \ We want to copy four bytes, spread out into an 8-byte
+                        \ block, so set a counter in Y to cover 8 bytes
+
+.NOL1
+
+ LDA #0                 \ Set the X-th byte of XX16 to 0
+ STA XX16,X
+
+ DEX                    \ Decrement the destination byte pointer
+
+ LDA SFX,Y              \ Set the X-th byte of XX16 to the value from SFX+Y
+ STA XX16,X
+
+ DEY                    \ Decrement the source byte pointer again
+
+ DEX                    \ Decrement the destination byte pointer again
+
+ BPL NOL1               \ Loop back for the next source byte
+
+ RTS                    \ Return from the subroutine
+
+\ ******************************************************************************
+\
+\       Name: CTRL
+\       Type: Subroutine
+\   Category: Keyboard
+\    Summary: Scan the keyboard to see if CTRL is currently pressed
+\
+\ ------------------------------------------------------------------------------
+\
+\ Returns:
+\
+\   X                   X = %10000001 (i.e. 129 or -127) if CTRL is being
+\                       pressed
+\
+\                       X = 1 if CTRL is not being pressed
+\
+\   A                   Contains the same as X
+\
+\ ******************************************************************************
 
 .CTRL
 
- LDX #&01
+ LDX #1                 \ Set X to the internal key number for CTRL and fall
+                        \ through to DKS4 to scan the keyboard
 
 .DKS4
 
@@ -16562,91 +16755,262 @@ ENDIF
  TAX
  RTS
 
-.adval
+\ ******************************************************************************
+\
+\       Name: DKS2
+\       Type: Subroutine
+\   Category: Keyboard
+\    Summary: Read the joystick position
+\
+\ ------------------------------------------------------------------------------
+\
+\ Return the value of ADC channel in X (used to read the joystick). The value
+\ will be inverted if the game has been configured to reverse both joystick
+\ channels (which can be done by pausing the game and pressing J).
+\
+\ Arguments:
+\
+\   X                   The ADC channel to read:
+\
+\                         * 1 = joystick X
+\
+\                         * 2 = joystick Y
+\
+\ Returns:
+\
+\   (A X)               The 16-bit value read from channel X, with the value
+\                       inverted if the game has been configured to reverse the
+\                       joystick
+\
+\ ******************************************************************************
 
- LDA #&80
- JSR osbyte
- TYA
- EOR j_flag
- RTS
+.DKS2
 
-.tog_flags
+ LDA #128               \ Call OSBYTE 128 to fetch the 16-bit value from ADC
+ JSR OSBYTE             \ channel X, returning (Y X), i.e. the high byte in Y
+                        \ and the low byte in X
 
- STY &D1
- CPX &D1
- BNE tog_end
- LDA &0387,X
- EOR #&FF
- STA &0387,X
- JSR BELL
- JSR DELAY
- LDY &D1
+ TYA                    \ Copy Y to A, so the result is now in (A X)
 
-.tog_end
+ EOR JSTE               \ The high byte A is now EOR'd with the value in
+                        \ location JSTE, which contains &FF if both joystick
+                        \ channels are reversed and 0 otherwise (so A now
+                        \ contains the high byte but inverted, if that's what
+                        \ the current settings say)
 
- RTS
+ RTS                    \ Return from the subroutine
+
+\ ******************************************************************************
+\
+\       Name: DKS3
+\       Type: Subroutine
+\   Category: Keyboard
+\    Summary: Toggle a configuration setting and emit a beep
+\
+\ ------------------------------------------------------------------------------
+\
+\ This is called when the game is paused and a key is pressed that changes the
+\ game's configuration.
+\
+\ Specifically, this routine toggles the configuration settings for the
+\ following keys:
+\
+\   * CAPS LOCK toggles keyboard flight damping (&40)
+\   * A toggles keyboard auto-recentre (&41)
+\   * X toggles author names on start-up screen (&42)
+\   * F toggles flashing console bars (&43)
+\   * Y toggles reverse joystick Y channel (&44)
+\   * J toggles reverse both joystick channels (&45)
+\   * K toggles keyboard and joystick (&46)
+\
+\ The numbers in brackets are the internal key numbers (see p.142 of the
+\ Advanced User Guide for a list of internal key numbers). We pass the key that
+\ has been pressed in X, and the configuration option to check it against in Y,
+\ so this routine is typically called in a loop that loops through the various
+\ configuration options.
+\
+\ Arguments:
+\
+\   X                   The internal number of the key that's been pressed
+\
+\   Y                   The internal number of the configuration key to check
+\                       against, from the list above (i.e. Y must be from &40 to
+\                       &46)
+\
+\ ******************************************************************************
+
+.DKS3
+
+ STY T                  \ Store the configuration key argument in T
+
+ CPX T                  \ If X <> Y, jump to Dk3 to return from the subroutine
+ BNE Dk3
+
+                        \ We have a match between X and Y, so now to toggle
+                        \ the relevant configuration byte. CAPS LOCK has a key
+                        \ value of &40 and has its configuration byte at
+                        \ location DAMP, A has a value of &41 and has its byte
+                        \ at location DJD, which is DAMP+1, and so on. So we
+                        \ can toggle the configuration byte by changing the
+                        \ byte at DAMP + (X - &40), or to put it in indexing
+                        \ terms, DAMP-&40,X. It's no coincidence that the
+                        \ game's configuration bytes are set up in this order
+                        \ and with these keys (and this is also why the sound
+                        \ on/off keys are dealt with elsewhere, as the internal
+                        \ key for S and Q are &51 and &10, which don't fit
+                        \ nicely into this approach)
+
+ LDA DAMP-&40,X         \ Fetch the byte from DAMP + (X - &40), invert it and
+ EOR #&FF               \ put it back (0 means no and &FF means yes in the
+ STA DAMP-&40,X         \ configuration bytes, so this toggles the setting)
+
+ JSR BELL               \ Make a beep sound so we know something has happened
+
+ JSR DELAY              \ Wait for Y vertical syncs (Y is between 64 and 70, so
+                        \ this is always a bit longer than a second)
+
+ LDY T                  \ Restore the configuration key argument into Y
+
+.Dk3
+
+ RTS                    \ Return from the subroutine
+
+\ ******************************************************************************
+\
+\       Name: DOKEY
+\       Type: Subroutine
+\   Category: Keyboard
+\
+\ ******************************************************************************
 
 .DOKEY
 
- LDA JSTK
- BEQ spec_key
- LDX #&01
- JSR adval
- ORA #&01
- STA JSTX
- LDX #&02
- JSR adval
- EOR y_flag
- STA JSTY
+ LDA JSTK               \ If JSTK is zero, then we are configured to use the
+ BEQ DK4                \ keyboard rather than the joystick, so jump to DK4
 
-.spec_key
+ LDX #1                 \ Call DKS2 to fetch the value of ADC channel 1 (the
+ JSR DKS2               \ joystick X value) into (A X), and OR A with 1. This
+ ORA #1                 \ ensures that the high byte is at least 1, and then we
+ STA JSTX               \ store the result in JSTX
 
- JSR RDKEY
- STX KL
- CPX #&69
- BNE no_freeze
+ LDX #2                 \ Call DKS2 to fetch the value of ADC channel 2 (the
+ JSR DKS2               \ joystick Y value) into (A X), and EOR A with JSTGY.
+ EOR JSTGY              \ JSTGY will be &FF if the game is configured to
+ STA JSTY               \ reverse the joystick Y channel, so this EOR does
+                        \ exactly that, and then we store the result in JSTY
 
-.no_thaw
+                        \ Fall through into DK4 to scan for other keys
 
- JSR WSCAN
- JSR RDKEY
- CPX #&51
- BNE not_sound
- LDA #&00
- STA s_flag
+\ ******************************************************************************
+\
+\       Name: DK4
+\       Type: Subroutine
+\   Category: Keyboard
+\    Summary: Scan for pause, configuration and secondary flight keys
+\  Deep dive: The key logger
+\
+\ ------------------------------------------------------------------------------
+\
+\ Scan for pause and configuration keys, and if this is a space view, also scan
+\ for secondary flight controls.
+\
+\ Specifically:
+\
+\   * Scan for the pause button (COPY) and if it's pressed, pause the game and
+\     process any configuration key presses until the game is unpaused (DELETE)
+\
+\   * If this is a space view, scan for secondary flight keys and update the
+\     relevant bytes in the key logger
+\
+\ ******************************************************************************
 
-.not_sound
+.DK4
 
- LDY #&40
+ JSR RDKEY              \ Scan the keyboard for a key press and return the
+                        \ internal key number in X (or 0 for no key press)
 
-.flag_loop
+ STX KL                 \ Store X in KL, byte #0 of the key logger
 
- JSR tog_flags
- INY
- CPY #&48
- BNE flag_loop
- CPX #&10
- BNE not_quiet
- STX s_flag
+ CPX #&69               \ If COPY is not being pressed, jump to DK2 below,
+ BNE DK2                \ otherwise let's process the configuration keys
 
-.not_quiet
+.FREEZE
 
- CPX #&70
- BNE not_escape
- JMP BR1
+                        \ COPY is being pressed, so we enter a loop that
+                        \ listens for configuration keys, and we keep looping
+                        \ until we detect a DELETE key press. This effectively
+                        \ pauses the game when COPY is pressed, and unpauses
+                        \ it when DELETE is pressed
 
-.not_escape
+ JSR WSCAN              \ Call WSCAN to wait for the vertical sync, so the whole
+                        \ screen gets drawn
 
- CPX #&59
- BNE no_thaw
+ JSR RDKEY              \ Scan the keyboard for a key press and return the
+                        \ internal key number in X (or 0 for no key press)
 
-.no_freeze
+ CPX #&51               \ If "S" is not being pressed, skip to DK6
+ BNE DK6
 
- LDA &87
- BNE frz_ret
- LDY #&10
- LDA #&FF
- RTS
+ LDA #0                 \ "S" is being pressed, so set DNOIZ to 0 to turn the
+ STA DNOIZ              \ sound on
+
+.DK6
+
+ LDY #&40               \ We now want to loop through the keys that toggle
+                        \ various settings. These have internal key numbers
+                        \ between &40 (CAPS LOCK) and &46 ("K"), so we set up
+                        \ the first key number in Y to act as a loop counter.
+                        \ See subroutine DKS3 for more details on this
+
+.DKL4
+
+ JSR DKS3               \ Call DKS3 to scan for the key given in Y, and toggle
+                        \ the relevant setting if it is pressed
+
+ INY                    \ Increment Y to point to the next toggle key
+
+ CPY #&48               \ AJD
+
+ BNE DKL4               \ If not, loop back to check for the next toggle key
+
+.DK55
+
+ CPX #&10               \ If "Q" is not being pressed, skip to DK7
+ BNE DK7
+
+ STX DNOIZ              \ "Q" is being pressed, so set DNOIZ to X, which is
+                        \ non-zero (&10), so this will turn the sound off
+
+.DK7
+
+ CPX #&70               \ If ESCAPE is not being pressed, skip over the next
+ BNE P%+5               \ instruction
+
+ JMP BR1                \ ESCAPE is being pressed, so jump to BR1 to end the
+                        \ game
+
+ CPX #&59               \ If DELETE is not being pressed, we are still paused,
+ BNE FREEZE             \ so loop back up to keep listening for configuration
+                        \ keys, otherwise fall through into the rest of the
+                        \ key detection code, which unpauses the game
+
+.DK2
+
+ LDA QQ11               \ If the current view is non-zero (i.e. not a space
+ BNE out                \ view), return from the subroutine (as out contains
+                        \ an RTS)
+
+ LDY #16                \ This is a space view, so now we want to check for all
+                        \ the secondary flight keys. The internal key numbers
+                        \ are in the keyboard table KYTB from KYTB+8 to
+                        \ KYTB+16, and their key logger locations are from KL+8
+                        \ to KL+16. So set a decreasing counter in Y for the
+                        \ index, starting at 16, so we can loop through them
+
+ LDA #&FF               \ Set A to &FF so we can store this in the keyboard
+                        \ logger for keys that are being pressed
+
+ RTS                    \ Return from the subroutine
 
 .TT217
 
@@ -16657,7 +17021,7 @@ ENDIF
  JSR tube_read
  TAX
 
-.frz_ret
+.out
 
  RTS
 
@@ -16773,7 +17137,7 @@ ENDIF
  BPL l_3e85
  RTS
 
-.l_3e8c
+.TIS2
 
  TAY
  AND #&7F
@@ -21730,7 +22094,7 @@ ENDIF
  JSR d_263d
  JMP run_tcode
  \d_1452
- \	JSR d_43b1
+ \	JSR EXNO3
  \	JSR d_2160
  \	BNE d_1473
 
@@ -21757,7 +22121,7 @@ ENDIF
 .d_146d
 
  JSR n_through
- JSR d_43b1
+ JSR EXNO3
 
 .d_1473
 
@@ -21789,7 +22153,7 @@ ENDIF
  LDA &44
  BEQ d_14ed
  LDX #&0F
- JSR d_43dd
+ JSR EXNO
  LDA &44
  LDY &8C
  CPY #&02
@@ -21820,7 +22184,7 @@ ENDIF
  JSR d_1678
  LDY #&05
  JSR d_1678
- JSR d_43ce
+ JSR EXNO2
 
 .d_14e6
 
@@ -23354,7 +23718,7 @@ ENDIF
 .d_210c
 
  JSR d_2160
- JSR d_43b1
+ JSR EXNO3
  LDA #&FA
  JMP d_36e4
 
@@ -23408,7 +23772,7 @@ ENDIF
 
 .d_215d
 
- JSR d_43ce
+ JSR EXNO2
 
 .d_2160
 
@@ -26670,7 +27034,7 @@ ENDIF
 
 .d_3719
 
- JSR d_43b1
+ JSR EXNO3
  JMP d_45ea
 
 .d_371f
@@ -27172,7 +27536,7 @@ ENDIF
  ASL A
  JSR NOISE
 
-.draw_ecm
+.ECBLB
 
  LDA #&93
  JMP tube_write
@@ -28466,7 +28830,7 @@ ENDIF
 
 .d_41c6
 
- JSR d_43b1
+ JSR EXNO3
  JSR RES2
  ASL &7D
  ASL &7D
@@ -28761,11 +29125,31 @@ ENDIF
  LDA #&28
  JMP NOISE
 
-.d_43b1
+\ ******************************************************************************
+\
+\       Name: EXNO3
+\       Type: Subroutine
+\   Category: Sound
+\    Summary: Make an explosion sound
+\
+\ ------------------------------------------------------------------------------
+\
+\ Make the sound of death in the cold, hard vacuum of space. Apparently, in
+\ Elite space, everyone can hear you scream.
+\
+\ This routine also makes the sound of a destroyed cargo canister if we don't
+\ get scooping right, the sound of us colliding with another ship, and the sound
+\ of us being hit with depleted shields. It is not a good sound to hear.
+\
+\ ******************************************************************************
 
- JSR sound_10
- LDA #&18
- JMP NOISE
+.EXNO3
+
+ JSR sound_10           \ AJD
+
+ LDA #24                \ Call the NOISE routine with A = 24 to make the
+ JMP NOISE              \ death sound and return from the subroutine using a
+                        \ tail call
 
 .d_43be
 
@@ -28784,35 +29168,117 @@ ENDIF
 
  RTS
 
-.d_43ce
+\ ******************************************************************************
+\
+\       Name: EXNO2
+\       Type: Subroutine
+\   Category: Sound
+\    Summary: Process us making a kill
+\  Deep dive: Combat rank
+\
+\ ------------------------------------------------------------------------------
+\
+\ We have killed a ship, so increase the kill tally, displaying an iconic
+\ message of encouragement if the kill total is a multiple of 256, and then
+\ make a nearby explosion sound.
+\
+\ Other entry points:
+\
+\   EXNO-2              Set X = 7 and fall through into EXNO to make the sound
+\                       of a ship exploding
+\
+\ ******************************************************************************
 
- INC TALLY
- BNE d_43db
- INC TALLY+&01
- LDA #&65
- JSR MESS
+.EXNO2
 
-.d_43db
+ INC TALLY              \ Increment the low byte of the kill count in TALLY
 
- LDX #&07
+ BNE EXNO-2             \ If there is no carry, jump to the LDX #7 below (at
+                        \ EXNO-2)
 
-.d_43dd
+ INC TALLY+1            \ Increment the high byte of the kill count in TALLY
 
- STX &D1
- LDA #&18
- JSR pp_sound
- LDA &4D
- LSR A
- LSR A
- AND &D1
- ORA #&F1
- STA &0B
- JSR sound_rdy
+ LDA #101               \ The kill total is a multiple of 256, so it's time
+ JSR MESS               \ for a pat on the back, so print recursive token 101
+                        \ ("RIGHT ON COMMANDER!") as an in-flight message
+
+ LDX #7                 \ Set X = 7 and fall through into EXNO to make the
+                        \ sound of a ship exploding
+
+\ ******************************************************************************
+\
+\       Name: EXNO
+\       Type: Subroutine
+\   Category: Sound
+\    Summary: Make the sound of a laser strike or ship explosion
+\
+\ ------------------------------------------------------------------------------
+\
+\ Make the two-part explosion sound of us making a laser strike, or of another
+\ ship exploding.
+\
+\ The volume of the first explosion is affected by the distance of the ship
+\ being hit, with more distant ships being quieter. The value in X also affects
+\ the volume of the first explosion, with a higher X giving a quieter sound
+\ (so X can be used to differentiate a laser strike from an explosion).
+\
+\ Arguments:
+\
+\   X                   The larger the value of X, the fainter the explosion.
+\                       Allowed values are:
+\
+\                         * 7  = explosion is louder (i.e. the ship has just
+\                                exploded)
+\
+\                         * 15 = explosion is quieter (i.e. this is just a laser
+\                                strike)
+\
+\ ******************************************************************************
+
+.EXNO
+
+ STX T                  \ Store the distance in T
+
+ LDA #24                \ Set A = 24 to denote the sound of us making a hit or
+ JSR NOS1               \ kill (part 1 of the explosion), and call NOS1 to set
+                        \ up the sound block in XX16
+
+ LDA INWK+7             \ Fetch z_hi, the distance of the ship being hit in
+ LSR A                  \ terms of the z-axis (in and out of the screen), and
+ LSR A                  \ divide by 4. If z_hi has either bit 6 or 7 set then
+                        \ that ship is too far away to be shown on the scanner
+                        \ (as per the SCAN routine), so we know the maximum
+                        \ z_hi at this point is %00111111, and shifting z_hi
+                        \ to the right twice gives us a maximum value of
+                        \ %00001111
+
+ AND T                  \ This reduces A to a maximum of X; X can be either
+                        \ 7 = %0111 or 15 = %1111, so AND'ing with 15 will
+                        \ not affect A, while AND'ing with 7 will clear bit
+                        \ 3, reducing the maximum value in A to 7
+
+ ORA #%11110001         \ The SOUND statement's amplitude ranges from 0 (for no
+                        \ sound) to -15 (full volume), so we can set bits 0 and
+                        \ 4-7 in A, and keep bits 1-3 from the above to get
+                        \ a value between -15 (%11110001) and -1 (%11111111),
+                        \ with lower values of z_hi and argument X leading
+                        \ to a more negative, or quieter number (so the closer
+                        \ the ship, i.e. the smaller the value of X, the louder
+                        \ the sound)
+
+ STA XX16+2             \ The amplitude byte of the sound block in XX16 is in
+                        \ byte #3 (where it's the low byte of the amplitude), so
+                        \ this sets the amplitude to the value in A
+
+ JSR NO3                \ Make the sound from our updated sound block in XX16
 
 .sound_10
 
- LDA #&10
- JMP NOISE
+ LDA #16                \ Set A = 16 to denote we have made a hit or kill
+                        \ (part 2 of the explosion), and fall through into NOISE
+                        \ to make the sound
+
+ JMP NOISE              \ AJD
 
 .d_4429
 
@@ -28842,12 +29308,12 @@ ENDIF
  EOR #&10
  STA &0307
  LDX #&01
- JSR adval
+ JSR DKS2
  ORA #&01
  STA JSTX
  LDX #&02
- JSR adval
- EOR y_flag
+ JSR DKS2
+ EOR JSTGY
  STA JSTY
  JMP d_4555
 
@@ -29002,7 +29468,7 @@ ENDIF
  CPX #&51
  BNE d_456e
  LDA #&00
- STA s_flag
+ STA DNOIZ
 
 .d_456e
 
@@ -29010,13 +29476,13 @@ ENDIF
 
 .d_4570
 
- JSR tog_flags
+ JSR DKS3
  INY
  CPY #&48
  BNE d_4570
  CPX #&10
  BNE d_457f
- STX s_flag
+ STX DNOIZ
 
 .d_457f
 

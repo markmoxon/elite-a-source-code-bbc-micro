@@ -13269,261 +13269,835 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
  RTS                    \ Return from the subroutine
 
+\ ******************************************************************************
+\
+\       Name: NORM
+\       Type: Subroutine
+\   Category: Maths (Geometry)
+\    Summary: Normalise the three-coordinate vector in XX15
+\  Deep dive: Tidying orthonormal vectors
+\             Orientation vectors
+\
+\ ------------------------------------------------------------------------------
+\
+\ We do this by dividing each of the three coordinates by the length of the
+\ vector, which we can calculate using Pythagoras. Once normalised, 96 (&E0) is
+\ used to represent a value of 1, and 96 with bit 7 set (&E0) is used to
+\ represent -1. This enables us to represent fractional values of less than 1
+\ using integers.
+\
+\ Arguments:
+\
+\   XX15                The vector to normalise, with:
+\
+\                         * The x-coordinate in XX15
+\
+\                         * The y-coordinate in XX15+1
+\
+\                         * The z-coordinate in XX15+2
+\
+\ Returns:
+\
+\   XX15                The normalised vector
+\
+\   Q                   The length of the original XX15 vector
+\
+\ Other entry points:
+\
+\   NO1                 Contains an RTS
+\
+\ ******************************************************************************
+
 .NORM
 
- LDA &34
- JSR SQUA
- STA &82
- LDA &1B
- STA &81
- LDA &35
- JSR SQUA
- STA &D1
- LDA &1B
- ADC &81
- STA &81
- LDA &D1
- ADC &82
- STA &82
- LDA &36
- JSR SQUA
- STA &D1
- LDA &1B
- ADC &81
- STA &81
- LDA &D1
- ADC &82
- STA &82
- JSR LL5
- LDA &34
- JSR l_3e8c
- STA &34
- LDA &35
- JSR l_3e8c
- STA &35
- LDA &36
- JSR l_3e8c
- STA &36
+ LDA XX15               \ Fetch the x-coordinate into A
 
-.l_3c1f
+ JSR SQUA               \ Set (A P) = A * A = x^2
 
- RTS
+ STA R                  \ Set (R Q) = (A P) = x^2
+ LDA P
+ STA Q
+
+ LDA XX15+1             \ Fetch the y-coordinate into A
+
+ JSR SQUA               \ Set (A P) = A * A = y^2
+
+ STA T                  \ Set (T P) = (A P) = y^2
+
+ LDA P                  \ Set (R Q) = (R Q) + (T P) = x^2 + y^2
+ ADC Q                  \
+ STA Q                  \ First, doing the low bytes, Q = Q + P
+
+ LDA T                  \ And then the high bytes, R = R + T
+ ADC R
+ STA R
+
+ LDA XX15+2             \ Fetch the z-coordinate into A
+
+ JSR SQUA               \ Set (A P) = A * A = z^2
+
+ STA T                  \ Set (T P) = (A P) = z^2
+
+ LDA P                  \ Set (R Q) = (R Q) + (T P) = x^2 + y^2 + z^2
+ ADC Q                  \
+ STA Q                  \ First, doing the low bytes, Q = Q + P
+
+ LDA T                  \ And then the high bytes, R = R + T
+ ADC R
+ STA R
+
+ JSR LL5                \ We now have the following:
+                        \
+                        \ (R Q) = x^2 + y^2 + z^2
+                        \
+                        \ so we can call LL5 to use Pythagoras to get:
+                        \
+                        \ Q = SQRT(R Q)
+                        \   = SQRT(x^2 + y^2 + z^2)
+                        \
+                        \ So Q now contains the length of the vector (x, y, z),
+                        \ and we can normalise the vector by dividing each of
+                        \ the coordinates by this value, which we do by calling
+                        \ routine TIS2. TIS2 returns the divided figure, using
+                        \ 96 to represent 1 and 96 with bit 7 set for -1
+
+ LDA XX15               \ Call TIS2 to divide the x-coordinate in XX15 by Q,
+ JSR TIS2               \ with 1 being represented by 96
+ STA XX15
+
+ LDA XX15+1             \ Call TIS2 to divide the y-coordinate in XX15+1 by Q,
+ JSR TIS2               \ with 1 being represented by 96
+ STA XX15+1
+
+ LDA XX15+2             \ Call TIS2 to divide the z-coordinate in XX15+2 by Q,
+ JSR TIS2               \ with 1 being represented by 96
+ STA XX15+2
+
+.NO1
+
+ RTS                    \ Return from the subroutine
+
+\ ******************************************************************************
+\
+\       Name: RDKEY
+\       Type: Subroutine
+\   Category: Keyboard
+\    Summary: Scan the keyboard for key presses
+\
+\ ------------------------------------------------------------------------------
+\
+\ Scan the keyboard, starting with internal key number 16 ("Q") and working
+\ through the set of internal key numbers (see p.142 of the Advanced User Guide
+\ for a list of internal key numbers).
+\
+\ This routine is effectively the same as OSBYTE 122, though the OSBYTE call
+\ preserves A, unlike this routine.
+\
+\ Returns:
+\
+\   X                   If a key is being pressed, X contains the internal key
+\                       number, otherwise it contains 0
+\
+\   A                   Contains the same as X
+\
+\ ******************************************************************************
 
 .RDKEY
 
- LDX #&10
+ LDX #16                \ Start the scan with internal key number 16 ("Q")
 
-.scan_loop
+.Rd1
 
- JSR DKS4
- BMI scan_key
- INX
- BPL scan_loop
- TXA
+ JSR DKS4               \ Scan the keyboard to see if the key in X is currently
+                        \ being pressed, returning the result in A and X
 
-.scan_key
+ BMI Rd2                \ Jump to Rd2 if this key is being pressed (in which
+                        \ case DKS4 will have returned the key number with bit
+                        \ 7 set, which is negative)
 
- EOR #&80
- TAX
- RTS
+ INX                    \ Increment the key number, which was unchanged by the
+                        \ above call to DKS4
+
+ BPL Rd1                \ Loop back to test the next key, ending the loop when
+                        \ X is negative (i.e. 128)
+
+ TXA                    \ If we get here, nothing is being pressed, so copy X
+                        \ into A so that X = A = 128 = %10000000
+
+.Rd2
+
+ EOR #%10000000         \ EOR A with #%10000000 to flip bit 7, so A now contains
+                        \ 0 if no key has been pressed, or the internal key
+                        \ number if a key has been pressed
+
+ TAX                    \ Copy A into X
+
+ RTS                    \ Return from the subroutine
+
+\ ******************************************************************************
+\
+\       Name: ECMOF
+\       Type: Subroutine
+\   Category: Sound
+\    Summary: Switch off the E.C.M.
+\
+\ ------------------------------------------------------------------------------
+\
+\ Switch the E.C.M. off, turn off the dashboard bulb and make the sound of the
+\ E.C.M. switching off).
+\
+\ ******************************************************************************
 
 .ECMOF
 
- LDA #&00
- STA &30
- STA &0340
- LDA #&48
- BNE NOISE
+ LDA #0                 \ Set ECMA and ECMB to 0 to indicate that no E.C.M. is
+ STA ECMA               \ currently running
+ STA ECMP
+
+ LDA #72                \ Call the NOISE routine with A = 72 to make the sound
+ BNE NOISE              \ of the E.C.M. being turned off and return from the
+                        \ subroutine using a tail call (this BNE is effectively
+                        \ a JMP as A will never be zero)
+
+\ ******************************************************************************
+\
+\       Name: BEEP
+\       Type: Subroutine
+\   Category: Sound
+\    Summary: Make a short, high beep
+\
+\ ******************************************************************************
 
 .BEEP
 
- LDA #&20
+ LDA #32                \ Set A = 32 to denote a short, high beep, and fall
+                        \ through into the NOISE routine to make the sound
+
+\ ******************************************************************************
+\
+\       Name: NOISE
+\       Type: Subroutine
+\   Category: Sound
+\    Summary: Make the sound whose number is in A
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   A                   The number of the sound to be made. See the
+\                       documentation for variable SFX for a list of sound
+\                       numbers
+\
+\ ******************************************************************************
 
 .NOISE
 
- JSR pp_sound
- LDX s_flag
- BNE l_3c1f
- LDX #&09
- LDY #&00
- LDA #&07
- JMP osword
+ JSR NOS1               \ Set up the sound block in XX16 for the sound in A and
+                        \ fall through into NO3 to make the sound
 
-.pp_sound
+\ ******************************************************************************
+\
+\       Name: NO3
+\       Type: Subroutine
+\   Category: Sound
+\    Summary: Make a sound from a prepared sound block
+\
+\ ------------------------------------------------------------------------------
+\
+\ Make a sound from a prepared sound block in XX16 (if sound is enabled). See
+\ routine NOS1 for details of preparing the XX16 sound block.
+\
+\ ******************************************************************************
 
- LSR A
- ADC #&03
- TAY
- LDX #&07
+.NO3
 
-.l_3c83
+ LDX DNOIZ              \ Set X to the DNOIZ configuration setting
 
- LDA #&00
- STA &09,X
- DEX
- LDA SFX,Y
- STA &09,X
- DEY
- DEX
- BPL l_3c83
+ BNE NO1                \ If DNOIZ is non-zero, then sound is disabled, so
+                        \ return from the subroutine (as NO1 contains an RTS)
+
+ LDX #LO(XX16)          \ Otherwise set (Y X) to point to the sound block in
+ LDY #HI(XX16)          \ XX16
+
+ LDA #7                 \ Call OSWORD 7 to makes the sound, as described in the
+ JMP OSWORD             \ documentation for variable SFX, and return from the
+                        \ subroutine using a tail call
+
+\ ******************************************************************************
+\
+\       Name: NOS1
+\       Type: Subroutine
+\   Category: Sound
+\    Summary: Prepare a sound block
+\
+\ ------------------------------------------------------------------------------
+\
+\ Copy four sound bytes from SFX into XX16, interspersing them with null bytes,
+\ with Y indicating the sound number to copy (from the values in the sound
+\ table at SFX). So, for example, if we call this routine with A = 40 (long,
+\ low beep), the following bytes will be set in XX16 to XX16+7:
+\
+\   &13 &00 &F4 &00 &0C &00 &08 &00
+\
+\ This block will be passed to OSWORD 7 to make the sound, which expects the
+\ four sound attributes as 16-bit big-endian values - in other words, with the
+\ low byte first. So the above block would pass the values &0013, &00F4, &000C
+\ and &0008 to the SOUND statement when used with OSWORD 7, or:
+\
+\   SOUND &13, &F4, &0C, &08
+\
+\ as the high bytes are always zero.
+\
+\ Arguments:
+\
+\   A                   The sound number to copy from SFX to XX16, which is
+\                       always a multiple of 8
+\
+\ ******************************************************************************
+
+.NOS1
+
+ LSR A                  \ Divide A by 2, and also clear the C flag, as bit 0 of
+                        \ A is always zero (as A is a multiple of 8)
+
+ ADC #3                 \ Set Y = A + 3, so Y now points to the last byte of
+ TAY                    \ four within the block of four-byte values
+
+ LDX #7                 \ We want to copy four bytes, spread out into an 8-byte
+                        \ block, so set a counter in Y to cover 8 bytes
+
+.NOL1
+
+ LDA #0                 \ Set the X-th byte of XX16 to 0
+ STA XX16,X
+
+ DEX                    \ Decrement the destination byte pointer
+
+ LDA SFX,Y              \ Set the X-th byte of XX16 to the value from SFX+Y
+ STA XX16,X
+
+ DEY                    \ Decrement the source byte pointer again
+
+ DEX                    \ Decrement the destination byte pointer again
+
+ BPL NOL1               \ Loop back for the next source byte
+
+                        \ Fall through into KYTB to return from the subroutine,
+                        \ as the first byte of KYTB is an RTS
+
+\ ******************************************************************************
+\
+\       Name: CTRL
+\       Type: Subroutine
+\   Category: Keyboard
+\    Summary: Scan the keyboard to see if CTRL is currently pressed
+\
+\ ------------------------------------------------------------------------------
+\
+\ Returns:
+\
+\   X                   X = %10000001 (i.e. 129 or -127) if CTRL is being
+\                       pressed
+\
+\                       X = 1 if CTRL is not being pressed
+\
+\   A                   Contains the same as X
+\
+\ ******************************************************************************
 
 .CTRL
 
- LDX #&01
+ LDX #1                 \ Set X to the internal key number for CTRL and fall
+                        \ through to DKS4 to scan the keyboard
+
+\ ******************************************************************************
+\
+\       Name: DKS4
+\       Type: Subroutine
+\   Category: Keyboard
+\    Summary: Scan the keyboard to see if a specific key is being pressed
+\  Deep dive: The key logger
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   X                   The internal number of the key to check (see p.142 of
+\                       the Advanced User Guide for a list of internal key
+\                       numbers)
+\
+\ Returns:
+\
+\   A                   If the key in A is being pressed, A contains the
+\                       original argument A, but with bit 7 set (i.e. A + 128).
+\                       If the key in A is not being pressed, the value in A is
+\                       unchanged
+\
+\   X                   Contains the same as A
+\
+\ Other entry points:
+\
+\   DKS2-1              Contains an RTS
+\
+\ ******************************************************************************
 
 .DKS4
 
- LDA #&03
- SEI
- STA &FE40
- LDA #&7F
- STA &FE43
- STX &FE4F
- LDX &FE4F
- LDA #&0B
- STA &FE40
- CLI
- TXA
- RTS
+ LDA #%00000011         \ Set A to %00000011, so it's ready to send to SHEILA
+                        \ once interrupts have been disabled
 
-.adval
+ SEI                    \ Disable interrupts so we can scan the keyboard
+                        \ without being hijacked
 
- LDA #&80
- JSR osbyte
- TYA
- EOR j_flag
- RTS
+ STA VIA+&40            \ Set 6522 System VIA output register ORB (SHEILA &40)
+                        \ to %00000011 to stop auto scan of keyboard
 
-.tog_flag
+ LDA #%01111111         \ Set 6522 System VIA data direction register DDRA
+ STA VIA+&43            \ (SHEILA &43) to %01111111. This sets the A registers
+                        \ (IRA and ORA) so that:
+                        \
+                        \   * Bits 0-6 of ORA will be sent to the keyboard
+                        \
+                        \   * Bit 7 of IRA will be read from the keyboard
 
- STY &D1
- CPX &D1
- BNE tog_end
- LDA &0387,X
- EOR #&FF
- STA &0387,X
- JSR BELL
- JSR DELAY
- LDY &D1
+ STX VIA+&4F            \ Set 6522 System VIA output register ORA (SHEILA &4F)
+                        \ to X, the key we want to scan for; bits 0-6 will be
+                        \ sent to the keyboard, of which bits 0-3 determine the
+                        \ keyboard column, and bits 4-6 the keyboard row
 
-.tog_end
+ LDX VIA+&4F            \ Read 6522 System VIA output register IRA (SHEILA &4F)
+                        \ into X; bit 7 is the only bit that will have changed.
+                        \ If the key is pressed, then bit 7 will be set,
+                        \ otherwise it will be clear
 
- RTS
+ LDA #%00001011         \ Set 6522 System VIA output register ORB (SHEILA &40)
+ STA VIA+&40            \ to %00001011 to restart auto scan of keyboard
+
+ CLI                    \ Allow interrupts again
+
+ TXA                    \ Transfer X into A
+
+ RTS                    \ Return from the subroutine
+
+\ ******************************************************************************
+\
+\       Name: DKS2
+\       Type: Subroutine
+\   Category: Keyboard
+\    Summary: Read the joystick position
+\
+\ ------------------------------------------------------------------------------
+\
+\ Return the value of ADC channel in X (used to read the joystick). The value
+\ will be inverted if the game has been configured to reverse both joystick
+\ channels (which can be done by pausing the game and pressing J).
+\
+\ Arguments:
+\
+\   X                   The ADC channel to read:
+\
+\                         * 1 = joystick X
+\
+\                         * 2 = joystick Y
+\
+\ Returns:
+\
+\   (A X)               The 16-bit value read from channel X, with the value
+\                       inverted if the game has been configured to reverse the
+\                       joystick
+\
+\ ******************************************************************************
+
+.DKS2
+
+ LDA #128               \ Call OSBYTE 128 to fetch the 16-bit value from ADC
+ JSR OSBYTE             \ channel X, returning (Y X), i.e. the high byte in Y
+                        \ and the low byte in X
+
+ TYA                    \ Copy Y to A, so the result is now in (A X)
+
+ EOR JSTE               \ The high byte A is now EOR'd with the value in
+                        \ location JSTE, which contains &FF if both joystick
+                        \ channels are reversed and 0 otherwise (so A now
+                        \ contains the high byte but inverted, if that's what
+                        \ the current settings say)
+
+ RTS                    \ Return from the subroutine
+
+\ ******************************************************************************
+\
+\       Name: DKS3
+\       Type: Subroutine
+\   Category: Keyboard
+\    Summary: Toggle a configuration setting and emit a beep
+\
+\ ------------------------------------------------------------------------------
+\
+\ This is called when the game is paused and a key is pressed that changes the
+\ game's configuration.
+\
+\ Specifically, this routine toggles the configuration settings for the
+\ following keys:
+\
+\   * CAPS LOCK toggles keyboard flight damping (&40)
+\   * A toggles keyboard auto-recentre (&41)
+\   * X toggles author names on start-up screen (&42)
+\   * F toggles flashing console bars (&43)
+\   * Y toggles reverse joystick Y channel (&44)
+\   * J toggles reverse both joystick channels (&45)
+\   * K toggles keyboard and joystick (&46)
+\
+\ The numbers in brackets are the internal key numbers (see p.142 of the
+\ Advanced User Guide for a list of internal key numbers). We pass the key that
+\ has been pressed in X, and the configuration option to check it against in Y,
+\ so this routine is typically called in a loop that loops through the various
+\ configuration options.
+\
+\ Arguments:
+\
+\   X                   The internal number of the key that's been pressed
+\
+\   Y                   The internal number of the configuration key to check
+\                       against, from the list above (i.e. Y must be from &40 to
+\                       &46)
+\
+\ ******************************************************************************
+
+.DKS3
+
+ STY T                  \ Store the configuration key argument in T
+
+ CPX T                  \ If X <> Y, jump to Dk3 to return from the subroutine
+ BNE Dk3
+
+                        \ We have a match between X and Y, so now to toggle
+                        \ the relevant configuration byte. CAPS LOCK has a key
+                        \ value of &40 and has its configuration byte at
+                        \ location DAMP, A has a value of &41 and has its byte
+                        \ at location DJD, which is DAMP+1, and so on. So we
+                        \ can toggle the configuration byte by changing the
+                        \ byte at DAMP + (X - &40), or to put it in indexing
+                        \ terms, DAMP-&40,X. It's no coincidence that the
+                        \ game's configuration bytes are set up in this order
+                        \ and with these keys (and this is also why the sound
+                        \ on/off keys are dealt with elsewhere, as the internal
+                        \ key for S and Q are &51 and &10, which don't fit
+                        \ nicely into this approach)
+
+ LDA DAMP-&40,X         \ Fetch the byte from DAMP + (X - &40), invert it and
+ EOR #&FF               \ put it back (0 means no and &FF means yes in the
+ STA DAMP-&40,X         \ configuration bytes, so this toggles the setting)
+
+ JSR BELL               \ Make a beep sound so we know something has happened
+
+ JSR DELAY              \ Wait for Y vertical syncs (Y is between 64 and 70, so
+                        \ this is always a bit longer than a second)
+
+ LDY T                  \ Restore the configuration key argument into Y
+
+.Dk3
+
+ RTS                    \ Return from the subroutine
+
+\ ******************************************************************************
+\
+\       Name: DOKEY
+\       Type: Subroutine
+\   Category: Keyboard
+\
+\ ******************************************************************************
 
 .DOKEY
 
- LDA JSTK
- BEQ spec_key
- LDX #&01
- JSR adval
- ORA #&01
- STA JSTX
- LDX #&02
- JSR adval
- EOR y_flag
- STA JSTY
+ LDA JSTK               \ If JSTK is zero, then we are configured to use the
+ BEQ DK4                \ keyboard rather than the joystick, so jump to DK4
 
-.spec_key
+ LDX #1                 \ Call DKS2 to fetch the value of ADC channel 1 (the
+ JSR DKS2               \ joystick X value) into (A X), and OR A with 1. This
+ ORA #1                 \ ensures that the high byte is at least 1, and then we
+ STA JSTX               \ store the result in JSTX
 
- JSR RDKEY
- STX KL
- CPX #&69
- BNE no_freeze
+ LDX #2                 \ Call DKS2 to fetch the value of ADC channel 2 (the
+ JSR DKS2               \ joystick Y value) into (A X), and EOR A with JSTGY.
+ EOR JSTGY              \ JSTGY will be &FF if the game is configured to
+ STA JSTY               \ reverse the joystick Y channel, so this EOR does
+                        \ exactly that, and then we store the result in JSTY
 
-.no_thaw
+                        \ Fall through into DK4 to scan for other keys
 
- JSR WSCAN
- JSR RDKEY
- CPX #&51
- BNE not_sound
- LDA #&00
- STA s_flag
+\ ******************************************************************************
+\
+\       Name: DK4
+\       Type: Subroutine
+\   Category: Keyboard
+\    Summary: Scan for pause, configuration and secondary flight keys
+\  Deep dive: The key logger
+\
+\ ------------------------------------------------------------------------------
+\
+\ Scan for pause and configuration keys, and if this is a space view, also scan
+\ for secondary flight controls.
+\
+\ Specifically:
+\
+\   * Scan for the pause button (COPY) and if it's pressed, pause the game and
+\     process any configuration key presses until the game is unpaused (DELETE)
+\
+\   * If this is a space view, scan for secondary flight keys and update the
+\     relevant bytes in the key logger
+\
+\ ******************************************************************************
 
-.not_sound
+.DK4
 
- LDY #&40
+ JSR RDKEY              \ Scan the keyboard for a key press and return the
+                        \ internal key number in X (or 0 for no key press)
 
-.flag_loop
+ STX KL                 \ Store X in KL, byte #0 of the key logger
 
- JSR tog_flag
- INY
- CPY #&48
- BNE flag_loop
- CPX #&10
- BNE not_quiet
- STX s_flag
+ CPX #&69               \ If COPY is not being pressed, jump to DK2 below,
+ BNE DK2                \ otherwise let's process the configuration keys
 
-.not_quiet
+.FREEZE
 
- CPX #&70
- BNE not_escape
- JMP escape
+                        \ COPY is being pressed, so we enter a loop that
+                        \ listens for configuration keys, and we keep looping
+                        \ until we detect a DELETE key press. This effectively
+                        \ pauses the game when COPY is pressed, and unpauses
+                        \ it when DELETE is pressed
 
-.not_escape
+ JSR WSCAN              \ Call WSCAN to wait for the vertical sync, so the whole
+                        \ screen gets drawn
 
- CPX #&59
- BNE no_thaw
+ JSR RDKEY              \ Scan the keyboard for a key press and return the
+                        \ internal key number in X (or 0 for no key press)
 
-.no_freeze
+ CPX #&51               \ If "S" is not being pressed, skip to DK6
+ BNE DK6
 
- LDA &87
- BNE frz_ret
- LDY #&10
- LDA #&FF
- RTS
+ LDA #0                 \ "S" is being pressed, so set DNOIZ to 0 to turn the
+ STA DNOIZ              \ sound on
+
+.DK6
+
+ LDY #&40               \ We now want to loop through the keys that toggle
+                        \ various settings. These have internal key numbers
+                        \ between &40 (CAPS LOCK) and &46 ("K"), so we set up
+                        \ the first key number in Y to act as a loop counter.
+                        \ See subroutine DKS3 for more details on this
+
+.DKL4
+
+ JSR DKS3               \ Call DKS3 to scan for the key given in Y, and toggle
+                        \ the relevant setting if it is pressed
+
+ INY                    \ Increment Y to point to the next toggle key
+
+ CPY #&48               \ AJD
+
+ BNE DKL4               \ If not, loop back to check for the next toggle key
+
+.DK55
+
+ CPX #&10               \ If "Q" is not being pressed, skip to DK7
+ BNE DK7
+
+ STX DNOIZ              \ "Q" is being pressed, so set DNOIZ to X, which is
+                        \ non-zero (&10), so this will turn the sound off
+
+.DK7
+
+ CPX #&70               \ If ESCAPE is not being pressed, skip over the next
+ BNE P%+5               \ instruction
+
+ JMP escape             \ AJD
+
+ CPX #&59               \ If DELETE is not being pressed, we are still paused,
+ BNE FREEZE             \ so loop back up to keep listening for configuration
+                        \ keys, otherwise fall through into the rest of the
+                        \ key detection code, which unpauses the game
+
+.DK2
+
+ LDA QQ11               \ If the current view is non-zero (i.e. not a space
+ BNE out                \ view), return from the subroutine (as out contains
+                        \ an RTS)
+
+ LDY #16                \ This is a space view, so now we want to check for all
+                        \ the secondary flight keys. The internal key numbers
+                        \ are in the keyboard table KYTB from KYTB+8 to
+                        \ KYTB+16, and their key logger locations are from KL+8
+                        \ to KL+16. So set a decreasing counter in Y for the
+                        \ index, starting at 16, so we can loop through them
+
+ LDA #&FF               \ Set A to &FF so we can store this in the keyboard
+                        \ logger for keys that are being pressed
+
+ RTS                    \ Return from the subroutine
+
+\ ******************************************************************************
+\
+\       Name: TT217
+\       Type: Subroutine
+\   Category: Keyboard
+\    Summary: Scan the keyboard until a key is pressed
+\
+\ ------------------------------------------------------------------------------
+\
+\ Scan the keyboard until a key is pressed, and return the key's ASCII code.
+\ If, on entry, a key is already being held down, then wait until that key is
+\ released first (so this routine detects the first key down event following
+\ the subroutine call).
+\
+\ Returns:
+\
+\   X                   The ASCII code of the key that was pressed
+\
+\   A                   Contains the same as X
+\
+\   Y                   Y is preserved
+\
+\ Other entry points:
+\
+\   out                 Contains an RTS
+\
+\ ******************************************************************************
 
 .TT217
 
- STY &85
+ STY YSAV               \ Store Y in temporary storage, so we can restore it
+                        \ later
 
-.get_key
+.t
 
- LDY #&02
- JSR DELAY
- JSR RDKEY
- BNE get_key
+ LDY #2                 \ Delay for 2 vertical syncs (2/50 = 0.04 seconds) so we
+ JSR DELAY              \ don't take up too much CPU time while looping round
 
-.press
+ JSR RDKEY              \ Scan the keyboard for a key press and return the
+                        \ internal key number in X (or 0 for no key press)
 
- JSR RDKEY
- BEQ press
- TAY
- LDA (key_table),Y
- LDY &85
- TAX
+ BNE t                  \ If a key was already being held down when we entered
+                        \ this routine, keep looping back up to t, until the
+                        \ key is released
 
-.frz_ret
+.t2
 
- RTS
+ JSR RDKEY              \ Any pre-existing key press is now gone, so we can
+                        \ start scanning the keyboard again, returning the
+                        \ internal key number in X (or 0 for no key press)
 
-.l_3d77
+ BEQ t2                 \ Keep looping up to t2 until a key is pressed
 
- STX &034A
- PHA
- LDA &03A4
- JSR l_3d99
- PLA
+ TAY                    \ Copy A to Y, so Y contains the internal key number
+                        \ of the key pressed
+
+ LDA (TRTB%),Y          \ The address in TRTB% points to the MOS key
+                        \ translation table, which is used to translate
+                        \ internal key numbers to ASCII, so this fetches the
+                        \ key's ASCII code into A
+
+ LDY YSAV               \ Restore the original value of Y we stored above
+
+ TAX                    \ Copy A into X
+
+.out
+
+ RTS                    \ Return from the subroutine
+
+\ ******************************************************************************
+\
+\       Name: me1
+\       Type: Subroutine
+\   Category: Text
+\    Summary: Erase an old in-flight message and display a new one
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   A                   The text token to be printed
+\
+\   X                   Must be set to 0
+\
+\ ******************************************************************************
+
+.me1
+
+ STX DLY                \ Set the message delay in DLY to 0, so any new
+                        \ in-flight messages will be shown instantly
+
+ PHA                    \ Store the new message token we want to print
+
+ LDA MCH                \ Set A to the token number of the message that is
+ JSR mes9               \ currently on-screen, and call mes9 to print it (which
+                        \ will remove it from the screen, as printing is done
+                        \ using EOR logic)
+
+ PLA                    \ Restore the new message token
+
+\ ******************************************************************************
+\
+\       Name: MESS
+\       Type: Subroutine
+\   Category: Text
+\    Summary: Display an in-flight message
+\
+\ ------------------------------------------------------------------------------
+\
+\ Display an in-flight message in capitals at the bottom of the space view,
+\ erasing any existing in-flight message first.
+\
+\ Arguments:
+\
+\   A                   The text token to be printed
+\
+\ ******************************************************************************
 
 .MESS
 
- LDX #&00
+ LDX #0                 \ Set QQ17 = 0 to switch to ALL CAPS
  STX QQ17
- LDY #&09
- STY XC
- LDY #&16
+
+ LDY #9                 \ Move the text cursor to column 9, row 22, at the
+ STY XC                 \ bottom middle of the screen, and set Y = 22
+ LDY #22
  STY YC
- CPX &034A
- BNE l_3d77
- STY &034A
- STA &03A4
 
-.l_3d99
+ CPX DLY                \ If the message delay in DLY is not zero, jump up to
+ BNE me1                \ me1 to erase the current message first (whose token
+                        \ number will be in MCH)
 
- JSR TT27
- LSR &034B
- BEQ frz_ret
- LDA #&FD
- JMP TT27
+ STY DLY                \ Set the message delay in DLY to 22
+
+ STA MCH                \ Set MCH to the token we are about to display
+
+                        \ Fall through into mes9 to print the token in A
+
+\ ******************************************************************************
+\
+\       Name: mes9
+\       Type: Subroutine
+\   Category: Text
+\    Summary: Print a text token, possibly followed by " DESTROYED"
+\
+\ ------------------------------------------------------------------------------
+\
+\ Print a text token, followed by " DESTROYED" if the destruction flag is set
+\ (for when a piece of equipment is destroyed).
+\
+\ ******************************************************************************
+
+.mes9
+
+ JSR TT27               \ Call TT27 to print the text token in A
+
+ LSR de                 \ If bits 1-7 of variable de are clear, return from the
+ BEQ out                \ subroutine (as out contains an RTS). This means that
+                        \ " DESTROYED" is never shown, even if bit 0 of de is
+                        \ set, which makes sense as we are docked
+
+ LDA #253               \ Print recursive token 93 (" DESTROYED") and return
+ JMP TT27               \ from the subroutine using a tail call
 
 .l_3dea
 
@@ -13617,7 +14191,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  BPL l_3e85
  RTS
 
-.l_3e8c
+.TIS2
 
  TAY
  AND #&7F
