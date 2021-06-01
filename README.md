@@ -34,7 +34,6 @@ See the [introduction](#introduction) for more information.
 * [Notes on the original source files](#notes-on-the-original-source-files)
 
   * [Converting the original build process to BeebAsm](#converting-the-original-build-process-to-beebasm)
-  * [Producing byte-accurate binaries](#producing-byte-accurate-binaries)
 
 ## Introduction
 
@@ -164,8 +163,6 @@ b1447e60  16778  b1447e60  16778   Yes   1.E.bin
 3d638042   1956  3d638042   1956   Yes   2.H.bin
 1f1783e7  43141  1f1783e7  43141   Yes   2.T.bin
 171ccea5   5363  171ccea5   5363   Yes   ELITE.bin
-538d2d54   2560  -             -    -    S.T.bin
-fc10cbad  17422  fc10cbad  17422   Yes   tcode.bin
 ```
 
 All the compiled binaries match the extracts, so we know we are producing the same final game as the release version.
@@ -213,22 +210,6 @@ You can see the differences between the releases by searching the source code fo
 ### Converting the original build process to BeebAsm
 
 See [the original source files](sources/original_sources) for details about how Angus's original sources have been converted to assemble in BeebAsm, so Elite-A can be built on modern computers.
-
-### Producing byte-accurate binaries
-
-The `extracted/<release>/workspaces` folders (where `<release>` is the release version) contain binary files that match the workspaces in the original game binaries (a workspace being a block of memory). Instead of initialising workspaces with null values like BeebAsm, the original BBC Micro source code creates the `1.D` file by loading `tcode` and `S.T` into memory and then saving them out in one file. This saving process will also save out the bytes in the gap between the two files, which can contain anything, so if we want to be able to produce byte-accurate binaries from the modern BeebAsm assembly process, we need to include this "workspace noise" when building the project, and that's what the binaries in the `extracted/<release>/workspaces` folder are for.
-
-Here's an example of how these binaries are included:
-
-```
-IF _RELEASED
- INCBIN "extracted/released/workspaces/1.D.bin"
-ELIF _SOURCE_DISC
- INCBIN "extracted/source-disc/workspaces/1.D.bin"
-ENDIF
-```
-
-This is where we load the correct workspace noise for the gap between `tcode` and `S.T` when creating the `1.D` binary.
 
 ---
 

@@ -174,15 +174,10 @@ ORG CODE%
 
 LOAD_A% = LOAD%
 
- \ a.qelite - tube elite startup file
-
-\EXEC = tube_elite
-
 key_tube = &90
 
 brkv = &0202
 wrchv = &020E
-oscli = &FFF7
 
 tube_r1s = &FEE0
 tube_r1d = &FEE1
@@ -248,7 +243,7 @@ cursor_y = &9F
  STA brkv+&01
  LDX #LO(tube_run)
  LDY #HI(tube_run)
- JMP oscli
+ JMP OSCLI
 
 tube_brk = &16	\ tube BRK vector
 

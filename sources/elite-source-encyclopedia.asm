@@ -167,6 +167,11 @@ E% = &563E              \ The address of the default NEWB ship bytes within the
 SHIP_MISSILE = &7F00    \ The address of the missile ship blueprint, as set in
                         \ elite-loader3.asm
 
+save_lock = &233        \ IND2V+1
+new_file = &234         \ IND3V
+new_posn = &235         \ IND3V+1
+new_name = &74D
+
 \ ******************************************************************************
 \
 \       Name: ZP
@@ -1305,8 +1310,12 @@ ORG &0300
                         \       (0 = pulse or mining laser) or is always on
                         \       (1 = beam or military laser)
 
- SKIP 2                 \ These bytes appear to be unused (they were originally
-                        \ used for up/down lasers, but they were dropped)
+ SKIP 1                 \ This byte appears to be unused
+
+.new_type
+.cmdr_ship
+
+ SKIP 1                 \ AJD
 
 .CRGO
 
@@ -1389,7 +1398,17 @@ ORG &0300
                         \
                         \   * &FF = fitted
 
- SKIP 4                 \ These bytes appear to be unused
+.cmdr_cour
+
+ SKIP 2                 \ AJD
+
+.cmdr_courx
+
+ SKIP 1                 \ AJD
+
+.cmdr_coury
+
+ SKIP 1                 \ AJD
 
 .NOMSL
 
@@ -1780,6 +1799,66 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
                         \ of the catalogue, between the two lists of filenames,
                         \ so it can be dropped without affecting the layout)
 
+.new_pulse
+
+ SKIP 1                 \ AJD
+
+.new_beam
+
+ SKIP 1                 \ AJD
+
+.new_military
+
+ SKIP 1                 \ AJD
+
+.new_mining
+
+ SKIP 1                 \ AJD
+
+.new_mounts
+
+ SKIP 1                 \ AJD
+
+.new_missiles
+
+ SKIP 1                 \ AJD
+
+.new_shields
+
+ SKIP 1                 \ AJD
+
+.new_energy
+
+ SKIP 1                 \ AJD
+
+.new_speed
+
+ SKIP 1                 \ AJD
+
+.new_hold
+
+ SKIP 1                 \ AJD
+
+.new_range
+
+ SKIP 1                 \ AJD
+
+.new_costs
+
+ SKIP 1                 \ AJD
+
+.new_max
+
+ SKIP 1                 \ AJD
+
+.new_min
+
+ SKIP 1                 \ AJD
+
+.new_space
+
+ SKIP 1                 \ AJD
+
 \ ******************************************************************************
 \
 \       Name: K%
@@ -1943,111 +2022,15 @@ ORG CODE%
 
 LOAD_A% = LOAD%
 
- \ a.icode - ELITE III encyclopedia
-
-\OPT TABS=16
-
-key_table = &04
-ptr = &07
-font = &1C
-cursor_x = &2C
-cursor_y = &2D
-vdu_stat = &72
-brk_line = &FD
-last_key = &300
-ship_type = &311
-cabin_t = &342
-target = &344
-view_dirn = &345
-laser_t = &347
-adval_x = &34C
-adval_y = &34D
-cmdr_mission = &358
-cmdr_homex = &359
-cmdr_homey = &35A
-cmdr_gseed = &35B
-cmdr_money = &361
-cmdr_fuel = &365
-cmdr_galxy = &367
-cmdr_laser = &368
-cmdr_ship = &36D
-cmdr_hold = &36E
-cmdr_cargo = &36F
-cmdr_ecm = &380
-cmdr_scoop = &381
-cmdr_bomb = &382
-cmdr_eunit = &383
-cmdr_dock = &384
-cmdr_ghype = &385
-cmdr_escape = &386
-cmdr_cour = &387
-cmdr_courx = &389
-cmdr_coury = &38A
-cmdr_misl = &38B
-cmdr_legal = &38C
-cmdr_avail = &38D
-cmdr_price = &39E
-cmdr_kills = &39F
-f_shield = &3A5
-r_shield = &3A6
-energy = &3A7
-home_econ = &3AC
-home_govmt = &3AE
-home_tech = &3AF
-data_econ = &3B8
-data_govm = &3B9
-data_tech = &3BA
-data_popn = &3BB
-data_gnp = &3BD
-hype_dist = &3BF
-data_homex = &3C1
-data_homey = &3C2
-s_flag = &3C6
-cap_flag = &3C7
-a_flag = &3C8
-x_flag = &3C9
-f_flag = &3CA
-y_flag = &3CB
-j_flag = &3CC
-k_flag = &3CD
-b_flag = &3CE
- \
-save_lock = &233
-new_file = &234
-new_posn = &235
-new_type = &36D
-new_pulse = &3D0
-new_beam = &3D1
-new_military = &3D2
-new_mining = &3D3
-new_mounts = &3D4
-new_missiles = &3D5
-new_shields = &3D6
-new_energy = &3D7
-new_speed = &3D8
-new_hold = &3D9
-new_range = &3DA
-new_costs = &3DB
-new_max = &3DC
-new_min = &3DD
-new_space = &3DE
- \new_:	EQU &3DF
-new_name = &74D
- \
-iff_index = &D7A
-altitude = &FD1
-irq1 = &114B
-commander = &1189
-brkdst = &11D5
-ship_data = &55FE
-l_563d = &563D
-osfile = &FFDD
-oswrch = &FFEE
-osword = &FFF1
-osbyte = &FFF4
-oscli = &FFF7
-
-EXEC% = &11E3
+\ ******************************************************************************
+\
+\       Name: S%
+\       Type: Workspace
+\    Address: &11E3 to &11F0
+\   Category: Workspaces
+\    Summary: Entry points and vector addresses in the main encyclopedia code
+\
+\ ******************************************************************************
 
 .S%
 
@@ -2063,27 +2046,76 @@ EXEC% = &11E3
 
 BRKV = P% - 2
 
-.tcode
+\ ******************************************************************************
+\
+\       Name: INBAY
+\       Type: Subroutine
+\   Category: Loader
+\    Summary: Load and run the main docked code in T.CODE
+\
+\ ******************************************************************************
 
- LDX #LO(ltcode)
- LDY #HI(ltcode)
- JSR oscli
+.INBAY
 
-.ltcode
+ LDX #LO(LTLI)          \ Set (Y X) to point to LTLI ("L.T.CODE", which gets
+ LDY #HI(LTLI)          \ modified to "R.T.CODE" in the DOENTRY routine)
 
- EQUS "L.1.D", &0D
+ JSR OSCLI              \ Call OSCLI to run the OS command in LTLI, which *RUNs
+                        \ the main docked code in T.CODE
+
+\ ******************************************************************************
+\
+\       Name: LTLI
+\       Type: Variable
+\   Category: Loader
+\    Summary: The OS command string for loading the docked code file 1.D
+\
+\ ******************************************************************************
+
+.LTLI
+
+ EQUS "L.1.D"
+ EQUB 13
+
+\ ******************************************************************************
+\
+\       Name: launch
+\       Type: Subroutine
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
 
 .launch
 
  LDA #'R'
- STA ltcode
+ STA LTLI
+
  EQUB &2C
+
+\ ******************************************************************************
+\
+\       Name: escape
+\       Type: Subroutine
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
 
 .escape
 
- LDA #&00
+ LDA #0
  STA KL+1
- JMP tcode
+ JMP INBAY
+
+\ ******************************************************************************
+\
+\       Name: DOENTRY
+\       Type: Subroutine
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
 
 .DOENTRY
 
@@ -2653,7 +2685,16 @@ BRKV = P% - 2
 
  RTS                    \ Return from the subroutine
 
-.PAUSE
+\ ******************************************************************************
+\
+\       Name: column_16
+\       Type: Subroutine
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
+
+.column_16
 
  LDA #&10
  EQUB &2C
@@ -2676,7 +2717,7 @@ BRKV = P% - 2
 \
 \ Other entry points:
 \
-\   MT6                 AJD
+\   set_token           AJD
 \
 \ ******************************************************************************
 
@@ -2685,7 +2726,7 @@ BRKV = P% - 2
  LDA #6                 \ Move the text cursor to column 6
  STA XC
 
-.MT6
+.set_token
 
  LDA #%11111111         \ Set all the bits in DTW2
  STA DTW2
@@ -2747,6 +2788,15 @@ BRKV = P% - 2
 
  RTS                    \ Return from the subroutine
 
+\ ******************************************************************************
+\
+\       Name: clr_vdustat
+\       Type: Subroutine
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .clr_vdustat
 
  LDA #&01
@@ -2754,7 +2804,7 @@ BRKV = P% - 2
 
 \ ******************************************************************************
 \
-\       Name: set_token
+\       Name: MT6
 \       Type: Subroutine
 \   Category: Text
 \    Summary: Switch to standard tokens in Sentence Case
@@ -2770,7 +2820,7 @@ BRKV = P% - 2
 \
 \ ******************************************************************************
 
-.set_token
+.MT6
 
  LDA #%10000000         \ Set bit 7 of QQ17 to switch standard tokens to
  STA QQ17               \ Sentence Case
@@ -3037,9 +3087,9 @@ BRKV = P% - 2
  EQUW MT1               \ Token  1: Switch to ALL CAPS
  EQUW MT2               \ Token  2: Switch to Sentence Case
  EQUW TT27              \ Token  3: Print the selected system name
- EQUW set_token         \ Token  4: AJD
+ EQUW MT6               \ Token  4: Switch to standard tokens, in Sentence Case
  EQUW MT5               \ Token  5: Switch to extended tokens
- EQUW MT6               \ Token  6: Switch to standard tokens, in Sentence Case
+ EQUW set_token         \ Token  6: AJD
  EQUW DASC              \ Token  7: Beep
  EQUW MT8               \ Token  8: Tab to column 6
  EQUW MT9               \ Token  9: Clear screen, tab to column 1, view type = 1
@@ -3055,7 +3105,7 @@ BRKV = P% - 2
  EQUW MT19              \ Token 19: Capitalise first letter of next word only
  EQUW DASC              \ Token 20: Unused
  EQUW CLYNS             \ Token 21: Clear the bottom few lines of the space view
- EQUW PAUSE             \ Token 22: Display ship and wait for key press
+ EQUW column_16         \ Token 23: Tab to column 16
  EQUW MT23              \ Token 23: Move to row 10, white text, set lower case
  EQUW clr_vdustat       \ Token 24: AJD
  EQUW DASC              \ Token 25: Unused
@@ -9816,11 +9866,29 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  JMP TT27               \ Print the text token in A and return from the
                         \ subroutine using a tail call
 
+\ ******************************************************************************
+\
+\       Name: func_tab
+\       Type: Variable
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .func_tab
 
- EQUB &20, &71, &72, &73, &14, &74, &75, &16, &76, &77
+ EQUB f0, f1, f2, f3, f4, f5, f6, f7, f8, f9
 
-.BAY2
+\ ******************************************************************************
+\
+\       Name: buy_invnt
+\       Type: Subroutine
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
+
+.buy_invnt
 
  SBC #&50
  BCC buy_top
@@ -9898,9 +9966,9 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
                         \ with a result of 0, as the key pressed was not a
                         \ number or letter and is less than ASCII "0"
 
- CMP #10                \ If A >= 10, jump to BAY2 to display the Inventory
- BCS BAY2               \ screen, as the key pressed was a letter or other
-                        \ non-digit and is greater than ASCII "9"
+ CMP #10                \ If A >= 10, jump to buy_invnt to AJD
+ BCS buy_invnt
+ 
 
  STA S                  \ Store the numeric value of the key pressed in S
 
@@ -12692,16 +12760,56 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
  RTS                    \ Return from the subroutine
 
+\ ******************************************************************************
+\
+\       Name: Main game loop (Part 2 of 6)
+\       Type: Subroutine
+\   Category: Main loop
+\    Summary: Update the main loop counters
+\  Deep dive: Program flow of the main game loop
+\             Ship data blocks
+\
+\ ------------------------------------------------------------------------------
+\
+\ In the encyclopedia code, we start the main game loop at part 2 and then jump
+\ straight to part 5, as parts 1, 3 and 4 are not required when we are docked.
+\
+\ This section covers the following:
+\
+\   * Update the main loop counters
+\
+\ Other entry points:
+\
+\   TT100               The entry point for the start of the main game loop,
+\                       which calls the main flight loop and the moves into the
+\                       spawning routine
+\
+\   me3                 Used by me2 to jump back into the main game loop after
+\                       printing an in-flight message
+\
+\ ******************************************************************************
+
 .TT100
 
- DEC &034A
- BEQ me2
- BPL me3
- INC &034A
+ DEC DLY                \ Decrement the delay counter in DLY, so any in-flight
+                        \ messages get removed once the counter reaches zero
+
+ BEQ me2                \ If DLY is now 0, jump to me2 to remove any in-flight
+                        \ message from the space view, and once done, return to
+                        \ me3 below, skipping the following two instructions
+
+ BPL me3                \ If DLY is positive, jump to me3 to skip the next
+                        \ instruction
+
+ INC DLY                \ If we get here, DLY is negative, so we have gone too
+                        \ and need to increment DLY back to 0
 
 .me3
 
- DEC &8A
+ DEC MCNT               \ Decrement the main loop counter in MCNT
+
+                        \ Fall through into part 5 (parts 3 and 4 are not
+                        \ required when we are docked)
 
 \ ******************************************************************************
 \
@@ -12860,7 +12968,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
 .fvw
 
- CMP #&20
+ CMP #&20               \ AJD
  BEQ jump_menu
  CMP #&71
  BEQ jump_menu
@@ -13004,6 +13112,15 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 .brkd
 
  EQUB 0
+
+\ ******************************************************************************
+\
+\       Name: BR1
+\       Type: Subroutine
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
 
 .BR1
 
@@ -18242,6 +18359,15 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
  RTS                    \ Return from the subroutine
 
+\ ******************************************************************************
+\
+\       Name: info_menu
+\       Type: Subroutine
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .info_menu
 
  LDX #&00
@@ -18279,6 +18405,15 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  JSR dn2
  JMP BAY
 
+\ ******************************************************************************
+\
+\       Name: ships_ag
+\       Type: Subroutine
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .ships_ag
 
 .ships_kw
@@ -18307,7 +18442,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  STA ship_load+&04
  LDX #LO(ship_load)
  LDY #HI(ship_load)
- JSR oscli
+ JSR OSCLI
 
 .ship_skip
 
@@ -18361,6 +18496,15 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  BEQ l_395a
  JMP BAY
 
+\ ******************************************************************************
+\
+\       Name: controls
+\       Type: Subroutine
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .controls
 
  LDX #&03
@@ -18382,6 +18526,15 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  PLA
  JSR DETOK3
  JMP l_restart
+
+\ ******************************************************************************
+\
+\       Name: equip_data
+\       Type: Subroutine
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
 
 .equip_data
 
@@ -18409,12 +18562,30 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  JSR DETOK3
  JMP l_restart
 
+\ ******************************************************************************
+\
+\       Name: trading
+\       Type: Subroutine
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .trading
 
 .l_restart
 
  JSR PAUSE2
  JMP BAY
+
+\ ******************************************************************************
+\
+\       Name: write_card
+\       Type: Subroutine
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
 
 .write_card
 
@@ -18509,9 +18680,27 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
  RTS
 
+\ ******************************************************************************
+\
+\       Name: ship_load
+\       Type: Variable
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .ship_load
 
  EQUS "L.S.0", &0D
+
+\ ******************************************************************************
+\
+\       Name: ship_file
+\       Type: Variable
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
 
 .ship_file
 
@@ -18520,6 +18709,15 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  EQUB 'G', 'I', 'M', 'A', 'O', 'F', 'E'
  EQUB 'L', 'L', 'C', 'C', 'P', 'A', 'H'
 
+\ ******************************************************************************
+\
+\       Name: ship_posn
+\       Type: Variable
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .ship_posn
 
  EQUB 19, 14, 27, 11, 20, 12, 17
@@ -18527,12 +18725,30 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  EQUB 20, 17, 17, 11, 22, 21, 11
  EQUB  9, 17, 29, 30, 10, 16, 15
 
+\ ******************************************************************************
+\
+\       Name: ship_dist
+\       Type: Variable
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .ship_dist
 
  EQUB &01, &02, &01, &02, &01, &01, &01
  EQUB &02, &04, &04, &01, &01, &01, &02
  EQUB &01, &02, &01, &02, &01, &01, &02
  EQUB &01, &01, &03, &01, &01, &01, &01
+
+\ ******************************************************************************
+\
+\       Name: menu
+\       Type: Subroutine
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
 
 .menu
 
@@ -18591,27 +18807,79 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
  JMP BAY
 
+\ ******************************************************************************
+\
+\       Name: menu_title
+\       Type: Variable
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .menu_title
 
  EQUB &01, &02, &03, &05, &04
+
+\ ******************************************************************************
+\
+\       Name: menu_titlex
+\       Type: Variable
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
 
 .menu_titlex
 
  EQUB &05, &0C, &0C, &0C, &0B
 
+\ ******************************************************************************
+\
+\       Name: menu_offset
+\       Type: Variable
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .menu_offset
 
  EQUB &02, &07, &15, &5B, &5F
+
+\ ******************************************************************************
+\
+\       Name: menu_entry
+\       Type: Variable
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
 
 .menu_entry
 
  EQUB &04, &0E, &0E, &04, &0D
 
+\ ******************************************************************************
+\
+\       Name: menu_query
+\       Type: Variable
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .menu_query
 
  EQUB &06, &43, &43, &05, &04
 
-\ a.icode_3
+\ ******************************************************************************
+\
+\       Name: TKN1
+\       Type: Variable
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
 
 .TKN1
 
@@ -19097,6 +19365,15 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  EQUB &00
  EQUB &00
 
+\ ******************************************************************************
+\
+\       Name: RUTOK
+\       Type: Variable
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .RUTOK
 
  EQUB &00
@@ -19480,6 +19757,15 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  EQUS "AVA", &DC, &D8, &E5, " FROM TECH ", &E5, &FA, "L 12 UPW", &EE, "DS", &B1
  EQUB &00
 
+\ ******************************************************************************
+\
+\       Name: MTIN
+\       Type: Variable
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .MTIN
 
  EQUB &10, &15, &1A, &1F, &9B, &A0, &2E, &A5, &24, &29, &3D, &33
@@ -19487,12 +19773,30 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  EQUB &5B, &6A, &B4, &B9, &BE, &E1, &E6, &EB, &F0, &F5, &FA, &73
  EQUB &78, &7D
 
+\ ******************************************************************************
+\
+\       Name: ship_centre
+\       Type: Variable
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .ship_centre
 
  EQUB &0D, &0C, &0C, &0B, &0D, &0C, &0B
  EQUB &0B, &08, &07, &09, &0A, &0D, &0C
  EQUB &0D, &0D, &0D, &0C, &0D, &0C, &0D
  EQUB &0C, &0B, &0C, &0C, &0A, &0D, &0E
+
+\ ******************************************************************************
+\
+\       Name: card_pattern
+\       Type: Variable
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
 
 .card_pattern
 
@@ -19522,6 +19826,15 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  EQUB  1, 20, &2D	\ space
  EQUB  1, 21, &00
 
+\ ******************************************************************************
+\
+\       Name: card_addr
+\       Type: Variable
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .card_addr
 
  EQUW adder, anaconda, asp_2, boa, bushmaster, chameleon, cobra_1
@@ -19530,6 +19843,15 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  EQUW iguana, krait, mamba, monitor, moray, ophidian, python
  EQUW shuttle, sidewinder, thargoid, thargon
  EQUW transporter, viper, worm
+
+\ ******************************************************************************
+\
+\       Name: adder
+\       Type: Variable
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
 
 .adder
 
@@ -19555,6 +19877,15 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  EQUS "AM 18 ", &EA, " ", &C2
  EQUB 0, 0
 
+\ ******************************************************************************
+\
+\       Name: anaconda
+\       Type: Variable
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .anaconda
 
  EQUB 1
@@ -19578,6 +19909,15 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  EQUB 0, 10
  EQUS &C9, "32.24", &0C, &F4, "g", &EF, &DE, &F4, "s"
  EQUB 0, 0
+
+\ ******************************************************************************
+\
+\       Name: asp_2
+\       Type: Variable
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
 
 .asp_2
 
@@ -19603,6 +19943,15 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  EQUS &BC, " Whip", &F9, "sh", &0C, &01, "HK", &02, " ", &B2, &B5
  EQUB 0, 0
 
+\ ******************************************************************************
+\
+\       Name: boa
+\       Type: Variable
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .boa
 
  EQUB 1
@@ -19627,6 +19976,15 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  EQUS &C8, &0C, &B6, &B7, " ", &C2, &F4, "s"
  EQUB 0, 0
 
+\ ******************************************************************************
+\
+\       Name: bushmaster
+\       Type: Variable
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .bushmaster
 
  EQUB 1
@@ -19646,6 +20004,15 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  EQUB 0, 10
  EQUS &BC, " Whip", &F9, "sh", &0C, &01, "HT", &02, " ", &B2, &B5
  EQUB 0, 0
+
+\ ******************************************************************************
+\
+\       Name: chameleon
+\       Type: Variable
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
 
 .chameleon
 
@@ -19671,6 +20038,15 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  EQUS &BC, " ", &DE, &F0, "g", &F4, &0C, "Pul", &DA, &B5
  EQUB 0, 0
 
+\ ******************************************************************************
+\
+\       Name: cobra_1
+\       Type: Variable
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .cobra_1
 
  EQUB 1
@@ -19694,6 +20070,15 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  EQUB 0, 10
  EQUS &D0, &B5
  EQUB 0, 0
+
+\ ******************************************************************************
+\
+\       Name: cobra_3
+\       Type: Variable
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
 
 .cobra_3
 
@@ -19719,6 +20104,15 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  EQUS &BA, &B7, "fa", &DE, &0C, "Irrik", &FF, " Thru", &CD
  EQUB 0, 0
 
+\ ******************************************************************************
+\
+\       Name: coriolis
+\       Type: Variable
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .coriolis
 
  EQUB 1
@@ -19729,6 +20123,15 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  EQUS "2000", &C3, "s"
  EQUB 0, 0
 
+\ ******************************************************************************
+\
+\       Name: dodecagon
+\       Type: Variable
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .dodecagon
 
  EQUB 1
@@ -19738,6 +20141,15 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  EQUB 0, 11
  EQUS "2700", &C3, "s"
  EQUB 0, 0
+
+\ ******************************************************************************
+\
+\       Name: escape_pod
+\       Type: Variable
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
 
 .escape_pod
 
@@ -19750,6 +20162,15 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  EQUB 0, 5
  EQUS "1-2"
  EQUB 0, 0
+
+\ ******************************************************************************
+\
+\       Name: fer_de_lance
+\       Type: Variable
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
 
 .fer_de_lance
 
@@ -19775,6 +20196,15 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  EQUS "T", &DB, "r", &DF, "ix ", &F0, "t", &F4, "sun", &0C, &01, "LT", &02, " ", &CE
  EQUB 0, 0
 
+\ ******************************************************************************
+\
+\       Name: gecko
+\       Type: Variable
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .gecko
 
  EQUB 1
@@ -19798,6 +20228,15 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  EQUB 0, 10
  EQUS "B", &F2, "am", &B2, &B7, " ", &01, "XL", &02
  EQUB 0, 0
+
+\ ******************************************************************************
+\
+\       Name: ghavial
+\       Type: Variable
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
 
 .ghavial
 
@@ -19823,6 +20262,15 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  EQUS "Sp", &E4, "d", &F4, " & Prime ", &01, "TT1", &02
  EQUB 0, 0
 
+\ ******************************************************************************
+\
+\       Name: iguana
+\       Type: Variable
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .iguana
 
  EQUB 1
@@ -19847,6 +20295,15 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  EQUS &C7, " Sup", &F4, " ", &C2, &0C, &01, "VC", &02, "9"
  EQUB 0, 0
 
+\ ******************************************************************************
+\
+\       Name: krait
+\       Type: Variable
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .krait
 
  EQUB 1
@@ -19869,6 +20326,15 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  EQUS &C7, " Sp", &F0, &CE, " ZX14"
  EQUB 0, 0
 
+\ ******************************************************************************
+\
+\       Name: mamba
+\       Type: Variable
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .mamba
 
  EQUB 1
@@ -19890,6 +20356,15 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  EQUB 0, 10
  EQUS &B6, &B7, " ", &01, "HV", &02, " ", &C2
  EQUB 0, 0
+
+\ ******************************************************************************
+\
+\       Name: monitor
+\       Type: Variable
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
 
 .monitor
 
@@ -19915,6 +20390,15 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  EQUS &C9, "29.01", &0C, &B7, " ", &CA, &F4, "s"
  EQUB 0, 0
 
+\ ******************************************************************************
+\
+\       Name: moray
+\       Type: Variable
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .moray
 
  EQUB 1
@@ -19938,6 +20422,15 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  EQUB 0, 10
  EQUS "Turbul", &F6, " ", &FE, &EE, "k", &0C, &F2, "-ch", &EE, "g", &F4, " 1287"
  EQUB 0, 0
+
+\ ******************************************************************************
+\
+\       Name: ophidian
+\       Type: Variable
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
 
 .ophidian
 
@@ -19963,6 +20456,15 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  EQUS &BC, " ", &DE, &F0, "g", &F4, &0C, "Pul", &DA, &B5
  EQUB 0, 0
 
+\ ******************************************************************************
+\
+\       Name: python
+\       Type: Variable
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .python
 
  EQUB 1
@@ -19987,6 +20489,15 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  EQUS &C8, &0C, "Exl", &DF, " 76NN Model"
  EQUB 0, 0
 
+\ ******************************************************************************
+\
+\       Name: shuttle
+\       Type: Variable
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .shuttle
 
  EQUB 1
@@ -20004,6 +20515,15 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  EQUB 0, 10
  EQUS &C9, "20.20", &0C, &DE, &EE, &EF, "t ", &B5
  EQUB 0, 0
+
+\ ******************************************************************************
+\
+\       Name: sidewinder
+\       Type: Variable
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
 
 .sidewinder
 
@@ -20025,6 +20545,15 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  EQUS &C7, " Sp", &F0, &CE, " ", &01, "MV", &02
  EQUB 0, 0
 
+\ ******************************************************************************
+\
+\       Name: thargoid
+\       Type: Variable
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .thargoid
 
  EQUB 2
@@ -20045,6 +20574,15 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  EQUS &9E, " ", &C4
  EQUB 0, 0
 
+\ ******************************************************************************
+\
+\       Name: thargon
+\       Type: Variable
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .thargon
 
  EQUB 2
@@ -20063,6 +20601,15 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  EQUS &9E, " ", &C4
  EQUB 0, 0
 
+\ ******************************************************************************
+\
+\       Name: transporter
+\       Type: Variable
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .transporter
 
  EQUB 1
@@ -20076,6 +20623,15 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  EQUB 0, 7
  EQUS "10", &BE
  EQUB 0, 0
+
+\ ******************************************************************************
+\
+\       Name: viper
+\       Type: Variable
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
 
 .viper
 
@@ -20096,6 +20652,15 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  EQUB 0, 10
  EQUS &C7, " Sup", &F4, " ", &C2, &0C, &01, "VC", &02, "10"
  EQUB 0, 0
+
+\ ******************************************************************************
+\
+\       Name: worm
+\       Type: Variable
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
 
 .worm
 

@@ -167,6 +167,12 @@ E% = &563E              \ The address of the default NEWB ship bytes within the
 SHIP_MISSILE = &7F00    \ The address of the missile ship blueprint, as set in
                         \ elite-loader3.asm
 
+save_lock = &233        \ IND2V+1
+new_file = &234         \ IND3V
+new_posn = &235         \ IND3V+1
+new_name = &74D
+iff_index = &D7A
+
 \ ******************************************************************************
 \
 \       Name: ZP
@@ -1305,8 +1311,12 @@ ORG &0300
                         \       (0 = pulse or mining laser) or is always on
                         \       (1 = beam or military laser)
 
- SKIP 2                 \ These bytes appear to be unused (they were originally
-                        \ used for up/down lasers, but they were dropped)
+ SKIP 1                 \ This byte appears to be unused
+
+.new_type
+.cmdr_ship
+
+ SKIP 1                 \ AJD
 
 .CRGO
 
@@ -1389,7 +1399,17 @@ ORG &0300
                         \
                         \   * &FF = fitted
 
- SKIP 4                 \ These bytes appear to be unused
+.cmdr_cour
+
+ SKIP 2                 \ AJD
+
+.cmdr_courx
+
+ SKIP 1                 \ AJD
+
+.cmdr_coury
+
+ SKIP 1                 \ AJD
 
 .NOMSL
 
@@ -1780,6 +1800,66 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
                         \ of the catalogue, between the two lists of filenames,
                         \ so it can be dropped without affecting the layout)
 
+.new_pulse
+
+ SKIP 1                 \ AJD
+
+.new_beam
+
+ SKIP 1                 \ AJD
+
+.new_military
+
+ SKIP 1                 \ AJD
+
+.new_mining
+
+ SKIP 1                 \ AJD
+
+.new_mounts
+
+ SKIP 1                 \ AJD
+
+.new_missiles
+
+ SKIP 1                 \ AJD
+
+.new_shields
+
+ SKIP 1                 \ AJD
+
+.new_energy
+
+ SKIP 1                 \ AJD
+
+.new_speed
+
+ SKIP 1                 \ AJD
+
+.new_hold
+
+ SKIP 1                 \ AJD
+
+.new_range
+
+ SKIP 1                 \ AJD
+
+.new_costs
+
+ SKIP 1                 \ AJD
+
+.new_max
+
+ SKIP 1                 \ AJD
+
+.new_min
+
+ SKIP 1                 \ AJD
+
+.new_space
+
+ SKIP 1                 \ AJD
+
 \ ******************************************************************************
 \
 \       Name: K%
@@ -1943,112 +2023,6 @@ ORG CODE%
 
 LOAD_A% = LOAD%
 
- \ a.dcode - ELITE III in-flight code
-
-\OPT TABS=16
-
-key_table = &04
-ptr = &07
-font = &1C
-cursor_x = &2C
-cursor_y = &2D
-vdu_stat = &72
-brk_line = &FD
-last_key = &300
-ship_type = &311
-cabin_t = &342
-target = &344
-view_dirn = &345
-laser_t = &347
-adval_x = &34C
-adval_y = &34D
-cmdr_mission = &358
-cmdr_homex = &359
-cmdr_homey = &35A
-cmdr_gseed = &35B
-cmdr_money = &361
-cmdr_fuel = &365
-cmdr_galxy = &367
-cmdr_laser = &368
-cmdr_ship = &36D
-cmdr_hold = &36E
-cmdr_cargo = &36F
-cmdr_ecm = &380
-cmdr_scoop = &381
-cmdr_bomb = &382
-cmdr_eunit = &383
-cmdr_dock = &384
-cmdr_ghype = &385
-cmdr_escape = &386
-cmdr_cour = &387
-cmdr_courx = &389
-cmdr_coury = &38A
-cmdr_misl = &38B
-cmdr_legal = &38C
-cmdr_avail = &38D
-cmdr_price = &39E
-cmdr_kills = &39F
-f_shield = &3A5
-r_shield = &3A6
-energy = &3A7
-home_econ = &3AC
-home_govmt = &3AE
-home_tech = &3AF
-data_econ = &3B8
-data_govm = &3B9
-data_tech = &3BA
-data_popn = &3BB
-data_gnp = &3BD
-hype_dist = &3BF
-data_homex = &3C1
-data_homey = &3C2
-s_flag = &3C6
-cap_flag = &3C7
-a_flag = &3C8
-x_flag = &3C9
-f_flag = &3CA
-y_flag = &3CB
-j_flag = &3CC
-k_flag = &3CD
-b_flag = &3CE
- \
-save_lock = &233
-new_file = &234
-new_posn = &235
-new_type = &36D
-new_pulse = &3D0
-new_beam = &3D1
-new_military = &3D2
-new_mining = &3D3
-new_mounts = &3D4
-new_missiles = &3D5
-new_shields = &3D6
-new_energy = &3D7
-new_speed = &3D8
-new_hold = &3D9
-new_range = &3DA
-new_costs = &3DB
-new_max = &3DC
-new_min = &3DD
-new_space = &3DE
- \new_:	EQU &3DF
-new_name = &74D
- \
-iff_index = &D7A
-altitude = &FD1
-irq1 = &114B
-commander = &1189
-brkdst = &11D5
-ship_data = &55FE
-l_563d = &563D
-osfile = &FFDD
-oswrch = &FFEE
-osword = &FFF1
-osbyte = &FFF4
-oscli = &FFF7
-
-EXEC% = &11E3
-
 .S%
 
  JMP RSHIPS
@@ -2064,7 +2038,7 @@ EXEC% = &11E3
 
 .brk_in
 
- JMP brkdst
+ JMP BRBR1
 
 BRKV = P% - 2
 
@@ -2074,7 +2048,7 @@ BRKV = P% - 2
 
  LDX #LO(l_11f8)
  LDY #HI(l_11f8)
- JSR oscli
+ JSR OSCLI
 
 .l_11f8
 
@@ -2179,11 +2153,11 @@ BRKV = P% - 2
  STA &2B
  ORA &7B
  STA &2A
- \	LDA b_flag
+ \	LDA BSTK
  \	BEQ l_129e
  \	LDX #&03
  \	LDA #&80
- \	JSR osbyte
+ \	JSR OSBYTE
  \	TYA
  \	LSR A
  \	LSR A
@@ -2248,14 +2222,14 @@ BRKV = P% - 2
 .l_12ef
 
  LDA &0308
- AND cmdr_bomb
+ AND BOMB
  BEQ l_12f7
  \	LDA #&03
  \	JSR TT66
  \	JSR LL164
  \	JSR RES2
  \	STY &0341
- INC cmdr_bomb
+ INC BOMB
  INC new_hold	\***
  \	JSR NLUNCH
  JSR DORND
@@ -2683,7 +2657,7 @@ BRKV = P% - 2
 .l_156c
 
  SEC
- LDA cmdr_eunit
+ LDA ENGY
  ADC ENERGY
  BCS l_1578
  STA ENERGY
@@ -5741,7 +5715,7 @@ NEXT
 .sell_equip
 
  LDA CRGO               \ AJD
- BEQ l_1ce7	\ IFF if flag not set
+ BEQ l_1ce7             \ IFF if flag not set
  LDA #&6B
  JSR plf2
 
@@ -5798,19 +5772,19 @@ NEXT
 
  LDX &93                \ AJD
  LDY LASER,X
- CPY new_beam	\ beam laser
+ CPY new_beam           \ beam laser
  BNE l_1b9d
  LDA #&68
 
 .l_1b9d
 
- CPY new_military	\ military laser
+ CPY new_military       \ military laser
  BNE l_1ba3
  LDA #&75
 
 .l_1ba3
 
- CPY new_mining	\ mining laser
+ CPY new_mining         \ mining laser
  BNE l_1ba9
  LDA #&76
 
@@ -7634,8 +7608,8 @@ NEXT
  LDA #0                 \ Set A = 0 so we can use it to zero the contents of
                         \ the cargo hold
 
- STA QQ20+&10
- LDX #&0C	\LDX #&10	\ save gold/plat/gems
+ STA QQ20+&10           \ AJD
+ LDX #&0C               \ LDX #&10 save gold/plat/gems
 
 .ESL2
 
@@ -7951,7 +7925,7 @@ LOAD_C% = LOAD% +P% - CODE%
  CMP #&E6
  BCC l_226d
  LDX &8C
- LDA l_563d,X
+ LDA E%-1,X
  BPL l_226d
  LDA #&00
  STA &66
@@ -8835,7 +8809,7 @@ LOAD_C% = LOAD% +P% - CODE%
  SEC
  SBC #&01
  STA &D1
- LDA font
+ LDA P+1
  LSR &42
  ROR A
  STA &41
@@ -12187,7 +12161,7 @@ LOAD_D% = LOAD% + P% - CODE%
  STA XC
  INC XC
 
- LDA &E0
+ LDA &E0                \ AJD
 
  ASL A                  \ Set K4 = 90 + y-delta * 2
  ADC #90                \
@@ -16109,8 +16083,8 @@ LOAD_E% = LOAD% + P% - CODE%
  LDY #HI(l_3832)
  STA SC
  LDA #&7D
- STX font
- STY font+&01
+ STX P+1
+ STY P+2
  JMP RREN
 
 .l_3832
@@ -16150,7 +16124,7 @@ LOAD_E% = LOAD% + P% - CODE%
  LDA &46
  STA &1B
  LDA &47
- STA font
+ STA P+1
  LDA &48
  JSR l_3cfa
  BCS l_388d
@@ -16163,7 +16137,7 @@ LOAD_E% = LOAD% + P% - CODE%
  LDA &49
  STA &1B
  LDA &4A
- STA font
+ STA P+1
  LDA &4B
  EOR #&80
  JSR l_3cfa
@@ -16202,7 +16176,7 @@ LOAD_E% = LOAD% + P% - CODE%
  JSR PROJ
  BCS l_388e
  LDA #&60
- STA font
+ STA P+1
  LDA #&00
  STA &1B
  JSR DVID3B2
@@ -16314,7 +16288,7 @@ LOAD_E% = LOAD% + P% - CODE%
  STA &1B
  LDA &47,X
  AND #&7F
- STA font
+ STA P+1
  LDA &47,X
  AND #&80
  JSR DVID3B2
@@ -17757,7 +17731,7 @@ LOAD_E% = LOAD% + P% - CODE%
 
  LDA &1B
  STA &03B0
- LDA font
+ LDA P+1
  STA &03B1
  RTS
 
@@ -17861,7 +17835,7 @@ LOAD_E% = LOAD% + P% - CODE%
  INY
  LDA (&20),Y
  ADC #&00
- STA font
+ STA P+1
 
 .l_3e1f
 
@@ -17886,9 +17860,9 @@ LOAD_E% = LOAD% + P% - CODE%
  SEC
  SBC &D1
  STA &1B
- LDA font
+ LDA P+1
  SBC #&00
- STA font
+ STA P+1
  TXA
  ASL A
  TAY
@@ -17905,7 +17879,7 @@ LOAD_E% = LOAD% + P% - CODE%
  DEY
  LDA (SC),Y
  STA &41
- LDA font
+ LDA P+1
  STA (&20),Y
  DEY
  LDA (SC),Y
@@ -18706,7 +18680,7 @@ LOAD_E% = LOAD% + P% - CODE%
 
  LDA QQ11               \ If the current view is a chart (QQ11 = 64 or 128),
  AND #%11000000         \ keep going, otherwise jump down to TT107 to skip the
- BEQ TT107              \ following
+ BEQ TT107              \ following AJD
 
  LDA T1                 \ Restore the original value of A (the key that's been
                         \ pressed) from T1
@@ -18971,7 +18945,7 @@ LOAD_E% = LOAD% + P% - CODE%
  STA d_mox+&04
  LDX #LO(d_mox)
  LDY #HI(d_mox)
- JMP oscli
+ JMP OSCLI
 
 .d_mox
 
@@ -19677,7 +19651,7 @@ LOAD_E% = LOAD% + P% - CODE%
 
 .DKS1
 
- LDA b_flag
+ LDA BSTK
  BMI b_14
  LDX l_4419-1,Y
  JSR DKS4

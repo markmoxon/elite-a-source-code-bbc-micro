@@ -143,6 +143,10 @@ BRBR1 = &11D5           \ The address of the main break handler, which BRKV
 SHIP_MISSILE = &7F00    \ The address of the missile ship blueprint, as set in
                         \ elite-loader3.asm
 
+save_lock = &233        \ IND2V+1
+new_file = &234         \ IND3V
+new_posn = &235         \ IND3V+1
+
 \ ******************************************************************************
 \
 \       Name: ZP
@@ -1281,8 +1285,12 @@ ORG &0300
                         \       (0 = pulse or mining laser) or is always on
                         \       (1 = beam or military laser)
 
- SKIP 2                 \ These bytes appear to be unused (they were originally
-                        \ used for up/down lasers, but they were dropped)
+ SKIP 1                 \ This byte appears to be unused
+
+.new_type
+.cmdr_ship
+
+ SKIP 1                 \ AJD
 
 .CRGO
 
@@ -1365,7 +1373,17 @@ ORG &0300
                         \
                         \   * &FF = fitted
 
- SKIP 4                 \ These bytes appear to be unused
+.cmdr_cour
+
+ SKIP 2                 \ AJD
+
+.cmdr_courx
+
+ SKIP 1                 \ AJD
+
+.cmdr_coury
+
+ SKIP 1                 \ AJD
 
 .NOMSL
 
@@ -1756,6 +1774,66 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
                         \ of the catalogue, between the two lists of filenames,
                         \ so it can be dropped without affecting the layout)
 
+.new_pulse
+
+ SKIP 1                 \ AJD
+
+.new_beam
+
+ SKIP 1                 \ AJD
+
+.new_military
+
+ SKIP 1                 \ AJD
+
+.new_mining
+
+ SKIP 1                 \ AJD
+
+.new_mounts
+
+ SKIP 1                 \ AJD
+
+.new_missiles
+
+ SKIP 1                 \ AJD
+
+.new_shields
+
+ SKIP 1                 \ AJD
+
+.new_energy
+
+ SKIP 1                 \ AJD
+
+.new_speed
+
+ SKIP 1                 \ AJD
+
+.new_hold
+
+ SKIP 1                 \ AJD
+
+.new_range
+
+ SKIP 1                 \ AJD
+
+.new_costs
+
+ SKIP 1                 \ AJD
+
+.new_max
+
+ SKIP 1                 \ AJD
+
+.new_min
+
+ SKIP 1                 \ AJD
+
+.new_space
+
+ SKIP 1                 \ AJD
+
 \ ******************************************************************************
 \
 \       Name: K%
@@ -1919,48 +1997,8 @@ ORG CODE%
 
 LOAD_A% = LOAD%
 
- \ a.qcode - ELITE III second processor code
-
-\EXEC = boot_in
-
 dockedp = &A0
-brk_line = &FD
 BRKV = &202
-cmdr_ship = &36D
-cmdr_cour = &387
-cmdr_courx = &389
-cmdr_coury = &38A
-
-a_flag = &3C8
-b_flag = &3CE
-
-save_lock = &233
-new_file = &234
-new_posn = &235
-new_type = &36D
-new_pulse = &3D0
-new_beam = &3D1
-new_military = &3D2
-new_mining = &3D3
-new_mounts = &3D4
-new_missiles = &3D5
-new_shields = &3D6
-new_energy = &3D7
-new_speed = &3D8
-new_hold = &3D9
-new_range = &3DA
-new_costs = &3DB
-new_max = &3DC
-new_min = &3DD
-new_space = &3DE
- \new_:	EQU &3DF
- \new_name:	EQU &74D
-
-osfile = &FFDD
-oswrch = &FFEE
-osword = &FFF1
-osbyte = &FFF4
-oscli = &FFF7
 
 tube_r1s = &FEF8
 tube_r1d = &FEF9
@@ -2857,7 +2895,7 @@ tube_r4d = &FEFF
 \
 \ Other entry points:
 \
-\   set_token           AJD
+\   set_token           Switch to standard tokens, keeping the current case
 \
 \ ******************************************************************************
 
@@ -4324,7 +4362,7 @@ tube_r4d = &FEFF
  JSR plf                \ Print the text token in A (which contains our ship's
                         \ condition) followed by a newline
 
- JMP stat_legal
+ JMP stat_legal         \ AJD
 
 .stat_dock
 
@@ -4430,7 +4468,7 @@ tube_r4d = &FEFF
 .sell_equip
 
  LDA CRGO               \ AJD
- BEQ l_1b57	\ IFF if flag not set
+ BEQ l_1b57             \ IFF if flag not set
  LDA #&6B
  LDX #&06
  JSR plf2
@@ -4499,19 +4537,19 @@ tube_r4d = &FEFF
 
  LDX &93                \ AJD
  LDY LASER,X
- CPY new_beam	\ beam laser
+ CPY new_beam           \ beam laser
  BNE l_1b9d
  LDA #&68
 
 .l_1b9d
 
- CPY new_military	\ military laser
+ CPY new_military       \ military laser
  BNE l_1ba3
  LDA #&75
 
 .l_1ba3
 
- CPY new_mining	\ mining laser
+ CPY new_mining         \ mining laser
  BNE l_1ba9
  LDA #&76
 
@@ -6303,7 +6341,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
 .DL31
 
- JSR tube_write
+ JSR tube_write         \ AJD
  LDA SC
  JSR tube_write
  LDA SC+1
@@ -8732,7 +8770,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
 .TT25
 
- JSR CTRL
+ JSR CTRL               \ AJD
  BPL not_cyclop
  LDA dockedp
  BNE not_cyclop
@@ -10014,12 +10052,11 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
  LDA &03AA              \ AJD
  STA &81
- \	JSR GCASH	\--
  JSR MULTU
  JSR price_xy
- JSR MCASH	\++
- JSR MCASH	\++
- JSR MCASH	\++
+ JSR MCASH
+ JSR MCASH
+ JSR MCASH
  JSR MCASH
 
  LDA #0                 \ We've made the sale, so set the amount
@@ -10439,7 +10476,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  STA XC
  INC XC
 
- LDA &E0
+ LDA &E0                \ AJD
 
  ASL A                  \ Set K4 = 90 + y-delta * 2
  ADC #90                \
@@ -12690,7 +12727,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  DEX
  BNE l_31d2
 
- EQUB &2C               \ AJD
+ EQUB &2C
 
 .vdu_80
 
@@ -15068,7 +15105,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
                         \ zeroed them all
 
  LDA #&7F               \ AJD
- STA b_flag
+ STA BSTK
 
                         \ Fall through into TT170 to start the game
 
@@ -15086,7 +15123,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
 .BR1
 
- LDX #10
+ LDX #10                \ AJD
  LDY #&0B
  JSR install_ship
  LDX #19
@@ -15885,7 +15922,7 @@ ENDIF
  JSR DETOK              \ prints the boxed-out title "DRIVE {drive number}
                         \ CATALOGUE"
 
- LDA #&8E
+ LDA #&8E               \ AJD
  JSR tube_write
  LDA XC
  JSR tube_write
@@ -26156,8 +26193,8 @@ ENDIF
  LDA #0                 \ Set A = 0 so we can use it to zero the contents of
                         \ the cargo hold
 
- STA QQ20+&10
- LDX #&0C	\LDX #&10	\ save gold/plat/gems
+ STA QQ20+&10           \ AJD
+ LDX #&0C               \ LDX #&10 save gold/plat/gems
 
 .ESL2
 
@@ -31084,7 +31121,7 @@ ENDIF
  CMP #&43               \ If "F" was not pressed, jump down to HME1, otherwise
  BNE HME1               \ keep going to process searching for systems
 
- LDA &87
+ LDA &87                \ AJD
  AND #&C0
  BEQ n_finder
  LDA dockedp
@@ -31174,7 +31211,7 @@ ENDIF
 
 .ee2
 
- BIT dockedp
+ BIT dockedp            \ AJD
  BMI flying
  CMP #&20
  BNE fvw
@@ -31765,7 +31802,7 @@ ENDIF
  JSR tube_write
  TYA
  JSR tube_write
- LDA b_flag
+ LDA BSTK
  JSR tube_write
  JSR tube_read
  BPL b_quit

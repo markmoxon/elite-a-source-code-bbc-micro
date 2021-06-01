@@ -120,8 +120,9 @@ f9 = &77                \ Internal key number for red key f9 (Inventory)
 NRU% = 25               \ The number of planetary systems with extended system
                         \ description overrides in the RUTOK table
 
-VE = &57                \ The obfuscation byte used to hide the extended tokens
-                        \ table from crackers viewing the binary code
+VE = 0                  \ The obfuscation byte used to hide the extended tokens
+                        \ table from crackers viewing the binary code, which is
+                        \ zero in Elite-A as the token table is not obfuscated
 
 LL = 30                 \ The length of lines (in characters) of justified text
                         \ in the extended tokens system
@@ -160,6 +161,11 @@ CHK = &11D4             \ The address of the first checksum byte for the saved
 
 SHIP_MISSILE = &7F00    \ The address of the missile ship blueprint, as set in
                         \ elite-loader3.asm
+
+save_lock = &233        \ IND2V+1
+new_file = &234         \ IND3V
+new_posn = &235         \ IND3V+1
+new_name = &74D
 
 \ ******************************************************************************
 \
@@ -1299,8 +1305,12 @@ ORG &0300
                         \       (0 = pulse or mining laser) or is always on
                         \       (1 = beam or military laser)
 
- SKIP 2                 \ These bytes appear to be unused (they were originally
-                        \ used for up/down lasers, but they were dropped)
+ SKIP 1                 \ This byte appears to be unused
+
+.new_type
+.cmdr_ship
+
+ SKIP 1                 \ AJD
 
 .CRGO
 
@@ -1383,7 +1393,17 @@ ORG &0300
                         \
                         \   * &FF = fitted
 
- SKIP 4                 \ These bytes appear to be unused
+.cmdr_cour
+
+ SKIP 2                 \ AJD
+
+.cmdr_courx
+
+ SKIP 1                 \ AJD
+
+.cmdr_coury
+
+ SKIP 1                 \ AJD
 
 .NOMSL
 
@@ -1774,6 +1794,66 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
                         \ of the catalogue, between the two lists of filenames,
                         \ so it can be dropped without affecting the layout)
 
+.new_pulse
+
+ SKIP 1                 \ AJD
+
+.new_beam
+
+ SKIP 1                 \ AJD
+
+.new_military
+
+ SKIP 1                 \ AJD
+
+.new_mining
+
+ SKIP 1                 \ AJD
+
+.new_mounts
+
+ SKIP 1                 \ AJD
+
+.new_missiles
+
+ SKIP 1                 \ AJD
+
+.new_shields
+
+ SKIP 1                 \ AJD
+
+.new_energy
+
+ SKIP 1                 \ AJD
+
+.new_speed
+
+ SKIP 1                 \ AJD
+
+.new_hold
+
+ SKIP 1                 \ AJD
+
+.new_range
+
+ SKIP 1                 \ AJD
+
+.new_costs
+
+ SKIP 1                 \ AJD
+
+.new_max
+
+ SKIP 1                 \ AJD
+
+.new_min
+
+ SKIP 1                 \ AJD
+
+.new_space
+
+ SKIP 1                 \ AJD
+
 \ ******************************************************************************
 \
 \       Name: K%
@@ -1937,108 +2017,6 @@ ORG CODE%
 
 LOAD_A% = LOAD%
 
-\OPT TABS=16
-
-key_table = &04
-ptr = &07
-font = &1C
-cursor_x = &2C
-cursor_y = &2D
-vdu_stat = &72
-brk_line = &FD
-last_key = &300
-ship_type = &311
-cabin_t = &342
-target = &344
-view_dirn = &345
-laser_t = &347
-adval_x = &34C
-adval_y = &34D
-cmdr_mission = &358
-cmdr_homex = &359
-cmdr_homey = &35A
-cmdr_gseed = &35B
-cmdr_money = &361
-cmdr_fuel = &365
-cmdr_galxy = &367
-cmdr_laser = &368
-cmdr_ship = &36D
-cmdr_hold = &36E
-cmdr_cargo = &36F
-cmdr_ecm = &380
-cmdr_scoop = &381
-cmdr_bomb = &382
-cmdr_eunit = &383
-cmdr_dock = &384
-cmdr_ghype = &385
-cmdr_escape = &386
-cmdr_cour = &387
-cmdr_courx = &389
-cmdr_coury = &38A
-cmdr_misl = &38B
-cmdr_legal = &38C
-cmdr_avail = &38D
-cmdr_price = &39E
-cmdr_kills = &39F
-f_shield = &3A5
-r_shield = &3A6
-energy = &3A7
-home_econ = &3AC
-home_govmt = &3AE
-home_tech = &3AF
-data_econ = &3B8
-data_govm = &3B9
-data_tech = &3BA
-data_popn = &3BB
-data_gnp = &3BD
-hype_dist = &3BF
-data_homex = &3C1
-data_homey = &3C2
-s_flag = &3C6
-cap_flag = &3C7
-a_flag = &3C8
-x_flag = &3C9
-f_flag = &3CA
-y_flag = &3CB
-j_flag = &3CC
-k_flag = &3CD
-b_flag = &3CE
- \
-save_lock = &233
-new_file = &234
-new_posn = &235
-new_type = &36D
-new_pulse = &3D0
-new_beam = &3D1
-new_military = &3D2
-new_mining = &3D3
-new_mounts = &3D4
-new_missiles = &3D5
-new_shields = &3D6
-new_energy = &3D7
-new_speed = &3D8
-new_hold = &3D9
-new_range = &3DA
-new_costs = &3DB
-new_max = &3DC
-new_min = &3DD
-new_space = &3DE
- \new_:	EQU &3DF
-new_name = &74D
- \
-iff_index = &D7A
-altitude = &FD1
-irq1 = &114B
-commander = &1189
-brkdst = &11D5
-ship_data = &55FE
-l_563d = &563D
-osfile = &FFDD
-oswrch = &FFEE
-osword = &FFF1
-osbyte = &FFF4
-oscli = &FFF7
-
 \ ******************************************************************************
 \
 \       Name: S%
@@ -2066,10 +2044,20 @@ BRKV = P% - 2           \ The address of the destination address in the above
                         \ updates BRKV will update this instruction instead of
                         \ the actual vector
 
+\ ******************************************************************************
+\
+\       Name: INBAY
+\       Type: Subroutine
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .INBAY
 
  JSR BRKBK
  JMP icode_set
+
  EQUB 0
  \ dead entry
  LDA #0
@@ -2255,6 +2243,15 @@ BRKV = P% - 2           \ The address of the destination address in the above
  JMP BAY                \ If we get here them we didn't start or any missions,
                         \ so jump to BAY to go to the docking bay (i.e. show the
                         \ Status Mode screen)
+
+\ ******************************************************************************
+\
+\       Name: scramble
+\       Type: Subroutine
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
 
 .scramble
 
@@ -2923,7 +2920,7 @@ BRKV = P% - 2           \ The address of the destination address in the above
 \
 \ Other entry points:
 \
-\   set_token           AJD
+\   set_token           Switch to standard tokens, keeping the current case
 \
 \ ******************************************************************************
 
@@ -5645,7 +5642,7 @@ LOAD_B% = LOAD% + P% - CODE%
 .sell_equip
 
  LDA CRGO               \ AJD
- BEQ l_1b57	\ IFF if flag not set
+ BEQ l_1b57             \ IFF if flag not set
  LDA #&6B
  LDX #&06
  JSR plf2
@@ -5714,19 +5711,19 @@ LOAD_B% = LOAD% + P% - CODE%
 
  LDX &93                \ AJD
  LDY LASER,X
- CPY new_beam	\ beam laser
+ CPY new_beam           \ beam laser
  BNE l_1b9d
  LDA #&68
 
 .l_1b9d
 
- CPY new_military	\ military laser
+ CPY new_military       \ military laser
  BNE l_1ba3
  LDA #&75
 
 .l_1ba3
 
- CPY new_mining	\ mining laser
+ CPY new_mining         \ mining laser
  BNE l_1ba9
  LDA #&76
 
@@ -11852,6 +11849,15 @@ LOAD_D% = LOAD% + P% - CODE%
  JMP FRCE               \ "pressed" to red key f9 (so we show the Inventory
                         \ screen)
 
+\ ******************************************************************************
+\
+\       Name: sell_yn
+\       Type: Subroutine
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .sell_yn
 
  LDA #&CD
@@ -11994,6 +12000,15 @@ LOAD_D% = LOAD% + P% - CODE%
  STA R
 
  RTS                    \ Return from the subroutine
+
+\ ******************************************************************************
+\
+\       Name: sell_jump
+\       Type: Subroutine
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
 
 .sell_jump
 
@@ -12180,12 +12195,11 @@ LOAD_D% = LOAD% + P% - CODE%
 
  LDA &03AA              \ AJD
  STA &81
- \	JSR GCASH	\--
  JSR MULTU
  JSR price_xy
- JSR MCASH	\++
- JSR MCASH	\++
- JSR MCASH	\++
+ JSR MCASH
+ JSR MCASH
+ JSR MCASH
  JSR MCASH
 
  LDA #0                 \ We've made the sale, so set the amount
@@ -12609,7 +12623,7 @@ LOAD_D% = LOAD% + P% - CODE%
  STA XC
  INC XC
 
- LDA &E0
+ LDA &E0                \ AJD
 
  ASL A                  \ Set K4 = 90 + y-delta * 2
  ADC #90                \
@@ -13607,6 +13621,15 @@ LOAD_D% = LOAD% + P% - CODE%
  STA gov                \ selected system's government from QQ4
 
  RTS                    \ Return from the subroutine
+
+\ ******************************************************************************
+\
+\       Name: encyclopedia
+\       Type: Subroutine
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
 
 .encyclopedia
 
@@ -14930,7 +14953,7 @@ LOAD_E% = LOAD% + P% - CODE%
  DEX
  BNE l_31d2
 
- EQUB &2C               \ AJD
+ EQUB &2C
 
 .vdu_80
 
@@ -17456,16 +17479,56 @@ LOAD_F% = LOAD% + P% - CODE%
 
  RTS                    \ Return from the subroutine
 
+\ ******************************************************************************
+\
+\       Name: Main game loop (Part 2 of 6)
+\       Type: Subroutine
+\   Category: Main loop
+\    Summary: Update the main loop counters
+\  Deep dive: Program flow of the main game loop
+\             Ship data blocks
+\
+\ ------------------------------------------------------------------------------
+\
+\ In the docked code, we start the main game loop at part 2 and then jump
+\ straight to part 5, as parts 1, 3 and 4 are not required when we are docked.
+\
+\ This section covers the following:
+\
+\   * Update the main loop counters
+\
+\ Other entry points:
+\
+\   TT100               The entry point for the start of the main game loop,
+\                       which calls the main flight loop and the moves into the
+\                       spawning routine
+\
+\   me3                 Used by me2 to jump back into the main game loop after
+\                       printing an in-flight message
+\
+\ ******************************************************************************
+
 .TT100
 
- DEC &034A
- BEQ me2
- BPL me3
- INC &034A
+ DEC DLY                \ Decrement the delay counter in DLY, so any in-flight
+                        \ messages get removed once the counter reaches zero
+
+ BEQ me2                \ If DLY is now 0, jump to me2 to remove any in-flight
+                        \ message from the space view, and once done, return to
+                        \ me3 below, skipping the following two instructions
+
+ BPL me3                \ If DLY is positive, jump to me3 to skip the next
+                        \ instruction
+
+ INC DLY                \ If we get here, DLY is negative, so we have gone too
+                        \ and need to increment DLY back to 0
 
 .me3
 
- DEC &8A
+ DEC MCNT               \ Decrement the main loop counter in MCNT
+
+                        \ Fall through into part 5 (parts 3 and 4 are not
+                        \ required when we are docked)
 
 \ ******************************************************************************
 \
@@ -17876,7 +17939,7 @@ LOAD_F% = LOAD% + P% - CODE%
                         \ zeroed them all
 
  LDA #&7F               \ AJD
- STA b_flag
+ STA BSTK
 
                         \ Fall through into TT170 to start the game
 
@@ -19037,6 +19100,15 @@ ENDIF
  JMP BRKBK              \ Jump to BRKBK to set BRKV back to the standard BRKV
                         \ handler for the game, and return from the subroutine
                         \ using a tail call
+
+\ ******************************************************************************
+\
+\       Name: confirm
+\       Type: Subroutine
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
 
 .confirm
 
@@ -24397,30 +24469,12 @@ LOAD_G% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
 \
-\ Save output/ELTG.bin
+\       Name: n_buyship
+\       Type: Subroutine
+\   Category: Elite-A
+\    Summary: AJD
 \
 \ ******************************************************************************
-
-PRINT "ELITE G"
-PRINT "Assembled at ", ~CODE_G%
-PRINT "Ends at ", ~P%
-PRINT "Code size is ", ~(P% - CODE_G%)
-PRINT "Execute at ", ~LOAD%
-PRINT "Reload at ", ~LOAD_G%
-
-PRINT "S.ELTG ", ~CODE_G%, " ", ~P%, " ", ~LOAD%, " ", ~LOAD_G%
-\SAVE "output/T.ELTG.bin", CODE_G%, P%, LOAD%
-
-\ ******************************************************************************
-\
-\ ELITE H FILE
-\
-\ ******************************************************************************
-
-CODE_H% = P%
-LOAD_H% = LOAD% + P% - CODE%
-
-\ additions start here
 
 .n_buyship
 
@@ -24530,6 +24584,15 @@ LOAD_H% = LOAD% + P% - CODE%
  JSR msblob
  JMP BAY
 
+\ ******************************************************************************
+\
+\       Name: n_load
+\       Type: Subroutine
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .n_load
 
  LDY new_type
@@ -24562,7 +24625,7 @@ LOAD_H% = LOAD% + P% - CODE%
  LDX count_offs,Y
  LDA LASER,X
  BEQ count_sys
- DEC new_hold	\**
+ DEC new_hold
 
 .count_sys
 
@@ -24570,9 +24633,27 @@ LOAD_H% = LOAD% + P% - CODE%
  BPL count_lasers
  RTS
 
+\ ******************************************************************************
+\
+\       Name: count_offs
+\       Type: Variable
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .count_offs
 
  EQUB &00, &01, &02, &03, &06, &18, &19, &1A, &1B, &1C, &1D, &1E
+
+\ ******************************************************************************
+\
+\       Name: n_name
+\       Type: Subroutine
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
 
 .n_name
 
@@ -24592,6 +24673,15 @@ LOAD_H% = LOAD% + P% - CODE%
  BNE n_lprint
  RTS
 
+\ ******************************************************************************
+\
+\       Name: n_price
+\       Type: Subroutine
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .n_price
 
  \ put price 0 <= Y <= &C into 40-43
@@ -24606,6 +24696,15 @@ LOAD_H% = LOAD% + P% - CODE%
  DEY
  BPL n_lprice
  RTS
+
+\ ******************************************************************************
+\
+\       Name: cour_buy
+\       Type: Subroutine
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
 
 .cour_buy
 
@@ -24701,7 +24800,7 @@ LOAD_H% = LOAD% + P% - CODE%
  INC &4C
  BEQ cour_menu
  DEC &46
- BNE cour_count	
+ BNE cour_count
  LDX &49
  LDA &6F
  CMP QQ0
@@ -24812,6 +24911,15 @@ LOAD_H% = LOAD% + P% - CODE%
  STA &46
  JMP cour_loop
 
+\ ******************************************************************************
+\
+\       Name: cour_dock
+\       Type: Subroutine
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .cour_dock
 
  LDA cmdr_cour
@@ -24855,6 +24963,15 @@ LOAD_H% = LOAD% + P% - CODE%
 .cour_quit
 
  RTS
+
+\ ******************************************************************************
+\
+\       Name: stay_here
+\       Type: Subroutine
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
 
 .stay_here
 
@@ -24911,6 +25028,15 @@ LOAD_H% = LOAD% + P% - CODE%
 
  JMP BAY
 
+\ ******************************************************************************
+\
+\       Name: new_offsets
+\       Type: Variable
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .new_offsets
 
  EQUB   0,  13,  26,  39,  52,  65,  78,  91
@@ -24921,6 +25047,15 @@ LOAD_H% = LOAD% + P% - CODE%
  \ Pulse, Beam, Military, Mining Lasers, Mounts, Missiles
  \ Shields, Energy, Speed, Hold, Range, Costs
  \ Manouvre-h, Manoevre-l	\, Spare, Spare
+
+\ ******************************************************************************
+\
+\       Name: new_ships
+\       Type: Variable
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
 
 .new_ships
 
@@ -25024,6 +25159,15 @@ ELIF _RELEASED
 
 ENDIF
 
+\ ******************************************************************************
+\
+\       Name: new_details
+\       Type: Variable
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .new_details
 
  EQUB &0E, &8E, &92, &19, &02, &02	\ adder
@@ -25116,28 +25260,28 @@ ENDIF
 
 \ ******************************************************************************
 \
-\ Save output/ELTH.bin
+\ Save output/ELTG.bin
 \
 \ ******************************************************************************
 
-PRINT "ELITE H"
-PRINT "Assembled at ", ~CODE_H%
+PRINT "ELITE G"
+PRINT "Assembled at ", ~CODE_G%
 PRINT "Ends at ", ~P%
-PRINT "Code size is ", ~(P% - CODE_H%)
+PRINT "Code size is ", ~(P% - CODE_G%)
 PRINT "Execute at ", ~LOAD%
-PRINT "Reload at ", ~LOAD_H%
+PRINT "Reload at ", ~LOAD_G%
 
-PRINT "S.ELTH ", ~CODE_H%, " ", ~P%, " ", ~LOAD%, " ", ~LOAD_H%
-\SAVE "output/T.ELTH.bin", CODE_H%, P%, LOAD%
+PRINT "S.ELTG ", ~CODE_G%, " ", ~P%, " ", ~LOAD%, " ", ~LOAD_G%
+\SAVE "output/T.ELTG.bin", CODE_G%, P%, LOAD%
 
 \ ******************************************************************************
 \
-\ ELITE I FILE
+\ ELITE H FILE
 \
 \ ******************************************************************************
 
-CODE_I% = P%
-LOAD_I% = LOAD% + P% - CODE%
+CODE_H% = P%
+LOAD_H% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
 \
@@ -25385,654 +25529,4059 @@ MACRO TOKN n
 
 ENDMACRO
 
+\ ******************************************************************************
+\
+\       Name: TKN1
+\       Type: Variable
+\   Category: Text
+\    Summary: The first extended token table for recursive tokens 0-255 (DETOK)
+\  Deep dive: Extended text tokens
+\
+\ ******************************************************************************
+
 .TKN1
 
- EQUB &00
- EQUS &09, &0B, &01, &08, " ", &F1, "SK AC", &E9, "SS ME", &E1, &D7, &0A, &02, "1. ", &95, &D7, "2. SA", &FA
- EQUS " ", &9A, " ", &04, &D7, "3. C", &F5, "A", &E0, "GUE", &D7, "4. DEL", &DD, "E", &D0, "FI", &E5, &D7, "5. E"
- EQUS "X", &DB, &D7
- EQUB &00
- EQUS &0C, "WHICH ", &97, "?"
- EQUB &00
- \	EQUA "ARE YOU SURE?"
- EQUS &EE, "E ", &B3, " SU", &F2, "?"
- EQUB &00
- EQUS &96, &97, " ", &10, &98, &D7
- EQUB &00
- EQUS &B0, "m", &CA, "n", &B1
- EQUB &00
- EQUS "  ", &95, " ", &01, "(Y/N)?", &02, &0C, &0C
- EQUB &00
- EQUS "P", &F2, "SS SPA", &E9, " ", &FD, " FI", &F2, ",", &9A, ".", &0C, &0C
- EQUB &00
- EQUS &9A, "'S", &C8
- EQUB &00
- EQUS &15, "FI", &E5, &C9, "DEL", &DD, "E?"
- EQUB &00
- EQUS &17, &0E, &02, "G", &F2, &DD, &F0, "GS", &D5, &B2, &13, "I ", &F7, "G", &D0, "MOM", &F6, "T OF ", &B3, "R V", &E4
- EQUS "U", &D8, &E5, " ", &FB, "ME", &CC, "WE W", &D9, "LD LIKE ", &B3, &C9, "DO", &D0, "L", &DB, "T", &E5, " JO"
- EQUS "B F", &FD, " ", &EC, &CC, &93, &CF, " ", &B3, " ", &DA, "E HE", &F2, &CA, "A", &D2, "MODEL, ", &93
- EQUS &13, "C", &DF, &DE, "RICT", &FD, ", E", &FE, "IP", &C4, "WI", &E2, &D0, "TOP ", &DA, "CR", &DD, &D2, "SHI"
- EQUS "ELD G", &F6, &F4, &F5, &FD, &CC, "UNF", &FD, "TUN", &F5, "ELY ", &DB, "'S ", &F7, &F6, " ", &DE, "O"
- EQUS "L", &F6, &CC, &16, &DB, " W", &F6, "T MISS", &C3, "FROM ", &D9, "R ", &CF, " Y", &EE, "D ", &DF, " ", &13, &E6
- EQUS &F4, " FI", &FA, " M", &DF, &E2, "S AGO", &B2, &1C, &CC, &B3, "R MISSI", &DF, ", SH", &D9, "LD "
- EQUS &B3, " DECIDE", &C9, "AC", &E9, "PT ", &DB, ", IS", &C9, &DA, "EK", &B2, "D", &ED, "TROY ", &94, &CF
- EQUS &CC, &B3, " A", &F2, " CAU", &FB, &DF, &C4, &E2, &F5, " ", &DF, "LY ", &06, "u", &05, "S W", &DC, "L P", &F6
- EQUS &DD, &F8, "TE ", &93, "NEW SHIELDS", &B2, &E2, &F5, " ", &93, &13, "C", &DF, &DE, "RICT", &FD
- EQUS &CA, "F", &DB, "T", &C4, "WI", &E2, " ", &FF, " ", &06, "l", &05, &B1, &02, &08, "GOOD LUCK, ", &9A, &D4, &16
- EQUB &00
- EQUS &19, &09, &17, &0E, &02, "  ", &F5, "T", &F6, &FB, &DF, &D5, ". ", &13, "WE HA", &FA, " NE", &C4, "OF ", &B3, "R"
- EQUS " ", &DA, "RVIC", &ED, " AGA", &F0, &CC, "IF ", &B3, " W", &D9, "LD ", &F7, " ", &EB, " GOOD AS", &C9
- EQUS "GO", &C9, &13, &E9, &F4, &F1, " ", &B3, " W", &DC, "L ", &F7, " BRIEF", &FC, &CC, "IF SUC", &E9, "S"
- EQUS "SFUL, ", &B3, " W", &DC, "L ", &F7, " WELL ", &F2, "W", &EE, "D", &FC, &D4, &18
- EQUB &00
- EQUS "(", &13, "C) AC", &FD, "N", &EB, "FT 1984"
- EQUB &00
- EQUS "BY D.B", &F8, &F7, "N & I.", &F7, "LL"
- EQUB &00
- EQUS &15, &91, &C8, &1A
- EQUB &00
- EQUS &19, &09, &17, &0E, &02, "  C", &DF, "G", &F8, "TU", &F9, &FB, &DF, "S ", &9A, "!", &0C, &0C, &E2, &F4, "E", &0D, " W"
- EQUS &DC, "L ", &E4, "WAYS ", &F7, &D0, "P", &F9, &E9, " F", &FD, " ", &B3, " ", &F0, &D3, &CC, &FF, "D ", &EF
- EQUS "Y", &F7, " ", &EB, &DF, &F4, " ", &E2, &FF, " ", &B3, " ", &E2, &F0, "K..", &D4, &18
- EQUB &00
- EQUS "F", &D8, &E5, "D"
- EQUB &00
- EQUS &E3, "T", &D8, &E5
- EQUB &00
- EQUS "WELL K", &E3, "WN"
- EQUB &00
- EQUS "FAMO", &EC
- EQUB &00
- EQUS &E3, "T", &FC
- EQUB &00
- EQUS &FA, "RY"
- EQUB &00
- EQUS "M", &DC, "DLY"
- EQUB &00
- EQUS "MO", &DE
- EQUB &00
- EQUS &F2, "AS", &DF, &D8, "LY"
- EQUB &00
- EQUB &00
- EQUS &A5
- EQUB &00
- EQUS "r"
- EQUB &00
- EQUS "G", &F2, &F5
- EQUB &00
- EQUS "VA", &DE
- EQUB &00
- EQUS "P", &F0, "K"
- EQUB &00
- EQUS &02, "w v", &0D, " ", &B9, "A", &FB, &DF, "S"
- EQUB &00
- EQUS &9C, "S"
- EQUB &00
- EQUS "u"
- EQUB &00
- EQUS &80, " F", &FD, &ED, "TS"
- EQUB &00
- EQUS "O", &E9, &FF, "S"
- EQUB &00
- EQUS "SHYN", &ED, "S"
- EQUB &00
- EQUS "S", &DC, "L", &F0, &ED, "S"
- EQUB &00
- EQUS &EF, "T", &C3, "T", &F8, &F1, &FB, &DF, "S"
- EQUB &00
- EQUS &E0, &F5, "H", &C3, "OF d"
- EQUB &00
- EQUS &E0, &FA, " F", &FD, " d"
- EQUB &00
- EQUS "FOOD B", &E5, "ND", &F4, "S"
- EQUB &00
- EQUS "T", &D9, "RI", &DE, "S"
- EQUB &00
- EQUS "PO", &DD, "RY"
- EQUB &00
- EQUS &F1, "SCOS"
- EQUB &00
- EQUS "l"
- EQUB &00
- EQUS "W", &E4, "K", &C3, &9E
- EQUB &00
- EQUS "C", &F8, "B"
- EQUB &00
- EQUS "B", &F5
- EQUB &00
- EQUS &E0, "B", &DE
- EQUB &00
- EQUS &12
- EQUB &00
- EQUS &F7, "S", &DD
- EQUB &00
- EQUS "P", &F9, "GU", &FC
- EQUB &00
- EQUS &F8, "VAG", &FC
- EQUB &00
- EQUS "CURS", &FC
- EQUB &00
- EQUS "SC", &D9, "RG", &FC
- EQUB &00
- EQUS "q CIV", &DC, " W", &EE
- EQUB &00
- EQUS "h _ `S"
- EQUB &00
- EQUS "A h ", &F1, &DA, "A", &DA
- EQUB &00
- EQUS "q E", &EE, &E2, &FE, "AK", &ED
- EQUB &00
- EQUS "q ", &EB, &F9, "R AC", &FB, "V", &DB, "Y"
- EQUB &00
- EQUS &AF, "] ^"
- EQUB &00
- EQUS &93, &11, " _ `"
- EQUB &00
- EQUS &AF, &C1, "S' b c"
- EQUB &00
- EQUS &02, "z", &0D
- EQUB &00
- EQUS &AF, "k l"
- EQUB &00
- EQUS "JUI", &E9
- EQUB &00
- EQUS "B", &F8, "NDY"
- EQUB &00
- EQUS "W", &F5, &F4
- EQUB &00
- EQUS "B", &F2, "W"
- EQUB &00
- EQUS "G", &EE, "G", &E5, " B", &F9, &DE, &F4, "S"
- EQUB &00
- EQUS &12
- EQUB &00
- EQUS &11, " `"
- EQUB &00
- EQUS &11, " ", &12
- EQUB &00
- EQUS &11, " h"
- EQUB &00
- EQUS "h ", &12
- EQUB &00
- EQUS "F", &D8, "U", &E0, &EC
- EQUB &00
- EQUS "EXO", &FB, "C"
- EQUB &00
- EQUS "HOOPY"
- EQUB &00
- EQUS "U", &E1, "SU", &E4
- EQUB &00
- EQUS "EXC", &DB, &F0, "G"
- EQUB &00
- EQUS "CUIS", &F0, "E"
- EQUB &00
- EQUS "NIGHT LIFE"
- EQUB &00
- EQUS "CASI", &E3, "S"
- EQUB &00
- EQUS "S", &DB, " COMS"
- EQUB &00
- EQUS &02, "z", &0D
- EQUB &00
- EQUS &03
- EQUB &00
- EQUS &93, &91, " ", &03
- EQUB &00
- EQUS &93, &92, " ", &03
- EQUB &00
- EQUS &94, &91
- EQUB &00
- EQUS &94, &92
- EQUB &00
- EQUS "S", &DF, " OF", &D0, "B", &DB, "CH"
- EQUB &00
- EQUS "SC", &D9, "ND", &F2, "L"
- EQUB &00
- EQUS "B", &F9, "CKGU", &EE, "D"
- EQUB &00
- EQUS "ROGUE"
- EQUB &00
- EQUS "WH", &FD, &ED, &DF, " ", &F7, &DD, &E5, " HEAD", &C6, "F", &F9, "P E", &EE, "'D KNA", &FA
- EQUB &00
- EQUS "N UN", &F2, &EF, "RK", &D8, &E5
- EQUB &00
- EQUS " B", &FD, &F0, "G"
- EQUB &00
- EQUS " DULL"
- EQUB &00
- EQUS " TE", &F1, "O", &EC
- EQUB &00
- EQUS " ", &F2, "VOLT", &F0, "G"
- EQUB &00
- EQUS &91
- EQUB &00
- EQUS &92
- EQUB &00
- EQUS "P", &F9, &E9
- EQUB &00
- EQUS "L", &DB, "T", &E5, " ", &91
- EQUB &00
- EQUS "DUMP"
- EQUB &00
- EQUS "I HE", &EE, &D0, "r ", &E0, "OK", &C3, &CF, " APPE", &EE, &C4, &F5, &D1
- EQUB &00
- EQUS "YEAH, I HE", &EE, &D0, "r ", &CF, " ", &E5, "FT", &D1, &D0, " WHI", &E5, " BACK"
- EQUB &00
- EQUS "G", &DD, " ", &B3, "R IR", &DF, " ASS OV", &F4, " TO", &D1
- EQUB &00
- EQUS &EB, "ME s", &D2, &CF, " WAS ", &DA, &F6, " ", &F5, &D1
- EQUB &00
- EQUS "TRY", &D1
- EQUB &00
- EQUS &01, "SPECI", &E4, " C", &EE, "GO"
- EQUB &00
- EQUB &00
- EQUS "C", &EE, "GO V", &E4, "UE:"
- EQUB &00
- EQUS " MO", &F1, "FI", &FC, " BY A.J.C.DUGG", &FF
- EQUB &00
- EQUS "WASP"
- EQUB &00
- EQUS "MO", &E2
- EQUB &00
- EQUS "GRUB"
- EQUB &00
- EQUS &FF, "T"
- EQUB &00
- EQUS &12
- EQUB &00
- EQUS "PO", &DD
- EQUB &00
- EQUS &EE, "TS G", &F8, "DU", &F5, "E"
- EQUB &00
- EQUS "YAK"
- EQUB &00
- EQUS "SNA", &DC
- EQUB &00
- EQUS "SLUG"
- EQUB &00
- EQUS "TROPIC", &E4
- EQUB &00
- EQUS "D", &F6, &DA
- EQUB &00
- EQUS &F8, &F0
- EQUB &00
- EQUS "IMP", &F6, &DD, &F8, "B", &E5
- EQUB &00
- EQUS "EXU", &F7, &F8, "NT"
- EQUB &00
- EQUS "FUNNY"
- EQUB &00
- EQUS "WI", &F4, "D"
- EQUB &00
- EQUS "U", &E1, "SU", &E4
- EQUB &00
- EQUS &DE, &F8, "N", &E7
- EQUB &00
- EQUS "PECULI", &EE
- EQUB &00
- EQUS "F", &F2, &FE, &F6, "T"
- EQUB &00
- EQUS "OCCASI", &DF, &E4
- EQUB &00
- EQUS "UNP", &F2, &F1, "CT", &D8, &E5
- EQUB &00
- EQUS "D", &F2, "ADFUL"
- EQUB &00
- EQUS &AB
- EQUB &00
- EQUS "\ [ F", &FD, " e"
- EQUB &00
- EQUS &8C, &B2, "e"
- EQUB &00
- EQUS "f BY g"
- EQUB &00
- EQUS &8C, " BUT ", &8E
- EQUB &00
- EQUS " Ao p"
- EQUB &00
- EQUS "PL", &FF, &DD
- EQUB &00
- EQUS "W", &FD, "LD"
- EQUB &00
- EQUS &E2, "E "
- EQUB &00
- EQUS &E2, "IS "
- EQUB &00
- EQUS &E0, "AD", &D2, &9A
- EQUB &00
- EQUS &09, &0B, &01, &08
- EQUB &00
- EQUS "DRI", &FA
- EQUB &00
- EQUS " C", &F5, "A", &E0, "GUE"
- EQUB &00
- EQUS "I", &FF
- EQUB &00
- EQUS &13, "COMM", &FF, "D", &F4
- EQUB &00
- EQUS "h"
- EQUB &00
- EQUS "M", &D9, "NTA", &F0
- EQUB &00
- EQUS &FC, "IB", &E5
- EQUB &00
- EQUS "T", &F2, "E"
- EQUB &00
- EQUS "SPOTT", &FC
- EQUB &00
- EQUS "x"
- EQUB &00
- EQUS "y"
- EQUB &00
- EQUS "aOID"
- EQUB &00
- EQUS &7F
- EQUB &00
- EQUS "~"
- EQUB &00
- EQUS &FF, "CI", &F6, "T"
- EQUB &00
- EQUS "EX", &E9, "P", &FB, &DF, &E4
- EQUB &00
- EQUS "EC", &E9, "NTRIC"
- EQUB &00
- EQUS &F0, "G", &F8, &F0, &FC
- EQUB &00
- EQUS "r"
- EQUB &00
- EQUS "K", &DC, "L", &F4
- EQUB &00
- EQUS "DEADLY"
- EQUB &00
- EQUS "EV", &DC
- EQUB &00
- EQUS &E5, &E2, &E4
- EQUB &00
- EQUS "VICIO", &EC
- EQUB &00
- EQUS &DB, "S "
- EQUB &00
- EQUS &0D, &0E, &13
- EQUB &00
- EQUS ".", &0C, &0F
- EQUB &00
- EQUS " ", &FF, "D "
- EQUB &00
- EQUS "Y", &D9
- EQUB &00
- EQUS "P", &EE, "K", &C3, "M", &DD, &F4, "S"
- EQUB &00
- EQUS "D", &EC, "T C", &E0, "UDS"
- EQUB &00
- EQUS "I", &E9, " ", &F7, "RGS"
- EQUB &00
- EQUS "ROCK F", &FD, &EF, &FB, &DF, "S"
- EQUB &00
- EQUS "VOLCA", &E3, &ED
- EQUB &00
- EQUS "PL", &FF, "T"
- EQUB &00
- EQUS "TULIP"
- EQUB &00
- EQUS "B", &FF, &FF, "A"
- EQUB &00
- EQUS "C", &FD, "N"
- EQUB &00
- EQUS &12, "WE", &FC
- EQUB &00
- EQUS &12
- EQUB &00
- EQUS &11, " ", &12
- EQUB &00
- EQUS &11, " h"
- EQUB &00
- EQUS &F0, "HA", &EA, "T", &FF, "T"
- EQUB &00
- EQUS &BF
- EQUB &00
- EQUS &F0, "G "
- EQUB &00
- EQUS &FC, " "
- EQUB &00
- EQUB &00
- EQUB &00
- EQUB &00
- EQUS " NAME? "
- EQUB &00
- EQUS " TO "
- EQUB &00
- EQUS " IS "
- EQUB &00
- EQUS "WAS ", &F9, &DE, " ", &DA, &F6, " ", &F5, " ", &13
- EQUB &00
- EQUS ".", &0C, " ", &13
- EQUB &00
- EQUS "DOCK", &FC
- EQUB &00
- EQUS &01, "(Y/N)?"
- EQUB &00
- EQUS "SHIP"
- EQUB &00
- EQUS " A "
- EQUB &00
- EQUS " ", &F4, "RI", &EC
- EQUB &00
- EQUS " NEW "
- EQUB &00
- EQUS &02, " H", &F4, " ", &EF, "J", &ED, "TY'S SPA", &E9, " NAVY", &0D
- EQUB &00
- EQUS &B1, &08, &01, "  M", &ED, "SA", &E7, " ", &F6, "DS"
- EQUB &00
- EQUS " ", &9A, " ", &04, ", I ", &0D, "AM", &02, " CAPTA", &F0, " ", &1B, " ", &0D, "OF", &D3
- EQUB &00
- EQUB &00
- EQUS &0F, " UNK", &E3, "WN ", &91
- EQUB &00
- EQUS &09, &08, &17, &01, &F0, "COM", &C3, "M", &ED, "SA", &E7
- EQUB &00
- EQUS "CURRU", &E2, &F4, "S"
- EQUB &00
- EQUS "FOSDYKE SMY", &E2, "E"
- EQUB &00
- EQUS "F", &FD, "T", &ED, &FE, "E"
- EQUB &00
- EQUS &CB, &F2, &ED, &F1, &E9
- EQUB &00
- EQUS "IS ", &F7, "LIEV", &FC, &C9, "HA", &FA, " JUMP", &FC, &C9, &94, "G", &E4, "AXY"
- EQUB &00
- EQUS &19, &09, &1D, &0E, &02, "GOOD DAY ", &9A, " ", &04, &CC, "I", &0D, " AM ", &13, "AG", &F6, "T ", &13, "B", &F9, "KE"
- EQUS " OF ", &13, "NAV", &E4, " ", &13, &F0, "TEL", &E5, "G", &F6, &E9, &CC, "AS ", &B3, " K", &E3, "W, ", &93, &13
- EQUS "NAVY HA", &FA, " ", &F7, &F6, " KEEP", &C3, &93, &13, &E2, &EE, "GOIDS OFF ", &B3, "R A"
- EQUS "SS ", &D9, "T ", &F0, " DEEP SPA", &E9, " F", &FD, " ", &EF, "NY YE", &EE, "S ", &E3, "W. ", &13, "WEL"
- EQUS "L ", &93, "S", &DB, "UA", &FB, &DF, " HAS CH", &FF, "G", &FC, &CC, &D9, "R BOYS ", &EE, "E ", &F2
- EQUS "ADY F", &FD, &D0, "P", &EC, "H RIGHT", &C9, &93, "HOME SY", &DE, "EM OF ", &E2, "O", &DA, " MO"
- EQUS &E2, &F4, "S", &CC, &18, &09, &1D, "I", &0D, " HA", &FA, " OBTA", &F0, &C4, &93, "DEF", &F6, &E9, " P", &F9
- EQUS "NS F", &FD, " ", &E2, "EIR ", &13, "HI", &FA, " ", &13, "W", &FD, "LDS", &CC, &93, &F7, &DD, &E5, "S K", &E3
- EQUS "W WE'", &FA, " GOT ", &EB, "ME", &E2, &C3, "BUT ", &E3, "T WH", &F5, &CC, "IF ", &13, "I T", &F8, "N"
- EQUS "SM", &DB, " ", &93, "P", &F9, "NS", &C9, &D9, "R BA", &DA, " ", &DF, " ", &13, &EA, &F2, &F8, " ", &E2, "EY'L"
- EQUS "L ", &F0, "T", &F4, &E9, "PT ", &93, "TR", &FF, "SMISSI", &DF, ". ", &13, "I NE", &FC, &D0, &CF, &C9
- EQUS &EF, "KE ", &93, "RUN", &CC, &B3, "'", &F2, " E", &E5, "CT", &FC, &CC, &93, "P", &F9, "NS A", &F2, " "
- EQUS "UNIPUL", &DA, " COD", &C4, "WI", &E2, &F0, " ", &94, "TR", &FF, "SMISSI", &DF, &CC, &08, &B3, " "
- EQUS "W", &DC, "L ", &F7, " PAID", &CC, "    ", &13, "GOOD LUCK ", &9A, &D4, &18
- EQUB &00
- EQUS &19, &09, &1D, &08, &0E, &0D, &13, "WELL D", &DF, "E ", &9A, &CC, &B3, " HA", &FA, " ", &DA, "RV", &C4, &EC, " "
- EQUS "WELL", &B2, "WE SH", &E4, "L ", &F2, "MEMB", &F4, &CC, "WE ", &F1, "D ", &E3, "T EXPECT ", &93
- EQUS &13, &E2, &EE, "GOIDS", &C9, "F", &F0, "D ", &D9, "T ", &D8, &D9, "T ", &B3, &CC, "F", &FD, " ", &93, "MOM", &F6
- EQUS "T P", &E5, "A", &DA, " AC", &E9, "PT ", &94, &13, "NAVY ", &06, "r", &05, " AS PAYM", &F6, "T", &D4, &18
- EQUB &00
- EQUB &00
- EQUS "SH", &F2, "W"
- EQUB &00
- EQUS &F7, "A", &DE
- EQUB &00
- EQUS &EA, "S", &DF
- EQUB &00
- EQUS "SNAKE"
- EQUB &00
- EQUS "WOLF"
- EQUB &00
- EQUS &E5, "OP", &EE, "D"
- EQUB &00
- EQUS "C", &F5
- EQUB &00
- EQUS "M", &DF, "KEY"
- EQUB &00
- EQUS "GO", &F5
- EQUB &00
- EQUS "FISH"
- EQUB &00
- EQUS "j i"
- EQUB &00
- EQUS &11, " x {"
- EQUB &00
- EQUS &AF, "k y {"
- EQUB &00
- EQUS &7C, " }"
- EQUB &00
- EQUS "j i"
- EQUB &00
- EQUS "ME", &F5
- EQUB &00
- EQUS "CUTL", &DD
- EQUB &00
- EQUS &DE, "EAK"
- EQUB &00
- EQUS "BURG", &F4, "S"
- EQUB &00
- EQUS &EB, "UP"
- EQUB &00
- EQUS "I", &E9
- EQUB &00
- EQUS "MUD"
- EQUB &00
- EQUS "Z", &F4, "O-", &13, "G"
- EQUB &00
- EQUS "VACUUM"
- EQUB &00
- EQUS &11, " ULT", &F8
- EQUB &00
- EQUS "HOCKEY"
- EQUB &00
- EQUS "CRICK", &DD
- EQUB &00
- EQUS "K", &EE, &F5, "E"
- EQUB &00
- EQUS "PO", &E0
- EQUB &00
- EQUS "T", &F6, "NIS"
- EQUB &00
+ EQUB VE                \ Token 0:      ""
+                        \
+                        \ Encoded as:   ""
 
-.l_5338
+ EJMP 9                 \ Token 1:      "{clear screen}
+ EJMP 11                \                {draw box around title}
+ EJMP 1                 \                {all caps}
+ EJMP 8                 \                {tab 6} DISK ACCESS MENU{crlf}
+ ECHR ' '               \                {lf}
+ ETWO 'D', 'I'          \                {sentence case}
+ ECHR 'S'               \                1. LOAD NEW {single cap}COMMANDER{crlf}
+ ECHR 'K'               \                2. SAVE {single cap}COMMANDER
+ ECHR ' '               \                   {commander name}{crlf}
+ ECHR 'A'               \                3. CATALOGUE{crlf}
+ ECHR 'C'               \                4. DELETE A FILE{crlf}
+ ETWO 'C', 'E'          \                5. EXIT{crlf}
+ ECHR 'S'               \               "
+ ECHR 'S'               \
+ ECHR ' '               \ Encoded as:   "{9}{11}{1}{8} <241>SK AC<233>SS ME
+ ECHR 'M'               \                <225><215>{10}{2}1. [149]<215>2. SA
+ ECHR 'E'               \                <250> [154] {4}<215>3. C<245>A<224>GUE
+ ETWO 'N', 'U'          \                <215>4. DEL<221>E[208]FI<229><215>5. EX
+ ETWO '-', '-'          \                <219><215>"
+ EJMP 10
+ EJMP 2
+ ECHR '1'
+ ECHR '.'
+ ECHR ' '
+ ETOK 149
+ ETWO '-', '-'
+ ECHR '2'
+ ECHR '.'
+ ECHR ' '
+ ECHR 'S'
+ ECHR 'A'
+ ETWO 'V', 'E'
+ ECHR ' '
+ ETOK 154
+ ECHR ' '
+ EJMP 4
+ ETWO '-', '-'
+ ECHR '3'
+ ECHR '.'
+ ECHR ' '
+ ECHR 'C'
+ ETWO 'A', 'T'
+ ECHR 'A'
+ ETWO 'L', 'O'
+ ECHR 'G'
+ ECHR 'U'
+ ECHR 'E'
+ ETWO '-', '-'
+ ECHR '4'
+ ECHR '.'
+ ECHR ' '
+ ECHR 'D'
+ ECHR 'E'
+ ECHR 'L'
+ ETWO 'E', 'T'
+ ECHR 'E'
+ ETOK 208
+ ECHR 'F'
+ ECHR 'I'
+ ETWO 'L', 'E'
+ ETWO '-', '-'
+ ECHR '5'
+ ECHR '.'
+ ECHR ' '
+ ECHR 'E'
+ ECHR 'X'
+ ETWO 'I', 'T'
+ ETWO '-', '-'
+ EQUB VE
 
- EQUB &00
+ EJMP 12                \ Token 2:      "{cr}
+ ECHR 'W'               \                WHICH DRIVE?"
+ ECHR 'H'               \
+ ECHR 'I'               \ Encoded as:   "{12}WHICH [151]?"
+ ECHR 'C'
+ ECHR 'H'
+ ECHR ' '
+ ETOK 151
+ ECHR '?'
+ EQUB VE
+
+ ETWO 'A', 'R'          \ Token 3:      "ARE YOU SURE?"
+ ECHR 'E'               \
+ ECHR ' '               \ Encoded as:   "<238>E [179] SU<242>?"
+ ETOK 179
+ ECHR ' '
+ ECHR 'S'
+ ECHR 'U'
+ ETWO 'R', 'E'
+ ECHR '?'
+ EQUB VE
+
+ ETOK 150               \ Token 4:      "{clear screen}
+ ETOK 151               \                {draw box around title}
+ ECHR ' '               \                {all caps}
+ EJMP 16                \                {tab 6}DRIVE {drive number} CATALOGUE
+ ETOK 152               \                {crlf}
+ ETWO '-', '-'          \               "
+ EQUB VE                \
+                        \ Encoded as:   "[150][151] {16}[152]<215>"
+
+ ETOK 176               \ Token 5:      "{lower case}
+ ERND 18                \                {justify}
+ ETOK 202               \                {single cap}[86-90] IS [140-144].{cr}
+ ERND 19                \                {left align}"
+ ETOK 177               \
+ EQUB VE                \ Encoded as:   "[176][18?][202][19?][177]"
+
+ ECHR ' '               \ Token 6:      "  LOAD NEW {single cap}COMMANDER {all
+ ECHR ' '               \                caps}(Y/N)?{sentence case}{cr}{cr}"
+ ETOK 149               \
+ ECHR ' '               \ Encoded as:   "  [149] {1}(Y/N)?{2}{12}{12}"
+ EJMP 1
+ ECHR '('
+ ECHR 'Y'
+ ECHR '/'
+ ECHR 'N'
+ ECHR ')'
+ ECHR '?'
+ EJMP 2
+ EJMP 12
+ EJMP 12
+ EQUB VE
+
+ ECHR 'P'               \ Token 7:      "PRESS SPACE OR FIRE,{single cap}
+ ETWO 'R', 'E'          \                COMMANDER.{cr}{cr}"
+ ECHR 'S'               \
+ ECHR 'S'               \ Encoded as:   "P<242>SS SPA<233> <253> FI<242>,[154].
+ ECHR ' '               \                {12}{12}"
+ ECHR 'S'
+ ECHR 'P'
+ ECHR 'A'
+ ETWO 'C', 'E'
+ ECHR ' '
+ ETWO 'O', 'R'
+ ECHR ' '
+ ECHR 'F'
+ ECHR 'I'
+ ETWO 'R', 'E'
+ ECHR ','
+ ETOK 154
+ ECHR '.'
+ EJMP 12
+ EJMP 12
+ EQUB VE
+
+ ETOK 154               \ Token 8:      "{single cap}COMMANDER'S NAME? "
+ ECHR '`'               \
+ ECHR 'S'               \ Encoded as:   "[154][39]S[200]"
+ ETOK 200
+ EQUB VE
+
+ EJMP 21                \ Token 9:      "{clear bottom of screen}
+ ECHR 'F'               \                FILE TO DELETE?"
+ ECHR 'I'               \
+ ETWO 'L', 'E'          \ Encoded as:   "{21}FI<229>[201]DEL<221>E?"
+ ETOK 201
+ ECHR 'D'
+ ECHR 'E'
+ ECHR 'L'
+ ETWO 'E', 'T'
+ ECHR 'E'
+ ECHR '?'
+ EQUB VE
+
+ EJMP 23                \ Token 10:     "{move to row 10, white, lower case}
+ EJMP 14                \                {justify}
+ EJMP 2                 \                {sentence case}
+ ECHR 'G'               \                GREETINGS {single cap}COMMANDER
+ ETWO 'R', 'E'          \                {commander name}, I {lower case}AM
+ ETWO 'E', 'T'          \                {sentence case} CAPTAIN {mission
+ ETWO 'I', 'N'          \                captain's name} {lower case}OF{sentence
+ ECHR 'G'               \                case} HER MAJESTY'S SPACE NAVY{lower
+ ECHR 'S'               \                case} AND {single cap}I BEG A MOMENT OF
+ ETOK 213               \                YOUR VALUABLE TIME.{cr}
+ ETOK 178               \                 {single cap}WE WOULD LIKE YOU TO DO A
+ EJMP 19                \                LITTLE JOB FOR US.{cr}
+ ECHR 'I'               \                 {single cap}THE SHIP YOU SEE HERE IS A
+ ECHR ' '               \                NEW MODEL, THE {single cap}CONSTRICTOR,
+ ETWO 'B', 'E'          \                EQUIPED WITH A TOP SECRET NEW SHIELD
+ ECHR 'G'               \                GENERATOR.{cr}
+ ETOK 208               \                 {single cap}UNFORTUNATELY IT'S BEEN
+ ECHR 'M'               \                STOLEN.{cr}
+ ECHR 'O'               \                 {single cap}{display ship, wait for
+ ECHR 'M'               \                key press}IT WENT MISSING FROM OUR SHIP
+ ETWO 'E', 'N'          \                YARD ON {single cap}XEER FIVE MONTHS
+ ECHR 'T'               \                AGO AND {mission 1 location hint}.{cr}
+ ECHR ' '               \                 {single cap}YOUR MISSION, SHOULD YOU
+ ECHR 'O'               \                DECIDE TO ACCEPT IT, IS TO SEEK AND
+ ECHR 'F'               \                DESTROY THIS SHIP.{cr}
+ ECHR ' '               \                 {single cap}YOU ARE CAUTIONED THAT
+ ETOK 179               \                ONLY {standard tokens, sentence case}
+ ECHR 'R'               \                MILITARY  LASERS{extended tokens} WILL
+ ECHR ' '               \                PENETRATE THE NEW SHIELDS AND THAT THE
+ ECHR 'V'               \                {single cap}CONSTRICTOR IS FITTED WITH
+ ETWO 'A', 'L'          \                AN {standard tokens, sentence case}
+ ECHR 'U'               \                E.C.M.SYSTEM{extended tokens}.{cr}
+ ETWO 'A', 'B'          \                 {left align}{sentence case}{tab 6}GOOD
+ ETWO 'L', 'E'          \                LUCK, {single cap}COMMANDER.{cr}
+ ECHR ' '               \                 {left align}{tab 6}{all caps}  MESSAGE
+ ETWO 'T', 'I'          \                ENDS{display ship, wait for key press}"
+ ECHR 'M'               \
+ ECHR 'E'               \ Encoded as:   "{23}{14}{2}G<242><221><240>GS[213][178]
+ ETOK 204               \                {19}I <247>G[208]MOM<246>T OF [179]R V
+ ECHR 'W'               \                <228>U<216><229> <251>ME[204]WE W<217>
+ ECHR 'E'               \                LD LIKE [179][201]DO[208]L<219>T<229>
+ ECHR ' '               \                 JOB F<253> <236>[204][147][207] [179]
+ ECHR 'W'               \                 <218>E HE<242>[202]A[210]MODEL, [147]
+ ETWO 'O', 'U'          \                {19}C<223><222>RICT<253>, E<254>IP[196]
+ ECHR 'L'               \                WI<226>[208]TOP <218>CR<221>[210]SHIELD
+ ECHR 'D'               \                 G<246><244><245><253>[204]UNF<253>TUN
+ ECHR ' '               \                <245>ELY <219>[39]S <247><246> <222>OL
+ ECHR 'L'               \                <246>[204]{22}<219> W<246>T MISS[195]
+ ECHR 'I'               \                FROM <217>R [207] Y<238>D <223> {19}
+ ECHR 'K'               \                <230><244> FI<250> M<223><226>S AGO
+ ECHR 'E'               \                [178]{28}[204][179]R MISSI<223>, SH
+ ECHR ' '               \                <217>LD [179] DECIDE[201]AC<233>PT
+ ETOK 179               \                 <219>, IS[201]<218>EK[178]D<237>TROY
+ ETOK 201               \                 [148][207][204][179] A<242> CAU<251>
+ ECHR 'D'               \                <223>[196]<226><245> <223>LY {6}[116]
+ ECHR 'O'               \                {5}S W<220>L P<246><221><248>TE [147]
+ ETOK 208               \                NEW SHIELDS[178]<226><245> [147]{19}
+ ECHR 'L'               \                C<223><222>RICT<253>[202]F<219>T[196]WI
+ ETWO 'I', 'T'          \                <226> <255> {6}[108]{5}[177]{2}{8}GOOD
+ ECHR 'T'               \                 LUCK, [154][212]{22}"
+ ETWO 'L', 'E'
+ ECHR ' '
+ ECHR 'J'
+ ECHR 'O'
+ ECHR 'B'
+ ECHR ' '
+ ECHR 'F'
+ ETWO 'O', 'R'
+ ECHR ' '
+ ETWO 'U', 'S'
+ ETOK 204
+ ETOK 147
+ ETOK 207
+ ECHR ' '
+ ETOK 179
+ ECHR ' '
+ ETWO 'S', 'E'
+ ECHR 'E'
+ ECHR ' '
+ ECHR 'H'
+ ECHR 'E'
+ ETWO 'R', 'E'
+ ETOK 202
+ ECHR 'A'
+ ETOK 210
+ ECHR 'M'
+ ECHR 'O'
+ ECHR 'D'
+ ECHR 'E'
+ ECHR 'L'
+ ECHR ','
+ ECHR ' '
+ ETOK 147
+ EJMP 19
+ ECHR 'C'
+ ETWO 'O', 'N'
+ ETWO 'S', 'T'
+ ECHR 'R'
+ ECHR 'I'
+ ECHR 'C'
+ ECHR 'T'
+ ETWO 'O', 'R'
+ ECHR ','
+ ECHR ' '
+ ECHR 'E'
+ ETWO 'Q', 'U'
+ ECHR 'I'
+ ECHR 'P'
+ ETOK 196
+ ECHR 'W'
+ ECHR 'I'
+ ETWO 'T', 'H'
+ ETOK 208
+ ECHR 'T'
+ ECHR 'O'
+ ECHR 'P'
+ ECHR ' '
+ ETWO 'S', 'E'
+ ECHR 'C'
+ ECHR 'R'
+ ETWO 'E', 'T'
+ ETOK 210
+ ECHR 'S'
+ ECHR 'H'
+ ECHR 'I'
+ ECHR 'E'
+ ECHR 'L'
+ ECHR 'D'
+ ECHR ' '
+ ECHR 'G'
+ ETWO 'E', 'N'
+ ETWO 'E', 'R'
+ ETWO 'A', 'T'
+ ETWO 'O', 'R'
+ ETOK 204
+ ECHR 'U'
+ ECHR 'N'
+ ECHR 'F'
+ ETWO 'O', 'R'
+ ECHR 'T'
+ ECHR 'U'
+ ECHR 'N'
+ ETWO 'A', 'T'
+ ECHR 'E'
+ ECHR 'L'
+ ECHR 'Y'
+ ECHR ' '
+ ETWO 'I', 'T'
+ ECHR '`'
+ ECHR 'S'
+ ECHR ' '
+ ETWO 'B', 'E'
+ ETWO 'E', 'N'
+ ECHR ' '
+ ETWO 'S', 'T'
+ ECHR 'O'
+ ECHR 'L'
+ ETWO 'E', 'N'
+ ETOK 204
+ EJMP 22
+ ETWO 'I', 'T'
+ ECHR ' '
+ ECHR 'W'
+ ETWO 'E', 'N'
+ ECHR 'T'
+ ECHR ' '
+ ECHR 'M'
+ ECHR 'I'
+ ECHR 'S'
+ ECHR 'S'
+ ETOK 195
+ ECHR 'F'
+ ECHR 'R'
+ ECHR 'O'
+ ECHR 'M'
+ ECHR ' '
+ ETWO 'O', 'U'
+ ECHR 'R'
+ ECHR ' '
+ ETOK 207
+ ECHR ' '
+ ECHR 'Y'
+ ETWO 'A', 'R'
+ ECHR 'D'
+ ECHR ' '
+ ETWO 'O', 'N'
+ ECHR ' '
+ EJMP 19
+ ETWO 'X', 'E'
+ ETWO 'E', 'R'
+ ECHR ' '
+ ECHR 'F'
+ ECHR 'I'
+ ETWO 'V', 'E'
+ ECHR ' '
+ ECHR 'M'
+ ETWO 'O', 'N'
+ ETWO 'T', 'H'
+ ECHR 'S'
+ ECHR ' '
+ ECHR 'A'
+ ECHR 'G'
+ ECHR 'O'
+ ETOK 178
+ EJMP 28
+ ETOK 204
+ ETOK 179
+ ECHR 'R'
+ ECHR ' '
+ ECHR 'M'
+ ECHR 'I'
+ ECHR 'S'
+ ECHR 'S'
+ ECHR 'I'
+ ETWO 'O', 'N'
+ ECHR ','
+ ECHR ' '
+ ECHR 'S'
+ ECHR 'H'
+ ETWO 'O', 'U'
+ ECHR 'L'
+ ECHR 'D'
+ ECHR ' '
+ ETOK 179
+ ECHR ' '
+ ECHR 'D'
+ ECHR 'E'
+ ECHR 'C'
+ ECHR 'I'
+ ECHR 'D'
+ ECHR 'E'
+ ETOK 201
+ ECHR 'A'
+ ECHR 'C'
+ ETWO 'C', 'E'
+ ECHR 'P'
+ ECHR 'T'
+ ECHR ' '
+ ETWO 'I', 'T'
+ ECHR ','
+ ECHR ' '
+ ECHR 'I'
+ ECHR 'S'
+ ETOK 201
+ ETWO 'S', 'E'
+ ECHR 'E'
+ ECHR 'K'
+ ETOK 178
+ ECHR 'D'
+ ETWO 'E', 'S'
+ ECHR 'T'
+ ECHR 'R'
+ ECHR 'O'
+ ECHR 'Y'
+ ECHR ' '
+ ETOK 148
+ ETOK 207
+ ETOK 204
+ ETOK 179
+ ECHR ' '
+ ECHR 'A'
+ ETWO 'R', 'E'
+ ECHR ' '
+ ECHR 'C'
+ ECHR 'A'
+ ECHR 'U'
+ ETWO 'T', 'I'
+ ETWO 'O', 'N'
+ ETOK 196
+ ETWO 'T', 'H'
+ ETWO 'A', 'T'
+ ECHR ' '
+ ETWO 'O', 'N'
+ ECHR 'L'
+ ECHR 'Y'
+ ECHR ' '
+ EJMP 6
+ TOKN 117
+ EJMP 5
+ ECHR 'S'
+ ECHR ' '
+ ECHR 'W'
+ ETWO 'I', 'L'
+ ECHR 'L'
+ ECHR ' '
+ ECHR 'P'
+ ETWO 'E', 'N'
+ ETWO 'E', 'T'
+ ETWO 'R', 'A'
+ ECHR 'T'
+ ECHR 'E'
+ ECHR ' '
+ ETOK 147
+ ECHR 'N'
+ ECHR 'E'
+ ECHR 'W'
+ ECHR ' '
+ ECHR 'S'
+ ECHR 'H'
+ ECHR 'I'
+ ECHR 'E'
+ ECHR 'L'
+ ECHR 'D'
+ ECHR 'S'
+ ETOK 178
+ ETWO 'T', 'H'
+ ETWO 'A', 'T'
+ ECHR ' '
+ ETOK 147
+ EJMP 19
+ ECHR 'C'
+ ETWO 'O', 'N'
+ ETWO 'S', 'T'
+ ECHR 'R'
+ ECHR 'I'
+ ECHR 'C'
+ ECHR 'T'
+ ETWO 'O', 'R'
+ ETOK 202
+ ECHR 'F'
+ ETWO 'I', 'T'
+ ECHR 'T'
+ ETOK 196
+ ECHR 'W'
+ ECHR 'I'
+ ETWO 'T', 'H'
+ ECHR ' '
+ ETWO 'A', 'N'
+ ECHR ' '
+ EJMP 6
+ TOKN 108
+ EJMP 5
+ ETOK 177
+ EJMP 2
+ EJMP 8
+ ECHR 'G'
+ ECHR 'O'
+ ECHR 'O'
+ ECHR 'D'
+ ECHR ' '
+ ECHR 'L'
+ ECHR 'U'
+ ECHR 'C'
+ ECHR 'K'
+ ECHR ','
+ ECHR ' '
+ ETOK 154
+ ETOK 212
+ EJMP 22
+ EQUB VE
+
+ EJMP 25                \ Token 11:     "{incoming message screen, wait 2s}
+ EJMP 9                 \                {clear screen}
+ EJMP 23                \                {move to row 10, white, lower case}
+ EJMP 14                \                {justify}
+ EJMP 2                 \                {sentence case}
+ ECHR ' '               \                  ATTENTION {single cap}COMMANDER
+ ECHR ' '               \                {commander name}, I {lower case}AM
+ ETWO 'A', 'T'          \                {sentence case} CAPTAIN {mission
+ ECHR 'T'               \                captain's name} {lower case}OF{sentence
+ ETWO 'E', 'N'          \                case} HER MAJESTY'S SPACE NAVY{lower
+ ETWO 'T', 'I'          \                case}. {single cap}WE HAVE NEED OF YOUR
+ ETWO 'O', 'N'          \                SERVICES AGAIN.{cr}
+ ETOK 213               \                 {single cap}IF YOU WOULD BE SO GOOD AS
+ ECHR '.'               \                TO GO TO {single cap}CEERDI YOU WILL BE
+ ECHR ' '               \                BRIEFED.{cr}
+ EJMP 19                \                 {single cap}IF SUCCESSFUL, YOU WILL BE
+ ECHR 'W'               \                WELL REWARDED.{cr}
+ ECHR 'E'               \                {left align}{tab 6}{all caps}  MESSAGE
+ ECHR ' '               \                ENDS{wait for key press}"
+ ECHR 'H'               \
+ ECHR 'A'               \ Encoded as:   "{25}{9}{23}{14}{2}  <245>T<246>
+ ETWO 'V', 'E'          \                <251><223>[213]. {19}WE HA<250> NE[196]
+ ECHR ' '               \                OF [179]R <218>RVIC<237> AGA<240>[204]
+ ECHR 'N'               \                IF [179] W<217>LD <247> <235> GOOD AS
+ ECHR 'E'               \                [201]GO[201]{19}<233><244><241> [179]
+ ETOK 196               \                 W<220>L <247> BRIEF<252>[204]IF SUC
+ ECHR 'O'               \                <233>SSFUL, [179] W<220>L <247> WELL
+ ECHR 'F'               \                 <242>W<238>D<252>[212]{24}"
+ ECHR ' '
+ ETOK 179
+ ECHR 'R'
+ ECHR ' '
+ ETWO 'S', 'E'
+ ECHR 'R'
+ ECHR 'V'
+ ECHR 'I'
+ ECHR 'C'
+ ETWO 'E', 'S'
+ ECHR ' '
+ ECHR 'A'
+ ECHR 'G'
+ ECHR 'A'
+ ETWO 'I', 'N'
+ ETOK 204
+ ECHR 'I'
+ ECHR 'F'
+ ECHR ' '
+ ETOK 179
+ ECHR ' '
+ ECHR 'W'
+ ETWO 'O', 'U'
+ ECHR 'L'
+ ECHR 'D'
+ ECHR ' '
+ ETWO 'B', 'E'
+ ECHR ' '
+ ETWO 'S', 'O'
+ ECHR ' '
+ ECHR 'G'
+ ECHR 'O'
+ ECHR 'O'
+ ECHR 'D'
+ ECHR ' '
+ ECHR 'A'
+ ECHR 'S'
+ ETOK 201
+ ECHR 'G'
+ ECHR 'O'
+ ETOK 201
+ EJMP 19
+ ETWO 'C', 'E'
+ ETWO 'E', 'R'
+ ETWO 'D', 'I'
+ ECHR ' '
+ ETOK 179
+ ECHR ' '
+ ECHR 'W'
+ ETWO 'I', 'L'
+ ECHR 'L'
+ ECHR ' '
+ ETWO 'B', 'E'
+ ECHR ' '
+ ECHR 'B'
+ ECHR 'R'
+ ECHR 'I'
+ ECHR 'E'
+ ECHR 'F'
+ ETWO 'E', 'D'
+ ETOK 204
+ ECHR 'I'
+ ECHR 'F'
+ ECHR ' '
+ ECHR 'S'
+ ECHR 'U'
+ ECHR 'C'
+ ETWO 'C', 'E'
+ ECHR 'S'
+ ECHR 'S'
+ ECHR 'F'
+ ECHR 'U'
+ ECHR 'L'
+ ECHR ','
+ ECHR ' '
+ ETOK 179
+ ECHR ' '
+ ECHR 'W'
+ ETWO 'I', 'L'
+ ECHR 'L'
+ ECHR ' '
+ ETWO 'B', 'E'
+ ECHR ' '
+ ECHR 'W'
+ ECHR 'E'
+ ECHR 'L'
+ ECHR 'L'
+ ECHR ' '
+ ETWO 'R', 'E'
+ ECHR 'W'
+ ETWO 'A', 'R'
+ ECHR 'D'
+ ETWO 'E', 'D'
+ ETOK 212
+ EJMP 24
+ EQUB VE
+
+ ECHR '('               \ Token 12:     "({single cap}C) ACORNSOFT 1984"
+ EJMP 19                \
+ ECHR 'C'               \ Encoded as:   "({19}C) AC<253>N<235>FT 1984"
+ ECHR ')'
+ ECHR ' '
+ ECHR 'A'
+ ECHR 'C'
+ ETWO 'O', 'R'
+ ECHR 'N'
+ ETWO 'S', 'O'
+ ECHR 'F'
+ ECHR 'T'
+ ECHR ' '
+ ECHR '1'
+ ECHR '9'
+ ECHR '8'
+ ECHR '4'
+ EQUB VE
+
+ ECHR 'B'               \ Token 13:     "BY D.BRABEN & I.BELL"
+ ECHR 'Y'               \
+ ECHR ' '               \ Encoded as:   "BY D.B<248><247>N & I.<247>LL"
+ ECHR 'D'
+ ECHR '.'
+ ECHR 'B'
+ ETWO 'R', 'A'
+ ETWO 'B', 'E'
+ ECHR 'N'
+ ECHR ' '
+ ECHR '&'
+ ECHR ' '
+ ECHR 'I'
+ ECHR '.'
+ ETWO 'B', 'E'
+ ECHR 'L'
+ ECHR 'L'
+ EQUB VE
+
+ EJMP 21                \ Token 14:     "{clear bottom of screen}
+ ETOK 145               \                PLANET NAME?
+ ETOK 200               \                {fetch line input from keyboard}"
+ EJMP 26                \
+ EQUB VE                \ Encoded as:   "{21}[145][200]{26}"
+
+ EJMP 25                \ Token 15:     "{incoming message screen, wait 2s}
+ EJMP 9                 \                {clear screen}
+ EJMP 23                \                {move to row 10, white, lower case}
+ EJMP 14                \                {justify}
+ EJMP 2                 \                {sentence case}
+ ECHR ' '               \                  CONGRATULATIONS {single cap}
+ ECHR ' '               \                COMMANDER!{cr}
+ ECHR 'C'               \                {cr}
+ ETWO 'O', 'N'          \                THERE{lower case} WILL ALWAYS BE A
+ ECHR 'G'               \                PLACE FOR YOU IN{sentence case} HER
+ ETWO 'R', 'A'          \                MAJESTY'S SPACE NAVY{lower case}.{cr}
+ ECHR 'T'               \                 {single cap}AND MAYBE SOONER THAN YOU
+ ECHR 'U'               \                THINK...{cr}
+ ETWO 'L', 'A'          \                {left align}{tab 6}{all caps}  MESSAGE
+ ETWO 'T', 'I'          \                ENDS{wait for key press}"
+ ETWO 'O', 'N'          \
+ ECHR 'S'               \ Encoded as:   "{25}{9}{23}{14}{2}  C<223>G<248>TU
+ ECHR ' '               \                <249><251><223>S [154]!{12}{12}<226>
+ ETOK 154               \                <244>E{13} W<220>L <228>WAYS <247>[208]
+ ECHR '!'               \                P<249><233> F<253> [179] <240>[211]
+ EJMP 12                \                [204]<255>D <239>Y<247> <235><223><244>
+ EJMP 12                \                 <226><255> [179] <226><240>K..[212]
+ ETWO 'T', 'H'          \                {24}"
+ ETWO 'E', 'R'
+ ECHR 'E'
+ EJMP 13
+ ECHR ' '
+ ECHR 'W'
+ ETWO 'I', 'L'
+ ECHR 'L'
+ ECHR ' '
+ ETWO 'A', 'L'
+ ECHR 'W'
+ ECHR 'A'
+ ECHR 'Y'
+ ECHR 'S'
+ ECHR ' '
+ ETWO 'B', 'E'
+ ETOK 208
+ ECHR 'P'
+ ETWO 'L', 'A'
+ ETWO 'C', 'E'
+ ECHR ' '
+ ECHR 'F'
+ ETWO 'O', 'R'
+ ECHR ' '
+ ETOK 179
+ ECHR ' '
+ ETWO 'I', 'N'
+ ETOK 211
+ ETOK 204
+ ETWO 'A', 'N'
+ ECHR 'D'
+ ECHR ' '
+ ETWO 'M', 'A'
+ ECHR 'Y'
+ ETWO 'B', 'E'
+ ECHR ' '
+ ETWO 'S', 'O'
+ ETWO 'O', 'N'
+ ETWO 'E', 'R'
+ ECHR ' '
+ ETWO 'T', 'H'
+ ETWO 'A', 'N'
+ ECHR ' '
+ ETOK 179
+ ECHR ' '
+ ETWO 'T', 'H'
+ ETWO 'I', 'N'
+ ECHR 'K'
+ ECHR '.'
+ ECHR '.'
+ ETOK 212
+ EJMP 24
+ EQUB VE
+
+ ECHR 'F'               \ Token 16:     "FABLED"
+ ETWO 'A', 'B'          \
+ ETWO 'L', 'E'          \ Encoded as:   "F<216><229>D"
+ ECHR 'D'
+ EQUB VE
+
+ ETWO 'N', 'O'          \ Token 17:     "NOTABLE"
+ ECHR 'T'               \
+ ETWO 'A', 'B'          \ Encoded as:   "<227>T<216><229>"
+ ETWO 'L', 'E'
+ EQUB VE
+
+ ECHR 'W'               \ Token 18:     "WELL KNOWN"
+ ECHR 'E'               \
+ ECHR 'L'               \ Encoded as:   "WELL K<227>WN"
+ ECHR 'L'
+ ECHR ' '
+ ECHR 'K'
+ ETWO 'N', 'O'
+ ECHR 'W'
+ ECHR 'N'
+ EQUB VE
+
+ ECHR 'F'               \ Token 19:     "FAMOUS"
+ ECHR 'A'               \
+ ECHR 'M'               \ Encoded as:   "FAMO<236>"
+ ECHR 'O'
+ ETWO 'U', 'S'
+ EQUB VE
+
+ ETWO 'N', 'O'          \ Token 20:     "NOTED"
+ ECHR 'T'               \
+ ETWO 'E', 'D'          \ Encoded as:   "<227>T<252>"
+ EQUB VE
+
+ ETWO 'V', 'E'          \ Token 21:     "VERY"
+ ECHR 'R'               \
+ ECHR 'Y'               \ Encoded as:   "<250>RY"
+ EQUB VE
+
+ ECHR 'M'               \ Token 22:     "MILDLY"
+ ETWO 'I', 'L'          \
+ ECHR 'D'               \ Encoded as:   "M<220>DLY"
+ ECHR 'L'
+ ECHR 'Y'
+ EQUB VE
+
+ ECHR 'M'               \ Token 23:     "MOST"
+ ECHR 'O'               \
+ ETWO 'S', 'T'          \ Encoded as:   "MO<222>"
+ EQUB VE
+
+ ETWO 'R', 'E'          \ Token 24:     "REASONABLY"
+ ECHR 'A'               \
+ ECHR 'S'               \ Encoded as:   "<242>AS<223><216>LY"
+ ETWO 'O', 'N'
+ ETWO 'A', 'B'
+ ECHR 'L'
+ ECHR 'Y'
+ EQUB VE
+
+ EQUB VE                \ Token 25:     ""
+                        \
+                        \ Encoded as:   ""
+
+ ETOK 165               \ Token 26:     "ANCIENT"
+ EQUB VE                \
+                        \ Encoded as:   "[165]"
+
+ ERND 23                \ Token 27:     "[130-134]"
+ EQUB VE                \
+                        \ Encoded as:   "[23?]"
+
+ ECHR 'G'               \ Token 28:     "GREAT"
+ ETWO 'R', 'E'          \
+ ETWO 'A', 'T'          \ Encoded as:   "G<242><245>"
+ EQUB VE
+
+ ECHR 'V'               \ Token 29:     "VAST"
+ ECHR 'A'               \
+ ETWO 'S', 'T'          \ Encoded as:   "VA<222>"
+ EQUB VE
+
+ ECHR 'P'               \ Token 30:     "PINK"
+ ETWO 'I', 'N'          \
+ ECHR 'K'               \ Encoded as:   "P<240>K"
+ EQUB VE
+
+ EJMP 2                 \ Token 31:     "{sentence case}[190-194] [185-189]
+ ERND 28                \                {lower case} PLANTATIONS"
+ ECHR ' '               \
+ ERND 27                \ Encoded as:   "{2}[28?] [27?]{13} [185]A<251><223>S"
+ EJMP 13
+ ECHR ' '
+ ETOK 185
+ ECHR 'A'
+ ETWO 'T', 'I'
+ ETWO 'O', 'N'
+ ECHR 'S'
+ EQUB VE
+
+ ETOK 156               \ Token 32:     "MOUNTAINS"
+ ECHR 'S'               \
+ EQUB VE                \ Encoded as:   "[156]S"
+
+ ERND 26                \ Token 33:     "[180-184]"
+ EQUB VE                \
+                        \ Encoded as:   "[26?]"
+
+ ERND 37                \ Token 34:     "[125-129] FORESTS"
+ ECHR ' '               \
+ ECHR 'F'               \ Encoded as:   "[37?] F<253><237>TS"
+ ETWO 'O', 'R'
+ ETWO 'E', 'S'
+ ECHR 'T'
+ ECHR 'S'
+ EQUB VE
+
+ ECHR 'O'               \ Token 35:     "OCEANS"
+ ETWO 'C', 'E'          \
+ ETWO 'A', 'N'          \ Encoded as:   "O<233><255>S"
+ ECHR 'S'
+ EQUB VE
+
+ ECHR 'S'               \ Token 36:     "SHYNESS"
+ ECHR 'H'               \
+ ECHR 'Y'               \ Encoded as:   "SHYN<237>S"
+ ECHR 'N'
+ ETWO 'E', 'S'
+ ECHR 'S'
+ EQUB VE
+
+ ECHR 'S'               \ Token 37:     "SILLINESS"
+ ETWO 'I', 'L'          \
+ ECHR 'L'               \ Encoded as:   "S<220>L<240><237>S"
+ ETWO 'I', 'N'
+ ETWO 'E', 'S'
+ ECHR 'S'
+ EQUB VE
+
+ ETWO 'M', 'A'          \ Token 38:     "MATING TRADITIONS"
+ ECHR 'T'               \
+ ETOK 195               \ Encoded as:   "<239>T[195]T<248><241><251><223>S"
+ ECHR 'T'
+ ETWO 'R', 'A'
+ ETWO 'D', 'I'
+ ETWO 'T', 'I'
+ ETWO 'O', 'N'
+ ECHR 'S'
+ EQUB VE
+
+ ETWO 'L', 'O'          \ Token 39:     "LOATHING OF [41-45]"
+ ETWO 'A', 'T'          \
+ ECHR 'H'               \ Encoded as:   "<224><245>H[195]OF [9?]"
+ ETOK 195
+ ECHR 'O'
+ ECHR 'F'
+ ECHR ' '
+ ERND 9
+ EQUB VE
+
+ ETWO 'L', 'O'          \ Token 40:     "LOVE FOR [41-45]"
+ ETWO 'V', 'E'          \
+ ECHR ' '               \ Encoded as:   "<224><250> F<253> [9?]"
+ ECHR 'F'
+ ETWO 'O', 'R'
+ ECHR ' '
+ ERND 9
+ EQUB VE
+
+ ECHR 'F'               \ Token 41:     "FOOD BLENDERS"
+ ECHR 'O'               \
+ ECHR 'O'               \ Encoded as:   "FOOD B<229>ND<244>S"
+ ECHR 'D'
+ ECHR ' '
+ ECHR 'B'
+ ETWO 'L', 'E'
+ ECHR 'N'
+ ECHR 'D'
+ ETWO 'E', 'R'
+ ECHR 'S'
+ EQUB VE
+
+ ECHR 'T'               \ Token 42:     "TOURISTS"
+ ETWO 'O', 'U'          \
+ ECHR 'R'               \ Encoded as:   "T<217>RI<222>S"
+ ECHR 'I'
+ ETWO 'S', 'T'
+ ECHR 'S'
+ EQUB VE
+
+ ECHR 'P'               \ Token 43:     "POETRY"
+ ECHR 'O'               \
+ ETWO 'E', 'T'          \ Encoded as:   "PO<221>RY"
+ ECHR 'R'
+ ECHR 'Y'
+ EQUB VE
+
+ ETWO 'D', 'I'          \ Token 44:     "DISCOS"
+ ECHR 'S'               \
+ ECHR 'C'               \ Encoded as:   "<241>SCOS"
+ ECHR 'O'
+ ECHR 'S'
+ EQUB VE
+
+ ERND 17                \ Token 45:     "[81-85]"
+ EQUB VE                \
+                        \ Encoded as:   "[17?]"
+
+ ECHR 'W'               \ Token 46:     "WALKING TREE"
+ ETWO 'A', 'L'          \
+ ECHR 'K'               \ Encoded as:   "W<228>K[195][158]"
+ ETOK 195
+ ETOK 158
+ EQUB VE
+
+ ECHR 'C'               \ Token 47:     "CRAB"
+ ETWO 'R', 'A'          \
+ ECHR 'B'               \ Encoded as:   "C<248>B"
+ EQUB VE
+
+ ECHR 'B'               \ Token 48:     "BAT"
+ ETWO 'A', 'T'          \
+ EQUB VE                \ Encoded as:   "B<245>"
+
+ ETWO 'L', 'O'          \ Token 49:     "LOBST"
+ ECHR 'B'               \
+ ETWO 'S', 'T'          \ Encoded as:   "<224>B<222>"
+ EQUB VE
+
+ EJMP 18                \ Token 50:     "{random 1-8 letter word}"
+ EQUB VE                \
+                        \ Encoded as:   "{18}"
+
+ ETWO 'B', 'E'          \ Token 51:     "BESET"
+ ECHR 'S'               \
+ ETWO 'E', 'T'          \ Encoded as:   "<247>S<221>"
+ EQUB VE
+
+ ECHR 'P'               \ Token 52:     "PLAGUED"
+ ETWO 'L', 'A'          \
+ ECHR 'G'               \ Encoded as:   "P<249>GU<252>"
+ ECHR 'U'
+ ETWO 'E', 'D'
+ EQUB VE
+
+ ETWO 'R', 'A'          \ Token 53:     "RAVAGED"
+ ECHR 'V'               \
+ ECHR 'A'               \ Encoded as:   "<248>VAG<252>"
+ ECHR 'G'
+ ETWO 'E', 'D'
+ EQUB VE
+
+ ECHR 'C'               \ Token 54:     "CURSED"
+ ECHR 'U'               \
+ ECHR 'R'               \ Encoded as:   "CURS<252>"
+ ECHR 'S'
+ ETWO 'E', 'D'
+ EQUB VE
+
+ ECHR 'S'               \ Token 55:     "SCOURGED"
+ ECHR 'C'               \
+ ETWO 'O', 'U'          \ Encoded as:   "SC<217>RG<252>"
+ ECHR 'R'
+ ECHR 'G'
+ ETWO 'E', 'D'
+ EQUB VE
+
+ ERND 22                \ Token 56:     "[135-139] CIVIL WAR"
+ ECHR ' '               \
+ ECHR 'C'               \ Encoded as:   "[22?] CIV<220> W<238>"
+ ECHR 'I'
+ ECHR 'V'
+ ETWO 'I', 'L'
+ ECHR ' '
+ ECHR 'W'
+ ETWO 'A', 'R'
+ EQUB VE
+
+ ERND 13                \ Token 57:     "[170-174] [155-159] [160-164]S"
+ ECHR ' '               \
+ ERND 4                 \ Encoded as:   "[13?] [4?] [5?]S"
+ ECHR ' '
+ ERND 5
+ ECHR 'S'
+ EQUB VE
+
+ ECHR 'A'               \ Token 58:     "A [170-174] DISEASE"
+ ECHR ' '               \
+ ERND 13                \ Encoded as:   "A [13?] <241><218>A<218>"
+ ECHR ' '
+ ETWO 'D', 'I'
+ ETWO 'S', 'E'
+ ECHR 'A'
+ ETWO 'S', 'E'
+ EQUB VE
+
+ ERND 22                \ Token 59:     "[135-139] EARTHQUAKES"
+ ECHR ' '               \
+ ECHR 'E'               \ Encoded as:   "[22?] E<238><226><254>AK<237>"
+ ETWO 'A', 'R'
+ ETWO 'T', 'H'
+ ETWO 'Q', 'U'
+ ECHR 'A'
+ ECHR 'K'
+ ETWO 'E', 'S'
+ EQUB VE
+
+ ERND 22                \ Token 60:     "[135-139] SOLAR ACTIVITY"
+ ECHR ' '               \
+ ETWO 'S', 'O'          \ Encoded as:   "[22?] <235><249>R AC<251>V<219>Y"
+ ETWO 'L', 'A'
+ ECHR 'R'
+ ECHR ' '
+ ECHR 'A'
+ ECHR 'C'
+ ETWO 'T', 'I'
+ ECHR 'V'
+ ETWO 'I', 'T'
+ ECHR 'Y'
+ EQUB VE
+
+ ETOK 175               \ Token 61:     "ITS [26-30] [31-35]"
+ ERND 2                 \
+ ECHR ' '               \ Encoded as:   "[175][2?] [3?]"
+ ERND 3
+ EQUB VE
+
+ ETOK 147               \ Token 62:     "THE {system name adjective} [155-159]
+ EJMP 17                \                 [160-164]"
+ ECHR ' '               \
+ ERND 4                 \ Encoded as:   "[147]{17} [4?] [5?]"
+ ECHR ' '
+ ERND 5
+ EQUB VE
+
+ ETOK 175               \ Token 63:     "ITS INHABITANTS' [165-169] [36-40]"
+ ETOK 193               \
+ ECHR 'S'               \ Encoded as:   "[175][193]S[39] [7?] [8?]"
+ ECHR '`'
+ ECHR ' '
+ ERND 7
+ ECHR ' '
+ ERND 8
+ EQUB VE
+
+ EJMP 2                 \ Token 64:     "{sentence case}[235-239]{lower case}"
+ ERND 31                \
+ EJMP 13                \ Encoded as:   "{2}[31?]{13}"
+ EQUB VE
+
+ ETOK 175               \ Token 65:     "ITS [76-80] [81-85]"
+ ERND 16                \
+ ECHR ' '               \ Encoded as:   "[175][16?] [17?]"
+ ERND 17
+ EQUB VE
+
+ ECHR 'J'               \ Token 66:     "JUICE"
+ ECHR 'U'               \
+ ECHR 'I'               \ Encoded as:   "JUI<233>"
+ ETWO 'C', 'E'
+ EQUB VE
+
+ ECHR 'B'               \ Token 67:     "BRANDY"
+ ETWO 'R', 'A'          \
+ ECHR 'N'               \ Encoded as:   "B<248>NDY"
+ ECHR 'D'
+ ECHR 'Y'
+ EQUB VE
+
+ ECHR 'W'               \ Token 68:     "WATER"
+ ETWO 'A', 'T'          \
+ ETWO 'E', 'R'          \ Encoded as:   "W<245><244>"
+ EQUB VE
+
+ ECHR 'B'               \ Token 69:     "BREW"
+ ETWO 'R', 'E'          \
+ ECHR 'W'               \ Encoded as:   "B<242>W"
+ EQUB VE
+
+ ECHR 'G'               \ Token 70:     "GARGLE BLASTERS"
+ ETWO 'A', 'R'          \
+ ECHR 'G'               \ Encoded as:   "G<238>G<229> B<249><222><244>S"
+ ETWO 'L', 'E'
+ ECHR ' '
+ ECHR 'B'
+ ETWO 'L', 'A'
+ ETWO 'S', 'T'
+ ETWO 'E', 'R'
+ ECHR 'S'
+ EQUB VE
+
+ EJMP 18                \ Token 71:     "{random 1-8 letter word}"
+ EQUB VE                \
+                        \ Encoded as:   "{18}"
+
+ EJMP 17                \ Token 72:     "{system name adjective} [160-164]"
+ ECHR ' '               \
+ ERND 5                 \ Encoded as:   "{17} [5?]"
+ EQUB VE
+
+ EJMP 17                \ Token 73:     "{system name adjective} {random 1-8
+ ECHR ' '               \                letter word}"
+ EJMP 18                \
+ EQUB VE                \ Encoded as:   "{17} {18}"
+
+ EJMP 17                \ Token 74:     "{system name adjective} [170-174]"
+ ECHR ' '               \
+ ERND 13                \ Encoded as:   "{17} [13?]"
+ EQUB VE
+
+ ERND 13                \ Token 75:     "[170-174] {random 1-8 letter word}"
+ ECHR ' '               \
+ EJMP 18                \ Encoded as:   "[13?] {18}"
+ EQUB VE
+
+ ECHR 'F'               \ Token 76:     "FABULOUS"
+ ETWO 'A', 'B'          \
+ ECHR 'U'               \ Encoded as:   "F<216>U<224><236>"
+ ETWO 'L', 'O'
+ ETWO 'U', 'S'
+ EQUB VE
+
+ ECHR 'E'               \ Token 77:     "EXOTIC"
+ ECHR 'X'               \
+ ECHR 'O'               \ Encoded as:   "EXO<251>C"
+ ETWO 'T', 'I'
+ ECHR 'C'
+ EQUB VE
+
+ ECHR 'H'               \ Token 78:     "HOOPY"
+ ECHR 'O'               \
+ ECHR 'O'               \ Encoded as:   "HOOPY"
+ ECHR 'P'
+ ECHR 'Y'
+ EQUB VE
+
+ ECHR 'U'               \ Token 79:     "UNUSUAL"
+ ETWO 'N', 'U'          \
+ ECHR 'S'               \ Encoded as:   "U<225>SU<228>"
+ ECHR 'U'
+ ETWO 'A', 'L'
+ EQUB VE
+
+ ECHR 'E'               \ Token 80:     "EXCITING"
+ ECHR 'X'               \
+ ECHR 'C'               \ Encoded as:   "EXC<219><240>G"
+ ETWO 'I', 'T'
+ ETWO 'I', 'N'
+ ECHR 'G'
+ EQUB VE
+
+ ECHR 'C'               \ Token 81:     "CUISINE"
+ ECHR 'U'               \
+ ECHR 'I'               \ Encoded as:   "CUIS<240>E"
+ ECHR 'S'
+ ETWO 'I', 'N'
+ ECHR 'E'
+ EQUB VE
+
+ ECHR 'N'               \ Token 82:     "NIGHT LIFE"
+ ECHR 'I'               \
+ ECHR 'G'               \ Encoded as:   "NIGHT LIFE"
+ ECHR 'H'
+ ECHR 'T'
+ ECHR ' '
+ ECHR 'L'
+ ECHR 'I'
+ ECHR 'F'
+ ECHR 'E'
+ EQUB VE
+
+ ECHR 'C'               \ Token 83:     "CASINOS"
+ ECHR 'A'               \
+ ECHR 'S'               \ Encoded as:   "CASI<227>S"
+ ECHR 'I'
+ ETWO 'N', 'O'
+ ECHR 'S'
+ EQUB VE
+
+ ECHR 'S'               \ Token 84:     "SIT COMS"
+ ETWO 'I', 'T'          \
+ ECHR ' '               \ Encoded as:   "S<219> COMS"
+ ECHR 'C'
+ ECHR 'O'
+ ECHR 'M'
+ ECHR 'S'
+ EQUB VE
+
+ EJMP 2                 \ Token 85:     "{sentence case}[235-239]{lower case}"
+ ERND 31                \
+ EJMP 13                \ Encoded as:   "{2}[31?]{13}"
+ EQUB VE
+
+ EJMP 3                 \ Token 86:     "{selected system name}"
+ EQUB VE                \
+                        \ Encoded as:   "{3}"
+
+ ETOK 147               \ Token 87:     "THE PLANET {selected system name}"
+ ETOK 145               \
+ ECHR ' '               \ Encoded as:   "[147][145] {3}"
+ EJMP 3
+ EQUB VE
+
+ ETOK 147               \ Token 88:     "THE WORLD {selected system name}"
+ ETOK 146               \
+ ECHR ' '               \ Encoded as:   "[147][146] {3}"
+ EJMP 3
+ EQUB VE
+
+ ETOK 148               \ Token 89:     "THIS PLANET"
+ ETOK 145               \
+ EQUB VE                \ Encoded as:   "[148][145]"
+
+ ETOK 148               \ Token 90:     "THIS WORLD"
+ ETOK 146               \
+ EQUB VE                \ Encoded as:   "[148][146]"
+
+ ECHR 'S'               \ Token 91:     "SON OF A BITCH"
+ ETWO 'O', 'N'          \
+ ECHR ' '               \ Encoded as:   "S<223> OF[208]B<219>CH"
+ ECHR 'O'
+ ECHR 'F'
+ ETOK 208
+ ECHR 'B'
+ ETWO 'I', 'T'
+ ECHR 'C'
+ ECHR 'H'
+ EQUB VE
+
+ ECHR 'S'               \ Token 92:     "SCOUNDREL"
+ ECHR 'C'               \
+ ETWO 'O', 'U'          \ Encoded as:   "SC<217>ND<242>L"
+ ECHR 'N'
+ ECHR 'D'
+ ETWO 'R', 'E'
+ ECHR 'L'
+ EQUB VE
+
+ ECHR 'B'               \ Token 93:     "BLACKGUARD"
+ ETWO 'L', 'A'          \
+ ECHR 'C'               \ Encoded as:   "B<249>CKGU<238>D"
+ ECHR 'K'
+ ECHR 'G'
+ ECHR 'U'
+ ETWO 'A', 'R'
+ ECHR 'D'
+ EQUB VE
+
+ ECHR 'R'               \ Token 94:     "ROGUE"
+ ECHR 'O'               \
+ ECHR 'G'               \ Encoded as:   "ROGUE"
+ ECHR 'U'
+ ECHR 'E'
+ EQUB VE
+
+ ECHR 'W'               \ Token 95:     "WHORESON BEETLE HEAD FLAP EAR'D
+ ECHR 'H'               \                KNAVE"
+ ETWO 'O', 'R'          \
+ ETWO 'E', 'S'          \ Encoded as:   "WH<253><237><223> <247><221><229> HEAD
+ ETWO 'O', 'N'          \                [198]F<249>P E<238>[39]D KNA<250>"
+ ECHR ' '
+ ETWO 'B', 'E'
+ ETWO 'E', 'T'
+ ETWO 'L', 'E'
+ ECHR ' '
+ ECHR 'H'
+ ECHR 'E'
+ ECHR 'A'
+ ECHR 'D'
+ ETOK 198
+ ECHR 'F'
+ ETWO 'L', 'A'
+ ECHR 'P'
+ ECHR ' '
+ ECHR 'E'
+ ETWO 'A', 'R'
+ ECHR '`'
+ ECHR 'D'
+ ECHR ' '
+ ECHR 'K'
+ ECHR 'N'
+ ECHR 'A'
+ ETWO 'V', 'E'
+ EQUB VE
+
+ ECHR 'N'               \ Token 96:     "N UNREMARKABLE"
+ ECHR ' '               \
+ ECHR 'U'               \ Encoded as:   "N UN<242><239>RK<216><229>"
+ ECHR 'N'
+ ETWO 'R', 'E'
+ ETWO 'M', 'A'
+ ECHR 'R'
+ ECHR 'K'
+ ETWO 'A', 'B'
+ ETWO 'L', 'E'
+ EQUB VE
+
+ ECHR ' '               \ Token 97:     " BORING"
+ ECHR 'B'               \
+ ETWO 'O', 'R'          \ Encoded as:   " B<253><240>G"
+ ETWO 'I', 'N'
+ ECHR 'G'
+ EQUB VE
+
+ ECHR ' '               \ Token 98:     " DULL"
+ ECHR 'D'               \
+ ECHR 'U'               \ Encoded as:   " DULL"
+ ECHR 'L'
+ ECHR 'L'
+ EQUB VE
+
+ ECHR ' '               \ Token 99:     " TEDIOUS"
+ ECHR 'T'               \
+ ECHR 'E'               \ Encoded as:   " TE<241>O<236>"
+ ETWO 'D', 'I'
+ ECHR 'O'
+ ETWO 'U', 'S'
+ EQUB VE
+
+ ECHR ' '               \ Token 100:    " REVOLTING"
+ ETWO 'R', 'E'          \
+ ECHR 'V'               \ Encoded as:   " <242>VOLT<240>G"
+ ECHR 'O'
+ ECHR 'L'
+ ECHR 'T'
+ ETWO 'I', 'N'
+ ECHR 'G'
+ EQUB VE
+
+ ETOK 145               \ Token 101:    "PLANET"
+ EQUB VE                \
+                        \ Encoded as:   "[145]"
+
+ ETOK 146               \ Token 102:    "WORLD"
+ EQUB VE                \
+                        \ Encoded as:   "[146]"
+
+ ECHR 'P'               \ Token 103:    "PLACE"
+ ETWO 'L', 'A'          \
+ ETWO 'C', 'E'          \ Encoded as:   "P<249><233>"
+ EQUB VE
+
+ ECHR 'L'               \ Token 104:    "LITTLE PLANET"
+ ETWO 'I', 'T'          \
+ ECHR 'T'               \ Encoded as:   "L<219>T<229> [145]"
+ ETWO 'L', 'E'
+ ECHR ' '
+ ETOK 145
+ EQUB VE
+
+ ECHR 'D'               \ Token 105:    "DUMP"
+ ECHR 'U'               \
+ ECHR 'M'               \ Encoded as:   "DUMP"
+ ECHR 'P'
+ EQUB VE
+
+ ECHR 'I'               \ Token 106:    "I HEAR A [130-134] LOOKING SHIP
+ ECHR ' '               \                APPEARED AT ERRIUS"
+ ECHR 'H'               \
+ ECHR 'E'               \ Encoded as:   "I HE<238>[208][23?] <224>OK[195][207]
+ ETWO 'A', 'R'          \                 APPE<238>[196]<245>[209]"
+ ETOK 208
+ ERND 23
+ ECHR ' '
+ ETWO 'L', 'O'
+ ECHR 'O'
+ ECHR 'K'
+ ETOK 195
+ ETOK 207
+ ECHR ' '
+ ECHR 'A'
+ ECHR 'P'
+ ECHR 'P'
+ ECHR 'E'
+ ETWO 'A', 'R'
+ ETOK 196
+ ETWO 'A', 'T'
+ ETOK 209
+ EQUB VE
+
+ ECHR 'Y'               \ Token 107:    "YEAH, I HEAR A [130-134] SHIP LEFT
+ ECHR 'E'               \                ERRIUS A  WHILE BACK"
+ ECHR 'A'               \
+ ECHR 'H'               \ Encoded as:   "YEAH, I HE<238>[208][23?] [207]
+ ECHR ','               \                 <229>FT[209][208] WHI<229> BACK"
+ ECHR ' '
+ ECHR 'I'
+ ECHR ' '
+ ECHR 'H'
+ ECHR 'E'
+ ETWO 'A', 'R'
+ ETOK 208
+ ERND 23
+ ECHR ' '
+ ETOK 207
+ ECHR ' '
+ ETWO 'L', 'E'
+ ECHR 'F'
+ ECHR 'T'
+ ETOK 209
+ ETOK 208
+ ECHR ' '
+ ECHR 'W'
+ ECHR 'H'
+ ECHR 'I'
+ ETWO 'L', 'E'
+ ECHR ' '
+ ECHR 'B'
+ ECHR 'A'
+ ECHR 'C'
+ ECHR 'K'
+ EQUB VE
+
+ ECHR 'G'               \ Token 108:    "GET YOUR IRON ASS OVER TO ERRIUS"
+ ETWO 'E', 'T'          \
+ ECHR ' '               \ Encoded as:   "G<221> [179]R IR<223> ASS OV<244> TO
+ ETOK 179               \                [209]"
+ ECHR 'R'
+ ECHR ' '
+ ECHR 'I'
+ ECHR 'R'
+ ETWO 'O', 'N'
+ ECHR ' '
+ ECHR 'A'
+ ECHR 'S'
+ ECHR 'S'
+ ECHR ' '
+ ECHR 'O'
+ ECHR 'V'
+ ETWO 'E', 'R'
+ ECHR ' '
+ ECHR 'T'
+ ECHR 'O'
+ ETOK 209
+ EQUB VE
+
+ ETWO 'S', 'O'          \ Token 109:    "SOME [91-95] NEW SHIP WAS SEEN AT
+ ECHR 'M'               \                ERRIUS"
+ ECHR 'E'               \
+ ECHR ' '               \ Encoded as:   "<235>ME [24?][210][207] WAS <218><246>
+ ERND 24                \                 <245>[209]"
+ ETOK 210
+ ETOK 207
+ ECHR ' '
+ ECHR 'W'
+ ECHR 'A'
+ ECHR 'S'
+ ECHR ' '
+ ETWO 'S', 'E'
+ ETWO 'E', 'N'
+ ECHR ' '
+ ETWO 'A', 'T'
+ ETOK 209
+ EQUB VE
+
+ ECHR 'T'               \ Token 110:    "TRY ERRIUS"
+ ECHR 'R'               \
+ ECHR 'Y'               \ Encoded as:   "TRY[209]"
+ ETOK 209
+ EQUB VE
+
+ EJMP 1                 \ Token 111:    "{all caps}SPECIAL CARGO"
+ ECHR 'S'               \
+ ECHR 'P'               \ Encoded as:   "{1}SPECI<228> C<238>GO"
+ ECHR 'E'
+ ECHR 'C'
+ ECHR 'I'
+ ETWO 'A', 'L'
+ ECHR ' '
+ ECHR 'C'
+ ETWO 'A', 'R'
+ ECHR 'G'
+ ECHR 'O'
+ EQUB VE
+
+ EQUB VE                \ Token 112:    ""
+                        \
+                        \ Encoded as:   ""
+
+ ECHR 'C'               \ Token 113:    "CARGO VALUE:"
+ ETWO 'A', 'R'          \
+ ECHR 'G'               \ Encoded as:   "C<238>GO V<228>UE:"
+ ECHR 'O'
+ ECHR ' '
+ ECHR 'V'
+ ETWO 'A', 'L'
+ ECHR 'U'
+ ECHR 'E'
+ ECHR ':'
+ EQUB VE
+
+ ECHR ' '               \ Token 114:    " MODIFIED BY A.J.C.DUGGAN"
+ ECHR 'M'               \
+ ECHR 'O'               \ Encoded as:   " MO<241>FI<252> BY A.J.C.DUGG<255>"
+ ETWO 'D', 'I'
+ ECHR 'F'
+ ECHR 'I'
+ ETWO 'E', 'D'
+ ECHR ' '
+ ECHR 'B'
+ ECHR 'Y'
+ ECHR ' '
+ ECHR 'A'
+ ECHR '.'
+ ECHR 'J'
+ ECHR '.'
+ ECHR 'C'
+ ECHR '.'
+ ECHR 'D'
+ ECHR 'U'
+ ECHR 'G'
+ ECHR 'G'
+ ETWO 'A', 'N'
+ EQUB VE
+
+ ECHR 'W'               \ Token 115:    "WASP"
+ ECHR 'A'               \
+ ECHR 'S'               \ Encoded as:   "WASP"
+ ECHR 'P'
+ EQUB VE
+
+ ECHR 'M'               \ Token 116:    "MOTH"
+ ECHR 'O'               \
+ ETWO 'T', 'H'          \ Encoded as:   "MO<226>"
+ EQUB VE
+
+ ECHR 'G'               \ Token 117:    "GRUB"
+ ECHR 'R'               \
+ ECHR 'U'               \ Encoded as:   "GRUB"
+ ECHR 'B'
+ EQUB VE
+
+ ETWO 'A', 'N'          \ Token 118:    "ANT"
+ ECHR 'T'               \
+ EQUB VE                \ Encoded as:   "<255>T"
+
+ EJMP 18                \ Token 119:    "{random 1-8 letter word}"
+ EQUB VE                \
+                        \ Encoded as:   "{18}"
+
+ ECHR 'P'               \ Token 120:    "POET"
+ ECHR 'O'               \
+ ETWO 'E', 'T'          \ Encoded as:   "PO<221>"
+ EQUB VE
+
+ ETWO 'A', 'R'          \ Token 121:    "ARTS GRADUATE"
+ ECHR 'T'               \
+ ECHR 'S'               \ Encoded as:   "<238>TS G<248>DU<245>E"
+ ECHR ' '
+ ECHR 'G'
+ ETWO 'R', 'A'
+ ECHR 'D'
+ ECHR 'U'
+ ETWO 'A', 'T'
+ ECHR 'E'
+ EQUB VE
+
+ ECHR 'Y'               \ Token 122:    "YAK"
+ ECHR 'A'               \
+ ECHR 'K'               \ Encoded as:   "YAK"
+ EQUB VE
+
+ ECHR 'S'               \ Token 123:    "SNAIL"
+ ECHR 'N'               \
+ ECHR 'A'               \ Encoded as:   "SNA<220>"
+ ETWO 'I', 'L'
+ EQUB VE
+
+ ECHR 'S'               \ Token 124:    "SLUG"
+ ECHR 'L'               \
+ ECHR 'U'               \ Encoded as:   "SLUG"
+ ECHR 'G'
+ EQUB VE
+
+ ECHR 'T'               \ Token 125:    "TROPICAL"
+ ECHR 'R'               \
+ ECHR 'O'               \ Encoded as:   "TROPIC<228>"
+ ECHR 'P'
+ ECHR 'I'
+ ECHR 'C'
+ ETWO 'A', 'L'
+ EQUB VE
+
+ ECHR 'D'               \ Token 126:    "DENSE"
+ ETWO 'E', 'N'          \
+ ETWO 'S', 'E'          \ Encoded as:   "D<246><218>"
+ EQUB VE
+
+ ETWO 'R', 'A'          \ Token 127:    "RAIN"
+ ETWO 'I', 'N'          \
+ EQUB VE                \ Encoded as:   "<248><240>"
+
+ ECHR 'I'               \ Token 128:    "IMPENETRABLE"
+ ECHR 'M'               \
+ ECHR 'P'               \ Encoded as:   "IMP<246><221><248>B<229>"
+ ETWO 'E', 'N'
+ ETWO 'E', 'T'
+ ETWO 'R', 'A'
+ ECHR 'B'
+ ETWO 'L', 'E'
+ EQUB VE
+
+ ECHR 'E'               \ Token 129:    "EXUBERANT"
+ ECHR 'X'               \
+ ECHR 'U'               \ Encoded as:   "EXU<247><248>NT"
+ ETWO 'B', 'E'
+ ETWO 'R', 'A'
+ ECHR 'N'
+ ECHR 'T'
+ EQUB VE
+
+ ECHR 'F'               \ Token 130:    "FUNNY"
+ ECHR 'U'               \
+ ECHR 'N'               \ Encoded as:   "FUNNY"
+ ECHR 'N'
+ ECHR 'Y'
+ EQUB VE
+
+ ECHR 'W'               \ Token 131:    "WIERD"
+ ECHR 'I'               \
+ ETWO 'E', 'R'          \ Encoded as:   "WI<244>D"
+ ECHR 'D'
+ EQUB VE
+
+ ECHR 'U'               \ Token 132:    "UNUSUAL"
+ ETWO 'N', 'U'          \
+ ECHR 'S'               \ Encoded as:   "U<225>SU<228>"
+ ECHR 'U'
+ ETWO 'A', 'L'
+ EQUB VE
+
+ ETWO 'S', 'T'          \ Token 133:    "STRANGE"
+ ETWO 'R', 'A'          \
+ ECHR 'N'               \ Encoded as:   "<222><248>N<231>"
+ ETWO 'G', 'E'
+ EQUB VE
+
+ ECHR 'P'               \ Token 134:    "PECULIAR"
+ ECHR 'E'               \
+ ECHR 'C'               \ Encoded as:   "PECULI<238>"
+ ECHR 'U'
+ ECHR 'L'
+ ECHR 'I'
+ ETWO 'A', 'R'
+ EQUB VE
+
+ ECHR 'F'               \ Token 135:    "FREQUENT"
+ ETWO 'R', 'E'          \
+ ETWO 'Q', 'U'          \ Encoded as:   "F<242><254><246>T"
+ ETWO 'E', 'N'
+ ECHR 'T'
+ EQUB VE
+
+ ECHR 'O'               \ Token 136:    "OCCASIONAL"
+ ECHR 'C'               \
+ ECHR 'C'               \ Encoded as:   "OCCASI<223><228>"
+ ECHR 'A'
+ ECHR 'S'
+ ECHR 'I'
+ ETWO 'O', 'N'
+ ETWO 'A', 'L'
+ EQUB VE
+
+ ECHR 'U'               \ Token 137:    "UNPREDICTABLE"
+ ECHR 'N'               \
+ ECHR 'P'               \ Encoded as:   "UNP<242><241>CT<216><229>"
+ ETWO 'R', 'E'
+ ETWO 'D', 'I'
+ ECHR 'C'
+ ECHR 'T'
+ ETWO 'A', 'B'
+ ETWO 'L', 'E'
+ EQUB VE
+
+ ECHR 'D'               \ Token 138:    "DREADFUL"
+ ETWO 'R', 'E'          \
+ ECHR 'A'               \ Encoded as:   "D<242>ADFUL"
+ ECHR 'D'
+ ECHR 'F'
+ ECHR 'U'
+ ECHR 'L'
+ EQUB VE
+
+ ETOK 171               \ Token 139:    "DEADLY"
+ EQUB VE                \
+                        \ Encoded as:   "[171]"
+
+ ERND 1                 \ Token 140:    "[21-25] [16-20] FOR [61-65]"
+ ECHR ' '               \
+ ERND 0                 \ Encoded as:   "[1?] [0?] F<253> [10?]"
+ ECHR ' '
+ ECHR 'F'
+ ETWO 'O', 'R'
+ ECHR ' '
+ ERND 10
+ EQUB VE
+
+ ETOK 140               \ Token 141:    "[21-25] [16-20] FOR [61-65] AND
+ ETOK 178               \                [61-65]"
+ ERND 10                \
+ EQUB VE                \ Encoded as:   "[140][178][10?]"
+
+ ERND 11                \ Token 142:    "[51-55] BY [56-60]"
+ ECHR ' '               \
+ ECHR 'B'               \ Encoded as:   "[11?] BY [12?]"
+ ECHR 'Y'
+ ECHR ' '
+ ERND 12
+ EQUB VE
+
+ ETOK 140               \ Token 143:    "[21-25] [16-20] FOR [61-65] BUT [51-55]
+ ECHR ' '               \                BY [56-60]"
+ ECHR 'B'               \
+ ECHR 'U'               \ Encoded as:   "[140] BUT [142]"
+ ECHR 'T'
+ ECHR ' '
+ ETOK 142
+ EQUB VE
+
+ ECHR ' '               \ Token 144:    " A[96-100] [101-105]"
+ ECHR 'A'               \
+ ERND 20                \ Encoded as:   " A[20?] [21?]"
+ ECHR ' '
+ ERND 21
+ EQUB VE
+
+ ECHR 'P'               \ Token 145:    "PLANET"
+ ECHR 'L'               \
+ ETWO 'A', 'N'          \ Encoded as:   "PL<255><221>"
+ ETWO 'E', 'T'
+ EQUB VE
+
+ ECHR 'W'               \ Token 146:    "WORLD"
+ ETWO 'O', 'R'          \
+ ECHR 'L'               \ Encoded as:   "W<253>LD"
+ ECHR 'D'
+ EQUB VE
+
+ ETWO 'T', 'H'          \ Token 147:    "THE "
+ ECHR 'E'               \
+ ECHR ' '               \ Encoded as:   "<226>E "
+ EQUB VE
+
+ ETWO 'T', 'H'          \ Token 148:    "THIS "
+ ECHR 'I'               \
+ ECHR 'S'               \ Encoded as:   "<226>IS "
+ ECHR ' '
+ EQUB VE
+
+ ETWO 'L', 'O'          \ Token 149:    "LOAD NEW {single cap}COMMANDER"
+ ECHR 'A'               \
+ ECHR 'D'               \ Encoded as:   "<224>AD[210][154]"
+ ETOK 210
+ ETOK 154
+ EQUB VE
+
+ EJMP 9                 \ Token 150:    "{clear screen}
+ EJMP 11                \                {draw box around title}
+ EJMP 1                 \                {all caps}
+ EJMP 8                 \                {tab 6}"
+ EQUB VE                \
+                        \ Encoded as:   "{9}{11}{1}{8}"
+
+ ECHR 'D'               \ Token 151:    "DRIVE"
+ ECHR 'R'               \
+ ECHR 'I'               \ Encoded as:   "DRI<250>"
+ ETWO 'V', 'E'
+ EQUB VE
+
+ ECHR ' '               \ Token 152:    " CATALOGUE"
+ ECHR 'C'               \
+ ETWO 'A', 'T'          \ Encoded as:   " C<245>A<224>GUE"
+ ECHR 'A'
+ ETWO 'L', 'O'
+ ECHR 'G'
+ ECHR 'U'
+ ECHR 'E'
+ EQUB VE
+
+ ECHR 'I'               \ Token 153:    "IAN"
+ ETWO 'A', 'N'          \
+ EQUB VE                \ Encoded as:   "I<255>"
+
+ EJMP 19                \ Token 154:    "{single cap}COMMANDER"
+ ECHR 'C'               \
+ ECHR 'O'               \ Encoded as:   "{19}COMM<255>D<244>"
+ ECHR 'M'
+ ECHR 'M'
+ ETWO 'A', 'N'
+ ECHR 'D'
+ ETWO 'E', 'R'
+ EQUB VE
+
+ ERND 13                \ Token 155:    "[170-174]"
+ EQUB VE                \
+                        \ Encoded as:   "[13?]"
+
+ ECHR 'M'               \ Token 156:    "MOUNTAIN"
+ ETWO 'O', 'U'          \
+ ECHR 'N'               \ Encoded as:   "M<217>NTA<240>"
+ ECHR 'T'
+ ECHR 'A'
+ ETWO 'I', 'N'
+ EQUB VE
+
+ ETWO 'E', 'D'          \ Token 157:    "EDIBLE"
+ ECHR 'I'               \
+ ECHR 'B'               \ Encoded as:   "<252>IB<229>"
+ ETWO 'L', 'E'
+ EQUB VE
+
+ ECHR 'T'               \ Token 158:    "TREE"
+ ETWO 'R', 'E'          \
+ ECHR 'E'               \ Encoded as:   "T<242>E"
+ EQUB VE
+
+ ECHR 'S'               \ Token 159:    "SPOTTED"
+ ECHR 'P'               \
+ ECHR 'O'               \ Encoded as:   "SPOTT<252>"
+ ECHR 'T'
+ ECHR 'T'
+ ETWO 'E', 'D'
+ EQUB VE
+
+ ERND 29                \ Token 160:    "[225-229]"
+ EQUB VE                \
+                        \ Encoded as:   "[29?]"
+
+ ERND 30                \ Token 161:    "[230-234]"
+ EQUB VE                \
+                        \ Encoded as:   "[30?]"
+
+ ERND 6                 \ Token 162:    "[46-50]OID"
+ ECHR 'O'               \
+ ECHR 'I'               \ Encoded as:   "[6?]OID"
+ ECHR 'D'
+ EQUB VE
+
+ ERND 36                \ Token 163:    "[120-124]"
+ EQUB VE                \
+                        \ Encoded as:   "[36?]"
+
+ ERND 35                \ Token 164:    "[115-119]"
+ EQUB VE                \
+                        \ Encoded as:   "[35?]"
+
+ ETWO 'A', 'N'          \ Token 165:    "ANCIENT"
+ ECHR 'C'               \
+ ECHR 'I'               \ Encoded as:   "<255>CI<246>T"
+ ETWO 'E', 'N'
+ ECHR 'T'
+ EQUB VE
+
+ ECHR 'E'               \ Token 166:    "EXCEPTIONAL"
+ ECHR 'X'               \
+ ETWO 'C', 'E'          \ Encoded as:   "EX<233>P<251><223><228>"
+ ECHR 'P'
+ ETWO 'T', 'I'
+ ETWO 'O', 'N'
+ ETWO 'A', 'L'
+ EQUB VE
+
+ ECHR 'E'               \ Token 167:    "ECCENTRIC"
+ ECHR 'C'               \
+ ETWO 'C', 'E'          \ Encoded as:   "EC<233>NTRIC"
+ ECHR 'N'
+ ECHR 'T'
+ ECHR 'R'
+ ECHR 'I'
+ ECHR 'C'
+ EQUB VE
+
+ ETWO 'I', 'N'          \ Token 168:    "INGRAINED"
+ ECHR 'G'               \
+ ETWO 'R', 'A'          \ Encoded as:   "<240>G<248><240><252>"
+ ETWO 'I', 'N'
+ ETWO 'E', 'D'
+ EQUB VE
+
+ ERND 23                \ Token 169:    "[130-134]"
+ EQUB VE                \
+                        \ Encoded as:   "[23?]"
+
+ ECHR 'K'               \ Token 170:    "KILLER"
+ ETWO 'I', 'L'          \
+ ECHR 'L'               \ Encoded as:   "K<220>L<244>"
+ ETWO 'E', 'R'
+ EQUB VE
+
+ ECHR 'D'               \ Token 171:    "DEADLY"
+ ECHR 'E'               \
+ ECHR 'A'               \ Encoded as:   "DEADLY"
+ ECHR 'D'
+ ECHR 'L'
+ ECHR 'Y'
+ EQUB VE
+
+ ECHR 'E'               \ Token 172:    "EVIL"
+ ECHR 'V'               \
+ ETWO 'I', 'L'          \ Encoded as:   "EV<220>"
+ EQUB VE
+
+ ETWO 'L', 'E'          \ Token 173:    "LETHAL"
+ ETWO 'T', 'H'          \
+ ETWO 'A', 'L'          \ Encoded as:   "<229><226><228>"
+ EQUB VE
+
+ ECHR 'V'               \ Token 174:    "VICIOUS"
+ ECHR 'I'               \
+ ECHR 'C'               \ Encoded as:   "VICIO<236>"
+ ECHR 'I'
+ ECHR 'O'
+ ETWO 'U', 'S'
+ EQUB VE
+
+ ETWO 'I', 'T'          \ Token 175:    "ITS "
+ ECHR 'S'               \
+ ECHR ' '               \ Encoded as:   "<219>S "
+ EQUB VE
+
+ EJMP 13                \ Token 176:    "{lower case}
+ EJMP 14                \                {justify}
+ EJMP 19                \                {single cap}"
+ EQUB VE                \
+                        \ Encoded as:   "{13}{14}{19}"
+
+ ECHR '.'               \ Token 177:    ".{cr}
+ EJMP 12                \                {left align}"
+ EJMP 15                \
+ EQUB VE                \ Encoded as:   ".{12}{15}"
+
+ ECHR ' '               \ Token 178:    " AND "
+ ETWO 'A', 'N'          \
+ ECHR 'D'               \ Encoded as:   " <255>D "
+ ECHR ' '
+ EQUB VE
+
+ ECHR 'Y'               \ Token 179:    "YOU"
+ ETWO 'O', 'U'          \
+ EQUB VE                \ Encoded as:   "Y<217>"
+
+ ECHR 'P'               \ Token 180:    "PARKING METERS"
+ ETWO 'A', 'R'          \
+ ECHR 'K'               \ Encoded as:   "P<238>K[195]M<221><244>S"
+ ETOK 195
+ ECHR 'M'
+ ETWO 'E', 'T'
+ ETWO 'E', 'R'
+ ECHR 'S'
+ EQUB VE
+
+ ECHR 'D'               \ Token 181:    "DUST CLOUDS"
+ ETWO 'U', 'S'          \
+ ECHR 'T'               \ Encoded as:   "D<236>T C<224>UDS"
+ ECHR ' '
+ ECHR 'C'
+ ETWO 'L', 'O'
+ ECHR 'U'
+ ECHR 'D'
+ ECHR 'S'
+ EQUB VE
+
+ ECHR 'I'               \ Token 182:    "ICE BERGS"
+ ETWO 'C', 'E'          \
+ ECHR ' '               \ Encoded as:   "I<233> <247>RGS"
+ ETWO 'B', 'E'
+ ECHR 'R'
+ ECHR 'G'
+ ECHR 'S'
+ EQUB VE
+
+ ECHR 'R'               \ Token 183:    "ROCK FORMATIONS"
+ ECHR 'O'               \
+ ECHR 'C'               \ Encoded as:   "ROCK F<253><239><251><223>S"
+ ECHR 'K'
+ ECHR ' '
+ ECHR 'F'
+ ETWO 'O', 'R'
+ ETWO 'M', 'A'
+ ETWO 'T', 'I'
+ ETWO 'O', 'N'
+ ECHR 'S'
+ EQUB VE
+
+ ECHR 'V'               \ Token 184:    "VOLCANOES"
+ ECHR 'O'               \
+ ECHR 'L'               \ Encoded as:   "VOLCA<227><237>"
+ ECHR 'C'
+ ECHR 'A'
+ ETWO 'N', 'O'
+ ETWO 'E', 'S'
+ EQUB VE
+
+ ECHR 'P'               \ Token 185:    "PLANT"
+ ECHR 'L'               \
+ ETWO 'A', 'N'          \ Encoded as:   "PL<255>T"
+ ECHR 'T'
+ EQUB VE
+
+ ECHR 'T'               \ Token 186:    "TULIP"
+ ECHR 'U'               \
+ ECHR 'L'               \ Encoded as:   "TULIP"
+ ECHR 'I'
+ ECHR 'P'
+ EQUB VE
+
+ ECHR 'B'               \ Token 187:    "BANANA"
+ ETWO 'A', 'N'          \
+ ETWO 'A', 'N'          \ Encoded as:   "B<255><255>A"
+ ECHR 'A'
+ EQUB VE
+
+ ECHR 'C'               \ Token 188:    "CORN"
+ ETWO 'O', 'R'          \
+ ECHR 'N'               \ Encoded as:   "C<253>N"
+ EQUB VE
+
+ EJMP 18                \ Token 189:    "{random 1-8 letter word}WEED"
+ ECHR 'W'               \
+ ECHR 'E'               \ Encoded as:   "{18}WE<252>"
+ ETWO 'E', 'D'
+ EQUB VE
+
+ EJMP 18                \ Token 190:    "{random 1-8 letter word}"
+ EQUB VE                \
+                        \ Encoded as:   "{18}"
+
+ EJMP 17                \ Token 191:    "{system name adjective} {random 1-8
+ ECHR ' '               \                letter word}"
+ EJMP 18                \
+ EQUB VE                \ Encoded as:   "{17} {18}"
+
+ EJMP 17                \ Token 192:    "{system name adjective} [170-174]"
+ ECHR ' '               \
+ ERND 13                \ Encoded as:   "{17} [13?]"
+ EQUB VE
+
+ ETWO 'I', 'N'          \ Token 193:    "INHABITANT"
+ ECHR 'H'               \
+ ECHR 'A'               \ Encoded as:   "<240>HA<234>T<255>T"
+ ETWO 'B', 'I'
+ ECHR 'T'
+ ETWO 'A', 'N'
+ ECHR 'T'
+ EQUB VE
+
+ ETOK 191               \ Token 194:    "{system name adjective} {random 1-8
+ EQUB VE                \                letter word}"
+                        \
+                        \ Encoded as:   "[191]"
+
+ ETWO 'I', 'N'          \ Token 195:    "ING "
+ ECHR 'G'               \
+ ECHR ' '               \ Encoded as:   "<240>G "
+ EQUB VE
+
+ ETWO 'E', 'D'          \ Token 196:    "ED "
+ ECHR ' '               \
+ EQUB VE                \ Encoded as:   "<252> "
+
+ EQUB VE                \ Token 197:    ""
+                        \
+                        \ Encoded as:   ""
+
+ EQUB VE                \ Token 198:    ""
+                        \
+                        \ Encoded as:   ""
+
+ EQUB VE                \ Token 199:    ""
+                        \
+                        \ Encoded as:   ""
+
+ ECHR ' '               \ Token 200:    " NAME? "
+ ECHR 'N'               \
+ ECHR 'A'               \ Encoded as:   " NAME? "
+ ECHR 'M'
+ ECHR 'E'
+ ECHR '?'
+ ECHR ' '
+ EQUB VE
+
+ ECHR ' '               \ Token 201:    " TO "
+ ECHR 'T'               \
+ ECHR 'O'               \ Encoded as:   " TO "
+ ECHR ' '
+ EQUB VE
+
+ ECHR ' '               \ Token 202:    " IS "
+ ECHR 'I'               \
+ ECHR 'S'               \ Encoded as:   " IS "
+ ECHR ' '
+ EQUB VE
+
+ ECHR 'W'               \ Token 203:    "WAS LAST SEEN AT {single cap}"
+ ECHR 'A'               \
+ ECHR 'S'               \ Encoded as:   "WAS <249><222> <218><246> <245> {19}"
+ ECHR ' '
+ ETWO 'L', 'A'
+ ETWO 'S', 'T'
+ ECHR ' '
+ ETWO 'S', 'E'
+ ETWO 'E', 'N'
+ ECHR ' '
+ ETWO 'A', 'T'
+ ECHR ' '
+ EJMP 19
+ EQUB VE
+
+ ECHR '.'               \ Token 204:    ".{cr}
+ EJMP 12                \                 {single cap}"
+ ECHR ' '               \
+ EJMP 19                \ Encoded as:   ".{12} {19}"
+ EQUB VE
+
+ ECHR 'D'               \ Token 205:    "DOCKED"
+ ECHR 'O'               \
+ ECHR 'C'               \ Encoded as:   "DOCK<252>"
+ ECHR 'K'
+ ETWO 'E', 'D'
+ EQUB VE
+
+ EJMP 1                 \ Token 206:    "{all caps}(Y/N)?"
+ ECHR '('               \
+ ECHR 'Y'               \ Encoded as:   "{1}(Y/N)?"
+ ECHR '/'
+ ECHR 'N'
+ ECHR ')'
+ ECHR '?'
+ EQUB VE
+
+ ECHR 'S'               \ Token 207:    "SHIP"
+ ECHR 'H'               \
+ ECHR 'I'               \ Encoded as:   "SHIP"
+ ECHR 'P'
+ EQUB VE
+
+ ECHR ' '               \ Token 208:    " A "
+ ECHR 'A'               \
+ ECHR ' '               \ Encoded as:   " A "
+ EQUB VE
+
+ ECHR ' '               \ Token 209:    " ERRIUS"
+ ETWO 'E', 'R'          \
+ ECHR 'R'               \ Encoded as:   " <244>RI<236>"
+ ECHR 'I'
+ ETWO 'U', 'S'
+ EQUB VE
+
+ ECHR ' '               \ Token 210:    " NEW "
+ ECHR 'N'               \
+ ECHR 'E'               \ Encoded as:   " NEW "
+ ECHR 'W'
+ ECHR ' '
+ EQUB VE
+
+ EJMP 2                 \ Token 211:    "{sentence case} HER MAJESTY'S SPACE
+ ECHR ' '               \                 NAVY{lower case}"
+ ECHR 'H'               \
+ ETWO 'E', 'R'          \ Encoded as:   "{2} H<244> <239>J<237>TY[39]S SPA<233>
+ ECHR ' '               \                 NAVY{13}"
+ ETWO 'M', 'A'
+ ECHR 'J'
+ ETWO 'E', 'S'
+ ECHR 'T'
+ ECHR 'Y'
+ ECHR '`'
+ ECHR 'S'
+ ECHR ' '
+ ECHR 'S'
+ ECHR 'P'
+ ECHR 'A'
+ ETWO 'C', 'E'
+ ECHR ' '
+ ECHR 'N'
+ ECHR 'A'
+ ECHR 'V'
+ ECHR 'Y'
+ EJMP 13
+ EQUB VE
+
+ ETOK 177               \ Token 212:    ".{cr}
+ EJMP 8                 \                {left align}
+ EJMP 1                 \                {tab 6}{all caps}  MESSAGE ENDS"
+ ECHR ' '               \
+ ECHR ' '               \ Encoded as:   "[177]{8}{1}  M<237>SA<231> <246>DS"
+ ECHR 'M'
+ ETWO 'E', 'S'
+ ECHR 'S'
+ ECHR 'A'
+ ETWO 'G', 'E'
+ ECHR ' '
+ ETWO 'E', 'N'
+ ECHR 'D'
+ ECHR 'S'
+ EQUB VE
+
+ ECHR ' '               \ Token 213:    " {single cap}COMMANDER {commander
+ ETOK 154               \                name}, I {lower case}AM{sentence case}
+ ECHR ' '               \                CAPTAIN {mission captain's name}
+ EJMP 4                 \                {lower case}OF{sentence case} HER
+ ECHR ','               \                MAJESTY'S SPACE NAVY{lower case}"
+ ECHR ' '               \
+ ECHR 'I'               \ Encoded as:   " [154] {4}, I {13}AM{2} CAPTA<240> {27}
+ ECHR ' '               \                 {13}OF[211]"
+ EJMP 13
+ ECHR 'A'
+ ECHR 'M'
+ EJMP 2
+ ECHR ' '
+ ECHR 'C'
+ ECHR 'A'
+ ECHR 'P'
+ ECHR 'T'
+ ECHR 'A'
+ ETWO 'I', 'N'
+ ECHR ' '
+ EJMP 27
+ ECHR ' '
+ EJMP 13
+ ECHR 'O'
+ ECHR 'F'
+ ETOK 211
+ EQUB VE
+
+ EQUB VE                \ Token 214:    ""
+                        \
+                        \ Encoded as:   ""
+
+ EJMP 15                \ Token 215:    "{left align} UNKNOWN PLANET"
+ ECHR ' '               \
+ ECHR 'U'               \ Encoded as:   "{15} UNK<227>WN [145]"
+ ECHR 'N'
+ ECHR 'K'
+ ETWO 'N', 'O'
+ ECHR 'W'
+ ECHR 'N'
+ ECHR ' '
+ ETOK 145
+ EQUB VE
+
+ EJMP 9                 \ Token 216:    "{clear screen}
+ EJMP 8                 \                {tab 6}
+ EJMP 23                \                {move to row 10, white, lower case}
+ EJMP 1                 \                {all caps}
+ ETWO 'I', 'N'          \                INCOMING MESSAGE"
+ ECHR 'C'               \
+ ECHR 'O'               \ Encoded as:   "{9}{8}{23}{1}<240>COM[195]M<237>SA
+ ECHR 'M'               \                <231>"
+ ETOK 195
+ ECHR 'M'
+ ETWO 'E', 'S'
+ ECHR 'S'
+ ECHR 'A'
+ ETWO 'G', 'E'
+ EQUB VE
+
+ ECHR 'C'               \ Token 217:    "CURRUTHERS"
+ ECHR 'U'               \
+ ECHR 'R'               \ Encoded as:   "CURRU<226><244>S"
+ ECHR 'R'
+ ECHR 'U'
+ ETWO 'T', 'H'
+ ETWO 'E', 'R'
+ ECHR 'S'
+ EQUB VE
+
+ ECHR 'F'               \ Token 218:    "FOSDYKE SMYTHE"
+ ECHR 'O'               \
+ ECHR 'S'               \ Encoded as:   "FOSDYKE SMY<226>E"
+ ECHR 'D'
+ ECHR 'Y'
+ ECHR 'K'
+ ECHR 'E'
+ ECHR ' '
+ ECHR 'S'
+ ECHR 'M'
+ ECHR 'Y'
+ ETWO 'T', 'H'
+ ECHR 'E'
+ EQUB VE
+
+ ECHR 'F'               \ Token 219:    "FORTESQUE"
+ ETWO 'O', 'R'          \
+ ECHR 'T'               \ Encoded as:   "F<253>T<237><254>E"
+ ETWO 'E', 'S'
+ ETWO 'Q', 'U'
+ ECHR 'E'
+ EQUB VE
+
+ ETOK 203               \ Token 220:    "WAS LAST SEEN AT {single cap}REESDICE"
+ ETWO 'R', 'E'          \
+ ETWO 'E', 'S'          \ Encoded as:   "[203]<242><237><241><233>"
+ ETWO 'D', 'I'
+ ETWO 'C', 'E'
+ EQUB VE
+
+ ECHR 'I'               \ Token 221:    "IS BELIEVED TO HAVE JUMPED TO THIS
+ ECHR 'S'               \                GALAXY"
+ ECHR ' '               \
+ ETWO 'B', 'E'          \ Encoded as:   "IS <247>LIEV<252>[201]HA<250> JUMP<252>
+ ECHR 'L'               \                [201][148]G<228>AXY"
+ ECHR 'I'
+ ECHR 'E'
+ ECHR 'V'
+ ETWO 'E', 'D'
+ ETOK 201
+ ECHR 'H'
+ ECHR 'A'
+ ETWO 'V', 'E'
+ ECHR ' '
+ ECHR 'J'
+ ECHR 'U'
+ ECHR 'M'
+ ECHR 'P'
+ ETWO 'E', 'D'
+ ETOK 201
+ ETOK 148
+ ECHR 'G'
+ ETWO 'A', 'L'
+ ECHR 'A'
+ ECHR 'X'
+ ECHR 'Y'
+ EQUB VE
+
+ EJMP 25                \ Token 222:    "{incoming message screen, wait 2s}
+ EJMP 9                 \                {clear screen}
+ EJMP 29                \                {tab 6, white, lower case in words}
+ EJMP 14                \                {justify}
+ EJMP 2                 \                {sentence case}
+ ECHR 'G'               \                GOOD DAY {single cap}COMMANDER
+ ECHR 'O'               \                {commander name}.{cr}
+ ECHR 'O'               \                 {single cap}I{lower case} AM {single
+ ECHR 'D'               \                cap}AGENT{single cap}BLAKE OF {single
+ ECHR ' '               \                cap}NAVAL {single cap}INTELLEGENCE.{cr}
+ ECHR 'D'               \                 {single cap}AS YOU KNOW, THE {single
+ ECHR 'A'               \                cap}NAVY HAVE BEEN KEEPING THE {single
+ ECHR 'Y'               \                cap}THARGOIDS OFF YOUR ASS OUT IN DEEP
+ ECHR ' '               \                SPACE FOR MANY YEARS NOW. {single cap}
+ ETOK 154               \                WELL THE SITUATION HAS CHANGED.{cr}
+ ECHR ' '               \                 {single cap}OUR BOYS ARE READY FOR A
+ EJMP 4                 \                PUSH RIGHT TO THE HOME SYSTEM OF THOSE
+ ETOK 204               \                MOTHERS.{cr}
+ ECHR 'I'               \                 {single cap}
+ EJMP 13                \                {wait for key press}
+ ECHR ' '               \                {clear screen}
+ ECHR 'A'               \                {white}
+ ECHR 'M'               \                {tab 6, white, lower case in words}
+ ECHR ' '               \                I{lower case} HAVE OBTAINED THE DEFENCE
+ EJMP 19                \                PLANS FOR THEIR {single cap}HIVE
+ ECHR 'A'               \                {single cap}WORLDS.{cr} {single cap}THE
+ ECHR 'G'               \                BEETLES KNOW WE'VE GOT SOMETHING BUT
+ ETWO 'E', 'N'          \                NOT WHAT.{cr} {single cap}IF {single
+ ECHR 'T'               \                cap}I TRANSMIT THE PLANS TO OUR BASE ON
+ ECHR ' '               \                {single cap}BIRERA THEY'LL INTERCEPT
+ EJMP 19                \                THE TRANSMISSION. {single cap}I NEED A
+ ECHR 'B'               \                SHIP TO MAKE THE RUN.{cr}
+ ETWO 'L', 'A'          \                 {single cap}YOU'RE ELECTED.{cr}
+ ECHR 'K'               \                 {single cap}THE PLANS ARE UNIPULSE
+ ECHR 'E'               \                CODED WITHIN THIS TRANSMISSION.{cr}
+ ECHR ' '               \                 {single cap}{tab 6}YOU WILL BE
+ ECHR 'O'               \                PAID.{cr}
+ ECHR 'F'               \                 {single cap}    {single cap}GOOD LUCK
+ ECHR ' '               \                {single cap}COMMANDER.{cr}
+ EJMP 19                \                {left align}
+ ECHR 'N'               \                {tab 6}{all caps}  MESSAGE ENDS
+ ECHR 'A'               \                {wait for key press}"
+ ECHR 'V'               \
+ ETWO 'A', 'L'          \ Encoded as:   "{25}{9}{29}{14}{2}GOOD DAY [154] {4}
+ ECHR ' '               \                [204]I{13} AM {19}AG<246>T {19}B<249>
+ EJMP 19                \                KE OF {19}NAV<228> {19}<240>TEL<229>
+ ETWO 'I', 'N'          \                G<246><233>[204]AS [179] K<227>W, [147]
+ ECHR 'T'               \                {19}NAVY HA<250> <247><246> KEEP[195]
+ ECHR 'E'               \                [147]{19}<226><238>GOIDS OFF [179]R ASS
+ ECHR 'L'               \                 <217>T <240> DEEP SPA<233> F<253>
+ ETWO 'L', 'E'          \                 <239>NY YE<238>S <227>W. {19}WELL
+ ECHR 'G'               \                 [147]S<219>UA<251><223> HAS CH<255>G
+ ETWO 'E', 'N'          \                <252>[204]<217>R BOYS <238>E <242>ADY F
+ ETWO 'C', 'E'          \                <253>[208]P<236>H RIGHT[201][147]HOME
+ ETOK 204               \                 SY<222>EM OF <226>O<218> MO<226><244>S
+ ECHR 'A'               \                [204]{24}{9}{29}I{13} HA<250> OBTA
+ ECHR 'S'               \                <240>[196][147]DEF<246><233> P<249>NS F
+ ECHR ' '               \                <253> <226>EIR {19}HI<250> {19}W<253>LD
+ ETOK 179               \                S[204][147]<247><221><229>S K<227>W WE
+ ECHR ' '               \                [39]<250> GOT <235>ME<226>[195]BUT
+ ECHR 'K'               \                 <227>T WH<245>[204]IF {19}I T<248>NSM
+ ETWO 'N', 'O'          \                <219> [147]P<249>NS[201]<217>R BA<218>
+ ECHR 'W'               \                 <223> {19}<234><242><248> <226>EY[39]L
+ ECHR ','               \                L <240>T<244><233>PT [147]TR<255>SMISSI
+ ECHR ' '               \                <223>. {19}I NE<252>[208][207][201]
+ ETOK 147               \                <239>KE [147]RUN[204][179][39]<242> E
+ EJMP 19                \                <229>CT<252>[204][147]P<249>NS A<242>
+ ECHR 'N'               \                 UNIPUL<218> COD[196]WI<226><240> [148]
+ ECHR 'A'               \                TR<255>SMISSI<223>[204]{8}[179] W<220>L
+ ECHR 'V'               \                 <247> PAID[204]    {19}GOOD LUCK [154]
+ ECHR 'Y'               \                [212]{24}"
+ ECHR ' '
+ ECHR 'H'
+ ECHR 'A'
+ ETWO 'V', 'E'
+ ECHR ' '
+ ETWO 'B', 'E'
+ ETWO 'E', 'N'
+ ECHR ' '
+ ECHR 'K'
+ ECHR 'E'
+ ECHR 'E'
+ ECHR 'P'
+ ETOK 195
+ ETOK 147
+ EJMP 19
+ ETWO 'T', 'H'
+ ETWO 'A', 'R'
+ ECHR 'G'
+ ECHR 'O'
+ ECHR 'I'
+ ECHR 'D'
+ ECHR 'S'
+ ECHR ' '
+ ECHR 'O'
+ ECHR 'F'
+ ECHR 'F'
+ ECHR ' '
+ ETOK 179
+ ECHR 'R'
+ ECHR ' '
+ ECHR 'A'
+ ECHR 'S'
+ ECHR 'S'
+ ECHR ' '
+ ETWO 'O', 'U'
+ ECHR 'T'
+ ECHR ' '
+ ETWO 'I', 'N'
+ ECHR ' '
+ ECHR 'D'
+ ECHR 'E'
+ ECHR 'E'
+ ECHR 'P'
+ ECHR ' '
+ ECHR 'S'
+ ECHR 'P'
+ ECHR 'A'
+ ETWO 'C', 'E'
+ ECHR ' '
+ ECHR 'F'
+ ETWO 'O', 'R'
+ ECHR ' '
+ ETWO 'M', 'A'
+ ECHR 'N'
+ ECHR 'Y'
+ ECHR ' '
+ ECHR 'Y'
+ ECHR 'E'
+ ETWO 'A', 'R'
+ ECHR 'S'
+ ECHR ' '
+ ETWO 'N', 'O'
+ ECHR 'W'
+ ECHR '.'
+ ECHR ' '
+ EJMP 19
+ ECHR 'W'
+ ECHR 'E'
+ ECHR 'L'
+ ECHR 'L'
+ ECHR ' '
+ ETOK 147
+ ECHR 'S'
+ ETWO 'I', 'T'
+ ECHR 'U'
+ ECHR 'A'
+ ETWO 'T', 'I'
+ ETWO 'O', 'N'
+ ECHR ' '
+ ECHR 'H'
+ ECHR 'A'
+ ECHR 'S'
+ ECHR ' '
+ ECHR 'C'
+ ECHR 'H'
+ ETWO 'A', 'N'
+ ECHR 'G'
+ ETWO 'E', 'D'
+ ETOK 204
+ ETWO 'O', 'U'
+ ECHR 'R'
+ ECHR ' '
+ ECHR 'B'
+ ECHR 'O'
+ ECHR 'Y'
+ ECHR 'S'
+ ECHR ' '
+ ETWO 'A', 'R'
+ ECHR 'E'
+ ECHR ' '
+ ETWO 'R', 'E'
+ ECHR 'A'
+ ECHR 'D'
+ ECHR 'Y'
+ ECHR ' '
+ ECHR 'F'
+ ETWO 'O', 'R'
+ ETOK 208
+ ECHR 'P'
+ ETWO 'U', 'S'
+ ECHR 'H'
+ ECHR ' '
+ ECHR 'R'
+ ECHR 'I'
+ ECHR 'G'
+ ECHR 'H'
+ ECHR 'T'
+ ETOK 201
+ ETOK 147
+ ECHR 'H'
+ ECHR 'O'
+ ECHR 'M'
+ ECHR 'E'
+ ECHR ' '
+ ECHR 'S'
+ ECHR 'Y'
+ ETWO 'S', 'T'
+ ECHR 'E'
+ ECHR 'M'
+ ECHR ' '
+ ECHR 'O'
+ ECHR 'F'
+ ECHR ' '
+ ETWO 'T', 'H'
+ ECHR 'O'
+ ETWO 'S', 'E'
+ ECHR ' '
+ ECHR 'M'
+ ECHR 'O'
+ ETWO 'T', 'H'
+ ETWO 'E', 'R'
+ ECHR 'S'
+ ETOK 204
+ EJMP 24
+ EJMP 9
+ EJMP 29
+ ECHR 'I'
+ EJMP 13
+ ECHR ' '
+ ECHR 'H'
+ ECHR 'A'
+ ETWO 'V', 'E'
+ ECHR ' '
+ ECHR 'O'
+ ECHR 'B'
+ ECHR 'T'
+ ECHR 'A'
+ ETWO 'I', 'N'
+ ETOK 196
+ ETOK 147
+ ECHR 'D'
+ ECHR 'E'
+ ECHR 'F'
+ ETWO 'E', 'N'
+ ETWO 'C', 'E'
+ ECHR ' '
+ ECHR 'P'
+ ETWO 'L', 'A'
+ ECHR 'N'
+ ECHR 'S'
+ ECHR ' '
+ ECHR 'F'
+ ETWO 'O', 'R'
+ ECHR ' '
+ ETWO 'T', 'H'
+ ECHR 'E'
+ ECHR 'I'
+ ECHR 'R'
+ ECHR ' '
+ EJMP 19
+ ECHR 'H'
+ ECHR 'I'
+ ETWO 'V', 'E'
+ ECHR ' '
+ EJMP 19
+ ECHR 'W'
+ ETWO 'O', 'R'
+ ECHR 'L'
+ ECHR 'D'
+ ECHR 'S'
+ ETOK 204
+ ETOK 147
+ ETWO 'B', 'E'
+ ETWO 'E', 'T'
+ ETWO 'L', 'E'
+ ECHR 'S'
+ ECHR ' '
+ ECHR 'K'
+ ETWO 'N', 'O'
+ ECHR 'W'
+ ECHR ' '
+ ECHR 'W'
+ ECHR 'E'
+ ECHR '`'
+ ETWO 'V', 'E'
+ ECHR ' '
+ ECHR 'G'
+ ECHR 'O'
+ ECHR 'T'
+ ECHR ' '
+ ETWO 'S', 'O'
+ ECHR 'M'
+ ECHR 'E'
+ ETWO 'T', 'H'
+ ETOK 195
+ ECHR 'B'
+ ECHR 'U'
+ ECHR 'T'
+ ECHR ' '
+ ETWO 'N', 'O'
+ ECHR 'T'
+ ECHR ' '
+ ECHR 'W'
+ ECHR 'H'
+ ETWO 'A', 'T'
+ ETOK 204
+ ECHR 'I'
+ ECHR 'F'
+ ECHR ' '
+ EJMP 19
+ ECHR 'I'
+ ECHR ' '
+ ECHR 'T'
+ ETWO 'R', 'A'
+ ECHR 'N'
+ ECHR 'S'
+ ECHR 'M'
+ ETWO 'I', 'T'
+ ECHR ' '
+ ETOK 147
+ ECHR 'P'
+ ETWO 'L', 'A'
+ ECHR 'N'
+ ECHR 'S'
+ ETOK 201
+ ETWO 'O', 'U'
+ ECHR 'R'
+ ECHR ' '
+ ECHR 'B'
+ ECHR 'A'
+ ETWO 'S', 'E'
+ ECHR ' '
+ ETWO 'O', 'N'
+ ECHR ' '
+ EJMP 19
+ ETWO 'B', 'I'
+ ETWO 'R', 'E'
+ ETWO 'R', 'A'
+ ECHR ' '
+ ETWO 'T', 'H'
+ ECHR 'E'
+ ECHR 'Y'
+ ECHR '`'
+ ECHR 'L'
+ ECHR 'L'
+ ECHR ' '
+ ETWO 'I', 'N'
+ ECHR 'T'
+ ETWO 'E', 'R'
+ ETWO 'C', 'E'
+ ECHR 'P'
+ ECHR 'T'
+ ECHR ' '
+ ETOK 147
+ ECHR 'T'
+ ECHR 'R'
+ ETWO 'A', 'N'
+ ECHR 'S'
+ ECHR 'M'
+ ECHR 'I'
+ ECHR 'S'
+ ECHR 'S'
+ ECHR 'I'
+ ETWO 'O', 'N'
+ ECHR '.'
+ ECHR ' '
+ EJMP 19
+ ECHR 'I'
+ ECHR ' '
+ ECHR 'N'
+ ECHR 'E'
+ ETWO 'E', 'D'
+ ETOK 208
+ ETOK 207
+ ETOK 201
+ ETWO 'M', 'A'
+ ECHR 'K'
+ ECHR 'E'
+ ECHR ' '
+ ETOK 147
+ ECHR 'R'
+ ECHR 'U'
+ ECHR 'N'
+ ETOK 204
+ ETOK 179
+ ECHR '`'
+ ETWO 'R', 'E'
+ ECHR ' '
+ ECHR 'E'
+ ETWO 'L', 'E'
+ ECHR 'C'
+ ECHR 'T'
+ ETWO 'E', 'D'
+ ETOK 204
+ ETOK 147
+ ECHR 'P'
+ ETWO 'L', 'A'
+ ECHR 'N'
+ ECHR 'S'
+ ECHR ' '
+ ECHR 'A'
+ ETWO 'R', 'E'
+ ECHR ' '
+ ECHR 'U'
+ ECHR 'N'
+ ECHR 'I'
+ ECHR 'P'
+ ECHR 'U'
+ ECHR 'L'
+ ETWO 'S', 'E'
+ ECHR ' '
+ ECHR 'C'
+ ECHR 'O'
+ ECHR 'D'
+ ETOK 196
+ ECHR 'W'
+ ECHR 'I'
+ ETWO 'T', 'H'
+ ETWO 'I', 'N'
+ ECHR ' '
+ ETOK 148
+ ECHR 'T'
+ ECHR 'R'
+ ETWO 'A', 'N'
+ ECHR 'S'
+ ECHR 'M'
+ ECHR 'I'
+ ECHR 'S'
+ ECHR 'S'
+ ECHR 'I'
+ ETWO 'O', 'N'
+ ETOK 204
+ EJMP 8
+ ETOK 179
+ ECHR ' '
+ ECHR 'W'
+ ETWO 'I', 'L'
+ ECHR 'L'
+ ECHR ' '
+ ETWO 'B', 'E'
+ ECHR ' '
+ ECHR 'P'
+ ECHR 'A'
+ ECHR 'I'
+ ECHR 'D'
+ ETOK 204
+ ECHR ' '
+ ECHR ' '
+ ECHR ' '
+ ECHR ' '
+ EJMP 19
+ ECHR 'G'
+ ECHR 'O'
+ ECHR 'O'
+ ECHR 'D'
+ ECHR ' '
+ ECHR 'L'
+ ECHR 'U'
+ ECHR 'C'
+ ECHR 'K'
+ ECHR ' '
+ ETOK 154
+ ETOK 212
+ EJMP 24
+ EQUB VE
+
+ EJMP 25                \ Token 223:    "{incoming message screen, wait 2s}
+ EJMP 9                 \                {clear screen}
+ EJMP 29                \                {tab 6, white, lower case in words}
+ EJMP 8                 \                {tab 6}
+ EJMP 14                \                {justify}
+ EJMP 13                \                {lower case}
+ EJMP 19                \                {single cap}WELL DONE {single cap}
+ ECHR 'W'               \                COMMANDER.{cr}
+ ECHR 'E'               \                 {single cap}YOU HAVE SERVED US WELL
+ ECHR 'L'               \                AND WE SHALL REMEMBER.{cr}
+ ECHR 'L'               \                 {single cap}WE DID NOT EXPECT THE
+ ECHR ' '               \                 {single cap}THARGOIDS TO FIND OUT
+ ECHR 'D'               \                ABOUT YOU.{cr}
+ ETWO 'O', 'N'          \                 {single cap}FOR THE MOMENT PLEASE
+ ECHR 'E'               \                ACCEPT THIS {single cap}NAVY {standard
+ ECHR ' '               \                tokens, sentence case}EXTRA ENERGY
+ ETOK 154               \                UNIT{extended tokens} AS PAYMENT.{cr}
+ ETOK 204               \                {left align}
+ ETOK 179               \                {tab 6}{all caps}  MESSAGE ENDS
+ ECHR ' '               \                {wait for key press}"
+ ECHR 'H'               \
+ ECHR 'A'               \ Encoded as:   "{25}{9}{29}{8}{14}{13}{19}WELL D
+ ETWO 'V', 'E'          \                <223>E [154][204][179] HA<250> <218>RV
+ ECHR ' '               \                [196]<236> WELL[178]WE SH<228>L <242>ME
+ ETWO 'S', 'E'          \                MB<244>[204]WE <241>D <227>T EXPECT
+ ECHR 'R'               \                 [147]{19}<226><238>GOIDS[201]F<240>D
+ ECHR 'V'               \                 <217>T <216><217>T [179][204]F<253>
+ ETOK 196               \                 [147]MOM<246>T P<229>A<218> AC<233>PT
+ ETWO 'U', 'S'          \                 [148]{19}NAVY {6}[114]{5} AS PAYM<246>
+ ECHR ' '               \                T[212]{24}"
+ ECHR 'W'
+ ECHR 'E'
+ ECHR 'L'
+ ECHR 'L'
+ ETOK 178
+ ECHR 'W'
+ ECHR 'E'
+ ECHR ' '
+ ECHR 'S'
+ ECHR 'H'
+ ETWO 'A', 'L'
+ ECHR 'L'
+ ECHR ' '
+ ETWO 'R', 'E'
+ ECHR 'M'
+ ECHR 'E'
+ ECHR 'M'
+ ECHR 'B'
+ ETWO 'E', 'R'
+ ETOK 204
+ ECHR 'W'
+ ECHR 'E'
+ ECHR ' '
+ ETWO 'D', 'I'
+ ECHR 'D'
+ ECHR ' '
+ ETWO 'N', 'O'
+ ECHR 'T'
+ ECHR ' '
+ ECHR 'E'
+ ECHR 'X'
+ ECHR 'P'
+ ECHR 'E'
+ ECHR 'C'
+ ECHR 'T'
+ ECHR ' '
+ ETOK 147
+ EJMP 19
+ ETWO 'T', 'H'
+ ETWO 'A', 'R'
+ ECHR 'G'
+ ECHR 'O'
+ ECHR 'I'
+ ECHR 'D'
+ ECHR 'S'
+ ETOK 201
+ ECHR 'F'
+ ETWO 'I', 'N'
+ ECHR 'D'
+ ECHR ' '
+ ETWO 'O', 'U'
+ ECHR 'T'
+ ECHR ' '
+ ETWO 'A', 'B'
+ ETWO 'O', 'U'
+ ECHR 'T'
+ ECHR ' '
+ ETOK 179
+ ETOK 204
+ ECHR 'F'
+ ETWO 'O', 'R'
+ ECHR ' '
+ ETOK 147
+ ECHR 'M'
+ ECHR 'O'
+ ECHR 'M'
+ ETWO 'E', 'N'
+ ECHR 'T'
+ ECHR ' '
+ ECHR 'P'
+ ETWO 'L', 'E'
+ ECHR 'A'
+ ETWO 'S', 'E'
+ ECHR ' '
+ ECHR 'A'
+ ECHR 'C'
+ ETWO 'C', 'E'
+ ECHR 'P'
+ ECHR 'T'
+ ECHR ' '
+ ETOK 148
+ EJMP 19
+ ECHR 'N'
+ ECHR 'A'
+ ECHR 'V'
+ ECHR 'Y'
+ ECHR ' '
+ EJMP 6
+ TOKN 114
+ EJMP 5
+ ECHR ' '
+ ECHR 'A'
+ ECHR 'S'
+ ECHR ' '
+ ECHR 'P'
+ ECHR 'A'
+ ECHR 'Y'
+ ECHR 'M'
+ ETWO 'E', 'N'
+ ECHR 'T'
+ ETOK 212
+ EJMP 24
+ EQUB VE
+
+ EQUB VE                \ Token 224:    ""
+                        \
+                        \ Encoded as:   ""
+
+ ECHR 'S'               \ Token 225:    "SHREW"
+ ECHR 'H'               \
+ ETWO 'R', 'E'          \ Encoded as:   "SH<242>W"
+ ECHR 'W'
+ EQUB VE
+
+ ETWO 'B', 'E'          \ Token 226:    "BEAST"
+ ECHR 'A'               \
+ ETWO 'S', 'T'          \ Encoded as:   "<247>A<222>"
+ EQUB VE
+
+ ETWO 'B', 'I'          \ Token 227:    "BISON"
+ ECHR 'S'               \
+ ETWO 'O', 'N'          \ Encoded as:   "<234>IS<223>"
+ EQUB VE
+
+ ECHR 'S'               \ Token 228:    "SNAKE"
+ ECHR 'N'               \
+ ECHR 'A'               \ Encoded as:   "SNAKE"
+ ECHR 'K'
+ ECHR 'E'
+ EQUB VE
+
+ ECHR 'W'               \ Token 229:    "WOLF"
+ ECHR 'O'               \
+ ECHR 'L'               \ Encoded as:   "WOLF"
+ ECHR 'F'
+ EQUB VE
+
+ ETWO 'L', 'E'          \ Token 230:    "LEOPARD"
+ ECHR 'O'               \
+ ECHR 'P'               \ Encoded as:   "<229>OP<238>D"
+ ETWO 'A', 'R'
+ ECHR 'D'
+ EQUB VE
+
+ ECHR 'C'               \ Token 231:    "CAT"
+ ETWO 'A', 'T'          \
+ EQUB VE                \ Encoded as:   "C<245>"
+
+ ECHR 'M'               \ Token 232:    "MONKEY"
+ ETWO 'O', 'N'          \
+ ECHR 'K'               \ Encoded as:   "M<223>KEY"
+ ECHR 'E'
+ ECHR 'Y'
+ EQUB VE
+
+ ECHR 'G'               \ Token 233:    "GOAT"
+ ECHR 'O'               \
+ ETWO 'A', 'T'          \ Encoded as:   "GO<245>"
+ EQUB VE
+
+ ECHR 'F'               \ Token 234:    "FISH"
+ ECHR 'I'               \
+ ECHR 'S'               \ Encoded as:   "FISH"
+ ECHR 'H'
+ EQUB VE
+
+ ERND 15                \ Token 235:    "[71-75] [66-70]"
+ ECHR ' '               \
+ ERND 14                \ Encoded as:   "[15?] [14?]"
+ EQUB VE
+
+ EJMP 17                \ Token 236:    "{system name adjective} [225-229]
+ ECHR ' '               \                 [240-244]"
+ ERND 29                \
+ ECHR ' '               \ Encoded as:   "{17} [29?] [32?]"
+ ERND 32
+ EQUB VE
+
+ ETOK 175               \ Token 237:    "ITS [76-80] [230-234] [240-244]"
+ ERND 16                \
+ ECHR ' '               \ Encoded as:   "[175][16?] [30?] [32?]"
+ ERND 30
+ ECHR ' '
+ ERND 32
+ EQUB VE
+
+ ERND 33                \ Token 238:    "[245-249] [250-254]"
+ ECHR ' '               \
+ ERND 34                \ Encoded as:   "[33?] [34?]"
+ EQUB VE
+
+ ERND 15                \ Token 239:    "[71-75] [66-70]"
+ ECHR ' '               \
+ ERND 14                \ Encoded as:   "[15?] [14?]"
+ EQUB VE
+
+ ECHR 'M'               \ Token 240:    "MEAT"
+ ECHR 'E'               \
+ ETWO 'A', 'T'          \ Encoded as:   "ME<245>"
+ EQUB VE
+
+ ECHR 'C'               \ Token 241:    "CUTLET"
+ ECHR 'U'               \
+ ECHR 'T'               \ Encoded as:   "CUTL<221>"
+ ECHR 'L'
+ ETWO 'E', 'T'
+ EQUB VE
+
+ ETWO 'S', 'T'          \ Token 242:    "STEAK"
+ ECHR 'E'               \
+ ECHR 'A'               \ Encoded as:   "<222>EAK"
+ ECHR 'K'
+ EQUB VE
+
+ ECHR 'B'               \ Token 243:    "BURGERS"
+ ECHR 'U'               \
+ ECHR 'R'               \ Encoded as:   "BURG<244>S"
+ ECHR 'G'
+ ETWO 'E', 'R'
+ ECHR 'S'
+ EQUB VE
+
+ ETWO 'S', 'O'          \ Token 244:    "SOUP"
+ ECHR 'U'               \
+ ECHR 'P'               \ Encoded as:   "<235>UP"
+ EQUB VE
+
+ ECHR 'I'               \ Token 245:    "ICE"
+ ETWO 'C', 'E'          \
+ EQUB VE                \ Encoded as:   "I<233>"
+
+ ECHR 'M'               \ Token 246:    "MUD"
+ ECHR 'U'               \
+ ECHR 'D'               \ Encoded as:   "MUD"
+ EQUB VE
+
+ ECHR 'Z'               \ Token 247:    "ZERO-{single cap}G"
+ ETWO 'E', 'R'          \
+ ECHR 'O'               \ Encoded as:   "Z<244>O-{19}G"
+ ECHR '-'
+ EJMP 19
+ ECHR 'G'
+ EQUB VE
+
+ ECHR 'V'               \ Token 248:    "VACUUM"
+ ECHR 'A'               \
+ ECHR 'C'               \ Encoded as:   "VACUUM"
+ ECHR 'U'
+ ECHR 'U'
+ ECHR 'M'
+ EQUB VE
+
+ EJMP 17                \ Token 249:    "{system name adjective} ULTRA"
+ ECHR ' '               \
+ ECHR 'U'               \ Encoded as:   "{17} ULT<248>"
+ ECHR 'L'
+ ECHR 'T'
+ ETWO 'R', 'A'
+ EQUB VE
+
+ ECHR 'H'               \ Token 250:    "HOCKEY"
+ ECHR 'O'               \
+ ECHR 'C'               \ Encoded as:   "HOCKEY"
+ ECHR 'K'
+ ECHR 'E'
+ ECHR 'Y'
+ EQUB VE
+
+ ECHR 'C'               \ Token 251:    "CRICKET"
+ ECHR 'R'               \
+ ECHR 'I'               \ Encoded as:   "CRICK<221>"
+ ECHR 'C'
+ ECHR 'K'
+ ETWO 'E', 'T'
+ EQUB VE
+
+ ECHR 'K'               \ Token 252:    "KARATE"
+ ETWO 'A', 'R'          \
+ ETWO 'A', 'T'          \ Encoded as:   "K<238><245>E"
+ ECHR 'E'
+ EQUB VE
+
+ ECHR 'P'               \ Token 253:    "POLO"
+ ECHR 'O'               \
+ ETWO 'L', 'O'          \ Encoded as:   "PO<224>"
+ EQUB VE
+
+ ECHR 'T'               \ Token 254:    "TENNIS"
+ ETWO 'E', 'N'          \
+ ECHR 'N'               \ Encoded as:   "T<246>NIS"
+ ECHR 'I'
+ ECHR 'S'
+ EQUB VE
+
+ EQUB VE                \ Token 255:    ""
+                        \
+                        \ Encoded as:   ""
+
+\ ******************************************************************************
+\
+\       Name: RUPLA
+\       Type: Variable
+\   Category: Text
+\    Summary: System numbers that have extended decription overrides
+\  Deep dive: Extended system descriptions
+\             Extended text tokens
+\
+\ ------------------------------------------------------------------------------
+\
+\ This table contains the extended token numbers to show as the specified
+\ system's extended description, if the criteria in the RUGAL table are met.
+\
+\ The three variables work as follows:
+\
+\   * The RUPLA table contains the system numbers
+\
+\   * The RUGAL table contains the galaxy numbers and mission criteria
+\
+\   * The RUTOK table contains the extended token to display instead of the
+\     normal extended description if the criteria in RUPLA and RUGAL are met
+\
+\ See the PDESC routine for details of how extended system descriptions work.
+\
+\ ******************************************************************************
 
 .RUPLA
 
- EQUB &D3, &96, &24, &1C, &FD, &4F, &35, &76, &64, &20, &44, &A4
- EQUB &DC, &6A, &10, &A2, &03, &6B, &1A, &C0, &B8, &05, &65, &C1
+ EQUB 211                \ System 211, Galaxy 0                Teorge = Token  1
+ EQUB 150                \ System 150, Galaxy 0, Mission 1       Xeer = Token  2
+ EQUB 36                 \ System  36, Galaxy 0, Mission 1   Reesdice = Token  3
+ EQUB 28                 \ System  28, Galaxy 0, Mission 1      Arexe = Token  4
+ EQUB 253                \ System 253, Galaxy 1, Mission 1     Errius = Token  5
+ EQUB 79                 \ System  79, Galaxy 1, Mission 1     Inbibe = Token  6
+ EQUB 53                 \ System  53, Galaxy 1, Mission 1      Ausar = Token  7
+ EQUB 118                \ System 118, Galaxy 1, Mission 1     Usleri = Token  8
+ EQUB 100                \ System 100, Galaxy 2                Arredi = Token  9
+ EQUB 32                 \ System  32, Galaxy 1, Mission 1     Bebege = Token 10
+ EQUB 68                 \ System  68, Galaxy 1, Mission 1     Cearso = Token 11
+ EQUB 164                \ System 164, Galaxy 1, Mission 1     Dicela = Token 12
+ EQUB 220                \ System 220, Galaxy 1, Mission 1     Eringe = Token 13
+ EQUB 106                \ System 106, Galaxy 1, Mission 1     Gexein = Token 14
+ EQUB 16                 \ System  16, Galaxy 1, Mission 1     Isarin = Token 15
+ EQUB 162                \ System 162, Galaxy 1, Mission 1   Letibema = Token 16
+ EQUB 3                  \ System   3, Galaxy 1, Mission 1     Maisso = Token 17
+ EQUB 107                \ System 107, Galaxy 1, Mission 1       Onen = Token 18
+ EQUB 26                 \ System  26, Galaxy 1, Mission 1     Ramaza = Token 19
+ EQUB 192                \ System 192, Galaxy 1, Mission 1     Sosole = Token 20
+ EQUB 184                \ System 184, Galaxy 1, Mission 1     Tivere = Token 21
+ EQUB 5                  \ System   5, Galaxy 1, Mission 1     Veriar = Token 22
+ EQUB 101                \ System 101, Galaxy 2, Mission 1     Xeveon = Token 23
+ EQUB 193                \ System 193, Galaxy 1, Mission 1     Orarra = Token 24
+ EQUB 41                 \ System  41, Galaxy 2                Anreer = Token 25
 
- EQUB &29
+\ ******************************************************************************
+\
+\       Name: RUGAL
+\       Type: Variable
+\   Category: Text
+\    Summary: The criteria for systems with extended decription overrides
+\  Deep dive: Extended system descriptions
+\             Extended text tokens
+\
+\ ------------------------------------------------------------------------------
+\
+\ This table contains the criteria for printing an extended decription override
+\ for a system. The galaxy number is in bits 0-6, while bit 7 determines whether
+\ to show this token during mission 1 only (bit 7 is clear, i.e. a value of &0x
+\ in the table below), or all of the time (bit 7 is set, i.e. a value of &8x in
+\ the table below).
+\
+\ In other words, Teorge, Arredi, Anreer and Lave have extended decription
+\ overrides descriptions that are always shown, while the rest only appear when
+\ mission 1 is in progress.
+\
+\ The three variables work as follows:
+\
+\   * The RUPLA table contains the system numbers
+\
+\   * The RUGAL table contains the galaxy numbers and mission criteria
+\
+\   * The RUTOK table contains the extended token to display instead of the
+\     normal extended description if the criteria in RUPLA and RUGAL are met
+\
+\ See the PDESC routine for details of how extended system descriptions work.
+\
+\ ******************************************************************************
 
 .RUGAL
 
- EQUB &80, &00, &00, &00, &01, &01, &01, &01, &82, &01, &01
- EQUB &01, &01, &01, &01, &01, &01, &01, &01, &01, &01, &01, &02
- EQUB &01, &82
+ EQUB &80                \ System 211, Galaxy 0                Teorge = Token  1
+ EQUB &00                \ System 150, Galaxy 0, Mission 1       Xeer = Token  2
+ EQUB &00                \ System  36, Galaxy 0, Mission 1   Reesdice = Token  3
+ EQUB &00                \ System  28, Galaxy 0, Mission 1      Arexe = Token  4
+ EQUB &01                \ System 253, Galaxy 1, Mission 1     Errius = Token  5
+ EQUB &01                \ System  79, Galaxy 1, Mission 1     Inbibe = Token  6
+ EQUB &01                \ System  53, Galaxy 1, Mission 1      Ausar = Token  7
+ EQUB &01                \ System 118, Galaxy 1, Mission 1     Usleri = Token  8
+ EQUB &82                \ System 100, Galaxy 2                Arredi = Token  9
+ EQUB &01                \ System  32, Galaxy 1, Mission 1     Bebege = Token 10
+ EQUB &01                \ System  68, Galaxy 1, Mission 1     Cearso = Token 11
+ EQUB &01                \ System 164, Galaxy 1, Mission 1     Dicela = Token 12
+ EQUB &01                \ System 220, Galaxy 1, Mission 1     Eringe = Token 13
+ EQUB &01                \ System 106, Galaxy 1, Mission 1     Gexein = Token 14
+ EQUB &01                \ System  16, Galaxy 1, Mission 1     Isarin = Token 15
+ EQUB &01                \ System 162, Galaxy 1, Mission 1   Letibema = Token 16
+ EQUB &01                \ System   3, Galaxy 1, Mission 1     Maisso = Token 17
+ EQUB &01                \ System 107, Galaxy 1, Mission 1       Onen = Token 18
+ EQUB &01                \ System  26, Galaxy 1, Mission 1     Ramaza = Token 19
+ EQUB &01                \ System 192, Galaxy 1, Mission 1     Sosole = Token 20
+ EQUB &01                \ System 184, Galaxy 1, Mission 1     Tivere = Token 21
+ EQUB &01                \ System   5, Galaxy 1, Mission 1     Veriar = Token 22
+ EQUB &02                \ System 101, Galaxy 2, Mission 1     Xeveon = Token 23
+ EQUB &01                \ System 193, Galaxy 1, Mission 1     Orarra = Token 24
+ EQUB &82                \ System  41, Galaxy 2                Anreer = Token 25
+
+\ ******************************************************************************
+\
+\       Name: RUTOK
+\       Type: Variable
+\   Category: Text
+\    Summary: The second extended token table for recursive tokens 0-26 (DETOK3)
+\  Deep dive: Extended system descriptions
+\             Extended text tokens
+\
+\ ------------------------------------------------------------------------------
+\
+\ Contains the tokens for extended description overrides of systems that match
+\ the system number in RUPLA and the conditions in RUGAL.
+\
+\ The three variables work as follows:
+\
+\   * The RUPLA table contains the system numbers
+\
+\   * The RUGAL table contains the galaxy numbers and mission criteria
+\
+\   * The RUTOK table contains the extended token to display instead of the
+\     normal extended description if the criteria in RUPLA and RUGAL are met
+\
+\ See the PDESC routine for details of how extended system descriptions work.
+\
+\ ******************************************************************************
 
 .RUTOK
 
- EQUB &00
- EQUS &93, "CO", &E0, "NI", &DE, "S HE", &F2, " HA", &FA, " VIOL", &F5, &FC, &02, " ", &F0, "T", &F4, "G", &E4
- EQUS "AC", &FB, "C C", &E0, "N", &C3, "PROTOCOL", &0D, &B2, "SH", &D9, "LD ", &F7, " AVOID", &FC
- EQUB &00
- EQUS &93, "C", &DF, &DE, "RICT", &FD, " ", &CB, &F2, &ED, &F1, &E9, ", ", &9A
- EQUB &00
- EQUS "A r ", &E0, "OK", &C3, &CF, " ", &E5, "FT HE", &F2, &D0, "WHI", &E5, " BACK. ", &E0, "OK", &C4, "B", &D9
- EQUS "ND F", &FD, " ", &EE, "E", &E6
- EQUB &00
- EQUS "YEP,", &D0, "r", &D2, &CF, " HAD", &D0, "G", &E4, "AC", &FB, "C HYP", &F4, "DRI", &FA, " F", &DB, "T", &C4
- EQUS "HE", &F2, ". ", &EC, &C4, &DB, " TOO"
- EQUB &00
- EQUS &94, " r ", &CF, " DEHYP", &C4, "HE", &F2, " FROM ", &E3, "WHE", &F2, ", SUN SKIMM", &FC
- EQUS &B2, "JUMP", &FC, ". I HE", &EE, " ", &DB, " W", &F6, "T", &C9, &F0, &EA, &F7
- EQUB &00
- EQUS "s ", &CF, " W", &F6, "T F", &FD, " ME ", &F5, " A", &EC, &EE, ". MY ", &F9, "S", &F4, "S ", &F1, "DN'T E"
- EQUS "V", &F6, " SC", &F8, "TCH ", &93, "s"
- EQUB &00
- EQUS "OH DE", &EE, " ME Y", &ED, ".", &D0, "FRIGHTFUL ROGUE WI", &E2, " WH", &F5, " I ", &F7
- EQUS "LIE", &FA, " ", &B3, " PEOP", &E5, " C", &E4, "L", &D0, &E5, "AD PO", &DE, &F4, "I", &FD, " SHOT UP"
- EQUS " ", &E0, "TS OF ", &E2, "O", &DA, " ", &F7, "A", &DE, "LY PI", &F8, "T", &ED, &B2, "W", &F6, "T", &C9, &EC, &E5
- EQUS "RI"
- EQUB &00
- EQUS &B3, " C", &FF, " TACK", &E5, " ", &93, "h s IF ", &B3, " LIKE. HE'S ", &F5, " ", &FD, &EE
- EQUS &F8
- EQUB &00
- EQUS &01, "COM", &C3, &EB, &DF, ": EL", &DB, "E III"
- EQUB &00
- EQUS "t"
- EQUB &00
- EQUS "t"
- EQUB &00
- EQUS "t"
- EQUB &00
- EQUS "t"
- EQUB &00
- EQUS "t"
- EQUB &00
- EQUS "t"
- EQUB &00
- EQUS "t"
- EQUB &00
- EQUS "t"
- EQUB &00
- EQUS "t"
- EQUB &00
- EQUS "t"
- EQUB &00
- EQUS "t"
- EQUB &00
- EQUS "t"
- EQUB &00
- EQUS "t"
- EQUB &00
- EQUS "BOY A", &F2, " ", &B3, " ", &F0, " ", &93, "WR", &DF, "G G", &E4, "AXY!"
- EQUB &00
- EQUS &E2, &F4, "E'S", &D0, &F2, &E4, " s PI", &F8, "TE ", &D9, "T ", &E2, &F4, "E"
- EQUB &00
- EQUS &93, &C1, "S OF m A", &F2, " ", &EB, " A", &EF, "Z", &F0, "GLY PRIMI", &FB, &FA, " ", &E2, &F5
- EQUS " ", &E2, "EY ", &DE, &DC, "L ", &E2, &F0, "K ", &13, "EL", &DB, "E", &CA, "A P", &F2, "TTY NE", &F5, " GAME"
- EQUB &00
+ EQUB VE                \ Token 0:      ""
+                        \
+                        \ Encoded as:   ""
+
+ ETOK 147               \ Token 1:      "THE COLONISTS HERE HAVE VIOLATED
+ ECHR 'C'               \                {sentence case} INTERGALACTIC CLONING
+ ECHR 'O'               \                PROTOCOL{lower case} AND SHOULD BE
+ ETWO 'L', 'O'          \                AVOIDED"
+ ECHR 'N'               \
+ ECHR 'I'               \ Encoded as:   "[147]CO<224>NI<222>S HE<242> HA<250>
+ ETWO 'S', 'T'          \                 VIOL<245><252>{2} <240>T<244>G<228>AC
+ ECHR 'S'               \                <251>C C<224>N[195]PROTOCOL{13}[178]SH
+ ECHR ' '               \                <217>LD <247> AVOID<252>"
+ ECHR 'H'
+ ECHR 'E'
+ ETWO 'R', 'E'
+ ECHR ' '
+ ECHR 'H'
+ ECHR 'A'
+ ETWO 'V', 'E'
+ ECHR ' '
+ ECHR 'V'
+ ECHR 'I'
+ ECHR 'O'
+ ECHR 'L'
+ ETWO 'A', 'T'
+ ETWO 'E', 'D'
+ EJMP 2
+ ECHR ' '
+ ETWO 'I', 'N'
+ ECHR 'T'
+ ETWO 'E', 'R'
+ ECHR 'G'
+ ETWO 'A', 'L'
+ ECHR 'A'
+ ECHR 'C'
+ ETWO 'T', 'I'
+ ECHR 'C'
+ ECHR ' '
+ ECHR 'C'
+ ETWO 'L', 'O'
+ ECHR 'N'
+ ETOK 195
+ ECHR 'P'
+ ECHR 'R'
+ ECHR 'O'
+ ECHR 'T'
+ ECHR 'O'
+ ECHR 'C'
+ ECHR 'O'
+ ECHR 'L'
+ EJMP 13
+ ETOK 178
+ ECHR 'S'
+ ECHR 'H'
+ ETWO 'O', 'U'
+ ECHR 'L'
+ ECHR 'D'
+ ECHR ' '
+ ETWO 'B', 'E'
+ ECHR ' '
+ ECHR 'A'
+ ECHR 'V'
+ ECHR 'O'
+ ECHR 'I'
+ ECHR 'D'
+ ETWO 'E', 'D'
+ EQUB VE
+
+ ETOK 147               \ Token 2:      "THE CONSTRICTOR WAS LAST SEEN AT
+ ECHR 'C'               \                {single cap}REESDICE, {single cap}
+ ETWO 'O', 'N'          \                COMMANDER"
+ ETWO 'S', 'T'          \
+ ECHR 'R'               \ Encoded as:   "[147]C<223><222>RICT<253> [203]<242>
+ ECHR 'I'               \                <237><241><233>, [154]"
+ ECHR 'C'
+ ECHR 'T'
+ ETWO 'O', 'R'
+ ECHR ' '
+ ETOK 203
+ ETWO 'R', 'E'
+ ETWO 'E', 'S'
+ ETWO 'D', 'I'
+ ETWO 'C', 'E'
+ ECHR ','
+ ECHR ' '
+ ETOK 154
+ EQUB VE
+
+ ECHR 'A'               \ Token 3:      "A [130-134] LOOKING SHIP LEFT HERE A
+ ECHR ' '               \                WHILE BACK. LOOKED BOUND FOR AREXE"
+ ERND 23                \
+ ECHR ' '               \ Encoded as:   "A [23?] <224>OK[195][207] <229>FT HE
+ ETWO 'L', 'O'          \                <242>[208]WHI<229> BACK. <224>OK[196]B
+ ECHR 'O'               \                <217>ND F<253> <238>E<230>"
+ ECHR 'K'
+ ETOK 195
+ ETOK 207
+ ECHR ' '
+ ETWO 'L', 'E'
+ ECHR 'F'
+ ECHR 'T'
+ ECHR ' '
+ ECHR 'H'
+ ECHR 'E'
+ ETWO 'R', 'E'
+ ETOK 208
+ ECHR 'W'
+ ECHR 'H'
+ ECHR 'I'
+ ETWO 'L', 'E'
+ ECHR ' '
+ ECHR 'B'
+ ECHR 'A'
+ ECHR 'C'
+ ECHR 'K'
+ ECHR '.'
+ ECHR ' '
+ ETWO 'L', 'O'
+ ECHR 'O'
+ ECHR 'K'
+ ETOK 196
+ ECHR 'B'
+ ETWO 'O', 'U'
+ ECHR 'N'
+ ECHR 'D'
+ ECHR ' '
+ ECHR 'F'
+ ETWO 'O', 'R'
+ ECHR ' '
+ ETWO 'A', 'R'
+ ECHR 'E'
+ ETWO 'X', 'E'
+ EQUB VE
+
+ ECHR 'Y'               \ Token 4:      "YEP, A [130-134] NEW SHIP HAD A
+ ECHR 'E'               \                GALACTIC HYPERDRIVE FITTED HERE. USED
+ ECHR 'P'               \                IT TOO"
+ ECHR ','               \
+ ETOK 208               \ Encoded as:   "YEP,[208][23?][210][207] HAD[208]G
+ ERND 23                \                <228>AC<251>C HYP<244>DRI<250> F<219>
+ ETOK 210               \                T[196]HE<242>. <236>[196]<219> TOO"
+ ETOK 207
+ ECHR ' '
+ ECHR 'H'
+ ECHR 'A'
+ ECHR 'D'
+ ETOK 208
+ ECHR 'G'
+ ETWO 'A', 'L'
+ ECHR 'A'
+ ECHR 'C'
+ ETWO 'T', 'I'
+ ECHR 'C'
+ ECHR ' '
+ ECHR 'H'
+ ECHR 'Y'
+ ECHR 'P'
+ ETWO 'E', 'R'
+ ECHR 'D'
+ ECHR 'R'
+ ECHR 'I'
+ ETWO 'V', 'E'
+ ECHR ' '
+ ECHR 'F'
+ ETWO 'I', 'T'
+ ECHR 'T'
+ ETOK 196
+ ECHR 'H'
+ ECHR 'E'
+ ETWO 'R', 'E'
+ ECHR '.'
+ ECHR ' '
+ ETWO 'U', 'S'
+ ETOK 196
+ ETWO 'I', 'T'
+ ECHR ' '
+ ECHR 'T'
+ ECHR 'O'
+ ECHR 'O'
+ EQUB VE
+
+ ETOK 148               \ Token 5:      "THIS  [130-134] SHIP DEHYPED HERE FROM
+ ECHR ' '               \                NOWHERE, SUN SKIMMED AND JUMPED. I HEAR
+ ERND 23                \                IT WENT TO INBIBE"
+ ECHR ' '               \
+ ETOK 207               \ Encoded as:   "[148] [23?] [207] DEHYP[196]HE<242> FRO
+ ECHR ' '               \                M <227>WHE<242>, SUN SKIMM<252>[178]JUM
+ ECHR 'D'               \                P<252>. I HE<238> <219> W<246>T[201]
+ ECHR 'E'               \                <240><234><247>"
+ ECHR 'H'
+ ECHR 'Y'
+ ECHR 'P'
+ ETOK 196
+ ECHR 'H'
+ ECHR 'E'
+ ETWO 'R', 'E'
+ ECHR ' '
+ ECHR 'F'
+ ECHR 'R'
+ ECHR 'O'
+ ECHR 'M'
+ ECHR ' '
+ ETWO 'N', 'O'
+ ECHR 'W'
+ ECHR 'H'
+ ECHR 'E'
+ ETWO 'R', 'E'
+ ECHR ','
+ ECHR ' '
+ ECHR 'S'
+ ECHR 'U'
+ ECHR 'N'
+ ECHR ' '
+ ECHR 'S'
+ ECHR 'K'
+ ECHR 'I'
+ ECHR 'M'
+ ECHR 'M'
+ ETWO 'E', 'D'
+ ETOK 178
+ ECHR 'J'
+ ECHR 'U'
+ ECHR 'M'
+ ECHR 'P'
+ ETWO 'E', 'D'
+ ECHR '.'
+ ECHR ' '
+ ECHR 'I'
+ ECHR ' '
+ ECHR 'H'
+ ECHR 'E'
+ ETWO 'A', 'R'
+ ECHR ' '
+ ETWO 'I', 'T'
+ ECHR ' '
+ ECHR 'W'
+ ETWO 'E', 'N'
+ ECHR 'T'
+ ETOK 201
+ ETWO 'I', 'N'
+ ETWO 'B', 'I'
+ ETWO 'B', 'E'
+ EQUB VE
+
+ ERND 24                \ Token 6:      "[91-95] SHIP WENT FOR ME AT AUSAR. MY
+ ECHR ' '               \                LASERS DIDN'T EVEN SCRATCH THE [91-95]"
+ ETOK 207               \
+ ECHR ' '               \ Encoded as:   "[24?] [207] W<246>T F<253> ME <245>
+ ECHR 'W'               \                 A<236><238>. MY <249>S<244>S <241>DN
+ ETWO 'E', 'N'          \                 [39]TEV<246> SC<248>TCH [147][24?]"
+ ECHR 'T'
+ ECHR ' '
+ ECHR 'F'
+ ETWO 'O', 'R'
+ ECHR ' '
+ ECHR 'M'
+ ECHR 'E'
+ ECHR ' '
+ ETWO 'A', 'T'
+ ECHR ' '
+ ECHR 'A'
+ ETWO 'U', 'S'
+ ETWO 'A', 'R'
+ ECHR '.'
+ ECHR ' '
+ ECHR 'M'
+ ECHR 'Y'
+ ECHR ' '
+ ETWO 'L', 'A'
+ ECHR 'S'
+ ETWO 'E', 'R'
+ ECHR 'S'
+ ECHR ' '
+ ETWO 'D', 'I'
+ ECHR 'D'
+ ECHR 'N'
+ ECHR '`'
+ ECHR 'T'
+ ECHR ' '
+ ECHR 'E'
+ ECHR 'V'
+ ETWO 'E', 'N'
+ ECHR ' '
+ ECHR 'S'
+ ECHR 'C'
+ ETWO 'R', 'A'
+ ECHR 'T'
+ ECHR 'C'
+ ECHR 'H'
+ ECHR ' '
+ ETOK 147
+ ERND 24
+ EQUB VE
+
+ ECHR 'O'               \ Token 7:      "OH DEAR ME YES. A FRIGHTFUL ROGUE WITH
+ ECHR 'H'               \                WHAT I BELIEVE YOU PEOPLE CALL A LEAD
+ ECHR ' '               \                POSTERIOR SHOT UP LOTS OF THOSE BEASTLY
+ ECHR 'D'               \                PIRATES AND WENT TO USLERI"
+ ECHR 'E'               \
+ ETWO 'A', 'R'          \ Encoded as:   "OH DE<238> ME Y<237>.[208]FRIGHTFUL ROG
+ ECHR ' '               \                UE WI<226> WH<245> I <247>LIE<250>
+ ECHR 'M'               \                 [179] PEOP<229> C<228>L[208]<229>AD PO
+ ECHR 'E'               \                <222><244>I<253> SHOT UP <224>TS OF
+ ECHR ' '               \                 <226>O<218> <247>A<222>LY PI<248>T
+ ECHR 'Y'               \                <237>[178]W<246>T[201]<236><229>RI"
+ ETWO 'E', 'S'
+ ECHR '.'
+ ETOK 208
+ ECHR 'F'
+ ECHR 'R'
+ ECHR 'I'
+ ECHR 'G'
+ ECHR 'H'
+ ECHR 'T'
+ ECHR 'F'
+ ECHR 'U'
+ ECHR 'L'
+ ECHR ' '
+ ECHR 'R'
+ ECHR 'O'
+ ECHR 'G'
+ ECHR 'U'
+ ECHR 'E'
+ ECHR ' '
+ ECHR 'W'
+ ECHR 'I'
+ ETWO 'T', 'H'
+ ECHR ' '
+ ECHR 'W'
+ ECHR 'H'
+ ETWO 'A', 'T'
+ ECHR ' '
+ ECHR 'I'
+ ECHR ' '
+ ETWO 'B', 'E'
+ ECHR 'L'
+ ECHR 'I'
+ ECHR 'E'
+ ETWO 'V', 'E'
+ ECHR ' '
+ ETOK 179
+ ECHR ' '
+ ECHR 'P'
+ ECHR 'E'
+ ECHR 'O'
+ ECHR 'P'
+ ETWO 'L', 'E'
+ ECHR ' '
+ ECHR 'C'
+ ETWO 'A', 'L'
+ ECHR 'L'
+ ETOK 208
+ ETWO 'L', 'E'
+ ECHR 'A'
+ ECHR 'D'
+ ECHR ' '
+ ECHR 'P'
+ ECHR 'O'
+ ETWO 'S', 'T'
+ ETWO 'E', 'R'
+ ECHR 'I'
+ ETWO 'O', 'R'
+ ECHR ' '
+ ECHR 'S'
+ ECHR 'H'
+ ECHR 'O'
+ ECHR 'T'
+ ECHR ' '
+ ECHR 'U'
+ ECHR 'P'
+ ECHR ' '
+ ETWO 'L', 'O'
+ ECHR 'T'
+ ECHR 'S'
+ ECHR ' '
+ ECHR 'O'
+ ECHR 'F'
+ ECHR ' '
+ ETWO 'T', 'H'
+ ECHR 'O'
+ ETWO 'S', 'E'
+ ECHR ' '
+ ETWO 'B', 'E'
+ ECHR 'A'
+ ETWO 'S', 'T'
+ ECHR 'L'
+ ECHR 'Y'
+ ECHR ' '
+ ECHR 'P'
+ ECHR 'I'
+ ETWO 'R', 'A'
+ ECHR 'T'
+ ETWO 'E', 'S'
+ ETOK 178
+ ECHR 'W'
+ ETWO 'E', 'N'
+ ECHR 'T'
+ ETOK 201
+ ETWO 'U', 'S'
+ ETWO 'L', 'E'
+ ECHR 'R'
+ ECHR 'I'
+ EQUB VE
+
+ ETOK 179               \ Token 8:      "YOU CAN TACKLE THE [170-174] [91-95]
+ ECHR ' '               \                IF YOU LIKE. HE'S AT ORARRA"
+ ECHR 'C'               \
+ ETWO 'A', 'N'          \ Encoded as:   "[179] C<255> TACK<229> [147][13?] [24?]
+ ECHR ' '               \                 IF [179] LIKE. HE[39]S <245> <253>
+ ECHR 'T'               \                <238><248>"
+ ECHR 'A'
+ ECHR 'C'
+ ECHR 'K'
+ ETWO 'L', 'E'
+ ECHR ' '
+ ETOK 147
+ ERND 13
+ ECHR ' '
+ ERND 24
+ ECHR ' '
+ ECHR 'I'
+ ECHR 'F'
+ ECHR ' '
+ ETOK 179
+ ECHR ' '
+ ECHR 'L'
+ ECHR 'I'
+ ECHR 'K'
+ ECHR 'E'
+ ECHR '.'
+ ECHR ' '
+ ECHR 'H'
+ ECHR 'E'
+ ECHR '`'
+ ECHR 'S'
+ ECHR ' '
+ ETWO 'A', 'T'
+ ECHR ' '
+ ETWO 'O', 'R'
+ ETWO 'A', 'R'
+ ETWO 'R', 'A'
+ EQUB VE
+
+ EJMP 1                 \ Token 9:      "{all caps}COMING SOON: ELITE III"
+ ECHR 'C'               \
+ ECHR 'O'               \ Encoded as:   "{1}COM[195]<235><223>: EL<219>E III"
+ ECHR 'M'
+ ETOK 195
+ ETWO 'S', 'O'
+ ETWO 'O', 'N'
+ ECHR ':'
+ ECHR ' '
+ ECHR 'E'
+ ECHR 'L'
+ ETWO 'I', 'T'
+ ECHR 'E'
+ ECHR ' '
+ ECHR 'I'
+ ECHR 'I'
+ ECHR 'I'
+ EQUB VE
+
+ ERND 25                \ Token 10:     "[106-110]"
+ EQUB VE                \
+                        \ Encoded as:   "[25?]"
+
+ ERND 25                \ Token 11:     "[106-110]"
+ EQUB VE                \
+                        \ Encoded as:   "[25?]"
+
+ ERND 25                \ Token 12:     "[106-110]"
+ EQUB VE                \
+                        \ Encoded as:   "[25?]"
+
+ ERND 25                \ Token 13:     "[106-110]"
+ EQUB VE                \
+                        \ Encoded as:   "[25?]"
+
+ ERND 25                \ Token 14:     "[106-110]"
+ EQUB VE                \
+                        \ Encoded as:   "[25?]"
+
+ ERND 25                \ Token 15:     "[106-110]"
+ EQUB VE                \
+                        \ Encoded as:   "[25?]"
+
+ ERND 25                \ Token 16:     "[106-110]"
+ EQUB VE                \
+                        \ Encoded as:   "[25?]"
+
+ ERND 25                \ Token 17:     "[106-110]"
+ EQUB VE                \
+                        \ Encoded as:   "[25?]"
+
+ ERND 25                \ Token 18:     "[106-110]"
+ EQUB VE                \
+                        \ Encoded as:   "[25?]"
+
+ ERND 25                \ Token 19:     "[106-110]"
+ EQUB VE                \
+                        \ Encoded as:   "[25?]"
+
+ ERND 25                \ Token 20:     "[106-110]"
+ EQUB VE                \
+                        \ Encoded as:   "[25?]"
+
+ ERND 25                \ Token 21:     "[106-110]"
+ EQUB VE                \
+                        \ Encoded as:   "[25?]"
+
+ ERND 25                \ Token 22:     "[106-110]"
+ EQUB VE                \
+                        \ Encoded as:   "[25?]"
+
+ ECHR 'B'               \ Token 23:     "BOY ARE YOU IN THE WRONG GALAXY!"
+ ECHR 'O'               \
+ ECHR 'Y'               \ Encoded as:   "BOY A<242> [179] <240> [147]WR<223>G G
+ ECHR ' '               \                <228>AXY!"
+ ECHR 'A'
+ ETWO 'R', 'E'
+ ECHR ' '
+ ETOK 179
+ ECHR ' '
+ ETWO 'I', 'N'
+ ECHR ' '
+ ETOK 147
+ ECHR 'W'
+ ECHR 'R'
+ ETWO 'O', 'N'
+ ECHR 'G'
+ ECHR ' '
+ ECHR 'G'
+ ETWO 'A', 'L'
+ ECHR 'A'
+ ECHR 'X'
+ ECHR 'Y'
+ ECHR '!'
+ EQUB VE
+
+ ETWO 'T', 'H'          \ Token 24:     "THERE'S A REAL [91-95] PIRATE OUT
+ ETWO 'E', 'R'          \                THERE"
+ ECHR 'E'               \
+ ECHR '`'               \ Encoded as:   "<226><244>E[39]S[208]<242><228> [24?] P
+ ECHR 'S'               \                I<248>TE <217>T <226><244>E"
+ ETOK 208
+ ETWO 'R', 'E'
+ ETWO 'A', 'L'
+ ECHR ' '
+ ERND 24
+ ECHR ' '
+ ECHR 'P'
+ ECHR 'I'
+ ETWO 'R', 'A'
+ ECHR 'T'
+ ECHR 'E'
+ ECHR ' '
+ ETWO 'O', 'U'
+ ECHR 'T'
+ ECHR ' '
+ ETWO 'T', 'H'
+ ETWO 'E', 'R'
+ ECHR 'E'
+ EQUB VE
+
+ ETOK 147               \ Token 25:     "THE INHABITANTS OF [86-90] ARE SO
+ ETOK 193               \                AMAZINGLY PRIMITIVE THAT THEY STILL
+ ECHR 'S'               \                THINK {single cap}ELITE IS A PRETTY
+ ECHR ' '               \                NEAT GAME"
+ ECHR 'O'               \
+ ECHR 'F'               \ Encoded as:   "[147][193]S OF [18?] A<242> <235> A
+ ECHR ' '               \                <239>Z<240>GLY PRIMI<251><250> <226>
+ ERND 18                \                <245> <226>EY <222><220>L <226><240>K
+ ECHR ' '               \                 {19}EL<219>E[202]A P<242>TTY NE<245>
+ ECHR 'A'               \                 GAME"
+ ETWO 'R', 'E'
+ ECHR ' '
+ ETWO 'S', 'O'
+ ECHR ' '
+ ECHR 'A'
+ ETWO 'M', 'A'
+ ECHR 'Z'
+ ETWO 'I', 'N'
+ ECHR 'G'
+ ECHR 'L'
+ ECHR 'Y'
+ ECHR ' '
+ ECHR 'P'
+ ECHR 'R'
+ ECHR 'I'
+ ECHR 'M'
+ ECHR 'I'
+ ETWO 'T', 'I'
+ ETWO 'V', 'E'
+ ECHR ' '
+ ETWO 'T', 'H'
+ ETWO 'A', 'T'
+ ECHR ' '
+ ETWO 'T', 'H'
+ ECHR 'E'
+ ECHR 'Y'
+ ECHR ' '
+ ETWO 'S', 'T'
+ ETWO 'I', 'L'
+ ECHR 'L'
+ ECHR ' '
+ ETWO 'T', 'H'
+ ETWO 'I', 'N'
+ ECHR 'K'
+ ECHR ' '
+ EJMP 19
+ ECHR 'E'
+ ECHR 'L'
+ ETWO 'I', 'T'
+ ECHR 'E'
+ ETOK 202
+ ECHR 'A'
+ ECHR ' '
+ ECHR 'P'
+ ETWO 'R', 'E'
+ ECHR 'T'
+ ECHR 'T'
+ ECHR 'Y'
+ ECHR ' '
+ ECHR 'N'
+ ECHR 'E'
+ ETWO 'A', 'T'
+ ECHR ' '
+ ECHR 'G'
+ ECHR 'A'
+ ECHR 'M'
+ ECHR 'E'
+ EQUB VE
+
+\ ******************************************************************************
+\
+\       Name: MTIN
+\       Type: Variable
+\   Category: Text
+\    Summary: Lookup table for random tokens in the extended token table (0-37)
+\  Deep dive: Extended text tokens
+\
+\ ------------------------------------------------------------------------------
+\
+\ The ERND token type, which is part of the extended token system, takes an
+\ argument between 0 and 37, and returns a randomly chosen token in the range
+\ specified in this table. This is used to generate the extended description of
+\ each system.
+\
+\ For example, the entry at position 13 in this table (counting from 0) is 66,
+\ so ERND 14 will expand into a random token in the range 66-70, i.e. one of
+\ "JUICE", "BRANDY", "WATER", "BREW" and "GARGLE BLASTERS".
+\
+\ ******************************************************************************
 
 .MTIN
 
- EQUB &10, &15, &1A, &1F, &9B, &A0, &2E, &A5, &24, &29, &3D, &33
- EQUB &38, &AA, &42, &47, &4C, &51, &56, &8C, &60, &65, &87, &82
- EQUB &5B, &6A, &B4, &B9, &BE, &E1, &E6, &EB, &F0, &F5, &FA, &73
- EQUB &78, &7D
+ EQUB 16                \ Token  0: a random extended token between 16 and 20
+ EQUB 21                \ Token  1: a random extended token between 21 and 25
+ EQUB 26                \ Token  2: a random extended token between 26 and 30
+ EQUB 31                \ Token  3: a random extended token between 31 and 35
+ EQUB 155               \ Token  4: a random extended token between 155 and 159
+ EQUB 160               \ Token  5: a random extended token between 160 and 164
+ EQUB 46                \ Token  6: a random extended token between 46 and 50
+ EQUB 165               \ Token  7: a random extended token between 165 and 169
+ EQUB 36                \ Token  8: a random extended token between 36 and 40
+ EQUB 41                \ Token  9: a random extended token between 41 and 45
+ EQUB 61                \ Token 10: a random extended token between 61 and 65
+ EQUB 51                \ Token 11: a random extended token between 51 and 55
+ EQUB 56                \ Token 12: a random extended token between 56 and 60
+ EQUB 170               \ Token 13: a random extended token between 170 and 174
+ EQUB 66                \ Token 14: a random extended token between 66 and 70
+ EQUB 71                \ Token 15: a random extended token between 71 and 75
+ EQUB 76                \ Token 16: a random extended token between 76 and 80
+ EQUB 81                \ Token 17: a random extended token between 81 and 85
+ EQUB 86                \ Token 18: a random extended token between 86 and 90
+ EQUB 140               \ Token 19: a random extended token between 140 and 144
+ EQUB 96                \ Token 20: a random extended token between 96 and 100
+ EQUB 101               \ Token 21: a random extended token between 101 and 105
+ EQUB 135               \ Token 22: a random extended token between 135 and 139
+ EQUB 130               \ Token 23: a random extended token between 130 and 134
+ EQUB 91                \ Token 24: a random extended token between 91 and 95
+ EQUB 106               \ Token 25: a random extended token between 106 and 110
+ EQUB 180               \ Token 26: a random extended token between 180 and 184
+ EQUB 185               \ Token 27: a random extended token between 185 and 189
+ EQUB 190               \ Token 28: a random extended token between 190 and 194
+ EQUB 225               \ Token 29: a random extended token between 225 and 229
+ EQUB 230               \ Token 30: a random extended token between 230 and 234
+ EQUB 235               \ Token 31: a random extended token between 235 and 239
+ EQUB 240               \ Token 32: a random extended token between 240 and 244
+ EQUB 245               \ Token 33: a random extended token between 245 and 249
+ EQUB 250               \ Token 34: a random extended token between 250 and 254
+ EQUB 115               \ Token 35: a random extended token between 115 and 119
+ EQUB 120               \ Token 36: a random extended token between 120 and 124
+ EQUB 125               \ Token 37: a random extended token between 125 and 129
 
-IF _RELEASED
- INCBIN "extracted/released/workspaces/1.D.bin"
-ELIF _SOURCE_DISC
- INCBIN "extracted/source-disc/workspaces/1.D.bin"
-ENDIF
+ EQUB &56, &05          \ These bytes appear to be unused
+ EQUB &EA, &32
+ EQUB &00, &00
+ EQUB &06, &4C
+ EQUB &5F, &33
+ EQUB &36, &43
+ EQUB &35, &56
+ EQUB &57
 
 \ ******************************************************************************
 \
-\ Save output/ELTI.bin
+\ Save output/ELTH.bin
 \
 \ ******************************************************************************
 
-PRINT "ELITE I"
-PRINT "Assembled at ", ~CODE_I%
+PRINT "ELITE H"
+PRINT "Assembled at ", ~CODE_H%
 PRINT "Ends at ", ~P%
-PRINT "Code size is ", ~(P% - CODE_I%)
+PRINT "Code size is ", ~(P% - CODE_H%)
 PRINT "Execute at ", ~LOAD%
-PRINT "Reload at ", ~LOAD_I%
+PRINT "Reload at ", ~LOAD_H%
 
-PRINT "S.ELTI ", ~CODE_I%, " ", ~P%, " ", ~LOAD%, " ", ~LOAD_I%
-\SAVE "output/T.ELTI.bin", CODE_I%, P%, LOAD%
+PRINT "S.ELTH ", ~CODE_H%, " ", ~P%, " ", ~LOAD%, " ", ~LOAD_H%
+\SAVE "versions/disc/output/T.ELTH.bin", CODE_H%, P%, LOAD%
 
 \ ******************************************************************************
 \
@@ -26040,18 +29589,1049 @@ PRINT "S.ELTI ", ~CODE_I%, " ", ~P%, " ", ~LOAD%, " ", ~LOAD_I%
 \
 \ ******************************************************************************
 
-ORG &5600
-
 CODE_SHIPS% = P%
 LOAD_SHIPS% = LOAD% + P% - CODE%
 
+\ ******************************************************************************
+\
+\       Name: XX21
+\       Type: Variable
+\   Category: Drawing ships
+\    Summary: Ship blueprints lookup table for the ship hanger
+\  Deep dive: Ship blueprints in the disc version
+\
+\ ******************************************************************************
+
 .XX21
 
-IF _RELEASED
- INCBIN "extracted/released/S.T.bin"
-ELIF _SOURCE_DISC
- INCBIN "extracted/source-disc/S.T.bin"
-ENDIF
+ EQUW SHIP_MISSILE      \ MSL  =  1 = Missile
+ EQUW 0
+ EQUW 0
+ EQUW 0
+ EQUW SHIP_CANISTER     \ OIL  =  5 = Cargo canister
+ EQUW 0
+ EQUW 0
+ EQUW 0
+ EQUW SHIP_SHUTTLE      \ SHU  =  9 = Shuttle
+ EQUW SHIP_TRANSPORTER  \        10 = Transporter
+ EQUW SHIP_COBRA_MK_3   \ CYL  = 11 = Cobra Mk III
+ EQUW SHIP_PYTHON       \        12 = Python
+ EQUW 0
+ EQUW 0
+ EQUW 0
+ EQUW SHIP_VIPER        \ COPS = 16 = Viper
+ EQUW 0
+ EQUW 0
+ EQUW SHIP_KRAIT        \ KRA  = 19 = Krait
+ EQUW 0
+ EQUW 0
+ EQUW 0
+ EQUW 0
+ EQUW 0
+ EQUW 0
+ EQUW 0
+ EQUW 0
+ EQUW 0
+ EQUW 0
+ EQUW 0
+ EQUW SHIP_CONSTRICTOR  \ CON  = 31 = Constrictor
+
+\ ******************************************************************************
+\
+\       Name: E%
+\       Type: Variable
+\   Category: Drawing ships
+\    Summary: Ship blueprints default NEWB flags for the ship hanger
+\  Deep dive: Ship blueprints
+\             Advanced tactics with the NEWB flags
+\
+\ ******************************************************************************
+
+.E%
+
+ EQUB %00000000         \ Missile
+ EQUB 0
+ EQUB 0
+ EQUB 0
+ EQUB %00000000         \ Cargo canister
+ EQUB 0
+ EQUB 0
+ EQUB 0
+ EQUB %00100001         \ Shuttle                               Trader, innocent
+ EQUB %01100001         \ Transporter                      Trader, innocent, cop
+ EQUB %10100000         \ Cobra Mk III                      Innocent, escape pod
+ EQUB %10100000         \ Python                            Innocent, escape pod
+ EQUB 0
+ EQUB 0
+ EQUB 0
+ EQUB %11000010         \ Viper                   Bounty hunter, cop, escape pod
+ EQUB 0
+ EQUB 0
+ EQUB %10001100         \ Krait                      Hostile, pirate, escape pod
+ EQUB 0
+ EQUB 0
+ EQUB 0
+ EQUB 0
+ EQUB 0
+ EQUB 0
+ EQUB 0
+ EQUB 0
+ EQUB 0
+ EQUB 0
+ EQUB 0
+ EQUB %10001100         \ Constrictor                Hostile, pirate, escape pod
+
+\ ******************************************************************************
+\
+\       Name: VERTEX
+\       Type: Macro
+\   Category: Drawing ships
+\    Summary: Macro definition for adding vertices to ship blueprints
+\  Deep dive: Ship blueprints
+\
+\ ------------------------------------------------------------------------------
+\
+\ The following macro is used to build the ship blueprints:
+\
+\   VERTEX x, y, z, face1, face2, face3, face4, visibility
+\
+\ See the deep dive on "Ship blueprints" for details of how vertices are stored
+\ in the ship blueprints, and the deep dive on "Drawing ships" for information
+\ on how vertices are used to draw 3D wiremesh ships.
+\
+\ Arguments:
+\
+\   x                   The vertex's x-coordinate
+\
+\   y                   The vertex's y-coordinate
+\
+\   z                   The vertex's z-coordinate
+\
+\   face1               The number of face 1 associated with this vertex
+\
+\   face2               The number of face 2 associated with this vertex
+\
+\   face3               The number of face 3 associated with this vertex
+\
+\   face4               The number of face 4 associated with this vertex
+\
+\   visibility          The visibility distance, beyond which the vertex is not
+\                       shown
+\
+\ ******************************************************************************
+
+MACRO VERTEX x, y, z, face1, face2, face3, face4, visibility
+
+  IF x < 0
+    s_x = 1 << 7
+  ELSE
+    s_x = 0
+  ENDIF
+
+  IF y < 0
+    s_y = 1 << 6
+  ELSE
+    s_y = 0
+  ENDIF
+
+  IF z < 0
+    s_z = 1 << 5
+  ELSE
+    s_z = 0
+  ENDIF
+
+  s = s_x + s_y + s_z + visibility
+  f1 = face1 + (face2 << 4)
+  f2 = face3 + (face4 << 4)
+  ax = ABS(x)
+  ay = ABS(y)
+  az = ABS(z)
+
+  EQUB ax, ay, az, s, f1, f2
+
+ENDMACRO
+
+\ ******************************************************************************
+\
+\       Name: EDGE
+\       Type: Macro
+\   Category: Drawing ships
+\    Summary: Macro definition for adding edges to ship blueprints
+\  Deep dive: Ship blueprints
+\
+\ ------------------------------------------------------------------------------
+\
+\ The following macro is used to build the ship blueprints:
+\
+\   EDGE vertex1, vertex2, face1, face2, visibility
+\
+\ See the deep dive on "Ship blueprints" for details of how edges are stored
+\ in the ship blueprints, and the deep dive on "Drawing ships" for information
+\ on how edges are used to draw 3D wiremesh ships.
+\
+\ Arguments:
+\
+\   vertex1             The number of the vertex at the start of the edge
+\
+\   vertex1             The number of the vertex at the end of the edge
+\
+\   face1               The number of face 1 associated with this edge
+\
+\   face2               The number of face 2 associated with this edge
+\
+\   visibility          The visibility distance, beyond which the edge is not
+\                       shown
+\
+\ ******************************************************************************
+
+MACRO EDGE vertex1, vertex2, face1, face2, visibility
+
+  f = face1 + (face2 << 4)
+  EQUB visibility, f, vertex1 << 2, vertex2 << 2
+
+ENDMACRO
+
+\ ******************************************************************************
+\
+\       Name: FACE
+\       Type: Macro
+\   Category: Drawing ships
+\    Summary: Macro definition for adding faces to ship blueprints
+\  Deep dive: Ship blueprints
+\
+\ ------------------------------------------------------------------------------
+\
+\ The following macro is used to build the ship blueprints:
+\
+\   FACE normal_x, normal_y, normal_z, visibility
+\
+\ See the deep dive on "Ship blueprints" for details of how faces are stored
+\ in the ship blueprints, and the deep dive on "Drawing ships" for information
+\ on how faces are used to draw 3D wiremesh ships.
+\
+\ Arguments:
+\
+\   normal_x            The face normal's x-coordinate
+\
+\   normal_y            The face normal's y-coordinate
+\
+\   normal_z            The face normal's z-coordinate
+\
+\   visibility          The visibility distance, beyond which the edge is always
+\                       shown
+\
+\ ******************************************************************************
+
+MACRO FACE normal_x, normal_y, normal_z, visibility
+
+  IF normal_x < 0
+    s_x = 1 << 7
+  ELSE
+    s_x = 0
+  ENDIF
+
+  IF normal_y < 0
+    s_y = 1 << 6
+  ELSE
+    s_y = 0
+  ENDIF
+
+  IF normal_z < 0
+    s_z = 1 << 5
+  ELSE
+    s_z = 0
+  ENDIF
+
+  s = s_x + s_y + s_z + visibility
+  ax = ABS(normal_x)
+  ay = ABS(normal_y)
+  az = ABS(normal_z)
+
+  EQUB s, ax, ay, az
+
+ENDMACRO
+
+\ ******************************************************************************
+\
+\       Name: SHIP_CANISTER
+\       Type: Variable
+\   Category: Drawing ships
+\    Summary: Ship blueprint for a cargo canister
+\  Deep dive: Ship blueprints
+\
+\ ******************************************************************************
+
+.SHIP_CANISTER
+
+ EQUB 0                 \ Max. canisters on demise = 0
+ EQUW 20 * 20           \ Targetable area          = 20 * 20
+ EQUB &50               \ Edges data offset (low)  = &0050
+ EQUB &8C               \ Faces data offset (low)  = &008C
+ EQUB 49                \ Max. edge count          = (49 - 1) / 4 = 12
+ EQUB 0                 \ Gun vertex               = 0
+ EQUB 18                \ Explosion count          = 3, as (4 * n) + 6 = 18
+ EQUB 60                \ Number of vertices       = 60 / 6 = 10
+ EQUB 15                \ Number of edges          = 15
+ EQUW 0                 \ Bounty                   = 0
+ EQUB 28                \ Number of faces          = 28 / 4 = 7
+ EQUB 12                \ Visibility distance      = 12
+ EQUB 8                 \ Max. energy              = 8
+ EQUB 15                \ Max. speed               = 15
+ EQUB &00               \ Edges data offset (high) = &0050
+ EQUB &00               \ Faces data offset (high) = &008C
+ EQUB 2                 \ Normals are scaled by    = 2^2 = 4
+ EQUB %00000000         \ Laser power              = 0
+                        \ Missiles                 = 0
+
+\VERTEX    x,    y,    z, face1, face2, face3, face4, visibility
+ VERTEX   24,   16,    0,     0,      1,    5,     5,         31    \ Vertex 0
+ VERTEX   24,    5,   15,     0,      1,    2,     2,         31    \ Vertex 1
+ VERTEX   24,  -13,    9,     0,      2,    3,     3,         31    \ Vertex 2
+ VERTEX   24,  -13,   -9,     0,      3,    4,     4,         31    \ Vertex 3
+ VERTEX   24,    5,  -15,     0,      4,    5,     5,         31    \ Vertex 4
+ VERTEX  -24,   16,    0,     1,      5,    6,     6,         31    \ Vertex 5
+ VERTEX  -24,    5,   15,     1,      2,    6,     6,         31    \ Vertex 6
+ VERTEX  -24,  -13,    9,     2,      3,    6,     6,         31    \ Vertex 7
+ VERTEX  -24,  -13,   -9,     3,      4,    6,     6,         31    \ Vertex 8
+ VERTEX  -24,    5,  -15,     4,      5,    6,     6,         31    \ Vertex 9
+
+.SHIP_CANISTER_EDGES
+
+\EDGE vertex1, vertex2, face1, face2, visibility
+ EDGE       0,       1,     0,     1,         31    \ Edge 0
+ EDGE       1,       2,     0,     2,         31    \ Edge 1
+ EDGE       2,       3,     0,     3,         31    \ Edge 2
+ EDGE       3,       4,     0,     4,         31    \ Edge 3
+ EDGE       0,       4,     0,     5,         31    \ Edge 4
+ EDGE       0,       5,     1,     5,         31    \ Edge 5
+ EDGE       1,       6,     1,     2,         31    \ Edge 6
+ EDGE       2,       7,     2,     3,         31    \ Edge 7
+ EDGE       3,       8,     3,     4,         31    \ Edge 8
+ EDGE       4,       9,     4,     5,         31    \ Edge 9
+ EDGE       5,       6,     1,     6,         31    \ Edge 10
+ EDGE       6,       7,     2,     6,         31    \ Edge 11
+ EDGE       7,       8,     3,     6,         31    \ Edge 12
+ EDGE       8,       9,     4,     6,         31    \ Edge 13
+ EDGE       9,       5,     5,     6,         31    \ Edge 14
+
+\FACE normal_x, normal_y, normal_z, visibility
+ FACE       96,        0,        0,         31    \ Face 0
+ FACE        0,       41,       30,         31    \ Face 1
+ FACE        0,      -18,       48,         31    \ Face 2
+ FACE        0,      -51,        0,         31    \ Face 3
+ FACE        0,      -18,      -48,         31    \ Face 4
+ FACE        0,       41,      -30,         31    \ Face 5
+ FACE      -96,        0,        0,         31    \ Face 6
+
+\ ******************************************************************************
+\
+\       Name: SHIP_SHUTTLE
+\       Type: Variable
+\   Category: Drawing ships
+\    Summary: Ship blueprint for a Shuttle
+\  Deep dive: Ship blueprints
+\
+\ ******************************************************************************
+
+.SHIP_SHUTTLE
+
+ EQUB 15                \ Max. canisters on demise = 15
+ EQUW 50 * 50           \ Targetable area          = 50 * 50
+ EQUB &86               \ Edges data offset (low)  = &0086
+ EQUB &FE               \ Faces data offset (low)  = &00FE
+ EQUB 109               \ Max. edge count          = (109 - 1) / 4 = 27
+ EQUB 0                 \ Gun vertex               = 0
+ EQUB 38                \ Explosion count          = 8, as (4 * n) + 6 = 38
+ EQUB 114               \ Number of vertices       = 114 / 6 = 19
+ EQUB 30                \ Number of edges          = 30
+ EQUW 0                 \ Bounty                   = 0
+ EQUB 52                \ Number of faces          = 52 / 4 = 13
+ EQUB 22                \ Visibility distance      = 22
+ EQUB 32                \ Max. energy              = 32
+ EQUB 8                 \ Max. speed               = 8
+ EQUB &00               \ Edges data offset (high) = &0086
+ EQUB &00               \ Faces data offset (high) = &00FE
+ EQUB 2                 \ Normals are scaled by    = 2^2 = 4
+ EQUB %00000000         \ Laser power              = 0
+                        \ Missiles                 = 0
+
+\VERTEX    x,    y,    z, face1, face2, face3, face4, visibility
+ VERTEX    0,  -35,   47,    15,    15,    15,    15,         31     \ Vertex 0
+ VERTEX  -35,    0,   47,    15,    15,    15,    15,         31     \ Vertex 1
+ VERTEX    0,   35,   47,    15,    15,    15,    15,         31     \ Vertex 2
+ VERTEX   35,    0,   47,    15,    15,    15,    15,         31     \ Vertex 3
+ VERTEX  -40,  -40,  -53,     2,     1,     9,     3,         31     \ Vertex 4
+ VERTEX  -40,   40,  -53,     4,     3,     9,     5,         31     \ Vertex 5
+ VERTEX   40,   40,  -53,     6,     5,     9,     7,         31     \ Vertex 6
+ VERTEX   40,  -40,  -53,     7,     1,     9,     8,         31     \ Vertex 7
+ VERTEX   10,    0,  -53,     9,     9,     9,     9,         16     \ Vertex 8
+ VERTEX    0,   -5,  -53,     9,     9,     9,     9,         16     \ Vertex 9
+ VERTEX  -10,    0,  -53,     9,     9,     9,     9,          8     \ Vertex 10
+ VERTEX    0,    5,  -53,     9,     9,     9,     9,          8     \ Vertex 11
+ VERTEX    0,  -17,   71,    10,     0,    12,    11,         16     \ Vertex 12
+ VERTEX    5,   -2,   61,    15,    15,     2,     0,          6     \ Vertex 13
+ VERTEX    7,   23,   49,     1,     0,     4,    15,          7     \ Vertex 14
+ VERTEX   21,    9,   49,     1,    10,    15,     3,          7     \ Vertex 15
+ VERTEX   -5,   -2,   61,    11,     6,     3,     2,          6     \ Vertex 16
+ VERTEX   -7,   23,   49,     8,    15,     0,    12,          7     \ Vertex 17
+ VERTEX  -21,    9,   49,    15,     4,     8,     1,          7     \ Vertex 18
+
+\EDGE vertex1, vertex2, face1, face2, visibility
+ EDGE       0,       1,     2,     0,         31    \ Edge 0
+ EDGE       1,       2,    10,     4,         31    \ Edge 1
+ EDGE       2,       3,    11,     6,         31    \ Edge 2
+ EDGE       0,       3,    12,     8,         31    \ Edge 3
+ EDGE       0,       7,     8,     1,         31    \ Edge 4
+ EDGE       0,       4,     2,     1,         24    \ Edge 5
+ EDGE       1,       4,     3,     2,         31    \ Edge 6
+ EDGE       1,       5,     4,     3,         24    \ Edge 7
+ EDGE       2,       5,     5,     4,         31    \ Edge 8
+ EDGE       2,       6,     6,     5,         12    \ Edge 9
+ EDGE       3,       6,     7,     6,         31    \ Edge 10
+ EDGE       3,       7,     8,     7,         24    \ Edge 11
+ EDGE       4,       5,     9,     3,         31    \ Edge 12
+ EDGE       5,       6,     9,     5,         31    \ Edge 13
+ EDGE       6,       7,     9,     7,         31    \ Edge 14
+ EDGE       4,       7,     9,     1,         31    \ Edge 15
+ EDGE       0,      12,    12,     0,         16    \ Edge 16
+ EDGE       1,      12,    10,     0,         16    \ Edge 17
+ EDGE       2,      12,    11,    10,         16    \ Edge 18
+ EDGE       3,      12,    12,    11,         16    \ Edge 19
+ EDGE       8,       9,     9,     9,         16    \ Edge 20
+ EDGE       9,      10,     9,     9,          6    \ Edge 21
+ EDGE      10,      11,     9,     9,          8    \ Edge 22
+ EDGE       8,      11,     9,     9,          6    \ Edge 23
+ EDGE      13,      14,    11,    11,          4    \ Edge 24
+ EDGE      14,      15,    11,    11,          7    \ Edge 25
+ EDGE      13,      15,    11,    11,          6    \ Edge 26
+ EDGE      16,      17,    10,    10,          4    \ Edge 27
+ EDGE      17,      18,    10,    10,          7    \ Edge 28
+ EDGE      16,      18,    10,    10,          6    \ Edge 29
+
+\FACE normal_x, normal_y, normal_z, visibility
+ FACE     -110,     -110,       80,         31    \ Face 0
+ FACE        0,     -149,        7,         31    \ Face 1
+ FACE     -102,     -102,       46,         31    \ Face 2
+ FACE     -149,        0,        7,         31    \ Face 3
+ FACE     -102,      102,       46,         31    \ Face 4
+ FACE        0,      149,        7,         31    \ Face 5
+ FACE      102,      102,       46,         31    \ Face 6
+ FACE      149,        0,        7,         31    \ Face 7
+ FACE      102,     -102,       46,         31    \ Face 8
+ FACE        0,        0,     -213,         31    \ Face 9
+ FACE      -81,       81,      177,         31    \ Face 10
+ FACE       81,       81,      177,         31    \ Face 11
+ FACE      110,     -110,       80,         31    \ Face 12
+
+\ ******************************************************************************
+\
+\       Name: SHIP_TRANSPORTER
+\       Type: Variable
+\   Category: Drawing ships
+\    Summary: Ship blueprint for a Transporter
+\  Deep dive: Ship blueprints
+\
+\ ******************************************************************************
+
+.SHIP_TRANSPORTER
+
+ EQUB 0                 \ Max. canisters on demise = 0
+ EQUW 50 * 50           \ Targetable area          = 50 * 50
+ EQUB &F2               \ Edges data offset (low)  = &00F2
+ EQUB &AA               \ Faces data offset (low)  = &01AA
+ EQUB 145               \ Max. edge count          = (145 - 1) / 4 = 36
+ EQUB 48                \ Gun vertex               = 48
+ EQUB 26                \ Explosion count          = 5, as (4 * n) + 6 = 26
+ EQUB 222               \ Number of vertices       = 222 / 6 = 37
+ EQUB 46                \ Number of edges          = 46
+ EQUW 0                 \ Bounty                   = 0
+ EQUB 56                \ Number of faces          = 56 / 4 = 14
+ EQUB 16                \ Visibility distance      = 16
+ EQUB 32                \ Max. energy              = 32
+ EQUB 10                \ Max. speed               = 10
+ EQUB &00               \ Edges data offset (high) = &00F2
+ EQUB &01               \ Faces data offset (high) = &01AA
+ EQUB 1                 \ Normals are scaled by    = 2^1 = 2
+ EQUB %00000000         \ Laser power              = 0
+                        \ Missiles                 = 0
+
+\VERTEX    x,    y,    z, face1, face2, face3, face4, visibility
+ VERTEX    0,   19,  -51,     6,     0,     7,     7,         31     \ Vertex 0
+ VERTEX  -51,    7,  -51,     1,     0,     7,     7,         31     \ Vertex 1
+ VERTEX  -57,   -7,  -51,     1,     0,     2,     2,         31     \ Vertex 2
+ VERTEX  -51,  -17,  -51,     2,     0,     3,     3,         31     \ Vertex 3
+ VERTEX   51,  -17,  -51,     3,     0,     4,     4,         31     \ Vertex 4
+ VERTEX   57,   -7,  -51,     4,     0,     5,     5,         31     \ Vertex 5
+ VERTEX   51,    7,  -51,     5,     0,     6,     6,         31     \ Vertex 6
+ VERTEX    0,   12,   24,    15,    15,    15,    15,         18     \ Vertex 7
+ VERTEX  -60,   -2,   24,     7,     1,     9,     8,         31     \ Vertex 8
+ VERTEX  -66,  -17,   24,     2,     1,     9,     3,         31     \ Vertex 9
+ VERTEX   66,  -17,   24,     4,     3,    10,     5,         31     \ Vertex 10
+ VERTEX   60,   -2,   24,     6,     5,    11,    10,         31     \ Vertex 11
+ VERTEX  -22,   -5,   61,     9,     8,    13,    12,         31     \ Vertex 12
+ VERTEX  -27,  -17,   61,     9,     3,    13,    13,         31     \ Vertex 13
+ VERTEX   27,  -17,   61,    10,     3,    13,    13,         31     \ Vertex 14
+ VERTEX   22,   -5,   61,    11,    10,    13,    12,         31     \ Vertex 15
+ VERTEX  -10,   11,    5,     7,     7,     7,     7,          6     \ Vertex 16
+ VERTEX  -36,    5,    5,     7,     7,     7,     7,          6     \ Vertex 17
+ VERTEX  -10,   13,  -14,     7,     7,     7,     7,          6     \ Vertex 18
+ VERTEX  -36,    7,  -14,     7,     7,     7,     7,          6     \ Vertex 19
+ VERTEX  -23,   12,  -29,     7,     7,     7,     7,          6     \ Vertex 20
+ VERTEX  -23,   10,  -14,     7,     7,     7,     7,          6     \ Vertex 21
+ VERTEX   10,   15,  -29,     6,     6,     6,     6,          6     \ Vertex 22
+ VERTEX   36,    9,  -29,     6,     6,     6,     6,          6     \ Vertex 23
+ VERTEX   23,   10,  -14,     6,     6,     6,     6,          6     \ Vertex 24
+ VERTEX   10,   12,   -6,     6,     6,     6,     6,          6     \ Vertex 25
+ VERTEX   36,    6,   -6,     6,     6,     6,     6,          6     \ Vertex 26
+ VERTEX   23,    7,   16,     6,     6,     6,     6,          6     \ Vertex 27
+ VERTEX   23,    9,   -6,     6,     6,     6,     6,          6     \ Vertex 28
+ VERTEX  -33,  -17,  -26,     3,     3,     3,     3,          5     \ Vertex 29
+ VERTEX  -33,  -17,   33,     3,     3,     3,     3,          5     \ Vertex 30
+ VERTEX   33,  -17,  -26,     3,     3,     3,     3,          5     \ Vertex 31
+ VERTEX   33,  -17,   33,     3,     3,     3,     3,          5     \ Vertex 32
+ VERTEX  -25,   -6,  -51,     0,     0,     0,     0,          7     \ Vertex 33
+ VERTEX   26,   -6,  -51,     0,     0,     0,     0,          7     \ Vertex 34
+ VERTEX   17,    6,  -51,     0,     0,     0,     0,          4     \ Vertex 35
+ VERTEX  -17,    6,  -51,     0,     0,     0,     0,          4     \ Vertex 36
+
+\EDGE vertex1, vertex2, face1, face2, visibility
+ EDGE       0,       1,     7,     0,         31    \ Edge 0
+ EDGE       1,       2,     1,     0,         31    \ Edge 1
+ EDGE       2,       3,     2,     0,         31    \ Edge 2
+ EDGE       3,       4,     3,     0,         31    \ Edge 3
+ EDGE       4,       5,     4,     0,         31    \ Edge 4
+ EDGE       5,       6,     5,     0,         31    \ Edge 5
+ EDGE       0,       6,     6,     0,         31    \ Edge 6
+ EDGE       0,       7,     7,     6,         15    \ Edge 7
+ EDGE       1,       8,     7,     1,         31    \ Edge 8
+ EDGE       2,       9,     2,     1,         10    \ Edge 9
+ EDGE       3,       9,     3,     2,         31    \ Edge 10
+ EDGE       4,      10,     4,     3,         31    \ Edge 11
+ EDGE       5,      10,     5,     4,         10    \ Edge 12
+ EDGE       6,      11,     6,     5,         31    \ Edge 13
+ EDGE       7,       8,     8,     7,         16    \ Edge 14
+ EDGE       8,       9,     9,     1,         16    \ Edge 15
+ EDGE      10,      11,    10,     5,         16    \ Edge 16
+ EDGE       7,      11,    11,     6,         16    \ Edge 17
+ EDGE       7,      15,    12,    11,         18    \ Edge 18
+ EDGE       7,      12,    12,     8,         18    \ Edge 19
+ EDGE       8,      12,     9,     8,         16    \ Edge 20
+ EDGE       9,      13,     9,     3,         31    \ Edge 21
+ EDGE      10,      14,    10,     3,         31    \ Edge 22
+ EDGE      11,      15,    11,    10,         16    \ Edge 23
+ EDGE      12,      13,    13,     9,         31    \ Edge 24
+ EDGE      13,      14,    13,     3,         31    \ Edge 25
+ EDGE      14,      15,    13,    10,         31    \ Edge 26
+ EDGE      12,      15,    13,    12,         31    \ Edge 27
+ EDGE      16,      17,     7,     7,          6    \ Edge 28
+ EDGE      18,      19,     7,     7,          6    \ Edge 29
+ EDGE      19,      20,     7,     7,          6    \ Edge 30
+ EDGE      18,      20,     7,     7,          6    \ Edge 31
+ EDGE      20,      21,     7,     7,          6    \ Edge 32
+ EDGE      22,      23,     6,     6,          6    \ Edge 33
+ EDGE      23,      24,     6,     6,          6    \ Edge 34
+ EDGE      24,      22,     6,     6,          6    \ Edge 35
+ EDGE      25,      26,     6,     6,          6    \ Edge 36
+ EDGE      26,      27,     6,     6,          6    \ Edge 37
+ EDGE      25,      27,     6,     6,          6    \ Edge 38
+ EDGE      27,      28,     6,     6,          6    \ Edge 39
+ EDGE      29,      30,     3,     3,          5    \ Edge 40
+ EDGE      31,      32,     3,     3,          5    \ Edge 41
+ EDGE      33,      34,     0,     0,          7    \ Edge 42
+ EDGE      34,      35,     0,     0,          4    \ Edge 43
+ EDGE      35,      36,     0,     0,          4    \ Edge 44
+ EDGE      36,      33,     0,     0,          4    \ Edge 45
+
+\FACE normal_x, normal_y, normal_z, visibility
+ FACE        0,        0,     -103,         31    \ Face 0
+ FACE     -111,       48,       -7,         31    \ Face 1
+ FACE     -105,      -63,      -21,         31    \ Face 2
+ FACE        0,      -34,        0,         31    \ Face 3
+ FACE      105,      -63,      -21,         31    \ Face 4
+ FACE      111,       48,       -7,         31    \ Face 5
+ FACE        8,       32,        3,         31    \ Face 6
+ FACE       -8,       32,        3,         31    \ Face 7
+ FACE       -8,       34,       11,         18    \ Face 8
+ FACE      -75,       32,       79,         31    \ Face 9
+ FACE       75,       32,       79,         31    \ Face 10
+ FACE        8,       34,       11,         18    \ Face 11
+ FACE        0,       38,       17,         31    \ Face 12
+ FACE        0,        0,      121,         31    \ Face 13
+
+\ ******************************************************************************
+\
+\       Name: SHIP_COBRA_MK_3
+\       Type: Variable
+\   Category: Drawing ships
+\    Summary: Ship blueprint for a Cobra Mk III
+\  Deep dive: Ship blueprints
+\
+\ ******************************************************************************
+
+.SHIP_COBRA_MK_3
+
+ EQUB 3                 \ Max. canisters on demise = 3
+ EQUW 95 * 95           \ Targetable area          = 95 * 95
+ EQUB &BC               \ Edges data offset (low)  = &00BC
+ EQUB &54               \ Faces data offset (low)  = &0154
+ EQUB 153               \ Max. edge count          = (153 - 1) / 4 = 38
+ EQUB 84                \ Gun vertex               = 84 / 4 = 21
+ EQUB 42                \ Explosion count          = 9, as (4 * n) + 6 = 42
+ EQUB 168               \ Number of vertices       = 168 / 6 = 28
+ EQUB 38                \ Number of edges          = 38
+ EQUW 0                 \ Bounty                   = 0
+ EQUB 52                \ Number of faces          = 52 / 4 = 13
+ EQUB 50                \ Visibility distance      = 50
+ EQUB 98                \ Max. energy              = 98
+ EQUB 28                \ Max. speed               = 28
+ EQUB &00               \ Edges data offset (high) = &00BC
+ EQUB &01               \ Faces data offset (high) = &0154
+ EQUB 1                 \ Normals are scaled by    = 2^1 = 2
+ EQUB %00010011         \ Laser power              = 2
+                        \ Missiles                 = 3
+
+\VERTEX    x,    y,    z, face1, face2, face3, face4, visibility
+ VERTEX   32,    0,   76,    15,     15,   15,    15,         31    \ Vertex 0
+ VERTEX  -32,    0,   76,    15,     15,   15,    15,         31    \ Vertex 1
+ VERTEX    0,   26,   24,    15,     15,   15,    15,         31    \ Vertex 2
+ VERTEX -120,   -3,   -8,     3,      7,   10,    10,         31    \ Vertex 3
+ VERTEX  120,   -3,   -8,     4,      8,   12,    12,         31    \ Vertex 4
+ VERTEX  -88,   16,  -40,    15,     15,   15,    15,         31    \ Vertex 5
+ VERTEX   88,   16,  -40,    15,     15,   15,    15,         31    \ Vertex 6
+ VERTEX  128,   -8,  -40,     8,      9,   12,    12,         31    \ Vertex 7
+ VERTEX -128,   -8,  -40,     7,      9,   10,    10,         31    \ Vertex 8
+ VERTEX    0,   26,  -40,     5,      6,    9,     9,         31    \ Vertex 9
+ VERTEX  -32,  -24,  -40,     9,     10,   11,    11,         31    \ Vertex 10
+ VERTEX   32,  -24,  -40,     9,     11,   12,    12,         31    \ Vertex 11
+ VERTEX  -36,    8,  -40,     9,      9,    9,     9,         20    \ Vertex 12
+ VERTEX   -8,   12,  -40,     9,      9,    9,     9,         20    \ Vertex 13
+ VERTEX    8,   12,  -40,     9,      9,    9,     9,         20    \ Vertex 14
+ VERTEX   36,    8,  -40,     9,      9,    9,     9,         20    \ Vertex 15
+ VERTEX   36,  -12,  -40,     9,      9,    9,     9,         20    \ Vertex 16
+ VERTEX    8,  -16,  -40,     9,      9,    9,     9,         20    \ Vertex 17
+ VERTEX   -8,  -16,  -40,     9,      9,    9,     9,         20    \ Vertex 18
+ VERTEX  -36,  -12,  -40,     9,      9,    9,     9,         20    \ Vertex 19
+ VERTEX    0,    0,   76,     0,     11,   11,    11,          6    \ Vertex 20
+ VERTEX    0,    0,   90,     0,     11,   11,    11,         31    \ Vertex 21
+ VERTEX  -80,   -6,  -40,     9,      9,    9,     9,          8    \ Vertex 22
+ VERTEX  -80,    6,  -40,     9,      9,    9,     9,          8    \ Vertex 23
+ VERTEX  -88,    0,  -40,     9,      9,    9,     9,          6    \ Vertex 24
+ VERTEX   80,    6,  -40,     9,      9,    9,     9,          8    \ Vertex 25
+ VERTEX   88,    0,  -40,     9,      9,    9,     9,          6    \ Vertex 26
+ VERTEX   80,   -6,  -40,     9,      9,    9,     9,          8    \ Vertex 27
+
+\EDGE vertex1, vertex2, face1, face2, visibility
+ EDGE       0,       1,     0,    11,         31    \ Edge 0
+ EDGE       0,       4,     4,    12,         31    \ Edge 1
+ EDGE       1,       3,     3,    10,         31    \ Edge 2
+ EDGE       3,       8,     7,    10,         31    \ Edge 3
+ EDGE       4,       7,     8,    12,         31    \ Edge 4
+ EDGE       6,       7,     8,     9,         31    \ Edge 5
+ EDGE       6,       9,     6,     9,         31    \ Edge 6
+ EDGE       5,       9,     5,     9,         31    \ Edge 7
+ EDGE       5,       8,     7,     9,         31    \ Edge 8
+ EDGE       2,       5,     1,     5,         31    \ Edge 9
+ EDGE       2,       6,     2,     6,         31    \ Edge 10
+ EDGE       3,       5,     3,     7,         31    \ Edge 11
+ EDGE       4,       6,     4,     8,         31    \ Edge 12
+ EDGE       1,       2,     0,     1,         31    \ Edge 13
+ EDGE       0,       2,     0,     2,         31    \ Edge 14
+ EDGE       8,      10,     9,    10,         31    \ Edge 15
+ EDGE      10,      11,     9,    11,         31    \ Edge 16
+ EDGE       7,      11,     9,    12,         31    \ Edge 17
+ EDGE       1,      10,    10,    11,         31    \ Edge 18
+ EDGE       0,      11,    11,    12,         31    \ Edge 19
+ EDGE       1,       5,     1,     3,         29    \ Edge 20
+ EDGE       0,       6,     2,     4,         29    \ Edge 21
+ EDGE      20,      21,     0,    11,          6    \ Edge 22
+ EDGE      12,      13,     9,     9,         20    \ Edge 23
+ EDGE      18,      19,     9,     9,         20    \ Edge 24
+ EDGE      14,      15,     9,     9,         20    \ Edge 25
+ EDGE      16,      17,     9,     9,         20    \ Edge 26
+ EDGE      15,      16,     9,     9,         19    \ Edge 27
+ EDGE      14,      17,     9,     9,         17    \ Edge 28
+ EDGE      13,      18,     9,     9,         19    \ Edge 29
+ EDGE      12,      19,     9,     9,         19    \ Edge 30
+ EDGE       2,       9,     5,     6,         30    \ Edge 31
+ EDGE      22,      24,     9,     9,          6    \ Edge 32
+ EDGE      23,      24,     9,     9,          6    \ Edge 33
+ EDGE      22,      23,     9,     9,          8    \ Edge 34
+ EDGE      25,      26,     9,     9,          6    \ Edge 35
+ EDGE      26,      27,     9,     9,          6    \ Edge 36
+ EDGE      25,      27,     9,     9,          8    \ Edge 37
+
+\FACE normal_x, normal_y, normal_z, visibility
+ FACE        0,       62,       31,         31    \ Face 0
+ FACE      -18,       55,       16,         31    \ Face 1
+ FACE       18,       55,       16,         31    \ Face 2
+ FACE      -16,       52,       14,         31    \ Face 3
+ FACE       16,       52,       14,         31    \ Face 4
+ FACE      -14,       47,        0,         31    \ Face 5
+ FACE       14,       47,        0,         31    \ Face 6
+ FACE      -61,      102,        0,         31    \ Face 7
+ FACE       61,      102,        0,         31    \ Face 8
+ FACE        0,        0,      -80,         31    \ Face 9
+ FACE       -7,      -42,        9,         31    \ Face 10
+ FACE        0,      -30,        6,         31    \ Face 11
+ FACE        7,      -42,        9,         31    \ Face 12
+
+\ ******************************************************************************
+\
+\       Name: SHIP_PYTHON
+\       Type: Variable
+\   Category: Drawing ships
+\    Summary: Ship blueprint for a Python
+\  Deep dive: Ship blueprints
+\
+\ ******************************************************************************
+
+.SHIP_PYTHON
+
+ EQUB 5                 \ Max. canisters on demise = 5
+ EQUW 80 * 80           \ Targetable area          = 80 * 80
+ EQUB &56               \ Edges data offset (low)  = &0056
+ EQUB &BE               \ Faces data offset (low)  = &00BE
+ EQUB 85                \ Max. edge count          = (85 - 1) / 4 = 21
+ EQUB 0                 \ Gun vertex               = 0
+ EQUB 42                \ Explosion count          = 9, as (4 * n) + 6 = 42
+ EQUB 66                \ Number of vertices       = 66 / 6 = 11
+ EQUB 26                \ Number of edges          = 26
+ EQUW 0                 \ Bounty                   = 0
+ EQUB 52                \ Number of faces          = 52 / 4 = 13
+ EQUB 40                \ Visibility distance      = 40
+ EQUB 125               \ Max. energy              = 125
+ EQUB 20                \ Max. speed               = 20
+ EQUB &00               \ Edges data offset (high) = &0056
+ EQUB &00               \ Faces data offset (high) = &00BE
+ EQUB 0                 \ Normals are scaled by    = 2^0 = 1
+ EQUB %00011011         \ Laser power              = 3
+                        \ Missiles                 = 3
+
+\VERTEX    x,    y,    z, face1, face2, face3, face4, visibility
+ VERTEX    0,    0,  224,     0,      1,    2,     3,         31    \ Vertex 0
+ VERTEX    0,   48,   48,     0,      1,    4,     5,         30    \ Vertex 1
+ VERTEX   96,    0,  -16,    15,     15,   15,    15,         31    \ Vertex 2
+ VERTEX  -96,    0,  -16,    15,     15,   15,    15,         31    \ Vertex 3
+ VERTEX    0,   48,  -32,     4,      5,    8,     9,         30    \ Vertex 4
+ VERTEX    0,   24, -112,     9,      8,   12,    12,         31    \ Vertex 5
+ VERTEX  -48,    0, -112,     8,     11,   12,    12,         31    \ Vertex 6
+ VERTEX   48,    0, -112,     9,     10,   12,    12,         31    \ Vertex 7
+ VERTEX    0,  -48,   48,     2,      3,    6,     7,         30    \ Vertex 8
+ VERTEX    0,  -48,  -32,     6,      7,   10,    11,         30    \ Vertex 9
+ VERTEX    0,  -24, -112,    10,     11,   12,    12,         30    \ Vertex 10
+
+\EDGE vertex1, vertex2, face1, face2, visibility
+ EDGE       0,       8,     2,     3,         30    \ Edge 0
+ EDGE       0,       3,     0,     2,         31    \ Edge 1
+ EDGE       0,       2,     1,     3,         31    \ Edge 2
+ EDGE       0,       1,     0,     1,         30    \ Edge 3
+ EDGE       2,       4,     9,     5,         29    \ Edge 4
+ EDGE       1,       2,     1,     5,         29    \ Edge 5
+ EDGE       2,       8,     7,     3,         29    \ Edge 6
+ EDGE       1,       3,     0,     4,         29    \ Edge 7
+ EDGE       3,       8,     2,     6,         29    \ Edge 8
+ EDGE       2,       9,     7,    10,         29    \ Edge 9
+ EDGE       3,       4,     4,     8,         29    \ Edge 10
+ EDGE       3,       9,     6,    11,         29    \ Edge 11
+ EDGE       3,       5,     8,     8,          5    \ Edge 12
+ EDGE       3,      10,    11,    11,          5    \ Edge 13
+ EDGE       2,       5,     9,     9,          5    \ Edge 14
+ EDGE       2,      10,    10,    10,          5    \ Edge 15
+ EDGE       2,       7,     9,    10,         31    \ Edge 16
+ EDGE       3,       6,     8,    11,         31    \ Edge 17
+ EDGE       5,       6,     8,    12,         31    \ Edge 18
+ EDGE       5,       7,     9,    12,         31    \ Edge 19
+ EDGE       7,      10,    12,    10,         29    \ Edge 20
+ EDGE       6,      10,    11,    12,         29    \ Edge 21
+ EDGE       4,       5,     8,     9,         29    \ Edge 22
+ EDGE       9,      10,    10,    11,         29    \ Edge 23
+ EDGE       1,       4,     4,     5,         29    \ Edge 24
+ EDGE       8,       9,     6,     7,         29    \ Edge 25
+
+\FACE normal_x, normal_y, normal_z, visibility
+ FACE      -27,       40,       11,         30    \ Face 0
+ FACE       27,       40,       11,         30    \ Face 1
+ FACE      -27,      -40,       11,         30    \ Face 2
+ FACE       27,      -40,       11,         30    \ Face 3
+ FACE      -19,       38,        0,         30    \ Face 4
+ FACE       19,       38,        0,         30    \ Face 5
+ FACE      -19,      -38,        0,         30    \ Face 6
+ FACE       19,      -38,        0,         30    \ Face 7
+ FACE      -25,       37,      -11,         30    \ Face 8
+ FACE       25,       37,      -11,         30    \ Face 9
+ FACE       25,      -37,      -11,         30    \ Face 10
+ FACE      -25,      -37,      -11,         30    \ Face 11
+ FACE        0,        0,     -112,         30    \ Face 12
+
+\ ******************************************************************************
+\
+\       Name: SHIP_VIPER
+\       Type: Variable
+\   Category: Drawing ships
+\    Summary: Ship blueprint for a Viper
+\  Deep dive: Ship blueprints
+\
+\ ******************************************************************************
+
+.SHIP_VIPER
+
+ EQUB 0                 \ Max. canisters on demise = 0
+ EQUW 75 * 75           \ Targetable area          = 75 * 75
+ EQUB &6E               \ Edges data offset (low)  = &006E
+ EQUB &BE               \ Faces data offset (low)  = &00BE
+ EQUB 77                \ Max. edge count          = (77 - 1) / 4 = 19
+ EQUB 0                 \ Gun vertex               = 0
+ EQUB 42                \ Explosion count          = 9, as (4 * n) + 6 = 42
+ EQUB 90                \ Number of vertices       = 90 / 6 = 15
+ EQUB 20                \ Number of edges          = 20
+ EQUW 0                 \ Bounty                   = 0
+ EQUB 28                \ Number of faces          = 28 / 4 = 7
+ EQUB 23                \ Visibility distance      = 23
+ EQUB 91                \ Max. energy              = 91
+ EQUB 32                \ Max. speed               = 32
+ EQUB &00               \ Edges data offset (high) = &006E
+ EQUB &00               \ Faces data offset (high) = &00BE
+ EQUB 1                 \ Normals are scaled by    = 2^1 = 2
+ EQUB %00010001         \ Laser power              = 2
+                        \ Missiles                 = 1
+
+\VERTEX    x,    y,    z, face1, face2, face3, face4, visibility
+ VERTEX    0,    0,   72,     1,      2,    3,     4,         31    \ Vertex 0
+ VERTEX    0,   16,   24,     0,      1,    2,     2,         30    \ Vertex 1
+ VERTEX    0,  -16,   24,     3,      4,    5,     5,         30    \ Vertex 2
+ VERTEX   48,    0,  -24,     2,      4,    6,     6,         31    \ Vertex 3
+ VERTEX  -48,    0,  -24,     1,      3,    6,     6,         31    \ Vertex 4
+ VERTEX   24,  -16,  -24,     4,      5,    6,     6,         30    \ Vertex 5
+ VERTEX  -24,  -16,  -24,     5,      3,    6,     6,         30    \ Vertex 6
+ VERTEX   24,   16,  -24,     0,      2,    6,     6,         31    \ Vertex 7
+ VERTEX  -24,   16,  -24,     0,      1,    6,     6,         31    \ Vertex 8
+ VERTEX  -32,    0,  -24,     6,      6,    6,     6,         19    \ Vertex 9
+ VERTEX   32,    0,  -24,     6,      6,    6,     6,         19    \ Vertex 10
+ VERTEX    8,    8,  -24,     6,      6,    6,     6,         19    \ Vertex 11
+ VERTEX   -8,    8,  -24,     6,      6,    6,     6,         19    \ Vertex 12
+ VERTEX   -8,   -8,  -24,     6,      6,    6,     6,         18    \ Vertex 13
+ VERTEX    8,   -8,  -24,     6,      6,    6,     6,         18    \ Vertex 14
+
+\EDGE vertex1, vertex2, face1, face2, visibility
+ EDGE       0,       3,     2,     4,         31    \ Edge 0
+ EDGE       0,       1,     1,     2,         30    \ Edge 1
+ EDGE       0,       2,     3,     4,         30    \ Edge 2
+ EDGE       0,       4,     1,     3,         31    \ Edge 3
+ EDGE       1,       7,     0,     2,         30    \ Edge 4
+ EDGE       1,       8,     0,     1,         30    \ Edge 5
+ EDGE       2,       5,     4,     5,         30    \ Edge 6
+ EDGE       2,       6,     3,     5,         30    \ Edge 7
+ EDGE       7,       8,     0,     6,         31    \ Edge 8
+ EDGE       5,       6,     5,     6,         30    \ Edge 9
+ EDGE       4,       8,     1,     6,         31    \ Edge 10
+ EDGE       4,       6,     3,     6,         30    \ Edge 11
+ EDGE       3,       7,     2,     6,         31    \ Edge 12
+ EDGE       3,       5,     6,     4,         30    \ Edge 13
+ EDGE       9,      12,     6,     6,         19    \ Edge 14
+ EDGE       9,      13,     6,     6,         18    \ Edge 15
+ EDGE      10,      11,     6,     6,         19    \ Edge 16
+ EDGE      10,      14,     6,     6,         18    \ Edge 17
+ EDGE      11,      14,     6,     6,         16    \ Edge 18
+ EDGE      12,      13,     6,     6,         16    \ Edge 19
+
+\FACE normal_x, normal_y, normal_z, visibility
+ FACE        0,       32,        0,         31    \ Face 0
+ FACE      -22,       33,       11,         31    \ Face 1
+ FACE       22,       33,       11,         31    \ Face 2
+ FACE      -22,      -33,       11,         31    \ Face 3
+ FACE       22,      -33,       11,         31    \ Face 4
+ FACE        0,      -32,        0,         31    \ Face 5
+ FACE        0,        0,      -48,         31    \ Face 6
+
+\ ******************************************************************************
+\
+\       Name: SHIP_KRAIT
+\       Type: Variable
+\   Category: Drawing ships
+\    Summary: Ship blueprint for a Krait
+\  Deep dive: Ship blueprints
+\
+\ ******************************************************************************
+
+.SHIP_KRAIT
+
+ EQUB 1                 \ Max. canisters on demise = 1
+ EQUW 60 * 60           \ Targetable area          = 60 * 60
+ EQUB &7A               \ Edges data offset (low)  = &007A
+ EQUB &CE               \ Faces data offset (low)  = &00CE
+ EQUB 85                \ Max. edge count          = (85 - 1) / 4 = 21
+ EQUB 0                 \ Gun vertex               = 0
+ EQUB 18                \ Explosion count          = 3, as (4 * n) + 6 = 18
+ EQUB 102               \ Number of vertices       = 102 / 6 = 17
+ EQUB 21                \ Number of edges          = 21
+ EQUW 100               \ Bounty                   = 100
+ EQUB 24                \ Number of faces          = 24 / 4 = 6
+ EQUB 25                \ Visibility distance      = 25
+ EQUB 73                \ Max. energy              = 73
+ EQUB 30                \ Max. speed               = 30
+ EQUB &00               \ Edges data offset (high) = &007A
+ EQUB &00               \ Faces data offset (high) = &00CE
+ EQUB 1                 \ Normals are scaled by    = 2^1 = 2
+ EQUB %00010000         \ Laser power              = 2
+                        \ Missiles                 = 0
+
+\VERTEX    x,    y,    z, face1, face2, face3, face4, visibility
+ VERTEX    0,    0,   96,     1,      0,    3,     2,         31    \ Vertex 0
+ VERTEX    0,   18,  -48,     3,      0,    5,     4,         31    \ Vertex 1
+ VERTEX    0,  -18,  -48,     2,      1,    5,     4,         31    \ Vertex 2
+ VERTEX   90,    0,   -3,     1,      0,    4,     4,         31    \ Vertex 3
+ VERTEX  -90,    0,   -3,     3,      2,    5,     5,         31    \ Vertex 4
+ VERTEX   90,    0,   87,     1,      0,    1,     1,         30    \ Vertex 5
+ VERTEX  -90,    0,   87,     3,      2,    3,     3,         30    \ Vertex 6
+ VERTEX    0,    5,   53,     0,      0,    3,     3,          9    \ Vertex 7
+ VERTEX    0,    7,   38,     0,      0,    3,     3,          6    \ Vertex 8
+ VERTEX  -18,    7,   19,     3,      3,    3,     3,          9    \ Vertex 9
+ VERTEX   18,    7,   19,     0,      0,    0,     0,          9    \ Vertex 10
+ VERTEX   18,   11,  -39,     4,      4,    4,     4,          8    \ Vertex 11
+ VERTEX   18,  -11,  -39,     4,      4,    4,     4,          8    \ Vertex 12
+ VERTEX   36,    0,  -30,     4,      4,    4,     4,          8    \ Vertex 13
+ VERTEX  -18,   11,  -39,     5,      5,    5,     5,          8    \ Vertex 14
+ VERTEX  -18,  -11,  -39,     5,      5,    5,     5,          8    \ Vertex 15
+ VERTEX  -36,    0,  -30,     5,      5,    5,     5,          8    \ Vertex 16
+
+\EDGE vertex1, vertex2, face1, face2, visibility
+ EDGE       0,       1,     3,     0,         31    \ Edge 0
+ EDGE       0,       2,     2,     1,         31    \ Edge 1
+ EDGE       0,       3,     1,     0,         31    \ Edge 2
+ EDGE       0,       4,     3,     2,         31    \ Edge 3
+ EDGE       1,       4,     5,     3,         31    \ Edge 4
+ EDGE       4,       2,     5,     2,         31    \ Edge 5
+ EDGE       2,       3,     4,     1,         31    \ Edge 6
+ EDGE       3,       1,     4,     0,         31    \ Edge 7
+ EDGE       3,       5,     1,     0,         30    \ Edge 8
+ EDGE       4,       6,     3,     2,         30    \ Edge 9
+ EDGE       1,       2,     5,     4,          8    \ Edge 10
+ EDGE       7,      10,     0,     0,          9    \ Edge 11
+ EDGE       8,      10,     0,     0,          6    \ Edge 12
+ EDGE       7,       9,     3,     3,          9    \ Edge 13
+ EDGE       8,       9,     3,     3,          6    \ Edge 14
+ EDGE      11,      13,     4,     4,          8    \ Edge 15
+ EDGE      13,      12,     4,     4,          8    \ Edge 16
+ EDGE      12,      11,     4,     4,          7    \ Edge 17
+ EDGE      14,      15,     5,     5,          7    \ Edge 18
+ EDGE      15,      16,     5,     5,          8    \ Edge 19
+ EDGE      16,      14,     5,     5,          8    \ Edge 20
+
+\FACE normal_x, normal_y, normal_z, visibility
+ FACE        3,       24,        3,         31    \ Face 0
+ FACE        3,      -24,        3,         31    \ Face 1
+ FACE       -3,      -24,        3,         31    \ Face 2
+ FACE       -3,       24,        3,         31    \ Face 3
+ FACE       38,        0,      -77,         31    \ Face 4
+ FACE      -38,        0,      -77,         31    \ Face 5
+
+\ ******************************************************************************
+\
+\       Name: SHIP_CONSTRICTOR
+\       Type: Variable
+\   Category: Drawing ships
+\    Summary: Ship blueprint for a Constrictor
+\  Deep dive: Ship blueprints
+\
+\ ******************************************************************************
+
+.SHIP_CONSTRICTOR
+
+ EQUB 3 + (15 << 4)     \ Max. canisters on demise = 3
+                        \ Market item when scooped = 15 + 1 = 16 (Alien items)
+ EQUW 99 * 99           \ Targetable area          = 99 * 99
+ EQUB &7A               \ Edges data offset (low)  = &007A
+ EQUB &DA               \ Faces data offset (low)  = &00DA
+ EQUB 77                \ Max. edge count          = (77 - 1) / 4 = 19
+ EQUB 0                 \ Gun vertex               = 0
+ EQUB 46                \ Explosion count          = 10, as (4 * n) + 6 = 46
+ EQUB 102               \ Number of vertices       = 102 / 6 = 17
+ EQUB 24                \ Number of edges          = 24
+ EQUW 0                 \ Bounty                   = 0
+ EQUB 40                \ Number of faces          = 40 / 4 = 10
+ EQUB 45                \ Visibility distance      = 45
+ EQUB 118               \ Max. energy              = 118
+ EQUB 55                \ Max. speed               = 55
+ EQUB &00               \ Edges data offset (high) = &007A
+ EQUB &00               \ Faces data offset (high) = &00DA
+ EQUB 2                 \ Normals are scaled by    = 2^2 = 4
+ EQUB %00101111         \ Laser power              = 2
+                        \ Missiles                 = 7
+
+\VERTEX    x,    y,    z, face1, face2, face3, face4, visibility
+ VERTEX   20,   -7,   80,     2,      0,    9,     9,         31    \ Vertex 0
+ VERTEX  -20,   -7,   80,     1,      0,    9,     9,         31    \ Vertex 1
+ VERTEX  -54,   -7,   40,     4,      1,    9,     9,         31    \ Vertex 2
+ VERTEX  -54,   -7,  -40,     5,      4,    9,     8,         31    \ Vertex 3
+ VERTEX  -20,   13,  -40,     6,      5,    8,     8,         31    \ Vertex 4
+ VERTEX   20,   13,  -40,     7,      6,    8,     8,         31    \ Vertex 5
+ VERTEX   54,   -7,  -40,     7,      3,    9,     8,         31    \ Vertex 6
+ VERTEX   54,   -7,   40,     3,      2,    9,     9,         31    \ Vertex 7
+ VERTEX   20,   13,    5,    15,     15,   15,    15,         31    \ Vertex 8
+ VERTEX  -20,   13,    5,    15,     15,   15,    15,         31    \ Vertex 9
+ VERTEX   20,   -7,   62,     9,      9,    9,     9,         18    \ Vertex 10
+ VERTEX  -20,   -7,   62,     9,      9,    9,     9,         18    \ Vertex 11
+ VERTEX   25,   -7,  -25,     9,      9,    9,     9,         18    \ Vertex 12
+ VERTEX  -25,   -7,  -25,     9,      9,    9,     9,         18    \ Vertex 13
+ VERTEX   15,   -7,  -15,     9,      9,    9,     9,         10    \ Vertex 14
+ VERTEX  -15,   -7,  -15,     9,      9,    9,     9,         10    \ Vertex 15
+ VERTEX    0,   -7,    0,    15,      9,    1,     0,          0    \ Vertex 16
+
+\EDGE vertex1, vertex2, face1, face2, visibility
+ EDGE       0,       1,     9,     0,         31    \ Edge 0
+ EDGE       1,       2,     9,     1,         31    \ Edge 1
+ EDGE       1,       9,     1,     0,         31    \ Edge 2
+ EDGE       0,       8,     2,     0,         31    \ Edge 3
+ EDGE       0,       7,     9,     2,         31    \ Edge 4
+ EDGE       7,       8,     3,     2,         31    \ Edge 5
+ EDGE       2,       9,     4,     1,         31    \ Edge 6
+ EDGE       2,       3,     9,     4,         31    \ Edge 7
+ EDGE       6,       7,     9,     3,         31    \ Edge 8
+ EDGE       6,       8,     7,     3,         31    \ Edge 9
+ EDGE       5,       8,     7,     6,         31    \ Edge 10
+ EDGE       4,       9,     6,     5,         31    \ Edge 11
+ EDGE       3,       9,     5,     4,         31    \ Edge 12
+ EDGE       3,       4,     8,     5,         31    \ Edge 13
+ EDGE       4,       5,     8,     6,         31    \ Edge 14
+ EDGE       5,       6,     8,     7,         31    \ Edge 15
+ EDGE       3,       6,     9,     8,         31    \ Edge 16
+ EDGE       8,       9,     6,     0,         31    \ Edge 17
+ EDGE      10,      12,     9,     9,         18    \ Edge 18
+ EDGE      12,      14,     9,     9,          5    \ Edge 19
+ EDGE      14,      10,     9,     9,         10    \ Edge 20
+ EDGE      11,      15,     9,     9,         10    \ Edge 21
+ EDGE      13,      15,     9,     9,          5    \ Edge 22
+ EDGE      11,      13,     9,     9,         18    \ Edge 23
+
+\FACE normal_x, normal_y, normal_z, visibility
+ FACE        0,       55,       15,         31    \ Face 0
+ FACE      -24,       75,       20,         31    \ Face 1
+ FACE       24,       75,       20,         31    \ Face 2
+ FACE       44,       75,        0,         31    \ Face 3
+ FACE      -44,       75,        0,         31    \ Face 4
+ FACE      -44,       75,        0,         31    \ Face 5
+ FACE        0,       53,        0,         31    \ Face 6
+ FACE       44,       75,        0,         31    \ Face 7
+ FACE        0,        0,     -160,         31    \ Face 8
+ FACE        0,      -27,        0,         31    \ Face 9
+
+SKIP 171
+
+\ ******************************************************************************
+\
+\ Save output/S.T.bin
+\
+\ ******************************************************************************
+
+PRINT "S.T"
+PRINT "Assembled at ", ~CODE_SHIPS%
+PRINT "Ends at ", ~P%
+PRINT "Code size is ", ~(P% - CODE_SHIPS%)
+PRINT "Execute at ", ~LOAD%
+PRINT "Reload at ", ~LOAD_SHIPS%
+
+PRINT "S.S.T ", ~CODE_B%, " ", ~P%, " ", ~LOAD%, " ", ~LOAD_SHIPS%
+\SAVE "versions/disc/output/S.T.bin", CODE_SHIPS%, P%, LOAD%
 
 \ ******************************************************************************
 \
@@ -26059,5 +30639,5 @@ ENDIF
 \
 \ ******************************************************************************
 
-PRINT "S.1.D ", ~CODE%, " &6000 ", ~LOAD%, " ", ~LOAD%
-SAVE "output/1.D.bin", CODE%, &6000
+PRINT "S.1.D ", ~CODE%, " ", ~P%, " ", ~LOAD%, " ", ~LOAD%
+SAVE "output/1.D.bin", CODE%, P%

@@ -49,10 +49,10 @@ fscv = &021E
 netv = &0224
 ind2v = &0232
 cmdr_iff = &036E
-oswrch = &FFEE
-osword = &FFF1
-osbyte = &FFF4
-oscli = &FFF7
+OSWRCH = &FFEE
+OSWORD = &FFF1
+OSBYTE = &FFF4
+OSCLI = &FFF7
 
 .l_1900
 
@@ -91,7 +91,7 @@ oscli = &FFF7
  LDA #&90
  LDX #&FF
  LDY #&01
- JSR osbyte
+ JSR OSBYTE
  LDA #LO(l_1900)
  STA &70
  LDA #HI(l_1900)
@@ -101,14 +101,14 @@ oscli = &FFF7
 .vdu_loop
 
  LDA (&70),Y
- JSR oswrch
+ JSR OSWRCH
  INY 
  CPY #&43
  BNE vdu_loop
  JSR seed
  LDA #&10
  LDX #&02
- JSR osbyte
+ JSR OSBYTE
  LDA #&60
  STA ind2v
  LDA #HI(ind2v)
@@ -137,7 +137,7 @@ oscli = &FFF7
  LDX #&00
  JSR osb_set
  LDA #&77
- JSR osbyte
+ JSR OSBYTE
  JSR or789
  LDA #&00
  STA &70
@@ -188,22 +188,22 @@ oscli = &FFF7
  LDX #LO(envelope1)
  LDY #HI(envelope1)
  LDA #&08
- JSR osword
+ JSR OSWORD
  LDX #LO(envelope2)
  LDY #HI(envelope2)
  LDA #&08
- JSR osword
+ JSR OSWORD
  LDX #LO(envelope3)
  LDY #HI(envelope3)
  LDA #&08
- JSR osword
+ JSR OSWORD
  LDX #LO(envelope4)
  LDY #HI(envelope4)
  LDA #&08
- JSR osword
+ JSR OSWORD
  LDX #LO(l_1d44)
  LDY #HI(l_1d44)
- JSR oscli
+ JSR OSCLI
  LDA #&F0	\ set up DDRB
  STA &FE62
  LDA #0	\ Set up palatte flags
@@ -231,7 +231,7 @@ oscli = &FFF7
  CLI 
  LDA #0	\ test for BBC Master
  LDX #1
- JSR osbyte	\ get OS version
+ JSR OSBYTE	\ get OS version
  CPX #3
  BCC not_master
  LDX #0	\ copy master code to DD00
@@ -246,7 +246,7 @@ oscli = &FFF7
  LDA #&8F	\ service call
  LDX #&21	\ ?
  LDY #&C0	\ ? top of absolute workspace
- JSR osbyte	\ ? in XY
+ JSR OSBYTE	\ ? in XY
  STX put0+1	\ modify workspace save address
  STX put1+1
  STX put2+1
@@ -280,13 +280,13 @@ oscli = &FFF7
  LDA #&EA	\ test for tube
  LDY #&FF
  LDX #&00
- JSR osbyte
+ JSR OSBYTE
  TXA
  BNE tube_go
  LDA #&AC	\ keyboard translation table
  LDX #&00
  LDY #&FF
- JSR osbyte
+ JSR OSBYTE
  STX key_io
  STY key_io+&01
  LDA #&00
@@ -327,7 +327,7 @@ oscli = &FFF7
  LDA #&AC	\ keyboard translation table
  LDX #&00
  LDY #&FF
- JSR osbyte
+ JSR OSBYTE
  STX key_tube
  STY key_tube+&01
  \	LDX #LO(tube_400)
@@ -356,7 +356,7 @@ oscli = &FFF7
  \	STA wrchv+&01
  LDX #LO(tube_run)
  LDY #HI(tube_run)
- JMP oscli
+ JMP OSCLI
 
 .tube_run
 
@@ -413,7 +413,7 @@ oscli = &FFF7
 
  LDX #<(l_tcode-tob00+&B00)
  LDY #>(l_tcode-tob00+&B00)
- JSR oscli
+ JSR OSCLI
  JMP &11E6
 
 .l_tcode
@@ -700,7 +700,7 @@ oscli = &FFF7
 .osb_set
 
  LDY #&00
- JMP osbyte
+ JMP OSBYTE
 
 .decode
 
@@ -1084,7 +1084,7 @@ oscli = &FFF7
 
 .brkloop
 
- JSR oswrch
+ JSR OSWRCH
  INY 
  LDA (&FD),Y
  BNE brkloop
