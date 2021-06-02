@@ -8017,7 +8017,7 @@ PRINT "Execute at ", ~LOAD%
 PRINT "Reload at ", ~LOAD_B%
 
 PRINT "S.ELTB ", ~CODE_B%, " ", ~P%, " ", ~LOAD%, " ", ~LOAD_B%
-\SAVE "elite-a/T.ELTB.bin", CODE_B%, P%, LOAD%
+\SAVE "output/T.ELTB.bin", CODE_B%, P%, LOAD%
 
 \ ******************************************************************************
 \
@@ -13858,6 +13858,8 @@ LOAD_D% = LOAD% + P% - CODE%
 \   err                 Beep, pause and go to the docking bay (i.e. show the
 \                       Status Mode screen)
 \
+\   pres+3              AJD
+\
 \ ******************************************************************************
 
 .EQSHP
@@ -14037,8 +14039,8 @@ LOAD_D% = LOAD% + P% - CODE%
 
  LDY #124               \ Set Y to recursive token 124 ("ALL")
 
- CPX new_missiles       \ AJD, convert pres to pres+2 or pres+3
- BCS pres2
+ CPX new_missiles       \ AJD
+ BCS pres+3
 
  STX NOMSL              \ Otherwise update the number of missiles in NOMSL
 
@@ -14108,8 +14110,6 @@ LOAD_D% = LOAD% + P% - CODE%
 .pres
 
  INC new_hold           \ AJD
-
-.pres2
 
                         \ If we get here we need to show an error to say that
                         \ item number A is already present, where the item's
@@ -24582,6 +24582,7 @@ LOAD_G% = LOAD% + P% - CODE%
  LDA new_range
  STA QQ14
  JSR msblob
+
  JMP BAY
 
 \ ******************************************************************************
@@ -24720,9 +24721,9 @@ LOAD_G% = LOAD% + P% - CODE%
  LDA #&6F
  JSR DETOK
  JSR NLIN4
- \	LDA #&80
- \	STA QQ17
+
  JSR vdu_80
+
  LDA QQ26
  EOR QQ0
  EOR QQ1
@@ -24982,6 +24983,7 @@ LOAD_G% = LOAD% + P% - CODE%
  JSR cour_dock
  JSR DORND
  STA QQ26
+
  LDX #&00
  STX &96
 

@@ -120,8 +120,9 @@ f9 = &77                \ Internal key number for red key f9 (Inventory)
 NRU% = 25               \ The number of planetary systems with extended system
                         \ description overrides in the RUTOK table
 
-VE = &57                \ The obfuscation byte used to hide the extended tokens
-                        \ table from crackers viewing the binary code
+VE = 0                  \ The obfuscation byte used to hide the extended tokens
+                        \ table from crackers viewing the binary code, which is
+                        \ zero in Elite-A as the token table is not obfuscated
 
 LL = 30                 \ The length of lines (in characters) of justified text
                         \ in the extended tokens system
@@ -2213,6 +2214,15 @@ tube_r4d = &FEFF
                         \ so jump to BAY to go to the docking bay (i.e. show the
                         \ Status Mode screen)
 
+\ ******************************************************************************
+\
+\       Name: scramble
+\       Type: Subroutine
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .scramble
 
  STA save_lock
@@ -2235,20 +2245,54 @@ tube_r4d = &FEFF
 
  RTS                    \ Return from the subroutine
 
+\ ******************************************************************************
+\
+\       Name: write_msg3
+\       Type: Subroutine
+\   Category: Elite-A
+\    Summary: Print an extended recursive token from the msg_3 token table
+\  Deep dive: Extended text tokens
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   A                   The recursive token to be printed, in the range 0-255
+\
+\ Returns:
+\
+\   A                   A is preserved
+\
+\   Y                   Y is preserved
+\
+\   V(1 0)              V(1 0) is preserved
+\
+\ ******************************************************************************
+
 .write_msg3
 
+ PHA                    \ Store A on the stack, so we can retrieve it later
+
+ TAX                    \ Copy the token number from A into X
+
+ TYA                    \ Store Y on the stack
  PHA
- TAX
- TYA
+
+ LDA V                  \ Store V(1 0) on the stack
  PHA
- LDA &22
+ LDA V+1
  PHA
- LDA &23
- PHA
- LDA #LO(msg_3)
- STA &22
- LDA #HI(msg_3)
- BNE DTEN
+
+ LDA #LO(msg_3)         \ Set V to the low byte of RUTOK
+ STA V
+
+ LDA #HI(msg_3)         \ Set A to the high byte of RUTOK
+
+ BNE DTEN               \ Call DTEN to print token number X from the RUTOK
+                        \ table and restore the values of A, Y and V(1 0) from
+                        \ the stack, returning from the subroutine using a tail
+                        \ call (this BNE is effectively a JMP as A is never
+                        \ zero)
 
 \ ******************************************************************************
 \
@@ -4569,9 +4613,27 @@ tube_r4d = &FEFF
 
  RTS                    \ Return from the subroutine
 
+\ ******************************************************************************
+\
+\       Name: plf2
+\       Type: Subroutine
+\   Category: Text
+\    Summary: Print text followed by a newline and indent of 6 characters
+\
+\ ------------------------------------------------------------------------------
+\
+\ Print a text token followed by a newline, and indent the next line to text
+\ column 6.
+\
+\ Arguments:
+\
+\   A                   The text token to be printed
+\
+\ ******************************************************************************
+
 .plf2
 
- STX &93
+ STX &93                \ AJD
  STA &96
  JSR TT27
  LDX &87
@@ -4600,10 +4662,11 @@ tube_r4d = &FEFF
  ROR A
  TAX
  JSR MCASH
- INC new_hold	\**
+ INC new_hold
  LDX &93
  LDA #&00
  STA LASER,X
+
  JSR update_pod
 
 .status_no
@@ -6763,7 +6826,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
  LDX #&02
 
-.l_200e
+.HAL1
 
  STX &84
  LDA #&82
@@ -6779,10 +6842,10 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  LDX &84
  INX
  CPX #&0D
- BCC l_200e
+ BCC HAL1
  LDA #&10
 
-.l_204e
+.HAL6
 
  STA &84
  LDA #&9B
@@ -6792,75 +6855,170 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  LDA &84
  CLC
  ADC #&10
- BNE l_204e
+ BNE HAL6
  RTS
+
+\ ******************************************************************************
+\
+\       Name: HAS1
+\       Type: Subroutine
+\   Category: Ship hanger
+\    Summary: Draw a ship in the ship hanger
+\
+\ ------------------------------------------------------------------------------
+\
+\ The ship's position within the hanger is determined by the arguments and the
+\ size of the ship's targetable area, as follows:
+\
+\   * The x-coordinate is (x_sign x_hi 0) from the arguments, so the ship can be
+\     left of centre or right of centre
+\
+\   * The y-coordinate is negative and is lower down the screen for smaller
+\     ships, so smaller ships are drawn closer to the ground (because they are)
+\
+\   * The z-coordinate is positive, with both z_hi (which is 1 or 2) and z_lo
+\     coming from the arguments
+\
+\ Arguments:
+\
+\   XX15                Bits 0-7 = Ship's z_lo
+\                       Bit 0    = Ship's x_sign
+\
+\   XX15+1              Bits 0-7 = Ship's x_hi
+\                       Bit 0    = Ship's z_hi (1 if clear, or 2 if set)
+\
+\   XX15+2              Non-zero = Ship type to draw
+\                       0        = Don't draw anything
+\
+\ ******************************************************************************
 
 .HAS1
 
- JSR ZINF
- LDA &34
- STA &4C
- LSR A
- ROR &48
- LDA &35
- STA &46
- LSR A
- LDA #&01
- ADC #&00
- STA &4D
- LDA #&80
- STA &4B
- STA &9A
- LDA #&0B
- STA &68
- JSR DORND
- STA &84
+ JSR ZINF               \ Call ZINF to reset the INWK ship workspace and reset
+                        \ the orientation vectors, with nosev pointing out of
+                        \ the screen, so this puts the ship flat on the
+                        \ horizontal deck (the y = 0 plane) with its nose
+                        \ pointing towards us
+
+ LDA XX15               \ Set z_lo = XX15
+ STA INWK+6
+
+ LSR A                  \ Set the sign bit of x_sign to bit 0 of A
+ ROR INWK+2
+
+ LDA XX15+1             \ Set x_hi = XX15+1
+ STA INWK
+
+ LSR A                  \ Set z_hi = 1 + bit 0 of XX15+1
+ LDA #1
+ ADC #0
+ STA INWK+7
+
+ LDA #%10000000         \ Set bit 7 of y_sign, so y is negative
+ STA INWK+5
+
+ STA RAT2               \ Set RAT2 = %10000000, so the yaw calls in HAL5 below
+                        \ are negative
+
+ LDA #&B                \ Set the ship line heap pointer in INWK(35 34) to point
+ STA INWK+34            \ to &0B00
+
+ JSR DORND              \ We now perform a random number of small angle (3.6
+ STA XSAV               \ degree) rotations to spin the ship on the deck while
+                        \ keeping it flat on the deck (a bit like spinning a
+                        \ bottle), so we set XSAV to a random number between 0
+                        \ and 255 for the number of small yaw rotations to
+                        \ perform, so the ship could be pointing in any
+                        \ direction by the time we're done
 
 .HAL5
 
- LDX #&15
- LDY #&09
+ LDX #21                \ Rotate (sidev_x, nosev_x) by a small angle (yaw)
+ LDY #9
  JSR MVS5
- LDX #&17
- LDY #&0B
+
+ LDX #23                \ Rotate (sidev_y, nosev_y) by a small angle (yaw)
+ LDY #11
  JSR MVS5
- LDX #&19
- LDY #&0D
+
+ LDX #25                \ Rotate (sidev_z, nosev_z) by a small angle (yaw)
+ LDY #13
  JSR MVS5
- DEC &84
- BNE HAL5
- LDY &36
- BEQ HA1
- LDX #&04
+
+ DEC XSAV               \ Decrement the yaw counter in XSAV
+
+ BNE HAL5               \ Loop back to yaw a little more until we have yawed
+                        \ by the number of times in XSAV
+
+ LDY XX15+2             \ Set Y = XX15+2, the ship type of the ship we need to
+                        \ draw
+
+ BEQ HA1                \ If Y = 0, return from the subroutine (as HA1 contains
+                        \ an RTS)
+
+                        \ We now work our way through the ship blueprints table
+                        \ for the hanger, counting valid blueprints until we
+                        \ have found the Y-th valid blueprint (we do this as the
+                        \ hanger blueprint table at XX21 is not fully populated,
+                        \ so the Y-th ship is not necessarily at position Y)
+
+ LDX #4                 \ We can start looking from ship blueprint 3, because we
+                        \ don't show ship 1 (missile) or ship 2 (space station)
+                        \ in the hanger. Setting X to 4, which then gets
+                        \ incremented to 6, will start us at XX21(5 4), which is
+                        \ the address of ship blueprint 3 (escape pod)
 
 .hloop
 
- INX
- INX
- LDA XX21-2,X
- STA &1E
- LDA XX21-1,X
- STA &1F
- BEQ hloop
- DEY
- BNE hloop
- LDY #&01
- LDA (&1E),Y
- STA &81
- INY
- LDA (&1E),Y
- STA &82
- JSR LL5
- LDA #&64
- SBC &81
- LSR A
- STA &49
- JSR TIDY
- JMP LL9         \ Same as LL9_FLIGHT
+ INX                    \ Increment X by 2 to point to the next blueprint in the
+ INX                    \ table
+
+ LDA XX21-2,X           \ Set XX0(1 0) to the X-th address in the ship blueprint
+ STA XX0                \ address lookup table at XX21, so XX0(1 0) now points
+ LDA XX21-1,X           \ to the blueprint for the ship we need to draw
+ STA XX0+1
+
+ BEQ hloop              \ If the high byte of the blueprint address is 0, then
+                        \ the blueprint for this ship is not available, so jump
+                        \ back to hloop to try the next ship along in the table
+
+ DEY                    \ We have found a valid blueprint, so decrement the ship
+                        \ number that we are looking for in Y
+
+ BNE hloop              \ If Y is not yet zero, we still haven't found the Y-th
+                        \ valid blueprint, so loop back to hloop to try the next
+                        \ ship along in the table
+
+ LDY #1                 \ Set Q = ship byte #1
+ LDA (XX0),Y
+ STA Q
+
+ INY                    \ Set R = ship byte #2
+ LDA (XX0),Y            \
+ STA R                  \ so (R Q) contains the ship's targetable area, which is
+                        \ a square number
+
+ JSR LL5                \ Set Q = SQRT(R Q)
+
+ LDA #100               \ Set y_lo = (100 - Q) / 2
+ SBC Q                  \
+ LSR A                  \ so the bigger the ship's targetable area, the smaller
+ STA INWK+3             \ the magnitude of the y-coordinate, so because we set
+                        \ y_sign to be negative above, this means smaller ships
+                        \ are drawn lower down, i.e. closer to the ground, while
+                        \ larger ships are drawn higher up, as you would expect
+
+ JSR TIDY               \ Call TIDY to tidy up the orientation vectors, to
+                        \ prevent the ship from getting elongated and out of
+                        \ shape due to the imprecise nature of trigonometry
+                        \ in assembly language
+
+ JMP LL9                \ Jump to LL9 to display the ship and return from the
+                        \ subroutine using a tail call
 
 .HA1
 
- RTS
+ RTS                    \ Return from the subroutine
 
 .UNWISE
 
@@ -9724,6 +9882,15 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  JMP FRCE               \ "pressed" to red key f9 (so we show the Inventory
                         \ screen)
 
+\ ******************************************************************************
+\
+\       Name: sell_yn
+\       Type: Subroutine
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .sell_yn
 
  LDA #&CD
@@ -9866,6 +10033,15 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  STA R
 
  RTS                    \ Return from the subroutine
+
+\ ******************************************************************************
+\
+\       Name: sell_jump
+\       Type: Subroutine
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
 
 .sell_jump
 
@@ -11654,6 +11830,8 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 \   err                 Beep, pause and go to the docking bay (i.e. show the
 \                       Status Mode screen)
 \
+\   pres+3              AJD
+\
 \ ******************************************************************************
 
 .EQSHP
@@ -11834,8 +12012,8 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
  LDY #124               \ Set Y to recursive token 124 ("ALL")
 
- CPX new_missiles       \ AJD, convert pres to pres+2 or pres+3
- BCS pres2
+ CPX new_missiles       \ AJD
+ BCS pres+3
 
  STX NOMSL              \ Otherwise update the number of missiles in NOMSL
 
@@ -11905,8 +12083,6 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 .pres
 
  INC new_hold           \ AJD
-
-.pres2
 
                         \ If we get here we need to show an error to say that
                         \ item number A is already present, where the item's
@@ -14856,16 +15032,50 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
  JMP me3                \ Jump back into the main spawning loop at TT100
 
+\ ******************************************************************************
+\
+\       Name: Main game loop (Part 2 of 6)
+\       Type: Subroutine
+\   Category: Main loop
+\    Summary: Update the main loop counters
+\  Deep dive: Program flow of the main game loop
+\             Ship data blocks
+\
+\ ------------------------------------------------------------------------------
+\
+\ This section covers the following:
+\
+\   * Update the main loop counters
+\
+\ Other entry points:
+\
+\   TT100               The entry point for the start of the main game loop,
+\                       which calls the main flight loop and the moves into the
+\                       spawning routine
+\
+\   me3                 Used by me2 to jump back into the main game loop after
+\                       printing an in-flight message
+\
+\ ******************************************************************************
+
 .TT100
 
- DEC &034A
- BEQ me2
- BPL me3
- INC &034A
+ DEC DLY                \ Decrement the delay counter in DLY, so any in-flight
+                        \ messages get removed once the counter reaches zero
+
+ BEQ me2                \ If DLY is now 0, jump to me2 to remove any in-flight
+                        \ message from the space view, and once done, return to
+                        \ me3 below, skipping the following two instructions
+
+ BPL me3                \ If DLY is positive, jump to me3 to skip the next
+                        \ instruction
+
+ INC DLY                \ If we get here, DLY is negative, so we have gone too
+                        \ and need to increment DLY back to 0
 
 .me3
 
- DEC &8A
+ DEC MCNT               \ Decrement the main loop counter in MCNT
 
 \ ******************************************************************************
 \
@@ -16250,6 +16460,15 @@ ENDIF
  JMP BRKBK              \ Jump to BRKBK to set BRKV back to the standard BRKV
                         \ handler for the game, and return from the subroutine
                         \ using a tail call
+
+\ ******************************************************************************
+\
+\       Name: confirm
+\       Type: Subroutine
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
 
 .confirm
 
@@ -21344,7 +21563,14 @@ ENDMACRO
 
  RTS                    \ Return from the subroutine
 
- \ additions start here
+\ ******************************************************************************
+\
+\       Name: n_buyship
+\       Type: Subroutine
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
 
 .n_buyship
 
@@ -21452,8 +21678,19 @@ ENDMACRO
  LDA new_range
  STA QQ14
  JSR msblob
+
  JSR update_pod
+
  JMP BAY
+
+\ ******************************************************************************
+\
+\       Name: n_load
+\       Type: Subroutine
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
 
 .n_load
 
@@ -21487,7 +21724,7 @@ ENDMACRO
  LDX count_offs,Y
  LDA LASER,X
  BEQ count_sys
- DEC new_hold	\**
+ DEC new_hold
 
 .count_sys
 
@@ -21495,9 +21732,27 @@ ENDMACRO
  BPL count_lasers
  RTS
 
+\ ******************************************************************************
+\
+\       Name: count_offs
+\       Type: Variable
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .count_offs
 
  EQUB &00, &01, &02, &03, &06, &18, &19, &1A, &1B, &1C, &1D, &1E
+
+\ ******************************************************************************
+\
+\       Name: n_name
+\       Type: Subroutine
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
 
 .n_name
 
@@ -21517,6 +21772,15 @@ ENDMACRO
  BNE n_lprint
  RTS
 
+\ ******************************************************************************
+\
+\       Name: n_price
+\       Type: Subroutine
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .n_price
 
  \ put price 0 <= Y <= &C into 40-43
@@ -21532,6 +21796,15 @@ ENDMACRO
  BPL n_lprice
  RTS
 
+\ ******************************************************************************
+\
+\       Name: cour_buy
+\       Type: Subroutine
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .cour_buy
 
  LDA cmdr_cour
@@ -21546,8 +21819,10 @@ ENDMACRO
  LDA #&6F
  JSR DETOK
  JSR NLIN4
+
  LDA #&80
  STA QQ17
+
  LDA QQ26
  EOR QQ0
  EOR QQ1
@@ -21625,7 +21900,7 @@ ENDMACRO
  INC &4C
  BEQ cour_menu
  DEC &46
- BNE cour_count	
+ BNE cour_count
  LDX &49
  LDA &6F
  CMP QQ0
@@ -21736,6 +22011,15 @@ ENDMACRO
  STA &46
  JMP cour_loop
 
+\ ******************************************************************************
+\
+\       Name: cour_dock
+\       Type: Subroutine
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .cour_dock
 
  LDA cmdr_cour
@@ -21780,6 +22064,15 @@ ENDMACRO
 
  RTS
 
+\ ******************************************************************************
+\
+\       Name: stay_here
+\       Type: Subroutine
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .stay_here
 
  LDX #&F4
@@ -21789,6 +22082,7 @@ ENDMACRO
  JSR cour_dock
  JSR DORND
  STA QQ26
+
  JSR GVL
 
 .stay_quit
@@ -21893,6 +22187,15 @@ ENDMACRO
 
  RTS                    \ Return from the subroutine
 
+\ ******************************************************************************
+\
+\       Name: new_offsets
+\       Type: Variable
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .new_offsets
 
  EQUB   0,  13,  26,  39,  52,  65,  78,  91
@@ -21903,6 +22206,15 @@ ENDMACRO
  \ Pulse, Beam, Military, Mining Lasers, Mounts, Missiles
  \ Shields, Energy, Speed, Hold, Range, Costs
  \ Manouvre-h, Manoevre-l	\, Spare, Spare
+
+\ ******************************************************************************
+\
+\       Name: new_ships
+\       Type: Variable
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
 
 .new_ships
 
@@ -22006,6 +22318,15 @@ ELIF _RELEASED
 
 ENDIF
 
+\ ******************************************************************************
+\
+\       Name: new_details
+\       Type: Variable
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .new_details
 
  EQUB &0E, &8E, &92, &19, &02, &02	\ adder
@@ -22096,1016 +22417,8333 @@ ELIF _RELEASED
 
 ENDIF
 
-\ a.qcode_3
+\ ******************************************************************************
+\
+\       Name: EJMP
+\       Type: Macro
+\   Category: Text
+\    Summary: Macro definition for jump tokens in the extended token table
+\  Deep dive: Extended text tokens
+\
+\ ------------------------------------------------------------------------------
+\
+\ The following macro is used when building the extended token table:
+\
+\   EJMP n              Insert a jump to address n in the JMTB table
+\
+\ See the deep dive on "Printing extended text tokens" for details on how jump
+\ tokens are stored in the extended token table.
+\
+\ Arguments:
+\
+\   n                   The jump number to insert into the table
+\
+\ ******************************************************************************
+
+MACRO EJMP n
+
+  EQUB n EOR VE
+
+ENDMACRO
+
+\ ******************************************************************************
+\
+\       Name: ECHR
+\       Type: Macro
+\   Category: Text
+\    Summary: Macro definition for characters in the extended token table
+\  Deep dive: Extended text tokens
+\
+\ ------------------------------------------------------------------------------
+\
+\ The following macro is used when building the extended token table:
+\
+\   ECHR 'x'            Insert ASCII character "x"
+\
+\ To include an apostrophe, use a backtick character, as in i.e. CHAR '`'.
+\
+\ See the deep dive on "Printing extended text tokens" for details on how
+\ characters are stored in the extended token table.
+\
+\ Arguments:
+\
+\   'x'                 The character to insert into the table
+\
+\ ******************************************************************************
+
+MACRO ECHR x
+
+  IF x = '`'
+    EQUB 39 EOR VE
+  ELSE
+    EQUB x EOR VE
+  ENDIF
+
+ENDMACRO
+
+\ ******************************************************************************
+\
+\       Name: ETOK
+\       Type: Macro
+\   Category: Text
+\    Summary: Macro definition for recursive tokens in the extended token table
+\  Deep dive: Extended text tokens
+\
+\ ------------------------------------------------------------------------------
+\
+\ The following macro is used when building the extended token table:
+\
+\   ETOK n              Insert extended recursive token [n]
+\
+\ See the deep dive on "Printing extended text tokens" for details on how
+\ recursive tokens are stored in the extended token table.
+\
+\ Arguments:
+\
+\   n                   The number of the recursive token to insert into the
+\                       table, in the range 129 to 214
+\
+\ ******************************************************************************
+
+MACRO ETOK n
+
+  EQUB n EOR VE
+
+ENDMACRO
+
+\ ******************************************************************************
+\
+\       Name: ETWO
+\       Type: Macro
+\   Category: Text
+\    Summary: Macro definition for two-letter tokens in the extended token table
+\  Deep dive: Extended text tokens
+\
+\ ------------------------------------------------------------------------------
+\
+\ The following macro is used when building the extended token table:
+\
+\   ETWO 'x', 'y'       Insert two-letter token "xy"
+\
+\ The newline token can be entered using ETWO '-', '-'.
+\
+\ See the deep dive on "Printing extended text tokens" for details on how
+\ two-letter tokens are stored in the extended token table.
+\
+\ Arguments:
+\
+\   'x'                 The first letter of the two-letter token to insert into
+\                       the table
+\
+\   'y'                 The second letter of the two-letter token to insert into
+\                       the table
+\
+\ ******************************************************************************
+
+MACRO ETWO t, k
+
+  IF t = '-' AND k = '-' : EQUB 215 EOR VE : ENDIF
+  IF t = 'A' AND k = 'B' : EQUB 216 EOR VE : ENDIF
+  IF t = 'O' AND k = 'U' : EQUB 217 EOR VE : ENDIF
+  IF t = 'S' AND k = 'E' : EQUB 218 EOR VE : ENDIF
+  IF t = 'I' AND k = 'T' : EQUB 219 EOR VE : ENDIF
+  IF t = 'I' AND k = 'L' : EQUB 220 EOR VE : ENDIF
+  IF t = 'E' AND k = 'T' : EQUB 221 EOR VE : ENDIF
+  IF t = 'S' AND k = 'T' : EQUB 222 EOR VE : ENDIF
+  IF t = 'O' AND k = 'N' : EQUB 223 EOR VE : ENDIF
+  IF t = 'L' AND k = 'O' : EQUB 224 EOR VE : ENDIF
+  IF t = 'N' AND k = 'U' : EQUB 225 EOR VE : ENDIF
+  IF t = 'T' AND k = 'H' : EQUB 226 EOR VE : ENDIF
+  IF t = 'N' AND k = 'O' : EQUB 227 EOR VE : ENDIF
+
+  IF t = 'A' AND k = 'L' : EQUB 228 EOR VE : ENDIF
+  IF t = 'L' AND k = 'E' : EQUB 229 EOR VE : ENDIF
+  IF t = 'X' AND k = 'E' : EQUB 230 EOR VE : ENDIF
+  IF t = 'G' AND k = 'E' : EQUB 231 EOR VE : ENDIF
+  IF t = 'Z' AND k = 'A' : EQUB 232 EOR VE : ENDIF
+  IF t = 'C' AND k = 'E' : EQUB 233 EOR VE : ENDIF
+  IF t = 'B' AND k = 'I' : EQUB 234 EOR VE : ENDIF
+  IF t = 'S' AND k = 'O' : EQUB 235 EOR VE : ENDIF
+  IF t = 'U' AND k = 'S' : EQUB 236 EOR VE : ENDIF
+  IF t = 'E' AND k = 'S' : EQUB 237 EOR VE : ENDIF
+  IF t = 'A' AND k = 'R' : EQUB 238 EOR VE : ENDIF
+  IF t = 'M' AND k = 'A' : EQUB 239 EOR VE : ENDIF
+  IF t = 'I' AND k = 'N' : EQUB 240 EOR VE : ENDIF
+  IF t = 'D' AND k = 'I' : EQUB 241 EOR VE : ENDIF
+  IF t = 'R' AND k = 'E' : EQUB 242 EOR VE : ENDIF
+  IF t = 'A' AND k = '?' : EQUB 243 EOR VE : ENDIF
+  IF t = 'E' AND k = 'R' : EQUB 244 EOR VE : ENDIF
+  IF t = 'A' AND k = 'T' : EQUB 245 EOR VE : ENDIF
+  IF t = 'E' AND k = 'N' : EQUB 246 EOR VE : ENDIF
+  IF t = 'B' AND k = 'E' : EQUB 247 EOR VE : ENDIF
+  IF t = 'R' AND k = 'A' : EQUB 248 EOR VE : ENDIF
+  IF t = 'L' AND k = 'A' : EQUB 249 EOR VE : ENDIF
+  IF t = 'V' AND k = 'E' : EQUB 250 EOR VE : ENDIF
+  IF t = 'T' AND k = 'I' : EQUB 251 EOR VE : ENDIF
+  IF t = 'E' AND k = 'D' : EQUB 252 EOR VE : ENDIF
+  IF t = 'O' AND k = 'R' : EQUB 253 EOR VE : ENDIF
+  IF t = 'Q' AND k = 'U' : EQUB 254 EOR VE : ENDIF
+  IF t = 'A' AND k = 'N' : EQUB 255 EOR VE : ENDIF
+
+ENDMACRO
+
+\ ******************************************************************************
+\
+\       Name: ERND
+\       Type: Macro
+\   Category: Text
+\    Summary: Macro definition for random tokens in the extended token table
+\  Deep dive: Extended text tokens
+\
+\ ------------------------------------------------------------------------------
+\
+\ The following macro is used when building the extended token table:
+\
+\   ERND n              Insert recursive token [n]
+\
+\                         * Tokens 0-123 get stored as n + 91
+\
+\ See the deep dive on "Printing extended text tokens" for details on how
+\ random tokens are stored in the extended token table.
+\
+\ Arguments:
+\
+\   n                   The number of the random token to insert into the
+\                       table, in the range 0 to 37
+\
+\ ******************************************************************************
+
+MACRO ERND n
+
+  EQUB (n + 91) EOR VE
+
+ENDMACRO
+
+\ ******************************************************************************
+\
+\       Name: TOKN
+\       Type: Macro
+\   Category: Text
+\    Summary: Macro definition for standard tokens in the extended token table
+\  Deep dive: Printing text tokens
+\
+\ ------------------------------------------------------------------------------
+\
+\ The following macro is used when building the recursive token table:
+\
+\   TOKN n              Insert recursive token [n]
+\
+\                         * Tokens 0-95 get stored as n + 160
+\
+\                         * Tokens 128-145 get stored as n - 114
+\
+\                         * Tokens 96-127 get stored as n
+\
+\ See the deep dive on "Printing text tokens" for details on how recursive
+\ tokens are stored in the recursive token table.
+\
+\ Arguments:
+\
+\   n                   The number of the recursive token to insert into the
+\                       table, in the range 0 to 145
+\
+\ ******************************************************************************
+
+MACRO TOKN n
+
+  IF n >= 0 AND n <= 95
+    t = n + 160
+  ELIF n >= 128
+    t = n - 114
+  ELSE
+    t = n
+  ENDIF
+
+  EQUB t EOR VE
+
+ENDMACRO
+
+\ ******************************************************************************
+\
+\       Name: TKN1
+\       Type: Variable
+\   Category: Text
+\    Summary: The first extended token table for recursive tokens 0-255 (DETOK)
+\  Deep dive: Extended text tokens
+\
+\ ******************************************************************************
 
 .TKN1
 
- EQUB &00
- EQUS &09, &0B, &01, &08, " ", &F1, "SK AC", &E9, "SS ME", &E1, &D7, &0A, &02, "1. ", &95, &D7, "2. SA", &FA
- EQUS " ", &9A, " ", &04, &D7, "3. C", &F5, "A", &E0, "GUE", &D7, "4. DEL", &DD, "E", &D0, "FI", &E5, &D7, "5. E"
- EQUS "X", &DB, &D7
- EQUB &00
- EQUS &0C, "WHICH ", &97, "?"
- EQUB &00
- \	EQUA "ARE YOU SURE?"
- EQUS &EE, "E ", &B3, " SU", &F2, "?"
- EQUB &00
- EQUS &96, &97, " ", &10, &98, &D7
- EQUB &00
- EQUS &B0, "m", &CA, "n", &B1
- EQUB &00
- EQUS "  ", &95, " ", &01, "(Y/N)?", &02, &0C, &0C
- EQUB &00
- EQUS "P", &F2, "SS SPA", &E9, " ", &FD, " FI", &F2, ",", &9A, ".", &0C, &0C
- EQUB &00
- EQUS &9A, "'S", &C8
- EQUB &00
- EQUS &15, "FI", &E5, &C9, "DEL", &DD, "E?"
- EQUB &00
- EQUS &17, &0E, &02, "G", &F2, &DD, &F0, "GS", &D5, &B2, &13, "I ", &F7, "G", &D0, "MOM", &F6, "T OF ", &B3, "R V", &E4
- EQUS "U", &D8, &E5, " ", &FB, "ME", &CC, "WE W", &D9, "LD LIKE ", &B3, &C9, "DO", &D0, "L", &DB, "T", &E5, " JO"
- EQUS "B F", &FD, " ", &EC, &CC, &93, &CF, " ", &B3, " ", &DA, "E HE", &F2, &CA, "A", &D2, "MODEL, ", &93
- EQUS &13, "C", &DF, &DE, "RICT", &FD, ", E", &FE, "IP", &C4, "WI", &E2, &D0, "TOP ", &DA, "CR", &DD, &D2, "SHI"
- EQUS "ELD G", &F6, &F4, &F5, &FD, &CC, "UNF", &FD, "TUN", &F5, "ELY ", &DB, "'S ", &F7, &F6, " ", &DE, "O"
- EQUS "L", &F6, &CC, &16, &DB, " W", &F6, "T MISS", &C3, "FROM ", &D9, "R ", &CF, " Y", &EE, "D ", &DF, " ", &13, &E6
- EQUS &F4, " FI", &FA, " M", &DF, &E2, "S AGO", &B2, &1C, &CC, &B3, "R MISSI", &DF, ", SH", &D9, "LD "
- EQUS &B3, " DECIDE", &C9, "AC", &E9, "PT ", &DB, ", IS", &C9, &DA, "EK", &B2, "D", &ED, "TROY ", &94, &CF
- EQUS &CC, &B3, " A", &F2, " CAU", &FB, &DF, &C4, &E2, &F5, " ", &DF, "LY ", &06, "u", &05, "S W", &DC, "L P", &F6
- EQUS &DD, &F8, "TE ", &93, "NEW SHIELDS", &B2, &E2, &F5, " ", &93, &13, "C", &DF, &DE, "RICT", &FD
- EQUS &CA, "F", &DB, "T", &C4, "WI", &E2, " ", &FF, " ", &06, "l", &05, &B1, &02, &08, "GOOD LUCK, ", &9A, &D4, &16
- EQUB &00
- EQUS &19, &09, &17, &0E, &02, "  ", &F5, "T", &F6, &FB, &DF, &D5, ". ", &13, "WE HA", &FA, " NE", &C4, "OF ", &B3, "R"
- EQUS " ", &DA, "RVIC", &ED, " AGA", &F0, &CC, "IF ", &B3, " W", &D9, "LD ", &F7, " ", &EB, " GOOD AS", &C9
- EQUS "GO", &C9, &13, &E9, &F4, &F1, " ", &B3, " W", &DC, "L ", &F7, " BRIEF", &FC, &CC, "IF SUC", &E9, "S"
- EQUS "SFUL, ", &B3, " W", &DC, "L ", &F7, " WELL ", &F2, "W", &EE, "D", &FC, &D4, &18
- EQUB &00
- EQUS "(", &13, "C) AC", &FD, "N", &EB, "FT 1984"
- EQUB &00
- EQUS "BY D.B", &F8, &F7, "N & I.", &F7, "LL"
- EQUB &00
- EQUS &15, &91, &C8, &1A
- EQUB &00
- EQUS &19, &09, &17, &0E, &02, "  C", &DF, "G", &F8, "TU", &F9, &FB, &DF, "S ", &9A, "!", &0C, &0C, &E2, &F4, "E", &0D, " W"
- EQUS &DC, "L ", &E4, "WAYS ", &F7, &D0, "P", &F9, &E9, " F", &FD, " ", &B3, " ", &F0, &D3, &CC, &FF, "D ", &EF
- EQUS "Y", &F7, " ", &EB, &DF, &F4, " ", &E2, &FF, " ", &B3, " ", &E2, &F0, "K..", &D4, &18
- EQUB &00
- EQUS "F", &D8, &E5, "D"
- EQUB &00
- EQUS &E3, "T", &D8, &E5
- EQUB &00
- EQUS "WELL K", &E3, "WN"
- EQUB &00
- EQUS "FAMO", &EC
- EQUB &00
- EQUS &E3, "T", &FC
- EQUB &00
- EQUS &FA, "RY"
- EQUB &00
- EQUS "M", &DC, "DLY"
- EQUB &00
- EQUS "MO", &DE
- EQUB &00
- EQUS &F2, "AS", &DF, &D8, "LY"
- EQUB &00
- EQUB &00
- EQUS &A5
- EQUB &00
- EQUS "r"
- EQUB &00
- EQUS "G", &F2, &F5
- EQUB &00
- EQUS "VA", &DE
- EQUB &00
- EQUS "P", &F0, "K"
- EQUB &00
- EQUS &02, "w v", &0D, " ", &B9, "A", &FB, &DF, "S"
- EQUB &00
- EQUS &9C, "S"
- EQUB &00
- EQUS "u"
- EQUB &00
- EQUS &80, " F", &FD, &ED, "TS"
- EQUB &00
- EQUS "O", &E9, &FF, "S"
- EQUB &00
- EQUS "SHYN", &ED, "S"
- EQUB &00
- EQUS "S", &DC, "L", &F0, &ED, "S"
- EQUB &00
- EQUS &EF, "T", &C3, "T", &F8, &F1, &FB, &DF, "S"
- EQUB &00
- EQUS &E0, &F5, "H", &C3, "OF d"
- EQUB &00
- EQUS &E0, &FA, " F", &FD, " d"
- EQUB &00
- EQUS "FOOD B", &E5, "ND", &F4, "S"
- EQUB &00
- EQUS "T", &D9, "RI", &DE, "S"
- EQUB &00
- EQUS "PO", &DD, "RY"
- EQUB &00
- EQUS &F1, "SCOS"
- EQUB &00
- EQUS "l"
- EQUB &00
- EQUS "W", &E4, "K", &C3, &9E
- EQUB &00
- EQUS "C", &F8, "B"
- EQUB &00
- EQUS "B", &F5
- EQUB &00
- EQUS &E0, "B", &DE
- EQUB &00
- EQUS &12
- EQUB &00
- EQUS &F7, "S", &DD
- EQUB &00
- EQUS "P", &F9, "GU", &FC
- EQUB &00
- EQUS &F8, "VAG", &FC
- EQUB &00
- EQUS "CURS", &FC
- EQUB &00
- EQUS "SC", &D9, "RG", &FC
- EQUB &00
- EQUS "q CIV", &DC, " W", &EE
- EQUB &00
- EQUS "h _ `S"
- EQUB &00
- EQUS "A h ", &F1, &DA, "A", &DA
- EQUB &00
- EQUS "q E", &EE, &E2, &FE, "AK", &ED
- EQUB &00
- EQUS "q ", &EB, &F9, "R AC", &FB, "V", &DB, "Y"
- EQUB &00
- EQUS &AF, "] ^"
- EQUB &00
- EQUS &93, &11, " _ `"
- EQUB &00
- EQUS &AF, &C1, "S' b c"
- EQUB &00
- EQUS &02, "z", &0D
- EQUB &00
- EQUS &AF, "k l"
- EQUB &00
- EQUS "JUI", &E9
- EQUB &00
- EQUS "B", &F8, "NDY"
- EQUB &00
- EQUS "W", &F5, &F4
- EQUB &00
- EQUS "B", &F2, "W"
- EQUB &00
- EQUS "G", &EE, "G", &E5, " B", &F9, &DE, &F4, "S"
- EQUB &00
- EQUS &12
- EQUB &00
- EQUS &11, " `"
- EQUB &00
- EQUS &11, " ", &12
- EQUB &00
- EQUS &11, " h"
- EQUB &00
- EQUS "h ", &12
- EQUB &00
- EQUS "F", &D8, "U", &E0, &EC
- EQUB &00
- EQUS "EXO", &FB, "C"
- EQUB &00
- EQUS "HOOPY"
- EQUB &00
- EQUS "U", &E1, "SU", &E4
- EQUB &00
- EQUS "EXC", &DB, &F0, "G"
- EQUB &00
- EQUS "CUIS", &F0, "E"
- EQUB &00
- EQUS "NIGHT LIFE"
- EQUB &00
- EQUS "CASI", &E3, "S"
- EQUB &00
- EQUS "S", &DB, " COMS"
- EQUB &00
- EQUS &02, "z", &0D
- EQUB &00
- EQUS &03
- EQUB &00
- EQUS &93, &91, " ", &03
- EQUB &00
- EQUS &93, &92, " ", &03
- EQUB &00
- EQUS &94, &91
- EQUB &00
- EQUS &94, &92
- EQUB &00
- EQUS "S", &DF, " OF", &D0, "B", &DB, "CH"
- EQUB &00
- EQUS "SC", &D9, "ND", &F2, "L"
- EQUB &00
- EQUS "B", &F9, "CKGU", &EE, "D"
- EQUB &00
- EQUS "ROGUE"
- EQUB &00
- EQUS "WH", &FD, &ED, &DF, " ", &F7, &DD, &E5, " HEAD", &C6, "F", &F9, "P E", &EE, "'D KNA", &FA
- EQUB &00
- EQUS "N UN", &F2, &EF, "RK", &D8, &E5
- EQUB &00
- EQUS " B", &FD, &F0, "G"
- EQUB &00
- EQUS " DULL"
- EQUB &00
- EQUS " TE", &F1, "O", &EC
- EQUB &00
- EQUS " ", &F2, "VOLT", &F0, "G"
- EQUB &00
- EQUS &91
- EQUB &00
- EQUS &92
- EQUB &00
- EQUS "P", &F9, &E9
- EQUB &00
- EQUS "L", &DB, "T", &E5, " ", &91
- EQUB &00
- EQUS "DUMP"
- EQUB &00
- EQUS "I HE", &EE, &D0, "r ", &E0, "OK", &C3, &CF, " APPE", &EE, &C4, &F5, &D1
- EQUB &00
- EQUS "YEAH, I HE", &EE, &D0, "r ", &CF, " ", &E5, "FT", &D1, &D0, " WHI", &E5, " BACK"
- EQUB &00
- EQUS "G", &DD, " ", &B3, "R IR", &DF, " ASS OV", &F4, " TO", &D1
- EQUB &00
- EQUS &EB, "ME s", &D2, &CF, " WAS ", &DA, &F6, " ", &F5, &D1
- EQUB &00
- EQUS "TRY", &D1
- EQUB &00
- EQUS &01, "SPECI", &E4, " C", &EE, "GO"
- EQUB &00
- EQUB &00
- EQUS "C", &EE, "GO V", &E4, "UE:"
- EQUB &00
- EQUS " MO", &F1, "FI", &FC, " BY A.J.C.DUGG", &FF
- EQUB &00
- EQUS "WASP"
- EQUB &00
- EQUS "MO", &E2
- EQUB &00
- EQUS "GRUB"
- EQUB &00
- EQUS &FF, "T"
- EQUB &00
- EQUS &12
- EQUB &00
- EQUS "PO", &DD
- EQUB &00
- EQUS &EE, "TS G", &F8, "DU", &F5, "E"
- EQUB &00
- EQUS "YAK"
- EQUB &00
- EQUS "SNA", &DC
- EQUB &00
- EQUS "SLUG"
- EQUB &00
- EQUS "TROPIC", &E4
- EQUB &00
- EQUS "D", &F6, &DA
- EQUB &00
- EQUS &F8, &F0
- EQUB &00
- EQUS "IMP", &F6, &DD, &F8, "B", &E5
- EQUB &00
- EQUS "EXU", &F7, &F8, "NT"
- EQUB &00
- EQUS "FUNNY"
- EQUB &00
- EQUS "WI", &F4, "D"
- EQUB &00
- EQUS "U", &E1, "SU", &E4
- EQUB &00
- EQUS &DE, &F8, "N", &E7
- EQUB &00
- EQUS "PECULI", &EE
- EQUB &00
- EQUS "F", &F2, &FE, &F6, "T"
- EQUB &00
- EQUS "OCCASI", &DF, &E4
- EQUB &00
- EQUS "UNP", &F2, &F1, "CT", &D8, &E5
- EQUB &00
- EQUS "D", &F2, "ADFUL"
- EQUB &00
- EQUS &AB
- EQUB &00
- EQUS "\ [ F", &FD, " e"
- EQUB &00
- EQUS &8C, &B2, "e"
- EQUB &00
- EQUS "f BY g"
- EQUB &00
- EQUS &8C, " BUT ", &8E
- EQUB &00
- EQUS " Ao p"
- EQUB &00
- EQUS "PL", &FF, &DD
- EQUB &00
- EQUS "W", &FD, "LD"
- EQUB &00
- EQUS &E2, "E "
- EQUB &00
- EQUS &E2, "IS "
- EQUB &00
- EQUS &E0, "AD", &D2, &9A
- EQUB &00
- EQUS &09, &0B, &01, &08
- EQUB &00
- EQUS "DRI", &FA
- EQUB &00
- EQUS " C", &F5, "A", &E0, "GUE"
- EQUB &00
- EQUS "I", &FF
- EQUB &00
- EQUS &13, "COMM", &FF, "D", &F4
- EQUB &00
- EQUS "h"
- EQUB &00
- EQUS "M", &D9, "NTA", &F0
- EQUB &00
- EQUS &FC, "IB", &E5
- EQUB &00
- EQUS "T", &F2, "E"
- EQUB &00
- EQUS "SPOTT", &FC
- EQUB &00
- EQUS "x"
- EQUB &00
- EQUS "y"
- EQUB &00
- EQUS "aOID"
- EQUB &00
- EQUS &7F
- EQUB &00
- EQUS "~"
- EQUB &00
- EQUS &FF, "CI", &F6, "T"
- EQUB &00
- EQUS "EX", &E9, "P", &FB, &DF, &E4
- EQUB &00
- EQUS "EC", &E9, "NTRIC"
- EQUB &00
- EQUS &F0, "G", &F8, &F0, &FC
- EQUB &00
- EQUS "r"
- EQUB &00
- EQUS "K", &DC, "L", &F4
- EQUB &00
- EQUS "DEADLY"
- EQUB &00
- EQUS "EV", &DC
- EQUB &00
- EQUS &E5, &E2, &E4
- EQUB &00
- EQUS "VICIO", &EC
- EQUB &00
- EQUS &DB, "S "
- EQUB &00
- EQUS &0D, &0E, &13
- EQUB &00
- EQUS ".", &0C, &0F
- EQUB &00
- EQUS " ", &FF, "D "
- EQUB &00
- EQUS "Y", &D9
- EQUB &00
- EQUS "P", &EE, "K", &C3, "M", &DD, &F4, "S"
- EQUB &00
- EQUS "D", &EC, "T C", &E0, "UDS"
- EQUB &00
- EQUS "I", &E9, " ", &F7, "RGS"
- EQUB &00
- EQUS "ROCK F", &FD, &EF, &FB, &DF, "S"
- EQUB &00
- EQUS "VOLCA", &E3, &ED
- EQUB &00
- EQUS "PL", &FF, "T"
- EQUB &00
- EQUS "TULIP"
- EQUB &00
- EQUS "B", &FF, &FF, "A"
- EQUB &00
- EQUS "C", &FD, "N"
- EQUB &00
- EQUS &12, "WE", &FC
- EQUB &00
- EQUS &12
- EQUB &00
- EQUS &11, " ", &12
- EQUB &00
- EQUS &11, " h"
- EQUB &00
- EQUS &F0, "HA", &EA, "T", &FF, "T"
- EQUB &00
- EQUS &BF
- EQUB &00
- EQUS &F0, "G "
- EQUB &00
- EQUS &FC, " "
- EQUB &00
- EQUB &00
- EQUB &00
- EQUB &00
- EQUS " NAME? "
- EQUB &00
- EQUS " TO "
- EQUB &00
- EQUS " IS "
- EQUB &00
- EQUS "WAS ", &F9, &DE, " ", &DA, &F6, " ", &F5, " ", &13
- EQUB &00
- EQUS ".", &0C, " ", &13
- EQUB &00
- EQUS "DOCK", &FC
- EQUB &00
- EQUS &01, "(Y/N)?"
- EQUB &00
- EQUS "SHIP"
- EQUB &00
- EQUS " A "
- EQUB &00
- EQUS " ", &F4, "RI", &EC
- EQUB &00
- EQUS " NEW "
- EQUB &00
- EQUS &02, " H", &F4, " ", &EF, "J", &ED, "TY'S SPA", &E9, " NAVY", &0D
- EQUB &00
- EQUS &B1, &08, &01, "  M", &ED, "SA", &E7, " ", &F6, "DS"
- EQUB &00
- EQUS " ", &9A, " ", &04, ", I ", &0D, "AM", &02, " CAPTA", &F0, " ", &1B, " ", &0D, "OF", &D3
- EQUB &00
- EQUB &00
- EQUS &0F, " UNK", &E3, "WN ", &91
- EQUB &00
- EQUS &09, &08, &17, &01, &F0, "COM", &C3, "M", &ED, "SA", &E7
- EQUB &00
- EQUS "CURRU", &E2, &F4, "S"
- EQUB &00
- EQUS "FOSDYKE SMY", &E2, "E"
- EQUB &00
- EQUS "F", &FD, "T", &ED, &FE, "E"
- EQUB &00
- EQUS &CB, &F2, &ED, &F1, &E9
- EQUB &00
- EQUS "IS ", &F7, "LIEV", &FC, &C9, "HA", &FA, " JUMP", &FC, &C9, &94, "G", &E4, "AXY"
- EQUB &00
- EQUS &19, &09, &1D, &0E, &02, "GOOD DAY ", &9A, " ", &04, &CC, "I", &0D, " AM ", &13, "AG", &F6, "T ", &13, "B", &F9, "KE"
- EQUS " OF ", &13, "NAV", &E4, " ", &13, &F0, "TEL", &E5, "G", &F6, &E9, &CC, "AS ", &B3, " K", &E3, "W, ", &93, &13
- EQUS "NAVY HA", &FA, " ", &F7, &F6, " KEEP", &C3, &93, &13, &E2, &EE, "GOIDS OFF ", &B3, "R A"
- EQUS "SS ", &D9, "T ", &F0, " DEEP SPA", &E9, " F", &FD, " ", &EF, "NY YE", &EE, "S ", &E3, "W. ", &13, "WEL"
- EQUS "L ", &93, "S", &DB, "UA", &FB, &DF, " HAS CH", &FF, "G", &FC, &CC, &D9, "R BOYS ", &EE, "E ", &F2
- EQUS "ADY F", &FD, &D0, "P", &EC, "H RIGHT", &C9, &93, "HOME SY", &DE, "EM OF ", &E2, "O", &DA, " MO"
- EQUS &E2, &F4, "S", &CC, &18, &09, &1D, "I", &0D, " HA", &FA, " OBTA", &F0, &C4, &93, "DEF", &F6, &E9, " P", &F9
- EQUS "NS F", &FD, " ", &E2, "EIR ", &13, "HI", &FA, " ", &13, "W", &FD, "LDS", &CC, &93, &F7, &DD, &E5, "S K", &E3
- EQUS "W WE'", &FA, " GOT ", &EB, "ME", &E2, &C3, "BUT ", &E3, "T WH", &F5, &CC, "IF ", &13, "I T", &F8, "N"
- EQUS "SM", &DB, " ", &93, "P", &F9, "NS", &C9, &D9, "R BA", &DA, " ", &DF, " ", &13, &EA, &F2, &F8, " ", &E2, "EY'L"
- EQUS "L ", &F0, "T", &F4, &E9, "PT ", &93, "TR", &FF, "SMISSI", &DF, ". ", &13, "I NE", &FC, &D0, &CF, &C9
- EQUS &EF, "KE ", &93, "RUN", &CC, &B3, "'", &F2, " E", &E5, "CT", &FC, &CC, &93, "P", &F9, "NS A", &F2, " "
- EQUS "UNIPUL", &DA, " COD", &C4, "WI", &E2, &F0, " ", &94, "TR", &FF, "SMISSI", &DF, &CC, &08, &B3, " "
- EQUS "W", &DC, "L ", &F7, " PAID", &CC, "    ", &13, "GOOD LUCK ", &9A, &D4, &18
- EQUB &00
- EQUS &19, &09, &1D, &08, &0E, &0D, &13, "WELL D", &DF, "E ", &9A, &CC, &B3, " HA", &FA, " ", &DA, "RV", &C4, &EC, " "
- EQUS "WELL", &B2, "WE SH", &E4, "L ", &F2, "MEMB", &F4, &CC, "WE ", &F1, "D ", &E3, "T EXPECT ", &93
- EQUS &13, &E2, &EE, "GOIDS", &C9, "F", &F0, "D ", &D9, "T ", &D8, &D9, "T ", &B3, &CC, "F", &FD, " ", &93, "MOM", &F6
- EQUS "T P", &E5, "A", &DA, " AC", &E9, "PT ", &94, &13, "NAVY ", &06, "r", &05, " AS PAYM", &F6, "T", &D4, &18
- EQUB &00
- EQUB &00
- EQUS "SH", &F2, "W"
- EQUB &00
- EQUS &F7, "A", &DE
- EQUB &00
- EQUS &EA, "S", &DF
- EQUB &00
- EQUS "SNAKE"
- EQUB &00
- EQUS "WOLF"
- EQUB &00
- EQUS &E5, "OP", &EE, "D"
- EQUB &00
- EQUS "C", &F5
- EQUB &00
- EQUS "M", &DF, "KEY"
- EQUB &00
- EQUS "GO", &F5
- EQUB &00
- EQUS "FISH"
- EQUB &00
- EQUS "j i"
- EQUB &00
- EQUS &11, " x {"
- EQUB &00
- EQUS &AF, "k y {"
- EQUB &00
- EQUS &7C, " }"
- EQUB &00
- EQUS "j i"
- EQUB &00
- EQUS "ME", &F5
- EQUB &00
- EQUS "CUTL", &DD
- EQUB &00
- EQUS &DE, "EAK"
- EQUB &00
- EQUS "BURG", &F4, "S"
- EQUB &00
- EQUS &EB, "UP"
- EQUB &00
- EQUS "I", &E9
- EQUB &00
- EQUS "MUD"
- EQUB &00
- EQUS "Z", &F4, "O-", &13, "G"
- EQUB &00
- EQUS "VACUUM"
- EQUB &00
- EQUS &11, " ULT", &F8
- EQUB &00
- EQUS "HOCKEY"
- EQUB &00
- EQUS "CRICK", &DD
- EQUB &00
- EQUS "K", &EE, &F5, "E"
- EQUB &00
- EQUS "PO", &E0
- EQUB &00
- EQUS "T", &F6, "NIS"
- EQUB &00
+ EQUB VE                \ Token 0:      ""
+                        \
+                        \ Encoded as:   ""
 
-.l_5338
+ EJMP 9                 \ Token 1:      "{clear screen}
+ EJMP 11                \                {draw box around title}
+ EJMP 1                 \                {all caps}
+ EJMP 8                 \                {tab 6} DISK ACCESS MENU{crlf}
+ ECHR ' '               \                {lf}
+ ETWO 'D', 'I'          \                {sentence case}
+ ECHR 'S'               \                1. LOAD NEW {single cap}COMMANDER{crlf}
+ ECHR 'K'               \                2. SAVE {single cap}COMMANDER
+ ECHR ' '               \                   {commander name}{crlf}
+ ECHR 'A'               \                3. CATALOGUE{crlf}
+ ECHR 'C'               \                4. DELETE A FILE{crlf}
+ ETWO 'C', 'E'          \                5. EXIT{crlf}
+ ECHR 'S'               \               "
+ ECHR 'S'               \
+ ECHR ' '               \ Encoded as:   "{9}{11}{1}{8} <241>SK AC<233>SS ME
+ ECHR 'M'               \                <225><215>{10}{2}1. [149]<215>2. SA
+ ECHR 'E'               \                <250> [154] {4}<215>3. C<245>A<224>GUE
+ ETWO 'N', 'U'          \                <215>4. DEL<221>E[208]FI<229><215>5. EX
+ ETWO '-', '-'          \                <219><215>"
+ EJMP 10
+ EJMP 2
+ ECHR '1'
+ ECHR '.'
+ ECHR ' '
+ ETOK 149
+ ETWO '-', '-'
+ ECHR '2'
+ ECHR '.'
+ ECHR ' '
+ ECHR 'S'
+ ECHR 'A'
+ ETWO 'V', 'E'
+ ECHR ' '
+ ETOK 154
+ ECHR ' '
+ EJMP 4
+ ETWO '-', '-'
+ ECHR '3'
+ ECHR '.'
+ ECHR ' '
+ ECHR 'C'
+ ETWO 'A', 'T'
+ ECHR 'A'
+ ETWO 'L', 'O'
+ ECHR 'G'
+ ECHR 'U'
+ ECHR 'E'
+ ETWO '-', '-'
+ ECHR '4'
+ ECHR '.'
+ ECHR ' '
+ ECHR 'D'
+ ECHR 'E'
+ ECHR 'L'
+ ETWO 'E', 'T'
+ ECHR 'E'
+ ETOK 208
+ ECHR 'F'
+ ECHR 'I'
+ ETWO 'L', 'E'
+ ETWO '-', '-'
+ ECHR '5'
+ ECHR '.'
+ ECHR ' '
+ ECHR 'E'
+ ECHR 'X'
+ ETWO 'I', 'T'
+ ETWO '-', '-'
+ EQUB VE
 
- EQUB &00
+ EJMP 12                \ Token 2:      "{cr}
+ ECHR 'W'               \                WHICH DRIVE?"
+ ECHR 'H'               \
+ ECHR 'I'               \ Encoded as:   "{12}WHICH [151]?"
+ ECHR 'C'
+ ECHR 'H'
+ ECHR ' '
+ ETOK 151
+ ECHR '?'
+ EQUB VE
+
+ ETWO 'A', 'R'          \ Token 3:      "ARE YOU SURE?"
+ ECHR 'E'               \
+ ECHR ' '               \ Encoded as:   "<238>E [179] SU<242>?"
+ ETOK 179
+ ECHR ' '
+ ECHR 'S'
+ ECHR 'U'
+ ETWO 'R', 'E'
+ ECHR '?'
+ EQUB VE
+
+ ETOK 150               \ Token 4:      "{clear screen}
+ ETOK 151               \                {draw box around title}
+ ECHR ' '               \                {all caps}
+ EJMP 16                \                {tab 6}DRIVE {drive number} CATALOGUE
+ ETOK 152               \                {crlf}
+ ETWO '-', '-'          \               "
+ EQUB VE                \
+                        \ Encoded as:   "[150][151] {16}[152]<215>"
+
+ ETOK 176               \ Token 5:      "{lower case}
+ ERND 18                \                {justify}
+ ETOK 202               \                {single cap}[86-90] IS [140-144].{cr}
+ ERND 19                \                {left align}"
+ ETOK 177               \
+ EQUB VE                \ Encoded as:   "[176][18?][202][19?][177]"
+
+ ECHR ' '               \ Token 6:      "  LOAD NEW {single cap}COMMANDER {all
+ ECHR ' '               \                caps}(Y/N)?{sentence case}{cr}{cr}"
+ ETOK 149               \
+ ECHR ' '               \ Encoded as:   "  [149] {1}(Y/N)?{2}{12}{12}"
+ EJMP 1
+ ECHR '('
+ ECHR 'Y'
+ ECHR '/'
+ ECHR 'N'
+ ECHR ')'
+ ECHR '?'
+ EJMP 2
+ EJMP 12
+ EJMP 12
+ EQUB VE
+
+ ECHR 'P'               \ Token 7:      "PRESS SPACE OR FIRE,{single cap}
+ ETWO 'R', 'E'          \                COMMANDER.{cr}{cr}"
+ ECHR 'S'               \
+ ECHR 'S'               \ Encoded as:   "P<242>SS SPA<233> <253> FI<242>,[154].
+ ECHR ' '               \                {12}{12}"
+ ECHR 'S'
+ ECHR 'P'
+ ECHR 'A'
+ ETWO 'C', 'E'
+ ECHR ' '
+ ETWO 'O', 'R'
+ ECHR ' '
+ ECHR 'F'
+ ECHR 'I'
+ ETWO 'R', 'E'
+ ECHR ','
+ ETOK 154
+ ECHR '.'
+ EJMP 12
+ EJMP 12
+ EQUB VE
+
+ ETOK 154               \ Token 8:      "{single cap}COMMANDER'S NAME? "
+ ECHR '`'               \
+ ECHR 'S'               \ Encoded as:   "[154][39]S[200]"
+ ETOK 200
+ EQUB VE
+
+ EJMP 21                \ Token 9:      "{clear bottom of screen}
+ ECHR 'F'               \                FILE TO DELETE?"
+ ECHR 'I'               \
+ ETWO 'L', 'E'          \ Encoded as:   "{21}FI<229>[201]DEL<221>E?"
+ ETOK 201
+ ECHR 'D'
+ ECHR 'E'
+ ECHR 'L'
+ ETWO 'E', 'T'
+ ECHR 'E'
+ ECHR '?'
+ EQUB VE
+
+ EJMP 23                \ Token 10:     "{move to row 10, white, lower case}
+ EJMP 14                \                {justify}
+ EJMP 2                 \                {sentence case}
+ ECHR 'G'               \                GREETINGS {single cap}COMMANDER
+ ETWO 'R', 'E'          \                {commander name}, I {lower case}AM
+ ETWO 'E', 'T'          \                {sentence case} CAPTAIN {mission
+ ETWO 'I', 'N'          \                captain's name} {lower case}OF{sentence
+ ECHR 'G'               \                case} HER MAJESTY'S SPACE NAVY{lower
+ ECHR 'S'               \                case} AND {single cap}I BEG A MOMENT OF
+ ETOK 213               \                YOUR VALUABLE TIME.{cr}
+ ETOK 178               \                 {single cap}WE WOULD LIKE YOU TO DO A
+ EJMP 19                \                LITTLE JOB FOR US.{cr}
+ ECHR 'I'               \                 {single cap}THE SHIP YOU SEE HERE IS A
+ ECHR ' '               \                NEW MODEL, THE {single cap}CONSTRICTOR,
+ ETWO 'B', 'E'          \                EQUIPED WITH A TOP SECRET NEW SHIELD
+ ECHR 'G'               \                GENERATOR.{cr}
+ ETOK 208               \                 {single cap}UNFORTUNATELY IT'S BEEN
+ ECHR 'M'               \                STOLEN.{cr}
+ ECHR 'O'               \                 {single cap}{display ship, wait for
+ ECHR 'M'               \                key press}IT WENT MISSING FROM OUR SHIP
+ ETWO 'E', 'N'          \                YARD ON {single cap}XEER FIVE MONTHS
+ ECHR 'T'               \                AGO AND {mission 1 location hint}.{cr}
+ ECHR ' '               \                 {single cap}YOUR MISSION, SHOULD YOU
+ ECHR 'O'               \                DECIDE TO ACCEPT IT, IS TO SEEK AND
+ ECHR 'F'               \                DESTROY THIS SHIP.{cr}
+ ECHR ' '               \                 {single cap}YOU ARE CAUTIONED THAT
+ ETOK 179               \                ONLY {standard tokens, sentence case}
+ ECHR 'R'               \                MILITARY  LASERS{extended tokens} WILL
+ ECHR ' '               \                PENETRATE THE NEW SHIELDS AND THAT THE
+ ECHR 'V'               \                {single cap}CONSTRICTOR IS FITTED WITH
+ ETWO 'A', 'L'          \                AN {standard tokens, sentence case}
+ ECHR 'U'               \                E.C.M.SYSTEM{extended tokens}.{cr}
+ ETWO 'A', 'B'          \                 {left align}{sentence case}{tab 6}GOOD
+ ETWO 'L', 'E'          \                LUCK, {single cap}COMMANDER.{cr}
+ ECHR ' '               \                 {left align}{tab 6}{all caps}  MESSAGE
+ ETWO 'T', 'I'          \                ENDS{display ship, wait for key press}"
+ ECHR 'M'               \
+ ECHR 'E'               \ Encoded as:   "{23}{14}{2}G<242><221><240>GS[213][178]
+ ETOK 204               \                {19}I <247>G[208]MOM<246>T OF [179]R V
+ ECHR 'W'               \                <228>U<216><229> <251>ME[204]WE W<217>
+ ECHR 'E'               \                LD LIKE [179][201]DO[208]L<219>T<229>
+ ECHR ' '               \                 JOB F<253> <236>[204][147][207] [179]
+ ECHR 'W'               \                 <218>E HE<242>[202]A[210]MODEL, [147]
+ ETWO 'O', 'U'          \                {19}C<223><222>RICT<253>, E<254>IP[196]
+ ECHR 'L'               \                WI<226>[208]TOP <218>CR<221>[210]SHIELD
+ ECHR 'D'               \                 G<246><244><245><253>[204]UNF<253>TUN
+ ECHR ' '               \                <245>ELY <219>[39]S <247><246> <222>OL
+ ECHR 'L'               \                <246>[204]{22}<219> W<246>T MISS[195]
+ ECHR 'I'               \                FROM <217>R [207] Y<238>D <223> {19}
+ ECHR 'K'               \                <230><244> FI<250> M<223><226>S AGO
+ ECHR 'E'               \                [178]{28}[204][179]R MISSI<223>, SH
+ ECHR ' '               \                <217>LD [179] DECIDE[201]AC<233>PT
+ ETOK 179               \                 <219>, IS[201]<218>EK[178]D<237>TROY
+ ETOK 201               \                 [148][207][204][179] A<242> CAU<251>
+ ECHR 'D'               \                <223>[196]<226><245> <223>LY {6}[116]
+ ECHR 'O'               \                {5}S W<220>L P<246><221><248>TE [147]
+ ETOK 208               \                NEW SHIELDS[178]<226><245> [147]{19}
+ ECHR 'L'               \                C<223><222>RICT<253>[202]F<219>T[196]WI
+ ETWO 'I', 'T'          \                <226> <255> {6}[108]{5}[177]{2}{8}GOOD
+ ECHR 'T'               \                 LUCK, [154][212]{22}"
+ ETWO 'L', 'E'
+ ECHR ' '
+ ECHR 'J'
+ ECHR 'O'
+ ECHR 'B'
+ ECHR ' '
+ ECHR 'F'
+ ETWO 'O', 'R'
+ ECHR ' '
+ ETWO 'U', 'S'
+ ETOK 204
+ ETOK 147
+ ETOK 207
+ ECHR ' '
+ ETOK 179
+ ECHR ' '
+ ETWO 'S', 'E'
+ ECHR 'E'
+ ECHR ' '
+ ECHR 'H'
+ ECHR 'E'
+ ETWO 'R', 'E'
+ ETOK 202
+ ECHR 'A'
+ ETOK 210
+ ECHR 'M'
+ ECHR 'O'
+ ECHR 'D'
+ ECHR 'E'
+ ECHR 'L'
+ ECHR ','
+ ECHR ' '
+ ETOK 147
+ EJMP 19
+ ECHR 'C'
+ ETWO 'O', 'N'
+ ETWO 'S', 'T'
+ ECHR 'R'
+ ECHR 'I'
+ ECHR 'C'
+ ECHR 'T'
+ ETWO 'O', 'R'
+ ECHR ','
+ ECHR ' '
+ ECHR 'E'
+ ETWO 'Q', 'U'
+ ECHR 'I'
+ ECHR 'P'
+ ETOK 196
+ ECHR 'W'
+ ECHR 'I'
+ ETWO 'T', 'H'
+ ETOK 208
+ ECHR 'T'
+ ECHR 'O'
+ ECHR 'P'
+ ECHR ' '
+ ETWO 'S', 'E'
+ ECHR 'C'
+ ECHR 'R'
+ ETWO 'E', 'T'
+ ETOK 210
+ ECHR 'S'
+ ECHR 'H'
+ ECHR 'I'
+ ECHR 'E'
+ ECHR 'L'
+ ECHR 'D'
+ ECHR ' '
+ ECHR 'G'
+ ETWO 'E', 'N'
+ ETWO 'E', 'R'
+ ETWO 'A', 'T'
+ ETWO 'O', 'R'
+ ETOK 204
+ ECHR 'U'
+ ECHR 'N'
+ ECHR 'F'
+ ETWO 'O', 'R'
+ ECHR 'T'
+ ECHR 'U'
+ ECHR 'N'
+ ETWO 'A', 'T'
+ ECHR 'E'
+ ECHR 'L'
+ ECHR 'Y'
+ ECHR ' '
+ ETWO 'I', 'T'
+ ECHR '`'
+ ECHR 'S'
+ ECHR ' '
+ ETWO 'B', 'E'
+ ETWO 'E', 'N'
+ ECHR ' '
+ ETWO 'S', 'T'
+ ECHR 'O'
+ ECHR 'L'
+ ETWO 'E', 'N'
+ ETOK 204
+ EJMP 22
+ ETWO 'I', 'T'
+ ECHR ' '
+ ECHR 'W'
+ ETWO 'E', 'N'
+ ECHR 'T'
+ ECHR ' '
+ ECHR 'M'
+ ECHR 'I'
+ ECHR 'S'
+ ECHR 'S'
+ ETOK 195
+ ECHR 'F'
+ ECHR 'R'
+ ECHR 'O'
+ ECHR 'M'
+ ECHR ' '
+ ETWO 'O', 'U'
+ ECHR 'R'
+ ECHR ' '
+ ETOK 207
+ ECHR ' '
+ ECHR 'Y'
+ ETWO 'A', 'R'
+ ECHR 'D'
+ ECHR ' '
+ ETWO 'O', 'N'
+ ECHR ' '
+ EJMP 19
+ ETWO 'X', 'E'
+ ETWO 'E', 'R'
+ ECHR ' '
+ ECHR 'F'
+ ECHR 'I'
+ ETWO 'V', 'E'
+ ECHR ' '
+ ECHR 'M'
+ ETWO 'O', 'N'
+ ETWO 'T', 'H'
+ ECHR 'S'
+ ECHR ' '
+ ECHR 'A'
+ ECHR 'G'
+ ECHR 'O'
+ ETOK 178
+ EJMP 28
+ ETOK 204
+ ETOK 179
+ ECHR 'R'
+ ECHR ' '
+ ECHR 'M'
+ ECHR 'I'
+ ECHR 'S'
+ ECHR 'S'
+ ECHR 'I'
+ ETWO 'O', 'N'
+ ECHR ','
+ ECHR ' '
+ ECHR 'S'
+ ECHR 'H'
+ ETWO 'O', 'U'
+ ECHR 'L'
+ ECHR 'D'
+ ECHR ' '
+ ETOK 179
+ ECHR ' '
+ ECHR 'D'
+ ECHR 'E'
+ ECHR 'C'
+ ECHR 'I'
+ ECHR 'D'
+ ECHR 'E'
+ ETOK 201
+ ECHR 'A'
+ ECHR 'C'
+ ETWO 'C', 'E'
+ ECHR 'P'
+ ECHR 'T'
+ ECHR ' '
+ ETWO 'I', 'T'
+ ECHR ','
+ ECHR ' '
+ ECHR 'I'
+ ECHR 'S'
+ ETOK 201
+ ETWO 'S', 'E'
+ ECHR 'E'
+ ECHR 'K'
+ ETOK 178
+ ECHR 'D'
+ ETWO 'E', 'S'
+ ECHR 'T'
+ ECHR 'R'
+ ECHR 'O'
+ ECHR 'Y'
+ ECHR ' '
+ ETOK 148
+ ETOK 207
+ ETOK 204
+ ETOK 179
+ ECHR ' '
+ ECHR 'A'
+ ETWO 'R', 'E'
+ ECHR ' '
+ ECHR 'C'
+ ECHR 'A'
+ ECHR 'U'
+ ETWO 'T', 'I'
+ ETWO 'O', 'N'
+ ETOK 196
+ ETWO 'T', 'H'
+ ETWO 'A', 'T'
+ ECHR ' '
+ ETWO 'O', 'N'
+ ECHR 'L'
+ ECHR 'Y'
+ ECHR ' '
+ EJMP 6
+ TOKN 117
+ EJMP 5
+ ECHR 'S'
+ ECHR ' '
+ ECHR 'W'
+ ETWO 'I', 'L'
+ ECHR 'L'
+ ECHR ' '
+ ECHR 'P'
+ ETWO 'E', 'N'
+ ETWO 'E', 'T'
+ ETWO 'R', 'A'
+ ECHR 'T'
+ ECHR 'E'
+ ECHR ' '
+ ETOK 147
+ ECHR 'N'
+ ECHR 'E'
+ ECHR 'W'
+ ECHR ' '
+ ECHR 'S'
+ ECHR 'H'
+ ECHR 'I'
+ ECHR 'E'
+ ECHR 'L'
+ ECHR 'D'
+ ECHR 'S'
+ ETOK 178
+ ETWO 'T', 'H'
+ ETWO 'A', 'T'
+ ECHR ' '
+ ETOK 147
+ EJMP 19
+ ECHR 'C'
+ ETWO 'O', 'N'
+ ETWO 'S', 'T'
+ ECHR 'R'
+ ECHR 'I'
+ ECHR 'C'
+ ECHR 'T'
+ ETWO 'O', 'R'
+ ETOK 202
+ ECHR 'F'
+ ETWO 'I', 'T'
+ ECHR 'T'
+ ETOK 196
+ ECHR 'W'
+ ECHR 'I'
+ ETWO 'T', 'H'
+ ECHR ' '
+ ETWO 'A', 'N'
+ ECHR ' '
+ EJMP 6
+ TOKN 108
+ EJMP 5
+ ETOK 177
+ EJMP 2
+ EJMP 8
+ ECHR 'G'
+ ECHR 'O'
+ ECHR 'O'
+ ECHR 'D'
+ ECHR ' '
+ ECHR 'L'
+ ECHR 'U'
+ ECHR 'C'
+ ECHR 'K'
+ ECHR ','
+ ECHR ' '
+ ETOK 154
+ ETOK 212
+ EJMP 22
+ EQUB VE
+
+ EJMP 25                \ Token 11:     "{incoming message screen, wait 2s}
+ EJMP 9                 \                {clear screen}
+ EJMP 23                \                {move to row 10, white, lower case}
+ EJMP 14                \                {justify}
+ EJMP 2                 \                {sentence case}
+ ECHR ' '               \                  ATTENTION {single cap}COMMANDER
+ ECHR ' '               \                {commander name}, I {lower case}AM
+ ETWO 'A', 'T'          \                {sentence case} CAPTAIN {mission
+ ECHR 'T'               \                captain's name} {lower case}OF{sentence
+ ETWO 'E', 'N'          \                case} HER MAJESTY'S SPACE NAVY{lower
+ ETWO 'T', 'I'          \                case}. {single cap}WE HAVE NEED OF YOUR
+ ETWO 'O', 'N'          \                SERVICES AGAIN.{cr}
+ ETOK 213               \                 {single cap}IF YOU WOULD BE SO GOOD AS
+ ECHR '.'               \                TO GO TO {single cap}CEERDI YOU WILL BE
+ ECHR ' '               \                BRIEFED.{cr}
+ EJMP 19                \                 {single cap}IF SUCCESSFUL, YOU WILL BE
+ ECHR 'W'               \                WELL REWARDED.{cr}
+ ECHR 'E'               \                {left align}{tab 6}{all caps}  MESSAGE
+ ECHR ' '               \                ENDS{wait for key press}"
+ ECHR 'H'               \
+ ECHR 'A'               \ Encoded as:   "{25}{9}{23}{14}{2}  <245>T<246>
+ ETWO 'V', 'E'          \                <251><223>[213]. {19}WE HA<250> NE[196]
+ ECHR ' '               \                OF [179]R <218>RVIC<237> AGA<240>[204]
+ ECHR 'N'               \                IF [179] W<217>LD <247> <235> GOOD AS
+ ECHR 'E'               \                [201]GO[201]{19}<233><244><241> [179]
+ ETOK 196               \                 W<220>L <247> BRIEF<252>[204]IF SUC
+ ECHR 'O'               \                <233>SSFUL, [179] W<220>L <247> WELL
+ ECHR 'F'               \                 <242>W<238>D<252>[212]{24}"
+ ECHR ' '
+ ETOK 179
+ ECHR 'R'
+ ECHR ' '
+ ETWO 'S', 'E'
+ ECHR 'R'
+ ECHR 'V'
+ ECHR 'I'
+ ECHR 'C'
+ ETWO 'E', 'S'
+ ECHR ' '
+ ECHR 'A'
+ ECHR 'G'
+ ECHR 'A'
+ ETWO 'I', 'N'
+ ETOK 204
+ ECHR 'I'
+ ECHR 'F'
+ ECHR ' '
+ ETOK 179
+ ECHR ' '
+ ECHR 'W'
+ ETWO 'O', 'U'
+ ECHR 'L'
+ ECHR 'D'
+ ECHR ' '
+ ETWO 'B', 'E'
+ ECHR ' '
+ ETWO 'S', 'O'
+ ECHR ' '
+ ECHR 'G'
+ ECHR 'O'
+ ECHR 'O'
+ ECHR 'D'
+ ECHR ' '
+ ECHR 'A'
+ ECHR 'S'
+ ETOK 201
+ ECHR 'G'
+ ECHR 'O'
+ ETOK 201
+ EJMP 19
+ ETWO 'C', 'E'
+ ETWO 'E', 'R'
+ ETWO 'D', 'I'
+ ECHR ' '
+ ETOK 179
+ ECHR ' '
+ ECHR 'W'
+ ETWO 'I', 'L'
+ ECHR 'L'
+ ECHR ' '
+ ETWO 'B', 'E'
+ ECHR ' '
+ ECHR 'B'
+ ECHR 'R'
+ ECHR 'I'
+ ECHR 'E'
+ ECHR 'F'
+ ETWO 'E', 'D'
+ ETOK 204
+ ECHR 'I'
+ ECHR 'F'
+ ECHR ' '
+ ECHR 'S'
+ ECHR 'U'
+ ECHR 'C'
+ ETWO 'C', 'E'
+ ECHR 'S'
+ ECHR 'S'
+ ECHR 'F'
+ ECHR 'U'
+ ECHR 'L'
+ ECHR ','
+ ECHR ' '
+ ETOK 179
+ ECHR ' '
+ ECHR 'W'
+ ETWO 'I', 'L'
+ ECHR 'L'
+ ECHR ' '
+ ETWO 'B', 'E'
+ ECHR ' '
+ ECHR 'W'
+ ECHR 'E'
+ ECHR 'L'
+ ECHR 'L'
+ ECHR ' '
+ ETWO 'R', 'E'
+ ECHR 'W'
+ ETWO 'A', 'R'
+ ECHR 'D'
+ ETWO 'E', 'D'
+ ETOK 212
+ EJMP 24
+ EQUB VE
+
+ ECHR '('               \ Token 12:     "({single cap}C) ACORNSOFT 1984"
+ EJMP 19                \
+ ECHR 'C'               \ Encoded as:   "({19}C) AC<253>N<235>FT 1984"
+ ECHR ')'
+ ECHR ' '
+ ECHR 'A'
+ ECHR 'C'
+ ETWO 'O', 'R'
+ ECHR 'N'
+ ETWO 'S', 'O'
+ ECHR 'F'
+ ECHR 'T'
+ ECHR ' '
+ ECHR '1'
+ ECHR '9'
+ ECHR '8'
+ ECHR '4'
+ EQUB VE
+
+ ECHR 'B'               \ Token 13:     "BY D.BRABEN & I.BELL"
+ ECHR 'Y'               \
+ ECHR ' '               \ Encoded as:   "BY D.B<248><247>N & I.<247>LL"
+ ECHR 'D'
+ ECHR '.'
+ ECHR 'B'
+ ETWO 'R', 'A'
+ ETWO 'B', 'E'
+ ECHR 'N'
+ ECHR ' '
+ ECHR '&'
+ ECHR ' '
+ ECHR 'I'
+ ECHR '.'
+ ETWO 'B', 'E'
+ ECHR 'L'
+ ECHR 'L'
+ EQUB VE
+
+ EJMP 21                \ Token 14:     "{clear bottom of screen}
+ ETOK 145               \                PLANET NAME?
+ ETOK 200               \                {fetch line input from keyboard}"
+ EJMP 26                \
+ EQUB VE                \ Encoded as:   "{21}[145][200]{26}"
+
+ EJMP 25                \ Token 15:     "{incoming message screen, wait 2s}
+ EJMP 9                 \                {clear screen}
+ EJMP 23                \                {move to row 10, white, lower case}
+ EJMP 14                \                {justify}
+ EJMP 2                 \                {sentence case}
+ ECHR ' '               \                  CONGRATULATIONS {single cap}
+ ECHR ' '               \                COMMANDER!{cr}
+ ECHR 'C'               \                {cr}
+ ETWO 'O', 'N'          \                THERE{lower case} WILL ALWAYS BE A
+ ECHR 'G'               \                PLACE FOR YOU IN{sentence case} HER
+ ETWO 'R', 'A'          \                MAJESTY'S SPACE NAVY{lower case}.{cr}
+ ECHR 'T'               \                 {single cap}AND MAYBE SOONER THAN YOU
+ ECHR 'U'               \                THINK...{cr}
+ ETWO 'L', 'A'          \                {left align}{tab 6}{all caps}  MESSAGE
+ ETWO 'T', 'I'          \                ENDS{wait for key press}"
+ ETWO 'O', 'N'          \
+ ECHR 'S'               \ Encoded as:   "{25}{9}{23}{14}{2}  C<223>G<248>TU
+ ECHR ' '               \                <249><251><223>S [154]!{12}{12}<226>
+ ETOK 154               \                <244>E{13} W<220>L <228>WAYS <247>[208]
+ ECHR '!'               \                P<249><233> F<253> [179] <240>[211]
+ EJMP 12                \                [204]<255>D <239>Y<247> <235><223><244>
+ EJMP 12                \                 <226><255> [179] <226><240>K..[212]
+ ETWO 'T', 'H'          \                {24}"
+ ETWO 'E', 'R'
+ ECHR 'E'
+ EJMP 13
+ ECHR ' '
+ ECHR 'W'
+ ETWO 'I', 'L'
+ ECHR 'L'
+ ECHR ' '
+ ETWO 'A', 'L'
+ ECHR 'W'
+ ECHR 'A'
+ ECHR 'Y'
+ ECHR 'S'
+ ECHR ' '
+ ETWO 'B', 'E'
+ ETOK 208
+ ECHR 'P'
+ ETWO 'L', 'A'
+ ETWO 'C', 'E'
+ ECHR ' '
+ ECHR 'F'
+ ETWO 'O', 'R'
+ ECHR ' '
+ ETOK 179
+ ECHR ' '
+ ETWO 'I', 'N'
+ ETOK 211
+ ETOK 204
+ ETWO 'A', 'N'
+ ECHR 'D'
+ ECHR ' '
+ ETWO 'M', 'A'
+ ECHR 'Y'
+ ETWO 'B', 'E'
+ ECHR ' '
+ ETWO 'S', 'O'
+ ETWO 'O', 'N'
+ ETWO 'E', 'R'
+ ECHR ' '
+ ETWO 'T', 'H'
+ ETWO 'A', 'N'
+ ECHR ' '
+ ETOK 179
+ ECHR ' '
+ ETWO 'T', 'H'
+ ETWO 'I', 'N'
+ ECHR 'K'
+ ECHR '.'
+ ECHR '.'
+ ETOK 212
+ EJMP 24
+ EQUB VE
+
+ ECHR 'F'               \ Token 16:     "FABLED"
+ ETWO 'A', 'B'          \
+ ETWO 'L', 'E'          \ Encoded as:   "F<216><229>D"
+ ECHR 'D'
+ EQUB VE
+
+ ETWO 'N', 'O'          \ Token 17:     "NOTABLE"
+ ECHR 'T'               \
+ ETWO 'A', 'B'          \ Encoded as:   "<227>T<216><229>"
+ ETWO 'L', 'E'
+ EQUB VE
+
+ ECHR 'W'               \ Token 18:     "WELL KNOWN"
+ ECHR 'E'               \
+ ECHR 'L'               \ Encoded as:   "WELL K<227>WN"
+ ECHR 'L'
+ ECHR ' '
+ ECHR 'K'
+ ETWO 'N', 'O'
+ ECHR 'W'
+ ECHR 'N'
+ EQUB VE
+
+ ECHR 'F'               \ Token 19:     "FAMOUS"
+ ECHR 'A'               \
+ ECHR 'M'               \ Encoded as:   "FAMO<236>"
+ ECHR 'O'
+ ETWO 'U', 'S'
+ EQUB VE
+
+ ETWO 'N', 'O'          \ Token 20:     "NOTED"
+ ECHR 'T'               \
+ ETWO 'E', 'D'          \ Encoded as:   "<227>T<252>"
+ EQUB VE
+
+ ETWO 'V', 'E'          \ Token 21:     "VERY"
+ ECHR 'R'               \
+ ECHR 'Y'               \ Encoded as:   "<250>RY"
+ EQUB VE
+
+ ECHR 'M'               \ Token 22:     "MILDLY"
+ ETWO 'I', 'L'          \
+ ECHR 'D'               \ Encoded as:   "M<220>DLY"
+ ECHR 'L'
+ ECHR 'Y'
+ EQUB VE
+
+ ECHR 'M'               \ Token 23:     "MOST"
+ ECHR 'O'               \
+ ETWO 'S', 'T'          \ Encoded as:   "MO<222>"
+ EQUB VE
+
+ ETWO 'R', 'E'          \ Token 24:     "REASONABLY"
+ ECHR 'A'               \
+ ECHR 'S'               \ Encoded as:   "<242>AS<223><216>LY"
+ ETWO 'O', 'N'
+ ETWO 'A', 'B'
+ ECHR 'L'
+ ECHR 'Y'
+ EQUB VE
+
+ EQUB VE                \ Token 25:     ""
+                        \
+                        \ Encoded as:   ""
+
+ ETOK 165               \ Token 26:     "ANCIENT"
+ EQUB VE                \
+                        \ Encoded as:   "[165]"
+
+ ERND 23                \ Token 27:     "[130-134]"
+ EQUB VE                \
+                        \ Encoded as:   "[23?]"
+
+ ECHR 'G'               \ Token 28:     "GREAT"
+ ETWO 'R', 'E'          \
+ ETWO 'A', 'T'          \ Encoded as:   "G<242><245>"
+ EQUB VE
+
+ ECHR 'V'               \ Token 29:     "VAST"
+ ECHR 'A'               \
+ ETWO 'S', 'T'          \ Encoded as:   "VA<222>"
+ EQUB VE
+
+ ECHR 'P'               \ Token 30:     "PINK"
+ ETWO 'I', 'N'          \
+ ECHR 'K'               \ Encoded as:   "P<240>K"
+ EQUB VE
+
+ EJMP 2                 \ Token 31:     "{sentence case}[190-194] [185-189]
+ ERND 28                \                {lower case} PLANTATIONS"
+ ECHR ' '               \
+ ERND 27                \ Encoded as:   "{2}[28?] [27?]{13} [185]A<251><223>S"
+ EJMP 13
+ ECHR ' '
+ ETOK 185
+ ECHR 'A'
+ ETWO 'T', 'I'
+ ETWO 'O', 'N'
+ ECHR 'S'
+ EQUB VE
+
+ ETOK 156               \ Token 32:     "MOUNTAINS"
+ ECHR 'S'               \
+ EQUB VE                \ Encoded as:   "[156]S"
+
+ ERND 26                \ Token 33:     "[180-184]"
+ EQUB VE                \
+                        \ Encoded as:   "[26?]"
+
+ ERND 37                \ Token 34:     "[125-129] FORESTS"
+ ECHR ' '               \
+ ECHR 'F'               \ Encoded as:   "[37?] F<253><237>TS"
+ ETWO 'O', 'R'
+ ETWO 'E', 'S'
+ ECHR 'T'
+ ECHR 'S'
+ EQUB VE
+
+ ECHR 'O'               \ Token 35:     "OCEANS"
+ ETWO 'C', 'E'          \
+ ETWO 'A', 'N'          \ Encoded as:   "O<233><255>S"
+ ECHR 'S'
+ EQUB VE
+
+ ECHR 'S'               \ Token 36:     "SHYNESS"
+ ECHR 'H'               \
+ ECHR 'Y'               \ Encoded as:   "SHYN<237>S"
+ ECHR 'N'
+ ETWO 'E', 'S'
+ ECHR 'S'
+ EQUB VE
+
+ ECHR 'S'               \ Token 37:     "SILLINESS"
+ ETWO 'I', 'L'          \
+ ECHR 'L'               \ Encoded as:   "S<220>L<240><237>S"
+ ETWO 'I', 'N'
+ ETWO 'E', 'S'
+ ECHR 'S'
+ EQUB VE
+
+ ETWO 'M', 'A'          \ Token 38:     "MATING TRADITIONS"
+ ECHR 'T'               \
+ ETOK 195               \ Encoded as:   "<239>T[195]T<248><241><251><223>S"
+ ECHR 'T'
+ ETWO 'R', 'A'
+ ETWO 'D', 'I'
+ ETWO 'T', 'I'
+ ETWO 'O', 'N'
+ ECHR 'S'
+ EQUB VE
+
+ ETWO 'L', 'O'          \ Token 39:     "LOATHING OF [41-45]"
+ ETWO 'A', 'T'          \
+ ECHR 'H'               \ Encoded as:   "<224><245>H[195]OF [9?]"
+ ETOK 195
+ ECHR 'O'
+ ECHR 'F'
+ ECHR ' '
+ ERND 9
+ EQUB VE
+
+ ETWO 'L', 'O'          \ Token 40:     "LOVE FOR [41-45]"
+ ETWO 'V', 'E'          \
+ ECHR ' '               \ Encoded as:   "<224><250> F<253> [9?]"
+ ECHR 'F'
+ ETWO 'O', 'R'
+ ECHR ' '
+ ERND 9
+ EQUB VE
+
+ ECHR 'F'               \ Token 41:     "FOOD BLENDERS"
+ ECHR 'O'               \
+ ECHR 'O'               \ Encoded as:   "FOOD B<229>ND<244>S"
+ ECHR 'D'
+ ECHR ' '
+ ECHR 'B'
+ ETWO 'L', 'E'
+ ECHR 'N'
+ ECHR 'D'
+ ETWO 'E', 'R'
+ ECHR 'S'
+ EQUB VE
+
+ ECHR 'T'               \ Token 42:     "TOURISTS"
+ ETWO 'O', 'U'          \
+ ECHR 'R'               \ Encoded as:   "T<217>RI<222>S"
+ ECHR 'I'
+ ETWO 'S', 'T'
+ ECHR 'S'
+ EQUB VE
+
+ ECHR 'P'               \ Token 43:     "POETRY"
+ ECHR 'O'               \
+ ETWO 'E', 'T'          \ Encoded as:   "PO<221>RY"
+ ECHR 'R'
+ ECHR 'Y'
+ EQUB VE
+
+ ETWO 'D', 'I'          \ Token 44:     "DISCOS"
+ ECHR 'S'               \
+ ECHR 'C'               \ Encoded as:   "<241>SCOS"
+ ECHR 'O'
+ ECHR 'S'
+ EQUB VE
+
+ ERND 17                \ Token 45:     "[81-85]"
+ EQUB VE                \
+                        \ Encoded as:   "[17?]"
+
+ ECHR 'W'               \ Token 46:     "WALKING TREE"
+ ETWO 'A', 'L'          \
+ ECHR 'K'               \ Encoded as:   "W<228>K[195][158]"
+ ETOK 195
+ ETOK 158
+ EQUB VE
+
+ ECHR 'C'               \ Token 47:     "CRAB"
+ ETWO 'R', 'A'          \
+ ECHR 'B'               \ Encoded as:   "C<248>B"
+ EQUB VE
+
+ ECHR 'B'               \ Token 48:     "BAT"
+ ETWO 'A', 'T'          \
+ EQUB VE                \ Encoded as:   "B<245>"
+
+ ETWO 'L', 'O'          \ Token 49:     "LOBST"
+ ECHR 'B'               \
+ ETWO 'S', 'T'          \ Encoded as:   "<224>B<222>"
+ EQUB VE
+
+ EJMP 18                \ Token 50:     "{random 1-8 letter word}"
+ EQUB VE                \
+                        \ Encoded as:   "{18}"
+
+ ETWO 'B', 'E'          \ Token 51:     "BESET"
+ ECHR 'S'               \
+ ETWO 'E', 'T'          \ Encoded as:   "<247>S<221>"
+ EQUB VE
+
+ ECHR 'P'               \ Token 52:     "PLAGUED"
+ ETWO 'L', 'A'          \
+ ECHR 'G'               \ Encoded as:   "P<249>GU<252>"
+ ECHR 'U'
+ ETWO 'E', 'D'
+ EQUB VE
+
+ ETWO 'R', 'A'          \ Token 53:     "RAVAGED"
+ ECHR 'V'               \
+ ECHR 'A'               \ Encoded as:   "<248>VAG<252>"
+ ECHR 'G'
+ ETWO 'E', 'D'
+ EQUB VE
+
+ ECHR 'C'               \ Token 54:     "CURSED"
+ ECHR 'U'               \
+ ECHR 'R'               \ Encoded as:   "CURS<252>"
+ ECHR 'S'
+ ETWO 'E', 'D'
+ EQUB VE
+
+ ECHR 'S'               \ Token 55:     "SCOURGED"
+ ECHR 'C'               \
+ ETWO 'O', 'U'          \ Encoded as:   "SC<217>RG<252>"
+ ECHR 'R'
+ ECHR 'G'
+ ETWO 'E', 'D'
+ EQUB VE
+
+ ERND 22                \ Token 56:     "[135-139] CIVIL WAR"
+ ECHR ' '               \
+ ECHR 'C'               \ Encoded as:   "[22?] CIV<220> W<238>"
+ ECHR 'I'
+ ECHR 'V'
+ ETWO 'I', 'L'
+ ECHR ' '
+ ECHR 'W'
+ ETWO 'A', 'R'
+ EQUB VE
+
+ ERND 13                \ Token 57:     "[170-174] [155-159] [160-164]S"
+ ECHR ' '               \
+ ERND 4                 \ Encoded as:   "[13?] [4?] [5?]S"
+ ECHR ' '
+ ERND 5
+ ECHR 'S'
+ EQUB VE
+
+ ECHR 'A'               \ Token 58:     "A [170-174] DISEASE"
+ ECHR ' '               \
+ ERND 13                \ Encoded as:   "A [13?] <241><218>A<218>"
+ ECHR ' '
+ ETWO 'D', 'I'
+ ETWO 'S', 'E'
+ ECHR 'A'
+ ETWO 'S', 'E'
+ EQUB VE
+
+ ERND 22                \ Token 59:     "[135-139] EARTHQUAKES"
+ ECHR ' '               \
+ ECHR 'E'               \ Encoded as:   "[22?] E<238><226><254>AK<237>"
+ ETWO 'A', 'R'
+ ETWO 'T', 'H'
+ ETWO 'Q', 'U'
+ ECHR 'A'
+ ECHR 'K'
+ ETWO 'E', 'S'
+ EQUB VE
+
+ ERND 22                \ Token 60:     "[135-139] SOLAR ACTIVITY"
+ ECHR ' '               \
+ ETWO 'S', 'O'          \ Encoded as:   "[22?] <235><249>R AC<251>V<219>Y"
+ ETWO 'L', 'A'
+ ECHR 'R'
+ ECHR ' '
+ ECHR 'A'
+ ECHR 'C'
+ ETWO 'T', 'I'
+ ECHR 'V'
+ ETWO 'I', 'T'
+ ECHR 'Y'
+ EQUB VE
+
+ ETOK 175               \ Token 61:     "ITS [26-30] [31-35]"
+ ERND 2                 \
+ ECHR ' '               \ Encoded as:   "[175][2?] [3?]"
+ ERND 3
+ EQUB VE
+
+ ETOK 147               \ Token 62:     "THE {system name adjective} [155-159]
+ EJMP 17                \                 [160-164]"
+ ECHR ' '               \
+ ERND 4                 \ Encoded as:   "[147]{17} [4?] [5?]"
+ ECHR ' '
+ ERND 5
+ EQUB VE
+
+ ETOK 175               \ Token 63:     "ITS INHABITANTS' [165-169] [36-40]"
+ ETOK 193               \
+ ECHR 'S'               \ Encoded as:   "[175][193]S[39] [7?] [8?]"
+ ECHR '`'
+ ECHR ' '
+ ERND 7
+ ECHR ' '
+ ERND 8
+ EQUB VE
+
+ EJMP 2                 \ Token 64:     "{sentence case}[235-239]{lower case}"
+ ERND 31                \
+ EJMP 13                \ Encoded as:   "{2}[31?]{13}"
+ EQUB VE
+
+ ETOK 175               \ Token 65:     "ITS [76-80] [81-85]"
+ ERND 16                \
+ ECHR ' '               \ Encoded as:   "[175][16?] [17?]"
+ ERND 17
+ EQUB VE
+
+ ECHR 'J'               \ Token 66:     "JUICE"
+ ECHR 'U'               \
+ ECHR 'I'               \ Encoded as:   "JUI<233>"
+ ETWO 'C', 'E'
+ EQUB VE
+
+ ECHR 'B'               \ Token 67:     "BRANDY"
+ ETWO 'R', 'A'          \
+ ECHR 'N'               \ Encoded as:   "B<248>NDY"
+ ECHR 'D'
+ ECHR 'Y'
+ EQUB VE
+
+ ECHR 'W'               \ Token 68:     "WATER"
+ ETWO 'A', 'T'          \
+ ETWO 'E', 'R'          \ Encoded as:   "W<245><244>"
+ EQUB VE
+
+ ECHR 'B'               \ Token 69:     "BREW"
+ ETWO 'R', 'E'          \
+ ECHR 'W'               \ Encoded as:   "B<242>W"
+ EQUB VE
+
+ ECHR 'G'               \ Token 70:     "GARGLE BLASTERS"
+ ETWO 'A', 'R'          \
+ ECHR 'G'               \ Encoded as:   "G<238>G<229> B<249><222><244>S"
+ ETWO 'L', 'E'
+ ECHR ' '
+ ECHR 'B'
+ ETWO 'L', 'A'
+ ETWO 'S', 'T'
+ ETWO 'E', 'R'
+ ECHR 'S'
+ EQUB VE
+
+ EJMP 18                \ Token 71:     "{random 1-8 letter word}"
+ EQUB VE                \
+                        \ Encoded as:   "{18}"
+
+ EJMP 17                \ Token 72:     "{system name adjective} [160-164]"
+ ECHR ' '               \
+ ERND 5                 \ Encoded as:   "{17} [5?]"
+ EQUB VE
+
+ EJMP 17                \ Token 73:     "{system name adjective} {random 1-8
+ ECHR ' '               \                letter word}"
+ EJMP 18                \
+ EQUB VE                \ Encoded as:   "{17} {18}"
+
+ EJMP 17                \ Token 74:     "{system name adjective} [170-174]"
+ ECHR ' '               \
+ ERND 13                \ Encoded as:   "{17} [13?]"
+ EQUB VE
+
+ ERND 13                \ Token 75:     "[170-174] {random 1-8 letter word}"
+ ECHR ' '               \
+ EJMP 18                \ Encoded as:   "[13?] {18}"
+ EQUB VE
+
+ ECHR 'F'               \ Token 76:     "FABULOUS"
+ ETWO 'A', 'B'          \
+ ECHR 'U'               \ Encoded as:   "F<216>U<224><236>"
+ ETWO 'L', 'O'
+ ETWO 'U', 'S'
+ EQUB VE
+
+ ECHR 'E'               \ Token 77:     "EXOTIC"
+ ECHR 'X'               \
+ ECHR 'O'               \ Encoded as:   "EXO<251>C"
+ ETWO 'T', 'I'
+ ECHR 'C'
+ EQUB VE
+
+ ECHR 'H'               \ Token 78:     "HOOPY"
+ ECHR 'O'               \
+ ECHR 'O'               \ Encoded as:   "HOOPY"
+ ECHR 'P'
+ ECHR 'Y'
+ EQUB VE
+
+ ECHR 'U'               \ Token 79:     "UNUSUAL"
+ ETWO 'N', 'U'          \
+ ECHR 'S'               \ Encoded as:   "U<225>SU<228>"
+ ECHR 'U'
+ ETWO 'A', 'L'
+ EQUB VE
+
+ ECHR 'E'               \ Token 80:     "EXCITING"
+ ECHR 'X'               \
+ ECHR 'C'               \ Encoded as:   "EXC<219><240>G"
+ ETWO 'I', 'T'
+ ETWO 'I', 'N'
+ ECHR 'G'
+ EQUB VE
+
+ ECHR 'C'               \ Token 81:     "CUISINE"
+ ECHR 'U'               \
+ ECHR 'I'               \ Encoded as:   "CUIS<240>E"
+ ECHR 'S'
+ ETWO 'I', 'N'
+ ECHR 'E'
+ EQUB VE
+
+ ECHR 'N'               \ Token 82:     "NIGHT LIFE"
+ ECHR 'I'               \
+ ECHR 'G'               \ Encoded as:   "NIGHT LIFE"
+ ECHR 'H'
+ ECHR 'T'
+ ECHR ' '
+ ECHR 'L'
+ ECHR 'I'
+ ECHR 'F'
+ ECHR 'E'
+ EQUB VE
+
+ ECHR 'C'               \ Token 83:     "CASINOS"
+ ECHR 'A'               \
+ ECHR 'S'               \ Encoded as:   "CASI<227>S"
+ ECHR 'I'
+ ETWO 'N', 'O'
+ ECHR 'S'
+ EQUB VE
+
+ ECHR 'S'               \ Token 84:     "SIT COMS"
+ ETWO 'I', 'T'          \
+ ECHR ' '               \ Encoded as:   "S<219> COMS"
+ ECHR 'C'
+ ECHR 'O'
+ ECHR 'M'
+ ECHR 'S'
+ EQUB VE
+
+ EJMP 2                 \ Token 85:     "{sentence case}[235-239]{lower case}"
+ ERND 31                \
+ EJMP 13                \ Encoded as:   "{2}[31?]{13}"
+ EQUB VE
+
+ EJMP 3                 \ Token 86:     "{selected system name}"
+ EQUB VE                \
+                        \ Encoded as:   "{3}"
+
+ ETOK 147               \ Token 87:     "THE PLANET {selected system name}"
+ ETOK 145               \
+ ECHR ' '               \ Encoded as:   "[147][145] {3}"
+ EJMP 3
+ EQUB VE
+
+ ETOK 147               \ Token 88:     "THE WORLD {selected system name}"
+ ETOK 146               \
+ ECHR ' '               \ Encoded as:   "[147][146] {3}"
+ EJMP 3
+ EQUB VE
+
+ ETOK 148               \ Token 89:     "THIS PLANET"
+ ETOK 145               \
+ EQUB VE                \ Encoded as:   "[148][145]"
+
+ ETOK 148               \ Token 90:     "THIS WORLD"
+ ETOK 146               \
+ EQUB VE                \ Encoded as:   "[148][146]"
+
+ ECHR 'S'               \ Token 91:     "SON OF A BITCH"
+ ETWO 'O', 'N'          \
+ ECHR ' '               \ Encoded as:   "S<223> OF[208]B<219>CH"
+ ECHR 'O'
+ ECHR 'F'
+ ETOK 208
+ ECHR 'B'
+ ETWO 'I', 'T'
+ ECHR 'C'
+ ECHR 'H'
+ EQUB VE
+
+ ECHR 'S'               \ Token 92:     "SCOUNDREL"
+ ECHR 'C'               \
+ ETWO 'O', 'U'          \ Encoded as:   "SC<217>ND<242>L"
+ ECHR 'N'
+ ECHR 'D'
+ ETWO 'R', 'E'
+ ECHR 'L'
+ EQUB VE
+
+ ECHR 'B'               \ Token 93:     "BLACKGUARD"
+ ETWO 'L', 'A'          \
+ ECHR 'C'               \ Encoded as:   "B<249>CKGU<238>D"
+ ECHR 'K'
+ ECHR 'G'
+ ECHR 'U'
+ ETWO 'A', 'R'
+ ECHR 'D'
+ EQUB VE
+
+ ECHR 'R'               \ Token 94:     "ROGUE"
+ ECHR 'O'               \
+ ECHR 'G'               \ Encoded as:   "ROGUE"
+ ECHR 'U'
+ ECHR 'E'
+ EQUB VE
+
+ ECHR 'W'               \ Token 95:     "WHORESON BEETLE HEAD FLAP EAR'D
+ ECHR 'H'               \                KNAVE"
+ ETWO 'O', 'R'          \
+ ETWO 'E', 'S'          \ Encoded as:   "WH<253><237><223> <247><221><229> HEAD
+ ETWO 'O', 'N'          \                [198]F<249>P E<238>[39]D KNA<250>"
+ ECHR ' '
+ ETWO 'B', 'E'
+ ETWO 'E', 'T'
+ ETWO 'L', 'E'
+ ECHR ' '
+ ECHR 'H'
+ ECHR 'E'
+ ECHR 'A'
+ ECHR 'D'
+ ETOK 198
+ ECHR 'F'
+ ETWO 'L', 'A'
+ ECHR 'P'
+ ECHR ' '
+ ECHR 'E'
+ ETWO 'A', 'R'
+ ECHR '`'
+ ECHR 'D'
+ ECHR ' '
+ ECHR 'K'
+ ECHR 'N'
+ ECHR 'A'
+ ETWO 'V', 'E'
+ EQUB VE
+
+ ECHR 'N'               \ Token 96:     "N UNREMARKABLE"
+ ECHR ' '               \
+ ECHR 'U'               \ Encoded as:   "N UN<242><239>RK<216><229>"
+ ECHR 'N'
+ ETWO 'R', 'E'
+ ETWO 'M', 'A'
+ ECHR 'R'
+ ECHR 'K'
+ ETWO 'A', 'B'
+ ETWO 'L', 'E'
+ EQUB VE
+
+ ECHR ' '               \ Token 97:     " BORING"
+ ECHR 'B'               \
+ ETWO 'O', 'R'          \ Encoded as:   " B<253><240>G"
+ ETWO 'I', 'N'
+ ECHR 'G'
+ EQUB VE
+
+ ECHR ' '               \ Token 98:     " DULL"
+ ECHR 'D'               \
+ ECHR 'U'               \ Encoded as:   " DULL"
+ ECHR 'L'
+ ECHR 'L'
+ EQUB VE
+
+ ECHR ' '               \ Token 99:     " TEDIOUS"
+ ECHR 'T'               \
+ ECHR 'E'               \ Encoded as:   " TE<241>O<236>"
+ ETWO 'D', 'I'
+ ECHR 'O'
+ ETWO 'U', 'S'
+ EQUB VE
+
+ ECHR ' '               \ Token 100:    " REVOLTING"
+ ETWO 'R', 'E'          \
+ ECHR 'V'               \ Encoded as:   " <242>VOLT<240>G"
+ ECHR 'O'
+ ECHR 'L'
+ ECHR 'T'
+ ETWO 'I', 'N'
+ ECHR 'G'
+ EQUB VE
+
+ ETOK 145               \ Token 101:    "PLANET"
+ EQUB VE                \
+                        \ Encoded as:   "[145]"
+
+ ETOK 146               \ Token 102:    "WORLD"
+ EQUB VE                \
+                        \ Encoded as:   "[146]"
+
+ ECHR 'P'               \ Token 103:    "PLACE"
+ ETWO 'L', 'A'          \
+ ETWO 'C', 'E'          \ Encoded as:   "P<249><233>"
+ EQUB VE
+
+ ECHR 'L'               \ Token 104:    "LITTLE PLANET"
+ ETWO 'I', 'T'          \
+ ECHR 'T'               \ Encoded as:   "L<219>T<229> [145]"
+ ETWO 'L', 'E'
+ ECHR ' '
+ ETOK 145
+ EQUB VE
+
+ ECHR 'D'               \ Token 105:    "DUMP"
+ ECHR 'U'               \
+ ECHR 'M'               \ Encoded as:   "DUMP"
+ ECHR 'P'
+ EQUB VE
+
+ ECHR 'I'               \ Token 106:    "I HEAR A [130-134] LOOKING SHIP
+ ECHR ' '               \                APPEARED AT ERRIUS"
+ ECHR 'H'               \
+ ECHR 'E'               \ Encoded as:   "I HE<238>[208][23?] <224>OK[195][207]
+ ETWO 'A', 'R'          \                 APPE<238>[196]<245>[209]"
+ ETOK 208
+ ERND 23
+ ECHR ' '
+ ETWO 'L', 'O'
+ ECHR 'O'
+ ECHR 'K'
+ ETOK 195
+ ETOK 207
+ ECHR ' '
+ ECHR 'A'
+ ECHR 'P'
+ ECHR 'P'
+ ECHR 'E'
+ ETWO 'A', 'R'
+ ETOK 196
+ ETWO 'A', 'T'
+ ETOK 209
+ EQUB VE
+
+ ECHR 'Y'               \ Token 107:    "YEAH, I HEAR A [130-134] SHIP LEFT
+ ECHR 'E'               \                ERRIUS A  WHILE BACK"
+ ECHR 'A'               \
+ ECHR 'H'               \ Encoded as:   "YEAH, I HE<238>[208][23?] [207]
+ ECHR ','               \                 <229>FT[209][208] WHI<229> BACK"
+ ECHR ' '
+ ECHR 'I'
+ ECHR ' '
+ ECHR 'H'
+ ECHR 'E'
+ ETWO 'A', 'R'
+ ETOK 208
+ ERND 23
+ ECHR ' '
+ ETOK 207
+ ECHR ' '
+ ETWO 'L', 'E'
+ ECHR 'F'
+ ECHR 'T'
+ ETOK 209
+ ETOK 208
+ ECHR ' '
+ ECHR 'W'
+ ECHR 'H'
+ ECHR 'I'
+ ETWO 'L', 'E'
+ ECHR ' '
+ ECHR 'B'
+ ECHR 'A'
+ ECHR 'C'
+ ECHR 'K'
+ EQUB VE
+
+ ECHR 'G'               \ Token 108:    "GET YOUR IRON ASS OVER TO ERRIUS"
+ ETWO 'E', 'T'          \
+ ECHR ' '               \ Encoded as:   "G<221> [179]R IR<223> ASS OV<244> TO
+ ETOK 179               \                [209]"
+ ECHR 'R'
+ ECHR ' '
+ ECHR 'I'
+ ECHR 'R'
+ ETWO 'O', 'N'
+ ECHR ' '
+ ECHR 'A'
+ ECHR 'S'
+ ECHR 'S'
+ ECHR ' '
+ ECHR 'O'
+ ECHR 'V'
+ ETWO 'E', 'R'
+ ECHR ' '
+ ECHR 'T'
+ ECHR 'O'
+ ETOK 209
+ EQUB VE
+
+ ETWO 'S', 'O'          \ Token 109:    "SOME [91-95] NEW SHIP WAS SEEN AT
+ ECHR 'M'               \                ERRIUS"
+ ECHR 'E'               \
+ ECHR ' '               \ Encoded as:   "<235>ME [24?][210][207] WAS <218><246>
+ ERND 24                \                 <245>[209]"
+ ETOK 210
+ ETOK 207
+ ECHR ' '
+ ECHR 'W'
+ ECHR 'A'
+ ECHR 'S'
+ ECHR ' '
+ ETWO 'S', 'E'
+ ETWO 'E', 'N'
+ ECHR ' '
+ ETWO 'A', 'T'
+ ETOK 209
+ EQUB VE
+
+ ECHR 'T'               \ Token 110:    "TRY ERRIUS"
+ ECHR 'R'               \
+ ECHR 'Y'               \ Encoded as:   "TRY[209]"
+ ETOK 209
+ EQUB VE
+
+ EJMP 1                 \ Token 111:    "{all caps}SPECIAL CARGO"
+ ECHR 'S'               \
+ ECHR 'P'               \ Encoded as:   "{1}SPECI<228> C<238>GO"
+ ECHR 'E'
+ ECHR 'C'
+ ECHR 'I'
+ ETWO 'A', 'L'
+ ECHR ' '
+ ECHR 'C'
+ ETWO 'A', 'R'
+ ECHR 'G'
+ ECHR 'O'
+ EQUB VE
+
+ EQUB VE                \ Token 112:    ""
+                        \
+                        \ Encoded as:   ""
+
+ ECHR 'C'               \ Token 113:    "CARGO VALUE:"
+ ETWO 'A', 'R'          \
+ ECHR 'G'               \ Encoded as:   "C<238>GO V<228>UE:"
+ ECHR 'O'
+ ECHR ' '
+ ECHR 'V'
+ ETWO 'A', 'L'
+ ECHR 'U'
+ ECHR 'E'
+ ECHR ':'
+ EQUB VE
+
+ ECHR ' '               \ Token 114:    " MODIFIED BY A.J.C.DUGGAN"
+ ECHR 'M'               \
+ ECHR 'O'               \ Encoded as:   " MO<241>FI<252> BY A.J.C.DUGG<255>"
+ ETWO 'D', 'I'
+ ECHR 'F'
+ ECHR 'I'
+ ETWO 'E', 'D'
+ ECHR ' '
+ ECHR 'B'
+ ECHR 'Y'
+ ECHR ' '
+ ECHR 'A'
+ ECHR '.'
+ ECHR 'J'
+ ECHR '.'
+ ECHR 'C'
+ ECHR '.'
+ ECHR 'D'
+ ECHR 'U'
+ ECHR 'G'
+ ECHR 'G'
+ ETWO 'A', 'N'
+ EQUB VE
+
+ ECHR 'W'               \ Token 115:    "WASP"
+ ECHR 'A'               \
+ ECHR 'S'               \ Encoded as:   "WASP"
+ ECHR 'P'
+ EQUB VE
+
+ ECHR 'M'               \ Token 116:    "MOTH"
+ ECHR 'O'               \
+ ETWO 'T', 'H'          \ Encoded as:   "MO<226>"
+ EQUB VE
+
+ ECHR 'G'               \ Token 117:    "GRUB"
+ ECHR 'R'               \
+ ECHR 'U'               \ Encoded as:   "GRUB"
+ ECHR 'B'
+ EQUB VE
+
+ ETWO 'A', 'N'          \ Token 118:    "ANT"
+ ECHR 'T'               \
+ EQUB VE                \ Encoded as:   "<255>T"
+
+ EJMP 18                \ Token 119:    "{random 1-8 letter word}"
+ EQUB VE                \
+                        \ Encoded as:   "{18}"
+
+ ECHR 'P'               \ Token 120:    "POET"
+ ECHR 'O'               \
+ ETWO 'E', 'T'          \ Encoded as:   "PO<221>"
+ EQUB VE
+
+ ETWO 'A', 'R'          \ Token 121:    "ARTS GRADUATE"
+ ECHR 'T'               \
+ ECHR 'S'               \ Encoded as:   "<238>TS G<248>DU<245>E"
+ ECHR ' '
+ ECHR 'G'
+ ETWO 'R', 'A'
+ ECHR 'D'
+ ECHR 'U'
+ ETWO 'A', 'T'
+ ECHR 'E'
+ EQUB VE
+
+ ECHR 'Y'               \ Token 122:    "YAK"
+ ECHR 'A'               \
+ ECHR 'K'               \ Encoded as:   "YAK"
+ EQUB VE
+
+ ECHR 'S'               \ Token 123:    "SNAIL"
+ ECHR 'N'               \
+ ECHR 'A'               \ Encoded as:   "SNA<220>"
+ ETWO 'I', 'L'
+ EQUB VE
+
+ ECHR 'S'               \ Token 124:    "SLUG"
+ ECHR 'L'               \
+ ECHR 'U'               \ Encoded as:   "SLUG"
+ ECHR 'G'
+ EQUB VE
+
+ ECHR 'T'               \ Token 125:    "TROPICAL"
+ ECHR 'R'               \
+ ECHR 'O'               \ Encoded as:   "TROPIC<228>"
+ ECHR 'P'
+ ECHR 'I'
+ ECHR 'C'
+ ETWO 'A', 'L'
+ EQUB VE
+
+ ECHR 'D'               \ Token 126:    "DENSE"
+ ETWO 'E', 'N'          \
+ ETWO 'S', 'E'          \ Encoded as:   "D<246><218>"
+ EQUB VE
+
+ ETWO 'R', 'A'          \ Token 127:    "RAIN"
+ ETWO 'I', 'N'          \
+ EQUB VE                \ Encoded as:   "<248><240>"
+
+ ECHR 'I'               \ Token 128:    "IMPENETRABLE"
+ ECHR 'M'               \
+ ECHR 'P'               \ Encoded as:   "IMP<246><221><248>B<229>"
+ ETWO 'E', 'N'
+ ETWO 'E', 'T'
+ ETWO 'R', 'A'
+ ECHR 'B'
+ ETWO 'L', 'E'
+ EQUB VE
+
+ ECHR 'E'               \ Token 129:    "EXUBERANT"
+ ECHR 'X'               \
+ ECHR 'U'               \ Encoded as:   "EXU<247><248>NT"
+ ETWO 'B', 'E'
+ ETWO 'R', 'A'
+ ECHR 'N'
+ ECHR 'T'
+ EQUB VE
+
+ ECHR 'F'               \ Token 130:    "FUNNY"
+ ECHR 'U'               \
+ ECHR 'N'               \ Encoded as:   "FUNNY"
+ ECHR 'N'
+ ECHR 'Y'
+ EQUB VE
+
+ ECHR 'W'               \ Token 131:    "WIERD"
+ ECHR 'I'               \
+ ETWO 'E', 'R'          \ Encoded as:   "WI<244>D"
+ ECHR 'D'
+ EQUB VE
+
+ ECHR 'U'               \ Token 132:    "UNUSUAL"
+ ETWO 'N', 'U'          \
+ ECHR 'S'               \ Encoded as:   "U<225>SU<228>"
+ ECHR 'U'
+ ETWO 'A', 'L'
+ EQUB VE
+
+ ETWO 'S', 'T'          \ Token 133:    "STRANGE"
+ ETWO 'R', 'A'          \
+ ECHR 'N'               \ Encoded as:   "<222><248>N<231>"
+ ETWO 'G', 'E'
+ EQUB VE
+
+ ECHR 'P'               \ Token 134:    "PECULIAR"
+ ECHR 'E'               \
+ ECHR 'C'               \ Encoded as:   "PECULI<238>"
+ ECHR 'U'
+ ECHR 'L'
+ ECHR 'I'
+ ETWO 'A', 'R'
+ EQUB VE
+
+ ECHR 'F'               \ Token 135:    "FREQUENT"
+ ETWO 'R', 'E'          \
+ ETWO 'Q', 'U'          \ Encoded as:   "F<242><254><246>T"
+ ETWO 'E', 'N'
+ ECHR 'T'
+ EQUB VE
+
+ ECHR 'O'               \ Token 136:    "OCCASIONAL"
+ ECHR 'C'               \
+ ECHR 'C'               \ Encoded as:   "OCCASI<223><228>"
+ ECHR 'A'
+ ECHR 'S'
+ ECHR 'I'
+ ETWO 'O', 'N'
+ ETWO 'A', 'L'
+ EQUB VE
+
+ ECHR 'U'               \ Token 137:    "UNPREDICTABLE"
+ ECHR 'N'               \
+ ECHR 'P'               \ Encoded as:   "UNP<242><241>CT<216><229>"
+ ETWO 'R', 'E'
+ ETWO 'D', 'I'
+ ECHR 'C'
+ ECHR 'T'
+ ETWO 'A', 'B'
+ ETWO 'L', 'E'
+ EQUB VE
+
+ ECHR 'D'               \ Token 138:    "DREADFUL"
+ ETWO 'R', 'E'          \
+ ECHR 'A'               \ Encoded as:   "D<242>ADFUL"
+ ECHR 'D'
+ ECHR 'F'
+ ECHR 'U'
+ ECHR 'L'
+ EQUB VE
+
+ ETOK 171               \ Token 139:    "DEADLY"
+ EQUB VE                \
+                        \ Encoded as:   "[171]"
+
+ ERND 1                 \ Token 140:    "[21-25] [16-20] FOR [61-65]"
+ ECHR ' '               \
+ ERND 0                 \ Encoded as:   "[1?] [0?] F<253> [10?]"
+ ECHR ' '
+ ECHR 'F'
+ ETWO 'O', 'R'
+ ECHR ' '
+ ERND 10
+ EQUB VE
+
+ ETOK 140               \ Token 141:    "[21-25] [16-20] FOR [61-65] AND
+ ETOK 178               \                [61-65]"
+ ERND 10                \
+ EQUB VE                \ Encoded as:   "[140][178][10?]"
+
+ ERND 11                \ Token 142:    "[51-55] BY [56-60]"
+ ECHR ' '               \
+ ECHR 'B'               \ Encoded as:   "[11?] BY [12?]"
+ ECHR 'Y'
+ ECHR ' '
+ ERND 12
+ EQUB VE
+
+ ETOK 140               \ Token 143:    "[21-25] [16-20] FOR [61-65] BUT [51-55]
+ ECHR ' '               \                BY [56-60]"
+ ECHR 'B'               \
+ ECHR 'U'               \ Encoded as:   "[140] BUT [142]"
+ ECHR 'T'
+ ECHR ' '
+ ETOK 142
+ EQUB VE
+
+ ECHR ' '               \ Token 144:    " A[96-100] [101-105]"
+ ECHR 'A'               \
+ ERND 20                \ Encoded as:   " A[20?] [21?]"
+ ECHR ' '
+ ERND 21
+ EQUB VE
+
+ ECHR 'P'               \ Token 145:    "PLANET"
+ ECHR 'L'               \
+ ETWO 'A', 'N'          \ Encoded as:   "PL<255><221>"
+ ETWO 'E', 'T'
+ EQUB VE
+
+ ECHR 'W'               \ Token 146:    "WORLD"
+ ETWO 'O', 'R'          \
+ ECHR 'L'               \ Encoded as:   "W<253>LD"
+ ECHR 'D'
+ EQUB VE
+
+ ETWO 'T', 'H'          \ Token 147:    "THE "
+ ECHR 'E'               \
+ ECHR ' '               \ Encoded as:   "<226>E "
+ EQUB VE
+
+ ETWO 'T', 'H'          \ Token 148:    "THIS "
+ ECHR 'I'               \
+ ECHR 'S'               \ Encoded as:   "<226>IS "
+ ECHR ' '
+ EQUB VE
+
+ ETWO 'L', 'O'          \ Token 149:    "LOAD NEW {single cap}COMMANDER"
+ ECHR 'A'               \
+ ECHR 'D'               \ Encoded as:   "<224>AD[210][154]"
+ ETOK 210
+ ETOK 154
+ EQUB VE
+
+ EJMP 9                 \ Token 150:    "{clear screen}
+ EJMP 11                \                {draw box around title}
+ EJMP 1                 \                {all caps}
+ EJMP 8                 \                {tab 6}"
+ EQUB VE                \
+                        \ Encoded as:   "{9}{11}{1}{8}"
+
+ ECHR 'D'               \ Token 151:    "DRIVE"
+ ECHR 'R'               \
+ ECHR 'I'               \ Encoded as:   "DRI<250>"
+ ETWO 'V', 'E'
+ EQUB VE
+
+ ECHR ' '               \ Token 152:    " CATALOGUE"
+ ECHR 'C'               \
+ ETWO 'A', 'T'          \ Encoded as:   " C<245>A<224>GUE"
+ ECHR 'A'
+ ETWO 'L', 'O'
+ ECHR 'G'
+ ECHR 'U'
+ ECHR 'E'
+ EQUB VE
+
+ ECHR 'I'               \ Token 153:    "IAN"
+ ETWO 'A', 'N'          \
+ EQUB VE                \ Encoded as:   "I<255>"
+
+ EJMP 19                \ Token 154:    "{single cap}COMMANDER"
+ ECHR 'C'               \
+ ECHR 'O'               \ Encoded as:   "{19}COMM<255>D<244>"
+ ECHR 'M'
+ ECHR 'M'
+ ETWO 'A', 'N'
+ ECHR 'D'
+ ETWO 'E', 'R'
+ EQUB VE
+
+ ERND 13                \ Token 155:    "[170-174]"
+ EQUB VE                \
+                        \ Encoded as:   "[13?]"
+
+ ECHR 'M'               \ Token 156:    "MOUNTAIN"
+ ETWO 'O', 'U'          \
+ ECHR 'N'               \ Encoded as:   "M<217>NTA<240>"
+ ECHR 'T'
+ ECHR 'A'
+ ETWO 'I', 'N'
+ EQUB VE
+
+ ETWO 'E', 'D'          \ Token 157:    "EDIBLE"
+ ECHR 'I'               \
+ ECHR 'B'               \ Encoded as:   "<252>IB<229>"
+ ETWO 'L', 'E'
+ EQUB VE
+
+ ECHR 'T'               \ Token 158:    "TREE"
+ ETWO 'R', 'E'          \
+ ECHR 'E'               \ Encoded as:   "T<242>E"
+ EQUB VE
+
+ ECHR 'S'               \ Token 159:    "SPOTTED"
+ ECHR 'P'               \
+ ECHR 'O'               \ Encoded as:   "SPOTT<252>"
+ ECHR 'T'
+ ECHR 'T'
+ ETWO 'E', 'D'
+ EQUB VE
+
+ ERND 29                \ Token 160:    "[225-229]"
+ EQUB VE                \
+                        \ Encoded as:   "[29?]"
+
+ ERND 30                \ Token 161:    "[230-234]"
+ EQUB VE                \
+                        \ Encoded as:   "[30?]"
+
+ ERND 6                 \ Token 162:    "[46-50]OID"
+ ECHR 'O'               \
+ ECHR 'I'               \ Encoded as:   "[6?]OID"
+ ECHR 'D'
+ EQUB VE
+
+ ERND 36                \ Token 163:    "[120-124]"
+ EQUB VE                \
+                        \ Encoded as:   "[36?]"
+
+ ERND 35                \ Token 164:    "[115-119]"
+ EQUB VE                \
+                        \ Encoded as:   "[35?]"
+
+ ETWO 'A', 'N'          \ Token 165:    "ANCIENT"
+ ECHR 'C'               \
+ ECHR 'I'               \ Encoded as:   "<255>CI<246>T"
+ ETWO 'E', 'N'
+ ECHR 'T'
+ EQUB VE
+
+ ECHR 'E'               \ Token 166:    "EXCEPTIONAL"
+ ECHR 'X'               \
+ ETWO 'C', 'E'          \ Encoded as:   "EX<233>P<251><223><228>"
+ ECHR 'P'
+ ETWO 'T', 'I'
+ ETWO 'O', 'N'
+ ETWO 'A', 'L'
+ EQUB VE
+
+ ECHR 'E'               \ Token 167:    "ECCENTRIC"
+ ECHR 'C'               \
+ ETWO 'C', 'E'          \ Encoded as:   "EC<233>NTRIC"
+ ECHR 'N'
+ ECHR 'T'
+ ECHR 'R'
+ ECHR 'I'
+ ECHR 'C'
+ EQUB VE
+
+ ETWO 'I', 'N'          \ Token 168:    "INGRAINED"
+ ECHR 'G'               \
+ ETWO 'R', 'A'          \ Encoded as:   "<240>G<248><240><252>"
+ ETWO 'I', 'N'
+ ETWO 'E', 'D'
+ EQUB VE
+
+ ERND 23                \ Token 169:    "[130-134]"
+ EQUB VE                \
+                        \ Encoded as:   "[23?]"
+
+ ECHR 'K'               \ Token 170:    "KILLER"
+ ETWO 'I', 'L'          \
+ ECHR 'L'               \ Encoded as:   "K<220>L<244>"
+ ETWO 'E', 'R'
+ EQUB VE
+
+ ECHR 'D'               \ Token 171:    "DEADLY"
+ ECHR 'E'               \
+ ECHR 'A'               \ Encoded as:   "DEADLY"
+ ECHR 'D'
+ ECHR 'L'
+ ECHR 'Y'
+ EQUB VE
+
+ ECHR 'E'               \ Token 172:    "EVIL"
+ ECHR 'V'               \
+ ETWO 'I', 'L'          \ Encoded as:   "EV<220>"
+ EQUB VE
+
+ ETWO 'L', 'E'          \ Token 173:    "LETHAL"
+ ETWO 'T', 'H'          \
+ ETWO 'A', 'L'          \ Encoded as:   "<229><226><228>"
+ EQUB VE
+
+ ECHR 'V'               \ Token 174:    "VICIOUS"
+ ECHR 'I'               \
+ ECHR 'C'               \ Encoded as:   "VICIO<236>"
+ ECHR 'I'
+ ECHR 'O'
+ ETWO 'U', 'S'
+ EQUB VE
+
+ ETWO 'I', 'T'          \ Token 175:    "ITS "
+ ECHR 'S'               \
+ ECHR ' '               \ Encoded as:   "<219>S "
+ EQUB VE
+
+ EJMP 13                \ Token 176:    "{lower case}
+ EJMP 14                \                {justify}
+ EJMP 19                \                {single cap}"
+ EQUB VE                \
+                        \ Encoded as:   "{13}{14}{19}"
+
+ ECHR '.'               \ Token 177:    ".{cr}
+ EJMP 12                \                {left align}"
+ EJMP 15                \
+ EQUB VE                \ Encoded as:   ".{12}{15}"
+
+ ECHR ' '               \ Token 178:    " AND "
+ ETWO 'A', 'N'          \
+ ECHR 'D'               \ Encoded as:   " <255>D "
+ ECHR ' '
+ EQUB VE
+
+ ECHR 'Y'               \ Token 179:    "YOU"
+ ETWO 'O', 'U'          \
+ EQUB VE                \ Encoded as:   "Y<217>"
+
+ ECHR 'P'               \ Token 180:    "PARKING METERS"
+ ETWO 'A', 'R'          \
+ ECHR 'K'               \ Encoded as:   "P<238>K[195]M<221><244>S"
+ ETOK 195
+ ECHR 'M'
+ ETWO 'E', 'T'
+ ETWO 'E', 'R'
+ ECHR 'S'
+ EQUB VE
+
+ ECHR 'D'               \ Token 181:    "DUST CLOUDS"
+ ETWO 'U', 'S'          \
+ ECHR 'T'               \ Encoded as:   "D<236>T C<224>UDS"
+ ECHR ' '
+ ECHR 'C'
+ ETWO 'L', 'O'
+ ECHR 'U'
+ ECHR 'D'
+ ECHR 'S'
+ EQUB VE
+
+ ECHR 'I'               \ Token 182:    "ICE BERGS"
+ ETWO 'C', 'E'          \
+ ECHR ' '               \ Encoded as:   "I<233> <247>RGS"
+ ETWO 'B', 'E'
+ ECHR 'R'
+ ECHR 'G'
+ ECHR 'S'
+ EQUB VE
+
+ ECHR 'R'               \ Token 183:    "ROCK FORMATIONS"
+ ECHR 'O'               \
+ ECHR 'C'               \ Encoded as:   "ROCK F<253><239><251><223>S"
+ ECHR 'K'
+ ECHR ' '
+ ECHR 'F'
+ ETWO 'O', 'R'
+ ETWO 'M', 'A'
+ ETWO 'T', 'I'
+ ETWO 'O', 'N'
+ ECHR 'S'
+ EQUB VE
+
+ ECHR 'V'               \ Token 184:    "VOLCANOES"
+ ECHR 'O'               \
+ ECHR 'L'               \ Encoded as:   "VOLCA<227><237>"
+ ECHR 'C'
+ ECHR 'A'
+ ETWO 'N', 'O'
+ ETWO 'E', 'S'
+ EQUB VE
+
+ ECHR 'P'               \ Token 185:    "PLANT"
+ ECHR 'L'               \
+ ETWO 'A', 'N'          \ Encoded as:   "PL<255>T"
+ ECHR 'T'
+ EQUB VE
+
+ ECHR 'T'               \ Token 186:    "TULIP"
+ ECHR 'U'               \
+ ECHR 'L'               \ Encoded as:   "TULIP"
+ ECHR 'I'
+ ECHR 'P'
+ EQUB VE
+
+ ECHR 'B'               \ Token 187:    "BANANA"
+ ETWO 'A', 'N'          \
+ ETWO 'A', 'N'          \ Encoded as:   "B<255><255>A"
+ ECHR 'A'
+ EQUB VE
+
+ ECHR 'C'               \ Token 188:    "CORN"
+ ETWO 'O', 'R'          \
+ ECHR 'N'               \ Encoded as:   "C<253>N"
+ EQUB VE
+
+ EJMP 18                \ Token 189:    "{random 1-8 letter word}WEED"
+ ECHR 'W'               \
+ ECHR 'E'               \ Encoded as:   "{18}WE<252>"
+ ETWO 'E', 'D'
+ EQUB VE
+
+ EJMP 18                \ Token 190:    "{random 1-8 letter word}"
+ EQUB VE                \
+                        \ Encoded as:   "{18}"
+
+ EJMP 17                \ Token 191:    "{system name adjective} {random 1-8
+ ECHR ' '               \                letter word}"
+ EJMP 18                \
+ EQUB VE                \ Encoded as:   "{17} {18}"
+
+ EJMP 17                \ Token 192:    "{system name adjective} [170-174]"
+ ECHR ' '               \
+ ERND 13                \ Encoded as:   "{17} [13?]"
+ EQUB VE
+
+ ETWO 'I', 'N'          \ Token 193:    "INHABITANT"
+ ECHR 'H'               \
+ ECHR 'A'               \ Encoded as:   "<240>HA<234>T<255>T"
+ ETWO 'B', 'I'
+ ECHR 'T'
+ ETWO 'A', 'N'
+ ECHR 'T'
+ EQUB VE
+
+ ETOK 191               \ Token 194:    "{system name adjective} {random 1-8
+ EQUB VE                \                letter word}"
+                        \
+                        \ Encoded as:   "[191]"
+
+ ETWO 'I', 'N'          \ Token 195:    "ING "
+ ECHR 'G'               \
+ ECHR ' '               \ Encoded as:   "<240>G "
+ EQUB VE
+
+ ETWO 'E', 'D'          \ Token 196:    "ED "
+ ECHR ' '               \
+ EQUB VE                \ Encoded as:   "<252> "
+
+ EQUB VE                \ Token 197:    ""
+                        \
+                        \ Encoded as:   ""
+
+ EQUB VE                \ Token 198:    ""
+                        \
+                        \ Encoded as:   ""
+
+ EQUB VE                \ Token 199:    ""
+                        \
+                        \ Encoded as:   ""
+
+ ECHR ' '               \ Token 200:    " NAME? "
+ ECHR 'N'               \
+ ECHR 'A'               \ Encoded as:   " NAME? "
+ ECHR 'M'
+ ECHR 'E'
+ ECHR '?'
+ ECHR ' '
+ EQUB VE
+
+ ECHR ' '               \ Token 201:    " TO "
+ ECHR 'T'               \
+ ECHR 'O'               \ Encoded as:   " TO "
+ ECHR ' '
+ EQUB VE
+
+ ECHR ' '               \ Token 202:    " IS "
+ ECHR 'I'               \
+ ECHR 'S'               \ Encoded as:   " IS "
+ ECHR ' '
+ EQUB VE
+
+ ECHR 'W'               \ Token 203:    "WAS LAST SEEN AT {single cap}"
+ ECHR 'A'               \
+ ECHR 'S'               \ Encoded as:   "WAS <249><222> <218><246> <245> {19}"
+ ECHR ' '
+ ETWO 'L', 'A'
+ ETWO 'S', 'T'
+ ECHR ' '
+ ETWO 'S', 'E'
+ ETWO 'E', 'N'
+ ECHR ' '
+ ETWO 'A', 'T'
+ ECHR ' '
+ EJMP 19
+ EQUB VE
+
+ ECHR '.'               \ Token 204:    ".{cr}
+ EJMP 12                \                 {single cap}"
+ ECHR ' '               \
+ EJMP 19                \ Encoded as:   ".{12} {19}"
+ EQUB VE
+
+ ECHR 'D'               \ Token 205:    "DOCKED"
+ ECHR 'O'               \
+ ECHR 'C'               \ Encoded as:   "DOCK<252>"
+ ECHR 'K'
+ ETWO 'E', 'D'
+ EQUB VE
+
+ EJMP 1                 \ Token 206:    "{all caps}(Y/N)?"
+ ECHR '('               \
+ ECHR 'Y'               \ Encoded as:   "{1}(Y/N)?"
+ ECHR '/'
+ ECHR 'N'
+ ECHR ')'
+ ECHR '?'
+ EQUB VE
+
+ ECHR 'S'               \ Token 207:    "SHIP"
+ ECHR 'H'               \
+ ECHR 'I'               \ Encoded as:   "SHIP"
+ ECHR 'P'
+ EQUB VE
+
+ ECHR ' '               \ Token 208:    " A "
+ ECHR 'A'               \
+ ECHR ' '               \ Encoded as:   " A "
+ EQUB VE
+
+ ECHR ' '               \ Token 209:    " ERRIUS"
+ ETWO 'E', 'R'          \
+ ECHR 'R'               \ Encoded as:   " <244>RI<236>"
+ ECHR 'I'
+ ETWO 'U', 'S'
+ EQUB VE
+
+ ECHR ' '               \ Token 210:    " NEW "
+ ECHR 'N'               \
+ ECHR 'E'               \ Encoded as:   " NEW "
+ ECHR 'W'
+ ECHR ' '
+ EQUB VE
+
+ EJMP 2                 \ Token 211:    "{sentence case} HER MAJESTY'S SPACE
+ ECHR ' '               \                 NAVY{lower case}"
+ ECHR 'H'               \
+ ETWO 'E', 'R'          \ Encoded as:   "{2} H<244> <239>J<237>TY[39]S SPA<233>
+ ECHR ' '               \                 NAVY{13}"
+ ETWO 'M', 'A'
+ ECHR 'J'
+ ETWO 'E', 'S'
+ ECHR 'T'
+ ECHR 'Y'
+ ECHR '`'
+ ECHR 'S'
+ ECHR ' '
+ ECHR 'S'
+ ECHR 'P'
+ ECHR 'A'
+ ETWO 'C', 'E'
+ ECHR ' '
+ ECHR 'N'
+ ECHR 'A'
+ ECHR 'V'
+ ECHR 'Y'
+ EJMP 13
+ EQUB VE
+
+ ETOK 177               \ Token 212:    ".{cr}
+ EJMP 8                 \                {left align}
+ EJMP 1                 \                {tab 6}{all caps}  MESSAGE ENDS"
+ ECHR ' '               \
+ ECHR ' '               \ Encoded as:   "[177]{8}{1}  M<237>SA<231> <246>DS"
+ ECHR 'M'
+ ETWO 'E', 'S'
+ ECHR 'S'
+ ECHR 'A'
+ ETWO 'G', 'E'
+ ECHR ' '
+ ETWO 'E', 'N'
+ ECHR 'D'
+ ECHR 'S'
+ EQUB VE
+
+ ECHR ' '               \ Token 213:    " {single cap}COMMANDER {commander
+ ETOK 154               \                name}, I {lower case}AM{sentence case}
+ ECHR ' '               \                CAPTAIN {mission captain's name}
+ EJMP 4                 \                {lower case}OF{sentence case} HER
+ ECHR ','               \                MAJESTY'S SPACE NAVY{lower case}"
+ ECHR ' '               \
+ ECHR 'I'               \ Encoded as:   " [154] {4}, I {13}AM{2} CAPTA<240> {27}
+ ECHR ' '               \                 {13}OF[211]"
+ EJMP 13
+ ECHR 'A'
+ ECHR 'M'
+ EJMP 2
+ ECHR ' '
+ ECHR 'C'
+ ECHR 'A'
+ ECHR 'P'
+ ECHR 'T'
+ ECHR 'A'
+ ETWO 'I', 'N'
+ ECHR ' '
+ EJMP 27
+ ECHR ' '
+ EJMP 13
+ ECHR 'O'
+ ECHR 'F'
+ ETOK 211
+ EQUB VE
+
+ EQUB VE                \ Token 214:    ""
+                        \
+                        \ Encoded as:   ""
+
+ EJMP 15                \ Token 215:    "{left align} UNKNOWN PLANET"
+ ECHR ' '               \
+ ECHR 'U'               \ Encoded as:   "{15} UNK<227>WN [145]"
+ ECHR 'N'
+ ECHR 'K'
+ ETWO 'N', 'O'
+ ECHR 'W'
+ ECHR 'N'
+ ECHR ' '
+ ETOK 145
+ EQUB VE
+
+ EJMP 9                 \ Token 216:    "{clear screen}
+ EJMP 8                 \                {tab 6}
+ EJMP 23                \                {move to row 10, white, lower case}
+ EJMP 1                 \                {all caps}
+ ETWO 'I', 'N'          \                INCOMING MESSAGE"
+ ECHR 'C'               \
+ ECHR 'O'               \ Encoded as:   "{9}{8}{23}{1}<240>COM[195]M<237>SA
+ ECHR 'M'               \                <231>"
+ ETOK 195
+ ECHR 'M'
+ ETWO 'E', 'S'
+ ECHR 'S'
+ ECHR 'A'
+ ETWO 'G', 'E'
+ EQUB VE
+
+ ECHR 'C'               \ Token 217:    "CURRUTHERS"
+ ECHR 'U'               \
+ ECHR 'R'               \ Encoded as:   "CURRU<226><244>S"
+ ECHR 'R'
+ ECHR 'U'
+ ETWO 'T', 'H'
+ ETWO 'E', 'R'
+ ECHR 'S'
+ EQUB VE
+
+ ECHR 'F'               \ Token 218:    "FOSDYKE SMYTHE"
+ ECHR 'O'               \
+ ECHR 'S'               \ Encoded as:   "FOSDYKE SMY<226>E"
+ ECHR 'D'
+ ECHR 'Y'
+ ECHR 'K'
+ ECHR 'E'
+ ECHR ' '
+ ECHR 'S'
+ ECHR 'M'
+ ECHR 'Y'
+ ETWO 'T', 'H'
+ ECHR 'E'
+ EQUB VE
+
+ ECHR 'F'               \ Token 219:    "FORTESQUE"
+ ETWO 'O', 'R'          \
+ ECHR 'T'               \ Encoded as:   "F<253>T<237><254>E"
+ ETWO 'E', 'S'
+ ETWO 'Q', 'U'
+ ECHR 'E'
+ EQUB VE
+
+ ETOK 203               \ Token 220:    "WAS LAST SEEN AT {single cap}REESDICE"
+ ETWO 'R', 'E'          \
+ ETWO 'E', 'S'          \ Encoded as:   "[203]<242><237><241><233>"
+ ETWO 'D', 'I'
+ ETWO 'C', 'E'
+ EQUB VE
+
+ ECHR 'I'               \ Token 221:    "IS BELIEVED TO HAVE JUMPED TO THIS
+ ECHR 'S'               \                GALAXY"
+ ECHR ' '               \
+ ETWO 'B', 'E'          \ Encoded as:   "IS <247>LIEV<252>[201]HA<250> JUMP<252>
+ ECHR 'L'               \                [201][148]G<228>AXY"
+ ECHR 'I'
+ ECHR 'E'
+ ECHR 'V'
+ ETWO 'E', 'D'
+ ETOK 201
+ ECHR 'H'
+ ECHR 'A'
+ ETWO 'V', 'E'
+ ECHR ' '
+ ECHR 'J'
+ ECHR 'U'
+ ECHR 'M'
+ ECHR 'P'
+ ETWO 'E', 'D'
+ ETOK 201
+ ETOK 148
+ ECHR 'G'
+ ETWO 'A', 'L'
+ ECHR 'A'
+ ECHR 'X'
+ ECHR 'Y'
+ EQUB VE
+
+ EJMP 25                \ Token 222:    "{incoming message screen, wait 2s}
+ EJMP 9                 \                {clear screen}
+ EJMP 29                \                {tab 6, white, lower case in words}
+ EJMP 14                \                {justify}
+ EJMP 2                 \                {sentence case}
+ ECHR 'G'               \                GOOD DAY {single cap}COMMANDER
+ ECHR 'O'               \                {commander name}.{cr}
+ ECHR 'O'               \                 {single cap}I{lower case} AM {single
+ ECHR 'D'               \                cap}AGENT{single cap}BLAKE OF {single
+ ECHR ' '               \                cap}NAVAL {single cap}INTELLEGENCE.{cr}
+ ECHR 'D'               \                 {single cap}AS YOU KNOW, THE {single
+ ECHR 'A'               \                cap}NAVY HAVE BEEN KEEPING THE {single
+ ECHR 'Y'               \                cap}THARGOIDS OFF YOUR ASS OUT IN DEEP
+ ECHR ' '               \                SPACE FOR MANY YEARS NOW. {single cap}
+ ETOK 154               \                WELL THE SITUATION HAS CHANGED.{cr}
+ ECHR ' '               \                 {single cap}OUR BOYS ARE READY FOR A
+ EJMP 4                 \                PUSH RIGHT TO THE HOME SYSTEM OF THOSE
+ ETOK 204               \                MOTHERS.{cr}
+ ECHR 'I'               \                 {single cap}
+ EJMP 13                \                {wait for key press}
+ ECHR ' '               \                {clear screen}
+ ECHR 'A'               \                {white}
+ ECHR 'M'               \                {tab 6, white, lower case in words}
+ ECHR ' '               \                I{lower case} HAVE OBTAINED THE DEFENCE
+ EJMP 19                \                PLANS FOR THEIR {single cap}HIVE
+ ECHR 'A'               \                {single cap}WORLDS.{cr} {single cap}THE
+ ECHR 'G'               \                BEETLES KNOW WE'VE GOT SOMETHING BUT
+ ETWO 'E', 'N'          \                NOT WHAT.{cr} {single cap}IF {single
+ ECHR 'T'               \                cap}I TRANSMIT THE PLANS TO OUR BASE ON
+ ECHR ' '               \                {single cap}BIRERA THEY'LL INTERCEPT
+ EJMP 19                \                THE TRANSMISSION. {single cap}I NEED A
+ ECHR 'B'               \                SHIP TO MAKE THE RUN.{cr}
+ ETWO 'L', 'A'          \                 {single cap}YOU'RE ELECTED.{cr}
+ ECHR 'K'               \                 {single cap}THE PLANS ARE UNIPULSE
+ ECHR 'E'               \                CODED WITHIN THIS TRANSMISSION.{cr}
+ ECHR ' '               \                 {single cap}{tab 6}YOU WILL BE
+ ECHR 'O'               \                PAID.{cr}
+ ECHR 'F'               \                 {single cap}    {single cap}GOOD LUCK
+ ECHR ' '               \                {single cap}COMMANDER.{cr}
+ EJMP 19                \                {left align}
+ ECHR 'N'               \                {tab 6}{all caps}  MESSAGE ENDS
+ ECHR 'A'               \                {wait for key press}"
+ ECHR 'V'               \
+ ETWO 'A', 'L'          \ Encoded as:   "{25}{9}{29}{14}{2}GOOD DAY [154] {4}
+ ECHR ' '               \                [204]I{13} AM {19}AG<246>T {19}B<249>
+ EJMP 19                \                KE OF {19}NAV<228> {19}<240>TEL<229>
+ ETWO 'I', 'N'          \                G<246><233>[204]AS [179] K<227>W, [147]
+ ECHR 'T'               \                {19}NAVY HA<250> <247><246> KEEP[195]
+ ECHR 'E'               \                [147]{19}<226><238>GOIDS OFF [179]R ASS
+ ECHR 'L'               \                 <217>T <240> DEEP SPA<233> F<253>
+ ETWO 'L', 'E'          \                 <239>NY YE<238>S <227>W. {19}WELL
+ ECHR 'G'               \                 [147]S<219>UA<251><223> HAS CH<255>G
+ ETWO 'E', 'N'          \                <252>[204]<217>R BOYS <238>E <242>ADY F
+ ETWO 'C', 'E'          \                <253>[208]P<236>H RIGHT[201][147]HOME
+ ETOK 204               \                 SY<222>EM OF <226>O<218> MO<226><244>S
+ ECHR 'A'               \                [204]{24}{9}{29}I{13} HA<250> OBTA
+ ECHR 'S'               \                <240>[196][147]DEF<246><233> P<249>NS F
+ ECHR ' '               \                <253> <226>EIR {19}HI<250> {19}W<253>LD
+ ETOK 179               \                S[204][147]<247><221><229>S K<227>W WE
+ ECHR ' '               \                [39]<250> GOT <235>ME<226>[195]BUT
+ ECHR 'K'               \                 <227>T WH<245>[204]IF {19}I T<248>NSM
+ ETWO 'N', 'O'          \                <219> [147]P<249>NS[201]<217>R BA<218>
+ ECHR 'W'               \                 <223> {19}<234><242><248> <226>EY[39]L
+ ECHR ','               \                L <240>T<244><233>PT [147]TR<255>SMISSI
+ ECHR ' '               \                <223>. {19}I NE<252>[208][207][201]
+ ETOK 147               \                <239>KE [147]RUN[204][179][39]<242> E
+ EJMP 19                \                <229>CT<252>[204][147]P<249>NS A<242>
+ ECHR 'N'               \                 UNIPUL<218> COD[196]WI<226><240> [148]
+ ECHR 'A'               \                TR<255>SMISSI<223>[204]{8}[179] W<220>L
+ ECHR 'V'               \                 <247> PAID[204]    {19}GOOD LUCK [154]
+ ECHR 'Y'               \                [212]{24}"
+ ECHR ' '
+ ECHR 'H'
+ ECHR 'A'
+ ETWO 'V', 'E'
+ ECHR ' '
+ ETWO 'B', 'E'
+ ETWO 'E', 'N'
+ ECHR ' '
+ ECHR 'K'
+ ECHR 'E'
+ ECHR 'E'
+ ECHR 'P'
+ ETOK 195
+ ETOK 147
+ EJMP 19
+ ETWO 'T', 'H'
+ ETWO 'A', 'R'
+ ECHR 'G'
+ ECHR 'O'
+ ECHR 'I'
+ ECHR 'D'
+ ECHR 'S'
+ ECHR ' '
+ ECHR 'O'
+ ECHR 'F'
+ ECHR 'F'
+ ECHR ' '
+ ETOK 179
+ ECHR 'R'
+ ECHR ' '
+ ECHR 'A'
+ ECHR 'S'
+ ECHR 'S'
+ ECHR ' '
+ ETWO 'O', 'U'
+ ECHR 'T'
+ ECHR ' '
+ ETWO 'I', 'N'
+ ECHR ' '
+ ECHR 'D'
+ ECHR 'E'
+ ECHR 'E'
+ ECHR 'P'
+ ECHR ' '
+ ECHR 'S'
+ ECHR 'P'
+ ECHR 'A'
+ ETWO 'C', 'E'
+ ECHR ' '
+ ECHR 'F'
+ ETWO 'O', 'R'
+ ECHR ' '
+ ETWO 'M', 'A'
+ ECHR 'N'
+ ECHR 'Y'
+ ECHR ' '
+ ECHR 'Y'
+ ECHR 'E'
+ ETWO 'A', 'R'
+ ECHR 'S'
+ ECHR ' '
+ ETWO 'N', 'O'
+ ECHR 'W'
+ ECHR '.'
+ ECHR ' '
+ EJMP 19
+ ECHR 'W'
+ ECHR 'E'
+ ECHR 'L'
+ ECHR 'L'
+ ECHR ' '
+ ETOK 147
+ ECHR 'S'
+ ETWO 'I', 'T'
+ ECHR 'U'
+ ECHR 'A'
+ ETWO 'T', 'I'
+ ETWO 'O', 'N'
+ ECHR ' '
+ ECHR 'H'
+ ECHR 'A'
+ ECHR 'S'
+ ECHR ' '
+ ECHR 'C'
+ ECHR 'H'
+ ETWO 'A', 'N'
+ ECHR 'G'
+ ETWO 'E', 'D'
+ ETOK 204
+ ETWO 'O', 'U'
+ ECHR 'R'
+ ECHR ' '
+ ECHR 'B'
+ ECHR 'O'
+ ECHR 'Y'
+ ECHR 'S'
+ ECHR ' '
+ ETWO 'A', 'R'
+ ECHR 'E'
+ ECHR ' '
+ ETWO 'R', 'E'
+ ECHR 'A'
+ ECHR 'D'
+ ECHR 'Y'
+ ECHR ' '
+ ECHR 'F'
+ ETWO 'O', 'R'
+ ETOK 208
+ ECHR 'P'
+ ETWO 'U', 'S'
+ ECHR 'H'
+ ECHR ' '
+ ECHR 'R'
+ ECHR 'I'
+ ECHR 'G'
+ ECHR 'H'
+ ECHR 'T'
+ ETOK 201
+ ETOK 147
+ ECHR 'H'
+ ECHR 'O'
+ ECHR 'M'
+ ECHR 'E'
+ ECHR ' '
+ ECHR 'S'
+ ECHR 'Y'
+ ETWO 'S', 'T'
+ ECHR 'E'
+ ECHR 'M'
+ ECHR ' '
+ ECHR 'O'
+ ECHR 'F'
+ ECHR ' '
+ ETWO 'T', 'H'
+ ECHR 'O'
+ ETWO 'S', 'E'
+ ECHR ' '
+ ECHR 'M'
+ ECHR 'O'
+ ETWO 'T', 'H'
+ ETWO 'E', 'R'
+ ECHR 'S'
+ ETOK 204
+ EJMP 24
+ EJMP 9
+ EJMP 29
+ ECHR 'I'
+ EJMP 13
+ ECHR ' '
+ ECHR 'H'
+ ECHR 'A'
+ ETWO 'V', 'E'
+ ECHR ' '
+ ECHR 'O'
+ ECHR 'B'
+ ECHR 'T'
+ ECHR 'A'
+ ETWO 'I', 'N'
+ ETOK 196
+ ETOK 147
+ ECHR 'D'
+ ECHR 'E'
+ ECHR 'F'
+ ETWO 'E', 'N'
+ ETWO 'C', 'E'
+ ECHR ' '
+ ECHR 'P'
+ ETWO 'L', 'A'
+ ECHR 'N'
+ ECHR 'S'
+ ECHR ' '
+ ECHR 'F'
+ ETWO 'O', 'R'
+ ECHR ' '
+ ETWO 'T', 'H'
+ ECHR 'E'
+ ECHR 'I'
+ ECHR 'R'
+ ECHR ' '
+ EJMP 19
+ ECHR 'H'
+ ECHR 'I'
+ ETWO 'V', 'E'
+ ECHR ' '
+ EJMP 19
+ ECHR 'W'
+ ETWO 'O', 'R'
+ ECHR 'L'
+ ECHR 'D'
+ ECHR 'S'
+ ETOK 204
+ ETOK 147
+ ETWO 'B', 'E'
+ ETWO 'E', 'T'
+ ETWO 'L', 'E'
+ ECHR 'S'
+ ECHR ' '
+ ECHR 'K'
+ ETWO 'N', 'O'
+ ECHR 'W'
+ ECHR ' '
+ ECHR 'W'
+ ECHR 'E'
+ ECHR '`'
+ ETWO 'V', 'E'
+ ECHR ' '
+ ECHR 'G'
+ ECHR 'O'
+ ECHR 'T'
+ ECHR ' '
+ ETWO 'S', 'O'
+ ECHR 'M'
+ ECHR 'E'
+ ETWO 'T', 'H'
+ ETOK 195
+ ECHR 'B'
+ ECHR 'U'
+ ECHR 'T'
+ ECHR ' '
+ ETWO 'N', 'O'
+ ECHR 'T'
+ ECHR ' '
+ ECHR 'W'
+ ECHR 'H'
+ ETWO 'A', 'T'
+ ETOK 204
+ ECHR 'I'
+ ECHR 'F'
+ ECHR ' '
+ EJMP 19
+ ECHR 'I'
+ ECHR ' '
+ ECHR 'T'
+ ETWO 'R', 'A'
+ ECHR 'N'
+ ECHR 'S'
+ ECHR 'M'
+ ETWO 'I', 'T'
+ ECHR ' '
+ ETOK 147
+ ECHR 'P'
+ ETWO 'L', 'A'
+ ECHR 'N'
+ ECHR 'S'
+ ETOK 201
+ ETWO 'O', 'U'
+ ECHR 'R'
+ ECHR ' '
+ ECHR 'B'
+ ECHR 'A'
+ ETWO 'S', 'E'
+ ECHR ' '
+ ETWO 'O', 'N'
+ ECHR ' '
+ EJMP 19
+ ETWO 'B', 'I'
+ ETWO 'R', 'E'
+ ETWO 'R', 'A'
+ ECHR ' '
+ ETWO 'T', 'H'
+ ECHR 'E'
+ ECHR 'Y'
+ ECHR '`'
+ ECHR 'L'
+ ECHR 'L'
+ ECHR ' '
+ ETWO 'I', 'N'
+ ECHR 'T'
+ ETWO 'E', 'R'
+ ETWO 'C', 'E'
+ ECHR 'P'
+ ECHR 'T'
+ ECHR ' '
+ ETOK 147
+ ECHR 'T'
+ ECHR 'R'
+ ETWO 'A', 'N'
+ ECHR 'S'
+ ECHR 'M'
+ ECHR 'I'
+ ECHR 'S'
+ ECHR 'S'
+ ECHR 'I'
+ ETWO 'O', 'N'
+ ECHR '.'
+ ECHR ' '
+ EJMP 19
+ ECHR 'I'
+ ECHR ' '
+ ECHR 'N'
+ ECHR 'E'
+ ETWO 'E', 'D'
+ ETOK 208
+ ETOK 207
+ ETOK 201
+ ETWO 'M', 'A'
+ ECHR 'K'
+ ECHR 'E'
+ ECHR ' '
+ ETOK 147
+ ECHR 'R'
+ ECHR 'U'
+ ECHR 'N'
+ ETOK 204
+ ETOK 179
+ ECHR '`'
+ ETWO 'R', 'E'
+ ECHR ' '
+ ECHR 'E'
+ ETWO 'L', 'E'
+ ECHR 'C'
+ ECHR 'T'
+ ETWO 'E', 'D'
+ ETOK 204
+ ETOK 147
+ ECHR 'P'
+ ETWO 'L', 'A'
+ ECHR 'N'
+ ECHR 'S'
+ ECHR ' '
+ ECHR 'A'
+ ETWO 'R', 'E'
+ ECHR ' '
+ ECHR 'U'
+ ECHR 'N'
+ ECHR 'I'
+ ECHR 'P'
+ ECHR 'U'
+ ECHR 'L'
+ ETWO 'S', 'E'
+ ECHR ' '
+ ECHR 'C'
+ ECHR 'O'
+ ECHR 'D'
+ ETOK 196
+ ECHR 'W'
+ ECHR 'I'
+ ETWO 'T', 'H'
+ ETWO 'I', 'N'
+ ECHR ' '
+ ETOK 148
+ ECHR 'T'
+ ECHR 'R'
+ ETWO 'A', 'N'
+ ECHR 'S'
+ ECHR 'M'
+ ECHR 'I'
+ ECHR 'S'
+ ECHR 'S'
+ ECHR 'I'
+ ETWO 'O', 'N'
+ ETOK 204
+ EJMP 8
+ ETOK 179
+ ECHR ' '
+ ECHR 'W'
+ ETWO 'I', 'L'
+ ECHR 'L'
+ ECHR ' '
+ ETWO 'B', 'E'
+ ECHR ' '
+ ECHR 'P'
+ ECHR 'A'
+ ECHR 'I'
+ ECHR 'D'
+ ETOK 204
+ ECHR ' '
+ ECHR ' '
+ ECHR ' '
+ ECHR ' '
+ EJMP 19
+ ECHR 'G'
+ ECHR 'O'
+ ECHR 'O'
+ ECHR 'D'
+ ECHR ' '
+ ECHR 'L'
+ ECHR 'U'
+ ECHR 'C'
+ ECHR 'K'
+ ECHR ' '
+ ETOK 154
+ ETOK 212
+ EJMP 24
+ EQUB VE
+
+ EJMP 25                \ Token 223:    "{incoming message screen, wait 2s}
+ EJMP 9                 \                {clear screen}
+ EJMP 29                \                {tab 6, white, lower case in words}
+ EJMP 8                 \                {tab 6}
+ EJMP 14                \                {justify}
+ EJMP 13                \                {lower case}
+ EJMP 19                \                {single cap}WELL DONE {single cap}
+ ECHR 'W'               \                COMMANDER.{cr}
+ ECHR 'E'               \                 {single cap}YOU HAVE SERVED US WELL
+ ECHR 'L'               \                AND WE SHALL REMEMBER.{cr}
+ ECHR 'L'               \                 {single cap}WE DID NOT EXPECT THE
+ ECHR ' '               \                 {single cap}THARGOIDS TO FIND OUT
+ ECHR 'D'               \                ABOUT YOU.{cr}
+ ETWO 'O', 'N'          \                 {single cap}FOR THE MOMENT PLEASE
+ ECHR 'E'               \                ACCEPT THIS {single cap}NAVY {standard
+ ECHR ' '               \                tokens, sentence case}EXTRA ENERGY
+ ETOK 154               \                UNIT{extended tokens} AS PAYMENT.{cr}
+ ETOK 204               \                {left align}
+ ETOK 179               \                {tab 6}{all caps}  MESSAGE ENDS
+ ECHR ' '               \                {wait for key press}"
+ ECHR 'H'               \
+ ECHR 'A'               \ Encoded as:   "{25}{9}{29}{8}{14}{13}{19}WELL D
+ ETWO 'V', 'E'          \                <223>E [154][204][179] HA<250> <218>RV
+ ECHR ' '               \                [196]<236> WELL[178]WE SH<228>L <242>ME
+ ETWO 'S', 'E'          \                MB<244>[204]WE <241>D <227>T EXPECT
+ ECHR 'R'               \                 [147]{19}<226><238>GOIDS[201]F<240>D
+ ECHR 'V'               \                 <217>T <216><217>T [179][204]F<253>
+ ETOK 196               \                 [147]MOM<246>T P<229>A<218> AC<233>PT
+ ETWO 'U', 'S'          \                 [148]{19}NAVY {6}[114]{5} AS PAYM<246>
+ ECHR ' '               \                T[212]{24}"
+ ECHR 'W'
+ ECHR 'E'
+ ECHR 'L'
+ ECHR 'L'
+ ETOK 178
+ ECHR 'W'
+ ECHR 'E'
+ ECHR ' '
+ ECHR 'S'
+ ECHR 'H'
+ ETWO 'A', 'L'
+ ECHR 'L'
+ ECHR ' '
+ ETWO 'R', 'E'
+ ECHR 'M'
+ ECHR 'E'
+ ECHR 'M'
+ ECHR 'B'
+ ETWO 'E', 'R'
+ ETOK 204
+ ECHR 'W'
+ ECHR 'E'
+ ECHR ' '
+ ETWO 'D', 'I'
+ ECHR 'D'
+ ECHR ' '
+ ETWO 'N', 'O'
+ ECHR 'T'
+ ECHR ' '
+ ECHR 'E'
+ ECHR 'X'
+ ECHR 'P'
+ ECHR 'E'
+ ECHR 'C'
+ ECHR 'T'
+ ECHR ' '
+ ETOK 147
+ EJMP 19
+ ETWO 'T', 'H'
+ ETWO 'A', 'R'
+ ECHR 'G'
+ ECHR 'O'
+ ECHR 'I'
+ ECHR 'D'
+ ECHR 'S'
+ ETOK 201
+ ECHR 'F'
+ ETWO 'I', 'N'
+ ECHR 'D'
+ ECHR ' '
+ ETWO 'O', 'U'
+ ECHR 'T'
+ ECHR ' '
+ ETWO 'A', 'B'
+ ETWO 'O', 'U'
+ ECHR 'T'
+ ECHR ' '
+ ETOK 179
+ ETOK 204
+ ECHR 'F'
+ ETWO 'O', 'R'
+ ECHR ' '
+ ETOK 147
+ ECHR 'M'
+ ECHR 'O'
+ ECHR 'M'
+ ETWO 'E', 'N'
+ ECHR 'T'
+ ECHR ' '
+ ECHR 'P'
+ ETWO 'L', 'E'
+ ECHR 'A'
+ ETWO 'S', 'E'
+ ECHR ' '
+ ECHR 'A'
+ ECHR 'C'
+ ETWO 'C', 'E'
+ ECHR 'P'
+ ECHR 'T'
+ ECHR ' '
+ ETOK 148
+ EJMP 19
+ ECHR 'N'
+ ECHR 'A'
+ ECHR 'V'
+ ECHR 'Y'
+ ECHR ' '
+ EJMP 6
+ TOKN 114
+ EJMP 5
+ ECHR ' '
+ ECHR 'A'
+ ECHR 'S'
+ ECHR ' '
+ ECHR 'P'
+ ECHR 'A'
+ ECHR 'Y'
+ ECHR 'M'
+ ETWO 'E', 'N'
+ ECHR 'T'
+ ETOK 212
+ EJMP 24
+ EQUB VE
+
+ EQUB VE                \ Token 224:    ""
+                        \
+                        \ Encoded as:   ""
+
+ ECHR 'S'               \ Token 225:    "SHREW"
+ ECHR 'H'               \
+ ETWO 'R', 'E'          \ Encoded as:   "SH<242>W"
+ ECHR 'W'
+ EQUB VE
+
+ ETWO 'B', 'E'          \ Token 226:    "BEAST"
+ ECHR 'A'               \
+ ETWO 'S', 'T'          \ Encoded as:   "<247>A<222>"
+ EQUB VE
+
+ ETWO 'B', 'I'          \ Token 227:    "BISON"
+ ECHR 'S'               \
+ ETWO 'O', 'N'          \ Encoded as:   "<234>IS<223>"
+ EQUB VE
+
+ ECHR 'S'               \ Token 228:    "SNAKE"
+ ECHR 'N'               \
+ ECHR 'A'               \ Encoded as:   "SNAKE"
+ ECHR 'K'
+ ECHR 'E'
+ EQUB VE
+
+ ECHR 'W'               \ Token 229:    "WOLF"
+ ECHR 'O'               \
+ ECHR 'L'               \ Encoded as:   "WOLF"
+ ECHR 'F'
+ EQUB VE
+
+ ETWO 'L', 'E'          \ Token 230:    "LEOPARD"
+ ECHR 'O'               \
+ ECHR 'P'               \ Encoded as:   "<229>OP<238>D"
+ ETWO 'A', 'R'
+ ECHR 'D'
+ EQUB VE
+
+ ECHR 'C'               \ Token 231:    "CAT"
+ ETWO 'A', 'T'          \
+ EQUB VE                \ Encoded as:   "C<245>"
+
+ ECHR 'M'               \ Token 232:    "MONKEY"
+ ETWO 'O', 'N'          \
+ ECHR 'K'               \ Encoded as:   "M<223>KEY"
+ ECHR 'E'
+ ECHR 'Y'
+ EQUB VE
+
+ ECHR 'G'               \ Token 233:    "GOAT"
+ ECHR 'O'               \
+ ETWO 'A', 'T'          \ Encoded as:   "GO<245>"
+ EQUB VE
+
+ ECHR 'F'               \ Token 234:    "FISH"
+ ECHR 'I'               \
+ ECHR 'S'               \ Encoded as:   "FISH"
+ ECHR 'H'
+ EQUB VE
+
+ ERND 15                \ Token 235:    "[71-75] [66-70]"
+ ECHR ' '               \
+ ERND 14                \ Encoded as:   "[15?] [14?]"
+ EQUB VE
+
+ EJMP 17                \ Token 236:    "{system name adjective} [225-229]
+ ECHR ' '               \                 [240-244]"
+ ERND 29                \
+ ECHR ' '               \ Encoded as:   "{17} [29?] [32?]"
+ ERND 32
+ EQUB VE
+
+ ETOK 175               \ Token 237:    "ITS [76-80] [230-234] [240-244]"
+ ERND 16                \
+ ECHR ' '               \ Encoded as:   "[175][16?] [30?] [32?]"
+ ERND 30
+ ECHR ' '
+ ERND 32
+ EQUB VE
+
+ ERND 33                \ Token 238:    "[245-249] [250-254]"
+ ECHR ' '               \
+ ERND 34                \ Encoded as:   "[33?] [34?]"
+ EQUB VE
+
+ ERND 15                \ Token 239:    "[71-75] [66-70]"
+ ECHR ' '               \
+ ERND 14                \ Encoded as:   "[15?] [14?]"
+ EQUB VE
+
+ ECHR 'M'               \ Token 240:    "MEAT"
+ ECHR 'E'               \
+ ETWO 'A', 'T'          \ Encoded as:   "ME<245>"
+ EQUB VE
+
+ ECHR 'C'               \ Token 241:    "CUTLET"
+ ECHR 'U'               \
+ ECHR 'T'               \ Encoded as:   "CUTL<221>"
+ ECHR 'L'
+ ETWO 'E', 'T'
+ EQUB VE
+
+ ETWO 'S', 'T'          \ Token 242:    "STEAK"
+ ECHR 'E'               \
+ ECHR 'A'               \ Encoded as:   "<222>EAK"
+ ECHR 'K'
+ EQUB VE
+
+ ECHR 'B'               \ Token 243:    "BURGERS"
+ ECHR 'U'               \
+ ECHR 'R'               \ Encoded as:   "BURG<244>S"
+ ECHR 'G'
+ ETWO 'E', 'R'
+ ECHR 'S'
+ EQUB VE
+
+ ETWO 'S', 'O'          \ Token 244:    "SOUP"
+ ECHR 'U'               \
+ ECHR 'P'               \ Encoded as:   "<235>UP"
+ EQUB VE
+
+ ECHR 'I'               \ Token 245:    "ICE"
+ ETWO 'C', 'E'          \
+ EQUB VE                \ Encoded as:   "I<233>"
+
+ ECHR 'M'               \ Token 246:    "MUD"
+ ECHR 'U'               \
+ ECHR 'D'               \ Encoded as:   "MUD"
+ EQUB VE
+
+ ECHR 'Z'               \ Token 247:    "ZERO-{single cap}G"
+ ETWO 'E', 'R'          \
+ ECHR 'O'               \ Encoded as:   "Z<244>O-{19}G"
+ ECHR '-'
+ EJMP 19
+ ECHR 'G'
+ EQUB VE
+
+ ECHR 'V'               \ Token 248:    "VACUUM"
+ ECHR 'A'               \
+ ECHR 'C'               \ Encoded as:   "VACUUM"
+ ECHR 'U'
+ ECHR 'U'
+ ECHR 'M'
+ EQUB VE
+
+ EJMP 17                \ Token 249:    "{system name adjective} ULTRA"
+ ECHR ' '               \
+ ECHR 'U'               \ Encoded as:   "{17} ULT<248>"
+ ECHR 'L'
+ ECHR 'T'
+ ETWO 'R', 'A'
+ EQUB VE
+
+ ECHR 'H'               \ Token 250:    "HOCKEY"
+ ECHR 'O'               \
+ ECHR 'C'               \ Encoded as:   "HOCKEY"
+ ECHR 'K'
+ ECHR 'E'
+ ECHR 'Y'
+ EQUB VE
+
+ ECHR 'C'               \ Token 251:    "CRICKET"
+ ECHR 'R'               \
+ ECHR 'I'               \ Encoded as:   "CRICK<221>"
+ ECHR 'C'
+ ECHR 'K'
+ ETWO 'E', 'T'
+ EQUB VE
+
+ ECHR 'K'               \ Token 252:    "KARATE"
+ ETWO 'A', 'R'          \
+ ETWO 'A', 'T'          \ Encoded as:   "K<238><245>E"
+ ECHR 'E'
+ EQUB VE
+
+ ECHR 'P'               \ Token 253:    "POLO"
+ ECHR 'O'               \
+ ETWO 'L', 'O'          \ Encoded as:   "PO<224>"
+ EQUB VE
+
+ ECHR 'T'               \ Token 254:    "TENNIS"
+ ETWO 'E', 'N'          \
+ ECHR 'N'               \ Encoded as:   "T<246>NIS"
+ ECHR 'I'
+ ECHR 'S'
+ EQUB VE
+
+ EQUB VE                \ Token 255:    ""
+                        \
+                        \ Encoded as:   ""
+
+\ ******************************************************************************
+\
+\       Name: RUPLA
+\       Type: Variable
+\   Category: Text
+\    Summary: System numbers that have extended decription overrides
+\  Deep dive: Extended system descriptions
+\             Extended text tokens
+\
+\ ------------------------------------------------------------------------------
+\
+\ This table contains the extended token numbers to show as the specified
+\ system's extended description, if the criteria in the RUGAL table are met.
+\
+\ The three variables work as follows:
+\
+\   * The RUPLA table contains the system numbers
+\
+\   * The RUGAL table contains the galaxy numbers and mission criteria
+\
+\   * The RUTOK table contains the extended token to display instead of the
+\     normal extended description if the criteria in RUPLA and RUGAL are met
+\
+\ See the PDESC routine for details of how extended system descriptions work.
+\
+\ ******************************************************************************
 
 .RUPLA
 
- EQUB &D3, &96, &24, &1C, &FD, &4F, &35, &76, &64, &20, &44, &A4
- EQUB &DC, &6A, &10, &A2, &03, &6B, &1A, &C0, &B8, &05, &65, &C1
- EQUB &29
+ EQUB 211                \ System 211, Galaxy 0                Teorge = Token  1
+ EQUB 150                \ System 150, Galaxy 0, Mission 1       Xeer = Token  2
+ EQUB 36                 \ System  36, Galaxy 0, Mission 1   Reesdice = Token  3
+ EQUB 28                 \ System  28, Galaxy 0, Mission 1      Arexe = Token  4
+ EQUB 253                \ System 253, Galaxy 1, Mission 1     Errius = Token  5
+ EQUB 79                 \ System  79, Galaxy 1, Mission 1     Inbibe = Token  6
+ EQUB 53                 \ System  53, Galaxy 1, Mission 1      Ausar = Token  7
+ EQUB 118                \ System 118, Galaxy 1, Mission 1     Usleri = Token  8
+ EQUB 100                \ System 100, Galaxy 2                Arredi = Token  9
+ EQUB 32                 \ System  32, Galaxy 1, Mission 1     Bebege = Token 10
+ EQUB 68                 \ System  68, Galaxy 1, Mission 1     Cearso = Token 11
+ EQUB 164                \ System 164, Galaxy 1, Mission 1     Dicela = Token 12
+ EQUB 220                \ System 220, Galaxy 1, Mission 1     Eringe = Token 13
+ EQUB 106                \ System 106, Galaxy 1, Mission 1     Gexein = Token 14
+ EQUB 16                 \ System  16, Galaxy 1, Mission 1     Isarin = Token 15
+ EQUB 162                \ System 162, Galaxy 1, Mission 1   Letibema = Token 16
+ EQUB 3                  \ System   3, Galaxy 1, Mission 1     Maisso = Token 17
+ EQUB 107                \ System 107, Galaxy 1, Mission 1       Onen = Token 18
+ EQUB 26                 \ System  26, Galaxy 1, Mission 1     Ramaza = Token 19
+ EQUB 192                \ System 192, Galaxy 1, Mission 1     Sosole = Token 20
+ EQUB 184                \ System 184, Galaxy 1, Mission 1     Tivere = Token 21
+ EQUB 5                  \ System   5, Galaxy 1, Mission 1     Veriar = Token 22
+ EQUB 101                \ System 101, Galaxy 2, Mission 1     Xeveon = Token 23
+ EQUB 193                \ System 193, Galaxy 1, Mission 1     Orarra = Token 24
+ EQUB 41                 \ System  41, Galaxy 2                Anreer = Token 25
+
+\ ******************************************************************************
+\
+\       Name: RUGAL
+\       Type: Variable
+\   Category: Text
+\    Summary: The criteria for systems with extended decription overrides
+\  Deep dive: Extended system descriptions
+\             Extended text tokens
+\
+\ ------------------------------------------------------------------------------
+\
+\ This table contains the criteria for printing an extended decription override
+\ for a system. The galaxy number is in bits 0-6, while bit 7 determines whether
+\ to show this token during mission 1 only (bit 7 is clear, i.e. a value of &0x
+\ in the table below), or all of the time (bit 7 is set, i.e. a value of &8x in
+\ the table below).
+\
+\ In other words, Teorge, Arredi, Anreer and Lave have extended decription
+\ overrides descriptions that are always shown, while the rest only appear when
+\ mission 1 is in progress.
+\
+\ The three variables work as follows:
+\
+\   * The RUPLA table contains the system numbers
+\
+\   * The RUGAL table contains the galaxy numbers and mission criteria
+\
+\   * The RUTOK table contains the extended token to display instead of the
+\     normal extended description if the criteria in RUPLA and RUGAL are met
+\
+\ See the PDESC routine for details of how extended system descriptions work.
+\
+\ ******************************************************************************
 
 .RUGAL
 
- EQUB &80, &00, &00, &00, &01, &01, &01, &01, &82, &01, &01
- EQUB &01, &01, &01, &01, &01, &01, &01, &01, &01, &01, &01, &02
- EQUB &01, &82
+ EQUB &80                \ System 211, Galaxy 0                Teorge = Token  1
+ EQUB &00                \ System 150, Galaxy 0, Mission 1       Xeer = Token  2
+ EQUB &00                \ System  36, Galaxy 0, Mission 1   Reesdice = Token  3
+ EQUB &00                \ System  28, Galaxy 0, Mission 1      Arexe = Token  4
+ EQUB &01                \ System 253, Galaxy 1, Mission 1     Errius = Token  5
+ EQUB &01                \ System  79, Galaxy 1, Mission 1     Inbibe = Token  6
+ EQUB &01                \ System  53, Galaxy 1, Mission 1      Ausar = Token  7
+ EQUB &01                \ System 118, Galaxy 1, Mission 1     Usleri = Token  8
+ EQUB &82                \ System 100, Galaxy 2                Arredi = Token  9
+ EQUB &01                \ System  32, Galaxy 1, Mission 1     Bebege = Token 10
+ EQUB &01                \ System  68, Galaxy 1, Mission 1     Cearso = Token 11
+ EQUB &01                \ System 164, Galaxy 1, Mission 1     Dicela = Token 12
+ EQUB &01                \ System 220, Galaxy 1, Mission 1     Eringe = Token 13
+ EQUB &01                \ System 106, Galaxy 1, Mission 1     Gexein = Token 14
+ EQUB &01                \ System  16, Galaxy 1, Mission 1     Isarin = Token 15
+ EQUB &01                \ System 162, Galaxy 1, Mission 1   Letibema = Token 16
+ EQUB &01                \ System   3, Galaxy 1, Mission 1     Maisso = Token 17
+ EQUB &01                \ System 107, Galaxy 1, Mission 1       Onen = Token 18
+ EQUB &01                \ System  26, Galaxy 1, Mission 1     Ramaza = Token 19
+ EQUB &01                \ System 192, Galaxy 1, Mission 1     Sosole = Token 20
+ EQUB &01                \ System 184, Galaxy 1, Mission 1     Tivere = Token 21
+ EQUB &01                \ System   5, Galaxy 1, Mission 1     Veriar = Token 22
+ EQUB &02                \ System 101, Galaxy 2, Mission 1     Xeveon = Token 23
+ EQUB &01                \ System 193, Galaxy 1, Mission 1     Orarra = Token 24
+ EQUB &82                \ System  41, Galaxy 2                Anreer = Token 25
+
+\ ******************************************************************************
+\
+\       Name: RUTOK
+\       Type: Variable
+\   Category: Text
+\    Summary: The second extended token table for recursive tokens 0-26 (DETOK3)
+\  Deep dive: Extended system descriptions
+\             Extended text tokens
+\
+\ ------------------------------------------------------------------------------
+\
+\ Contains the tokens for extended description overrides of systems that match
+\ the system number in RUPLA and the conditions in RUGAL.
+\
+\ The three variables work as follows:
+\
+\   * The RUPLA table contains the system numbers
+\
+\   * The RUGAL table contains the galaxy numbers and mission criteria
+\
+\   * The RUTOK table contains the extended token to display instead of the
+\     normal extended description if the criteria in RUPLA and RUGAL are met
+\
+\ See the PDESC routine for details of how extended system descriptions work.
+\
+\ ******************************************************************************
 
 .RUTOK
 
- EQUB &00
- EQUS &93, "CO", &E0, "NI", &DE, "S HE", &F2, " HA", &FA, " VIOL", &F5, &FC, &02, " ", &F0, "T", &F4, "G", &E4
- EQUS "AC", &FB, "C C", &E0, "N", &C3, "PROTOCOL", &0D, &B2, "SH", &D9, "LD ", &F7, " AVOID", &FC
- EQUB &00
- EQUS &93, "C", &DF, &DE, "RICT", &FD, " ", &CB, &F2, &ED, &F1, &E9, ", ", &9A
- EQUB &00
- EQUS "A r ", &E0, "OK", &C3, &CF, " ", &E5, "FT HE", &F2, &D0, "WHI", &E5, " BACK. ", &E0, "OK", &C4, "B", &D9
- EQUS "ND F", &FD, " ", &EE, "E", &E6
- EQUB &00
- EQUS "YEP,", &D0, "r", &D2, &CF, " HAD", &D0, "G", &E4, "AC", &FB, "C HYP", &F4, "DRI", &FA, " F", &DB, "T", &C4
- EQUS "HE", &F2, ". ", &EC, &C4, &DB, " TOO"
- EQUB &00
- EQUS &94, " r ", &CF, " DEHYP", &C4, "HE", &F2, " FROM ", &E3, "WHE", &F2, ", SUN SKIMM", &FC
- EQUS &B2, "JUMP", &FC, ". I HE", &EE, " ", &DB, " W", &F6, "T", &C9, &F0, &EA, &F7
- EQUB &00
- EQUS "s ", &CF, " W", &F6, "T F", &FD, " ME ", &F5, " A", &EC, &EE, ". MY ", &F9, "S", &F4, "S ", &F1, "DN'T E"
- EQUS "V", &F6, " SC", &F8, "TCH ", &93, "s"
- EQUB &00
- EQUS "OH DE", &EE, " ME Y", &ED, ".", &D0, "FRIGHTFUL ROGUE WI", &E2, " WH", &F5, " I ", &F7
- EQUS "LIE", &FA, " ", &B3, " PEOP", &E5, " C", &E4, "L", &D0, &E5, "AD PO", &DE, &F4, "I", &FD, " SHOT UP"
- EQUS " ", &E0, "TS OF ", &E2, "O", &DA, " ", &F7, "A", &DE, "LY PI", &F8, "T", &ED, &B2, "W", &F6, "T", &C9, &EC, &E5
- EQUS "RI"
- EQUB &00
- EQUS &B3, " C", &FF, " TACK", &E5, " ", &93, "h s IF ", &B3, " LIKE. HE'S ", &F5, " ", &FD, &EE
- EQUS &F8
- EQUB &00
- EQUS &01, "COM", &C3, &EB, &DF, ": EL", &DB, "E III"
- EQUB &00
- EQUS "t"
- EQUB &00
- EQUS "t"
- EQUB &00
- EQUS "t"
- EQUB &00
- EQUS "t"
- EQUB &00
- EQUS "t"
- EQUB &00
- EQUS "t"
- EQUB &00
- EQUS "t"
- EQUB &00
- EQUS "t"
- EQUB &00
- EQUS "t"
- EQUB &00
- EQUS "t"
- EQUB &00
- EQUS "t"
- EQUB &00
- EQUS "t"
- EQUB &00
- EQUS "t"
- EQUB &00
- EQUS "BOY A", &F2, " ", &B3, " ", &F0, " ", &93, "WR", &DF, "G G", &E4, "AXY!"
- EQUB &00
- EQUS &E2, &F4, "E'S", &D0, &F2, &E4, " s PI", &F8, "TE ", &D9, "T ", &E2, &F4, "E"
- EQUB &00
- EQUS &93, &C1, "S OF m A", &F2, " ", &EB, " A", &EF, "Z", &F0, "GLY PRIMI", &FB, &FA, " ", &E2, &F5
- EQUS " ", &E2, "EY ", &DE, &DC, "L ", &E2, &F0, "K ", &13, "EL", &DB, "E", &CA, "A P", &F2, "TTY NE", &F5, " GAME"
- EQUB &00
+ EQUB VE                \ Token 0:      ""
+                        \
+                        \ Encoded as:   ""
+
+ ETOK 147               \ Token 1:      "THE COLONISTS HERE HAVE VIOLATED
+ ECHR 'C'               \                {sentence case} INTERGALACTIC CLONING
+ ECHR 'O'               \                PROTOCOL{lower case} AND SHOULD BE
+ ETWO 'L', 'O'          \                AVOIDED"
+ ECHR 'N'               \
+ ECHR 'I'               \ Encoded as:   "[147]CO<224>NI<222>S HE<242> HA<250>
+ ETWO 'S', 'T'          \                 VIOL<245><252>{2} <240>T<244>G<228>AC
+ ECHR 'S'               \                <251>C C<224>N[195]PROTOCOL{13}[178]SH
+ ECHR ' '               \                <217>LD <247> AVOID<252>"
+ ECHR 'H'
+ ECHR 'E'
+ ETWO 'R', 'E'
+ ECHR ' '
+ ECHR 'H'
+ ECHR 'A'
+ ETWO 'V', 'E'
+ ECHR ' '
+ ECHR 'V'
+ ECHR 'I'
+ ECHR 'O'
+ ECHR 'L'
+ ETWO 'A', 'T'
+ ETWO 'E', 'D'
+ EJMP 2
+ ECHR ' '
+ ETWO 'I', 'N'
+ ECHR 'T'
+ ETWO 'E', 'R'
+ ECHR 'G'
+ ETWO 'A', 'L'
+ ECHR 'A'
+ ECHR 'C'
+ ETWO 'T', 'I'
+ ECHR 'C'
+ ECHR ' '
+ ECHR 'C'
+ ETWO 'L', 'O'
+ ECHR 'N'
+ ETOK 195
+ ECHR 'P'
+ ECHR 'R'
+ ECHR 'O'
+ ECHR 'T'
+ ECHR 'O'
+ ECHR 'C'
+ ECHR 'O'
+ ECHR 'L'
+ EJMP 13
+ ETOK 178
+ ECHR 'S'
+ ECHR 'H'
+ ETWO 'O', 'U'
+ ECHR 'L'
+ ECHR 'D'
+ ECHR ' '
+ ETWO 'B', 'E'
+ ECHR ' '
+ ECHR 'A'
+ ECHR 'V'
+ ECHR 'O'
+ ECHR 'I'
+ ECHR 'D'
+ ETWO 'E', 'D'
+ EQUB VE
+
+ ETOK 147               \ Token 2:      "THE CONSTRICTOR WAS LAST SEEN AT
+ ECHR 'C'               \                {single cap}REESDICE, {single cap}
+ ETWO 'O', 'N'          \                COMMANDER"
+ ETWO 'S', 'T'          \
+ ECHR 'R'               \ Encoded as:   "[147]C<223><222>RICT<253> [203]<242>
+ ECHR 'I'               \                <237><241><233>, [154]"
+ ECHR 'C'
+ ECHR 'T'
+ ETWO 'O', 'R'
+ ECHR ' '
+ ETOK 203
+ ETWO 'R', 'E'
+ ETWO 'E', 'S'
+ ETWO 'D', 'I'
+ ETWO 'C', 'E'
+ ECHR ','
+ ECHR ' '
+ ETOK 154
+ EQUB VE
+
+ ECHR 'A'               \ Token 3:      "A [130-134] LOOKING SHIP LEFT HERE A
+ ECHR ' '               \                WHILE BACK. LOOKED BOUND FOR AREXE"
+ ERND 23                \
+ ECHR ' '               \ Encoded as:   "A [23?] <224>OK[195][207] <229>FT HE
+ ETWO 'L', 'O'          \                <242>[208]WHI<229> BACK. <224>OK[196]B
+ ECHR 'O'               \                <217>ND F<253> <238>E<230>"
+ ECHR 'K'
+ ETOK 195
+ ETOK 207
+ ECHR ' '
+ ETWO 'L', 'E'
+ ECHR 'F'
+ ECHR 'T'
+ ECHR ' '
+ ECHR 'H'
+ ECHR 'E'
+ ETWO 'R', 'E'
+ ETOK 208
+ ECHR 'W'
+ ECHR 'H'
+ ECHR 'I'
+ ETWO 'L', 'E'
+ ECHR ' '
+ ECHR 'B'
+ ECHR 'A'
+ ECHR 'C'
+ ECHR 'K'
+ ECHR '.'
+ ECHR ' '
+ ETWO 'L', 'O'
+ ECHR 'O'
+ ECHR 'K'
+ ETOK 196
+ ECHR 'B'
+ ETWO 'O', 'U'
+ ECHR 'N'
+ ECHR 'D'
+ ECHR ' '
+ ECHR 'F'
+ ETWO 'O', 'R'
+ ECHR ' '
+ ETWO 'A', 'R'
+ ECHR 'E'
+ ETWO 'X', 'E'
+ EQUB VE
+
+ ECHR 'Y'               \ Token 4:      "YEP, A [130-134] NEW SHIP HAD A
+ ECHR 'E'               \                GALACTIC HYPERDRIVE FITTED HERE. USED
+ ECHR 'P'               \                IT TOO"
+ ECHR ','               \
+ ETOK 208               \ Encoded as:   "YEP,[208][23?][210][207] HAD[208]G
+ ERND 23                \                <228>AC<251>C HYP<244>DRI<250> F<219>
+ ETOK 210               \                T[196]HE<242>. <236>[196]<219> TOO"
+ ETOK 207
+ ECHR ' '
+ ECHR 'H'
+ ECHR 'A'
+ ECHR 'D'
+ ETOK 208
+ ECHR 'G'
+ ETWO 'A', 'L'
+ ECHR 'A'
+ ECHR 'C'
+ ETWO 'T', 'I'
+ ECHR 'C'
+ ECHR ' '
+ ECHR 'H'
+ ECHR 'Y'
+ ECHR 'P'
+ ETWO 'E', 'R'
+ ECHR 'D'
+ ECHR 'R'
+ ECHR 'I'
+ ETWO 'V', 'E'
+ ECHR ' '
+ ECHR 'F'
+ ETWO 'I', 'T'
+ ECHR 'T'
+ ETOK 196
+ ECHR 'H'
+ ECHR 'E'
+ ETWO 'R', 'E'
+ ECHR '.'
+ ECHR ' '
+ ETWO 'U', 'S'
+ ETOK 196
+ ETWO 'I', 'T'
+ ECHR ' '
+ ECHR 'T'
+ ECHR 'O'
+ ECHR 'O'
+ EQUB VE
+
+ ETOK 148               \ Token 5:      "THIS  [130-134] SHIP DEHYPED HERE FROM
+ ECHR ' '               \                NOWHERE, SUN SKIMMED AND JUMPED. I HEAR
+ ERND 23                \                IT WENT TO INBIBE"
+ ECHR ' '               \
+ ETOK 207               \ Encoded as:   "[148] [23?] [207] DEHYP[196]HE<242> FRO
+ ECHR ' '               \                M <227>WHE<242>, SUN SKIMM<252>[178]JUM
+ ECHR 'D'               \                P<252>. I HE<238> <219> W<246>T[201]
+ ECHR 'E'               \                <240><234><247>"
+ ECHR 'H'
+ ECHR 'Y'
+ ECHR 'P'
+ ETOK 196
+ ECHR 'H'
+ ECHR 'E'
+ ETWO 'R', 'E'
+ ECHR ' '
+ ECHR 'F'
+ ECHR 'R'
+ ECHR 'O'
+ ECHR 'M'
+ ECHR ' '
+ ETWO 'N', 'O'
+ ECHR 'W'
+ ECHR 'H'
+ ECHR 'E'
+ ETWO 'R', 'E'
+ ECHR ','
+ ECHR ' '
+ ECHR 'S'
+ ECHR 'U'
+ ECHR 'N'
+ ECHR ' '
+ ECHR 'S'
+ ECHR 'K'
+ ECHR 'I'
+ ECHR 'M'
+ ECHR 'M'
+ ETWO 'E', 'D'
+ ETOK 178
+ ECHR 'J'
+ ECHR 'U'
+ ECHR 'M'
+ ECHR 'P'
+ ETWO 'E', 'D'
+ ECHR '.'
+ ECHR ' '
+ ECHR 'I'
+ ECHR ' '
+ ECHR 'H'
+ ECHR 'E'
+ ETWO 'A', 'R'
+ ECHR ' '
+ ETWO 'I', 'T'
+ ECHR ' '
+ ECHR 'W'
+ ETWO 'E', 'N'
+ ECHR 'T'
+ ETOK 201
+ ETWO 'I', 'N'
+ ETWO 'B', 'I'
+ ETWO 'B', 'E'
+ EQUB VE
+
+ ERND 24                \ Token 6:      "[91-95] SHIP WENT FOR ME AT AUSAR. MY
+ ECHR ' '               \                LASERS DIDN'T EVEN SCRATCH THE [91-95]"
+ ETOK 207               \
+ ECHR ' '               \ Encoded as:   "[24?] [207] W<246>T F<253> ME <245>
+ ECHR 'W'               \                 A<236><238>. MY <249>S<244>S <241>DN
+ ETWO 'E', 'N'          \                 [39]TEV<246> SC<248>TCH [147][24?]"
+ ECHR 'T'
+ ECHR ' '
+ ECHR 'F'
+ ETWO 'O', 'R'
+ ECHR ' '
+ ECHR 'M'
+ ECHR 'E'
+ ECHR ' '
+ ETWO 'A', 'T'
+ ECHR ' '
+ ECHR 'A'
+ ETWO 'U', 'S'
+ ETWO 'A', 'R'
+ ECHR '.'
+ ECHR ' '
+ ECHR 'M'
+ ECHR 'Y'
+ ECHR ' '
+ ETWO 'L', 'A'
+ ECHR 'S'
+ ETWO 'E', 'R'
+ ECHR 'S'
+ ECHR ' '
+ ETWO 'D', 'I'
+ ECHR 'D'
+ ECHR 'N'
+ ECHR '`'
+ ECHR 'T'
+ ECHR ' '
+ ECHR 'E'
+ ECHR 'V'
+ ETWO 'E', 'N'
+ ECHR ' '
+ ECHR 'S'
+ ECHR 'C'
+ ETWO 'R', 'A'
+ ECHR 'T'
+ ECHR 'C'
+ ECHR 'H'
+ ECHR ' '
+ ETOK 147
+ ERND 24
+ EQUB VE
+
+ ECHR 'O'               \ Token 7:      "OH DEAR ME YES. A FRIGHTFUL ROGUE WITH
+ ECHR 'H'               \                WHAT I BELIEVE YOU PEOPLE CALL A LEAD
+ ECHR ' '               \                POSTERIOR SHOT UP LOTS OF THOSE BEASTLY
+ ECHR 'D'               \                PIRATES AND WENT TO USLERI"
+ ECHR 'E'               \
+ ETWO 'A', 'R'          \ Encoded as:   "OH DE<238> ME Y<237>.[208]FRIGHTFUL ROG
+ ECHR ' '               \                UE WI<226> WH<245> I <247>LIE<250>
+ ECHR 'M'               \                 [179] PEOP<229> C<228>L[208]<229>AD PO
+ ECHR 'E'               \                <222><244>I<253> SHOT UP <224>TS OF
+ ECHR ' '               \                 <226>O<218> <247>A<222>LY PI<248>T
+ ECHR 'Y'               \                <237>[178]W<246>T[201]<236><229>RI"
+ ETWO 'E', 'S'
+ ECHR '.'
+ ETOK 208
+ ECHR 'F'
+ ECHR 'R'
+ ECHR 'I'
+ ECHR 'G'
+ ECHR 'H'
+ ECHR 'T'
+ ECHR 'F'
+ ECHR 'U'
+ ECHR 'L'
+ ECHR ' '
+ ECHR 'R'
+ ECHR 'O'
+ ECHR 'G'
+ ECHR 'U'
+ ECHR 'E'
+ ECHR ' '
+ ECHR 'W'
+ ECHR 'I'
+ ETWO 'T', 'H'
+ ECHR ' '
+ ECHR 'W'
+ ECHR 'H'
+ ETWO 'A', 'T'
+ ECHR ' '
+ ECHR 'I'
+ ECHR ' '
+ ETWO 'B', 'E'
+ ECHR 'L'
+ ECHR 'I'
+ ECHR 'E'
+ ETWO 'V', 'E'
+ ECHR ' '
+ ETOK 179
+ ECHR ' '
+ ECHR 'P'
+ ECHR 'E'
+ ECHR 'O'
+ ECHR 'P'
+ ETWO 'L', 'E'
+ ECHR ' '
+ ECHR 'C'
+ ETWO 'A', 'L'
+ ECHR 'L'
+ ETOK 208
+ ETWO 'L', 'E'
+ ECHR 'A'
+ ECHR 'D'
+ ECHR ' '
+ ECHR 'P'
+ ECHR 'O'
+ ETWO 'S', 'T'
+ ETWO 'E', 'R'
+ ECHR 'I'
+ ETWO 'O', 'R'
+ ECHR ' '
+ ECHR 'S'
+ ECHR 'H'
+ ECHR 'O'
+ ECHR 'T'
+ ECHR ' '
+ ECHR 'U'
+ ECHR 'P'
+ ECHR ' '
+ ETWO 'L', 'O'
+ ECHR 'T'
+ ECHR 'S'
+ ECHR ' '
+ ECHR 'O'
+ ECHR 'F'
+ ECHR ' '
+ ETWO 'T', 'H'
+ ECHR 'O'
+ ETWO 'S', 'E'
+ ECHR ' '
+ ETWO 'B', 'E'
+ ECHR 'A'
+ ETWO 'S', 'T'
+ ECHR 'L'
+ ECHR 'Y'
+ ECHR ' '
+ ECHR 'P'
+ ECHR 'I'
+ ETWO 'R', 'A'
+ ECHR 'T'
+ ETWO 'E', 'S'
+ ETOK 178
+ ECHR 'W'
+ ETWO 'E', 'N'
+ ECHR 'T'
+ ETOK 201
+ ETWO 'U', 'S'
+ ETWO 'L', 'E'
+ ECHR 'R'
+ ECHR 'I'
+ EQUB VE
+
+ ETOK 179               \ Token 8:      "YOU CAN TACKLE THE [170-174] [91-95]
+ ECHR ' '               \                IF YOU LIKE. HE'S AT ORARRA"
+ ECHR 'C'               \
+ ETWO 'A', 'N'          \ Encoded as:   "[179] C<255> TACK<229> [147][13?] [24?]
+ ECHR ' '               \                 IF [179] LIKE. HE[39]S <245> <253>
+ ECHR 'T'               \                <238><248>"
+ ECHR 'A'
+ ECHR 'C'
+ ECHR 'K'
+ ETWO 'L', 'E'
+ ECHR ' '
+ ETOK 147
+ ERND 13
+ ECHR ' '
+ ERND 24
+ ECHR ' '
+ ECHR 'I'
+ ECHR 'F'
+ ECHR ' '
+ ETOK 179
+ ECHR ' '
+ ECHR 'L'
+ ECHR 'I'
+ ECHR 'K'
+ ECHR 'E'
+ ECHR '.'
+ ECHR ' '
+ ECHR 'H'
+ ECHR 'E'
+ ECHR '`'
+ ECHR 'S'
+ ECHR ' '
+ ETWO 'A', 'T'
+ ECHR ' '
+ ETWO 'O', 'R'
+ ETWO 'A', 'R'
+ ETWO 'R', 'A'
+ EQUB VE
+
+ EJMP 1                 \ Token 9:      "{all caps}COMING SOON: ELITE III"
+ ECHR 'C'               \
+ ECHR 'O'               \ Encoded as:   "{1}COM[195]<235><223>: EL<219>E III"
+ ECHR 'M'
+ ETOK 195
+ ETWO 'S', 'O'
+ ETWO 'O', 'N'
+ ECHR ':'
+ ECHR ' '
+ ECHR 'E'
+ ECHR 'L'
+ ETWO 'I', 'T'
+ ECHR 'E'
+ ECHR ' '
+ ECHR 'I'
+ ECHR 'I'
+ ECHR 'I'
+ EQUB VE
+
+ ERND 25                \ Token 10:     "[106-110]"
+ EQUB VE                \
+                        \ Encoded as:   "[25?]"
+
+ ERND 25                \ Token 11:     "[106-110]"
+ EQUB VE                \
+                        \ Encoded as:   "[25?]"
+
+ ERND 25                \ Token 12:     "[106-110]"
+ EQUB VE                \
+                        \ Encoded as:   "[25?]"
+
+ ERND 25                \ Token 13:     "[106-110]"
+ EQUB VE                \
+                        \ Encoded as:   "[25?]"
+
+ ERND 25                \ Token 14:     "[106-110]"
+ EQUB VE                \
+                        \ Encoded as:   "[25?]"
+
+ ERND 25                \ Token 15:     "[106-110]"
+ EQUB VE                \
+                        \ Encoded as:   "[25?]"
+
+ ERND 25                \ Token 16:     "[106-110]"
+ EQUB VE                \
+                        \ Encoded as:   "[25?]"
+
+ ERND 25                \ Token 17:     "[106-110]"
+ EQUB VE                \
+                        \ Encoded as:   "[25?]"
+
+ ERND 25                \ Token 18:     "[106-110]"
+ EQUB VE                \
+                        \ Encoded as:   "[25?]"
+
+ ERND 25                \ Token 19:     "[106-110]"
+ EQUB VE                \
+                        \ Encoded as:   "[25?]"
+
+ ERND 25                \ Token 20:     "[106-110]"
+ EQUB VE                \
+                        \ Encoded as:   "[25?]"
+
+ ERND 25                \ Token 21:     "[106-110]"
+ EQUB VE                \
+                        \ Encoded as:   "[25?]"
+
+ ERND 25                \ Token 22:     "[106-110]"
+ EQUB VE                \
+                        \ Encoded as:   "[25?]"
+
+ ECHR 'B'               \ Token 23:     "BOY ARE YOU IN THE WRONG GALAXY!"
+ ECHR 'O'               \
+ ECHR 'Y'               \ Encoded as:   "BOY A<242> [179] <240> [147]WR<223>G G
+ ECHR ' '               \                <228>AXY!"
+ ECHR 'A'
+ ETWO 'R', 'E'
+ ECHR ' '
+ ETOK 179
+ ECHR ' '
+ ETWO 'I', 'N'
+ ECHR ' '
+ ETOK 147
+ ECHR 'W'
+ ECHR 'R'
+ ETWO 'O', 'N'
+ ECHR 'G'
+ ECHR ' '
+ ECHR 'G'
+ ETWO 'A', 'L'
+ ECHR 'A'
+ ECHR 'X'
+ ECHR 'Y'
+ ECHR '!'
+ EQUB VE
+
+ ETWO 'T', 'H'          \ Token 24:     "THERE'S A REAL [91-95] PIRATE OUT
+ ETWO 'E', 'R'          \                THERE"
+ ECHR 'E'               \
+ ECHR '`'               \ Encoded as:   "<226><244>E[39]S[208]<242><228> [24?] P
+ ECHR 'S'               \                I<248>TE <217>T <226><244>E"
+ ETOK 208
+ ETWO 'R', 'E'
+ ETWO 'A', 'L'
+ ECHR ' '
+ ERND 24
+ ECHR ' '
+ ECHR 'P'
+ ECHR 'I'
+ ETWO 'R', 'A'
+ ECHR 'T'
+ ECHR 'E'
+ ECHR ' '
+ ETWO 'O', 'U'
+ ECHR 'T'
+ ECHR ' '
+ ETWO 'T', 'H'
+ ETWO 'E', 'R'
+ ECHR 'E'
+ EQUB VE
+
+ ETOK 147               \ Token 25:     "THE INHABITANTS OF [86-90] ARE SO
+ ETOK 193               \                AMAZINGLY PRIMITIVE THAT THEY STILL
+ ECHR 'S'               \                THINK {single cap}ELITE IS A PRETTY
+ ECHR ' '               \                NEAT GAME"
+ ECHR 'O'               \
+ ECHR 'F'               \ Encoded as:   "[147][193]S OF [18?] A<242> <235> A
+ ECHR ' '               \                <239>Z<240>GLY PRIMI<251><250> <226>
+ ERND 18                \                <245> <226>EY <222><220>L <226><240>K
+ ECHR ' '               \                 {19}EL<219>E[202]A P<242>TTY NE<245>
+ ECHR 'A'               \                 GAME"
+ ETWO 'R', 'E'
+ ECHR ' '
+ ETWO 'S', 'O'
+ ECHR ' '
+ ECHR 'A'
+ ETWO 'M', 'A'
+ ECHR 'Z'
+ ETWO 'I', 'N'
+ ECHR 'G'
+ ECHR 'L'
+ ECHR 'Y'
+ ECHR ' '
+ ECHR 'P'
+ ECHR 'R'
+ ECHR 'I'
+ ECHR 'M'
+ ECHR 'I'
+ ETWO 'T', 'I'
+ ETWO 'V', 'E'
+ ECHR ' '
+ ETWO 'T', 'H'
+ ETWO 'A', 'T'
+ ECHR ' '
+ ETWO 'T', 'H'
+ ECHR 'E'
+ ECHR 'Y'
+ ECHR ' '
+ ETWO 'S', 'T'
+ ETWO 'I', 'L'
+ ECHR 'L'
+ ECHR ' '
+ ETWO 'T', 'H'
+ ETWO 'I', 'N'
+ ECHR 'K'
+ ECHR ' '
+ EJMP 19
+ ECHR 'E'
+ ECHR 'L'
+ ETWO 'I', 'T'
+ ECHR 'E'
+ ETOK 202
+ ECHR 'A'
+ ECHR ' '
+ ECHR 'P'
+ ETWO 'R', 'E'
+ ECHR 'T'
+ ECHR 'T'
+ ECHR 'Y'
+ ECHR ' '
+ ECHR 'N'
+ ECHR 'E'
+ ETWO 'A', 'T'
+ ECHR ' '
+ ECHR 'G'
+ ECHR 'A'
+ ECHR 'M'
+ ECHR 'E'
+ EQUB VE
+
+\ ******************************************************************************
+\
+\       Name: MTIN
+\       Type: Variable
+\   Category: Text
+\    Summary: Lookup table for random tokens in the extended token table (0-37)
+\  Deep dive: Extended text tokens
+\
+\ ------------------------------------------------------------------------------
+\
+\ The ERND token type, which is part of the extended token system, takes an
+\ argument between 0 and 37, and returns a randomly chosen token in the range
+\ specified in this table. This is used to generate the extended description of
+\ each system.
+\
+\ For example, the entry at position 13 in this table (counting from 0) is 66,
+\ so ERND 14 will expand into a random token in the range 66-70, i.e. one of
+\ "JUICE", "BRANDY", "WATER", "BREW" and "GARGLE BLASTERS".
+\
+\ ******************************************************************************
 
 .MTIN
 
- EQUB &10, &15, &1A, &1F, &9B, &A0, &2E, &A5, &24, &29, &3D, &33
- EQUB &38, &AA, &42, &47, &4C, &51, &56, &8C, &60, &65, &87, &82
- EQUB &5B, &6A, &B4, &B9, &BE, &E1, &E6, &EB, &F0, &F5, &FA, &73
- EQUB &78, &7D
+ EQUB 16                \ Token  0: a random extended token between 16 and 20
+ EQUB 21                \ Token  1: a random extended token between 21 and 25
+ EQUB 26                \ Token  2: a random extended token between 26 and 30
+ EQUB 31                \ Token  3: a random extended token between 31 and 35
+ EQUB 155               \ Token  4: a random extended token between 155 and 159
+ EQUB 160               \ Token  5: a random extended token between 160 and 164
+ EQUB 46                \ Token  6: a random extended token between 46 and 50
+ EQUB 165               \ Token  7: a random extended token between 165 and 169
+ EQUB 36                \ Token  8: a random extended token between 36 and 40
+ EQUB 41                \ Token  9: a random extended token between 41 and 45
+ EQUB 61                \ Token 10: a random extended token between 61 and 65
+ EQUB 51                \ Token 11: a random extended token between 51 and 55
+ EQUB 56                \ Token 12: a random extended token between 56 and 60
+ EQUB 170               \ Token 13: a random extended token between 170 and 174
+ EQUB 66                \ Token 14: a random extended token between 66 and 70
+ EQUB 71                \ Token 15: a random extended token between 71 and 75
+ EQUB 76                \ Token 16: a random extended token between 76 and 80
+ EQUB 81                \ Token 17: a random extended token between 81 and 85
+ EQUB 86                \ Token 18: a random extended token between 86 and 90
+ EQUB 140               \ Token 19: a random extended token between 140 and 144
+ EQUB 96                \ Token 20: a random extended token between 96 and 100
+ EQUB 101               \ Token 21: a random extended token between 101 and 105
+ EQUB 135               \ Token 22: a random extended token between 135 and 139
+ EQUB 130               \ Token 23: a random extended token between 130 and 134
+ EQUB 91                \ Token 24: a random extended token between 91 and 95
+ EQUB 106               \ Token 25: a random extended token between 106 and 110
+ EQUB 180               \ Token 26: a random extended token between 180 and 184
+ EQUB 185               \ Token 27: a random extended token between 185 and 189
+ EQUB 190               \ Token 28: a random extended token between 190 and 194
+ EQUB 225               \ Token 29: a random extended token between 225 and 229
+ EQUB 230               \ Token 30: a random extended token between 230 and 234
+ EQUB 235               \ Token 31: a random extended token between 235 and 239
+ EQUB 240               \ Token 32: a random extended token between 240 and 244
+ EQUB 245               \ Token 33: a random extended token between 245 and 249
+ EQUB 250               \ Token 34: a random extended token between 250 and 254
+ EQUB 115               \ Token 35: a random extended token between 115 and 119
+ EQUB 120               \ Token 36: a random extended token between 120 and 124
+ EQUB 125               \ Token 37: a random extended token between 125 and 129
+
+\ ******************************************************************************
+\
+\       Name: msg_3
+\       Type: Variable
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
 
 .msg_3
 
- EQUB &00
- EQUS &F6, "CYC", &E0, "P", &FC, "IA G", &E4, "AC", &FB, "CA"
- EQUB &00
- EQUS &CF, "S ", &01, "A-G", &02
- EQUB &00
- EQUS &CF, "S ", &01, "I-W", &02
- EQUB &00
- EQUS "E", &FE, "IPM", &F6, "T"
- EQUB &00
- EQUS "C", &DF, "TROLS"
- EQUB &00
- EQUS &F0, "F", &FD, &EF, &FB, &DF
- EQUB &00
- EQUS "ADD", &F4
- EQUB &00
- EQUS &FF, "AC", &DF, "DA"
- EQUB &00
- EQUS "ASP MK2"
- EQUB &00
- EQUS "BOA"
- EQUB &00
- EQUS "BUSHMASTER"
- EQUB &00
- EQUS "CHAMELEON"
- EQUB &00
- EQUS "COB", &F8, " MK1"
- EQUB &00
- EQUS "COB", &F8, " MK3"
- EQUB &00
- EQUS "C", &FD, "IOLIS ", &DE, &F5, "I", &DF
- EQUB &00
- EQUS "DODECAG", &DF, " ", &DE, &F5, "I", &DF
- EQUB &00
- EQUS &ED, "CAPE CAPSU", &E5
- EQUB &00
- EQUS "F", &F4, "-DE-", &13, &F9, "N", &E9
- EQUB &00
- EQUS &E7, "CKO"
- EQUB &00
- EQUS "GHAVI", &E4
- EQUB &00
- EQUS "IGUANA"
- EQUB &00
- EQUS "K", &F8, &DB
- EQUB &00
- EQUS &EF, "MBA"
- EQUB &00
- EQUS "M", &DF, &DB, &FD
- EQUB &00
- EQUS "MO", &F8, "Y"
- EQUB &00
- EQUS "OPHI", &F1, &FF
- EQUB &00
- EQUS "PY", &E2, &DF
- EQUB &00
- EQUS "SHUTT", &E5
- EQUB &00
- EQUS "SIDEW", &F0, "D", &F4
- EQUB &00
- EQUS &E2, &EE, "GOID"
- EQUB &00
- EQUS &E2, &EE, "G", &DF
- EQUB &00
- EQUS "T", &F8, "NSP", &FD, "T", &F4
- EQUB &00
- EQUS "VIP", &F4
- EQUB &00
- EQUS "W", &FD, "M"
- EQUB &00
- EQUS &EE, &EF, "M", &F6, "TS:"
- EQUB &00
- EQUS "SPE", &FC, ":"
- EQUB &00
- EQUS &F0, &DA, "RVI", &E9, " D", &F5, "E:"
- EQUB &00
- EQUS "COMB", &F5
- EQUB &00
- EQUS "C", &F2, "W:"
- EQUB &00
- EQUS &97, " MOT", &FD, "S:"
- EQUB &00
- EQUS &F8, "N", &E7, ":"
- EQUB &00
- EQUS "FT"
- EQUB &00
- EQUS &F1, "M", &F6, "SI", &DF, "S:"
- EQUB &00
- EQUS "HULL:"	\EQUA "", &F0, "T", &F4, "N", &E4
- EQUB &00
- EQUS "SPA", &E9, ":"
- EQUB &00
- EQUS " MISS", &DC, &ED
- EQUB &00
- EQUS "FACT", &FD, ":"
- EQUB &00
- EQUS &E7, "R", &DD, " ", &DE, &EE, &DA, "EK", &F4
- EQUB &00
- EQUS " ", &F9, &DA, "R"
- EQUB &00
- EQUS " PUL", &DA
- EQUB &00
- EQUS " SY", &DE, "EM"
- EQUB &00
- EQUS &F4, "G", &DF
- EQUB &00
- EQUS &97
- EQUB &00
- EQUS &DA, "EK"
- EQUB &00
- EQUS "LIGHT"
- EQUB &00
- EQUS &F0, "G", &F8, "M"
- EQUB &00
- EQUS &F9, "N", &E9, " & F", &F4, &EF, "N"
- EQUB &00
- EQUS &13, "KRU", &E7, "R "
- EQUB &00
- EQUS "HASS", &DF, "I"
- EQUB &00
- EQUS "VOLTAI", &F2
- EQUB &00
- EQUS "C", &EE, "GO"
- EQUB &00
- EQUS &01, "TC", &02
- EQUB &00
- EQUS &01, "LY", &02
- EQUB &00
- EQUS &01, "LM", &02
- EQUB &00
- EQUS "CF"
- EQUB &00
- EQUS &E2, "RU", &DE
- EQUB &00
- EQUS " ", &CF
- EQUB &00
- EQUS &F0, "V", &F6, &FB, &DF
- EQUB &00
- EQUS &D9, "TW", &FD, "LD"
- EQUB &00
- EQUS "Z", &FD, "G", &DF, " P", &DD, "T", &F4, "S", &DF, ")"
- EQUB &00
- EQUS "DE", &13, &F9, "CY"
- EQUB &00
- EQUS &01, "4*C40KV", &02, " AM", &ED, " ", &97
- EQUB &00
- EQUS "V & K "
- EQUB &00
- EQUS "B", &F9, &DE
- EQUB &00
- EQUS " (", &13, "GA", &DA, "C L", &D8, "S, ", &FA, &FB, &FB, &E9, ")"
- EQUB &00
- EQUS "F", &FC, "E", &F8, &FB, &DF
- EQUB &00
- EQUS "SPA", &E9
- EQUB &00
- EQUS &13, "I", &DF, "IC"
- EQUB &00
- EQUS "HUNT"
- EQUB &00
- EQUS "PROS", &DA, "T "
- EQUB &00
- EQUS " W", &FD, "KSHOPS)"
- EQUB &00
- EQUS &01, "/1L", &02
- EQUB &00
- EQUS &01, "/2L", &02
- EQUB &00
- EQUS &01, "/4L", &02
- EQUB &00
- EQUS " (", &13
- EQUB &00
- EQUS &01, "IFS", &02, " "
- EQUB &00
- EQUS &0C, "FLIGHT C", &DF, "TROLS", &D7
- EQUS "<", &08, &FF, &FB, "-C", &E0, "CKWI", &DA, " ROLL", &0C
- EQUS ">", &08, "C", &E0, "CKWI", &DA, " ROLL", &0C
- EQUS "S", &08, &F1, &FA, &0C
- EQUS "X", &08, "CLIMB", &0C
- EQUS &01, "SPC", &02, &08, &F0, "C", &F2, "A", &DA, " SPE", &FC, &0C
- EQUS "?", &08, "DEC", &F2, "A", &DA, " SPE", &FC, &0C
- EQUS &01, "T", &D8, &02, &08, "HYP", &F4, "SPA", &E9, " ", &ED, "CAPE", &0C
- EQUS &01, &ED, "C", &02, &08, &ED, "CAPE CAPSU", &E5, &0C
- EQUS "F", &08, "TOGG", &E5, " COMPASS", &0C
- EQUS "V", &08, "DOCK", &C3, "COMPUT", &F4, "S ", &DF, &0C	\EQUA "V", &08, &04, "s", &05, " ", &DF, &0C
- EQUS "P", &08, "DOCK", &C3, "COMPUT", &F4, "S OFF", &0C	\EQUA "P", &08, &04, "s", &05, " OFF", &0C
- EQUS "J", &08, "MICROJUMP", &0C
- EQUS &0D, "F0", &02, &08, "FR", &DF, "T VIEW", &0C
- EQUS &0D, "F1", &02, &08, &F2, &EE, " VIEW", &0C
- EQUS &0D, "F2", &02, &08, &E5, "FT VIEW", &0C
- EQUS &0D, "F3", &02, &08, "RIGHT VIEW", &0C
- EQUB &00
- EQUS &0C, "COMB", &F5, " C", &DF, "TROLS", &D7
- EQUS "A", &08, "FI", &F2, " ", &F9, &DA, "R", &0C
- EQUS "T", &08, "T", &EE, "G", &DD, " MISS", &DC, &ED, &0C
- EQUS "M", &08, "FI", &F2, " MISS", &DC, &ED, &0C
- EQUS "U", &08, "UN", &EE, "M MISS", &DC, &ED, &0C
- EQUS "E", &08, "TRIG", &E7, "R E.C.M.", &0C
- EQUS &0C, "I.F.F. COL", &D9, "R COD", &ED, &D7
- EQUS "WH", &DB, "E      OFFICI", &E4, " ", &CF, &0C
- EQUS "BLUE       ", &E5, "G", &E4, " ", &CF, &0C
- EQUS "BLUE/", &13, "WH", &DB, "E DEBRIS", &0C
- EQUS "BLUE/", &13, &F2, "D   N", &DF, "-R", &ED, "P", &DF, "D", &F6, "T", &0C
- EQUS "WH", &DB, "E/", &13, &F2, "D  MISS", &DC, &ED, &0C
- EQUB &00
- EQUS &0C, "NAVIG", &F5, "I", &DF, " C", &DF, "TROLS", &D7
- EQUS "H", &08, "HYP", &F4, "SPA", &E9, " JUMP", &0C
- EQUS "C-", &13, "H", &08, "G", &E4, "AC", &FB, "C HYP", &F4, "SPA", &E9, " JUMP", &0C
- EQUS "CUR", &EB, "R KEYS", &0C, &08, "HYP", &F4, "SPA", &E9, " CUR", &EB, "R C", &DF, "TROL", &0C
- EQUS "D", &08, &F1, &DE, &FF, &E9, &C9, "SY", &DE, "EM", &0C
- EQUS "O", &08, "HOME CUR", &EB, "R", &0C
- EQUS "F", &08, "F", &F0, "D SY", &DE, "EM (", &13, &CD, ")", &0C
- EQUS "W", &08, "F", &F0, "D DE", &DE, &F0, &F5, "I", &DF, " SY", &DE, "EM", &0C
- EQUS &0D, "F4", &02, &08, "G", &E4, "AC", &FB, "C ", &EF, "P", &0C
- EQUS &0D, "F5", &02, &08, "SH", &FD, "T ", &F8, "N", &E7, " ", &EF, "P", &0C
- EQUS &0D, "F6", &02, &08, "D", &F5, "A ", &DF, " ", &91, &0C
- EQUB &00
- EQUS &0C, "T", &F8, "D", &C3, "C", &DF, "TROLS", &D7
- EQUS &0D, "F0", &02, &08, &F9, "UNCH FROM ", &DE, &F5, "I", &DF, &0C
- EQUS "C-F0", &02, &08, &F2, &EF, &F0, " ", &CD, &0C
- EQUS &0D, "F1", &02, &08, "BUY C", &EE, "GO", &0C
- EQUS "C-F1", &08, "BUY SPECI", &E4, " C", &EE, "GO", &0C
- EQUS &0D, "F2", &02, &08, &DA, "LL C", &EE, "GO", &0C
- EQUS "C-F2", &08, &DA, "LL EQUIPMENT", &0C
- EQUS &0D, "F3", &02, &08, "EQUIP ", &CF, &0C
- EQUS "C-F3", &08, "BUY ", &CF, &0C
- EQUS "C-F6", &08, &F6, "CYC", &E0, "P", &FC, "IA", &0C
- EQUS &0D, "F7", &02, &08, "M", &EE, "K", &DD, " PRI", &E9, "S", &0C
- EQUS &0D, "F8", &02, &08, &DE, &F5, &EC, " PA", &E7, &0C
- EQUS &0D, "F9", &02, &08, &F0, "V", &F6, "T", &FD, "Y", &0C
- EQUB &00
- EQUS "FLIGHT"
- EQUB &00
- EQUS "COMB", &F5
- EQUB &00
- EQUS "NAVIG", &F5, "I", &DF
- EQUB &00
- EQUS "T", &F8, "D", &F0, "G"
- EQUB &00
- EQUS "MISS", &DC, &ED	\EQUA "", &04, "j", &05
- EQUB &00
- EQUS &01, "I.F.F.", &0D, " SY", &DE, "EM"	\EQUA "", &04, "k", &05
- EQUB &00
- EQUS &01, "E.C.M.", &0D, " SY", &DE, "EM"	\EQUA "", &04, "l", &05
- EQUB &00
- EQUS "PUL", &DA, " ", &F9, &DA, "RS"	\EQUA "", &04, "g", &05
- EQUB &00
- EQUS &F7, "AM ", &F9, &DA, "RS"	\EQUA "", &04, "h", &05
- EQUB &00
- EQUS "FUEL SCOOPS"	\EQUA "", &04, "o", &05
- EQUB &00
- EQUS &ED, "CAPE POD"	\EQUA "", &04, "p", &05
- EQUB &00
- EQUS "HYP", &F4, "SPA", &E9, " UN", &DB	\EQUA "", &04, "q", &05
- EQUB &00
- EQUS &F6, &F4, "GY UN", &DB	\EQUA "", &04, "r", &05
- EQUB &00
- EQUS "DOCK", &C3, "COMPUT", &F4, "S"	\EQUA "", &04, "s", &05
- EQUB &00
- EQUS "G", &E4, "AC", &FB, "C HYP", &F4, &97	\EQUA "", &04, "t", &05
- EQUB &00
- EQUS "M", &DC, &DB, &EE, "Y ", &F9, &DA, "RS"	\EQUA "", &04, "u", &05
- EQUB &00
- EQUS "M", &F0, &C3, &F9, &DA, "RS"	\EQUA "", &04, "v", &05
- EQUB &00
- EQUS &0E, &13, &DA, "LF HOM", &C3, "MISS", &DC, &ED, " ", &EF, "Y ", &F7, " "
- EQUS "B", &D9, "GHT ", &F5, " ", &FF, "Y SY", &DE, "EM.", &D7
- EQUS &13, &F7, "FO", &F2, &D0, "MISS", &DC, "E C", &FF, " ", &F7, " FIR", &C4
- EQUS &DB, " MU", &DE, " ", &F7, " ", &E0, "CK", &C4, &DF, "TO "
- EQUS "A T", &EE, "G", &DD, ".", &D7, &13, "WH", &F6, " FI", &F2, "D, ", &DB, " W", &DC, "L"
- EQUS " HOME ", &F0, &C9, &93, "T", &EE, "G", &DD, " "
- EQUS "UN", &E5, "SS ", &93, "T", &EE, "G", &DD, " C", &FF, " ", &D9, "T", &EF, &E3, "EUV"
- EQUS &F2, " ", &93, "MISS", &DC, "E, "
- EQUS "SHOOT ", &DB, ", ", &FD, " U", &DA, " E", &E5, "CTR", &DF, "IC C", &D9, "NT"
- EQUS &F4, " MEASUR", &ED, " ", &DF, " ", &DB, &B1
- EQUB &00
- EQUS &0E, &13, &FF, " ID", &F6, &FB, "FIC", &F5, "I", &DF, " FRI", &F6, "D ", &FD
- EQUS " FOE SY", &DE, "EM C", &FF, " ", &F7, " OBTA", &F0, &C4
- EQUS &F5, " TECH ", &E5, &FA, "L 2 ", &FD, " ", &D8, "O", &FA, ".", &D7, &13, &FF
- EQUS " ", &01, "I.F.F.", &0D, " SY", &DE, "EM W", &DC, "L ", &F1, "SP", &F9, "Y "
- EQUS &F1, "FFE", &F2, "NT TYP", &ED, " OF OBJECT ", &F0, " ", &F1, "FFE"
- EQUS &F2, "NT COL", &D9, "RS ", &DF, " ", &93
- EQUS &F8, "D", &EE, " ", &F1, "SP", &F9, "Y.", &D7, &13, &DA, "E ", &13, "C", &DF, "TROLS (", &13, "COMB", &F5, ")", &B1
- EQUB &00
- EQUS &0E, &13, &FF, " E", &E5, "CTR", &DF, "IC C", &D9, "NT", &F4, " MEASUR", &ED
- EQUS " SY", &DE, "EM ", &EF, "Y ", &F7, " B", &D9, "GHT ", &F5, " "
- EQUS &FF, "Y SY", &DE, "EM OF TECH ", &E5, &FA, "L 3 ", &FD, " HIGH"
- EQUS &F4, ".", &D7, &13, "WH", &F6, " AC", &FB, "V", &F5, &FC, ", ", &93
- EQUS &01, "E.C.M.", &0D, " SY", &DE, "EM W", &DC, "L ", &F1, "SRUPT ", &93, "GUID"
- EQUS &FF, &E9, " SY", &DE, "EMS OF ", &E4, "L "
- EQUS "MISS", &DC, &ED, " ", &F0, " ", &93, "VIC", &F0, &DB, "Y, ", &EF, "K", &C3, &E2, "EM ", &DA, "LF DE", &DE, "RUCT", &B1
- EQUB &00
- EQUS &0E, &13, "PUL", &DA, " ", &F9, &DA, "RS ", &EE, "E F", &FD, " S", &E4, "E ", &F5
- EQUS " TECH ", &E5, &FA, "L 4 ", &FD, " ", &D8, "O", &FA, ".", &D7
- EQUS &13, "PUL", &DA, " ", &F9, &DA, "RS FI", &F2, " ", &F0, "T", &F4, "M", &DB, "T", &F6, "T ", &F9, &DA, "R ", &F7, "AMS", &B1
- EQUB &00
- EQUS &0E, &13, &F7, "AM ", &F9, &DA, "RS ", &EE, "E AVA", &DC, &D8, &E5, " ", &F5
- EQUS " SY", &DE, "EMS OF TECH ", &E5, &FA, "L 5 ", &FD, " "
- EQUS "HIGH", &F4, ".", &D7, &13, &F7, "AM ", &F9, &DA, "RS FI", &F2, " C", &DF, &FB
- EQUS &E1, &D9, "S ", &F9, &DA, "R ", &DE, &F8, "NDS, W", &DB, "H "
- EQUS &EF, "NY ", &DE, &F8, "NDS ", &F0, " P", &EE, &E4, &E5, "L.", &D7, &13, &F7, "AM"
- EQUS " ", &F9, &DA, "RS OV", &F4, "HE", &F5, " MO", &F2, " "
- EQUS &F8, "PIDLY ", &E2, &FF, " PUL", &DA, " ", &F9, &DA, "RS", &B1
- EQUB &00
- EQUS &0E, &13, "FUEL SCOOPS ", &F6, &D8, &E5, &D0, &CF, &C9, "OBTA", &F0, " "
- EQUS "F", &F2, "E HYP", &F4, "SPA", &E9, " FUEL "
- EQUS "BY 'SUN-SKIMM", &F0, "G' - FLY", &C3, "C", &E0, &DA, &C9, &93, "SUN"
- EQUS ".", &D7, &13, "FUEL SCOOPS "
- EQUS "C", &FF, " ", &E4, &EB, " ", &F7, " ", &EC, &C4, "TO PICK UP SPA", &E9, " DEBRIS,"
- EQUS " SUCH AS C", &EE, "GO "
- EQUS "B", &EE, &F2, "LS ", &FD, " A", &DE, &F4, "OID F", &F8, "GM", &F6, "TS.", &D7, &13, "FUEL"
- EQUS " SCOOPS ", &EE, "E AVA", &DC, &D8, &E5, " "
- EQUS "FROM SY", &DE, "EMS OF TECH ", &E5, &FA, "L 6 ", &FD, " ", &D8, "O", &FA, &B1
- EQUB &00
- EQUS &0E, &13, &FF, " ", &ED, "CAPE POD", &CA, &FF, " ", &ED, &DA, "N", &FB, &E4
- EQUS " PIE", &E9, " OF EQUIPM", &F6, "T F", &FD, " "
- EQUS "MO", &DE, " SPA", &E9, &CF, "S.", &D7, &13, "WH", &F6, " EJECT", &FC, ","
- EQUS " ", &93, "CAPSU", &E5, " W", &DC, "L ", &F7, " T", &F8, "CK", &C4
- EQUS "TO ", &93, "NE", &EE, "E", &DE, " SPA", &E9, " ", &DE, &F5, "I", &DF, ".", &D7, &13
- EQUS "MO", &DE, " ", &ED, "CAPE PODS COME W", &DB, "H "
- EQUS &F0, "SU", &F8, "N", &E9, " POLICI", &ED, &C9, &F2, "P", &F9, &E9, " ", &93
- EQUS &CF, &B2, "EQUIPM", &F6, "T.", &D7
- EQUS &13, "P", &F6, &E4, &FB, &ED, " F", &FD, " ", &F0, "T", &F4, "F", &F4, &C3, "W", &DB, "H"
- EQUS " ", &ED, "CAPE PODS ", &EE, "E ", &DA, &FA, &F2, " "
- EQUS &F0, " MO", &DE, " ", &91, &EE, "Y SY", &DE, "EMS.", &D7, &13, &ED, "CAPE"
- EQUS " PODS ", &EF, "Y ", &F7, " B", &D9, "GHT ", &F5, " "
- EQUS "SY", &DE, "EMS OF TECH ", &E5, &FA, "L 7 ", &FD, " HIGH", &F4, &B1
- EQUB &00
- EQUS &0E, &13, "A ", &F2, &E9, "NT ", &F0, "V", &F6, &FB, &DF, ", ", &93, "HYP", &F4
- EQUS "SPA", &E9, " UN", &DB, &CA, &FF, " ", &E4, "T", &F4, "N", &F5, "I", &FA, " "
- EQUS "TO ", &93, &ED, "CAPE POD F", &FD, " ", &EF, "NY T", &F8, "D", &F4, "S."
- EQUS &D7, &13, "WH", &F6, " TRIG", &E7, &F2, "D, ", &93
- EQUS "HYP", &F4, "SPA", &E9, " UN", &DB, " W", &DC, "L U", &DA, " ", &DB, "S POW", &F4
- EQUS " ", &F0, " E", &E6, "CUT", &C3, "A HYP", &F4, "JUMP "
- EQUS "AWAY FROM ", &93, "CUR", &F2, "NT POS", &DB, "I", &DF, ".", &D7, &13, "UN"
- EQUS "F", &FD, "TUN", &F5, "ELY, ", &F7, "CAU", &DA, " ", &93
- EQUS "HYP", &F4, "JUMP", &CA, &F0, &DE, &FF, "T", &FF, "E", &D9, "S, ", &E2, "E", &F2
- EQUS &CA, &E3, " C", &DF, "TROL OF ", &93
- EQUS "DE", &DE, &F0, &F5, "I", &DF, " POS", &DB, "I", &DF, ".", &D7, &13, "A HYP", &F4, "SPA"
- EQUS &E9, " UN", &DB, &CA, "AVA", &DC, &D8, &E5, " ", &F5, " "
- EQUS "TECH ", &E5, &FA, "L 8 ", &FD, " ", &D8, "O", &FA, &B1
- EQUB &00
- EQUS &0E, &13, &FF, " ", &F6, &F4, "GY UN", &DB, " ", &F0, "C", &F2, "A", &DA, "S ", &93, "R", &F5, "E"
- EQUS " OF ", &F2, "CH", &EE, "G", &C3, "OF ", &93
- EQUS &F6, &F4, "GY B", &FF, "KS FROM SURFA", &E9, " ", &F8, &F1, &F5, "I", &DF
- EQUS " ", &D8, &EB, "RP", &FB, &DF, "."
- EQUS &D7, &13, &F6, &F4, "GY UN", &DB, "S ", &EE, "E AVA", &DC, &D8, &E5, " FROM"
- EQUS " TECH ", &E5, &FA, "L 9 UPW", &EE, "DS", &B1
- EQUB &00
- EQUS &0E, &13, "DOCK", &C3, "COMPUT", &F4, "S ", &EE, "E ", &F2, "COMM", &F6, "D", &C4, "BY ", &E4, "L ", &91, &EE, "Y "
- EQUS "GOV", &F4, "NM", &F6, "TS AS", &D0, "SAFE WAY OF ", &F2, "DUC", &C3, &93
- EQUS &E1, "MB", &F4, " OF DOCK", &C3
- EQUS "ACCID", &F6, "TS.", &D7, &13, "DOCK", &C3, "COMPUT", &F4, "S W", &DC, "L"
- EQUS " AUTO", &EF, &FB, "C", &E4, "LY DOCK", &D0, &CF, " "
- EQUS "WH", &F6, " TURN", &C4, &DF, ".", &D7, &13, "DOCK", &C3, "COMPUT", &F4, "S"
- EQUS " C", &FF, " ", &F7, " B", &D9, "GHT ", &F5, " SY", &DE, "EMS "
- EQUS "OF TECH ", &E5, &FA, "L 10 ", &FD, " MO", &F2, &B1
- EQUB &00
- EQUS &0E, &13, "G", &E4, "AC", &FB, "C HYP", &F4, "SPA", &E9, " ", &97, "S ", &EE, "E "
- EQUS "OBTA", &F0, &D8, &E5, " FROM ", &91, "S OF "
- EQUS "TECH ", &E5, &FA, "L 11 UPW", &EE, "DS.", &D7, &13, "WH", &F6, " "
- EQUS &93, &F0, "T", &F4, "G", &E4, "AC", &FB, "C HYP", &F4, &97, " "
- EQUS "IS ", &F6, "GA", &E7, "D, ", &93, &CF, &CA, "HYP", &F4, "JUMP", &C4, &F0, "TO"
- EQUS " ", &93, "P", &F2, "-PROG", &F8, "MM", &C4
- EQUS "G", &E4, "AXY", &B1
- EQUB &00
- EQUS &0E, &13, "M", &DC, &DB, &EE, "Y ", &F9, &DA, "RS ", &EE, "E ", &93, "HEIGHT"
- EQUS " OF ", &F9, &DA, "R ", &EB, "PHI", &DE, "IC", &F5, "I", &DF, ".", &D7
- EQUS &13, &E2, "EY U", &DA, " HIGH ", &F6, &F4, "GY ", &F9, &DA, "RS FIR", &C3, "C"
- EQUS &DF, &FB, &E1, &D9, "SLY", &C9, "PRODU", &E9, " "
- EQUS "DEVA", &DE, &F5, &C3, "EFFECTS, BUT ", &EE, "E PR", &DF, "E", &C9, "OV", &F4, "HE", &F5, &F0, "G.", &D7
- EQUS &13, "M", &DC, &DB, &EE, "Y ", &F9, &DA, "RS ", &EE, "E AVA", &DC, &D8, &E5, " "
- EQUS "FROM ", &91, "S OF TECH ", &E5, &FA, "L "
- EQUS "12 ", &FD, " MO", &F2, &B1
- EQUB &00
- EQUS &0E, &13, "M", &F0, &C3, &F9, &DA, "RS ", &EE, "E HIGHLY POWE", &F2, "D, "
- EQUS "S", &E0, "W FIR", &C3, "PUL", &DA, " ", &F9, &DA, "RS "
- EQUS "WHICH ", &EE, "E TUN", &C4, "TO F", &F8, "GM", &F6, "T A", &DE, &F4, "OIDS."
- EQUS &D7, &13, "M", &F0, &C3, &F9, &DA, "RS ", &EE, "E "
- EQUS "AVA", &DC, &D8, &E5, " FROM TECH ", &E5, &FA, "L 12 UPW", &EE, "DS", &B1
- EQUB &00
+ EQUB VE
+
+ ETWO 'E', 'N'
+ ECHR 'C'
+ ECHR 'Y'
+ ECHR 'C'
+ ETWO 'L', 'O'
+ ECHR 'P'
+ ETWO 'E', 'D'
+ ECHR 'I'
+ ECHR 'A'
+ ECHR ' '
+ ECHR 'G'
+ ETWO 'A', 'L'
+ ECHR 'A'
+ ECHR 'C'
+ ETWO 'T', 'I'
+ ECHR 'C'
+ ECHR 'A'
+ EQUB VE
+
+ ETOK 207
+ ECHR 'S'
+ ECHR ' '
+ EJMP 1
+ ECHR 'A'
+ ECHR '-'
+ ECHR 'G'
+ EJMP 2
+ EQUB VE
+
+ ETOK 207
+ ECHR 'S'
+ ECHR ' '
+ EJMP 1
+ ECHR 'I'
+ ECHR '-'
+ ECHR 'W'
+ EJMP 2
+ EQUB VE
+
+ ECHR 'E'
+ ETWO 'Q', 'U'
+ ECHR 'I'
+ ECHR 'P'
+ ECHR 'M'
+ ETWO 'E', 'N'
+ ECHR 'T'
+ EQUB VE
+
+ ECHR 'C'
+ ETWO 'O', 'N'
+ ECHR 'T'
+ ECHR 'R'
+ ECHR 'O'
+ ECHR 'L'
+ ECHR 'S'
+ EQUB VE
+
+ ETWO 'I', 'N'
+ ECHR 'F'
+ ETWO 'O', 'R'
+ ETWO 'M', 'A'
+ ETWO 'T', 'I'
+ ETWO 'O', 'N'
+ EQUB VE
+
+ ECHR 'A'
+ ECHR 'D'
+ ECHR 'D'
+ ETWO 'E', 'R'
+ EQUB VE
+
+ ETWO 'A', 'N'
+ ECHR 'A'
+ ECHR 'C'
+ ETWO 'O', 'N'
+ ECHR 'D'
+ ECHR 'A'
+ EQUB VE
+
+ ECHR 'A'
+ ECHR 'S'
+ ECHR 'P'
+ ECHR ' '
+ ECHR 'M'
+ ECHR 'K'
+ ECHR '2'
+ EQUB VE
+
+ ECHR 'B'
+ ECHR 'O'
+ ECHR 'A'
+ EQUB VE
+
+ ECHR 'B'
+ ECHR 'U'
+ ECHR 'S'
+ ECHR 'H'
+ ECHR 'M'
+ ECHR 'A'
+ ECHR 'S'
+ ECHR 'T'
+ ECHR 'E'
+ ECHR 'R'
+ EQUB VE
+
+ ECHR 'C'
+ ECHR 'H'
+ ECHR 'A'
+ ECHR 'M'
+ ECHR 'E'
+ ECHR 'L'
+ ECHR 'E'
+ ECHR 'O'
+ ECHR 'N'
+ EQUB VE
+
+ ECHR 'C'
+ ECHR 'O'
+ ECHR 'B'
+ ETWO 'R', 'A'
+ ECHR ' '
+ ECHR 'M'
+ ECHR 'K'
+ ECHR '1'
+ EQUB VE
+
+ ECHR 'C'
+ ECHR 'O'
+ ECHR 'B'
+ ETWO 'R', 'A'
+ ECHR ' '
+ ECHR 'M'
+ ECHR 'K'
+ ECHR '3'
+ EQUB VE
+
+ ECHR 'C'
+ ETWO 'O', 'R'
+ ECHR 'I'
+ ECHR 'O'
+ ECHR 'L'
+ ECHR 'I'
+ ECHR 'S'
+ ECHR ' '
+ ETWO 'S', 'T'
+ ETWO 'A', 'T'
+ ECHR 'I'
+ ETWO 'O', 'N'
+ EQUB VE
+
+ ECHR 'D'
+ ECHR 'O'
+ ECHR 'D'
+ ECHR 'E'
+ ECHR 'C'
+ ECHR 'A'
+ ECHR 'G'
+ ETWO 'O', 'N'
+ ECHR ' '
+ ETWO 'S', 'T'
+ ETWO 'A', 'T'
+ ECHR 'I'
+ ETWO 'O', 'N'
+ EQUB VE
+
+ ETWO 'E', 'S'
+ ECHR 'C'
+ ECHR 'A'
+ ECHR 'P'
+ ECHR 'E'
+ ECHR ' '
+ ECHR 'C'
+ ECHR 'A'
+ ECHR 'P'
+ ECHR 'S'
+ ECHR 'U'
+ ETWO 'L', 'E'
+ EQUB VE
+
+ ECHR 'F'
+ ETWO 'E', 'R'
+ ECHR '-'
+ ECHR 'D'
+ ECHR 'E'
+ ECHR '-'
+ EJMP 19
+ ETWO 'L', 'A'
+ ECHR 'N'
+ ETWO 'C', 'E'
+ EQUB VE
+
+ ETWO 'G', 'E'
+ ECHR 'C'
+ ECHR 'K'
+ ECHR 'O'
+ EQUB VE
+
+ ECHR 'G'
+ ECHR 'H'
+ ECHR 'A'
+ ECHR 'V'
+ ECHR 'I'
+ ETWO 'A', 'L'
+ EQUB VE
+
+ ECHR 'I'
+ ECHR 'G'
+ ECHR 'U'
+ ECHR 'A'
+ ECHR 'N'
+ ECHR 'A'
+ EQUB VE
+
+ ECHR 'K'
+ ETWO 'R', 'A'
+ ETWO 'I', 'T'
+ EQUB VE
+
+ ETWO 'M', 'A'
+ ECHR 'M'
+ ECHR 'B'
+ ECHR 'A'
+ EQUB VE
+
+ ECHR 'M'
+ ETWO 'O', 'N'
+ ETWO 'I', 'T'
+ ETWO 'O', 'R'
+ EQUB VE
+
+ ECHR 'M'
+ ECHR 'O'
+ ETWO 'R', 'A'
+ ECHR 'Y'
+ EQUB VE
+
+ ECHR 'O'
+ ECHR 'P'
+ ECHR 'H'
+ ECHR 'I'
+ ETWO 'D', 'I'
+ ETWO 'A', 'N'
+ EQUB VE
+
+ ECHR 'P'
+ ECHR 'Y'
+ ETWO 'T', 'H'
+ ETWO 'O', 'N'
+ EQUB VE
+
+ ECHR 'S'
+ ECHR 'H'
+ ECHR 'U'
+ ECHR 'T'
+ ECHR 'T'
+ ETWO 'L', 'E'
+ EQUB VE
+
+ ECHR 'S'
+ ECHR 'I'
+ ECHR 'D'
+ ECHR 'E'
+ ECHR 'W'
+ ETWO 'I', 'N'
+ ECHR 'D'
+ ETWO 'E', 'R'
+ EQUB VE
+
+ ETWO 'T', 'H'
+ ETWO 'A', 'R'
+ ECHR 'G'
+ ECHR 'O'
+ ECHR 'I'
+ ECHR 'D'
+ EQUB VE
+
+ ETWO 'T', 'H'
+ ETWO 'A', 'R'
+ ECHR 'G'
+ ETWO 'O', 'N'
+ EQUB VE
+
+ ECHR 'T'
+ ETWO 'R', 'A'
+ ECHR 'N'
+ ECHR 'S'
+ ECHR 'P'
+ ETWO 'O', 'R'
+ ECHR 'T'
+ ETWO 'E', 'R'
+ EQUB VE
+
+ ECHR 'V'
+ ECHR 'I'
+ ECHR 'P'
+ ETWO 'E', 'R'
+ EQUB VE
+
+ ECHR 'W'
+ ETWO 'O', 'R'
+ ECHR 'M'
+ EQUB VE
+
+ ETWO 'A', 'R'
+ ETWO 'M', 'A'
+ ECHR 'M'
+ ETWO 'E', 'N'
+ ECHR 'T'
+ ECHR 'S'
+ ECHR ':'
+ EQUB VE
+
+ ECHR 'S'
+ ECHR 'P'
+ ECHR 'E'
+ ETWO 'E', 'D'
+ ECHR ':'
+ EQUB VE
+
+ ETWO 'I', 'N'
+ ETWO 'S', 'E'
+ ECHR 'R'
+ ECHR 'V'
+ ECHR 'I'
+ ETWO 'C', 'E'
+ ECHR ' '
+ ECHR 'D'
+ ETWO 'A', 'T'
+ ECHR 'E'
+ ECHR ':'
+ EQUB VE
+
+ ECHR 'C'
+ ECHR 'O'
+ ECHR 'M'
+ ECHR 'B'
+ ETWO 'A', 'T'
+ EQUB VE
+
+ ECHR 'C'
+ ETWO 'R', 'E'
+ ECHR 'W'
+ ECHR ':'
+ EQUB VE
+
+ ETOK 151
+ ECHR ' '
+ ECHR 'M'
+ ECHR 'O'
+ ECHR 'T'
+ ETWO 'O', 'R'
+ ECHR 'S'
+ ECHR ':'
+ EQUB VE
+
+ ETWO 'R', 'A'
+ ECHR 'N'
+ ETWO 'G', 'E'
+ ECHR ':'
+ EQUB VE
+
+ ECHR 'F'
+ ECHR 'T'
+ EQUB VE
+
+ ETWO 'D', 'I'
+ ECHR 'M'
+ ETWO 'E', 'N'
+ ECHR 'S'
+ ECHR 'I'
+ ETWO 'O', 'N'
+ ECHR 'S'
+ ECHR ':'
+ EQUB VE
+
+ ECHR 'H'
+ ECHR 'U'
+ ECHR 'L'
+ ECHR 'L'
+ ECHR ':'
+ EQUB VE
+
+ ECHR 'S'
+ ECHR 'P'
+ ECHR 'A'
+ ETWO 'C', 'E'
+ ECHR ':'
+ EQUB VE
+
+ ECHR ' '
+ ECHR 'M'
+ ECHR 'I'
+ ECHR 'S'
+ ECHR 'S'
+ ETWO 'I', 'L'
+ ETWO 'E', 'S'
+ EQUB VE
+
+ ECHR 'F'
+ ECHR 'A'
+ ECHR 'C'
+ ECHR 'T'
+ ETWO 'O', 'R'
+ ECHR ':'
+ EQUB VE
+
+ ETWO 'G', 'E'
+ ECHR 'R'
+ ETWO 'E', 'T'
+ ECHR ' '
+ ETWO 'S', 'T'
+ ETWO 'A', 'R'
+ ETWO 'S', 'E'
+ ECHR 'E'
+ ECHR 'K'
+ ETWO 'E', 'R'
+ EQUB VE
+
+ ECHR ' '
+ ETWO 'L', 'A'
+ ETWO 'S', 'E'
+ ECHR 'R'
+ EQUB VE
+
+ ECHR ' '
+ ECHR 'P'
+ ECHR 'U'
+ ECHR 'L'
+ ETWO 'S', 'E'
+ EQUB VE
+
+ ECHR ' '
+ ECHR 'S'
+ ECHR 'Y'
+ ETWO 'S', 'T'
+ ECHR 'E'
+ ECHR 'M'
+ EQUB VE
+
+ ETWO 'E', 'R'
+ ECHR 'G'
+ ETWO 'O', 'N'
+ EQUB VE
+
+ ETOK 151
+ EQUB VE
+
+ ETWO 'S', 'E'
+ ECHR 'E'
+ ECHR 'K'
+ EQUB VE
+
+ ECHR 'L'
+ ECHR 'I'
+ ECHR 'G'
+ ECHR 'H'
+ ECHR 'T'
+ EQUB VE
+
+ ETWO 'I', 'N'
+ ECHR 'G'
+ ETWO 'R', 'A'
+ ECHR 'M'
+ EQUB VE
+
+ ETWO 'L', 'A'
+ ECHR 'N'
+ ETWO 'C', 'E'
+ ECHR ' '
+ ECHR '&'
+ ECHR ' '
+ ECHR 'F'
+ ETWO 'E', 'R'
+ ETWO 'M', 'A'
+ ECHR 'N'
+ EQUB VE
+
+ EJMP 19
+ ECHR 'K'
+ ECHR 'R'
+ ECHR 'U'
+ ETWO 'G', 'E'
+ ECHR 'R'
+ ECHR ' '
+ EQUB VE
+
+ ECHR 'H'
+ ECHR 'A'
+ ECHR 'S'
+ ECHR 'S'
+ ETWO 'O', 'N'
+ ECHR 'I'
+ EQUB VE
+
+ ECHR 'V'
+ ECHR 'O'
+ ECHR 'L'
+ ECHR 'T'
+ ECHR 'A'
+ ECHR 'I'
+ ETWO 'R', 'E'
+ EQUB VE
+
+ ECHR 'C'
+ ETWO 'A', 'R'
+ ECHR 'G'
+ ECHR 'O'
+ EQUB VE
+
+ EJMP 1
+ ECHR 'T'
+ ECHR 'C'
+ EJMP 2
+ EQUB VE
+
+ EJMP 1
+ ECHR 'L'
+ ECHR 'Y'
+ EJMP 2
+ EQUB VE
+
+ EJMP 1
+ ECHR 'L'
+ ECHR 'M'
+ EJMP 2
+ EQUB VE
+
+ ECHR 'C'
+ ECHR 'F'
+ EQUB VE
+
+ ETWO 'T', 'H'
+ ECHR 'R'
+ ECHR 'U'
+ ETWO 'S', 'T'
+ EQUB VE
+
+ ECHR ' '
+ ETOK 207
+ EQUB VE
+
+ ETWO 'I', 'N'
+ ECHR 'V'
+ ETWO 'E', 'N'
+ ETWO 'T', 'I'
+ ETWO 'O', 'N'
+ EQUB VE
+
+ ETWO 'O', 'U'
+ ECHR 'T'
+ ECHR 'W'
+ ETWO 'O', 'R'
+ ECHR 'L'
+ ECHR 'D'
+ EQUB VE
+
+ ECHR 'Z'
+ ETWO 'O', 'R'
+ ECHR 'G'
+ ETWO 'O', 'N'
+ ECHR ' '
+ ECHR 'P'
+ ETWO 'E', 'T'
+ ECHR 'T'
+ ETWO 'E', 'R'
+ ECHR 'S'
+ ETWO 'O', 'N'
+ ECHR ')'
+ EQUB VE
+
+ ECHR 'D'
+ ECHR 'E'
+ EJMP 19
+ ETWO 'L', 'A'
+ ECHR 'C'
+ ECHR 'Y'
+ EQUB VE
+
+ EJMP 1
+ ECHR '4'
+ ECHR '*'
+ ECHR 'C'
+ ECHR '4'
+ ECHR '0'
+ ECHR 'K'
+ ECHR 'V'
+ EJMP 2
+ ECHR ' '
+ ECHR 'A'
+ ECHR 'M'
+ ETWO 'E', 'S'
+ ECHR ' '
+ ETOK 151
+ EQUB VE
+
+ ECHR 'V'
+ ECHR ' '
+ ECHR '&'
+ ECHR ' '
+ ECHR 'K'
+ ECHR ' '
+ EQUB VE
+
+ ECHR 'B'
+ ETWO 'L', 'A'
+ ETWO 'S', 'T'
+ EQUB VE
+
+ ECHR ' '
+ ECHR '('
+ EJMP 19
+ ECHR 'G'
+ ECHR 'A'
+ ETWO 'S', 'E'
+ ECHR 'C'
+ ECHR ' '
+ ECHR 'L'
+ ETWO 'A', 'B'
+ ECHR 'S'
+ ECHR ','
+ ECHR ' '
+ ETWO 'V', 'E'
+ ETWO 'T', 'I'
+ ETWO 'T', 'I'
+ ETWO 'C', 'E'
+ ECHR ')'
+ EQUB VE
+
+ ECHR 'F'
+ ETWO 'E', 'D'
+ ECHR 'E'
+ ETWO 'R', 'A'
+ ETWO 'T', 'I'
+ ETWO 'O', 'N'
+ EQUB VE
+
+ ECHR 'S'
+ ECHR 'P'
+ ECHR 'A'
+ ETWO 'C', 'E'
+ EQUB VE
+
+ EJMP 19
+ ECHR 'I'
+ ETWO 'O', 'N'
+ ECHR 'I'
+ ECHR 'C'
+ EQUB VE
+
+ ECHR 'H'
+ ECHR 'U'
+ ECHR 'N'
+ ECHR 'T'
+ EQUB VE
+
+ ECHR 'P'
+ ECHR 'R'
+ ECHR 'O'
+ ECHR 'S'
+ ETWO 'S', 'E'
+ ECHR 'T'
+ ECHR ' '
+ EQUB VE
+
+ ECHR ' '
+ ECHR 'W'
+ ETWO 'O', 'R'
+ ECHR 'K'
+ ECHR 'S'
+ ECHR 'H'
+ ECHR 'O'
+ ECHR 'P'
+ ECHR 'S'
+ ECHR ')'
+ EQUB VE
+
+ EJMP 1
+ ECHR '/'
+ ECHR '1'
+ ECHR 'L'
+ EJMP 2
+ EQUB VE
+
+ EJMP 1
+ ECHR '/'
+ ECHR '2'
+ ECHR 'L'
+ EJMP 2
+ EQUB VE
+
+ EJMP 1
+ ECHR '/'
+ ECHR '4'
+ ECHR 'L'
+ EJMP 2
+ EQUB VE
+
+ ECHR ' '
+ ECHR '('
+ EJMP 19
+ EQUB VE
+
+ EJMP 1
+ ECHR 'I'
+ ECHR 'F'
+ ECHR 'S'
+ EJMP 2
+ ECHR ' '
+ EQUB VE
+
+ EJMP 12
+ ECHR 'F'
+ ECHR 'L'
+ ECHR 'I'
+ ECHR 'G'
+ ECHR 'H'
+ ECHR 'T'
+ ECHR ' '
+ ECHR 'C'
+ ETWO 'O', 'N'
+ ECHR 'T'
+ ECHR 'R'
+ ECHR 'O'
+ ECHR 'L'
+ ECHR 'S'
+ ETWO '-', '-'
+ ECHR '<'
+ EJMP 8
+ ETWO 'A', 'N'
+ ETWO 'T', 'I'
+ ECHR '-'
+ ECHR 'C'
+ ETWO 'L', 'O'
+ ECHR 'C'
+ ECHR 'K'
+ ECHR 'W'
+ ECHR 'I'
+ ETWO 'S', 'E'
+ ECHR ' '
+ ECHR 'R'
+ ECHR 'O'
+ ECHR 'L'
+ ECHR 'L'
+ EJMP 12
+ ECHR '>'
+ EJMP 8
+ ECHR 'C'
+ ETWO 'L', 'O'
+ ECHR 'C'
+ ECHR 'K'
+ ECHR 'W'
+ ECHR 'I'
+ ETWO 'S', 'E'
+ ECHR ' '
+ ECHR 'R'
+ ECHR 'O'
+ ECHR 'L'
+ ECHR 'L'
+ EJMP 12
+ ECHR 'S'
+ EJMP 8
+ ETWO 'D', 'I'
+ ETWO 'V', 'E'
+ EJMP 12
+ ECHR 'X'
+ EJMP 8
+ ECHR 'C'
+ ECHR 'L'
+ ECHR 'I'
+ ECHR 'M'
+ ECHR 'B'
+ EJMP 12
+ EJMP 1
+ ECHR 'S'
+ ECHR 'P'
+ ECHR 'C'
+ EJMP 2
+ EJMP 8
+ ETWO 'I', 'N'
+ ECHR 'C'
+ ETWO 'R', 'E'
+ ECHR 'A'
+ ETWO 'S', 'E'
+ ECHR ' '
+ ECHR 'S'
+ ECHR 'P'
+ ECHR 'E'
+ ETWO 'E', 'D'
+ EJMP 12
+ ECHR '?'
+ EJMP 8
+ ECHR 'D'
+ ECHR 'E'
+ ECHR 'C'
+ ETWO 'R', 'E'
+ ECHR 'A'
+ ETWO 'S', 'E'
+ ECHR ' '
+ ECHR 'S'
+ ECHR 'P'
+ ECHR 'E'
+ ETWO 'E', 'D'
+ EJMP 12
+ EJMP 1
+ ECHR 'T'
+ ETWO 'A', 'B'
+ EJMP 2
+ EJMP 8
+ ECHR 'H'
+ ECHR 'Y'
+ ECHR 'P'
+ ETWO 'E', 'R'
+ ECHR 'S'
+ ECHR 'P'
+ ECHR 'A'
+ ETWO 'C', 'E'
+ ECHR ' '
+ ETWO 'E', 'S'
+ ECHR 'C'
+ ECHR 'A'
+ ECHR 'P'
+ ECHR 'E'
+ EJMP 12
+ EJMP 1
+ ETWO 'E', 'S'
+ ECHR 'C'
+ EJMP 2
+ EJMP 8
+ ETWO 'E', 'S'
+ ECHR 'C'
+ ECHR 'A'
+ ECHR 'P'
+ ECHR 'E'
+ ECHR ' '
+ ECHR 'C'
+ ECHR 'A'
+ ECHR 'P'
+ ECHR 'S'
+ ECHR 'U'
+ ETWO 'L', 'E'
+ EJMP 12
+ ECHR 'F'
+ EJMP 8
+ ECHR 'T'
+ ECHR 'O'
+ ECHR 'G'
+ ECHR 'G'
+ ETWO 'L', 'E'
+ ECHR ' '
+ ECHR 'C'
+ ECHR 'O'
+ ECHR 'M'
+ ECHR 'P'
+ ECHR 'A'
+ ECHR 'S'
+ ECHR 'S'
+ EJMP 12
+ ECHR 'V'
+ EJMP 8
+ ECHR 'D'
+ ECHR 'O'
+ ECHR 'C'
+ ECHR 'K'
+ ETOK 195
+ ECHR 'C'
+ ECHR 'O'
+ ECHR 'M'
+ ECHR 'P'
+ ECHR 'U'
+ ECHR 'T'
+ ETWO 'E', 'R'
+ ECHR 'S'
+ ECHR ' '
+ ETWO 'O', 'N'
+ EJMP 12
+ ECHR 'P'
+ EJMP 8
+ ECHR 'D'
+ ECHR 'O'
+ ECHR 'C'
+ ECHR 'K'
+ ETOK 195
+ ECHR 'C'
+ ECHR 'O'
+ ECHR 'M'
+ ECHR 'P'
+ ECHR 'U'
+ ECHR 'T'
+ ETWO 'E', 'R'
+ ECHR 'S'
+ ECHR ' '
+ ECHR 'O'
+ ECHR 'F'
+ ECHR 'F'
+ EJMP 12
+ ECHR 'J'
+ EJMP 8
+ ECHR 'M'
+ ECHR 'I'
+ ECHR 'C'
+ ECHR 'R'
+ ECHR 'O'
+ ECHR 'J'
+ ECHR 'U'
+ ECHR 'M'
+ ECHR 'P'
+ EJMP 12
+ EJMP 13
+ ECHR 'F'
+ ECHR '0'
+ EJMP 2
+ EJMP 8
+ ECHR 'F'
+ ECHR 'R'
+ ETWO 'O', 'N'
+ ECHR 'T'
+ ECHR ' '
+ ECHR 'V'
+ ECHR 'I'
+ ECHR 'E'
+ ECHR 'W'
+ EJMP 12
+ EJMP 13
+ ECHR 'F'
+ ECHR '1'
+ EJMP 2
+ EJMP 8
+ ETWO 'R', 'E'
+ ETWO 'A', 'R'
+ ECHR ' '
+ ECHR 'V'
+ ECHR 'I'
+ ECHR 'E'
+ ECHR 'W'
+ EJMP 12
+ EJMP 13
+ ECHR 'F'
+ ECHR '2'
+ EJMP 2
+ EJMP 8
+ ETWO 'L', 'E'
+ ECHR 'F'
+ ECHR 'T'
+ ECHR ' '
+ ECHR 'V'
+ ECHR 'I'
+ ECHR 'E'
+ ECHR 'W'
+ EJMP 12
+ EJMP 13
+ ECHR 'F'
+ ECHR '3'
+ EJMP 2
+ EJMP 8
+ ECHR 'R'
+ ECHR 'I'
+ ECHR 'G'
+ ECHR 'H'
+ ECHR 'T'
+ ECHR ' '
+ ECHR 'V'
+ ECHR 'I'
+ ECHR 'E'
+ ECHR 'W'
+ EJMP 12
+ EQUB VE
+
+ EJMP 12
+ ECHR 'C'
+ ECHR 'O'
+ ECHR 'M'
+ ECHR 'B'
+ ETWO 'A', 'T'
+ ECHR ' '
+ ECHR 'C'
+ ETWO 'O', 'N'
+ ECHR 'T'
+ ECHR 'R'
+ ECHR 'O'
+ ECHR 'L'
+ ECHR 'S'
+ ETWO '-', '-'
+ ECHR 'A'
+ EJMP 8
+ ECHR 'F'
+ ECHR 'I'
+ ETWO 'R', 'E'
+ ECHR ' '
+ ETWO 'L', 'A'
+ ETWO 'S', 'E'
+ ECHR 'R'
+ EJMP 12
+ ECHR 'T'
+ EJMP 8
+ ECHR 'T'
+ ETWO 'A', 'R'
+ ECHR 'G'
+ ETWO 'E', 'T'
+ ECHR ' '
+ ECHR 'M'
+ ECHR 'I'
+ ECHR 'S'
+ ECHR 'S'
+ ETWO 'I', 'L'
+ ETWO 'E', 'S'
+ EJMP 12
+ ECHR 'M'
+ EJMP 8
+ ECHR 'F'
+ ECHR 'I'
+ ETWO 'R', 'E'
+ ECHR ' '
+ ECHR 'M'
+ ECHR 'I'
+ ECHR 'S'
+ ECHR 'S'
+ ETWO 'I', 'L'
+ ETWO 'E', 'S'
+ EJMP 12
+ ECHR 'U'
+ EJMP 8
+ ECHR 'U'
+ ECHR 'N'
+ ETWO 'A', 'R'
+ ECHR 'M'
+ ECHR ' '
+ ECHR 'M'
+ ECHR 'I'
+ ECHR 'S'
+ ECHR 'S'
+ ETWO 'I', 'L'
+ ETWO 'E', 'S'
+ EJMP 12
+ ECHR 'E'
+ EJMP 8
+ ECHR 'T'
+ ECHR 'R'
+ ECHR 'I'
+ ECHR 'G'
+ ETWO 'G', 'E'
+ ECHR 'R'
+ ECHR ' '
+ ECHR 'E'
+ ECHR '.'
+ ECHR 'C'
+ ECHR '.'
+ ECHR 'M'
+ ECHR '.'
+ EJMP 12
+ EJMP 12
+ ECHR 'I'
+ ECHR '.'
+ ECHR 'F'
+ ECHR '.'
+ ECHR 'F'
+ ECHR '.'
+ ECHR ' '
+ ECHR 'C'
+ ECHR 'O'
+ ECHR 'L'
+ ETWO 'O', 'U'
+ ECHR 'R'
+ ECHR ' '
+ ECHR 'C'
+ ECHR 'O'
+ ECHR 'D'
+ ETWO 'E', 'S'
+ ETWO '-', '-'
+ ECHR 'W'
+ ECHR 'H'
+ ETWO 'I', 'T'
+ ECHR 'E'
+ ECHR ' '
+ ECHR ' '
+ ECHR ' '
+ ECHR ' '
+ ECHR ' '
+ ECHR ' '
+ ECHR 'O'
+ ECHR 'F'
+ ECHR 'F'
+ ECHR 'I'
+ ECHR 'C'
+ ECHR 'I'
+ ETWO 'A', 'L'
+ ECHR ' '
+ ETOK 207
+ EJMP 12
+ ECHR 'B'
+ ECHR 'L'
+ ECHR 'U'
+ ECHR 'E'
+ ECHR ' '
+ ECHR ' '
+ ECHR ' '
+ ECHR ' '
+ ECHR ' '
+ ECHR ' '
+ ECHR ' '
+ ETWO 'L', 'E'
+ ECHR 'G'
+ ETWO 'A', 'L'
+ ECHR ' '
+ ETOK 207
+ EJMP 12
+ ECHR 'B'
+ ECHR 'L'
+ ECHR 'U'
+ ECHR 'E'
+ ECHR '/'
+ EJMP 19
+ ECHR 'W'
+ ECHR 'H'
+ ETWO 'I', 'T'
+ ECHR 'E'
+ ECHR ' '
+ ECHR 'D'
+ ECHR 'E'
+ ECHR 'B'
+ ECHR 'R'
+ ECHR 'I'
+ ECHR 'S'
+ EJMP 12
+ ECHR 'B'
+ ECHR 'L'
+ ECHR 'U'
+ ECHR 'E'
+ ECHR '/'
+ EJMP 19
+ ETWO 'R', 'E'
+ ECHR 'D'
+ ECHR ' '
+ ECHR ' '
+ ECHR ' '
+ ECHR 'N'
+ ETWO 'O', 'N'
+ ECHR '-'
+ ECHR 'R'
+ ETWO 'E', 'S'
+ ECHR 'P'
+ ETWO 'O', 'N'
+ ECHR 'D'
+ ETWO 'E', 'N'
+ ECHR 'T'
+ EJMP 12
+ ECHR 'W'
+ ECHR 'H'
+ ETWO 'I', 'T'
+ ECHR 'E'
+ ECHR '/'
+ EJMP 19
+ ETWO 'R', 'E'
+ ECHR 'D'
+ ECHR ' '
+ ECHR ' '
+ ECHR 'M'
+ ECHR 'I'
+ ECHR 'S'
+ ECHR 'S'
+ ETWO 'I', 'L'
+ ETWO 'E', 'S'
+ EJMP 12
+ EQUB VE
+
+ EJMP 12
+ ECHR 'N'
+ ECHR 'A'
+ ECHR 'V'
+ ECHR 'I'
+ ECHR 'G'
+ ETWO 'A', 'T'
+ ECHR 'I'
+ ETWO 'O', 'N'
+ ECHR ' '
+ ECHR 'C'
+ ETWO 'O', 'N'
+ ECHR 'T'
+ ECHR 'R'
+ ECHR 'O'
+ ECHR 'L'
+ ECHR 'S'
+ ETWO '-', '-'
+ ECHR 'H'
+ EJMP 8
+ ECHR 'H'
+ ECHR 'Y'
+ ECHR 'P'
+ ETWO 'E', 'R'
+ ECHR 'S'
+ ECHR 'P'
+ ECHR 'A'
+ ETWO 'C', 'E'
+ ECHR ' '
+ ECHR 'J'
+ ECHR 'U'
+ ECHR 'M'
+ ECHR 'P'
+ EJMP 12
+ ECHR 'C'
+ ECHR '-'
+ EJMP 19
+ ECHR 'H'
+ EJMP 8
+ ECHR 'G'
+ ETWO 'A', 'L'
+ ECHR 'A'
+ ECHR 'C'
+ ETWO 'T', 'I'
+ ECHR 'C'
+ ECHR ' '
+ ECHR 'H'
+ ECHR 'Y'
+ ECHR 'P'
+ ETWO 'E', 'R'
+ ECHR 'S'
+ ECHR 'P'
+ ECHR 'A'
+ ETWO 'C', 'E'
+ ECHR ' '
+ ECHR 'J'
+ ECHR 'U'
+ ECHR 'M'
+ ECHR 'P'
+ EJMP 12
+ ECHR 'C'
+ ECHR 'U'
+ ECHR 'R'
+ ETWO 'S', 'O'
+ ECHR 'R'
+ ECHR ' '
+ ECHR 'K'
+ ECHR 'E'
+ ECHR 'Y'
+ ECHR 'S'
+ EJMP 12
+ EJMP 8
+ ECHR 'H'
+ ECHR 'Y'
+ ECHR 'P'
+ ETWO 'E', 'R'
+ ECHR 'S'
+ ECHR 'P'
+ ECHR 'A'
+ ETWO 'C', 'E'
+ ECHR ' '
+ ECHR 'C'
+ ECHR 'U'
+ ECHR 'R'
+ ETWO 'S', 'O'
+ ECHR 'R'
+ ECHR ' '
+ ECHR 'C'
+ ETWO 'O', 'N'
+ ECHR 'T'
+ ECHR 'R'
+ ECHR 'O'
+ ECHR 'L'
+ EJMP 12
+ ECHR 'D'
+ EJMP 8
+ ETWO 'D', 'I'
+ ETWO 'S', 'T'
+ ETWO 'A', 'N'
+ ETWO 'C', 'E'
+ ETOK 201
+ ECHR 'S'
+ ECHR 'Y'
+ ETWO 'S', 'T'
+ ECHR 'E'
+ ECHR 'M'
+ EJMP 12
+ ECHR 'O'
+ EJMP 8
+ ECHR 'H'
+ ECHR 'O'
+ ECHR 'M'
+ ECHR 'E'
+ ECHR ' '
+ ECHR 'C'
+ ECHR 'U'
+ ECHR 'R'
+ ETWO 'S', 'O'
+ ECHR 'R'
+ EJMP 12
+ ECHR 'F'
+ EJMP 8
+ ECHR 'F'
+ ETWO 'I', 'N'
+ ECHR 'D'
+ ECHR ' '
+ ECHR 'S'
+ ECHR 'Y'
+ ETWO 'S', 'T'
+ ECHR 'E'
+ ECHR 'M'
+ ECHR ' '
+ ECHR '('
+ EJMP 19
+ ETOK 205
+ ECHR ')'
+ EJMP 12
+ ECHR 'W'
+ EJMP 8
+ ECHR 'F'
+ ETWO 'I', 'N'
+ ECHR 'D'
+ ECHR ' '
+ ECHR 'D'
+ ECHR 'E'
+ ETWO 'S', 'T'
+ ETWO 'I', 'N'
+ ETWO 'A', 'T'
+ ECHR 'I'
+ ETWO 'O', 'N'
+ ECHR ' '
+ ECHR 'S'
+ ECHR 'Y'
+ ETWO 'S', 'T'
+ ECHR 'E'
+ ECHR 'M'
+ EJMP 12
+ EJMP 13
+ ECHR 'F'
+ ECHR '4'
+ EJMP 2
+ EJMP 8
+ ECHR 'G'
+ ETWO 'A', 'L'
+ ECHR 'A'
+ ECHR 'C'
+ ETWO 'T', 'I'
+ ECHR 'C'
+ ECHR ' '
+ ETWO 'M', 'A'
+ ECHR 'P'
+ EJMP 12
+ EJMP 13
+ ECHR 'F'
+ ECHR '5'
+ EJMP 2
+ EJMP 8
+ ECHR 'S'
+ ECHR 'H'
+ ETWO 'O', 'R'
+ ECHR 'T'
+ ECHR ' '
+ ETWO 'R', 'A'
+ ECHR 'N'
+ ETWO 'G', 'E'
+ ECHR ' '
+ ETWO 'M', 'A'
+ ECHR 'P'
+ EJMP 12
+ EJMP 13
+ ECHR 'F'
+ ECHR '6'
+ EJMP 2
+ EJMP 8
+ ECHR 'D'
+ ETWO 'A', 'T'
+ ECHR 'A'
+ ECHR ' '
+ ETWO 'O', 'N'
+ ECHR ' '
+ ETOK 145
+ EJMP 12
+ EQUB VE
+
+ EJMP 12
+ ECHR 'T'
+ ETWO 'R', 'A'
+ ECHR 'D'
+ ETOK 195
+ ECHR 'C'
+ ETWO 'O', 'N'
+ ECHR 'T'
+ ECHR 'R'
+ ECHR 'O'
+ ECHR 'L'
+ ECHR 'S'
+ ETWO '-', '-'
+ EJMP 13
+ ECHR 'F'
+ ECHR '0'
+ EJMP 2
+ EJMP 8
+ ETWO 'L', 'A'
+ ECHR 'U'
+ ECHR 'N'
+ ECHR 'C'
+ ECHR 'H'
+ ECHR ' '
+ ECHR 'F'
+ ECHR 'R'
+ ECHR 'O'
+ ECHR 'M'
+ ECHR ' '
+ ETWO 'S', 'T'
+ ETWO 'A', 'T'
+ ECHR 'I'
+ ETWO 'O', 'N'
+ EJMP 12
+ ECHR 'C'
+ ECHR '-'
+ ECHR 'F'
+ ECHR '0'
+ EJMP 2
+ EJMP 8
+ ETWO 'R', 'E'
+ ETWO 'M', 'A'
+ ETWO 'I', 'N'
+ ECHR ' '
+ ETOK 205
+ EJMP 12
+ EJMP 13
+ ECHR 'F'
+ ECHR '1'
+ EJMP 2
+ EJMP 8
+ ECHR 'B'
+ ECHR 'U'
+ ECHR 'Y'
+ ECHR ' '
+ ECHR 'C'
+ ETWO 'A', 'R'
+ ECHR 'G'
+ ECHR 'O'
+ EJMP 12
+ ECHR 'C'
+ ECHR '-'
+ ECHR 'F'
+ ECHR '1'
+ EJMP 8
+ ECHR 'B'
+ ECHR 'U'
+ ECHR 'Y'
+ ECHR ' '
+ ECHR 'S'
+ ECHR 'P'
+ ECHR 'E'
+ ECHR 'C'
+ ECHR 'I'
+ ETWO 'A', 'L'
+ ECHR ' '
+ ECHR 'C'
+ ETWO 'A', 'R'
+ ECHR 'G'
+ ECHR 'O'
+ EJMP 12
+ EJMP 13
+ ECHR 'F'
+ ECHR '2'
+ EJMP 2
+ EJMP 8
+ ETWO 'S', 'E'
+ ECHR 'L'
+ ECHR 'L'
+ ECHR ' '
+ ECHR 'C'
+ ETWO 'A', 'R'
+ ECHR 'G'
+ ECHR 'O'
+ EJMP 12
+ ECHR 'C'
+ ECHR '-'
+ ECHR 'F'
+ ECHR '2'
+ EJMP 8
+ ETWO 'S', 'E'
+ ECHR 'L'
+ ECHR 'L'
+ ECHR ' '
+ ECHR 'E'
+ ECHR 'Q'
+ ECHR 'U'
+ ECHR 'I'
+ ECHR 'P'
+ ECHR 'M'
+ ECHR 'E'
+ ECHR 'N'
+ ECHR 'T'
+ EJMP 12
+ EJMP 13
+ ECHR 'F'
+ ECHR '3'
+ EJMP 2
+ EJMP 8
+ ECHR 'E'
+ ECHR 'Q'
+ ECHR 'U'
+ ECHR 'I'
+ ECHR 'P'
+ ECHR ' '
+ ETOK 207
+ EJMP 12
+ ECHR 'C'
+ ECHR '-'
+ ECHR 'F'
+ ECHR '3'
+ EJMP 8
+ ECHR 'B'
+ ECHR 'U'
+ ECHR 'Y'
+ ECHR ' '
+ ETOK 207
+ EJMP 12
+ ECHR 'C'
+ ECHR '-'
+ ECHR 'F'
+ ECHR '6'
+ EJMP 8
+ ETWO 'E', 'N'
+ ECHR 'C'
+ ECHR 'Y'
+ ECHR 'C'
+ ETWO 'L', 'O'
+ ECHR 'P'
+ ETWO 'E', 'D'
+ ECHR 'I'
+ ECHR 'A'
+ EJMP 12
+ EJMP 13
+ ECHR 'F'
+ ECHR '7'
+ EJMP 2
+ EJMP 8
+ ECHR 'M'
+ ETWO 'A', 'R'
+ ECHR 'K'
+ ETWO 'E', 'T'
+ ECHR ' '
+ ECHR 'P'
+ ECHR 'R'
+ ECHR 'I'
+ ETWO 'C', 'E'
+ ECHR 'S'
+ EJMP 12
+ EJMP 13
+ ECHR 'F'
+ ECHR '8'
+ EJMP 2
+ EJMP 8
+ ETWO 'S', 'T'
+ ETWO 'A', 'T'
+ ETWO 'U', 'S'
+ ECHR ' '
+ ECHR 'P'
+ ECHR 'A'
+ ETWO 'G', 'E'
+ EJMP 12
+ EJMP 13
+ ECHR 'F'
+ ECHR '9'
+ EJMP 2
+ EJMP 8
+ ETWO 'I', 'N'
+ ECHR 'V'
+ ETWO 'E', 'N'
+ ECHR 'T'
+ ETWO 'O', 'R'
+ ECHR 'Y'
+ EJMP 12
+ EQUB VE
+
+ ECHR 'F'
+ ECHR 'L'
+ ECHR 'I'
+ ECHR 'G'
+ ECHR 'H'
+ ECHR 'T'
+ EQUB VE
+
+ ECHR 'C'
+ ECHR 'O'
+ ECHR 'M'
+ ECHR 'B'
+ ETWO 'A', 'T'
+ EQUB VE
+
+ ECHR 'N'
+ ECHR 'A'
+ ECHR 'V'
+ ECHR 'I'
+ ECHR 'G'
+ ETWO 'A', 'T'
+ ECHR 'I'
+ ETWO 'O', 'N'
+ EQUB VE
+
+ ECHR 'T'
+ ETWO 'R', 'A'
+ ECHR 'D'
+ ETWO 'I', 'N'
+ ECHR 'G'
+ EQUB VE
+
+ ECHR 'M'
+ ECHR 'I'
+ ECHR 'S'
+ ECHR 'S'
+ ETWO 'I', 'L'
+ ETWO 'E', 'S'
+ EQUB VE
+
+ EJMP 1
+ ECHR 'I'
+ ECHR '.'
+ ECHR 'F'
+ ECHR '.'
+ ECHR 'F'
+ ECHR '.'
+ EJMP 13
+ ECHR ' '
+ ECHR 'S'
+ ECHR 'Y'
+ ETWO 'S', 'T'
+ ECHR 'E'
+ ECHR 'M'
+ EQUB VE
+
+ EJMP 1
+ ECHR 'E'
+ ECHR '.'
+ ECHR 'C'
+ ECHR '.'
+ ECHR 'M'
+ ECHR '.'
+ EJMP 13
+ ECHR ' '
+ ECHR 'S'
+ ECHR 'Y'
+ ETWO 'S', 'T'
+ ECHR 'E'
+ ECHR 'M'
+ EQUB VE
+
+ ECHR 'P'
+ ECHR 'U'
+ ECHR 'L'
+ ETWO 'S', 'E'
+ ECHR ' '
+ ETWO 'L', 'A'
+ ETWO 'S', 'E'
+ ECHR 'R'
+ ECHR 'S'
+ EQUB VE
+
+ ETWO 'B', 'E'
+ ECHR 'A'
+ ECHR 'M'
+ ECHR ' '
+ ETWO 'L', 'A'
+ ETWO 'S', 'E'
+ ECHR 'R'
+ ECHR 'S'
+ EQUB VE
+
+ ECHR 'F'
+ ECHR 'U'
+ ECHR 'E'
+ ECHR 'L'
+ ECHR ' '
+ ECHR 'S'
+ ECHR 'C'
+ ECHR 'O'
+ ECHR 'O'
+ ECHR 'P'
+ ECHR 'S'
+ EQUB VE
+
+ ETWO 'E', 'S'
+ ECHR 'C'
+ ECHR 'A'
+ ECHR 'P'
+ ECHR 'E'
+ ECHR ' '
+ ECHR 'P'
+ ECHR 'O'
+ ECHR 'D'
+ EQUB VE
+
+ ECHR 'H'
+ ECHR 'Y'
+ ECHR 'P'
+ ETWO 'E', 'R'
+ ECHR 'S'
+ ECHR 'P'
+ ECHR 'A'
+ ETWO 'C', 'E'
+ ECHR ' '
+ ECHR 'U'
+ ECHR 'N'
+ ETWO 'I', 'T'
+ EQUB VE
+
+ ETWO 'E', 'N'
+ ETWO 'E', 'R'
+ ECHR 'G'
+ ECHR 'Y'
+ ECHR ' '
+ ECHR 'U'
+ ECHR 'N'
+ ETWO 'I', 'T'
+ EQUB VE
+
+ ECHR 'D'
+ ECHR 'O'
+ ECHR 'C'
+ ECHR 'K'
+ ETOK 195
+ ECHR 'C'
+ ECHR 'O'
+ ECHR 'M'
+ ECHR 'P'
+ ECHR 'U'
+ ECHR 'T'
+ ETWO 'E', 'R'
+ ECHR 'S'
+ EQUB VE
+
+ ECHR 'G'
+ ETWO 'A', 'L'
+ ECHR 'A'
+ ECHR 'C'
+ ETWO 'T', 'I'
+ ECHR 'C'
+ ECHR ' '
+ ECHR 'H'
+ ECHR 'Y'
+ ECHR 'P'
+ ETWO 'E', 'R'
+ ETOK 151
+ EQUB VE
+
+ ECHR 'M'
+ ETWO 'I', 'L'
+ ETWO 'I', 'T'
+ ETWO 'A', 'R'
+ ECHR 'Y'
+ ECHR ' '
+ ETWO 'L', 'A'
+ ETWO 'S', 'E'
+ ECHR 'R'
+ ECHR 'S'
+ EQUB VE
+
+ ECHR 'M'
+ ETWO 'I', 'N'
+ ETOK 195
+ ETWO 'L', 'A'
+ ETWO 'S', 'E'
+ ECHR 'R'
+ ECHR 'S'
+ EQUB VE
+
+ EJMP 14
+ EJMP 19
+ ETWO 'S', 'E'
+ ECHR 'L'
+ ECHR 'F'
+ ECHR ' '
+ ECHR 'H'
+ ECHR 'O'
+ ECHR 'M'
+ ETOK 195
+ ECHR 'M'
+ ECHR 'I'
+ ECHR 'S'
+ ECHR 'S'
+ ETWO 'I', 'L'
+ ETWO 'E', 'S'
+ ECHR ' '
+ ETWO 'M', 'A'
+ ECHR 'Y'
+ ECHR ' '
+ ETWO 'B', 'E'
+ ECHR ' '
+ ECHR 'B'
+ ETWO 'O', 'U'
+ ECHR 'G'
+ ECHR 'H'
+ ECHR 'T'
+ ECHR ' '
+ ETWO 'A', 'T'
+ ECHR ' '
+ ETWO 'A', 'N'
+ ECHR 'Y'
+ ECHR ' '
+ ECHR 'S'
+ ECHR 'Y'
+ ETWO 'S', 'T'
+ ECHR 'E'
+ ECHR 'M'
+ ECHR '.'
+ ETWO '-', '-'
+ EJMP 19
+ ETWO 'B', 'E'
+ ECHR 'F'
+ ECHR 'O'
+ ETWO 'R', 'E'
+ ETOK 208
+ ECHR 'M'
+ ECHR 'I'
+ ECHR 'S'
+ ECHR 'S'
+ ETWO 'I', 'L'
+ ECHR 'E'
+ ECHR ' '
+ ECHR 'C'
+ ETWO 'A', 'N'
+ ECHR ' '
+ ETWO 'B', 'E'
+ ECHR ' '
+ ECHR 'F'
+ ECHR 'I'
+ ECHR 'R'
+ ETOK 196
+ ETWO 'I', 'T'
+ ECHR ' '
+ ECHR 'M'
+ ECHR 'U'
+ ETWO 'S', 'T'
+ ECHR ' '
+ ETWO 'B', 'E'
+ ECHR ' '
+ ETWO 'L', 'O'
+ ECHR 'C'
+ ECHR 'K'
+ ETOK 196
+ ETWO 'O', 'N'
+ ECHR 'T'
+ ECHR 'O'
+ ECHR ' '
+ ECHR 'A'
+ ECHR ' '
+ ECHR 'T'
+ ETWO 'A', 'R'
+ ECHR 'G'
+ ETWO 'E', 'T'
+ ECHR '.'
+ ETWO '-', '-'
+ EJMP 19
+ ECHR 'W'
+ ECHR 'H'
+ ETWO 'E', 'N'
+ ECHR ' '
+ ECHR 'F'
+ ECHR 'I'
+ ETWO 'R', 'E'
+ ECHR 'D'
+ ECHR ','
+ ECHR ' '
+ ETWO 'I', 'T'
+ ECHR ' '
+ ECHR 'W'
+ ETWO 'I', 'L'
+ ECHR 'L'
+ ECHR ' '
+ ECHR 'H'
+ ECHR 'O'
+ ECHR 'M'
+ ECHR 'E'
+ ECHR ' '
+ ETWO 'I', 'N'
+ ETOK 201
+ ETOK 147
+ ECHR 'T'
+ ETWO 'A', 'R'
+ ECHR 'G'
+ ETWO 'E', 'T'
+ ECHR ' '
+ ECHR 'U'
+ ECHR 'N'
+ ETWO 'L', 'E'
+ ECHR 'S'
+ ECHR 'S'
+ ECHR ' '
+ ETOK 147
+ ECHR 'T'
+ ETWO 'A', 'R'
+ ECHR 'G'
+ ETWO 'E', 'T'
+ ECHR ' '
+ ECHR 'C'
+ ETWO 'A', 'N'
+ ECHR ' '
+ ETWO 'O', 'U'
+ ECHR 'T'
+ ETWO 'M', 'A'
+ ETWO 'N', 'O'
+ ECHR 'E'
+ ECHR 'U'
+ ECHR 'V'
+ ETWO 'R', 'E'
+ ECHR ' '
+ ETOK 147
+ ECHR 'M'
+ ECHR 'I'
+ ECHR 'S'
+ ECHR 'S'
+ ETWO 'I', 'L'
+ ECHR 'E'
+ ECHR ','
+ ECHR ' '
+ ECHR 'S'
+ ECHR 'H'
+ ECHR 'O'
+ ECHR 'O'
+ ECHR 'T'
+ ECHR ' '
+ ETWO 'I', 'T'
+ ECHR ','
+ ECHR ' '
+ ETWO 'O', 'R'
+ ECHR ' '
+ ECHR 'U'
+ ETWO 'S', 'E'
+ ECHR ' '
+ ECHR 'E'
+ ETWO 'L', 'E'
+ ECHR 'C'
+ ECHR 'T'
+ ECHR 'R'
+ ETWO 'O', 'N'
+ ECHR 'I'
+ ECHR 'C'
+ ECHR ' '
+ ECHR 'C'
+ ETWO 'O', 'U'
+ ECHR 'N'
+ ECHR 'T'
+ ETWO 'E', 'R'
+ ECHR ' '
+ ECHR 'M'
+ ECHR 'E'
+ ECHR 'A'
+ ECHR 'S'
+ ECHR 'U'
+ ECHR 'R'
+ ETWO 'E', 'S'
+ ECHR ' '
+ ETWO 'O', 'N'
+ ECHR ' '
+ ETWO 'I', 'T'
+ ETOK 177
+ EQUB VE
+
+ EJMP 14
+ EJMP 19
+ ETWO 'A', 'N'
+ ECHR ' '
+ ECHR 'I'
+ ECHR 'D'
+ ETWO 'E', 'N'
+ ETWO 'T', 'I'
+ ECHR 'F'
+ ECHR 'I'
+ ECHR 'C'
+ ETWO 'A', 'T'
+ ECHR 'I'
+ ETWO 'O', 'N'
+ ECHR ' '
+ ECHR 'F'
+ ECHR 'R'
+ ECHR 'I'
+ ETWO 'E', 'N'
+ ECHR 'D'
+ ECHR ' '
+ ETWO 'O', 'R'
+ ECHR ' '
+ ECHR 'F'
+ ECHR 'O'
+ ECHR 'E'
+ ECHR ' '
+ ECHR 'S'
+ ECHR 'Y'
+ ETWO 'S', 'T'
+ ECHR 'E'
+ ECHR 'M'
+ ECHR ' '
+ ECHR 'C'
+ ETWO 'A', 'N'
+ ECHR ' '
+ ETWO 'B', 'E'
+ ECHR ' '
+ ECHR 'O'
+ ECHR 'B'
+ ECHR 'T'
+ ECHR 'A'
+ ETWO 'I', 'N'
+ ETOK 196
+ ETWO 'A', 'T'
+ ECHR ' '
+ ECHR 'T'
+ ECHR 'E'
+ ECHR 'C'
+ ECHR 'H'
+ ECHR ' '
+ ETWO 'L', 'E'
+ ETWO 'V', 'E'
+ ECHR 'L'
+ ECHR ' '
+ ECHR '2'
+ ECHR ' '
+ ETWO 'O', 'R'
+ ECHR ' '
+ ETWO 'A', 'B'
+ ECHR 'O'
+ ETWO 'V', 'E'
+ ECHR '.'
+ ETWO '-', '-'
+ EJMP 19
+ ETWO 'A', 'N'
+ ECHR ' '
+ EJMP 1
+ ECHR 'I'
+ ECHR '.'
+ ECHR 'F'
+ ECHR '.'
+ ECHR 'F'
+ ECHR '.'
+ EJMP 13
+ ECHR ' '
+ ECHR 'S'
+ ECHR 'Y'
+ ETWO 'S', 'T'
+ ECHR 'E'
+ ECHR 'M'
+ ECHR ' '
+ ECHR 'W'
+ ETWO 'I', 'L'
+ ECHR 'L'
+ ECHR ' '
+ ETWO 'D', 'I'
+ ECHR 'S'
+ ECHR 'P'
+ ETWO 'L', 'A'
+ ECHR 'Y'
+ ECHR ' '
+ ETWO 'D', 'I'
+ ECHR 'F'
+ ECHR 'F'
+ ECHR 'E'
+ ETWO 'R', 'E'
+ ECHR 'N'
+ ECHR 'T'
+ ECHR ' '
+ ECHR 'T'
+ ECHR 'Y'
+ ECHR 'P'
+ ETWO 'E', 'S'
+ ECHR ' '
+ ECHR 'O'
+ ECHR 'F'
+ ECHR ' '
+ ECHR 'O'
+ ECHR 'B'
+ ECHR 'J'
+ ECHR 'E'
+ ECHR 'C'
+ ECHR 'T'
+ ECHR ' '
+ ETWO 'I', 'N'
+ ECHR ' '
+ ETWO 'D', 'I'
+ ECHR 'F'
+ ECHR 'F'
+ ECHR 'E'
+ ETWO 'R', 'E'
+ ECHR 'N'
+ ECHR 'T'
+ ECHR ' '
+ ECHR 'C'
+ ECHR 'O'
+ ECHR 'L'
+ ETWO 'O', 'U'
+ ECHR 'R'
+ ECHR 'S'
+ ECHR ' '
+ ETWO 'O', 'N'
+ ECHR ' '
+ ETOK 147
+ ETWO 'R', 'A'
+ ECHR 'D'
+ ETWO 'A', 'R'
+ ECHR ' '
+ ETWO 'D', 'I'
+ ECHR 'S'
+ ECHR 'P'
+ ETWO 'L', 'A'
+ ECHR 'Y'
+ ECHR '.'
+ ETWO '-', '-'
+ EJMP 19
+ ETWO 'S', 'E'
+ ECHR 'E'
+ ECHR ' '
+ EJMP 19
+ ECHR 'C'
+ ETWO 'O', 'N'
+ ECHR 'T'
+ ECHR 'R'
+ ECHR 'O'
+ ECHR 'L'
+ ECHR 'S'
+ ECHR ' '
+ ECHR '('
+ EJMP 19
+ ECHR 'C'
+ ECHR 'O'
+ ECHR 'M'
+ ECHR 'B'
+ ETWO 'A', 'T'
+ ECHR ')'
+ ETOK 177
+ EQUB VE
+
+ EJMP 14
+ EJMP 19
+ ETWO 'A', 'N'
+ ECHR ' '
+ ECHR 'E'
+ ETWO 'L', 'E'
+ ECHR 'C'
+ ECHR 'T'
+ ECHR 'R'
+ ETWO 'O', 'N'
+ ECHR 'I'
+ ECHR 'C'
+ ECHR ' '
+ ECHR 'C'
+ ETWO 'O', 'U'
+ ECHR 'N'
+ ECHR 'T'
+ ETWO 'E', 'R'
+ ECHR ' '
+ ECHR 'M'
+ ECHR 'E'
+ ECHR 'A'
+ ECHR 'S'
+ ECHR 'U'
+ ECHR 'R'
+ ETWO 'E', 'S'
+ ECHR ' '
+ ECHR 'S'
+ ECHR 'Y'
+ ETWO 'S', 'T'
+ ECHR 'E'
+ ECHR 'M'
+ ECHR ' '
+ ETWO 'M', 'A'
+ ECHR 'Y'
+ ECHR ' '
+ ETWO 'B', 'E'
+ ECHR ' '
+ ECHR 'B'
+ ETWO 'O', 'U'
+ ECHR 'G'
+ ECHR 'H'
+ ECHR 'T'
+ ECHR ' '
+ ETWO 'A', 'T'
+ ECHR ' '
+ ETWO 'A', 'N'
+ ECHR 'Y'
+ ECHR ' '
+ ECHR 'S'
+ ECHR 'Y'
+ ETWO 'S', 'T'
+ ECHR 'E'
+ ECHR 'M'
+ ECHR ' '
+ ECHR 'O'
+ ECHR 'F'
+ ECHR ' '
+ ECHR 'T'
+ ECHR 'E'
+ ECHR 'C'
+ ECHR 'H'
+ ECHR ' '
+ ETWO 'L', 'E'
+ ETWO 'V', 'E'
+ ECHR 'L'
+ ECHR ' '
+ ECHR '3'
+ ECHR ' '
+ ETWO 'O', 'R'
+ ECHR ' '
+ ECHR 'H'
+ ECHR 'I'
+ ECHR 'G'
+ ECHR 'H'
+ ETWO 'E', 'R'
+ ECHR '.'
+ ETWO '-', '-'
+ EJMP 19
+ ECHR 'W'
+ ECHR 'H'
+ ETWO 'E', 'N'
+ ECHR ' '
+ ECHR 'A'
+ ECHR 'C'
+ ETWO 'T', 'I'
+ ECHR 'V'
+ ETWO 'A', 'T'
+ ETWO 'E', 'D'
+ ECHR ','
+ ECHR ' '
+ ETOK 147
+ EJMP 1
+ ECHR 'E'
+ ECHR '.'
+ ECHR 'C'
+ ECHR '.'
+ ECHR 'M'
+ ECHR '.'
+ EJMP 13
+ ECHR ' '
+ ECHR 'S'
+ ECHR 'Y'
+ ETWO 'S', 'T'
+ ECHR 'E'
+ ECHR 'M'
+ ECHR ' '
+ ECHR 'W'
+ ETWO 'I', 'L'
+ ECHR 'L'
+ ECHR ' '
+ ETWO 'D', 'I'
+ ECHR 'S'
+ ECHR 'R'
+ ECHR 'U'
+ ECHR 'P'
+ ECHR 'T'
+ ECHR ' '
+ ETOK 147
+ ECHR 'G'
+ ECHR 'U'
+ ECHR 'I'
+ ECHR 'D'
+ ETWO 'A', 'N'
+ ETWO 'C', 'E'
+ ECHR ' '
+ ECHR 'S'
+ ECHR 'Y'
+ ETWO 'S', 'T'
+ ECHR 'E'
+ ECHR 'M'
+ ECHR 'S'
+ ECHR ' '
+ ECHR 'O'
+ ECHR 'F'
+ ECHR ' '
+ ETWO 'A', 'L'
+ ECHR 'L'
+ ECHR ' '
+ ECHR 'M'
+ ECHR 'I'
+ ECHR 'S'
+ ECHR 'S'
+ ETWO 'I', 'L'
+ ETWO 'E', 'S'
+ ECHR ' '
+ ETWO 'I', 'N'
+ ECHR ' '
+ ETOK 147
+ ECHR 'V'
+ ECHR 'I'
+ ECHR 'C'
+ ETWO 'I', 'N'
+ ETWO 'I', 'T'
+ ECHR 'Y'
+ ECHR ','
+ ECHR ' '
+ ETWO 'M', 'A'
+ ECHR 'K'
+ ETOK 195
+ ETWO 'T', 'H'
+ ECHR 'E'
+ ECHR 'M'
+ ECHR ' '
+ ETWO 'S', 'E'
+ ECHR 'L'
+ ECHR 'F'
+ ECHR ' '
+ ECHR 'D'
+ ECHR 'E'
+ ETWO 'S', 'T'
+ ECHR 'R'
+ ECHR 'U'
+ ECHR 'C'
+ ECHR 'T'
+ ETOK 177
+ EQUB VE
+
+ EJMP 14
+ EJMP 19
+ ECHR 'P'
+ ECHR 'U'
+ ECHR 'L'
+ ETWO 'S', 'E'
+ ECHR ' '
+ ETWO 'L', 'A'
+ ETWO 'S', 'E'
+ ECHR 'R'
+ ECHR 'S'
+ ECHR ' '
+ ETWO 'A', 'R'
+ ECHR 'E'
+ ECHR ' '
+ ECHR 'F'
+ ETWO 'O', 'R'
+ ECHR ' '
+ ECHR 'S'
+ ETWO 'A', 'L'
+ ECHR 'E'
+ ECHR ' '
+ ETWO 'A', 'T'
+ ECHR ' '
+ ECHR 'T'
+ ECHR 'E'
+ ECHR 'C'
+ ECHR 'H'
+ ECHR ' '
+ ETWO 'L', 'E'
+ ETWO 'V', 'E'
+ ECHR 'L'
+ ECHR ' '
+ ECHR '4'
+ ECHR ' '
+ ETWO 'O', 'R'
+ ECHR ' '
+ ETWO 'A', 'B'
+ ECHR 'O'
+ ETWO 'V', 'E'
+ ECHR '.'
+ ETWO '-', '-'
+ EJMP 19
+ ECHR 'P'
+ ECHR 'U'
+ ECHR 'L'
+ ETWO 'S', 'E'
+ ECHR ' '
+ ETWO 'L', 'A'
+ ETWO 'S', 'E'
+ ECHR 'R'
+ ECHR 'S'
+ ECHR ' '
+ ECHR 'F'
+ ECHR 'I'
+ ETWO 'R', 'E'
+ ECHR ' '
+ ETWO 'I', 'N'
+ ECHR 'T'
+ ETWO 'E', 'R'
+ ECHR 'M'
+ ETWO 'I', 'T'
+ ECHR 'T'
+ ETWO 'E', 'N'
+ ECHR 'T'
+ ECHR ' '
+ ETWO 'L', 'A'
+ ETWO 'S', 'E'
+ ECHR 'R'
+ ECHR ' '
+ ETWO 'B', 'E'
+ ECHR 'A'
+ ECHR 'M'
+ ECHR 'S'
+ ETOK 177
+ EQUB VE
+
+ EJMP 14
+ EJMP 19
+ ETWO 'B', 'E'
+ ECHR 'A'
+ ECHR 'M'
+ ECHR ' '
+ ETWO 'L', 'A'
+ ETWO 'S', 'E'
+ ECHR 'R'
+ ECHR 'S'
+ ECHR ' '
+ ETWO 'A', 'R'
+ ECHR 'E'
+ ECHR ' '
+ ECHR 'A'
+ ECHR 'V'
+ ECHR 'A'
+ ETWO 'I', 'L'
+ ETWO 'A', 'B'
+ ETWO 'L', 'E'
+ ECHR ' '
+ ETWO 'A', 'T'
+ ECHR ' '
+ ECHR 'S'
+ ECHR 'Y'
+ ETWO 'S', 'T'
+ ECHR 'E'
+ ECHR 'M'
+ ECHR 'S'
+ ECHR ' '
+ ECHR 'O'
+ ECHR 'F'
+ ECHR ' '
+ ECHR 'T'
+ ECHR 'E'
+ ECHR 'C'
+ ECHR 'H'
+ ECHR ' '
+ ETWO 'L', 'E'
+ ETWO 'V', 'E'
+ ECHR 'L'
+ ECHR ' '
+ ECHR '5'
+ ECHR ' '
+ ETWO 'O', 'R'
+ ECHR ' '
+ ECHR 'H'
+ ECHR 'I'
+ ECHR 'G'
+ ECHR 'H'
+ ETWO 'E', 'R'
+ ECHR '.'
+ ETWO '-', '-'
+ EJMP 19
+ ETWO 'B', 'E'
+ ECHR 'A'
+ ECHR 'M'
+ ECHR ' '
+ ETWO 'L', 'A'
+ ETWO 'S', 'E'
+ ECHR 'R'
+ ECHR 'S'
+ ECHR ' '
+ ECHR 'F'
+ ECHR 'I'
+ ETWO 'R', 'E'
+ ECHR ' '
+ ECHR 'C'
+ ETWO 'O', 'N'
+ ETWO 'T', 'I'
+ ETWO 'N', 'U'
+ ETWO 'O', 'U'
+ ECHR 'S'
+ ECHR ' '
+ ETWO 'L', 'A'
+ ETWO 'S', 'E'
+ ECHR 'R'
+ ECHR ' '
+ ETWO 'S', 'T'
+ ETWO 'R', 'A'
+ ECHR 'N'
+ ECHR 'D'
+ ECHR 'S'
+ ECHR ','
+ ECHR ' '
+ ECHR 'W'
+ ETWO 'I', 'T'
+ ECHR 'H'
+ ECHR ' '
+ ETWO 'M', 'A'
+ ECHR 'N'
+ ECHR 'Y'
+ ECHR ' '
+ ETWO 'S', 'T'
+ ETWO 'R', 'A'
+ ECHR 'N'
+ ECHR 'D'
+ ECHR 'S'
+ ECHR ' '
+ ETWO 'I', 'N'
+ ECHR ' '
+ ECHR 'P'
+ ETWO 'A', 'R'
+ ETWO 'A', 'L'
+ ETWO 'L', 'E'
+ ECHR 'L'
+ ECHR '.'
+ ETWO '-', '-'
+ EJMP 19
+ ETWO 'B', 'E'
+ ECHR 'A'
+ ECHR 'M'
+ ECHR ' '
+ ETWO 'L', 'A'
+ ETWO 'S', 'E'
+ ECHR 'R'
+ ECHR 'S'
+ ECHR ' '
+ ECHR 'O'
+ ECHR 'V'
+ ETWO 'E', 'R'
+ ECHR 'H'
+ ECHR 'E'
+ ETWO 'A', 'T'
+ ECHR ' '
+ ECHR 'M'
+ ECHR 'O'
+ ETWO 'R', 'E'
+ ECHR ' '
+ ETWO 'R', 'A'
+ ECHR 'P'
+ ECHR 'I'
+ ECHR 'D'
+ ECHR 'L'
+ ECHR 'Y'
+ ECHR ' '
+ ETWO 'T', 'H'
+ ETWO 'A', 'N'
+ ECHR ' '
+ ECHR 'P'
+ ECHR 'U'
+ ECHR 'L'
+ ETWO 'S', 'E'
+ ECHR ' '
+ ETWO 'L', 'A'
+ ETWO 'S', 'E'
+ ECHR 'R'
+ ECHR 'S'
+ ETOK 177
+ EQUB VE
+
+ EJMP 14
+ EJMP 19
+ ECHR 'F'
+ ECHR 'U'
+ ECHR 'E'
+ ECHR 'L'
+ ECHR ' '
+ ECHR 'S'
+ ECHR 'C'
+ ECHR 'O'
+ ECHR 'O'
+ ECHR 'P'
+ ECHR 'S'
+ ECHR ' '
+ ETWO 'E', 'N'
+ ETWO 'A', 'B'
+ ETWO 'L', 'E'
+ ETOK 208
+ ETOK 207
+ ETOK 201
+ ECHR 'O'
+ ECHR 'B'
+ ECHR 'T'
+ ECHR 'A'
+ ETWO 'I', 'N'
+ ECHR ' '
+ ECHR 'F'
+ ETWO 'R', 'E'
+ ECHR 'E'
+ ECHR ' '
+ ECHR 'H'
+ ECHR 'Y'
+ ECHR 'P'
+ ETWO 'E', 'R'
+ ECHR 'S'
+ ECHR 'P'
+ ECHR 'A'
+ ETWO 'C', 'E'
+ ECHR ' '
+ ECHR 'F'
+ ECHR 'U'
+ ECHR 'E'
+ ECHR 'L'
+ ECHR ' '
+ ECHR 'B'
+ ECHR 'Y'
+ ECHR ' '
+ ECHR '''
+ ECHR 'S'
+ ECHR 'U'
+ ECHR 'N'
+ ECHR '-'
+ ECHR 'S'
+ ECHR 'K'
+ ECHR 'I'
+ ECHR 'M'
+ ECHR 'M'
+ ETWO 'I', 'N'
+ ECHR 'G'
+ ECHR '''
+ ECHR ' '
+ ECHR '-'
+ ECHR ' '
+ ECHR 'F'
+ ECHR 'L'
+ ECHR 'Y'
+ ETOK 195
+ ECHR 'C'
+ ETWO 'L', 'O'
+ ETWO 'S', 'E'
+ ETOK 201
+ ETOK 147
+ ECHR 'S'
+ ECHR 'U'
+ ECHR 'N'
+ ECHR '.'
+ ETWO '-', '-'
+ EJMP 19
+ ECHR 'F'
+ ECHR 'U'
+ ECHR 'E'
+ ECHR 'L'
+ ECHR ' '
+ ECHR 'S'
+ ECHR 'C'
+ ECHR 'O'
+ ECHR 'O'
+ ECHR 'P'
+ ECHR 'S'
+ ECHR ' '
+ ECHR 'C'
+ ETWO 'A', 'N'
+ ECHR ' '
+ ETWO 'A', 'L'
+ ETWO 'S', 'O'
+ ECHR ' '
+ ETWO 'B', 'E'
+ ECHR ' '
+ ETWO 'U', 'S'
+ ETOK 196
+ ECHR 'T'
+ ECHR 'O'
+ ECHR ' '
+ ECHR 'P'
+ ECHR 'I'
+ ECHR 'C'
+ ECHR 'K'
+ ECHR ' '
+ ECHR 'U'
+ ECHR 'P'
+ ECHR ' '
+ ECHR 'S'
+ ECHR 'P'
+ ECHR 'A'
+ ETWO 'C', 'E'
+ ECHR ' '
+ ECHR 'D'
+ ECHR 'E'
+ ECHR 'B'
+ ECHR 'R'
+ ECHR 'I'
+ ECHR 'S'
+ ECHR ','
+ ECHR ' '
+ ECHR 'S'
+ ECHR 'U'
+ ECHR 'C'
+ ECHR 'H'
+ ECHR ' '
+ ECHR 'A'
+ ECHR 'S'
+ ECHR ' '
+ ECHR 'C'
+ ETWO 'A', 'R'
+ ECHR 'G'
+ ECHR 'O'
+ ECHR ' '
+ ECHR 'B'
+ ETWO 'A', 'R'
+ ETWO 'R', 'E'
+ ECHR 'L'
+ ECHR 'S'
+ ECHR ' '
+ ETWO 'O', 'R'
+ ECHR ' '
+ ECHR 'A'
+ ETWO 'S', 'T'
+ ETWO 'E', 'R'
+ ECHR 'O'
+ ECHR 'I'
+ ECHR 'D'
+ ECHR ' '
+ ECHR 'F'
+ ETWO 'R', 'A'
+ ECHR 'G'
+ ECHR 'M'
+ ETWO 'E', 'N'
+ ECHR 'T'
+ ECHR 'S'
+ ECHR '.'
+ ETWO '-', '-'
+ EJMP 19
+ ECHR 'F'
+ ECHR 'U'
+ ECHR 'E'
+ ECHR 'L'
+ ECHR ' '
+ ECHR 'S'
+ ECHR 'C'
+ ECHR 'O'
+ ECHR 'O'
+ ECHR 'P'
+ ECHR 'S'
+ ECHR ' '
+ ETWO 'A', 'R'
+ ECHR 'E'
+ ECHR ' '
+ ECHR 'A'
+ ECHR 'V'
+ ECHR 'A'
+ ETWO 'I', 'L'
+ ETWO 'A', 'B'
+ ETWO 'L', 'E'
+ ECHR ' '
+ ECHR 'F'
+ ECHR 'R'
+ ECHR 'O'
+ ECHR 'M'
+ ECHR ' '
+ ECHR 'S'
+ ECHR 'Y'
+ ETWO 'S', 'T'
+ ECHR 'E'
+ ECHR 'M'
+ ECHR 'S'
+ ECHR ' '
+ ECHR 'O'
+ ECHR 'F'
+ ECHR ' '
+ ECHR 'T'
+ ECHR 'E'
+ ECHR 'C'
+ ECHR 'H'
+ ECHR ' '
+ ETWO 'L', 'E'
+ ETWO 'V', 'E'
+ ECHR 'L'
+ ECHR ' '
+ ECHR '6'
+ ECHR ' '
+ ETWO 'O', 'R'
+ ECHR ' '
+ ETWO 'A', 'B'
+ ECHR 'O'
+ ETWO 'V', 'E'
+ ETOK 177
+ EQUB VE
+
+ EJMP 14
+ EJMP 19
+ ETWO 'A', 'N'
+ ECHR ' '
+ ETWO 'E', 'S'
+ ECHR 'C'
+ ECHR 'A'
+ ECHR 'P'
+ ECHR 'E'
+ ECHR ' '
+ ECHR 'P'
+ ECHR 'O'
+ ECHR 'D'
+ ETOK 202
+ ETWO 'A', 'N'
+ ECHR ' '
+ ETWO 'E', 'S'
+ ETWO 'S', 'E'
+ ECHR 'N'
+ ETWO 'T', 'I'
+ ETWO 'A', 'L'
+ ECHR ' '
+ ECHR 'P'
+ ECHR 'I'
+ ECHR 'E'
+ ETWO 'C', 'E'
+ ECHR ' '
+ ECHR 'O'
+ ECHR 'F'
+ ECHR ' '
+ ECHR 'E'
+ ECHR 'Q'
+ ECHR 'U'
+ ECHR 'I'
+ ECHR 'P'
+ ECHR 'M'
+ ETWO 'E', 'N'
+ ECHR 'T'
+ ECHR ' '
+ ECHR 'F'
+ ETWO 'O', 'R'
+ ECHR ' '
+ ECHR 'M'
+ ECHR 'O'
+ ETWO 'S', 'T'
+ ECHR ' '
+ ECHR 'S'
+ ECHR 'P'
+ ECHR 'A'
+ ETWO 'C', 'E'
+ ETOK 207
+ ECHR 'S'
+ ECHR '.'
+ ETWO '-', '-'
+ EJMP 19
+ ECHR 'W'
+ ECHR 'H'
+ ETWO 'E', 'N'
+ ECHR ' '
+ ECHR 'E'
+ ECHR 'J'
+ ECHR 'E'
+ ECHR 'C'
+ ECHR 'T'
+ ETWO 'E', 'D'
+ ECHR ','
+ ECHR ' '
+ ETOK 147
+ ECHR 'C'
+ ECHR 'A'
+ ECHR 'P'
+ ECHR 'S'
+ ECHR 'U'
+ ETWO 'L', 'E'
+ ECHR ' '
+ ECHR 'W'
+ ETWO 'I', 'L'
+ ECHR 'L'
+ ECHR ' '
+ ETWO 'B', 'E'
+ ECHR ' '
+ ECHR 'T'
+ ETWO 'R', 'A'
+ ECHR 'C'
+ ECHR 'K'
+ ETOK 196
+ ECHR 'T'
+ ECHR 'O'
+ ECHR ' '
+ ETOK 147
+ ECHR 'N'
+ ECHR 'E'
+ ETWO 'A', 'R'
+ ECHR 'E'
+ ETWO 'S', 'T'
+ ECHR ' '
+ ECHR 'S'
+ ECHR 'P'
+ ECHR 'A'
+ ETWO 'C', 'E'
+ ECHR ' '
+ ETWO 'S', 'T'
+ ETWO 'A', 'T'
+ ECHR 'I'
+ ETWO 'O', 'N'
+ ECHR '.'
+ ETWO '-', '-'
+ EJMP 19
+ ECHR 'M'
+ ECHR 'O'
+ ETWO 'S', 'T'
+ ECHR ' '
+ ETWO 'E', 'S'
+ ECHR 'C'
+ ECHR 'A'
+ ECHR 'P'
+ ECHR 'E'
+ ECHR ' '
+ ECHR 'P'
+ ECHR 'O'
+ ECHR 'D'
+ ECHR 'S'
+ ECHR ' '
+ ECHR 'C'
+ ECHR 'O'
+ ECHR 'M'
+ ECHR 'E'
+ ECHR ' '
+ ECHR 'W'
+ ETWO 'I', 'T'
+ ECHR 'H'
+ ECHR ' '
+ ETWO 'I', 'N'
+ ECHR 'S'
+ ECHR 'U'
+ ETWO 'R', 'A'
+ ECHR 'N'
+ ETWO 'C', 'E'
+ ECHR ' '
+ ECHR 'P'
+ ECHR 'O'
+ ECHR 'L'
+ ECHR 'I'
+ ECHR 'C'
+ ECHR 'I'
+ ETWO 'E', 'S'
+ ETOK 201
+ ETWO 'R', 'E'
+ ECHR 'P'
+ ETWO 'L', 'A'
+ ETWO 'C', 'E'
+ ECHR ' '
+ ETOK 147
+ ETOK 207
+ ETOK 178
+ ECHR 'E'
+ ECHR 'Q'
+ ECHR 'U'
+ ECHR 'I'
+ ECHR 'P'
+ ECHR 'M'
+ ETWO 'E', 'N'
+ ECHR 'T'
+ ECHR '.'
+ ETWO '-', '-'
+ EJMP 19
+ ECHR 'P'
+ ETWO 'E', 'N'
+ ETWO 'A', 'L'
+ ETWO 'T', 'I'
+ ETWO 'E', 'S'
+ ECHR ' '
+ ECHR 'F'
+ ETWO 'O', 'R'
+ ECHR ' '
+ ETWO 'I', 'N'
+ ECHR 'T'
+ ETWO 'E', 'R'
+ ECHR 'F'
+ ETWO 'E', 'R'
+ ETOK 195
+ ECHR 'W'
+ ETWO 'I', 'T'
+ ECHR 'H'
+ ECHR ' '
+ ETWO 'E', 'S'
+ ECHR 'C'
+ ECHR 'A'
+ ECHR 'P'
+ ECHR 'E'
+ ECHR ' '
+ ECHR 'P'
+ ECHR 'O'
+ ECHR 'D'
+ ECHR 'S'
+ ECHR ' '
+ ETWO 'A', 'R'
+ ECHR 'E'
+ ECHR ' '
+ ETWO 'S', 'E'
+ ETWO 'V', 'E'
+ ETWO 'R', 'E'
+ ECHR ' '
+ ETWO 'I', 'N'
+ ECHR ' '
+ ECHR 'M'
+ ECHR 'O'
+ ETWO 'S', 'T'
+ ECHR ' '
+ ETOK 145
+ ETWO 'A', 'R'
+ ECHR 'Y'
+ ECHR ' '
+ ECHR 'S'
+ ECHR 'Y'
+ ETWO 'S', 'T'
+ ECHR 'E'
+ ECHR 'M'
+ ECHR 'S'
+ ECHR '.'
+ ETWO '-', '-'
+ EJMP 19
+ ETWO 'E', 'S'
+ ECHR 'C'
+ ECHR 'A'
+ ECHR 'P'
+ ECHR 'E'
+ ECHR ' '
+ ECHR 'P'
+ ECHR 'O'
+ ECHR 'D'
+ ECHR 'S'
+ ECHR ' '
+ ETWO 'M', 'A'
+ ECHR 'Y'
+ ECHR ' '
+ ETWO 'B', 'E'
+ ECHR ' '
+ ECHR 'B'
+ ETWO 'O', 'U'
+ ECHR 'G'
+ ECHR 'H'
+ ECHR 'T'
+ ECHR ' '
+ ETWO 'A', 'T'
+ ECHR ' '
+ ECHR 'S'
+ ECHR 'Y'
+ ETWO 'S', 'T'
+ ECHR 'E'
+ ECHR 'M'
+ ECHR 'S'
+ ECHR ' '
+ ECHR 'O'
+ ECHR 'F'
+ ECHR ' '
+ ECHR 'T'
+ ECHR 'E'
+ ECHR 'C'
+ ECHR 'H'
+ ECHR ' '
+ ETWO 'L', 'E'
+ ETWO 'V', 'E'
+ ECHR 'L'
+ ECHR ' '
+ ECHR '7'
+ ECHR ' '
+ ETWO 'O', 'R'
+ ECHR ' '
+ ECHR 'H'
+ ECHR 'I'
+ ECHR 'G'
+ ECHR 'H'
+ ETWO 'E', 'R'
+ ETOK 177
+ EQUB VE
+
+ EJMP 14
+ EJMP 19
+ ECHR 'A'
+ ECHR ' '
+ ETWO 'R', 'E'
+ ETWO 'C', 'E'
+ ECHR 'N'
+ ECHR 'T'
+ ECHR ' '
+ ETWO 'I', 'N'
+ ECHR 'V'
+ ETWO 'E', 'N'
+ ETWO 'T', 'I'
+ ETWO 'O', 'N'
+ ECHR ','
+ ECHR ' '
+ ETOK 147
+ ECHR 'H'
+ ECHR 'Y'
+ ECHR 'P'
+ ETWO 'E', 'R'
+ ECHR 'S'
+ ECHR 'P'
+ ECHR 'A'
+ ETWO 'C', 'E'
+ ECHR ' '
+ ECHR 'U'
+ ECHR 'N'
+ ETWO 'I', 'T'
+ ETOK 202
+ ETWO 'A', 'N'
+ ECHR ' '
+ ETWO 'A', 'L'
+ ECHR 'T'
+ ETWO 'E', 'R'
+ ECHR 'N'
+ ETWO 'A', 'T'
+ ECHR 'I'
+ ETWO 'V', 'E'
+ ECHR ' '
+ ECHR 'T'
+ ECHR 'O'
+ ECHR ' '
+ ETOK 147
+ ETWO 'E', 'S'
+ ECHR 'C'
+ ECHR 'A'
+ ECHR 'P'
+ ECHR 'E'
+ ECHR ' '
+ ECHR 'P'
+ ECHR 'O'
+ ECHR 'D'
+ ECHR ' '
+ ECHR 'F'
+ ETWO 'O', 'R'
+ ECHR ' '
+ ETWO 'M', 'A'
+ ECHR 'N'
+ ECHR 'Y'
+ ECHR ' '
+ ECHR 'T'
+ ETWO 'R', 'A'
+ ECHR 'D'
+ ETWO 'E', 'R'
+ ECHR 'S'
+ ECHR '.'
+ ETWO '-', '-'
+ EJMP 19
+ ECHR 'W'
+ ECHR 'H'
+ ETWO 'E', 'N'
+ ECHR ' '
+ ECHR 'T'
+ ECHR 'R'
+ ECHR 'I'
+ ECHR 'G'
+ ETWO 'G', 'E'
+ ETWO 'R', 'E'
+ ECHR 'D'
+ ECHR ','
+ ECHR ' '
+ ETOK 147
+ ECHR 'H'
+ ECHR 'Y'
+ ECHR 'P'
+ ETWO 'E', 'R'
+ ECHR 'S'
+ ECHR 'P'
+ ECHR 'A'
+ ETWO 'C', 'E'
+ ECHR ' '
+ ECHR 'U'
+ ECHR 'N'
+ ETWO 'I', 'T'
+ ECHR ' '
+ ECHR 'W'
+ ETWO 'I', 'L'
+ ECHR 'L'
+ ECHR ' '
+ ECHR 'U'
+ ETWO 'S', 'E'
+ ECHR ' '
+ ETWO 'I', 'T'
+ ECHR 'S'
+ ECHR ' '
+ ECHR 'P'
+ ECHR 'O'
+ ECHR 'W'
+ ETWO 'E', 'R'
+ ECHR ' '
+ ETWO 'I', 'N'
+ ECHR ' '
+ ECHR 'E'
+ ETWO 'X', 'E'
+ ECHR 'C'
+ ECHR 'U'
+ ECHR 'T'
+ ETOK 195
+ ECHR 'A'
+ ECHR ' '
+ ECHR 'H'
+ ECHR 'Y'
+ ECHR 'P'
+ ETWO 'E', 'R'
+ ECHR 'J'
+ ECHR 'U'
+ ECHR 'M'
+ ECHR 'P'
+ ECHR ' '
+ ECHR 'A'
+ ECHR 'W'
+ ECHR 'A'
+ ECHR 'Y'
+ ECHR ' '
+ ECHR 'F'
+ ECHR 'R'
+ ECHR 'O'
+ ECHR 'M'
+ ECHR ' '
+ ETOK 147
+ ECHR 'C'
+ ECHR 'U'
+ ECHR 'R'
+ ETWO 'R', 'E'
+ ECHR 'N'
+ ECHR 'T'
+ ECHR ' '
+ ECHR 'P'
+ ECHR 'O'
+ ECHR 'S'
+ ETWO 'I', 'T'
+ ECHR 'I'
+ ETWO 'O', 'N'
+ ECHR '.'
+ ETWO '-', '-'
+ EJMP 19
+ ECHR 'U'
+ ECHR 'N'
+ ECHR 'F'
+ ETWO 'O', 'R'
+ ECHR 'T'
+ ECHR 'U'
+ ECHR 'N'
+ ETWO 'A', 'T'
+ ECHR 'E'
+ ECHR 'L'
+ ECHR 'Y'
+ ECHR ','
+ ECHR ' '
+ ETWO 'B', 'E'
+ ECHR 'C'
+ ECHR 'A'
+ ECHR 'U'
+ ETWO 'S', 'E'
+ ECHR ' '
+ ETOK 147
+ ECHR 'H'
+ ECHR 'Y'
+ ECHR 'P'
+ ETWO 'E', 'R'
+ ECHR 'J'
+ ECHR 'U'
+ ECHR 'M'
+ ECHR 'P'
+ ETOK 202
+ ETWO 'I', 'N'
+ ETWO 'S', 'T'
+ ETWO 'A', 'N'
+ ECHR 'T'
+ ETWO 'A', 'N'
+ ECHR 'E'
+ ETWO 'O', 'U'
+ ECHR 'S'
+ ECHR ','
+ ECHR ' '
+ ETWO 'T', 'H'
+ ECHR 'E'
+ ETWO 'R', 'E'
+ ETOK 202
+ ETWO 'N', 'O'
+ ECHR ' '
+ ECHR 'C'
+ ETWO 'O', 'N'
+ ECHR 'T'
+ ECHR 'R'
+ ECHR 'O'
+ ECHR 'L'
+ ECHR ' '
+ ECHR 'O'
+ ECHR 'F'
+ ECHR ' '
+ ETOK 147
+ ECHR 'D'
+ ECHR 'E'
+ ETWO 'S', 'T'
+ ETWO 'I', 'N'
+ ETWO 'A', 'T'
+ ECHR 'I'
+ ETWO 'O', 'N'
+ ECHR ' '
+ ECHR 'P'
+ ECHR 'O'
+ ECHR 'S'
+ ETWO 'I', 'T'
+ ECHR 'I'
+ ETWO 'O', 'N'
+ ECHR '.'
+ ETWO '-', '-'
+ EJMP 19
+ ECHR 'A'
+ ECHR ' '
+ ECHR 'H'
+ ECHR 'Y'
+ ECHR 'P'
+ ETWO 'E', 'R'
+ ECHR 'S'
+ ECHR 'P'
+ ECHR 'A'
+ ETWO 'C', 'E'
+ ECHR ' '
+ ECHR 'U'
+ ECHR 'N'
+ ETWO 'I', 'T'
+ ETOK 202
+ ECHR 'A'
+ ECHR 'V'
+ ECHR 'A'
+ ETWO 'I', 'L'
+ ETWO 'A', 'B'
+ ETWO 'L', 'E'
+ ECHR ' '
+ ETWO 'A', 'T'
+ ECHR ' '
+ ECHR 'T'
+ ECHR 'E'
+ ECHR 'C'
+ ECHR 'H'
+ ECHR ' '
+ ETWO 'L', 'E'
+ ETWO 'V', 'E'
+ ECHR 'L'
+ ECHR ' '
+ ECHR '8'
+ ECHR ' '
+ ETWO 'O', 'R'
+ ECHR ' '
+ ETWO 'A', 'B'
+ ECHR 'O'
+ ETWO 'V', 'E'
+ ETOK 177
+ EQUB VE
+
+ EJMP 14
+ EJMP 19
+ ETWO 'A', 'N'
+ ECHR ' '
+ ETWO 'E', 'N'
+ ETWO 'E', 'R'
+ ECHR 'G'
+ ECHR 'Y'
+ ECHR ' '
+ ECHR 'U'
+ ECHR 'N'
+ ETWO 'I', 'T'
+ ECHR ' '
+ ETWO 'I', 'N'
+ ECHR 'C'
+ ETWO 'R', 'E'
+ ECHR 'A'
+ ETWO 'S', 'E'
+ ECHR 'S'
+ ECHR ' '
+ ETOK 147
+ ECHR 'R'
+ ETWO 'A', 'T'
+ ECHR 'E'
+ ECHR ' '
+ ECHR 'O'
+ ECHR 'F'
+ ECHR ' '
+ ETWO 'R', 'E'
+ ECHR 'C'
+ ECHR 'H'
+ ETWO 'A', 'R'
+ ECHR 'G'
+ ETOK 195
+ ECHR 'O'
+ ECHR 'F'
+ ECHR ' '
+ ETOK 147
+ ETWO 'E', 'N'
+ ETWO 'E', 'R'
+ ECHR 'G'
+ ECHR 'Y'
+ ECHR ' '
+ ECHR 'B'
+ ETWO 'A', 'N'
+ ECHR 'K'
+ ECHR 'S'
+ ECHR ' '
+ ECHR 'F'
+ ECHR 'R'
+ ECHR 'O'
+ ECHR 'M'
+ ECHR ' '
+ ECHR 'S'
+ ECHR 'U'
+ ECHR 'R'
+ ECHR 'F'
+ ECHR 'A'
+ ETWO 'C', 'E'
+ ECHR ' '
+ ETWO 'R', 'A'
+ ETWO 'D', 'I'
+ ETWO 'A', 'T'
+ ECHR 'I'
+ ETWO 'O', 'N'
+ ECHR ' '
+ ETWO 'A', 'B'
+ ETWO 'S', 'O'
+ ECHR 'R'
+ ECHR 'P'
+ ETWO 'T', 'I'
+ ETWO 'O', 'N'
+ ECHR '.'
+ ETWO '-', '-'
+ EJMP 19
+ ETWO 'E', 'N'
+ ETWO 'E', 'R'
+ ECHR 'G'
+ ECHR 'Y'
+ ECHR ' '
+ ECHR 'U'
+ ECHR 'N'
+ ETWO 'I', 'T'
+ ECHR 'S'
+ ECHR ' '
+ ETWO 'A', 'R'
+ ECHR 'E'
+ ECHR ' '
+ ECHR 'A'
+ ECHR 'V'
+ ECHR 'A'
+ ETWO 'I', 'L'
+ ETWO 'A', 'B'
+ ETWO 'L', 'E'
+ ECHR ' '
+ ECHR 'F'
+ ECHR 'R'
+ ECHR 'O'
+ ECHR 'M'
+ ECHR ' '
+ ECHR 'T'
+ ECHR 'E'
+ ECHR 'C'
+ ECHR 'H'
+ ECHR ' '
+ ETWO 'L', 'E'
+ ETWO 'V', 'E'
+ ECHR 'L'
+ ECHR ' '
+ ECHR '9'
+ ECHR ' '
+ ECHR 'U'
+ ECHR 'P'
+ ECHR 'W'
+ ETWO 'A', 'R'
+ ECHR 'D'
+ ECHR 'S'
+ ETOK 177
+ EQUB VE
+
+ EJMP 14
+ EJMP 19
+ ECHR 'D'
+ ECHR 'O'
+ ECHR 'C'
+ ECHR 'K'
+ ETOK 195
+ ECHR 'C'
+ ECHR 'O'
+ ECHR 'M'
+ ECHR 'P'
+ ECHR 'U'
+ ECHR 'T'
+ ETWO 'E', 'R'
+ ECHR 'S'
+ ECHR ' '
+ ETWO 'A', 'R'
+ ECHR 'E'
+ ECHR ' '
+ ETWO 'R', 'E'
+ ECHR 'C'
+ ECHR 'O'
+ ECHR 'M'
+ ECHR 'M'
+ ETWO 'E', 'N'
+ ECHR 'D'
+ ETOK 196
+ ECHR 'B'
+ ECHR 'Y'
+ ECHR ' '
+ ETWO 'A', 'L'
+ ECHR 'L'
+ ECHR ' '
+ ETOK 145
+ ETWO 'A', 'R'
+ ECHR 'Y'
+ ECHR ' '
+ ECHR 'G'
+ ECHR 'O'
+ ECHR 'V'
+ ETWO 'E', 'R'
+ ECHR 'N'
+ ECHR 'M'
+ ETWO 'E', 'N'
+ ECHR 'T'
+ ECHR 'S'
+ ECHR ' '
+ ECHR 'A'
+ ECHR 'S'
+ ETOK 208
+ ECHR 'S'
+ ECHR 'A'
+ ECHR 'F'
+ ECHR 'E'
+ ECHR ' '
+ ECHR 'W'
+ ECHR 'A'
+ ECHR 'Y'
+ ECHR ' '
+ ECHR 'O'
+ ECHR 'F'
+ ECHR ' '
+ ETWO 'R', 'E'
+ ECHR 'D'
+ ECHR 'U'
+ ECHR 'C'
+ ETOK 195
+ ETOK 147
+ ETWO 'N', 'U'
+ ECHR 'M'
+ ECHR 'B'
+ ETWO 'E', 'R'
+ ECHR ' '
+ ECHR 'O'
+ ECHR 'F'
+ ECHR ' '
+ ECHR 'D'
+ ECHR 'O'
+ ECHR 'C'
+ ECHR 'K'
+ ETOK 195
+ ECHR 'A'
+ ECHR 'C'
+ ECHR 'C'
+ ECHR 'I'
+ ECHR 'D'
+ ETWO 'E', 'N'
+ ECHR 'T'
+ ECHR 'S'
+ ECHR '.'
+ ETWO '-', '-'
+ EJMP 19
+ ECHR 'D'
+ ECHR 'O'
+ ECHR 'C'
+ ECHR 'K'
+ ETOK 195
+ ECHR 'C'
+ ECHR 'O'
+ ECHR 'M'
+ ECHR 'P'
+ ECHR 'U'
+ ECHR 'T'
+ ETWO 'E', 'R'
+ ECHR 'S'
+ ECHR ' '
+ ECHR 'W'
+ ETWO 'I', 'L'
+ ECHR 'L'
+ ECHR ' '
+ ECHR 'A'
+ ECHR 'U'
+ ECHR 'T'
+ ECHR 'O'
+ ETWO 'M', 'A'
+ ETWO 'T', 'I'
+ ECHR 'C'
+ ETWO 'A', 'L'
+ ECHR 'L'
+ ECHR 'Y'
+ ECHR ' '
+ ECHR 'D'
+ ECHR 'O'
+ ECHR 'C'
+ ECHR 'K'
+ ETOK 208
+ ETOK 207
+ ECHR ' '
+ ECHR 'W'
+ ECHR 'H'
+ ETWO 'E', 'N'
+ ECHR ' '
+ ECHR 'T'
+ ECHR 'U'
+ ECHR 'R'
+ ECHR 'N'
+ ETOK 196
+ ETWO 'O', 'N'
+ ECHR '.'
+ ETWO '-', '-'
+ EJMP 19
+ ECHR 'D'
+ ECHR 'O'
+ ECHR 'C'
+ ECHR 'K'
+ ETOK 195
+ ECHR 'C'
+ ECHR 'O'
+ ECHR 'M'
+ ECHR 'P'
+ ECHR 'U'
+ ECHR 'T'
+ ETWO 'E', 'R'
+ ECHR 'S'
+ ECHR ' '
+ ECHR 'C'
+ ETWO 'A', 'N'
+ ECHR ' '
+ ETWO 'B', 'E'
+ ECHR ' '
+ ECHR 'B'
+ ETWO 'O', 'U'
+ ECHR 'G'
+ ECHR 'H'
+ ECHR 'T'
+ ECHR ' '
+ ETWO 'A', 'T'
+ ECHR ' '
+ ECHR 'S'
+ ECHR 'Y'
+ ETWO 'S', 'T'
+ ECHR 'E'
+ ECHR 'M'
+ ECHR 'S'
+ ECHR ' '
+ ECHR 'O'
+ ECHR 'F'
+ ECHR ' '
+ ECHR 'T'
+ ECHR 'E'
+ ECHR 'C'
+ ECHR 'H'
+ ECHR ' '
+ ETWO 'L', 'E'
+ ETWO 'V', 'E'
+ ECHR 'L'
+ ECHR ' '
+ ECHR '1'
+ ECHR '0'
+ ECHR ' '
+ ETWO 'O', 'R'
+ ECHR ' '
+ ECHR 'M'
+ ECHR 'O'
+ ETWO 'R', 'E'
+ ETOK 177
+ EQUB VE
+
+ EJMP 14
+ EJMP 19
+ ECHR 'G'
+ ETWO 'A', 'L'
+ ECHR 'A'
+ ECHR 'C'
+ ETWO 'T', 'I'
+ ECHR 'C'
+ ECHR ' '
+ ECHR 'H'
+ ECHR 'Y'
+ ECHR 'P'
+ ETWO 'E', 'R'
+ ECHR 'S'
+ ECHR 'P'
+ ECHR 'A'
+ ETWO 'C', 'E'
+ ECHR ' '
+ ETOK 151
+ ECHR 'S'
+ ECHR ' '
+ ETWO 'A', 'R'
+ ECHR 'E'
+ ECHR ' '
+ ECHR 'O'
+ ECHR 'B'
+ ECHR 'T'
+ ECHR 'A'
+ ETWO 'I', 'N'
+ ETWO 'A', 'B'
+ ETWO 'L', 'E'
+ ECHR ' '
+ ECHR 'F'
+ ECHR 'R'
+ ECHR 'O'
+ ECHR 'M'
+ ECHR ' '
+ ETOK 145
+ ECHR 'S'
+ ECHR ' '
+ ECHR 'O'
+ ECHR 'F'
+ ECHR ' '
+ ECHR 'T'
+ ECHR 'E'
+ ECHR 'C'
+ ECHR 'H'
+ ECHR ' '
+ ETWO 'L', 'E'
+ ETWO 'V', 'E'
+ ECHR 'L'
+ ECHR ' '
+ ECHR '1'
+ ECHR '1'
+ ECHR ' '
+ ECHR 'U'
+ ECHR 'P'
+ ECHR 'W'
+ ETWO 'A', 'R'
+ ECHR 'D'
+ ECHR 'S'
+ ECHR '.'
+ ETWO '-', '-'
+ EJMP 19
+ ECHR 'W'
+ ECHR 'H'
+ ETWO 'E', 'N'
+ ECHR ' '
+ ETOK 147
+ ETWO 'I', 'N'
+ ECHR 'T'
+ ETWO 'E', 'R'
+ ECHR 'G'
+ ETWO 'A', 'L'
+ ECHR 'A'
+ ECHR 'C'
+ ETWO 'T', 'I'
+ ECHR 'C'
+ ECHR ' '
+ ECHR 'H'
+ ECHR 'Y'
+ ECHR 'P'
+ ETWO 'E', 'R'
+ ETOK 151
+ ECHR ' '
+ ECHR 'I'
+ ECHR 'S'
+ ECHR ' '
+ ETWO 'E', 'N'
+ ECHR 'G'
+ ECHR 'A'
+ ETWO 'G', 'E'
+ ECHR 'D'
+ ECHR ','
+ ECHR ' '
+ ETOK 147
+ ETOK 207
+ ETOK 202
+ ECHR 'H'
+ ECHR 'Y'
+ ECHR 'P'
+ ETWO 'E', 'R'
+ ECHR 'J'
+ ECHR 'U'
+ ECHR 'M'
+ ECHR 'P'
+ ETOK 196
+ ETWO 'I', 'N'
+ ECHR 'T'
+ ECHR 'O'
+ ECHR ' '
+ ETOK 147
+ ECHR 'P'
+ ETWO 'R', 'E'
+ ECHR '-'
+ ECHR 'P'
+ ECHR 'R'
+ ECHR 'O'
+ ECHR 'G'
+ ETWO 'R', 'A'
+ ECHR 'M'
+ ECHR 'M'
+ ETOK 196
+ ECHR 'G'
+ ETWO 'A', 'L'
+ ECHR 'A'
+ ECHR 'X'
+ ECHR 'Y'
+ ETOK 177
+ EQUB VE
+
+ EJMP 14
+ EJMP 19
+ ECHR 'M'
+ ETWO 'I', 'L'
+ ETWO 'I', 'T'
+ ETWO 'A', 'R'
+ ECHR 'Y'
+ ECHR ' '
+ ETWO 'L', 'A'
+ ETWO 'S', 'E'
+ ECHR 'R'
+ ECHR 'S'
+ ECHR ' '
+ ETWO 'A', 'R'
+ ECHR 'E'
+ ECHR ' '
+ ETOK 147
+ ECHR 'H'
+ ECHR 'E'
+ ECHR 'I'
+ ECHR 'G'
+ ECHR 'H'
+ ECHR 'T'
+ ECHR ' '
+ ECHR 'O'
+ ECHR 'F'
+ ECHR ' '
+ ETWO 'L', 'A'
+ ETWO 'S', 'E'
+ ECHR 'R'
+ ECHR ' '
+ ETWO 'S', 'O'
+ ECHR 'P'
+ ECHR 'H'
+ ECHR 'I'
+ ETWO 'S', 'T'
+ ECHR 'I'
+ ECHR 'C'
+ ETWO 'A', 'T'
+ ECHR 'I'
+ ETWO 'O', 'N'
+ ECHR '.'
+ ETWO '-', '-'
+ EJMP 19
+ ETWO 'T', 'H'
+ ECHR 'E'
+ ECHR 'Y'
+ ECHR ' '
+ ECHR 'U'
+ ETWO 'S', 'E'
+ ECHR ' '
+ ECHR 'H'
+ ECHR 'I'
+ ECHR 'G'
+ ECHR 'H'
+ ECHR ' '
+ ETWO 'E', 'N'
+ ETWO 'E', 'R'
+ ECHR 'G'
+ ECHR 'Y'
+ ECHR ' '
+ ETWO 'L', 'A'
+ ETWO 'S', 'E'
+ ECHR 'R'
+ ECHR 'S'
+ ECHR ' '
+ ECHR 'F'
+ ECHR 'I'
+ ECHR 'R'
+ ETOK 195
+ ECHR 'C'
+ ETWO 'O', 'N'
+ ETWO 'T', 'I'
+ ETWO 'N', 'U'
+ ETWO 'O', 'U'
+ ECHR 'S'
+ ECHR 'L'
+ ECHR 'Y'
+ ETOK 201
+ ECHR 'P'
+ ECHR 'R'
+ ECHR 'O'
+ ECHR 'D'
+ ECHR 'U'
+ ETWO 'C', 'E'
+ ECHR ' '
+ ECHR 'D'
+ ECHR 'E'
+ ECHR 'V'
+ ECHR 'A'
+ ETWO 'S', 'T'
+ ETWO 'A', 'T'
+ ETOK 195
+ ECHR 'E'
+ ECHR 'F'
+ ECHR 'F'
+ ECHR 'E'
+ ECHR 'C'
+ ECHR 'T'
+ ECHR 'S'
+ ECHR ','
+ ECHR ' '
+ ECHR 'B'
+ ECHR 'U'
+ ECHR 'T'
+ ECHR ' '
+ ETWO 'A', 'R'
+ ECHR 'E'
+ ECHR ' '
+ ECHR 'P'
+ ECHR 'R'
+ ETWO 'O', 'N'
+ ECHR 'E'
+ ETOK 201
+ ECHR 'O'
+ ECHR 'V'
+ ETWO 'E', 'R'
+ ECHR 'H'
+ ECHR 'E'
+ ETWO 'A', 'T'
+ ETWO 'I', 'N'
+ ECHR 'G'
+ ECHR '.'
+ ETWO '-', '-'
+ EJMP 19
+ ECHR 'M'
+ ETWO 'I', 'L'
+ ETWO 'I', 'T'
+ ETWO 'A', 'R'
+ ECHR 'Y'
+ ECHR ' '
+ ETWO 'L', 'A'
+ ETWO 'S', 'E'
+ ECHR 'R'
+ ECHR 'S'
+ ECHR ' '
+ ETWO 'A', 'R'
+ ECHR 'E'
+ ECHR ' '
+ ECHR 'A'
+ ECHR 'V'
+ ECHR 'A'
+ ETWO 'I', 'L'
+ ETWO 'A', 'B'
+ ETWO 'L', 'E'
+ ECHR ' '
+ ECHR 'F'
+ ECHR 'R'
+ ECHR 'O'
+ ECHR 'M'
+ ECHR ' '
+ ETOK 145
+ ECHR 'S'
+ ECHR ' '
+ ECHR 'O'
+ ECHR 'F'
+ ECHR ' '
+ ECHR 'T'
+ ECHR 'E'
+ ECHR 'C'
+ ECHR 'H'
+ ECHR ' '
+ ETWO 'L', 'E'
+ ETWO 'V', 'E'
+ ECHR 'L'
+ ECHR ' '
+ ECHR '1'
+ ECHR '2'
+ ECHR ' '
+ ETWO 'O', 'R'
+ ECHR ' '
+ ECHR 'M'
+ ECHR 'O'
+ ETWO 'R', 'E'
+ ETOK 177
+ EQUB VE
+
+ EJMP 14
+ EJMP 19
+ ECHR 'M'
+ ETWO 'I', 'N'
+ ETOK 195
+ ETWO 'L', 'A'
+ ETWO 'S', 'E'
+ ECHR 'R'
+ ECHR 'S'
+ ECHR ' '
+ ETWO 'A', 'R'
+ ECHR 'E'
+ ECHR ' '
+ ECHR 'H'
+ ECHR 'I'
+ ECHR 'G'
+ ECHR 'H'
+ ECHR 'L'
+ ECHR 'Y'
+ ECHR ' '
+ ECHR 'P'
+ ECHR 'O'
+ ECHR 'W'
+ ECHR 'E'
+ ETWO 'R', 'E'
+ ECHR 'D'
+ ECHR ','
+ ECHR ' '
+ ECHR 'S'
+ ETWO 'L', 'O'
+ ECHR 'W'
+ ECHR ' '
+ ECHR 'F'
+ ECHR 'I'
+ ECHR 'R'
+ ETOK 195
+ ECHR 'P'
+ ECHR 'U'
+ ECHR 'L'
+ ETWO 'S', 'E'
+ ECHR ' '
+ ETWO 'L', 'A'
+ ETWO 'S', 'E'
+ ECHR 'R'
+ ECHR 'S'
+ ECHR ' '
+ ECHR 'W'
+ ECHR 'H'
+ ECHR 'I'
+ ECHR 'C'
+ ECHR 'H'
+ ECHR ' '
+ ETWO 'A', 'R'
+ ECHR 'E'
+ ECHR ' '
+ ECHR 'T'
+ ECHR 'U'
+ ECHR 'N'
+ ETOK 196
+ ECHR 'T'
+ ECHR 'O'
+ ECHR ' '
+ ECHR 'F'
+ ETWO 'R', 'A'
+ ECHR 'G'
+ ECHR 'M'
+ ETWO 'E', 'N'
+ ECHR 'T'
+ ECHR ' '
+ ECHR 'A'
+ ETWO 'S', 'T'
+ ETWO 'E', 'R'
+ ECHR 'O'
+ ECHR 'I'
+ ECHR 'D'
+ ECHR 'S'
+ ECHR '.'
+ ETWO '-', '-'
+ EJMP 19
+ ECHR 'M'
+ ETWO 'I', 'N'
+ ETOK 195
+ ETWO 'L', 'A'
+ ETWO 'S', 'E'
+ ECHR 'R'
+ ECHR 'S'
+ ECHR ' '
+ ETWO 'A', 'R'
+ ECHR 'E'
+ ECHR ' '
+ ECHR 'A'
+ ECHR 'V'
+ ECHR 'A'
+ ETWO 'I', 'L'
+ ETWO 'A', 'B'
+ ETWO 'L', 'E'
+ ECHR ' '
+ ECHR 'F'
+ ECHR 'R'
+ ECHR 'O'
+ ECHR 'M'
+ ECHR ' '
+ ECHR 'T'
+ ECHR 'E'
+ ECHR 'C'
+ ECHR 'H'
+ ECHR ' '
+ ETWO 'L', 'E'
+ ETWO 'V', 'E'
+ ECHR 'L'
+ ECHR ' '
+ ECHR '1'
+ ECHR '2'
+ ECHR ' '
+ ECHR 'U'
+ ECHR 'P'
+ ECHR 'W'
+ ETWO 'A', 'R'
+ ECHR 'D'
+ ECHR 'S'
+ ETOK 177
+ EQUB VE
 
 .QQ18
 
@@ -23206,8 +30844,6 @@ ENDIF
  EQUB &00, &01, &03, &04, &05, &06, &08, &09, &0A, &0B, &0C, &0D
  EQUB &0F, &10, &11, &12, &13, &14, &15, &16, &17, &18, &19, &19
  EQUB &1A, &1B, &1C, &1D, &1D, &1E, &1F, &1F
-
-\ a.qcode_4
 
 .encyclopedia
 
@@ -23409,6 +31045,15 @@ ENDIF
 
  RTS
 
+\ ******************************************************************************
+\
+\       Name: write_card
+\       Type: Subroutine
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .write_card
 
  ASL A
@@ -23509,6 +31154,15 @@ ENDIF
  EQUB 35, 19, 18, 30, 25, 31, 11
  EQUB  8, 17, 26, 27,  9, 16, 14
 
+\ ******************************************************************************
+\
+\       Name: ship_dist
+\       Type: Variable
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .ship_dist
 
  EQUB &01, &02, &01, &02, &01, &01, &01
@@ -23573,25 +31227,79 @@ ENDIF
 
  JMP BAY
 
+\ ******************************************************************************
+\
+\       Name: menu_title
+\       Type: Variable
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .menu_title
 
  EQUB &01, &02, &03, &05, &04
+
+\ ******************************************************************************
+\
+\       Name: menu_titlex
+\       Type: Variable
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
 
 .menu_titlex
 
  EQUB &05, &0C, &0C, &0C, &0B
 
+\ ******************************************************************************
+\
+\       Name: menu_offset
+\       Type: Variable
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .menu_offset
 
  EQUB &02, &07, &15, &5B, &5F
+
+\ ******************************************************************************
+\
+\       Name: menu_entry
+\       Type: Variable
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
 
 .menu_entry
 
  EQUB &04, &0E, &0E, &04, &0D
 
+\ ******************************************************************************
+\
+\       Name: menu_query
+\       Type: Variable
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .menu_query
 
  EQUB &06, &43, &43, &05, &04
+
+\ ******************************************************************************
+\
+\       Name: ship_centre
+\       Type: Variable
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
 
 .ship_centre
 
@@ -23599,6 +31307,15 @@ ENDIF
  EQUB &0B, &08, &07, &09, &0A, &0D, &0C
  EQUB &0D, &0D, &0D, &0C, &0D, &0C, &0D
  EQUB &0C, &0B, &0C, &0C, &0A, &0D, &0E
+
+\ ******************************************************************************
+\
+\       Name: card_pattern
+\       Type: Variable
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
 
 .card_pattern
 
@@ -23628,6 +31345,15 @@ ENDIF
  EQUB  1, 20, &2D	\ space
  EQUB  1, 21, &00
 
+\ ******************************************************************************
+\
+\       Name: card_addr
+\       Type: Variable
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .card_addr
 
  EQUW adder, anaconda, asp_2, boa, bushmaster, chameleon, cobra_1
@@ -23636,6 +31362,15 @@ ENDIF
  EQUW iguana, krait, mamba, monitor, moray, ophidian, python
  EQUW shuttle, sidewinder, thargoid, thargon
  EQUW transporter, viper, worm
+
+\ ******************************************************************************
+\
+\       Name: adder
+\       Type: Variable
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
 
 .adder
 
@@ -23661,6 +31396,15 @@ ENDIF
  EQUS "AM 18 ", &EA, " ", &C2
  EQUB 0, 0
 
+\ ******************************************************************************
+\
+\       Name: anaconda
+\       Type: Variable
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .anaconda
 
  EQUB 1
@@ -23684,6 +31428,15 @@ ENDIF
  EQUB 0, 10
  EQUS &C9, "32.24", &0C, &F4, "g", &EF, &DE, &F4, "s"
  EQUB 0, 0
+
+\ ******************************************************************************
+\
+\       Name: asp_2
+\       Type: Variable
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
 
 .asp_2
 
@@ -23709,6 +31462,15 @@ ENDIF
  EQUS &BC, " Whip", &F9, "sh", &0C, &01, "HK", &02, " ", &B2, &B5
  EQUB 0, 0
 
+\ ******************************************************************************
+\
+\       Name: boa
+\       Type: Variable
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .boa
 
  EQUB 1
@@ -23733,6 +31495,15 @@ ENDIF
  EQUS &C8, &0C, &B6, &B7, " ", &C2, &F4, "s"
  EQUB 0, 0
 
+\ ******************************************************************************
+\
+\       Name: bushmaster
+\       Type: Variable
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .bushmaster
 
  EQUB 1
@@ -23752,6 +31523,15 @@ ENDIF
  EQUB 0, 10
  EQUS &BC, " Whip", &F9, "sh", &0C, &01, "HT", &02, " ", &B2, &B5
  EQUB 0, 0
+
+\ ******************************************************************************
+\
+\       Name: chameleon
+\       Type: Variable
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
 
 .chameleon
 
@@ -23777,6 +31557,15 @@ ENDIF
  EQUS &BC, " ", &DE, &F0, "g", &F4, &0C, "Pul", &DA, &B5
  EQUB 0, 0
 
+\ ******************************************************************************
+\
+\       Name: cobra_1
+\       Type: Variable
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .cobra_1
 
  EQUB 1
@@ -23800,6 +31589,15 @@ ENDIF
  EQUB 0, 10
  EQUS &D0, &B5
  EQUB 0, 0
+
+\ ******************************************************************************
+\
+\       Name: cobra_3
+\       Type: Variable
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
 
 .cobra_3
 
@@ -23825,6 +31623,15 @@ ENDIF
  EQUS &BA, &B7, "fa", &DE, &0C, "Irrik", &FF, " Thru", &CD
  EQUB 0, 0
 
+\ ******************************************************************************
+\
+\       Name: coriolis
+\       Type: Variable
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .coriolis
 
  EQUB 1
@@ -23835,6 +31642,15 @@ ENDIF
  EQUS "2000", &C3, "s"
  EQUB 0, 0
 
+\ ******************************************************************************
+\
+\       Name: dodecagon
+\       Type: Variable
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .dodecagon
 
  EQUB 1
@@ -23844,6 +31660,15 @@ ENDIF
  EQUB 0, 11
  EQUS "2700", &C3, "s"
  EQUB 0, 0
+
+\ ******************************************************************************
+\
+\       Name: escape_pod
+\       Type: Variable
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
 
 .escape_pod
 
@@ -23856,6 +31681,15 @@ ENDIF
  EQUB 0, 5
  EQUS "1-2"
  EQUB 0, 0
+
+\ ******************************************************************************
+\
+\       Name: fer_de_lance
+\       Type: Variable
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
 
 .fer_de_lance
 
@@ -23881,6 +31715,15 @@ ENDIF
  EQUS "T", &DB, "r", &DF, "ix ", &F0, "t", &F4, "sun", &0C, &01, "LT", &02, " ", &CE
  EQUB 0, 0
 
+\ ******************************************************************************
+\
+\       Name: gecko
+\       Type: Variable
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .gecko
 
  EQUB 1
@@ -23904,6 +31747,15 @@ ENDIF
  EQUB 0, 10
  EQUS "B", &F2, "am", &B2, &B7, " ", &01, "XL", &02
  EQUB 0, 0
+
+\ ******************************************************************************
+\
+\       Name: ghavial
+\       Type: Variable
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
 
 .ghavial
 
@@ -23929,6 +31781,15 @@ ENDIF
  EQUS "Sp", &E4, "d", &F4, " & Prime ", &01, "TT1", &02
  EQUB 0, 0
 
+\ ******************************************************************************
+\
+\       Name: iguana
+\       Type: Variable
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .iguana
 
  EQUB 1
@@ -23953,6 +31814,15 @@ ENDIF
  EQUS &C7, " Sup", &F4, " ", &C2, &0C, &01, "VC", &02, "9"
  EQUB 0, 0
 
+\ ******************************************************************************
+\
+\       Name: krait
+\       Type: Variable
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .krait
 
  EQUB 1
@@ -23975,6 +31845,15 @@ ENDIF
  EQUS &C7, " Sp", &F0, &CE, " ZX14"
  EQUB 0, 0
 
+\ ******************************************************************************
+\
+\       Name: mamba
+\       Type: Variable
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .mamba
 
  EQUB 1
@@ -23996,6 +31875,15 @@ ENDIF
  EQUB 0, 10
  EQUS &B6, &B7, " ", &01, "HV", &02, " ", &C2
  EQUB 0, 0
+
+\ ******************************************************************************
+\
+\       Name: monitor
+\       Type: Variable
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
 
 .monitor
 
@@ -24021,6 +31909,15 @@ ENDIF
  EQUS &C9, "29.01", &0C, &B7, " ", &CA, &F4, "s"
  EQUB 0, 0
 
+\ ******************************************************************************
+\
+\       Name: moray
+\       Type: Variable
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .moray
 
  EQUB 1
@@ -24044,6 +31941,15 @@ ENDIF
  EQUB 0, 10
  EQUS "Turbul", &F6, " ", &FE, &EE, "k", &0C, &F2, "-ch", &EE, "g", &F4, " 1287"
  EQUB 0, 0
+
+\ ******************************************************************************
+\
+\       Name: ophidian
+\       Type: Variable
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
 
 .ophidian
 
@@ -24069,6 +31975,15 @@ ENDIF
  EQUS &BC, " ", &DE, &F0, "g", &F4, &0C, "Pul", &DA, &B5
  EQUB 0, 0
 
+\ ******************************************************************************
+\
+\       Name: python
+\       Type: Variable
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .python
 
  EQUB 1
@@ -24093,6 +32008,15 @@ ENDIF
  EQUS &C8, &0C, "Exl", &DF, " 76NN Model"
  EQUB 0, 0
 
+\ ******************************************************************************
+\
+\       Name: shuttle
+\       Type: Variable
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .shuttle
 
  EQUB 1
@@ -24110,6 +32034,15 @@ ENDIF
  EQUB 0, 10
  EQUS &C9, "20.20", &0C, &DE, &EE, &EF, "t ", &B5
  EQUB 0, 0
+
+\ ******************************************************************************
+\
+\       Name: sidewinder
+\       Type: Variable
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
 
 .sidewinder
 
@@ -24131,6 +32064,15 @@ ENDIF
  EQUS &C7, " Sp", &F0, &CE, " ", &01, "MV", &02
  EQUB 0, 0
 
+\ ******************************************************************************
+\
+\       Name: thargoid
+\       Type: Variable
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .thargoid
 
  EQUB 2
@@ -24151,6 +32093,15 @@ ENDIF
  EQUS &9E, " ", &C4
  EQUB 0, 0
 
+\ ******************************************************************************
+\
+\       Name: thargon
+\       Type: Variable
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .thargon
 
  EQUB 2
@@ -24169,6 +32120,15 @@ ENDIF
  EQUS &9E, " ", &C4
  EQUB 0, 0
 
+\ ******************************************************************************
+\
+\       Name: transporter
+\       Type: Variable
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .transporter
 
  EQUB 1
@@ -24182,6 +32142,15 @@ ENDIF
  EQUB 0, 7
  EQUS "10", &BE
  EQUB 0, 0
+
+\ ******************************************************************************
+\
+\       Name: viper
+\       Type: Variable
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
 
 .viper
 
@@ -24202,6 +32171,15 @@ ENDIF
  EQUB 0, 10
  EQUS &C7, " Sup", &F4, " ", &C2, &0C, &01, "VC", &02, "10"
  EQUB 0, 0
+
+\ ******************************************************************************
+\
+\       Name: worm
+\       Type: Variable
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
 
 .worm
 
