@@ -2024,53 +2024,148 @@ ORG CODE%
 
 LOAD_A% = LOAD%
 
+\ ******************************************************************************
+\
+\       Name: S%
+\       Type: Workspace
+\    Address: &11E3 to &11F0
+\   Category: Workspaces
+\    Summary: Entry points and vector addresses in the main flight code
+\
+\ ******************************************************************************
+
 .S%
 
- JMP RSHIPS
-
-.boot_in
+ JMP RSHIPS             \ AJD
 
  JMP RSHIPS
 
-.wrch_in
+ JMP TT26               \ WRCHV is set to point here by elite-loader3.asm
 
- JMP TT26
- EQUW IRQ1
+ EQUW IRQ1              \ IRQ1V is set to point here by elite-loader3.asm
 
-.brk_in
+ JMP BRBR1              \ BRKV is set to point here by elite-loader3.asm
 
- JMP BRBR1
+\ ******************************************************************************
+\
+\       Name: INBAY
+\       Type: Subroutine
+\   Category: Loader
+\    Summary: Load and run the main docked code in T.CODE
+\
+\ ******************************************************************************
 
-BRKV = P% - 2
+.INBAY
 
-\ a.dcode_1
+ LDX #LO(LTLI)          \ Set (Y X) to point to LTLI ("L.T.CODE", which gets
+ LDY #HI(LTLI)          \ modified to "R.T.CODE" in the DOENTRY routine)
 
-.l_11f1
+ JSR OSCLI              \ Call OSCLI to run the OS command in LTLI, which *RUNs
+                        \ the main docked code in T.CODE
 
- LDX #LO(l_11f8)
- LDY #HI(l_11f8)
- JSR OSCLI
+\ ******************************************************************************
+\
+\       Name: LTLI
+\       Type: Variable
+\   Category: Loader
+\    Summary: The OS command string for loading the docked code file 1.D
+\
+\ ******************************************************************************
 
-.l_11f8
+.LTLI
 
- EQUS "L.1.D", &0D
+ EQUS "L.1.D"
+ EQUB 13
 
-.run_tcode
+.DOENTRY
 
  LDA #'R'
- STA l_11f8
+ STA LTLI
+
+\ ******************************************************************************
+\
+\       Name: DEATH2
+\       Type: Subroutine
+\   Category: Start and end
+\    Summary: Reset most of the game and restart from the title screen
+\
+\ ------------------------------------------------------------------------------
+\
+\ This routine is called following death, and when the game is quit by pressing
+\ ESCAPE when paused.
+\
+\ ******************************************************************************
 
 .DEATH2
 
- JSR RES2
- \	JMP l_11f1
- BMI l_11f1
+ JSR RES2               \ Reset a number of flight variables and workspaces
+                        \ and fall through into the entry code for the game
+                        \ to restart from the title screen
+
+ BMI INBAY              \ AJD
+
+\ ******************************************************************************
+\
+\       Name: Main flight loop (Part 1 of 16)
+\       Type: Subroutine
+\   Category: Main loop
+\    Summary: Seed the random number generator
+\  Deep dive: Program flow of the main game loop
+\             Generating random numbers
+\
+\ ------------------------------------------------------------------------------
+\
+\ The main flight loop covers most of the flight-specific aspects of Elite. This
+\ section covers the following:
+\
+\   * Seed the random number generator
+\
+\ Other entry points:
+\
+\   M%                  The entry point for the main flight loop
+\
+\ ******************************************************************************
 
 .M%
 
- LDA &0900
- STA &00
- LDX JSTX
+ LDA K%                 \ We want to seed the random number generator with a
+                        \ pretty random number, so fetch the contents of K%,
+                        \ which is the x_lo coordinate of the planet. This value
+                        \ will be fairly unpredictable, so it's a pretty good
+                        \ candidate
+
+ STA RAND               \ Store the seed in the first byte of the four-byte
+                        \ random number seed that's stored in RAND
+
+\ ******************************************************************************
+\
+\       Name: Main flight loop (Part 2 of 16)
+\       Type: Subroutine
+\   Category: Main loop
+\    Summary: Calculate the alpha and beta angles from the current pitch and
+\             roll of our ship
+\  Deep dive: Program flow of the main game loop
+\             Pitching and rolling
+\
+\ ------------------------------------------------------------------------------
+\
+\ The main flight loop covers most of the flight-specific aspects of Elite. This
+\ section covers the following:
+\
+\   * Calculate the alpha and beta angles from the current pitch and roll
+\
+\ Here we take the current rate of pitch and roll, as set by the joystick or
+\ keyboard, and convert them into alpha and beta angles that we can use in the
+\ matrix functions to rotate space around our ship. The alpha angle covers
+\ roll, while the beta angle covers pitch (there is no yaw in this version of
+\ Elite). The angles are in radians, which allows us to use the small angle
+\ approximation when moving objects in the sky (see the MVEIT routine for more
+\ on this). Also, the signs of the two angles are stored separately, in both
+\ the sign and the flipped sign, as this makes calculations easier.
+\
+\ ******************************************************************************
+
+ LDX JSTX               \ AJD
  CPX new_max
  BCC n_highx
  LDX new_max
@@ -2085,34 +2180,63 @@ BRKV = P% - 2
 
  JSR cntr
  JSR cntr
- TXA
- EOR #&80
+
+                        \ The roll rate in JSTX increases if we press ">" (and
+                        \ the RL indicator on the dashboard goes to the right).
+                        \ This rolls our ship to the right (clockwise), but we
+                        \ actually implement this by rolling everything else
+                        \ to the left (anticlockwise), so a positive roll rate
+                        \ in JSTX translates to a negative roll angle alpha
+
+ TXA                    \ Set A and Y to the roll rate but with the sign bit
+ EOR #%10000000         \ flipped (i.e. set them to the sign we want for alpha)
  TAY
- AND #&80
- STA &32
- STX JSTX
- EOR #&80
- STA &33
- TYA
- BPL l_124d
- EOR #&FF
- CLC
- ADC #&01
 
-.l_124d
+ AND #%10000000         \ Extract the flipped sign of the roll rate and store
+ STA ALP2               \ in ALP2 (so ALP2 contains the sign of the roll angle
+                        \ alpha)
 
+ STX JSTX               \ Update JSTX with the damped value that's still in X
+
+ EOR #%10000000         \ Extract the correct sign of the roll rate and store
+ STA ALP2+1             \ in ALP2+1 (so ALP2+1 contains the flipped sign of the
+                        \ roll angle alpha)
+
+ TYA                    \ Set A to the roll rate but with the sign bit flipped
+
+ BPL P%+7               \ If the value of A is positive, skip the following
+                        \ three instructions
+
+ EOR #%11111111         \ A is negative, so change the sign of A using two's
+ CLC                    \ complement so that A is now positive and contains
+ ADC #1                 \ the absolute value of the roll rate, i.e. |JSTX|
+
+ LSR A                  \ Divide the (positive) roll rate in A by 4
  LSR A
- LSR A
- CMP #&08
- BCS l_1254
- LSR A
 
-.l_1254
+ CMP #8                 \ If A >= 8, skip the following instruction
+ BCS P%+3
 
- STA &31
- ORA &32
- STA &8D
- LDX JSTY
+ LSR A                  \ A < 8, so halve A again
+
+ STA ALP1               \ Store A in ALP1, so we now have:
+                        \
+                        \   ALP1 = |JSTX| / 8    if |JSTX| < 32
+                        \
+                        \   ALP1 = |JSTX| / 4    if |JSTX| >= 32
+                        \
+                        \ This means that at lower roll rates, the roll angle is
+                        \ reduced closer to zero than at higher roll rates,
+                        \ which gives us finer control over the ship's roll at
+                        \ lower roll rates
+                        \
+                        \ Because JSTX is in the range -127 to +127, ALP1 is
+                        \ in the range 0 to 31
+
+ ORA ALP2               \ Store A in ALPHA, but with the sign set to ALP2 (so
+ STA ALPHA              \ ALPHA has a different sign to the actual roll rate)
+
+ LDX JSTY               \ AJD
  CPX new_max
  BCC n_highy
  LDX new_max
@@ -2126,330 +2250,690 @@ BRKV = P% - 2
 .n_lowy
 
  JSR cntr
- TXA
- EOR #&80
+
+ TXA                    \ Set A and Y to the pitch rate but with the sign bit
+ EOR #%10000000         \ flipped
  TAY
- AND #&80
- STX JSTY
- STA &7C
- EOR #&80
- STA &7B
- TYA
- BPL l_1274
- EOR #&FF
 
-.l_1274
+ AND #%10000000         \ Extract the flipped sign of the pitch rate into A
 
- ADC #&04
+ STX JSTY               \ Update JSTY with the damped value that's still in X
+
+ STA BET2+1             \ Store the flipped sign of the pitch rate in BET2+1
+
+ EOR #%10000000         \ Extract the correct sign of the pitch rate and store
+ STA BET2               \ it in BET2
+
+ TYA                    \ Set A to the pitch rate but with the sign bit flipped
+
+ BPL P%+4               \ If the value of A is positive, skip the following
+                        \ instruction
+
+ EOR #%11111111         \ A is negative, so flip the bits
+
+ ADC #4                 \ Add 4 to the (positive) pitch rate, so the maximum
+                        \ value is now up to 131 (rather than 127)
+
+ LSR A                  \ Divide the (positive) pitch rate in A by 16
  LSR A
  LSR A
- LSR A
- LSR A
- CMP #&03
- BCS l_127f
  LSR A
 
-.l_127f
+ CMP #3                 \ If A >= 3, skip the following instruction
+ BCS P%+3
 
- STA &2B
- ORA &7B
- STA &2A
- \	LDA BSTK
- \	BEQ l_129e
- \	LDX #&03
- \	LDA #&80
- \	JSR OSBYTE
- \	TYA
- \	LSR A
- \	LSR A
- \	CMP new_speed
- \	BCC l_129a
- \	LDA new_speed
- \l_129a
- \	STA &7D
- \	BNE l_12b6
- \l_129e
- LDA &0302
- BEQ l_12ab
- LDA &7D
+ LSR A                  \ A < 3, so halve A again
+
+ STA BET1               \ Store A in BET1, so we now have:
+                        \
+                        \   BET1 = |JSTY| / 32    if |JSTY| < 48
+                        \
+                        \   BET1 = |JSTY| / 16    if |JSTY| >= 48
+                        \
+                        \ This means that at lower pitch rates, the pitch angle
+                        \ is reduced closer to zero than at higher pitch rates,
+                        \ which gives us finer control over the ship's pitch at
+                        \ lower pitch rates
+                        \
+                        \ Because JSTY is in the range -131 to +131, BET1 is in
+                        \ the range 0 to 8
+
+ ORA BET2               \ Store A in BETA, but with the sign set to BET2 (so
+ STA BETA               \ BETA has the same sign as the actual pitch rate)
+
+\ ******************************************************************************
+\
+\       Name: Main flight loop (Part 3 of 16)
+\       Type: Subroutine
+\   Category: Main loop
+\    Summary: Scan for flight keys and process the results
+\  Deep dive: Program flow of the main game loop
+\             The key logger
+\
+\ ------------------------------------------------------------------------------
+\
+\ The main flight loop covers most of the flight-specific aspects of Elite. This
+\ section covers the following:
+\
+\   * Scan for flight keys and process the results
+\
+\ Flight keys are logged in the key logger at location KY1 onwards, with a
+\ non-zero value in the relevant location indicating a key press. See the deep
+\ dive on "The key logger" for more details.
+\
+\ The key presses that are processed are as follows:
+\
+\   * Space and "?" to speed up and slow down
+\   * "U", "T" and "M" to disarm, arm and fire missiles
+\   * TAB to fire an energy bomb
+\   * ESCAPE to launch an escape pod
+\   * "J" to initiate an in-system jump
+\   * "E" to deploy E.C.M. anti-missile countermeasures
+\   * "C" to use the docking computer
+\   * "A" to fire lasers
+\
+\ ******************************************************************************
+
+ LDA KY2                \ If Space is being pressed, keep going, otherwise jump
+ BEQ MA17               \ down to MA17 to skip the following
+
+ LDA &7D                \ AJD
  CMP new_speed
  BCC speed_up
- \	BCS l_12ab
- \	INC &7D
 
-.l_12ab
+.MA17
 
- LDA &0301
- BEQ l_12b6
- DEC &7D
- BNE l_12b6
+ LDA KY1                \ If "?" is being pressed, keep going, otherwise jump
+ BEQ MA4                \ down to MA4 to skip the following
+
+ DEC DELTA              \ The "slow down" key is being pressed, so we decrement
+                        \ the current ship speed in DELTA
+
+ BNE MA4                \ If the speed is still greater than zero, jump to MA4
 
 .speed_up
 
- INC &7D
+ INC DELTA              \ Otherwise we just braked a little too hard, so bump
+                        \ the speed back up to the minimum value of 1
 
-.l_12b6
+.MA4
 
- LDA &030B
- AND NOMSL
- BEQ l_12cd
- LDY #&EE
- JSR ABORT
- JSR l_439f
- LDA #&00
- STA MSAR
+ LDA KY15               \ If "U" is being pressed and the number of missiles
+ AND NOMSL              \ in NOMSL is non-zero, keep going, otherwise jump down
+ BEQ MA20               \ to MA20 to skip the following
 
-.l_12cd
+ LDY #&EE               \ The "disarm missiles" key is being pressed, so call
+ JSR ABORT              \ ABORT to disarm the missile and update the missile
+                        \ indicators on the dashboard to green/cyan (Y = &EE)
 
- LDA &45
- BPL l_12e3
- LDA &030A
- BEQ l_12e3
- LDX NOMSL
- BEQ l_12e3
- STA MSAR
- LDY #&E0
+ JSR LOWBEEP            \ Call the LOWBEEP routine to make a low, long beep to
+                        \ indicate the missile is now disarmed
+
+ LDA #0                 \ Set MSAR to 0 to indicate that no missiles are
+ STA MSAR               \ currently armed
+
+.MA20
+
+ LDA MSTG               \ If MSTG is positive (i.e. it does not have bit 7 set),
+ BPL MA25               \ then it indicates we already have a missile locked on
+                        \ a target (in which case MSTG contains the ship number
+                        \ of the target), so jump to MA25 to skip targeting. Or
+                        \ to put it another way, if MSTG = &FF, which means
+                        \ there is no current target lock, keep going
+
+ LDA KY14               \ If "T" is being pressed, keep going, otherwise jump
+ BEQ MA25               \ down to MA25 to skip the following
+
+ LDX NOMSL              \ If the number of missiles in NOMSL is zero, jump down
+ BEQ MA25               \ to MA25 to skip the following
+
+ STA MSAR               \ The "target missile" key is being pressed and we have
+                        \ at least one missile, so set MSAR = &FF to denote that
+                        \ our missile is currently armed (we know A has the
+                        \ value &FF, as we just loaded it from MSTG and checked
+                        \ that it was negative)
+
+ LDY #&E0               \ AJD
  DEX
  JSR MSBAR
 
-.l_12e3
+.MA25
 
- LDA &030C
- BEQ l_12ef
- LDA &45
- BMI l_1326
- JSR l_252e
+ LDA KY16               \ If "M" is being pressed, keep going, otherwise jump
+ BEQ MA24               \ down to MA24 to skip the following
 
-.l_12ef
+ LDA MSTG               \ If MSTG = &FF then there is no target lock, so jump to
+ BMI MA64               \ MA64 to skip the following (also skipping the checks
+                        \ for TAB, ESCAPE, "J" and "E")
 
- LDA &0308
+ JSR FRMIS              \ The "fire missile" key is being pressed and we have
+                        \ a missile lock, so call the FRMIS routine to fire
+                        \ the missile
+
+.MA24
+
+ LDA &0308              \ AJD
  AND BOMB
- BEQ l_12f7
- \	LDA #&03
- \	JSR TT66
- \	JSR LL164
- \	JSR RES2
- \	STY &0341
- INC BOMB
- INC new_hold	\***
- \	JSR NLUNCH
+ BEQ MA76
+
+ INC BOMB               \ AJD
+ INC new_hold
  JSR DORND
- STA QQ9	\QQ0
- STX QQ10	\QQ1
+ STA QQ9
+ STX QQ10
  JSR TT111
  JSR hyper_snap
 
-.l_12f7
+.MA76
 
- LDA &030F
+ LDA &030F              \ AJD
  AND DKCMP
  BNE dock_toggle
- \	BEQ l_1331
- \	STA &033F
- \l_1331
  LDA &0310
- BEQ l_1301
+ BEQ MA78
  LDA #&00
 
 .dock_toggle
 
  STA &033F
 
-.l_1301
+.MA78
 
- LDA &0309
- AND ESCP
- BEQ l_130c
- JMP ESCAPE
+ LDA KY13               \ If ESCAPE is being pressed and we have an escape pod
+ AND ESCP               \ fitted, keep going, otherwise jump to noescp to skip
+ BEQ noescp             \ the following instructions
 
-.l_130c
+ JMP ESCAPE             \ The "launch escape pod" button is being pressed and
+                        \ we have an escape pod fitted, so jump to ESCAPE to
+                        \ launch it, and exit the main flight loop using a tail
+                        \ call
 
- LDA &030E
- BEQ l_1314
- JSR l_434e
+.noescp
 
-.l_1314
+ LDA KY18               \ If "J" is being pressed, keep going, otherwise skip
+ BEQ P%+5               \ the next instruction
 
- LDA &030D
- AND ECM
- BEQ l_1326
- LDA &30
- BNE l_1326
- DEC &0340
- JSR l_3813
+ JSR WARP               \ Call the WARP routine to do an in-system jump
 
-.l_1326
+ LDA KY17               \ If "E" is being pressed and we have an E.C.M. fitted,
+ AND ECM                \ keep going, otherwise jump down to MA64 to skip the
+ BEQ MA64               \ following
 
- LDA #&00
- STA &44
- STA &7E
- LDA &7D
- LSR A
- ROR &7E
- LSR A
- ROR &7E
- STA &7F
- LDA &0346
- BNE l_1374
- LDA &0307
- BEQ l_1374
- LDA GNTMP
- CMP #&F2
- BCS l_1374
- LDX VIEW
- LDA LASER,X
- BEQ l_1374
- PHA
- AND #&7F
- STA &0343
- STA &44
- LDA #&00
- JSR NOISE
- JSR LASLI
- PLA
- BPL l_136f
- LDA #&00
+ LDA ECMA               \ If ECMA is non-zero, that means an E.C.M. is already
+ BNE MA64               \ operating and is counting down (this can be either
+                        \ our E.C.M. or an opponent's), so jump down to MA64 to
+                        \ skip the following (as we can't have two E.C.M.
+                        \ systems operating at the same time)
 
-.l_136f
+ DEC ECMP               \ The "E.C.M." button is being pressed and nobody else
+                        \ is operating their E.C.M., so decrease the value of
+                        \ ECMP to make it non-zero, to denote that our E.C.M.
+                        \ is now on
 
- STA &0346
+ JSR ECBLB2             \ Call ECBLB2 to light up the E.C.M. indicator bulb on
+                        \ the dashboard, set the E.C.M. countdown timer to 32,
+                        \ and start making the E.C.M. sound
 
-.l_1374
+.MA64
 
- LDX #&00
+.MA68
 
-.l_1376
+ LDA #0                 \ Set LAS = 0, to switch the laser off while we do the
+ STA LAS                \ following logic
 
- STX &84
- LDA FRIN,X
- BNE ins_ship
- JMP l_153f
+ STA DELT4              \ Take the 16-bit value (DELTA 0) - i.e. a two-byte
+ LDA DELTA              \ number with DELTA as the high byte and 0 as the low
+ LSR A                  \ byte - and divide it by 4, storing the 16-bit result
+ ROR DELT4              \ in DELT4(1 0). This has the effect of storing the
+ LSR A                  \ current speed * 64 in the 16-bit location DELT4(1 0)
+ ROR DELT4
+ STA DELT4+1
 
-.ins_ship
+ LDA LASCT              \ If LASCT is zero, keep going, otherwise the laser is
+ BNE MA3                \ a pulse laser that is between pulses, so jump down to
+                        \ MA3 to skip the following
 
- STA &8C
- JSR GINF
- LDY #&24
+ LDA KY7                \ If "A" is being pressed, keep going, otherwise jump
+ BEQ MA3                \ down to MA3 to skip the following
 
-.l_1387
+ LDA GNTMP              \ If the laser temperature >= 242 then the laser has
+ CMP #242               \ overheated, so jump down to MA3 to skip the following
+ BCS MA3
 
- LDA (&20),Y
- STA &46,Y
- DEY
- BPL l_1387
- LDA &8C
- BMI l_13b6
- ASL A
+ LDX VIEW               \ If the current space view has a laser fitted (i.e. the
+ LDA LASER,X            \ laser power for this view is greater than zero), then
+ BEQ MA3                \ keep going, otherwise jump down to MA3 to skip the
+                        \ following
+
+                        \ If we get here, then the "fire" button is being
+                        \ pressed, our laser hasn't overheated and isn't already
+                        \ being fired, and we actually have a laser fitted to
+                        \ the current space view, so it's time to hit me with
+                        \ those laser beams
+
+ PHA                    \ Store the current view's laser power on the stack
+
+ AND #%01111111         \ Set LAS and LAS2 to bits 0-6 of the laser power
+ STA LAS2
+ STA LAS
+
+ LDA #0                 \ Call the NOISE routine with A = 0 to make the sound
+ JSR NOISE              \ of our laser firing
+
+ JSR LASLI              \ Call LASLI to draw the laser lines
+
+ PLA                    \ Restore the current view's laser power into A
+
+ BPL ma1                \ If the laser power has bit 7 set, then it's an "always
+                        \ on" laser rather than a pulsing laser, so keep going,
+                        \ otherwise jump down to ma1 to skip the following
+                        \ instruction
+
+ LDA #0                 \ This is an "always on" laser (i.e. a beam laser,
+                        \ as the cassette version of Elite doesn't have military
+                        \ lasers), so set A = 0, which will be stored in LASCT
+                        \ to denote that this is not a pulsing laser
+
+.ma1
+
+ STA &0346              \ AJD
+
+\ ******************************************************************************
+\
+\       Name: Main flight loop (Part 4 of 16)
+\       Type: Subroutine
+\   Category: Main loop
+\    Summary: For each nearby ship: Copy the ship's data block from K% to the
+\             zero-page workspace at INWK
+\  Deep dive: Program flow of the main game loop
+\             Ship data blocks
+\
+\ ------------------------------------------------------------------------------
+\
+\ The main flight loop covers most of the flight-specific aspects of Elite. This
+\ section covers the following:
+\
+\   * Start looping through all the ships in the local bubble, and for each
+\     one:
+\
+\     * Copy the ship's data block from K% to INWK
+\
+\     * Set XX0 to point to the ship's blueprint (if this is a ship)
+\
+\ Other entry points:
+\
+\   MAL1                Marks the beginning of the ship analysis loop, so we
+\                       can jump back here from part 12 of the main flight loop
+\                       to work our way through each ship in the local bubble.
+\                       We also jump back here when a ship is removed from the
+\                       bubble, so we can continue processing from the next ship
+\
+\ ******************************************************************************
+
+.MA3
+
+ LDX #0                 \ We're about to work our way through all the ships in
+                        \ our local bubble of universe, so set a counter in X,
+                        \ starting from 0, to refer to each ship slot in turn
+
+.MAL1
+
+ STX XSAV               \ Store the current slot number in XSAV
+
+ LDA FRIN,X             \ Fetch the contents of this slot into A. If it is 0
+ BNE P%+5               \ then this slot is empty and we have no more ships to
+ JMP MA18               \ process, so jump to MA18 below, otherwise A contains
+                        \ the type of ship that's in this slot, so skip over the
+                        \ JMP MA18 instruction and keep going
+
+ STA TYPE               \ Store the ship type in TYPE
+
+ JSR GINF               \ Call GINF to fetch the address of the ship data block
+                        \ for the ship in slot X and store it in INF. The data
+                        \ block is in the K% workspace, which is where all the
+                        \ ship data blocks are stored
+
+                        \ Next we want to copy the ship data block from INF to
+                        \ the zero-page workspace at INWK, so we can process it
+                        \ more efficiently
+
+ LDY #NI%-1             \ There are NI% bytes in each ship data block (and in
+                        \ the INWK workspace, so we set a counter in Y so we can
+                        \ loop through them
+
+.MAL2
+
+ LDA (INF),Y            \ Load the Y-th byte of INF and store it in the Y-th
+ STA INWK,Y             \ byte of INWK
+
+ DEY                    \ Decrement the loop counter
+
+ BPL MAL2               \ Loop back for the next byte until we have copied the
+                        \ last byte from INF to INWK
+
+ LDA TYPE               \ If the ship type is negative then this indicates a
+ BMI MA21               \ planet or sun, so jump down to MA21, as the next bit
+                        \ sets up a pointer to the ship blueprint, and then
+                        \ checks for energy bomb damage, and neither of these
+                        \ apply to planets and suns
+
+ ASL A                  \ Set Y = ship type * 2
  TAY
- LDA &55FE,Y
- STA &1E
- LDA &55FF,Y
- STA &1F
 
-.l_13b6
+ LDA XX21-2,Y           \ The ship blueprints at XX21 start with a lookup
+ STA XX0                \ table that points to the individual ship blueprints,
+                        \ so this fetches the low byte of this particular ship
+                        \ type's blueprint and stores it in XX0
 
- JSR MVEIT
- LDY #&24
+ LDA XX21-1,Y           \ Fetch the high byte of this particular ship type's
+ STA XX0+1              \ blueprint and store it in XX0+1
 
-.l_13bb
+\ Omit part 5 (energy bomb)
 
- LDA &46,Y
- STA (&20),Y
- DEY
- BPL l_13bb
- LDA &65
- AND #&A0
- JSR l_41bf
- BNE l_141d
- LDA &46
- ORA &49
- ORA &4C
- BMI l_141d
- LDX &8C
- BMI l_141d
- CPX #&02
- BEQ l_1420
- AND #&C0
- BNE l_141d
- CPX #&01
- BEQ l_141d
- LDA BST
- AND &4B
- BPL l_1464
- CPX #&05
- BEQ l_13fd
- LDY #&00
- LDA (&1E),Y
+\ ******************************************************************************
+\
+\       Name: Main flight loop (Part 6 of 16)
+\       Type: Subroutine
+\   Category: Main loop
+\    Summary: For each nearby ship: Move the ship in space and copy the updated
+\             INWK data block back to K%
+\  Deep dive: Program flow of the main game loop
+\             Program flow of the ship-moving routine
+\             Ship data blocks
+\
+\ ------------------------------------------------------------------------------
+\
+\ The main flight loop covers most of the flight-specific aspects of Elite. This
+\ section covers the following:
+\
+\   * Continue looping through all the ships in the local bubble, and for each
+\     one:
+\
+\     * Move the ship in space
+\
+\     * Copy the updated ship's data block from INWK back to K%
+\
+\ ******************************************************************************
+
+.MA21
+
+ JSR MVEIT              \ Call MVEIT to move the ship we are processing in space
+
+                        \ Now that we are done processing this ship, we need to
+                        \ copy the ship data back from INWK to the correct place
+                        \ in the K% workspace. We already set INF in part 4 to
+                        \ point to the ship's data block in K%, so we can simply
+                        \ do the reverse of the copy we did before, this time
+                        \ copying from INWK to INF
+
+ LDY #(NI%-1)           \ Set a counter in Y so we can loop through the NI%
+                        \ bytes in the ship data block
+
+.MAL3
+
+ LDA INWK,Y             \ Load the Y-th byte of INWK and store it in the Y-th
+ STA (INF),Y            \ byte of INF
+
+ DEY                    \ Decrement the loop counter
+
+ BPL MAL3               \ Loop back for the next byte, until we have copied the
+                        \ last byte from INWK back to INF
+
+\ ******************************************************************************
+\
+\       Name: Main flight loop (Part 7 of 16)
+\       Type: Subroutine
+\   Category: Main loop
+\    Summary: For each nearby ship: Check whether we are docking, scooping or
+\             colliding with it
+\  Deep dive: Program flow of the main game loop
+\
+\ ------------------------------------------------------------------------------
+\
+\ The main flight loop covers most of the flight-specific aspects of Elite. This
+\ section covers the following:
+\
+\   * Continue looping through all the ships in the local bubble, and for each
+\     one:
+\
+\     * Check how close we are to this ship and work out if we are docking,
+\       scooping or colliding with it
+\
+\ ******************************************************************************
+
+ LDA INWK+31            \ Fetch the status of this ship from bits 5 (is ship
+ AND #%10100000         \ exploding?) and bit 7 (has ship been killed?) from
+                        \ ship byte #31 into A
+
+ JSR MAS4               \ Or this value with x_hi, y_hi and z_hi
+
+ BNE MA65               \ If this value is non-zero, then either the ship is
+                        \ far away (i.e. has a non-zero high byte in at least
+                        \ one of the three axes), or it is already exploding,
+                        \ or has been flagged as being killed - in which case
+                        \ jump to MA65 to skip the following, as we can't dock
+                        \ scoop or collide with it
+
+ LDA INWK               \ Set A = (x_lo OR y_lo OR z_lo), and if bit 7 of the
+ ORA INWK+3             \ result is set, the ship is still a fair distance
+ ORA INWK+6             \ away (further than 127 in at least one axis), so jump
+ BMI MA65               \ to MA65 to skip the following, as it's too far away to
+                        \ dock, scoop or collide with
+
+ LDX TYPE               \ If the current ship type is negative then it's either
+ BMI MA65               \ a planet or a sun, so jump down to MA65 to skip the
+                        \ following, as we can't dock with it or scoop it
+
+ CPX #SST               \ If this ship is the space station, jump to ISDK to
+ BEQ ISDK               \ check whether we are docking with it
+
+ AND #%11000000         \ If bit 6 of (x_lo OR y_lo OR z_lo) is set, then the
+ BNE MA65               \ ship is still a reasonable distance away (further than
+                        \ 63 in at least one axis), so jump to MA65 to skip the
+                        \ following, as it's too far away to dock, scoop or
+                        \ collide with
+
+ CPX #MSL               \ If this ship is a missile, jump down to MA65 to skip
+ BEQ MA65               \ the following, as we can't scoop or dock with a
+                        \ missile, and it has its own dedicated collision
+                        \ checks in the TACTICS routine
+
+ LDA BST                \ If we have fuel scoops fitted then BST will be &FF,
+                        \ otherwise it will be 0
+
+ AND INWK+5             \ Ship byte #5 contains the y_sign of this ship, so a
+                        \ negative value here means the canister is below us,
+                        \ which means the result of the AND will be negative if
+                        \ the canister is below us and we have a fuel scoop
+                        \ fitted
+
+ BPL MA58               \ If the result is positive, then we either have no
+                        \ scoop or the canister is above us, and in both cases
+                        \ this means we can't scoop the item, so jump to MA58
+                        \ to process a collision
+
+\ ******************************************************************************
+\
+\       Name: Main flight loop (Part 8 of 16)
+\       Type: Subroutine
+\   Category: Main loop
+\    Summary: For each nearby ship: Process us potentially scooping this item
+\  Deep dive: Program flow of the main game loop
+\
+\ ------------------------------------------------------------------------------
+\
+\ The main flight loop covers most of the flight-specific aspects of Elite. This
+\ section covers the following:
+\
+\   * Continue looping through all the ships in the local bubble, and for each
+\     one:
+\
+\     * Process us potentially scooping this item
+\
+\ ******************************************************************************
+
+ CPX #OIL               \ If this is a cargo canister, jump to oily to randomly
+ BEQ oily               \ decide the canister's contents
+
+ LDY #0                 \ Fetch byte #0 of the ship's blueprint
+ LDA (XX0),Y
+
+ LSR A                  \ Shift it right four times, so A now contains the high
+ LSR A                  \ nibble (i.e. bits 4-7)
  LSR A
  LSR A
- LSR A
- LSR A
- BEQ l_1464
- ADC #&01
- BNE l_1402
 
-.l_13fd
+ BEQ MA58               \ If A = 0, jump to MA58 to skip all the docking and
+                        \ scooping checks
 
- JSR DORND
- \	AND #&07
- AND #&0F
+                        \ Only the Thargon, alloy plate, splinter and escape pod
+                        \ have non-zero upper nibbles in their blueprint byte #0
+                        \ so if we get here, our ship is one of those, and the
+                        \ upper nibble gives the market item number of the item
+                        \ when scooped, less 1
 
-.l_1402
+ ADC #1                 \ Add 1 to the upper nibble to get the market item
+                        \ number
 
- TAX
- JSR l_2aec
- BCS l_1464
+ BNE slvy2              \ Skip to slvy2 so we scoop the ship as a market item
+
+.oily
+
+ JSR DORND              \ Set A and X to random numbers and reduce A to a
+ AND #15                \ random number in the range 0-15 AJD
+
+.slvy2
+
+                        \ By the time we get here, we are scooping, and A
+                        \ contains the type of item we are scooping (a random
+                        \ AJD
+
+ TAX                    \ AJD
+ JSR tnpr_FLIGHT
+
+ BCS MA58               \ AJD
  INC QQ20,X
  TXA
  ADC #&D0
  JSR MESS
- JSR top_6a
 
-.l_141d
+ JSR top_6a             \ AJD
 
- JMP l_1473
+.MA65
 
-.l_1420
+ JMP MA26               \ If we get here, then the ship we are processing was
+                        \ too far away to be scooped, docked or collided with,
+                        \ so jump to MA26 to skip over the collision routines
+                        \ and move on to missile targeting
 
- LDA &0949
- AND #&04
- BNE l_1449
- LDA &54
- CMP #&D6
- BCC l_1449
- LDY #&25
- JSR l_42ae
- LDA &36
- CMP #&56
- BCC l_1449
- LDA &56
- AND #&7F
- CMP #&50
- BCC l_1449
+\ ******************************************************************************
+\
+\       Name: Main flight loop (Part 9 of 16)
+\       Type: Subroutine
+\   Category: Main loop
+\    Summary: For each nearby ship: If it is a space station, check whether we
+\             are successfully docking with it
+\  Deep dive: Program flow of the main game loop
+\             Docking checks
+\
+\ ------------------------------------------------------------------------------
+\
+\ The main flight loop covers most of the flight-specific aspects of Elite. This
+\ section covers the following:
+\
+\   * Process docking with a space station
+\
+\ For details on the various docking checks in this routine, see the deep dive
+\ on "Docking checks".
+\
+\ Other entry points:
+\
+\   GOIN                We jump here from part 3 of the main flight loop if the
+\                       docking computer is activated by pressing "C"
+\
+\ ******************************************************************************
+
+.ISDK
+
+ LDA K%+NI%+36          \ 1. Fetch the NEWB flags (byte #36) of the second ship
+ AND #%00000100         \ in the ship data workspace at K%, which is reserved
+ BNE MA62               \ for the sun or the space station (in this case it's
+                        \ the latter), and if bit 2 is set, meaning the station
+                        \ is hostile, jump down to MA62 to fail docking (so
+                        \ trying to dock at a station that we have annoyed does
+                        \ not end well)
+
+ LDA INWK+14            \ 2. If nosev_z_hi < 214, jump down to MA62 to fail
+ CMP #214               \ docking, as the angle of approach is greater than 26
+ BCC MA62               \ degrees
+
+ LDY #&25               \ AJD
+
+ JSR SPS1               \ Call SPS1 to calculate the vector to the planet and
+                        \ store it in XX15
+
+ LDA XX15+2             \ Set A to the z-axis of the vector
+
+ CMP #86                \ 4. If z-axis < 86, jump to MA62 to fail docking, as
+ BCC MA62               \ we are not in the 26.3 degree safe cone of approach
+
+ LDA INWK+16            \ 5. If |roofv_x_hi| < 80, jump to MA62 to fail docking,
+ AND #%01111111         \ as the slot is more than 36.6 degrees from horizontal
+ CMP #80
+ BCC MA62
 
 .GOIN
 
- JSR RES2
- LDA #&08
- JSR l_263d
- JMP run_tcode
- \l_1452
- \	JSR EXNO3
- \	JSR l_2160
- \	BNE l_1473
+                        \ If we arrive here, either the docking computer has
+                        \ been activated, or we just docked successfully
 
-.l_1449
+ JSR RES2               \ Reset a number of flight variables and workspaces
 
- LDA &7D
- CMP #&05
+ LDA #8                 \ Set the step size for the launch tunnel rings to 8, so
+                        \ there are fewer sections in the rings and they are
+                        \ quite polygonal (compared to the step size of 4 used
+                        \ in the much rounder hyperspace rings)
+
+ JSR HFS2               \ Call HFS2 to draw the launch tunnel rings
+
+ JMP DOENTRY            \ Go to the docking bay (i.e. show the ship hanger)
+
+.MA62
+
+                        \ If we arrive here, docking has just failed
+
+ LDA &7D                \ AJD
+ CMP #5
  BCS n_crunch
- LDA &033F
+
+\ ******************************************************************************
+\
+\       Name: Main flight loop (Part 10 of 16)
+\       Type: Subroutine
+\   Category: Main loop
+\    Summary: For each nearby ship: Remove if scooped, or process collisions
+\  Deep dive: Program flow of the main game loop
+\
+\ ------------------------------------------------------------------------------
+\
+\ The main flight loop covers most of the flight-specific aspects of Elite. This
+\ section covers the following:
+\
+\   * Continue looping through all the ships in the local bubble, and for each
+\     one:
+\
+\     * Remove scooped item after both successful and failed scoopings
+\
+\     * Process collisions
+\
+\ ******************************************************************************
+
+ LDA &033F              \ AJD
  AND #&04
  EOR #&05
- \	LDA #&04
- BNE l_146d
+ BNE MA63
 
-.l_1464
+.MA58
 
  LDA #&40
  JSR n_hit
@@ -2459,106 +2943,194 @@ BRKV = P% - 2
 
  LDA #&80
 
-.l_146d
+.MA63
 
- JSR n_through
- JSR EXNO3
+ JSR OOPS               \ The amount of damage is in A, so call OOPS to reduce
+                        \ our shields, and if the shields are gone, there's a
+                        \ a chance of cargo loss or even death
 
-.l_1473
+ JSR EXNO3              \ Make the sound of colliding with the other ship and
+                        \ fall through into MA26 to try targeting a missile
 
- LDA &6A
- BPL l_147a
- JSR SCAN
+\ ******************************************************************************
+\
+\       Name: Main flight loop (Part 11 of 16)
+\       Type: Subroutine
+\   Category: Main loop
+\    Summary: For each nearby ship: Process missile lock and firing our laser
+\  Deep dive: Program flow of the main game loop
+\             Flipping axes between space views
+\
+\ ------------------------------------------------------------------------------
+\
+\ The main flight loop covers most of the flight-specific aspects of Elite. This
+\ section covers the following:
+\
+\   * Continue looping through all the ships in the local bubble, and for each
+\     one:
+\
+\     * If this is not the front space view, flip the axes of the ship's
+\        coordinates in INWK
+\
+\     * Process missile lock
+\
+\     * Process our laser firing
+\
+\ ******************************************************************************
 
-.l_147a
+.MA26
 
- LDA &87
- BNE l_14f0
- LDX VIEW
- BEQ l_1486
- JSR PU1
+ LDA NEWB               \ If bit 7 of the ship's NEWB flags is clear, skip the
+ BPL P%+5               \ following instruction
 
-.l_1486
+ JSR SCAN               \ Bit 7 of the ship's NEWB flags is set, which means the
+                        \ ship has docked or been scooped, so we draw the ship
+                        \ on the scanner, which has the effect of removing it
 
- JSR l_24c7
- BCC l_14ed
- LDA MSAR
- BEQ l_149a
- JSR BEEP
- LDX &84
- LDY #&0E
- JSR ABORT2
+ LDA QQ11               \ If this is not a space view, jump to MA15 to skip
+ BNE MA15               \ missile and laser locking
 
-.l_149a
+ LDX VIEW               \ Load the current view into X
 
- LDA &44
- BEQ l_14ed
- LDX #&0F
- JSR EXNO
- LDA &44
- LDY &8C
- CPY #&02
- BEQ l_14e8
+ BEQ P%+5               \ If the current view is the front view, skip the
+                        \ following instruction, as the geometry in INWK is
+                        \ already correct
+
+ JSR PU1                \ Call PU1 to update the geometric axes in INWK to
+                        \ match the view (front, rear, left, right)
+
+ JSR HITCH              \ Call HITCH to see if this ship is in the crosshairs,
+ BCC MA8                \ in which case the C flag will be set (so if there is
+                        \ no missile or laser lock, we jump to MA8 to skip the
+                        \ following)
+
+ LDA MSAR               \ We have missile lock, so check whether the leftmost
+ BEQ MA47               \ missile is currently armed, and if not, jump to MA47
+                        \ to process laser fire, as we can't lock an unarmed
+                        \ missile
+
+ JSR BEEP               \ We have missile lock and an armed missile, so call
+                        \ the BEEP subroutine to make a short, high beep
+
+ LDX XSAV               \ Call ABORT2 to store the details of this missile
+ LDY #&0E               \ lock, with the targeted ship's slot number in X
+ JSR ABORT2             \ (which we stored in XSAV at the start of this ship's
+                        \ loop at MAL1), and set the colour of the missile
+                        \ indicator to the colour in Y (red = &0E)
+
+.MA47
+
+                        \ If we get here then the ship is in our sights, but
+                        \ we didn't lock a missile, so let's see if we're
+                        \ firing the laser
+
+ LDA LAS                \ If we are firing the laser then LAS will contain the
+ BEQ MA8                \ laser power (which we set in MA68 above), so if this
+                        \ is zero, jump down to MA8 to skip the following
+
+ LDX #15                \ We are firing our laser and the ship in INWK is in
+ JSR EXNO               \ the crosshairs, so call EXNO to make the sound of
+                        \ us making a laser strike on another ship
+
+ LDA &44                \ AJD
+
+ LDY TYPE               \ Did we just hit the space station? If so, jump to
+ CPY #SST               \ MA14 to AJD
+ BEQ MA14
+
  CPY #&1F
- BNE l_14b7
+ BNE BURN
  LSR A
 
-.l_14b7
+.BURN
 
  LSR A
- JSR n_hit	\ hit enemy
- BCS l_14e6
- LDA &8C
- CMP #&07
- BNE l_14d9
- LDA &44
- CMP new_mining
- BNE l_14d9
- JSR DORND
- LDX #&08
- AND #&03
- JSR l_1687
 
-.l_14d9
+ JSR n_hit              \ hit enemy AJD
+ BCS MA14
 
- LDY #&04
- JSR l_1678
- LDY #&05
- JSR l_1678
- JSR EXNO2
+ LDA TYPE               \ Did we just kill an asteroid? If not, jump to nosp,
+ CMP #AST               \ otherwise keep going
+ BNE nosp
 
-.l_14e6
+ LDA LAS                \ Did we kill the asteroid using mining lasers? If not,
+ CMP new_mining         \ jump to nosp, otherwise keep going AJD
+ BNE nosp
 
-.l_14e8
+ JSR DORND              \ Set A and X to random numbers
 
- JSR anger_8c
+ LDX #SPL               \ Set X to the ship type for a splinter
 
-.l_14ed
+ AND #3                 \ Reduce the random number in A to the range 0-3
 
- JSR LL9
+ JSR SPIN2              \ Call SPIN2 to spawn A items of type X (i.e. spawn
+                        \ 0-3 spliters)
 
-.l_14f0
+.nosp
 
- LDY #&23
- LDA &69
- STA (&20),Y
- LDA &6A
- BMI l_1527
- LDA &65
- BPL l_152a
- AND #&20
- BEQ l_152a
- \	AND &6A	\ A=&20
- \	BEQ n_trader
- \	INC FIST
- \	BNE n_trader
- \	DEC FIST
- \n_trader
- \	LDA &6A
- \	AND #&40
- \	ORA FIST
- \	STA FIST
- BIT &6A	\ A=&20
+ LDY #PLT               \ Randomly spawn some alloy plates
+ JSR SPIN
+
+ LDY #OIL               \ Randomly spawn some cargo canisters
+ JSR SPIN
+
+ JSR EXNO2              \ Call EXNO2 to process the fact that we have killed a
+                        \ ship (so increase the kill tally, make an explosion
+                        \ sound and so on)
+
+.MA14
+
+ JSR anger_8c           \ AJD
+
+\ ******************************************************************************
+\
+\       Name: Main flight loop (Part 12 of 16)
+\       Type: Subroutine
+\   Category: Main loop
+\    Summary: For each nearby ship: Draw the ship, remove if killed, loop back
+\  Deep dive: Program flow of the main game loop
+\             Drawing ships
+\
+\ ------------------------------------------------------------------------------
+\
+\ The main flight loop covers most of the flight-specific aspects of Elite. This
+\ section covers the following:
+\
+\   * Continue looping through all the ships in the local bubble, and for each
+\     one:
+\
+\     * Draw the ship
+\
+\     * Process removal of killed ships
+\
+\   * Loop back up to MAL1 to move onto the next ship in the local bubble
+\
+\ ******************************************************************************
+
+.MA8
+
+ JSR LL9                \ Call LL9 to draw the ship we're processing on-screen
+
+.MA15
+
+ LDY #35                \ Fetch the ship's energy from byte #35 and copy it to
+ LDA INWK+35            \ byte #35 in INF (so the ship's data in K% gets
+ STA (INF),Y            \ updated)
+
+ LDA NEWB               \ If bit 7 of the ship's NEWB flags is set, which means
+ BMI KS1S               \ the ship has docked or been scooped, jump to KS1S to
+                        \ skip the following, as we can't get a bounty for a
+                        \ ship that's no longer around
+
+ LDA INWK+31            \ If bit 7 of the ship's byte #31 is clear, then the
+ BPL MAC1               \ ship hasn't been killed by energy bomb, collision or
+                        \ laser fire, so jump to MAC1 to skip the following
+
+ AND #%00100000         \ If bit 5 of the ship's byte #31 is clear then the
+ BEQ MAC1               \ ship is no longer exploding, so jump to MAC1 to skip
+                        \ the following
+
+ BIT &6A                \ AJD
  BVS n_badboy
  BEQ n_goodboy
  LDA #&80
@@ -2574,37 +3146,41 @@ BRKV = P% - 2
  BIT FIST
  BNE n_bitlegal
  ADC FIST
- BCS l_1527
+ BCS KS1S
  STA FIST
- BCC l_1527
+ BCC KS1S
 
 .n_goodboy
 
- LDA &034A
- ORA &0341
- BNE l_1527
- \	LDA &6A
- \	AND #&60
- \	BNE l_1527
- LDY #&0A
- LDA (&1E),Y
- \	BEQ l_1527
- TAX
- INY
- LDA (&1E),Y
- TAY
- JSR MCASH
- LDA #&00
- JSR MESS
+ LDA DLY                \ If we already have an in-flight message on-screen (in
+ ORA MJ                 \ which case DLY > 0), or we are in witchspace (in
+ BNE KS1S               \ which case MJ > 0), jump to KS1S to skip showing an
+                        \ on-screen bounty for this kill
 
-.l_1527
+ LDY #10                \ AJD
+ LDA (XX0),Y
 
- JMP l_3d7f
+ TAX                    \ Put the low byte of the bounty into X
+
+ INY                    \ Fetch byte #11 of the ship's blueprint, which is the
+ LDA (XX0),Y            \ high byte of the bounty awarded (in Cr * 10), and put
+ TAY                    \ it into Y
+
+ JSR MCASH              \ Call MCASH to add (Y X) to the cash pot
+
+ LDA #0                 \ Print control code 0 (current cash, right-aligned to
+ JSR MESS               \ width 9, then " CR", newline) as an in-flight message
+
+.KS1S
+
+ JMP KS1                \ Process the killing of this ship (which removes this
+                        \ ship from its slot and shuffles all the other ships
+                        \ down to close up the gap)
 
 .n_hit
 
  \ hit opponent
- STA &D1
+ STA &D1                \ AJD
  SEC
  LDY #&0E	\ opponent shield
  LDA (&1E),Y
@@ -2618,238 +3194,562 @@ BRKV = P% - 2
  ADC &69
  STA &69
  BCS n_kill
- JSR l_2160
+ JSR TA87+3
 
 .n_kill
 
  \ C clear if dead
  RTS
 
-.l_152a
+.MAC1
 
- LDA &8C
- BMI l_1533
- JSR l_41b2
- BCC l_1527
+ LDA TYPE               \ If the ship we are processing is a planet or sun,
+ BMI MA27               \ jump to MA27 to skip the following two instructions
 
-.l_1533
+ JSR FAROF              \ If the ship we are processing is a long way away (its
+ BCC KS1S               \ distance in any one direction is > 224, jump to KS1S
+                        \ to remove the ship from our local bubble, as it's just
+                        \ left the building
 
- LDY #&1F
- LDA &65
- STA (&20),Y
- LDX &84
- INX
- JMP l_1376
+.MA27
 
-.l_153f
+ LDY #31                \ Fetch the ship's explosion/killed state from byte #31
+ LDA INWK+31            \ and copy it to byte #31 in INF (so the ship's data in
+ STA (INF),Y            \ K% gets updated)
 
- LDA &8A
- AND #&07
- BNE l_15c2
- LDX ENERGY
- BPL l_156c
- LDX ASH
- JSR SHD
+ LDX XSAV               \ We're done processing this ship, so fetch the ship's
+                        \ slot number, which we saved in XSAV back at the start
+                        \ of the loop
+
+ INX                    \ Increment the slot number to move on to the next slot
+
+ JMP MAL1               \ And jump back up to the beginning of the loop to get
+                        \ the next ship in the local bubble for processing
+
+\ ******************************************************************************
+\
+\       Name: Main flight loop (Part 13 of 16)
+\       Type: Subroutine
+\   Category: Main loop
+\    Summary: Show energy bomb effect, charge shields and energy banks
+\  Deep dive: Program flow of the main game loop
+\             Scheduling tasks with the main loop counter
+\
+\ ------------------------------------------------------------------------------
+\
+\ The main flight loop covers most of the flight-specific aspects of Elite. This
+\ section covers the following:
+\
+\   * Show energy bomb effect (if applicable)
+\
+\   * Charge shields and energy banks (every 7 iterations of the main loop)
+\
+\ ******************************************************************************
+
+.MA18
+
+.MA77
+
+ LDA MCNT               \ Fetch the main loop counter and calculate MCNT mod 7,
+ AND #7                 \ jumping to MA22 if it is non-zero (so the following
+ BNE MA22               \ code only runs every 8 iterations of the main loop)
+
+ LDX ENERGY             \ Fetch our ship's energy levels and skip to b if bit 7
+ BPL b                  \ is not set, i.e. only charge the shields from the
+                        \ energy banks if they are at more than 50% charge
+
+ LDX ASH                \ Call SHD to recharge our aft shield and update the
+ JSR SHD                \ shield status in ASH
  STX ASH
- LDX FSH
- JSR SHD
+
+ LDX FSH                \ Call SHD to recharge our forward shield and update
+ JSR SHD                \ the shield status in FSH
  STX FSH
 
-.l_156c
+.b
 
- SEC
- LDA ENGY
- ADC ENERGY
- BCS l_1578
- STA ENERGY
+ SEC                    \ Set A = ENERGY + ENGY + 1, so our ship's energy
+ LDA ENGY               \ level goes up by 2 if we have an energy unit fitted,
+ ADC ENERGY             \ otherwise it goes up by 1
 
-.l_1578
+ BCS P%+5               \ If the value of A did not overflow (the maximum
+ STA ENERGY             \ energy level is &FF), then store A in ENERGY
 
- LDA &0341
- BNE l_15bf
- LDA &8A
- AND #&1F
- BNE l_15cb
- LDA &0320
- BNE l_15bf
- TAY
- JSR MAS2
- BNE l_15bf
- LDX #&1C
+\ ******************************************************************************
+\
+\       Name: Main flight loop (Part 14 of 16)
+\       Type: Subroutine
+\   Category: Main loop
+\    Summary: Spawn a space station if we are close enough to the planet
+\  Deep dive: Program flow of the main game loop
+\             Scheduling tasks with the main loop counter
+\             Ship data blocks
+\
+\ ------------------------------------------------------------------------------
+\
+\ The main flight loop covers most of the flight-specific aspects of Elite. This
+\ section covers the following:
+\
+\   * Spawn a space station if we are close enough to the planet (every 32
+\     iterations of the main loop)
+\
+\ ******************************************************************************
 
-.l_1590
+ LDA MJ                 \ If we are in witchspace, jump down to MA23S to skip
+ BNE MA23S              \ the following, as there are no space stations in
+                        \ witchspace
 
- LDA &0900,X
- STA &46,X
- DEX
- BPL l_1590
- INX
- LDY #&09
- JSR MAS1
- BNE l_15bf
- LDX #&03
- LDY #&0B
- JSR MAS1
- BNE l_15bf
- LDX #&06
- LDY #&0D
- JSR MAS1
- BNE l_15bf
- LDA #&C0
- JSR l_41b4
- BCC l_15bf
- JSR WPLS
- JSR NWSPS
+ LDA MCNT               \ Fetch the main loop counter and calculate MCNT mod 32,
+ AND #31                \ jumping to MA93 if it is on-zero (so the following
+ BNE MA93               \ code only runs every 32 iterations of the main loop
 
-.l_15bf
+ LDA SSPR               \ If we are inside the space station safe zone, jump to
+ BNE MA23S              \ MA23S to skip the following, as we already have a
+                        \ space station and don't need another
 
- JMP l_1648
+ TAY                    \ Set Y = A = 0 (A is 0 as we didn't branch with the
+                        \ previous BNE instruction)
 
-.l_15c2
+ JSR MAS2               \ Call MAS2 to calculate the largest distance to the
+ BNE MA23S              \ planet in any of the three axes, and if it's
+                        \ non-zero, jump to MA23S to skip the following, as we
+                        \ are too far from the planet to bump into a space
+                        \ station
 
- LDA &0341
- BNE l_15bf
- LDA &8A
- AND #&1F
+                        \ We now want to spawn a space station, so first we
+                        \ need to set up a ship data block for the station in
+                        \ INWK that we can then pass to NWSPS to add a new
+                        \ station to our bubble of universe. We do this by
+                        \ copying the planet data block from K% to INWK so we
+                        \ can work on it, but we only need the first 29 bytes,
+                        \ as we don't need to worry about bytes #29 to #35
+                        \ for planets (as they don't have rotation counters,
+                        \ AI, explosions, missiles, a ship line heap or energy
+                        \ levels)
 
-.l_15cb
+ LDX #28                \ So we set a counter in X to copy 29 bytes from K%+0
+                        \ to K%+28
 
- CMP #&0A
- BNE l_15fd
- LDA #&32
- CMP ENERGY
- BCC l_15da
- ASL A
- JSR MESS
+.MAL4
 
-.l_15da
+ LDA K%,X               \ Load the X-th byte of K% and store in the X-th byte
+ STA INWK,X             \ of the INWK workspace
 
- LDY #&FF
+ DEX                    \ Decrement the loop counter
+
+ BPL MAL4               \ Loop back for the next byte until we have copied the
+                        \ first 28 bytes of K% to INWK
+
+                        \ We now check the distance from our ship (at the
+                        \ origin) towards the planet's surface, by adding the
+                        \ planet's nosev vector to the planet's centre at
+                        \ (x, y, z) and checking our distance to the end
+                        \ point along the relevant axis
+
+ INX                    \ Set X = 0 (as we ended the above loop with X as &FF)
+
+ LDY #9                 \ Call MAS1 with X = 0, Y = 9 to do the following:
+ JSR MAS1               \
+                        \   (x_sign x_hi x_lo) += (nosev_x_hi nosev_x_lo) * 2
+                        \
+                        \   A = |x_hi|
+
+ BNE MA23S              \ If A > 0, jump to MA23S to skip the following, as we
+                        \ are too far from the planet in the x-direction to
+                        \ bump into a space station
+
+ LDX #3                 \ Call MAS1 with X = 3, Y = 11 to do the following:
+ LDY #11                \
+ JSR MAS1               \   (y_sign y_hi y_lo) += (nosev_y_hi nosev_y_lo) * 2
+                        \
+                        \   A = |y_hi|
+
+ BNE MA23S              \ If A > 0, jump to MA23S to skip the following, as we
+                        \ are too far from the planet in the y-direction to
+                        \ bump into a space station
+
+ LDX #6                 \ Call MAS1 with X = 6, Y = 13 to do the following:
+ LDY #13                \
+ JSR MAS1               \   (z_sign z_hi z_lo) += (nosev_z_hi nosev_z_lo) * 2
+                        \
+                        \   A = |z_hi|
+
+ BNE MA23S              \ If A > 0, jump to MA23S to skip the following, as we
+                        \ are too far from the planet in the z-direction to
+                        \ bump into a space station
+
+ LDA #192               \ Call FAROF2 to compare x_hi, y_hi and z_hi with 192,
+ JSR FAROF2             \ which will set the C flag if all three are < 192, or
+                        \ clear the C flag if any of them are >= 192
+
+ BCC MA23S              \ Jump to MA23S if any one of x_hi, y_hi or z_hi are
+                        \ >= 192 (i.e. they must all be < 192 for us to be near
+                        \ enough to the planet to bump into a space station)
+
+ JSR WPLS               \ Call WPLS to remove the sun from the screen, as we
+                        \ can't have both the sun and the space station at the
+                        \ same time
+
+ JSR NWSPS              \ Add a new space station to our local bubble of
+                        \ universe
+
+.MA23S
+
+ JMP MA23               \ Jump to MA23 to skip the following planet and sun
+                        \ altitude checks
+
+\ ******************************************************************************
+\
+\       Name: Main flight loop (Part 15 of 16)
+\       Type: Subroutine
+\   Category: Main loop
+\    Summary: Perform altitude checks with the planet and sun and process fuel
+\             scooping if appropriate
+\  Deep dive: Program flow of the main game loop
+\             Scheduling tasks with the main loop counter
+\
+\ ------------------------------------------------------------------------------
+\
+\ The main flight loop covers most of the flight-specific aspects of Elite. This
+\ section covers the following:
+\
+\   * Perform an altitude check with the planet (every 32 iterations of the main
+\     loop, on iteration 10 of each 32)
+\
+\   * Perform an an altitude check with the sun and process fuel scooping (every
+\     32 iterations of the main loop, on iteration 20 of each 32)
+\
+\ ******************************************************************************
+
+.MA22
+
+ LDA MJ                 \ If we are in witchspace, jump down to MA23S to skip
+ BNE MA23S              \ the following, as there are no planets or suns to
+                        \ bump into in witchspace
+
+ LDA MCNT               \ Fetch the main loop counter and calculate MCNT mod 32,
+ AND #31                \ which tells us the position of this loop in each block
+                        \ of 32 iterations
+
+.MA93
+
+ CMP #10                \ If this is the tenth iteration in this block of 32,
+ BNE MA29               \ do the following, otherwise jump to MA29 to skip the
+                        \ planet altitude check and move on to the sun distance
+                        \ check
+
+ LDA #50                \ If our energy bank status in ENERGY is >= 50, skip
+ CMP ENERGY             \ printing the following message (so the message is
+ BCC P%+6               \ only shown if our energy is low)
+
+ ASL A                  \ Print recursive token 100 ("ENERGY LOW{beep}") as an
+ JSR MESS               \ in-flight message
+
+ LDY #&FF               \ Set our altitude in ALTIT to &FF, the maximum
  STY ALTIT
- INY
- JSR m
- BNE l_1648
- JSR MAS3
- BCS l_1648
- SBC #&24
- BCC l_15fa
- STA &82
- JSR LL5
- LDA &81
+
+ INY                    \ Set Y = 0
+
+ JSR m                  \ Call m to calculate the maximum distance to the
+                        \ planet in any of the three axes, returned in A
+
+ BNE MA23               \ If A > 0 then we are a fair distance away from the
+                        \ planet in at least one axis, so jump to MA23 to skip
+                        \ the rest of the altitude check
+
+ JSR MAS3               \ Set A = x_hi^2 + y_hi^2 + z_hi^2, so using Pythagoras
+                        \ we now know that A now contains the square of the
+                        \ distance between our ship (at the origin) and the
+                        \ centre of the planet at (x_hi, y_hi, z_hi)
+
+ BCS MA23               \ If the C flag was set by MAS3, then the result
+                        \ overflowed (was greater than &FF) and we are still a
+                        \ fair distance from the planet, so jump to MA23 as we
+                        \ haven't crashed into the planet
+
+ SBC #36                \ Subtract 36 from x_hi^2 + y_hi^2 + z_hi^2. The radius
+                        \ of the planet is defined as 6 units and 6^2 = 36, so
+                        \ A now contains the high byte of our altitude above
+                        \ the planet surface, squared
+
+ BCC MA28               \ If A < 0 then jump to MA28 as we have crashed into
+                        \ the planet
+
+ STA R                  \ We are getting close to the planet, so we need to
+ JSR LL5                \ work out how close. We know from the above that A
+                        \ contains our altitude squared, so we store A in R
+                        \ and call LL5 to calculate:
+                        \
+                        \   Q = SQRT(R Q) = SQRT(A Q)
+                        \
+                        \ Interestingly, Q doesn't appear to be set to 0 for
+                        \ this calculation, so presumably this doesn't make a
+                        \ difference
+
+ LDA Q                  \ Store the result in ALTIT, our altitude
  STA ALTIT
- BNE l_1648
 
-.l_15fa
+ BNE MA23               \ If our altitude is non-zero then we haven't crashed,
+                        \ so jump to MA23 to skip to the next section
 
- JMP l_41c6
+.MA28
 
-.l_15fd
+ JMP DEATH              \ If we get here then we just crashed into the planet
+                        \ or got too close to the sun, so jump to DEATH to start
+                        \ the funeral preparations and return from the main
+                        \ flight loop using a tail call
 
- CMP #&0F
- BNE l_160a
- LDA &033F
- BEQ l_1648
- LDA #&7B
- BNE l_1645
+.MA29
 
-.l_160a
+ CMP #15                \ If this is the 15th iteration in this block of 32,
+ BNE MA33               \ do the following, otherwise jump to MA33 to skip the
+                        \ docking computer manoeuvring
 
- CMP #&14
- BNE l_1648
- LDA #&1E
- STA CABTMP
- LDA &0320
- BNE l_1648
- LDY #&25
- JSR MAS2
- BNE l_1648
- JSR MAS3
- EOR #&FF
- ADC #&1E
- STA CABTMP
- BCS l_15fa
- CMP #&E0
- BCC l_1648
- LDA BST
- BEQ l_1648
- LDA &7F
- LSR A
- ADC QQ14
- CMP new_range
- BCC l_1640
+ LDA auto               \ If auto is zero, then the docking computer is not
+ BEQ MA23               \ activated, so jump to MA33 to skip the
+                        \ docking computer manoeuvring
+
+ LDA #123               \ Set A = 123 and jump down to MA34 to print token 123
+ BNE MA34               \ ("DOCKING COMPUTERS ON") as an in-flight message
+
+.MA33
+
+ CMP #20                \ If this is the 20th iteration in this block of 32,
+ BNE MA23               \ do the following, otherwise jump to MA23 to skip the
+                        \ sun altitude check
+
+ LDA #30                \ Set CABTMP to 30, the cabin temperature in deep space
+ STA CABTMP             \ (i.e. one notch on the dashboard bar)
+
+ LDA SSPR               \ If we are inside the space station safe zone, jump to
+ BNE MA23               \ MA23 to skip the following, as we can't have both the
+                        \ sun and space station at the same time, so we clearly
+                        \ can't be flying near the sun
+
+ LDY #NI%               \ Set Y to NI%, which is the offset in K% for the sun's
+                        \ data block, as the second block at K% is reserved for
+                        \ the sun (or space station)
+
+ JSR MAS2               \ Call MAS2 to calculate the largest distance to the
+ BNE MA23               \ sun in any of the three axes, and if it's non-zero,
+                        \ jump to MA23 to skip the following, as we are too far
+                        \ from the sun for scooping or temperature changes
+
+ JSR MAS3               \ Set A = x_hi^2 + y_hi^2 + z_hi^2, so using Pythagoras
+                        \ we now know that A now contains the square of the
+                        \ distance between our ship (at the origin) and the
+                        \ heart of the sun at (x_hi, y_hi, z_hi)
+
+ EOR #%11111111         \ Invert A, so A is now small if we are far from the
+                        \ sun and large if we are close to the sun, in the
+                        \ range 0 = far away to &FF = extremely close, ouch,
+                        \ hot, hot, hot!
+
+ ADC #30                \ Add the minimum cabin temperature of 30, so we get
+                        \ one of the following:
+                        \
+                        \   * If the C flag is clear, A contains the cabin
+                        \     temperature, ranging from 30 to 255, that's hotter
+                        \     the closer we are to the sun
+                        \
+                        \   * If the C flag is set, the addition has rolled over
+                        \     and the cabin temperature is over 255
+
+ STA CABTMP             \ Store the updated cabin temperature
+
+ BCS MA28               \ If the C flag is set then jump to MA28 to die, as
+                        \ our temperature is off the scale
+
+ CMP #&E0               \ If the cabin temperature < 224 then jump to MA23 to
+ BCC MA23               \ to skip fuel scooping, as we aren't close enough
+
+ LDA BST                \ If we don't have fuel scoops fitted, jump to BA23 to
+ BEQ MA23               \ skip fuel scooping, as we can't scoop without fuel
+                        \ scoops
+
+ LDA DELT4+1            \ We are now successfully fuel scooping, so it's time
+ LSR A                  \ to work out how much fuel we're scooping. Fetch the
+                        \ high byte of DELT4, which contains our current speed
+                        \ divided by 4, and halve it to get our current speed
+                        \ divided by 8 (so it's now a value between 1 and 5, as
+                        \ our speed is normally between 1 and 40). This gives
+                        \ us the amount of fuel that's being scooped in A, so
+                        \ the faster we go, the more fuel we scoop, and because
+                        \ the fuel levels are stored as 10 * the fuel in light
+                        \ years, that means we just scooped between 0.1 and 0.5
+                        \ light years of free fuel
+
+ ADC QQ14               \ Set A = A + the current fuel level * 10 (from QQ14)
+
+ CMP new_range          \ AJD
+ BCC P%+5
  LDA new_range
 
-.l_1640
+ STA QQ14               \ Store the updated fuel level in QQ14
 
- STA QQ14
- LDA #&A0
+ LDA #160               \ Set A to token 160 ("FUEL SCOOPS ON")
 
-.l_1645
+.MA34
 
- JSR MESS
+ JSR MESS               \ Print the token in A as an in-flight message
 
-.l_1648
+\ ******************************************************************************
+\
+\       Name: Main flight loop (Part 16 of 16)
+\       Type: Subroutine
+\   Category: Main loop
+\    Summary: Process laser pulsing, E.C.M. energy drain, call stardust routine
+\  Deep dive: Program flow of the main game loop
+\
+\ ------------------------------------------------------------------------------
+\
+\ The main flight loop covers most of the flight-specific aspects of Elite. This
+\ section covers the following:
+\
+\   * Process laser pulsing
+\
+\   * Process E.C.M. energy drain
+\
+\   * Jump to the stardust routine if we are in a space view
+\
+\   * Return from the main flight loop
+\
+\ ******************************************************************************
 
- LDA &0343
- BEQ l_165c
- LDA &0346
- CMP #&08
- BCS l_165c
- JSR LASLI2
- LDA #&00
- STA &0343
+.MA23
 
-.l_165c
+ LDA LAS2               \ If the current view has no laser, jump to MA16 to skip
+ BEQ MA16               \ the following
 
- LDA &0340
- BEQ l_1666
- JSR DENGY
- BEQ l_166e
+ LDA LASCT              \ If LASCT >= 8, jump to MA16 to skip the following, so
+ CMP #8                 \ for a pulse laser with a LASCT between 8 and 10, the
+ BCS MA16               \ the laser stays on, but for a LASCT of 7 or less it
+                        \ gets turned off and stays off until LASCT reaches zero
+                        \ and the next pulse can start (if the fire button is
+                        \ still being pressed)
+                        \
+                        \ For pulse lasers, LASCT gets set to 10 in ma1 above,
+                        \ and it decrements every vertical sync (50 times a
+                        \ second), so this means it pulses five times a second,
+                        \ with the laser being on for the first 3/10 of each
+                        \ pulse and off for the rest of the pulse
+                        \
+                        \ If this is a beam laser, LASCT is 0 so we always keep
+                        \ going here. This means the laser doesn't pulse, but it
+                        \ does get drawn and removed every cycle, in a slightly
+                        \ different place each time, so the beams still flicker
+                        \ around the screen
 
-.l_1666
+ JSR LASLI2             \ Redraw the existing laser lines, which has the effect
+                        \ of removing them from the screen
 
- LDA &30
- BEQ l_1671
- DEC &30
- BNE l_1671
+ LDA #0                 \ Set LAS2 to 0 so if this is a pulse laser, it will
+ STA LAS2               \ skip over the above until the next pulse (this has no
+                        \ effect if this is a beam laser)
 
-.l_166e
+.MA16
 
- JSR ECMOF
+ LDA ECMP               \ If our E.C.M is not on, skip to MA69, otherwise keep
+ BEQ MA69               \ going to drain some energy
 
-.l_1671
+ JSR DENGY              \ Call DENGY to deplete our energy banks by 1
 
- LDA &87
- BNE l_1694
- JMP STARS
+ BEQ MA70               \ If we have no energy left, jump to MA70 to turn our
+                        \ E.C.M. off
 
-.l_1678
+.MA69
 
- JSR DORND
- BPL l_1694
- PHA
- TYA
+ LDA ECMA               \ If an E.C.M is going off (our's or an opponent's) then
+ BEQ MA66               \ keep going, otherwise skip to MA66
+
+ DEC ECMA               \ Decrement the E.C.M. countdown timer, and if it has
+ BNE MA66               \ reached zero, keep going, otherwise skip to MA66
+
+.MA70
+
+ JSR ECMOF              \ If we get here then either we have either run out of
+                        \ energy, or the E.C.M. timer has run down, so switch
+                        \ off the E.C.M.
+
+.MA66
+
+ LDA QQ11               \ If this is not a space view (i.e. QQ11 is non-zero)
+ BNE oh                 \ then jump to oh to return from the main flight loop
+                        \ (as oh is an RTS)
+
+ JMP STARS              \ This is a space view, so jump to the STARS routine to
+                        \ process the stardust, and return from the main flight
+                        \ loop using a tail call
+
+\ ******************************************************************************
+\
+\       Name: SPIN
+\       Type: Subroutine
+\   Category: Universe
+\    Summary: Randomly spawn cargo from a destroyed ship
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   Y                   The type of cargo to consider spawning (typically #PLT
+\                       or #OIL)
+\
+\ Other entry points:
+\
+\   oh                  Contains an RTS
+\
+\   SPIN2               Remove any randomness: spawn cargo of a specific type
+\                       (given in X), and always spawn the number given in A
+\
+\ ******************************************************************************
+
+.SPIN
+
+ JSR DORND              \ Fetch a random number, and jump to oh if it is
+ BPL oh                 \ positive (50% chance)
+
+ PHA                    \ Store A on the stack so we can restore it after the
+                        \ following transfers
+
+ TYA                    \ Copy the cargo type from Y into A and X
  TAX
- PLA
- LDY #&00
- AND (&1E),Y
- AND #&0F
 
-.l_1687
+ PLA                    \ Restore A from the stack
 
- STA &93
- BEQ l_1694
+ LDY #0                 \ Fetch the first byte of the hit ship's blueprint,
+ AND (XX0),Y            \ which determines the maximum number of bits of
+                        \ debris shown when the ship is destroyed, and AND
+                        \ with the random number we just fetched
 
-.l_168b
+ AND #15                \ Reduce the random number in A to the range 0-15
 
- LDA #&00
- JSR l_2592
- DEC &93
- BNE l_168b
+.SPIN2
 
-.l_1694
+ STA CNT                \ Store the result in CNT, so CNT contains a random
+                        \ number between 0 and the maximum number of bits of
+                        \ debris that this ship will release when destroyed
+                        \ (to a maximum of 15 bits of debris)
 
- RTS
+.spl
+
+ BEQ oh                 \ We're going to go round a loop using CNT as a counter
+                        \ so this checks whether the counter is zero and jumps
+                        \ to oh when it gets there (which might be straight
+                        \ away)
+
+ LDA #0                 \ Call SFS1 to spawn the specified cargo from the now
+ JSR SFS1               \ deceased parent ship, giving the spawned canister an
+                        \ AI flag of 0 (no AI, no E.C.M., non-hostile)
+
+ DEC CNT                \ Decrease the loop counter
+
+ BNE spl+2              \ Jump back up to the LDA &0 instruction above (this BPL
+                        \ is effectively a JMP as CNT will never be negative)
+
+.oh
+
+ RTS                    \ Return from the subroutine
 
 \ ******************************************************************************
 \
@@ -5805,12 +6705,32 @@ NEXT
 
  RTS                    \ Return from the subroutine
 
+\ ******************************************************************************
+\
+\       Name: plf2
+\       Type: Subroutine
+\   Category: Text
+\    Summary: Print text followed by a newline and indent of 6 characters
+\
+\ ------------------------------------------------------------------------------
+\
+\ Print a text token followed by a newline, and indent the next line to text
+\ column 6.
+\
+\ Arguments:
+\
+\   A                   The text token to be printed
+\
+\ ******************************************************************************
+
 .plf2
 
- JSR plf
- LDX #&08
+ JSR plf                \ Print the text token in A followed by a newline
+
+ LDX #8                 \ Move the text cursor to column 8
  STX XC
- RTS
+
+ RTS                    \ Return from the subroutine
 
 \ ******************************************************************************
 \
@@ -7664,432 +8584,973 @@ PRINT "S.ELTB ", ~CODE_B%, " ", ~P%, " ", ~LOAD%, " ", ~LOAD_B%
 CODE_C% = P%
 LOAD_C% = LOAD% +P% - CODE%
 
+\ ******************************************************************************
+\
+\       Name: TACTICS (Part 1 of 7)
+\       Type: Subroutine
+\   Category: Tactics
+\    Summary: Apply tactics: Process missiles, both enemy missiles and our own
+\  Deep dive: Program flow of the tactics routine
+\
+\ ------------------------------------------------------------------------------
+\
+\ This section implements missile tactics and is entered at TA18 from the main
+\ entry point below, if the current ship is a missile. Specifically:
+\
+\   * If E.C.M. is active, destroy the missile
+\
+\   * If the missile is hostile towards us, then check how close it is. If it
+\     hasn't reached us, jump to part 3 so it can streak towards us, otherwise
+\     we've been hit, so process a large amount of damage to our ship
+\
+\   * Otherwise see how close the missile is to its target. If it has not yet
+\     reached its target, give the target a chance to activate its E.C.M. if it
+\     has one, otherwise jump to TA19 with K3 set to the vector from the target
+\     to the missile
+\
+\   * If it has reached its target and the target is the space station, destroy
+\     the missile, potentially damaging us if we are nearby
+\
+\   * If it has reached its target and the target is a ship, destroy the missile
+\     and the ship, potentially damaging us if we are nearby
+\
+\ ******************************************************************************
+
 .TA34
 
- LDA #&00
- JSR l_41bf
- BEQ l_210c
- JMP l_21c5
+                        \ If we get here, the missile is hostile
 
-.l_210c
+ LDA #0                 \ Set A to x_hi OR y_hi OR z_hi
+ JSR MAS4
 
- JSR l_2160
- JSR EXNO3
- LDA #&FA
- JMP l_36e4
+ BEQ P%+5               \ If A = 0 then the missile is very close to our ship,
+                        \ so skip the following instruction
 
-.l_2117
+ JMP TA21               \ Jump down to part 3 to set up the vectors and skip
+                        \ straight to aggressive manoeuvring
 
- LDA &30
- BNE l_2150
- LDA &66
- ASL A
- BMI TA34
- LSR A
- TAX
- LDA UNIV,X
- STA &22
- LDA UNIV+&01,X
- JSR l_2409
- LDA &D4
- ORA &D7
- ORA &DA
- AND #&7F
- ORA &D3
- ORA &D6
- ORA &D9
- BNE l_2166
- LDA &66
- CMP #&82
- BEQ l_2150
- LDY #&23	\ missile damage
+ JSR TA87+3             \ The missile has hit our ship, so call TA87+3 to set
+                        \ bit 7 of the missile's byte #31, which marks the
+                        \ missile as being killed
+
+ JSR EXNO3              \ Make the sound of the missile exploding
+
+ LDA #250               \ Call OOPS2 to AJD
+ JMP OOPS2
+
+.TA18
+
+                        \ This is the entry point for missile tactics and is
+                        \ called from the main TACTICS routine below
+
+ LDA ECMA               \ If an E.C.M. is currently active (either our's or an
+ BNE TA35               \ opponent's), jump to TA35 to destroy this missile
+
+ LDA INWK+32            \ Fetch the AI flag from byte #32 and if bit 6 is set
+ ASL A                  \ (i.e. missile is hostile), jump up to TA34 to check
+ BMI TA34               \ whether the missile has hit us
+
+ LSR A                  \ Otherwise shift A right again. We know bits 6 and 7
+                        \ are now clear, so this leaves bits 0-5. Bits 1-5
+                        \ contain the target's slot number, and bit 0 is cleared
+                        \ in FRMIS when a missile is launched, so A contains
+                        \ the slot number shifted left by 1 (i.e. doubled) so we
+                        \ can use it as an index for the two-byte address table
+                        \ at UNIV
+
+ TAX                    \ Copy the address of the target ship's data block from
+ LDA UNIV,X             \ UNIV(X+1 X) to (A V)
+ STA V
+ LDA UNIV+1,X
+
+ JSR VCSUB              \ Calculate vector K3 as follows:
+                        \
+                        \ K3(2 1 0) = (x_sign x_hi x_lo) - x-coordinate of
+                        \ target ship
+                        \
+                        \ K3(5 4 3) = (y_sign y_hi z_lo) - y-coordinate of
+                        \ target ship
+                        \
+                        \ K3(8 7 6) = (z_sign z_hi z_lo) - z-coordinate of
+                        \ target ship
+
+                        \ So K3 now contains the vector from the target ship to
+                        \ the missile
+
+ LDA K3+2               \ Set A = OR of all the sign and high bytes of the
+ ORA K3+5               \ above, clearing bit 7 (i.e. ignore the signs)
+ ORA K3+8
+ AND #%01111111
+ ORA K3+1
+ ORA K3+4
+ ORA K3+7
+
+ BNE TA64               \ If the result is non-zero, then the missile is some
+                        \ distance from the target, so jump down to TA64 see if
+                        \ the target activates its E.C.M.
+
+ LDA INWK+32            \ Fetch the AI flag from byte #32 and if only bits 7 and
+ CMP #%10000010         \ 1 are set (AI is enabled and the target is slot 1, the
+ BEQ TA35               \ space station), jump to TA35 to destroy this missile,
+                        \ as the space station ain't kidding around
+
+ LDY #&23               \ missile damage AJD
  SEC
  LDA (&22),Y
  SBC #&40
  BCS n_misshit
- LDY #&1F
- LDA (&22),Y
- BIT l_216d+&01
- BNE l_2150
- ORA #&80	\ missile hits
+
+ LDY #31                \ Fetch byte #31 (the exploding flag) of the target ship
+ LDA (V),Y              \ into A
+
+ BIT M32+1              \ M32 contains an LDY #32 instruction, so M32+1 contains
+                        \ 32, so this instruction tests A with %00100000, which
+                        \ checks bit 5 of A (the "already exploding?" bit)
+
+ BNE TA35               \ If the target ship is already exploding, jump to TA35
+                        \ to destroy this missile
+
+ ORA #%10000000         \ Otherwise set bit 7 of the target's byte #31 to mark
 
 .n_misshit
 
- STA (&22),Y
+ STA (V),Y              \ the ship as having been killed, so it explodes
 
-.l_2150
+.TA35
 
- LDA &46
- ORA &49
- ORA &4C
- BNE l_215d
- LDA #&50
- JSR l_36e4
+ LDA INWK               \ Set A = x_lo OR y_lo OR z_lo of the missile
+ ORA INWK+3
+ ORA INWK+6
 
-.l_215d
+ BNE TA87               \ If A is non-zero then the missile is not near our
+                        \ ship, so jump to TA87 to skip damaging our ship
 
- JSR EXNO2
+ LDA #80                \ AJD
+ JSR OOPS2
 
-.l_2160
+.TA87
 
- ASL &65
- SEC
- ROR &65
+ JSR EXNO2              \ Call EXNO2 to process the fact that we have killed a
+                        \ missile (so increase the kill tally, make an explosion
+                        \ sound and so on)
 
-.l_2165
+ ASL INWK+31            \ Set bit 7 of the missile's byte #31 flag to mark it as
+ SEC                    \ having been killed, so it explodes
+ ROR INWK+31
 
- RTS
+.TA1
 
-.l_2166
+ RTS                    \ Return from the subroutine
 
- JSR DORND
- CMP #&10
- BCS l_2174
+.TA64
 
-.l_216d
+                        \ If we get here then the missile has not reached the
+                        \ target
 
- LDY #&20
- LDA (&22),Y
+ JSR DORND              \ Set A and X to random numbers
+
+ CMP #16                \ If A >= 16 (94% chance), jump down to TA19S with the
+ BCS TA19S              \ vector from the target to the missile in K3
+
+.M32
+
+ LDY #32                \ Fetch byte #32 for the target and shift bit 0 (E.C.M.)
+ LDA (V),Y              \ into the C flag
  LSR A
- BCS l_2177
 
-.l_2174
+ BCS P%+5               \ If the C flag is set then the target has E.C.M.
+                        \ fitted, so skip the next instruction
 
- JMP l_221a
+.TA19S
 
-.l_2177
+ JMP TA19               \ The target does not have E.C.M. fitted, so jump down
+                        \ to TA19 with the vector from the target to the missile
+                        \ in K3
 
- JMP l_3813
+ JMP ECBLB2             \ The target has E.C.M., so jump to ECBLB2 to set it
+                        \ off, returning from the subroutine using a tail call
+
+\ ******************************************************************************
+\
+\       Name: TACTICS (Part 2 of 7)
+\       Type: Subroutine
+\   Category: Tactics
+\    Summary: Apply tactics: Escape pod, station, lone Thargon, safe-zone pirate
+\  Deep dive: Program flow of the tactics routine
+\
+\ ------------------------------------------------------------------------------
+\
+\ This section contains the main entry point at TACTICS, which is called from
+\ part 2 of MVEIT for ships that have the AI flag set (i.e. bit 7 of byte #32).
+\ This part does the following:
+\
+\   * If this is a missile, jump up to the missile code in part 1
+\
+\   * If this is the space station and it is hostile, consider spawning a cop
+\     (6.2% chance, up to a maximum of seven) and we're done
+\
+\   * If this is the space station and it is not hostile, consider spawning
+\     (0.8% chance if there are no Transporters around) a Transporter or Shuttle
+\     (equal odds of each type) and we're done
+\
+\   * Recharge the ship's energy banks by 1
+\
+\ Arguments:
+\
+\   X                   The ship type
+\
+\ ******************************************************************************
 
 .TACTICS
 
- LDY #&03
- STY &99
- INY
- STY &9A
- LDA #&16
- STA &94
- CPX #&01
- BEQ l_2117
- CPX #&02
- BNE l_21bb
- LDA &6A
- AND #&04
- BNE l_21a6
- LDA &0328
- ORA &033F	\ no shuttles if docking computer on
- BNE l_2165
- JSR DORND
- CMP #&FD
- BCC l_2165
- AND #&01
- ADC #&08
- TAX
- BNE l_21b6	\ BRA
+ LDY #3                 \ Set RAT = 3, which is the magnitude we set the pitch
+ STY RAT                \ or roll counter to in part 7 when turning a ship
+                        \ towards a vector (a higher value giving a longer
+                        \ turn). This value is not changed in the TACTICS
+                        \ routine, but it is set to different values by the
+                        \ DOCKIT routine
 
-.l_21a6
+ INY                    \ Set RAT2 = 4, which is the threshold below which we
+ STY RAT2               \ don't apply pitch and roll to the ship (so a lower
+                        \ value means we apply pitch and roll more often, and a
+                        \ value of 0 means we always apply them). The value is
+                        \ compared with double the high byte of sidev . XX15,
+                        \ where XX15 is the vector from the ship to the enemy
+                        \ or planet. This value is set to different values by
+                        \ both the TACTICS and DOCKIT routines
 
- JSR DORND
- CMP #&F0
- BCC l_2165
- LDA &032E
- CMP #&07	\ viper hordes
- BCS l_21d4
- LDX #&10
+ LDA #22                \ Set CNT2 = 22, which is the maximum angle beyond which
+ STA CNT2               \ a ship will slow down to start turning towards its
+                        \ prey (a lower value means a ship will start to slow
+                        \ down even if its angle with the enemy ship is large,
+                        \ which gives a tighter turn). This value is not changed
+                        \ in the TACTICS routine, but it is set to different
+                        \ values by the DOCKIT routine
 
-.l_21b6
+ CPX #MSL               \ If this is a missile, jump up to TA18 to implement
+ BEQ TA18               \ missile tactics
 
- LDA #&F1
- JMP l_2592
+ CPX #SST               \ If this is not the space station, jump down to TA13
+ BNE TA13
 
-.l_21bb
+ LDA NEWB               \ This is the space station, so check whether bit 2 of
+ AND #%00000100         \ the ship's NEWB flags is set, and if it is (i.e. the
+ BNE TN5                \ station is hostile), jump to TN5 to spawn some cops
 
- LDY #&0E
- LDA &69
- CMP (&1E),Y
- BCS l_21c5
- INC &69
+ LDA MANY+SHU+1         \ The station is not hostile, so check how many
 
-.l_21c5
+ ORA &033F              \ AJD no shuttles if docking computer on
 
- CPX #&1E
- BNE l_21d5
- LDA &033B
- BNE l_21d5
- LSR &66
- ASL &66
- LSR &61
+ BNE TA1                \ Transporters there are in the vicinity, and if we
+                        \ already have one, return from the subroutine (as TA1
+                        \ contains an RTS)
 
-.l_21d4
+                        \ If we get here then the station is not hostile, so we
+                        \ can consider spawning a Transporter or Shuttle
 
- RTS
+ JSR DORND              \ Set A and X to random numbers
 
-.l_21d5
+ CMP #253               \ If A < 253 (99.2% chance), return from the subroutine
+ BCC TA1                \ (as TA1 contains an RTS)
 
- JSR DORND
- LDA &6A
+ AND #1                 \ Set A = a random number that's either 0 or 1
+
+ ADC #SHU-1             \ The C flag is set (as we didn't take the BCC above),
+ TAX                    \ so this sets X to a value of either #SHU or #SHU + 1,
+                        \ which is the ship type for a Shuttle or a Transporter
+
+ BNE TN6                \ Jump to TN6 to spawn this ship type and return from
+                        \ the subroutine using a tail call (this BNE is
+                        \ effectively a JMP as A is never zero)
+
+.TN5
+
+                        \ We only call the tactics routine for the space station
+                        \ when it is hostile, so if we get here then this is the
+                        \ station, and we already know it's hostile, so we need
+                        \ to spawn some cops
+
+ JSR DORND              \ Set A and X to random numbers
+
+ CMP #240               \ If A < 240 (93.8% chance), return from the subroutine
+ BCC TA1                \ (as TA1 contains an RTS)
+
+ LDA MANY+COPS          \ Check how many cops there are in the vicinity already,
+ CMP #7                 \ and if there are 7 or more, return from the subroutine
+ BCS TA22               \ (as TA22 contains an RTS)
+
+ LDX #COPS              \ Set X to the ship type for a cop
+
+.TN6
+
+ LDA #%11110001         \ Set the AI flag to give the ship E.C.M., enable AI and
+                        \ make it very aggressive (60 out of 63)
+
+ JMP SFS1               \ Jump to SFS1 to spawn the ship, returning from the
+                        \ subroutine using a tail call
+
+.TA13
+
+ LDY #14                \ If the ship's energy is greater or equal to the
+ LDA INWK+35            \ maximum value from the ship's blueprint pointed to by
+ CMP (XX0),Y            \ XX0, then skip the next instruction
+ BCS TA21
+
+ INC INWK+35            \ The ship's energy is not at maximum, so recharge the
+                        \ energy banks by 1
+
+\ ******************************************************************************
+\
+\       Name: TACTICS (Part 3 of 7)
+\       Type: Subroutine
+\   Category: Tactics
+\    Summary: Apply tactics: Calculate dot product to determine ship's aim
+\  Deep dive: Program flow of the tactics routine
+\
+\ ------------------------------------------------------------------------------
+\
+\ This section sets up some vectors and calculates dot products. Specifically:
+\
+\   * If this is a lone Thargon without a mothership, set it adrift aimlessly
+\     and we're done
+\
+\   * If this is a trader, 80% of the time we're done, 20% of the time the
+\     trader performs the same checks as the bounty hunter
+\
+\   * If this is a bounty hunter (or one of the 20% of traders) and we have been
+\     really bad (i.e. a fugitive or serious offender), the ship becomes hostile
+\     (if it isn't already)
+\
+\   * If the ship is not hostile, then either perform docking manouevres (if
+\     it's docking) or fly towards the planet (if it isn't docking) and we're
+\     done
+\
+\   * If the ship is hostile, and a pirate, and we are within the space station
+\     safe zone, stop the pirate from attacking by removing all its aggression
+\
+\   * Calculate the dot product of the ship's nose vector (i.e. the direction it
+\     is pointing) with the vector between us and the ship. This value will help
+\     us work out later on whether the enemy ship is pointing towards us, and
+\     therefore whether it can hit us with its lasers.
+\
+\ Other entry points:
+\
+\   GOPL                Make the ship head towards the planet
+\
+\ ******************************************************************************
+
+.TA21
+
+ CPX #TGL               \ If this is not a Thargon, jump down to TA14
+ BNE TA14
+
+ LDA MANY+THG           \ If there is at least one Thargoid in the vicinity,
+ BNE TA14               \ jump down to TA14
+
+ LSR INWK+32            \ This is a Thargon but there is no Thargoid mothership,
+ ASL INWK+32            \ so clear bit 0 of the AI flag to disable its E.C.M.
+
+ LSR INWK+27            \ And halve the Thargon's speed
+
+.TA22
+
+ RTS                    \ Return from the subroutine
+
+.TA14
+
+ JSR DORND              \ Set A and X to random numbers
+
+ LDA NEWB               \ Extract bit 0 of the ship's NEWB flags into the C flag
+ LSR A                  \ and jump to TN1 if it is clear (i.e. if this is not a
+ BCC TN1                \ trader)
+
+ CPX #100               \ This is a trader, so if X >= 100 (61% chance), return
+ BCS TA22               \ from the subroutine (as TA22 contains an RTS)
+
+.TN1
+
+ LSR A                  \ Extract bit 1 of the ship's NEWB flags into the C flag
+ BCC TN2                \ and jump to TN2 if it is clear (i.e. if this is not a
+                        \ bounty hunter)
+
+ LDX FIST               \ This is a bounty hunter, so check whether our FIST
+ CPX #40                \ rating is < 40 (where 50 is a fugitive), and jump to
+ BCC TN2                \ TN2 if we are not 100% evil
+
+ LDA NEWB               \ We are a fugitive or a bad offender, and this ship is
+ ORA #%00000100         \ a bounty hunter, so set bit 2 of the ship's NEWB flags
+ STA NEWB               \ to make it hostile
+
+ LSR A                  \ Shift A right twice so the next test in TN2 will check
+ LSR A                  \ bit 2
+
+.TN2
+
+ LSR A                  \ Extract bit 2 of the ship's NEWB flags into the C flag
+ BCS TN3                \ and jump to TN3 if it is set (i.e. if this ship is
+                        \ hostile)
+
+ LSR A                  \ The ship is not hostile, so extract bit 4 of the
+ LSR A                  \ ship's NEWB flags into the C flag, and jump to GOPL if
+ BCC GOPL               \ it is clear (i.e. if this ship is not docking)
+
+ JMP DOCKIT             \ The ship is not hostile and is docking, so jump to
+                        \ DOCKIT to apply the docking algorithm to this ship
+
+.GOPL
+
+ LDY #&00               \ AJD
+
+ JSR SPS1               \ The ship is not hostile and it is not docking, so call
+                        \ SPS1 to calculate the vector to the planet and store
+                        \ it in XX15
+
+ JMP TA151              \ Jump to TA151 to make the ship head towards the planet
+
+.TN3
+
+ LSR A                  \ Extract bit 2 of the ship's NEWB flags into the C flag
+ BCC TN4                \ and jump to TN4 if it is clear (i.e. if this ship is
+                        \ not a pirate)
+
+ LDA SSPR               \ If we are not inside the space station safe zone, jump
+ BEQ TN4                \ to TN4
+
+                        \ If we get here then this is a pirate and we are inside
+                        \ the space station safe zone
+
+ LDA INWK+32            \ Set bits 0 and 7 of the AI flag in byte #32 (has AI
+ AND #%10000001         \ enabled and has an E.C.M.)
+ STA INWK+32
+
+.TN4
+
+ LDX #8                 \ We now want to copy the ship's x, y and z coordinates
+                        \ from INWK to K3, so set up a counter for 9 bytes
+
+.TAL1
+
+ LDA INWK,X             \ Copy the X-th byte from INWK to the X-th byte of K3
+ STA K3,X
+
+ DEX                    \ Decrement the counter
+
+ BPL TAL1               \ Loop back until we have copied all 9 bytes
+
+.TA19
+
+                        \ If this is a missile that's heading for its target
+                        \ (not us, one of the other ships), then the missile
+                        \ routine at TA18 above jumps here after setting K3 to
+                        \ the vector from the target to the missile
+
+ JSR TAS2               \ Normalise the vector in K3 and store the normalised
+                        \ version in XX15, so XX15 contains the normalised
+                        \ vector from our ship to the ship we are applying AI
+                        \ tactics to (or the normalised vector from the target
+                        \ to the missile - in both cases it's the vector from
+                        \ the potential victim to the attacker)
+
+ JSR TAS3-2             \ Set (A X) = nosev . XX15
+
+ STA CNT                \ Store the high byte of the dot product in CNT. The
+                        \ bigger the value, the more aligned the two ships are,
+                        \ with a maximum magnitude of 36 (96 * 96 >> 8). If CNT
+                        \ is positive, the ships are facing in a similar
+                        \ direction, if it's negative they are facing in
+                        \ opposite directions
+
+\ ******************************************************************************
+\
+\       Name: TACTICS (Part 4 of 7)
+\       Type: Subroutine
+\   Category: Tactics
+\    Summary: Apply tactics: Check energy levels, maybe launch escape pod if low
+\  Deep dive: Program flow of the tactics routine
+\
+\ ------------------------------------------------------------------------------
+\
+\ This section works out what kind of condition the ship is in. Specifically:
+\
+\   * If this is an Anaconda, consider spawning (22% chance) a Worm
+\
+\   * Rarely (2.5% chance) roll the ship by a noticeable amount
+\
+\   * If the ship has at least half its energy banks full, jump to part 6 to
+\     consider firing the lasers
+\
+\   * If the ship is not into the last 1/8th of its energy, jump to part 5 to
+\     consider firing a missile
+\
+\   * If the ship is into the last 1/8th of its energy, and this ship type has
+\     an escape pod fitted, then rarely (10% chance) the ship launches an escape
+\     pod and is left drifting in space
+\
+\ ******************************************************************************
+
+ LDA TYPE               \ If this is not a missile, skip the following
+ CMP #MSL               \ instruction
+ BNE P%+5
+
+ JMP TA20               \ This is a missile, so jump down to TA20 to get
+                        \ straight into some aggressive manoeuvring
+
+ CMP #ANA               \ If this is not an Anaconda, jump down to TN7 to skip
+ BNE TN7                \ the following
+
+ JSR DORND              \ Set A and X to random numbers
+
+ CMP #200               \ If A < 200 (78% chance), jump down to TN7 to skip the
+ BCC TN7                \ following
+
+ LDX #15                \ AJD
+
+ JMP TN6                \ Jump to TN6 to AJD
+
+.TN7
+
+ JSR DORND              \ Set A and X to random numbers
+
+ CMP #250               \ If A < 250 (97.5% chance), jump down to TA7 to skip
+ BCC TA7                \ the following
+
+ JSR DORND              \ Set A and X to random numbers
+
+ ORA #104               \ Bump A up to at least 104 and store in the roll
+ STA INWK+29            \ counter, to gives the ship a noticeable roll
+
+.TA7
+
+ LDY #14                \ Set A = the ship's maximum energy / 2
+ LDA (XX0),Y
  LSR A
- BCC l_21e1
- CPX #&64
- BCS l_21d4
 
-.l_21e1
+ CMP INWK+35            \ If the ship's current energy in byte #35 > A, i.e. the
+ BCC TA3                \ ship has at least half of its energy banks charged,
+                        \ jump down to TA3
 
- LSR A
- BCC l_21f3
- LDX FIST
- CPX #&28
- BCC l_21f3
- LDA &6A
- ORA #&04
- STA &6A
- LSR A
- LSR A
+ LSR A                  \ If the ship's current energy in byte #35 > A / 4, i.e.
+ LSR A                  \ the ship is not into the last 1/8th of its energy,
+ CMP INWK+35            \ jump down to ta3 to consider firing a missile
+ BCC ta3
 
-.l_21f3
+ JSR DORND              \ Set A and X to random numbers
 
- LSR A
- BCS l_2203
- LSR A
- LSR A
- BCC l_21fd
- JMP DOCKIT
+ CMP #230               \ If A < 230 (90% chance), jump down to ta3 to consider
+ BCC ta3                \ firing a missile
 
-.l_21fd
+ LDX TYPE               \ Fetch the ship blueprint's default NEWB flags from the
+ LDA E%-1,X             \ table at E%, and if bit 7 is clear (i.e. this ship
+ BPL ta3                \ does not have an escape pod), jump to ta3 to skip the
+                        \ spawning of an escape pod
 
- LDY #&00
- JSR l_42ae
- JMP l_2324
+                        \ By this point, the ship has run out of both energy and
+                        \ luck, so it's time to bail
 
-.l_2203
+ LDA #0                 \ Set the AI flag to 0 to disable AI, hostility and
+ STA INWK+32            \ E.C.M., so the ship's a sitting duck
 
- LSR A
- BCC l_2211
- LDA &0320
- BEQ l_2211
- LDA &66
- AND #&81
- STA &66
+ JMP SESCP              \ Jump to SESCP to spawn an escape pod from the ship,
+                        \ returning from the subroutine using a tail call
 
-.l_2211
+\ ******************************************************************************
+\
+\       Name: TACTICS (Part 5 of 7)
+\       Type: Subroutine
+\   Category: Tactics
+\    Summary: Apply tactics: Consider whether to launch a missile at us
+\  Deep dive: Program flow of the tactics routine
+\
+\ ------------------------------------------------------------------------------
+\
+\ This section considers whether to launch a missile. Specifically:
+\
+\   * If the ship doesn't have any missiles, skip to the next part
+\
+\   * If an E.C.M. is firing, skip to the next part
+\
+\   * Randomly decide whether to fire a missile (or, in the case of Thargoids,
+\     release a Thargon), and if we do, we're done
+\
+\ ******************************************************************************
 
- LDX #&08
+.ta3
 
-.l_2213
+                        \ If we get here then the ship has less than half energy
+                        \ so there may not be enough juice for lasers, but let's
+                        \ see if we can fire a missile
 
- LDA &46,X
- STA &D2,X
- DEX
- BPL l_2213
+ LDA INWK+31            \ Set A = bits 0-2 of byte #31, the number of missiles
+ AND #%00000111         \ the ship has left
 
-.l_221a
+ BEQ TA3                \ If it doesn't have any missiles, jump to TA3
 
- JSR l_42bd
- JSR TAS3-2
- STA &93
- LDA &8C
- CMP #&01
- BNE l_222b
- JMP l_22dd
+ STA T                  \ Store the number of missiles in T
 
-.l_222b
+ JSR DORND              \ Set A and X to random numbers
 
- CMP #&0E
- BNE l_223b
- JSR DORND
- CMP #&C8
- BCC l_223b
- LDX #&0F
- JMP l_21b6
+ AND #15                \ Restrict A to a random number in the range 0-15
 
-.l_223b
+ CMP T                  \ If A >= T, which is quite likely, though less likely
+ BCS TA3                \ with higher numbers of missiles, jump to TA3
 
- JSR DORND
- CMP #&FA
- BCC l_2249
- JSR DORND
- ORA #&68
- STA &63
+ LDA ECMA               \ If an E.C.M. is currently active (either our's or an
+ BNE TA3                \ opponent's), jump to TA3
 
-.l_2249
+ DEC INWK+31            \ We're done with the checks, so it's time to fire off a
+                        \ missile, so reduce the missile count in byte #31 by 1
 
- LDY #&0E
- LDA (&1E),Y
- LSR A
- CMP &69
- BCC l_2294
- LSR A
- LSR A
- CMP &69
- BCC l_226d
- JSR DORND
- CMP #&E6
- BCC l_226d
- LDX &8C
- LDA E%-1,X
- BPL l_226d
- LDA #&00
- STA &66
- JMP l_258e
+ LDA TYPE               \ Fetch the ship type into A
 
-.l_226d
+ CMP #THG               \ If this is not a Thargoid, jump down to TA16 to launch
+ BNE TA16               \ a missile
 
- LDA &65
- AND #&07
- BEQ l_2294
- STA &D1
- JSR DORND
- \	AND #&1F
- AND #&0F
- CMP &D1
- BCS l_2294
- LDA &30
- BNE l_2294
- DEC &65
- LDA &8C
- CMP #&1D
- BNE l_2291
- LDX #&1E
- LDA &66
- JMP l_2592
+ LDX #TGL               \ This is a Thargoid, so instead of launching a missile,
+ LDA INWK+32            \ the mothership launches a Thargon, so call SFS1 to
+ JMP SFS1               \ spawn a Thargon from the parent ship, and return from
+                        \ the subroutine using a tail call
 
-.l_2291
+.TA16
 
- JMP l_43be
+ JMP SFRMIS             \ Jump to SFRMIS to spawn a missile as a child of the
+                        \ current ship, make a noise and print a message warning
+                        \ of incoming missiles, and return from the subroutine
+                        \ using a tail call
 
-.l_2294
+\ ******************************************************************************
+\
+\       Name: TACTICS (Part 6 of 7)
+\       Type: Subroutine
+\   Category: Tactics
+\    Summary: Apply tactics: Consider firing a laser at us, if aim is true
+\  Deep dive: Program flow of the tactics routine
+\
+\ ------------------------------------------------------------------------------
+\
+\ This section looks at potentially firing the ship's laser at us. Specifically:
+\
+\   * If the ship is not pointing at us, skip to the next part
+\
+\   * If the ship is pointing at us but not accurately, fire its laser at us and
+\     skip to the next part
+\
+\   * If we are in the ship's crosshairs, register some damage to our ship, slow
+\     down the attacking ship, make the noise of us being hit by laser fire, and
+\     we're done
+\
+\ ******************************************************************************
 
- LDA #&00
- JSR l_41bf
- AND #&E0
- BNE l_22c6
- LDX &93
- CPX #&A0
- BCC l_22c6
- LDY #&13
- LDA (&1E),Y
- AND #&F8
- BEQ l_22c6
- LDA &65
- ORA #&40
- STA &65
- CPX #&A3
- BCC l_22c6
- LDA (&1E),Y
- LSR A
- JSR l_36e4
- DEC &62
- LDA &30
- BNE l_2311
- LDA #&08
- JMP NOISE
+.TA3
 
-.l_22c6
+                        \ If we get here then the ship either has plenty of
+                        \ energy, or levels are low but it couldn't manage to
+                        \ launch a missile, so maybe we can fire the laser?
 
- LDA &4D
- CMP #&03
- BCS l_22d4
- LDA &47
- ORA &4A
- AND #&FE
- BEQ l_22e6
+ LDA #0                 \ Set A to x_hi OR y_hi OR z_hi
+ JSR MAS4
 
-.l_22d4
+ AND #%11100000         \ If any of the hi bytes have any of bits 5-7 set, then
+ BNE TA4                \ jump to TA4 to skip the laser checks, as the ship is
+                        \ too far away from us to hit us with a laser
 
- JSR DORND
- ORA #&80
- CMP &66
- BCS l_22e6
+ LDX CNT                \ Set X = the dot product set above in CNT. If this is
+                        \ positive, this ship and our ship are facing in similar
+                        \ directions, but if it's negative then we are facing
+                        \ each other, so for us to be in the enemy ship's line
+                        \ of fire, X needs to be negative. The value in X can
+                        \ have a maximum magnitude of 36, which would mean we
+                        \ were facing each other square on, so in the following
+                        \ code we check X like this:
+                        \
+                        \   X = 0 to -31, we are not in the enemy ship's line
+                        \       of fire, so they can't shoot at us
+                        \
+                        \   X = -32 to -34, we are in the enemy ship's line
+                        \       of fire, so they can shoot at us, but they can't
+                        \       hit us as we're not dead in their crosshairs
+                        \
+                        \   X = -35 to -36, we are bang in the middle of the
+                        \       enemy ship's crosshairs, so they can not only
+                        \       shoot us, they can hit us
 
-.l_22dd
+ CPX #160               \ If X < 160, i.e. X > -32, then we are not in the enemy
+ BCC TA4                \ ship's line of fire, so jump to TA4 to skip the laser
+                        \ checks
 
- JSR l_245d
- LDA &93
- EOR #&80
+ LDY #19                \ Fetch the enemy ship's byte #19 from their ship's
+ LDA (XX0),Y            \ blueprint into A
 
-.l_22e4
+ AND #%11111000         \ Extract bits 3-7, which contain the enemy's laser
+                        \ power
 
- STA &93
+ BEQ TA4                \ If the enemy has no laser power, jump to TA4 to skip
+                        \ the laser checks
 
-.l_22e6
+ LDA INWK+31            \ Set bit 6 in byte #31 to denote that the ship is
+ ORA #%01000000         \ firing its laser at us
+ STA INWK+31
 
- LDY #&10
- JSR TAS3
- TAX
- JSR l_2332
- STA &64
- LDA &63
- ASL A
- CMP #&20
- BCS l_2305
- LDY #&16
- JSR TAS3
- TAX
- EOR &64
- JSR l_2332
- STA &63
+ CPX #163               \ If X < 163, i.e. X > -35, then we are not in the enemy
+ BCC TA4                \ ship's crosshairs, so jump to TA4 to skip the laser
 
-.l_2305
+ LDA (XX0),Y            \ Fetch the enemy ship's byte #19 from their ship's
+                        \ blueprint into A
 
- LDA &93
- BMI l_2312
- CMP &94
- BCC l_2312
- LDA #&03
- STA &62
+ LSR A                  \ Halve the enemy ship's byte #19 (which contains both
+                        \ the laser power and number of missiles) to get the
+                        \ amount of damage we should take
 
-.l_2311
+ JSR OOPS2              \ AJD
 
- RTS
+ DEC INWK+28            \ Halve the attacking ship's acceleration in byte #28
 
-.l_2312
+ LDA ECMA               \ If an E.C.M. is currently active (either our's or an
+ BNE TA9-1              \ opponent's), return from the subroutine without making
+                        \ the laser-strike sound (as TA9-1 contains an RTS)
 
- AND #&7F
- CMP #&12
- BCC l_2323
- LDA #&FF
- LDX &8C
- CPX #&01
- BNE l_2321
- ASL A
+ LDA #8                 \ Call the NOISE routine with A = 8 to make the sound
+ JMP NOISE              \ of us being hit by lasers, returning from the
+                        \ subroutine using a tail call
 
-.l_2321
+\ ******************************************************************************
+\
+\       Name: TACTICS (Part 7 of 7)
+\       Type: Subroutine
+\   Category: Tactics
+\    Summary: Apply tactics: Set pitch, roll, and acceleration
+\  Deep dive: Program flow of the tactics routine
+\
+\ ------------------------------------------------------------------------------
+\
+\ This section looks at manoeuvring the ship. Specifically:
+\
+\   * Work out which direction the ship should be moving, depending on the type
+\     of ship, where it is, which direction it is pointing, and how aggressive
+\     it is
+\
+\   * Set the pitch and roll counters to head in that direction
+\
+\   * Speed up or slow down, depending on where the ship is in relation to us
+\
+\ Other entry points:
+\
+\   TA151               Make the ship head towards the planet
+\
+\ ******************************************************************************
 
- STA &62
+.TA4
 
-.l_2323
+ LDA INWK+7             \ If z_hi >= 3 then the ship is quite far away, so jump
+ CMP #3                 \ down to TA5
+ BCS TA5
 
- RTS
+ LDA INWK+1             \ Otherwise set A = x_hi OR y_hi and extract bits 1-7
+ ORA INWK+4
+ AND #%11111110
 
-.l_2324
+ BEQ TA15               \ If A = 0 then the ship is pretty close to us, so jump
+                        \ to TA15 so it heads away from us
 
- JSR TAS3-2
- CMP #&98
- BCC l_232f
- LDX #&00
- STX &9A
+.TA5
 
-.l_232f
+                        \ If we get here then the ship is quite far away
 
- JMP l_22e4
+ JSR DORND              \ Set A and X to random numbers
 
-.l_2332
+ ORA #%10000000         \ Set bit 7 of A
 
- EOR #&80
- AND #&80
- STA &D1
- TXA
- ASL A
- CMP &9A
- BCC l_2343
- LDA &99
- ORA &D1
- RTS
+ CMP INWK+32            \ If A >= byte #32 (the ship's AI flag) then jump down
+ BCS TA15               \ to TA15 so it heads away from us
 
-.l_2343
+                        \ We get here if A < byte #32, and the chances of this
+                        \ being true are greater with high values of byte #32.
+                        \ In other words, higher byte #32 values increase the
+                        \ chances of a ship changing direction to head towards
+                        \ us - or, to put it another way, ships with higher
+                        \ byte #32 values are spoiling for a fight. Thargoids
+                        \ have byte #32 set to 255, which explains an awful lot
 
- LDA &D1
- RTS
+.TA20
+
+                        \ If this is a missile we will have jumped straight
+                        \ here, but we also get here if the ship is either far
+                        \ away and aggressive, or not too close
+
+ JSR TAS6               \ Call TAS6 to negate the vector in XX15 so it points in
+                        \ the opposite direction
+
+ LDA CNT                \ Change the sign of the dot product in CNT, so now it's
+ EOR #%10000000         \ positive if the ships are facing each other, and
+                        \ negative if they are facing the same way
+
+.TA152
+
+ STA CNT                \ Update CNT with the new value in A
+
+.TA15
+
+                        \ If we get here, then one of the following is true:
+                        \
+                        \   * This is a trader and XX15 is pointing towards the
+                        \     planet
+                        \
+                        \   * The ship is pretty close to us, or it's just not
+                        \     very aggressive (though there is a random factor
+                        \     at play here too). XX15 is still pointing from our
+                        \     ship towards the enemy ship
+                        \
+                        \   * The ship is aggressive (though again, there's an
+                        \     element of randomness here). XX15 is pointing from
+                        \     the enemy ship towards our ship
+                        \
+                        \   * This is a missile heading for a target. XX15 is
+                        \     pointing from the missile towards the target
+                        \
+                        \ We now want to move the ship in the direction of XX15,
+                        \ which will make aggressive ships head towards us, and
+                        \ ships that are too close turn away. Peaceful traders,
+                        \ meanwhile, head off towards the planet in search of a
+                        \ space station, and missiles home in on their targets
+
+ LDY #16                \ Set (A X) = roofv . XX15
+ JSR TAS3               \
+                        \ This will be positive if XX15 is pointing in the same
+                        \ direction as an arrow out of the top of the ship, in
+                        \ other words if the ship should pull up to head in the
+                        \ direction of XX15
+
+ TAX                    \ Copy A into X so we can retrieve it below
+
+ JSR nroll              \ Call nroll to calculate the value of the ship's pitch
+                        \ counter
+
+ STA INWK+30            \ Store the result in the ship's pitch counter
+
+ LDA INWK+29            \ Fetch the roll counter from byte #29 into A
+
+ ASL A                  \ Shift A left to double it and drop the sign bit
+
+ CMP #32                \ If A >= 32 then jump to TA6, as the ship is already
+ BCS TA6                \ in the process of rolling
+
+ LDY #22                \ Set (A X) = sidev . XX15
+ JSR TAS3               \
+                        \ This will be positive if XX15 is pointing in the same
+                        \ direction as an arrow out of the right side of the
+                        \ ship, in other words if the ship should roll right to
+                        \ head in the direction of XX15
+
+ TAX                    \ Copy A into X so we can retrieve it below
+
+ EOR INWK+30            \ Give A the correct sign of the dot product * the
+                        \ current pitch direction (i.e. the sign is negative if
+                        \ the pitch counter and dot product have different
+                        \ signs, positive if they have the same sign)
+
+ JSR nroll              \ Call nroll to calculate the value of the ship's pitch
+                        \ counter
+
+ STA INWK+29            \ Store the result in the ship's roll counter
+
+.TA12
+
+.TA6
+
+ LDA CNT                \ Fetch the dot product, and if it's negative jump to
+ BMI TA9                \ TA9, as the ships are facing away from each other and
+                        \ the ship might want to slow down to take another shot
+
+ CMP CNT2               \ The dot product is positive, so the ships are facing
+ BCC TA9                \ each other. If A < CNT2 then the ships are not heading
+                        \ directly towards each other, so jump to TA9 to slow
+                        \ down
+
+.PH10E
+
+ LDA #3                 \ Otherwise set the acceleration in byte #28 to 3
+ STA INWK+28
+
+ RTS                    \ Return from the subroutine
+
+.TA9
+
+ AND #%01111111         \ Clear the sign bit of the dot product in A
+
+ CMP #18                \ If A < 18 then the ship is way off the XX15 vector, so
+ BCC TA10               \ return from the subroutine (TA10 contains an RTS)
+                        \ without slowing down, as it still has quite a bit of
+                        \ turning to do to get on course
+
+ LDA #&FF               \ Otherwise set A = -1
+
+ LDX TYPE               \ If this is not a missile then skip the ASL instruction
+ CPX #MSL
+ BNE P%+3
+
+ ASL A                  \ This is a missile, so set A = -2, as missiles are more
+                        \ nimble and can brake more quickly
+
+ STA INWK+28            \ Set the ship's acceleration to A
+
+.TA10
+
+ RTS                    \ Return from the subroutine
+
+.TA151
+
+                        \ This is called from part 3 with the vector to the
+                        \ planet in XX15, when we want the ship to turn towards
+                        \ the planet. It does the same dot product calculation
+                        \ as part 3, but it can also change the value of RAT2
+                        \ so that roll and pitch is always applied
+
+ JSR TAS3-2             \ Set (A X) = nosev . XX15
+                        \
+                        \ The bigger the value of the dot product, the more
+                        \ aligned the two vectors are, with a maximum magnitude
+                        \ in A of 36 (96 * 96 >> 8). If A is positive, the
+                        \ vectors are facing in a similar direction, if it's
+                        \ negative they are facing in opposite directions
+
+ CMP #&98               \ If A is positive or A <= -24, jump to ttt
+ BCC ttt
+
+ LDX #0                 \ A > -24, which means the vectors are facing in
+ STX RAT2               \ opposite directions but are quite aligned, so set
+                        \ RAT2 = 0 instead of the default value of 4, so we
+                        \ always apply roll and pitch when we turn the ship
+                        \ towards the planet
+
+.ttt
+
+ JMP TA152              \ Jump to TA152 to store A in CNT and move the ship in
+                        \ the direction of XX15
+
+.nroll
+
+ EOR #%10000000         \ Give the ship's pitch counter the opposite sign to the
+ AND #%10000000         \ dot product result, with a value of 0, and store it in
+ STA T                  \ T
+
+ TXA                    \ Retrieve the original value of A from X
+
+ ASL A                  \ Shift A left to double it and drop the sign bit
+
+ CMP RAT2               \ If A < RAT2, skip to nroll2 (so if RAT2 = 0, we always
+ BCC nroll2             \ set the pitch counter to RAT)
+
+ LDA RAT                \ Set the magnitude of the ship's pitch counter to RAT
+ ORA T                  \ (we already set the sign above and stored it in T)
+
+ RTS                    \ Return from the subroutine
+
+.nroll2
+
+ LDA T                  \ Set A to the value we stored in T above, which has a
+                        \ value of 0 and the opposite sign to the dot product
+                        \ result
+
+ RTS                    \ Return from the subroutine
 
 .DOCKIT
 
@@ -8104,7 +9565,7 @@ LOAD_C% = LOAD% +P% - CODE%
 
 .l_2356
 
- JMP l_21fd
+ JMP GOPL
 
 .l_2359
 
@@ -8117,7 +9578,7 @@ LOAD_C% = LOAD% +P% - CODE%
  JSR l_42e0
  LDA &81
  STA &40
- JSR l_42bd
+ JSR TAS2
  LDY #&0A
  JSR l_243b
  BMI l_239a
@@ -8134,8 +9595,8 @@ LOAD_C% = LOAD% +P% - CODE%
 
 .l_238c
 
- JSR l_245d
- JSR l_2324
+ JSR TAS6
+ JSR TA151
 
 .l_2392
 
@@ -8150,9 +9611,9 @@ LOAD_C% = LOAD% +P% - CODE%
  JSR l_2403
  JSR l_2470
  JSR l_2470
- JSR l_42bd
- JSR l_245d
- JMP l_2324
+ JSR TAS2
+ JSR TAS6
+ JMP TA151
 
 .l_23ac
 
@@ -8225,7 +9686,7 @@ LOAD_C% = LOAD% +P% - CODE%
  STA &22
  LDA #&09
 
-.l_2409
+.VCSUB
 
  STA &23
  LDY #&02
@@ -8273,7 +9734,7 @@ LOAD_C% = LOAD% +P% - CODE%
  LDA &36
  JMP MAD
 
-.l_245d
+.TAS6
 
  LDA &34
  EOR #&80
@@ -8343,7 +9804,7 @@ LOAD_C% = LOAD% +P% - CODE%
  STA &D4,X
  JMP l_249e
 
-.l_24c7
+.HITCH
 
  CLC
  LDA &4E
@@ -8413,7 +9874,7 @@ LOAD_C% = LOAD% +P% - CODE%
  TXA
  JMP NWSHP
 
-.l_252e
+.FRMIS
 
  LDX #&01
  JSR FRS1
@@ -8421,7 +9882,7 @@ LOAD_C% = LOAD% +P% - CODE%
  LDX &45
  JSR GINF
  LDA FRIN,X
- JSR l_254d
+ JSR ANGRY
  DEC NOMSL
  JSR msblob	\ redraw missiles
  STY MSAR
@@ -8432,7 +9893,7 @@ LOAD_C% = LOAD% +P% - CODE%
 
  LDA &8C
 
-.l_254d
+.ANGRY
 
  CMP #&02
  BEQ l_2580
@@ -8479,7 +9940,7 @@ LOAD_C% = LOAD% +P% - CODE%
  LDA #&C9
  JMP MESS
 
-.l_258e
+.SESCP
 
  LDX #&03
 
@@ -8487,7 +9948,7 @@ LOAD_C% = LOAD% +P% - CODE%
 
  LDA #&FE
 
-.l_2592
+.SFS1
 
  STA &06
  TXA
@@ -8593,7 +10054,7 @@ LOAD_C% = LOAD% +P% - CODE%
  LDA #&01
  STA &0348
  LDA #&04
- JSR l_263d
+ JSR HFS2
  DEC &0348
  RTS
 
@@ -8602,7 +10063,7 @@ LOAD_C% = LOAD% +P% - CODE%
  JSR n_sound30
  LDA #&08
 
-.l_263d
+.HFS2
 
  STA &95
  JSR TTX66
@@ -10646,7 +12107,7 @@ PRINT "S.ELTC ", ~CODE_C%, " ", ~P%, " ", ~LOAD%, " ", ~LOAD_C%
 CODE_D% = P%
 LOAD_D% = LOAD% + P% - CODE%
 
-.l_2aec
+.tnpr_FLIGHT
 
  CPX #&10
  BEQ n_aliens
@@ -15445,7 +16906,7 @@ LOAD_E% = LOAD% + P% - CODE%
 
 .l_station
 
- JSR l_42ae
+ JSR SPS1
  LDA &34
  JSR SPS2
  TXA
@@ -15519,13 +16980,13 @@ LOAD_E% = LOAD% + P% - CODE%
  STA (SC),Y
  RTS
 
-.l_36e4
+.OOPS2
 
  SEC	\ reduce damage
  SBC new_shields
  BCC n_shok
 
-.n_through
+.OOPS
 
  STA &D1
  LDX #&00
@@ -15567,7 +17028,7 @@ LOAD_E% = LOAD% + P% - CODE%
 
 .l_3716
 
- JMP l_41c6
+ JMP DEATH
 
 .l_3719
 
@@ -16061,7 +17522,7 @@ LOAD_E% = LOAD% + P% - CODE%
 
  RTS                    \ Return from the subroutine
 
-.l_3813
+.ECBLB2
 
  LDA #&20
  STA &30
@@ -17736,12 +19197,12 @@ LOAD_E% = LOAD% + P% - CODE%
  STA &03B1
  RTS
 
-.l_3d7f
+.KS1
 
  LDX &84
  JSR l_3dd8
  LDX &84
- JMP l_1376
+ JMP MAL1
 
 .l_3d89
 
@@ -18807,11 +20268,11 @@ LOAD_E% = LOAD% + P% - CODE%
  JMP TT146              \ Print the distance to the selected system and return
                         \ from the subroutine using a tail call
 
-.l_41b2
+.FAROF
 
  LDA #&E0
 
-.l_41b4
+.FAROF2
 
  CMP &47
  BCC l_41be
@@ -18823,14 +20284,14 @@ LOAD_E% = LOAD% + P% - CODE%
 
  RTS
 
-.l_41bf
+.MAS4
 
  ORA &47
  ORA &4A
  ORA &4D
  RTS
 
-.l_41c6
+.DEATH
 
  JSR EXNO3
  JSR RES2
@@ -19055,14 +20516,14 @@ LOAD_E% = LOAD% + P% - CODE%
 
  RTS                    \ Return from the subroutine
 
-.l_42ae
+.SPS1
 
  LDX #&00
  JSR l_371f
  JSR l_371f
  JSR l_371f
 
-.l_42bd
+.TAS2
 
  LDA &D2
  ORA &D5
@@ -19266,20 +20727,20 @@ LOAD_E% = LOAD% + P% - CODE%
 
  RTS                    \ Return from the subroutine
 
-.l_434e
+.WARP
 
  LDX &033E
  LDA FRIN+&02,X
  ORA &033E	\ no jump if any ship
  ORA &0320
  ORA &0341
- BNE l_439f
+ BNE LOWBEEP
  LDY &0908
  BMI l_4368
  TAY
  JSR MAS2
  LSR A
- BEQ l_439f
+ BEQ LOWBEEP
 
 .l_4368
 
@@ -19288,7 +20749,7 @@ LOAD_E% = LOAD% + P% - CODE%
  LDY #&25
  JSR m
  LSR A
- BEQ l_439f
+ BEQ LOWBEEP
 
 .l_4375
 
@@ -19310,7 +20771,7 @@ LOAD_E% = LOAD% + P% - CODE%
  LDX VIEW
  JMP LOOK1
 
-.l_439f
+.LOWBEEP
 
  LDA #&28
  BNE NOISE
@@ -19385,7 +20846,7 @@ LOAD_E% = LOAD% + P% - CODE%
                         \ call (this BNE is effectively a JMP as A will never be
                         \ zero)
 
-.l_43be
+.SFRMIS
 
  LDX #&01
  JSR l_2590
