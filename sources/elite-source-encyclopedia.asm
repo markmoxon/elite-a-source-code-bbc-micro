@@ -3105,7 +3105,7 @@ BRKV = P% - 2
  EQUW MT19              \ Token 19: Capitalise first letter of next word only
  EQUW DASC              \ Token 20: Unused
  EQUW CLYNS             \ Token 21: Clear the bottom few lines of the space view
- EQUW column_16         \ Token 23: Tab to column 16
+ EQUW column_16         \ Token 22: Tab to column 16
  EQUW MT23              \ Token 23: Move to row 10, white text, set lower case
  EQUW clr_vdustat       \ Token 24: AJD
  EQUW DASC              \ Token 25: Unused
@@ -20838,11 +20838,13 @@ ENDMACRO
 
 .msg_3
 
- EQUB VE
+ EQUB VE                \ Token 0:      ""
+                        \
+                        \ Encoded as:   ""
 
- ETWO 'E', 'N'
- ECHR 'C'
- ECHR 'Y'
+ ETWO 'E', 'N'          \ Token 1:      "ENCYCLOPEDIA GALACTICA"
+ ECHR 'C'               \
+ ECHR 'Y'               \ Encoded as:   "<246>CYC<224>P<252>IA G<228>AC<251>CA"
  ECHR 'C'
  ETWO 'L', 'O'
  ECHR 'P'
@@ -20859,9 +20861,9 @@ ENDMACRO
  ECHR 'A'
  EQUB VE
 
- ETOK 207
- ECHR 'S'
- ECHR ' '
+ ETOK 207               \ Token 2:      "SHIPS {all caps}A-G{sentence case}"
+ ECHR 'S'               \
+ ECHR ' '               \ Encoded as:   "[207]S {1}A-G{2}"
  EJMP 1
  ECHR 'A'
  ECHR '-'
@@ -20869,9 +20871,9 @@ ENDMACRO
  EJMP 2
  EQUB VE
 
- ETOK 207
- ECHR 'S'
- ECHR ' '
+ ETOK 207               \ Token 3:      "SHIPS {all caps}I-W{sentence case}""
+ ECHR 'S'               \
+ ECHR ' '               \ Encoded as:   "[207]S {1}I-W{2}"
  EJMP 1
  ECHR 'I'
  ECHR '-'
@@ -20879,63 +20881,63 @@ ENDMACRO
  EJMP 2
  EQUB VE
 
- ECHR 'E'
- ETWO 'Q', 'U'
- ECHR 'I'
+ ECHR 'E'               \ Token 4:      "EQUIPMENT"
+ ETWO 'Q', 'U'          \
+ ECHR 'I'               \ Encoded as:   "E<254>IPM<246>T"
  ECHR 'P'
  ECHR 'M'
  ETWO 'E', 'N'
  ECHR 'T'
  EQUB VE
 
- ECHR 'C'
- ETWO 'O', 'N'
- ECHR 'T'
+ ECHR 'C'               \ Token 5:      "CONTROLS"
+ ETWO 'O', 'N'          \
+ ECHR 'T'               \ Encoded as:   "C<223>TROLS"
  ECHR 'R'
  ECHR 'O'
  ECHR 'L'
  ECHR 'S'
  EQUB VE
 
- ETWO 'I', 'N'
- ECHR 'F'
- ETWO 'O', 'R'
+ ETWO 'I', 'N'          \ Token 6:      "INFORMATION"
+ ECHR 'F'               \
+ ETWO 'O', 'R'          \ Encoded as:   "<240>F<253><239><251><223>"
  ETWO 'M', 'A'
  ETWO 'T', 'I'
  ETWO 'O', 'N'
  EQUB VE
 
- ECHR 'A'
- ECHR 'D'
- ECHR 'D'
+ ECHR 'A'               \ Token 7:      "ADDER"
+ ECHR 'D'               \
+ ECHR 'D'               \ Encoded as:   "ADD<244>"
  ETWO 'E', 'R'
  EQUB VE
 
- ETWO 'A', 'N'
- ECHR 'A'
- ECHR 'C'
+ ETWO 'A', 'N'          \ Token 8:      "ANACONDA"
+ ECHR 'A'               \
+ ECHR 'C'               \ Encoded as:   "<255>AC<223>DA"
  ETWO 'O', 'N'
  ECHR 'D'
  ECHR 'A'
  EQUB VE
 
- ECHR 'A'
- ECHR 'S'
- ECHR 'P'
+ ECHR 'A'               \ Token 9:      "ASP MK2"
+ ECHR 'S'               \
+ ECHR 'P'               \ Encoded as:   "ASP MK2"
  ECHR ' '
  ECHR 'M'
  ECHR 'K'
  ECHR '2'
  EQUB VE
 
- ECHR 'B'
- ECHR 'O'
- ECHR 'A'
+ ECHR 'B'               \ Token 10:     "BOA"
+ ECHR 'O'               \
+ ECHR 'A'               \ Encoded as:   "BOA"
  EQUB VE
 
- ECHR 'B'
- ECHR 'U'
- ECHR 'S'
+ ECHR 'B'               \ Token 11:     "BUSHMASTER"
+ ECHR 'U'               \
+ ECHR 'S'               \ Encoded as:   "BUSHMASTER"
  ECHR 'H'
  ECHR 'M'
  ECHR 'A'
@@ -20945,9 +20947,9 @@ ENDMACRO
  ECHR 'R'
  EQUB VE
 
- ECHR 'C'
- ECHR 'H'
- ECHR 'A'
+ ECHR 'C'               \ Token 12:     "CHAMELEON"
+ ECHR 'H'               \
+ ECHR 'A'               \ Encoded as:   "CHAMELEON"
  ECHR 'M'
  ECHR 'E'
  ECHR 'L'
@@ -20956,9 +20958,9 @@ ENDMACRO
  ECHR 'N'
  EQUB VE
 
- ECHR 'C'
- ECHR 'O'
- ECHR 'B'
+ ECHR 'C'               \ Token 13:     "COBRA MK1"
+ ECHR 'O'               \
+ ECHR 'B'               \ Encoded as:   "COB<248> MK1"
  ETWO 'R', 'A'
  ECHR ' '
  ECHR 'M'
@@ -20966,9 +20968,9 @@ ENDMACRO
  ECHR '1'
  EQUB VE
 
- ECHR 'C'
- ECHR 'O'
- ECHR 'B'
+ ECHR 'C'               \ Token 14:     "COBRA MK3"
+ ECHR 'O'               \
+ ECHR 'B'               \ Encoded as:   "COB<248> MK3"
  ETWO 'R', 'A'
  ECHR ' '
  ECHR 'M'
@@ -20976,9 +20978,9 @@ ENDMACRO
  ECHR '3'
  EQUB VE
 
- ECHR 'C'
- ETWO 'O', 'R'
- ECHR 'I'
+ ECHR 'C'               \ Token 15:     "CORIOLIS STATION"
+ ETWO 'O', 'R'          \
+ ECHR 'I'               \ Encoded as:   "C<253>IOLIS <222><245>I<223>"
  ECHR 'O'
  ECHR 'L'
  ECHR 'I'
@@ -20990,9 +20992,9 @@ ENDMACRO
  ETWO 'O', 'N'
  EQUB VE
 
- ECHR 'D'
- ECHR 'O'
- ECHR 'D'
+ ECHR 'D'               \ Token 16:     "DODECAGON STATION"
+ ECHR 'O'               \
+ ECHR 'D'               \ Encoded as:   "DODECAG<223> <222><245>I<223>"
  ECHR 'E'
  ECHR 'C'
  ECHR 'A'
@@ -21005,9 +21007,9 @@ ENDMACRO
  ETWO 'O', 'N'
  EQUB VE
 
- ETWO 'E', 'S'
- ECHR 'C'
- ECHR 'A'
+ ETWO 'E', 'S'          \ Token 17:     "ESCAPE CAPSULE"
+ ECHR 'C'               \
+ ECHR 'A'               \ Encoded as:   "<237>CAPE CAPSU<229>"
  ECHR 'P'
  ECHR 'E'
  ECHR ' '
@@ -21019,9 +21021,9 @@ ENDMACRO
  ETWO 'L', 'E'
  EQUB VE
 
- ECHR 'F'
- ETWO 'E', 'R'
- ECHR '-'
+ ECHR 'F'               \ Token 18:     "FER-DE-{single cap}LANCE"
+ ETWO 'E', 'R'          \
+ ECHR '-'               \ Encoded as:   "F<244>-DE-{19}<249>N<233>"
  ECHR 'D'
  ECHR 'E'
  ECHR '-'
@@ -21031,76 +21033,76 @@ ENDMACRO
  ETWO 'C', 'E'
  EQUB VE
 
- ETWO 'G', 'E'
- ECHR 'C'
- ECHR 'K'
+ ETWO 'G', 'E'          \ Token 19:     "GECKO"
+ ECHR 'C'               \
+ ECHR 'K'               \ Encoded as:   "<231>CKO"
  ECHR 'O'
  EQUB VE
 
- ECHR 'G'
- ECHR 'H'
- ECHR 'A'
+ ECHR 'G'               \ Token 20:     "GHAVIAL"
+ ECHR 'H'               \
+ ECHR 'A'               \ Encoded as:   "GHAVI<228>"
  ECHR 'V'
  ECHR 'I'
  ETWO 'A', 'L'
  EQUB VE
 
- ECHR 'I'
- ECHR 'G'
- ECHR 'U'
+ ECHR 'I'               \ Token 21:     "IGUANA"
+ ECHR 'G'               \
+ ECHR 'U'               \ Encoded as:   "IGUANA"
  ECHR 'A'
  ECHR 'N'
  ECHR 'A'
  EQUB VE
 
- ECHR 'K'
- ETWO 'R', 'A'
- ETWO 'I', 'T'
+ ECHR 'K'               \ Token 22:     "KRAIT"
+ ETWO 'R', 'A'          \
+ ETWO 'I', 'T'          \ Encoded as:   "K<248><219>"
  EQUB VE
 
- ETWO 'M', 'A'
- ECHR 'M'
- ECHR 'B'
+ ETWO 'M', 'A'          \ Token 23:     "MAMBA"
+ ECHR 'M'               \
+ ECHR 'B'               \ Encoded as:   "<239>MBA"
  ECHR 'A'
  EQUB VE
 
- ECHR 'M'
- ETWO 'O', 'N'
- ETWO 'I', 'T'
+ ECHR 'M'               \ Token 24:     "MONITOR"
+ ETWO 'O', 'N'          \
+ ETWO 'I', 'T'          \ Encoded as:   "M<223><219><253>"
  ETWO 'O', 'R'
  EQUB VE
 
- ECHR 'M'
- ECHR 'O'
- ETWO 'R', 'A'
+ ECHR 'M'               \ Token 25:     "MORAY"
+ ECHR 'O'               \
+ ETWO 'R', 'A'          \ Encoded as:   "MO<248>Y"
  ECHR 'Y'
  EQUB VE
 
- ECHR 'O'
- ECHR 'P'
- ECHR 'H'
+ ECHR 'O'               \ Token 26:     "OPHIDIAN"
+ ECHR 'P'               \
+ ECHR 'H'               \ Encoded as:   "OPHI<241><255>"
  ECHR 'I'
  ETWO 'D', 'I'
  ETWO 'A', 'N'
  EQUB VE
 
- ECHR 'P'
- ECHR 'Y'
- ETWO 'T', 'H'
+ ECHR 'P'               \ Token 27:     "PYTHON"
+ ECHR 'Y'               \
+ ETWO 'T', 'H'          \ Encoded as:   "PY<226><223>"
  ETWO 'O', 'N'
  EQUB VE
 
- ECHR 'S'
- ECHR 'H'
- ECHR 'U'
+ ECHR 'S'               \ Token 28:     "SHUTTLE"
+ ECHR 'H'               \
+ ECHR 'U'               \ Encoded as:   "SHUTT<229>"
  ECHR 'T'
  ECHR 'T'
  ETWO 'L', 'E'
  EQUB VE
 
- ECHR 'S'
- ECHR 'I'
- ECHR 'D'
+ ECHR 'S'               \ Token 29:     "SIDEWINDER"
+ ECHR 'I'               \
+ ECHR 'D'               \ Encoded as:   "SIDEW<240>D<244>"
  ECHR 'E'
  ECHR 'W'
  ETWO 'I', 'N'
@@ -21108,23 +21110,23 @@ ENDMACRO
  ETWO 'E', 'R'
  EQUB VE
 
- ETWO 'T', 'H'
- ETWO 'A', 'R'
- ECHR 'G'
+ ETWO 'T', 'H'          \ Token 30:     "THARGOID"
+ ETWO 'A', 'R'          \
+ ECHR 'G'               \ Encoded as:   "<226><238>GOID"
  ECHR 'O'
  ECHR 'I'
  ECHR 'D'
  EQUB VE
 
- ETWO 'T', 'H'
- ETWO 'A', 'R'
- ECHR 'G'
+ ETWO 'T', 'H'          \ Token 31:     "THARGON"
+ ETWO 'A', 'R'          \
+ ECHR 'G'               \ Encoded as:   "<226><238>G<223>"
  ETWO 'O', 'N'
  EQUB VE
 
- ECHR 'T'
- ETWO 'R', 'A'
- ECHR 'N'
+ ECHR 'T'               \ Token 32:     "TRANSPORTER"
+ ETWO 'R', 'A'          \
+ ECHR 'N'               \ Encoded as:   "T<248>NSP<253>T<244>"
  ECHR 'S'
  ECHR 'P'
  ETWO 'O', 'R'
@@ -21132,36 +21134,36 @@ ENDMACRO
  ETWO 'E', 'R'
  EQUB VE
 
- ECHR 'V'
- ECHR 'I'
- ECHR 'P'
+ ECHR 'V'               \ Token 33:     "VIPER"
+ ECHR 'I'               \
+ ECHR 'P'               \ Encoded as:   "VIP<244>"
  ETWO 'E', 'R'
  EQUB VE
 
- ECHR 'W'
- ETWO 'O', 'R'
- ECHR 'M'
+ ECHR 'W'               \ Token 34:     "WORM"
+ ETWO 'O', 'R'          \
+ ECHR 'M'               \ Encoded as:   "W<253>M"
  EQUB VE
 
- ETWO 'A', 'R'
- ETWO 'M', 'A'
- ECHR 'M'
+ ETWO 'A', 'R'          \ Token 35:     "ARMAMENTS:"
+ ETWO 'M', 'A'          \
+ ECHR 'M'               \ Encoded as:   "<238><239>M<246>TS:"
  ETWO 'E', 'N'
  ECHR 'T'
  ECHR 'S'
  ECHR ':'
  EQUB VE
 
- ECHR 'S'
- ECHR 'P'
- ECHR 'E'
+ ECHR 'S'               \ Token 36:     "SPEED:"
+ ECHR 'P'               \
+ ECHR 'E'               \ Encoded as:   "SPE<252>:"
  ETWO 'E', 'D'
  ECHR ':'
  EQUB VE
 
- ETWO 'I', 'N'
- ETWO 'S', 'E'
- ECHR 'R'
+ ETWO 'I', 'N'          \ Token 37:     "INSERVICE DATE:"
+ ETWO 'S', 'E'          \
+ ECHR 'R'               \ Encoded as:   "<240><218>RVI<233> D<245>E:"
  ECHR 'V'
  ECHR 'I'
  ETWO 'C', 'E'
@@ -21172,22 +21174,22 @@ ENDMACRO
  ECHR ':'
  EQUB VE
 
- ECHR 'C'
- ECHR 'O'
- ECHR 'M'
+ ECHR 'C'               \ Token 38:     "COMBAT"
+ ECHR 'O'               \
+ ECHR 'M'               \ Encoded as:   "COMB<245>"
  ECHR 'B'
  ETWO 'A', 'T'
  EQUB VE
 
- ECHR 'C'
- ETWO 'R', 'E'
- ECHR 'W'
+ ECHR 'C'               \ Token 39:     "CREW:"
+ ETWO 'R', 'E'          \
+ ECHR 'W'               \ Encoded as:   "C<242>W:"
  ECHR ':'
  EQUB VE
 
- ETOK 151
- ECHR ' '
- ECHR 'M'
+ ETOK 151               \ Token 40:     "DRIVE MOTORS:"
+ ECHR ' '               \
+ ECHR 'M'               \ Encoded as:   "[151] MOT<253>S:"
  ECHR 'O'
  ECHR 'T'
  ETWO 'O', 'R'
@@ -21195,19 +21197,19 @@ ENDMACRO
  ECHR ':'
  EQUB VE
 
- ETWO 'R', 'A'
- ECHR 'N'
- ETWO 'G', 'E'
+ ETWO 'R', 'A'          \ Token 41:     "RANGE:"
+ ECHR 'N'               \
+ ETWO 'G', 'E'          \ Encoded as:   "<248>N<231>:"
  ECHR ':'
  EQUB VE
 
- ECHR 'F'
- ECHR 'T'
- EQUB VE
+ ECHR 'F'               \ Token 42:     "FT"
+ ECHR 'T'               \
+ EQUB VE                \ Encoded as:   "FT"
 
- ETWO 'D', 'I'
- ECHR 'M'
- ETWO 'E', 'N'
+ ETWO 'D', 'I'          \ Token 43:     "DIMENSIONS:"
+ ECHR 'M'               \
+ ETWO 'E', 'N'          \ Encoded as:   "<241>M<246>SI<223>S:"
  ECHR 'S'
  ECHR 'I'
  ETWO 'O', 'N'
@@ -21215,40 +21217,40 @@ ENDMACRO
  ECHR ':'
  EQUB VE
 
- ECHR 'H'
- ECHR 'U'
- ECHR 'L'
+ ECHR 'H'               \ Token 44:     "HULL:"
+ ECHR 'U'               \
+ ECHR 'L'               \ Encoded as:   "HULL:"
  ECHR 'L'
  ECHR ':'
  EQUB VE
 
- ECHR 'S'
- ECHR 'P'
- ECHR 'A'
+ ECHR 'S'               \ Token 45:     "SPACE:"
+ ECHR 'P'               \
+ ECHR 'A'               \ Encoded as:   "SPA<233>:"
  ETWO 'C', 'E'
  ECHR ':'
  EQUB VE
 
- ECHR ' '
- ECHR 'M'
- ECHR 'I'
+ ECHR ' '               \ Token 46:     " MISSILES"
+ ECHR 'M'               \
+ ECHR 'I'               \ Encoded as:   " MISS<220><237>"
  ECHR 'S'
  ECHR 'S'
  ETWO 'I', 'L'
  ETWO 'E', 'S'
  EQUB VE
 
- ECHR 'F'
- ECHR 'A'
- ECHR 'C'
+ ECHR 'F'               \ Token 47:     "FACTOR:"
+ ECHR 'A'               \
+ ECHR 'C'               \ Encoded as:   "FACT<253>:"
  ECHR 'T'
  ETWO 'O', 'R'
  ECHR ':'
  EQUB VE
 
- ETWO 'G', 'E'
- ECHR 'R'
- ETWO 'E', 'T'
+ ETWO 'G', 'E'          \ Token 48:     "GREAT STARSEEKER"
+ ECHR 'R'               \
+ ETWO 'E', 'T'          \ Encoded as:   "<231>R<221> <222><238><218>EK<244>"
  ECHR ' '
  ETWO 'S', 'T'
  ETWO 'A', 'R'
@@ -21258,56 +21260,57 @@ ENDMACRO
  ETWO 'E', 'R'
  EQUB VE
 
- ECHR ' '
- ETWO 'L', 'A'
- ETWO 'S', 'E'
+ ECHR ' '               \ Token 49:     " LASER"
+ ETWO 'L', 'A'          \
+ ETWO 'S', 'E'          \ Encoded as:   "<249><218>R"
  ECHR 'R'
  EQUB VE
 
- ECHR ' '
- ECHR 'P'
- ECHR 'U'
+ ECHR ' '               \ Token 50:     " PULSE"
+ ECHR 'P'               \
+ ECHR 'U'               \ Encoded as:   "PUL<218>"
  ECHR 'L'
  ETWO 'S', 'E'
  EQUB VE
 
- ECHR ' '
- ECHR 'S'
- ECHR 'Y'
+ ECHR ' '               \ Token 51:     " SYSTEM"
+ ECHR 'S'               \
+ ECHR 'Y'               \ Encoded as:   " SY<222>EM"
  ETWO 'S', 'T'
  ECHR 'E'
  ECHR 'M'
  EQUB VE
 
- ETWO 'E', 'R'
- ECHR 'G'
- ETWO 'O', 'N'
+ ETWO 'E', 'R'          \ Token 52:     "ERGON"
+ ECHR 'G'               \
+ ETWO 'O', 'N'          \ Encoded as:   "<244>G<223>"
  EQUB VE
 
- ETOK 151
+ ETOK 151               \ Token 53:     "DRIVE"
+ EQUB VE                \
+                        \ Encoded as:   "[151]"
+
+ ETWO 'S', 'E'          \ Token 54:     "SEEK"
+ ECHR 'E'               \
+ ECHR 'K'               \ Encoded as:   "<218>EK"
  EQUB VE
 
- ETWO 'S', 'E'
- ECHR 'E'
- ECHR 'K'
- EQUB VE
-
- ECHR 'L'
- ECHR 'I'
- ECHR 'G'
+ ECHR 'L'               \ Token 55:     "LIGHT"
+ ECHR 'I'               \
+ ECHR 'G'               \ Encoded as:   "LIGHT"
  ECHR 'H'
  ECHR 'T'
  EQUB VE
 
- ETWO 'I', 'N'
- ECHR 'G'
- ETWO 'R', 'A'
+ ETWO 'I', 'N'          \ Token 56:     "INGRAM"
+ ECHR 'G'               \
+ ETWO 'R', 'A'          \ Encoded as:   "<240>G<248>M"
  ECHR 'M'
  EQUB VE
 
- ETWO 'L', 'A'
- ECHR 'N'
- ETWO 'C', 'E'
+ ETWO 'L', 'A'          \ Token 57:     "LANCE & FERMAN"
+ ECHR 'N'               \
+ ETWO 'C', 'E'          \ Encoded as:   "<249>N<233> & F<244><239>N"
  ECHR ' '
  ECHR '&'
  ECHR ' '
@@ -21317,88 +21320,88 @@ ENDMACRO
  ECHR 'N'
  EQUB VE
 
- EJMP 19
- ECHR 'K'
- ECHR 'R'
+ EJMP 19                \ Token 58:     "{single cap}KRUGER ""
+ ECHR 'K'               \
+ ECHR 'R'               \ Encoded as:   "{19}KRU<231>R "
  ECHR 'U'
  ETWO 'G', 'E'
  ECHR 'R'
  ECHR ' '
  EQUB VE
 
- ECHR 'H'
- ECHR 'A'
- ECHR 'S'
+ ECHR 'H'               \ Token 59:     "HASSONI"
+ ECHR 'A'               \
+ ECHR 'S'               \ Encoded as:   "HASS<223>I"
  ECHR 'S'
  ETWO 'O', 'N'
  ECHR 'I'
  EQUB VE
 
- ECHR 'V'
- ECHR 'O'
- ECHR 'L'
+ ECHR 'V'               \ Token 60:     "VOLTAIRE"
+ ECHR 'O'               \
+ ECHR 'L'               \ Encoded as:   "VOLTAI<242>"
  ECHR 'T'
  ECHR 'A'
  ECHR 'I'
  ETWO 'R', 'E'
  EQUB VE
 
- ECHR 'C'
- ETWO 'A', 'R'
- ECHR 'G'
+ ECHR 'C'               \ Token 61:     "CARGO"
+ ETWO 'A', 'R'          \
+ ECHR 'G'               \ Encoded as:   "C<238>GO"
  ECHR 'O'
  EQUB VE
 
- EJMP 1
- ECHR 'T'
- ECHR 'C'
+ EJMP 1                 \ Token 62:     "{all caps}TC{sentence case}"
+ ECHR 'T'               \
+ ECHR 'C'               \ Encoded as:   "{1}TC{2}"
  EJMP 2
  EQUB VE
 
- EJMP 1
- ECHR 'L'
- ECHR 'Y'
+ EJMP 1                 \ Token 63:     "{all caps}LY{sentence case}"
+ ECHR 'L'               \
+ ECHR 'Y'               \ Encoded as:   "{1}LY{2}"
  EJMP 2
  EQUB VE
 
- EJMP 1
- ECHR 'L'
- ECHR 'M'
+ EJMP 1                 \ Token 64:     "{all caps}LM{sentence case}"
+ ECHR 'L'               \
+ ECHR 'M'               \ Encoded as:   "{1}LM{2}"
  EJMP 2
  EQUB VE
 
- ECHR 'C'
- ECHR 'F'
- EQUB VE
+ ECHR 'C'               \ Token 65:     "CF"
+ ECHR 'F'               \
+ EQUB VE                \ Encoded as:   "CF"
 
- ETWO 'T', 'H'
- ECHR 'R'
- ECHR 'U'
+ ETWO 'T', 'H'          \ Token 66:     "THRUST"
+ ECHR 'R'               \
+ ECHR 'U'               \ Encoded as:   "<226>RU<222>"
  ETWO 'S', 'T'
  EQUB VE
 
- ECHR ' '
- ETOK 207
- EQUB VE
-
- ETWO 'I', 'N'
- ECHR 'V'
- ETWO 'E', 'N'
+ ECHR ' '               \ Token 67:     " SHIP"
+ ETOK 207               \
+ EQUB VE                \ Encoded as:   " [207]"
+ 
+ ETWO 'I', 'N'          \ Token 68:     "INVENTION"
+ ECHR 'V'               \
+ ETWO 'E', 'N'          \ Encoded as:   "<240>V<246><251><223>"
  ETWO 'T', 'I'
  ETWO 'O', 'N'
  EQUB VE
 
- ETWO 'O', 'U'
- ECHR 'T'
- ECHR 'W'
+ ETWO 'O', 'U'          \ Token 69:     "OUTWORLD"
+ ECHR 'T'               \
+ ECHR 'W'               \ Encoded as:   "<217>TW<253>LD"
  ETWO 'O', 'R'
  ECHR 'L'
  ECHR 'D'
  EQUB VE
 
- ECHR 'Z'
- ETWO 'O', 'R'
- ECHR 'G'
+ ECHR 'Z'               \ Token 70:     "ZORGON PETTERSON)"
+ ETWO 'O', 'R'          \
+ ECHR 'G'               \ Encoded as:   "Z<253>G<223> P<221>T<244>S<223>)"
  ETWO 'O', 'N'
  ECHR ' '
  ECHR 'P'
@@ -21410,17 +21413,17 @@ ENDMACRO
  ECHR ')'
  EQUB VE
 
- ECHR 'D'
- ECHR 'E'
- EJMP 19
+ ECHR 'D'               \ Token 71:     "DE{single cap}LACY"
+ ECHR 'E'               \
+ EJMP 19                \ Encoded as:   "DE{19}<249>CY"
  ETWO 'L', 'A'
  ECHR 'C'
  ECHR 'Y'
  EQUB VE
 
- EJMP 1
- ECHR '4'
- ECHR '*'
+ EJMP 1                 \ Token 72:     "{all caps}4*C40KV{sentence case} AMES
+ ECHR '4'               \                DRIVE"
+ ECHR '*'               \ Encoded as:   "{1}4*C40KV{2} AM<237> [151]"
  ECHR 'C'
  ECHR '4'
  ECHR '0'
@@ -21435,23 +21438,23 @@ ENDMACRO
  ETOK 151
  EQUB VE
 
- ECHR 'V'
- ECHR ' '
- ECHR '&'
+ ECHR 'V'               \ Token 73:     "V & K "
+ ECHR ' '               \
+ ECHR '&'               \ Encoded as:   "V & K "
  ECHR ' '
  ECHR 'K'
  ECHR ' '
  EQUB VE
 
- ECHR 'B'
- ETWO 'L', 'A'
- ETWO 'S', 'T'
+ ECHR 'B'               \ Token 74:     "BLAST"
+ ETWO 'L', 'A'          \
+ ETWO 'S', 'T'          \ Encoded as:   "B<249><222>"
  EQUB VE
 
- ECHR ' '
- ECHR '('
- EJMP 19
- ECHR 'G'
+ ECHR ' '               \ Token 75:     " ({single cap}GASEC LABS, VETITICE)""
+ ECHR '('               \
+ EJMP 19                \ Encoded as:   "({19}GA<218>C L<216>S, <250><251><251>
+ ECHR 'G'               \                <233>)"
  ECHR 'A'
  ETWO 'S', 'E'
  ECHR 'C'
@@ -21468,45 +21471,45 @@ ENDMACRO
  ECHR ')'
  EQUB VE
 
- ECHR 'F'
- ETWO 'E', 'D'
- ECHR 'E'
+ ECHR 'F'               \ Token 76:     "FEDERATION"
+ ETWO 'E', 'D'          \
+ ECHR 'E'               \ Encoded as:   "F<252>E<248><251><223>"
  ETWO 'R', 'A'
  ETWO 'T', 'I'
  ETWO 'O', 'N'
  EQUB VE
 
- ECHR 'S'
- ECHR 'P'
- ECHR 'A'
+ ECHR 'S'               \ Token 77:     "SPACE"
+ ECHR 'P'               \
+ ECHR 'A'               \ Encoded as:   "SPA<233>"
  ETWO 'C', 'E'
  EQUB VE
 
- EJMP 19
- ECHR 'I'
- ETWO 'O', 'N'
+ EJMP 19                \ Token 78:     "{single cap}IONIC"
+ ECHR 'I'               \
+ ETWO 'O', 'N'          \ Encoded as:   "{19}I<223>IC"
  ECHR 'I'
  ECHR 'C'
  EQUB VE
 
- ECHR 'H'
- ECHR 'U'
- ECHR 'N'
+ ECHR 'H'               \ Token 79:     "HUNT"
+ ECHR 'U'               \
+ ECHR 'N'               \ Encoded as:   "HUNT"
  ECHR 'T'
  EQUB VE
 
- ECHR 'P'
- ECHR 'R'
- ECHR 'O'
+ ECHR 'P'               \ Token 80:     "PROSSET "
+ ECHR 'R'               \
+ ECHR 'O'               \ Encoded as:   "PROS<218>T "
  ECHR 'S'
  ETWO 'S', 'E'
  ECHR 'T'
  ECHR ' '
  EQUB VE
 
- ECHR ' '
- ECHR 'W'
- ETWO 'O', 'R'
+ ECHR ' '               \ Token 81:     " WORKSHOPS)"
+ ECHR 'W'               \
+ ETWO 'O', 'R'          \ Encoded as:   " W<253>KSHOPS)"
  ECHR 'K'
  ECHR 'S'
  ECHR 'H'
@@ -21516,84 +21519,84 @@ ENDMACRO
  ECHR ')'
  EQUB VE
 
- EJMP 1
- ECHR '/'
- ECHR '1'
+ EJMP 1                 \ Token 82:     "{all caps}/1L{sentence case}"
+ ECHR '/'               \
+ ECHR '1'               \ Encoded as:   "{1}/1L{2}"
  ECHR 'L'
  EJMP 2
  EQUB VE
 
- EJMP 1
- ECHR '/'
- ECHR '2'
+ EJMP 1                 \ Token 83:     "{all caps}/2L{sentence case}"
+ ECHR '/'               \
+ ECHR '2'               \ Encoded as:   "{1}/2L{2}"
  ECHR 'L'
  EJMP 2
  EQUB VE
 
- EJMP 1
- ECHR '/'
- ECHR '4'
+ EJMP 1                 \ Token 84:     "{all caps}/4L{sentence case}"
+ ECHR '/'               \
+ ECHR '4'               \ Encoded as:   "{1}/4L{2}"
  ECHR 'L'
  EJMP 2
  EQUB VE
 
- ECHR ' '
- ECHR '('
- EJMP 19
+ ECHR ' '               \ Token 85:     " ({single cap}"
+ ECHR '('               \
+ EJMP 19                \ Encoded as:   " ({19}"
  EQUB VE
 
- EJMP 1
- ECHR 'I'
- ECHR 'F'
+ EJMP 1                 \ Token 86:     "{all caps}IFS{sentence case} "
+ ECHR 'I'               \
+ ECHR 'F'               \ Encoded as:   "{1}IFS{2} "
  ECHR 'S'
  EJMP 2
  ECHR ' '
  EQUB VE
 
- EJMP 12
- ECHR 'F'
- ECHR 'L'
- ECHR 'I'
- ECHR 'G'
- ECHR 'H'
- ECHR 'T'
- ECHR ' '
- ECHR 'C'
- ETWO 'O', 'N'
- ECHR 'T'
- ECHR 'R'
- ECHR 'O'
- ECHR 'L'
- ECHR 'S'
- ETWO '-', '-'
- ECHR '<'
- EJMP 8
- ETWO 'A', 'N'
- ETWO 'T', 'I'
- ECHR '-'
- ECHR 'C'
- ETWO 'L', 'O'
- ECHR 'C'
- ECHR 'K'
- ECHR 'W'
- ECHR 'I'
- ETWO 'S', 'E'
- ECHR ' '
- ECHR 'R'
- ECHR 'O'
- ECHR 'L'
- ECHR 'L'
- EJMP 12
- ECHR '>'
- EJMP 8
- ECHR 'C'
- ETWO 'L', 'O'
- ECHR 'C'
- ECHR 'K'
- ECHR 'W'
- ECHR 'I'
- ETWO 'S', 'E'
- ECHR ' '
+ EJMP 12                \ Token 87:     "{cr}
+ ECHR 'F'               \                FLIGHT CONTROLS{crlf}
+ ECHR 'L'               \                <{tab 6}ANTI-CLOCKWISE ROLL{cr}
+ ECHR 'I'               \                >{tab 6}CLOCKWISE ROLL{cr}
+ ECHR 'G'               \                S{tab 6}DIVE{cr}
+ ECHR 'H'               \                X{tab 6}CLIMB{cr}
+ ECHR 'T'               \                {all caps}SPC{sentence case}{tab 6}
+ ECHR ' '               \                INCREASE SPEED{cr}
+ ECHR 'C'               \                ?{tab 6}DECREASE SPEED{cr}
+ ETWO 'O', 'N'          \                {all caps}TAB{sentence case}{tab 6}
+ ECHR 'T'               \                HYPERSPACE ESCAPE{cr}
+ ECHR 'R'               \                {all caps}ESC{sentence case}{tab 6}
+ ECHR 'O'               \                ESCAPE CAPSULE{cr}
+ ECHR 'L'               \                F{tab 6}TOGGLE COMPASS{cr}
+ ECHR 'S'               \                V{tab 6}{standard tokens, sentence
+ ETWO '-', '-'          \                case} DOCKING COMPUTERS{extended
+ ECHR '<'               \                tokens}ON{cr}
+ EJMP 8                 \                P{tab 6}{standard tokens, sentence
+ ETWO 'A', 'N'          \                case} DOCKING COMPUTERS{extended
+ ETWO 'T', 'I'          \                tokens} OFF{cr}
+ ECHR '-'               \                J{tab 6}MICROJUMP{cr}
+ ECHR 'C'               \                {lower case}F0{sentence case}{tab 6}
+ ETWO 'L', 'O'          \                FRONT VIEW{cr}
+ ECHR 'C'               \                {lower case}F1{sentence case}{tab 6}
+ ECHR 'K'               \                REAR VIEW{cr}
+ ECHR 'W'               \                {lower case}F2{sentence case}{tab 6}
+ ECHR 'I'               \                LEFT VIEW{cr}
+ ETWO 'S', 'E'          \                {lower case}F3{sentence case}{tab 6}
+ ECHR ' '               \                RIGHT VIEW{cr}"
+ ECHR 'R'               \
+ ECHR 'O'               \ Encoded as:   "{12}FLIGHT C<223>TROLS<215><{8}<255>
+ ECHR 'L'               \                <251>-C<224>CKWI<218> ROLL{12}>{8}C
+ ECHR 'L'               \                <224>CKWI<218> ROLL{12}S{8}<241><250>
+ EJMP 12                \                {12}X{8}CLIMB{12}{1}SPC{2}{8}<240>C
+ ECHR '>'               \                <242>A<218> SPE<252>{12}?{8}DEC<242>A
+ EJMP 8                 \                <218> SPE<252>{12}{1}T<216>{2}{8}HYP
+ ECHR 'C'               \                <244>SPA<233> <237>CAPE{12}{1}<237>C{2}
+ ETWO 'L', 'O'          \                {8}<237>CAPE CAPSU<229>{12}F{8}TOGG
+ ECHR 'C'               \                <229> COMPASS{12}V{8}{4}[115]{5} <223>
+ ECHR 'K'               \                {12}P{8}{4}[115]{5} OFF{12}J{8}MICROJUM
+ ECHR 'W'               \                P{12}{13}F0{2}{8}FR<223>T VIEW{12}{13}
+ ECHR 'I'               \                F1{2}{8}<242><238> VIEW{12}{13}F2{2}{8}
+ ETWO 'S', 'E'          \                <229>FT VIEW{12}{13}F3{2}{8}RIGHT VIEW
+ ECHR ' '               \                {12}"
  ECHR 'R'
  ECHR 'O'
  ECHR 'L'
@@ -21700,7 +21703,7 @@ ENDMACRO
  ECHR 'V'
  EJMP 8
  EJMP 4
- ERND 24
+ TOKN 115
  EJMP 5
  ECHR ' '
  ETWO 'O', 'N'
@@ -21708,7 +21711,7 @@ ENDMACRO
  ECHR 'P'
  EJMP 8
  EJMP 4
- ERND 24
+ TOKN 115
  EJMP 5
  ECHR ' '
  ECHR 'O'
@@ -21787,50 +21790,50 @@ ENDMACRO
  EJMP 12
  EQUB VE
 
+ EJMP 12                \ Token 88:     "{cr}
+ ECHR 'C'               \                COMBAT CONTROLS{crlf}
+ ECHR 'O'               \                A{tab 6}FIRE LASER{cr}
+ ECHR 'M'               \                T{tab 6}TARGET {standard tokens,
+ ECHR 'B'               \                sentence case} MISSILE{extended
+ ETWO 'A', 'T'          \                tokens}{cr}
+ ECHR ' '               \                M{tab 6}FIRE {standard tokens, sentence
+ ECHR 'C'               \                case} MISSILE{extended tokens}{cr}
+ ETWO 'O', 'N'          \                U{tab 6}UNARM {standard tokens,
+ ECHR 'T'               \                sentence case} MISSILE{extended
+ ECHR 'R'               \                tokens}{cr}
+ ECHR 'O'               \                E{tab 6}TRIGGER E.C.M.{cr}
+ ECHR 'L'               \                {cr}
+ ECHR 'S'               \                I.F.F. COLOUR CODES{crlf}
+ ETWO '-', '-'          \                WHITE{tab 16}OFFICIAL SHIP{cr}
+ ECHR 'A'               \                BLUE{tab 16}LEGAL SHIP{cr}
+ EJMP 8                 \                BLUE/{single cap}WHITE{tab 16}DEBRIS
+ ECHR 'F'               \                {cr}
+ ECHR 'I'               \                BLUE/{single cap}RED{tab 16}
+ ETWO 'R', 'E'          \                NON-RESPONDENT{cr}
+ ECHR ' '               \                WHITE/{single cap}RED{tab 16}{standard
+ ETWO 'L', 'A'          \                tokens, sentence case} MISSILE{extended
+ ETWO 'S', 'E'          \                tokens}{cr}"
+ ECHR 'R'               \
+ EJMP 12                \ Encoded as:   "{12}COMB<245> C<223>TROLS<215>A{8}FI
+ ECHR 'T'               \                <242> <249><218>R{12}T{8}T<238>G<221>
+ EJMP 8                 \                 {4}[106]{5}{12}M{8}FI<242> {4}[106]{5}
+ ECHR 'T'               \                {12}U{8}UN<238>M {4}[106]{5}{12}E{8}TRI
+ ETWO 'A', 'R'          \                G<231>R E.C.M.{12}{12}I.F.F. COL<217>R
+ ECHR 'G'               \                 COD<237><215>WH<219>E{22}OFFICI<228>
+ ETWO 'E', 'T'          \                 [207]{12}BLUE{22}<229>G<228> [207]{12}
+ ECHR ' '               \                BLUE/{19}WH<219>E{22}DEBRIS{12}BLUE/
+ EJMP 4                 \                {19}<242>D{22}N<223>-R<237>P<223>D<246>
+ TOKN 106               \                T{12}WH<219>E/{19}<242>D{22}{4}[106]{5}
+ EJMP 5                 \                {12}"
  EJMP 12
- ECHR 'C'
- ECHR 'O'
  ECHR 'M'
- ECHR 'B'
- ETWO 'A', 'T'
- ECHR ' '
- ECHR 'C'
- ETWO 'O', 'N'
- ECHR 'T'
- ECHR 'R'
- ECHR 'O'
- ECHR 'L'
- ECHR 'S'
- ETWO '-', '-'
- ECHR 'A'
  EJMP 8
  ECHR 'F'
  ECHR 'I'
  ETWO 'R', 'E'
  ECHR ' '
- ETWO 'L', 'A'
- ETWO 'S', 'E'
- ECHR 'R'
- EJMP 12
- ECHR 'T'
- EJMP 8
- ECHR 'T'
- ETWO 'A', 'R'
- ECHR 'G'
- ETWO 'E', 'T'
- ECHR ' '
  EJMP 4
- ERND 15
- EJMP 5
- EJMP 12
- ECHR 'M'
- EJMP 8
- ECHR 'F'
- ECHR 'I'
- ETWO 'R', 'E'
- ECHR ' '
- EJMP 4
- ERND 15
+ TOKN 106
  EJMP 5
  EJMP 12
  ECHR 'U'
@@ -21841,7 +21844,7 @@ ENDMACRO
  ECHR 'M'
  ECHR ' '
  EJMP 4
- ERND 15
+ TOKN 106
  EJMP 5
  EJMP 12
  ECHR 'E'
@@ -21953,42 +21956,42 @@ ENDMACRO
  ECHR 'D'
  EJMP 22
  EJMP 4
- ERND 15
+ TOKN 106
  EJMP 5
  EJMP 12
  EQUB VE
 
- EJMP 12
- ECHR 'N'
- ECHR 'A'
- ECHR 'V'
- ECHR 'I'
- ECHR 'G'
- ETWO 'A', 'T'
- ECHR 'I'
- ETWO 'O', 'N'
- ECHR ' '
- ECHR 'C'
- ETWO 'O', 'N'
- ECHR 'T'
- ECHR 'R'
- ECHR 'O'
- ECHR 'L'
- ECHR 'S'
- ETWO '-', '-'
- ECHR 'H'
- EJMP 8
- ECHR 'H'
- ECHR 'Y'
- ECHR 'P'
- ETWO 'E', 'R'
- ECHR 'S'
- ECHR 'P'
- ECHR 'A'
- ETWO 'C', 'E'
- ECHR ' '
- ECHR 'J'
- ECHR 'U'
+ EJMP 12                \ Token 89:     "{cr}
+ ECHR 'N'               \                NAVIGATION CONTROLS{crlf}
+ ECHR 'A'               \                H{tab 6}HYPERSPACE JUMP{cr}
+ ECHR 'V'               \                C-{single cap}H{tab 6}{standard tokens,
+ ECHR 'I'               \                sentence case} GALACTIC HYPERSPACE
+ ECHR 'G'               \                {extended tokens}{cr}
+ ETWO 'A', 'T'          \                CURSOR KEYS{cr}
+ ECHR 'I'               \                {tab 6}HYPERSPACE CURSOR CONTROL{cr}
+ ETWO 'O', 'N'          \                D{tab 6}DISTANCE TO SYSTEM{cr}
+ ECHR ' '               \                O{tab 6}HOME CURSOR{cr}
+ ECHR 'C'               \                F{tab 6}FIND SYSTEM ({single cap}DOCKED
+ ETWO 'O', 'N'          \                ){cr}
+ ECHR 'T'               \                W{tab 6}FIND DESTINATION SYSTEM{cr}
+ ECHR 'R'               \                {lower case}F4{sentence case}{tab 6}
+ ECHR 'O'               \                GALACTIC MAP{cr}
+ ECHR 'L'               \                {lower case}F5{sentence case}{tab 6}
+ ECHR 'S'               \                SHORT RANGE MAP{cr}
+ ETWO '-', '-'          \                {lower case}F6{sentence case}{tab 6}
+ ECHR 'H'               \                DATA ON PLANET{cr}"
+ EJMP 8                 \
+ ECHR 'H'               \ Encoded as:   "{12}NAVIG<245>I<223> C<223>TROLS<215>H
+ ECHR 'Y'               \                {8}HYP<244>SPA<233> JUMP{12}C-{19}H{8}
+ ECHR 'P'               \                {4}[116]{5}{12}CUR<235>R KEYS{12}{8}HYP
+ ETWO 'E', 'R'          \                <244>SPA<233> CUR<235>R C<223>TROL{12}D
+ ECHR 'S'               \                {8}<241><222><255><233>[201]SY<222>EM
+ ECHR 'P'               \                {12}O{8}HOME CUR<235>R{12}F{8}F<240>D S
+ ECHR 'A'               \                Y<222>EM ({19}[205]){12}W{8}F<240>D DE
+ ETWO 'C', 'E'          \                <222><240><245>I<223> SY<222>EM{12}{13}
+ ECHR ' '               \                F4{2}{8}G<228>AC<251>C <239>P{12}{13}F5
+ ECHR 'J'               \                {2}{8}SH<253>T <248>N<231> <239>P{12}
+ ECHR 'U'               \                {13}F6{2}{8}D<245>A <223> [145]{12}"
  ECHR 'M'
  ECHR 'P'
  EJMP 12
@@ -21998,7 +22001,7 @@ ENDMACRO
  ECHR 'H'
  EJMP 8
  EJMP 4
- ERND 25
+ TOKN 116
  EJMP 5
  EJMP 12
  ECHR 'C'
@@ -22145,41 +22148,41 @@ ENDMACRO
  EJMP 12
  EQUB VE
 
- EJMP 12
- ECHR 'T'
- ETWO 'R', 'A'
- ECHR 'D'
- ETOK 195
- ECHR 'C'
- ETWO 'O', 'N'
- ECHR 'T'
- ECHR 'R'
- ECHR 'O'
- ECHR 'L'
- ECHR 'S'
- ETWO '-', '-'
- EJMP 13
- ECHR 'F'
- ECHR '0'
- EJMP 2
- EJMP 8
- ETWO 'L', 'A'
- ECHR 'U'
- ECHR 'N'
- ECHR 'C'
- ECHR 'H'
- ECHR ' '
- ECHR 'F'
- ECHR 'R'
- ECHR 'O'
- ECHR 'M'
- ECHR ' '
- ETWO 'S', 'T'
- ETWO 'A', 'T'
- ECHR 'I'
- ETWO 'O', 'N'
- EJMP 12
- ECHR 'C'
+ EJMP 12                \ Token 90:     "{cr}
+ ECHR 'T'               \                TRADING CONTROLS{crlf}
+ ETWO 'R', 'A'          \                {lower case}F0{sentence case}{tab 6}
+ ECHR 'D'               \                LAUNCH FROM STATION{cr}
+ ETOK 195               \                C-F0{sentence case}{tab 6}REMAIN DOCKED
+ ECHR 'C'               \                {cr}
+ ETWO 'O', 'N'          \                {lower case}F1{sentence case}{tab 6}BUY
+ ECHR 'T'               \                CARGO{cr}
+ ECHR 'R'               \                C-F1{tab 6}BUY SPECIAL CARGO{cr}
+ ECHR 'O'               \                {lower case}F2{sentence case}{tab 6}
+ ECHR 'L'               \                SELL CARGO{cr}
+ ECHR 'S'               \                C-F2{tab 6}SELL EQUIPMENT{cr}
+ ETWO '-', '-'          \                {lower case}F3{sentence case}{tab 6}
+ EJMP 13                \                EQUIP SHIP{cr}
+ ECHR 'F'               \                C-F3{tab 6}BUY SHIP{cr}
+ ECHR '0'               \                C-F6{tab 6}ENCYCLOPEDIA{cr}
+ EJMP 2                 \                {lower case}F7{sentence case}{tab 6}
+ EJMP 8                 \                MARKET PRICES{cr}
+ ETWO 'L', 'A'          \                {lower case}F8{sentence case}{tab 6}
+ ECHR 'U'               \                STATUS PAGE{cr}
+ ECHR 'N'               \                {lower case}F9{sentence case}{tab 6}
+ ECHR 'C'               \                INVENTORY{cr}"
+ ECHR 'H'               \
+ ECHR ' '               \ Encoded as:   "{12}T<248>D[195]C<223>TROLS<215>{13}F0
+ ECHR 'F'               \                {2}{8}<249>UNCH FROM <222><245>I<223>
+ ECHR 'R'               \                {12}C-F0{2}{8}<242><239><240> [205]{12}
+ ECHR 'O'               \                {13}F1{2}{8}BUY C<238>GO{12}C-F1{8}BUY
+ ECHR 'M'               \                 SPECI<228> C<238>GO{12}{13}F2{2}{8}
+ ECHR ' '               \                <218>LL C<238>GO{12}C-F2{8}<218>LL EQUI
+ ETWO 'S', 'T'          \                PMENT{12}{13}F3{2}{8}EQUIP [207]{12}C-F
+ ETWO 'A', 'T'          \                3{8}BUY [207]{12}C-F6{8}<246>CYC<224>P
+ ECHR 'I'               \                <252>IA{12}{13}F7{2}{8}M<238>K<221> PRI
+ ETWO 'O', 'N'          \                <233>S{12}{13}F8{2}{8}<222><245><236> P
+ EJMP 12                \                A<231>{12}{13}F9{2}{8}<240>V<246>T<253>
+ ECHR 'C'               \                Y{12}"
  ECHR '-'
  ECHR 'F'
  ECHR '0'
@@ -22341,24 +22344,24 @@ ENDMACRO
  EJMP 12
  EQUB VE
 
- ECHR 'F'
- ECHR 'L'
- ECHR 'I'
+ ECHR 'F'               \ Token 91:     "FLIGHT"
+ ECHR 'L'               \
+ ECHR 'I'               \ Encoded as:   "FLIGHT"
  ECHR 'G'
  ECHR 'H'
  ECHR 'T'
  EQUB VE
 
- ECHR 'C'
- ECHR 'O'
- ECHR 'M'
+ ECHR 'C'               \ Token 92:     "COMBAT"
+ ECHR 'O'               \
+ ECHR 'M'               \ Encoded as:   "COMB<245>"
  ECHR 'B'
  ETWO 'A', 'T'
  EQUB VE
 
- ECHR 'N'
- ECHR 'A'
- ECHR 'V'
+ ECHR 'N'               \ Token 93:     "NAVIGATION"
+ ECHR 'A'               \
+ ECHR 'V'               \ Encoded as:   "NAVIG<245>I<223>"
  ECHR 'I'
  ECHR 'G'
  ETWO 'A', 'T'
@@ -22366,103 +22369,103 @@ ENDMACRO
  ETWO 'O', 'N'
  EQUB VE
 
- ECHR 'T'
- ETWO 'R', 'A'
- ECHR 'D'
+ ECHR 'T'               \ Token 94:     "TRADING"
+ ETWO 'R', 'A'          \
+ ECHR 'D'               \ Encoded as:   "T<248>D<240>G"
  ETWO 'I', 'N'
  ECHR 'G'
  EQUB VE
 
- EJMP 4
- ERND 15
- EJMP 5
- EQUB VE
+ EJMP 4                 \ Token 95:     "{standard tokens, sentence case}MISSILE
+ TOKN 106               \                {extended tokens}"
+ EJMP 5                 \
+ EQUB VE                \ Encoded as:   "{4}[106]{5}"
 
- EJMP 4
- ERND 16
- EJMP 5
- EQUB VE
+ EJMP 4                 \ Token 96:     "{standard tokens, sentence case}I.F.F.
+ TOKN 107               \                SYSTEM{extended tokens}" AJD
+ EJMP 5                 \
+ EQUB VE                \ Encoded as:   "{4}[107]{5}"
 
- EJMP 4
- ERND 17
- EJMP 5
- EQUB VE
+ EJMP 4                 \ Token 97:     "{standard tokens, sentence case}
+ TOKN 108               \                E.C.M.SYSTEM{extended tokens}"
+ EJMP 5                 \
+ EQUB VE                \ Encoded as:   "{4}[108]{5}"
 
- EJMP 4
- ERND 12
- EJMP 5
- EQUB VE
+ EJMP 4                 \ Token 98:     "{standard tokens, sentence case}PULSE
+ TOKN 103               \                LASER{extended tokens}"
+ EJMP 5                 \
+ EQUB VE                \ Encoded as:   "{4}[103]{5}"
 
- EJMP 4
- ERND 13
- EJMP 5
- EQUB VE
+ EJMP 4                 \ Token 99:     "{standard tokens, sentence case}BEAM
+ TOKN 104               \                LASER{extended tokens}"
+ EJMP 5                 \
+ EQUB VE                \ Encoded as:   "{4}[104]{5}"
 
- EJMP 4
- ERND 20
- EJMP 5
- EQUB VE
+ EJMP 4                 \ Token 100:    "{standard tokens, sentence case}FUEL
+ TOKN 111               \                SCOOPS{extended tokens}"
+ EJMP 5                 \
+ EQUB VE                \ Encoded as:   "{4}[111]{5}"
 
- EJMP 4
- ERND 21
- EJMP 5
- EQUB VE
+ EJMP 4                 \ Token 101:    "{standard tokens, sentence case}ESCAPE
+ TOKN 112               \                POD{extended tokens}"
+ EJMP 5                 \
+ EQUB VE                \ Encoded as:   "{4}[112]{5}"
 
- EJMP 4
- ERND 22
- EJMP 5
- EQUB VE
+ EJMP 4                 \ Token 102:    "{standard tokens, sentence case}
+ TOKN 113               \                HYPERSPACE UNIT{extended tokens}" AJD
+ EJMP 5                 \
+ EQUB VE                \ Encoded as:   "{4}[113]{5}"
 
- EJMP 4
- ERND 23
- EJMP 5
- EQUB VE
+ EJMP 4                 \ Token 103:    "{standard tokens, sentence case}ENERGY
+ TOKN 114               \                UNIT{extended tokens}"
+ EJMP 5                 \
+ EQUB VE                \ Encoded as:   "{4}[114]{5}"
 
- EJMP 4
- ERND 24
- EJMP 5
- EQUB VE
+ EJMP 4                 \ Token 104:    "{standard tokens, sentence case}DOCKING
+ TOKN 115               \                COMPUTERS{extended tokens}"
+ EJMP 5                 \
+ EQUB VE                \ Encoded as:   "{4}[115]{5}"
 
- EJMP 4
- ERND 25
- EJMP 5
- EQUB VE
+ EJMP 4                 \ Token 105:    "{standard tokens, sentence case}
+ TOKN 116               \                GALACTIC HYPERSPACE {extended tokens}"
+ EJMP 5                 \
+ EQUB VE                \ Encoded as:   "{4}[116]{5}"
 
- EJMP 4
- ERND 26
- EJMP 5
- EQUB VE
+ EJMP 4                 \ Token 106:    "{standard tokens, sentence case}
+ TOKN 117               \                MILITARY LASER{extended tokens}"
+ EJMP 5                 \
+ EQUB VE                \ Encoded as:   "{4}[117]{5}"
 
- EJMP 4
- ERND 27
- EJMP 5
- EQUB VE
+ EJMP 4                 \ Token 107:    "{standard tokens, sentence case}
+ TOKN 118               \                MINING LASER{extended tokens}"
+ EJMP 5                 \
+ EQUB VE                \ Encoded as:   "{4}[118]{5}"
 
- EJMP 14
- EJMP 19
- ETWO 'S', 'E'
- ECHR 'L'
- ECHR 'F'
- ECHR ' '
- ECHR 'H'
- ECHR 'O'
- ECHR 'M'
- ETOK 195
- ECHR 'M'
- ECHR 'I'
- ECHR 'S'
- ECHR 'S'
- ETWO 'I', 'L'
- ETWO 'E', 'S'
- ECHR ' '
- ETWO 'M', 'A'
- ECHR 'Y'
- ECHR ' '
- ETWO 'B', 'E'
- ECHR ' '
- ECHR 'B'
- ETWO 'O', 'U'
- ECHR 'G'
+ EJMP 14                \ Token 108:    "{justify}{single cap}SELF HOMING
+ EJMP 19                \                MISSILES MAY BE BOUGHT AT ANY SYSTEM.
+ ETWO 'S', 'E'          \                {crlf}
+ ECHR 'L'               \                {single cap}BEFORE A MISSILE CAN BE
+ ECHR 'F'               \                FIRED IT MUST BE LOCKED ONTO A TARGET.
+ ECHR ' '               \                {crlf}
+ ECHR 'H'               \                {single cap}WHEN FIRED, IT WILL HOME IN
+ ECHR 'O'               \                TO THE TARGET UNLESS THE TARGET CAN
+ ECHR 'M'               \                OUTMANOEUVRE THE MISSILE, SHOOT IT, OR
+ ETOK 195               \                USE ELECTRONIC COUNTER MEASURES ON IT.
+ ECHR 'M'               \                {cr}
+ ECHR 'I'               \                {left align}"
+ ECHR 'S'               \
+ ECHR 'S'               \ Encoded as:   "{14}{19}<218>LF HOM[195]MISS<220><237>
+ ETWO 'I', 'L'          \                 <239>Y <247> B<217>GHT <245> <255>Y SY
+ ETWO 'E', 'S'          \                <222>EM.<215>{19}<247>FO<242>[208]MISS
+ ECHR ' '               \                <220>E C<255> <247> FIR[196]<219> MU
+ ETWO 'M', 'A'          \                <222> <247> <224>CK[196]<223>TO A T
+ ECHR 'Y'               \                <238>G<221>.<215>{19}WH<246> FI<242>D,
+ ECHR ' '               \                 <219> W<220>L HOME <240>[201][147]T
+ ETWO 'B', 'E'          \                <238>G<221> UN<229>SS [147]T<238>G<221>
+ ECHR ' '               \                 C<255> <217>T<239><227>EUV<242> [147]M
+ ECHR 'B'               \                ISS<220>E, SHOOT <219>, <253> U<218> E
+ ETWO 'O', 'U'          \                <229>CTR<223>IC C<217>NT<244> MEASUR
+ ECHR 'G'               \                <237> <223> <219>[177]"
  ECHR 'H'
  ECHR 'T'
  ECHR ' '
@@ -22630,27 +22633,27 @@ ENDMACRO
  ETOK 177
  EQUB VE
 
- EJMP 14
- EJMP 19
- ETWO 'A', 'N'
- ECHR ' '
- ECHR 'I'
- ECHR 'D'
- ETWO 'E', 'N'
- ETWO 'T', 'I'
- ECHR 'F'
- ECHR 'I'
- ECHR 'C'
- ETWO 'A', 'T'
- ECHR 'I'
- ETWO 'O', 'N'
- ECHR ' '
- ECHR 'F'
- ECHR 'R'
- ECHR 'I'
- ETWO 'E', 'N'
- ECHR 'D'
- ECHR ' '
+ EJMP 14                \ Token 109:    "{justify}{single cap}AN IDENTIFICATION
+ EJMP 19                \                FRIEND OR FOE SYSTEM CAN BE OBTAINED AT
+ ETWO 'A', 'N'          \                TECH LEVEL 2 OR ABOVE.{crlf}
+ ECHR ' '               \                {single cap}AN {all caps}I.F.F.{lower
+ ECHR 'I'               \                case} SYSTEM WILL DISPLAY DIFFERENT
+ ECHR 'D'               \                TYPES OF OBJECT IN DIFFERENT COLOURS ON
+ ETWO 'E', 'N'          \                THE RADAR DISPLAY.{crlf}
+ ETWO 'T', 'I'          \                {single cap}SEE {single cap}CONTROLS
+ ECHR 'F'               \                ({single cap}COMBAT).{cr}
+ ECHR 'I'               \                {left align}"
+ ECHR 'C'               \
+ ETWO 'A', 'T'          \ Encoded as:   "{14}{19}<255> ID<246><251>FIC<245>I
+ ECHR 'I'               \                <223> FRI<246>D <253> FOE SY<222>EM C
+ ETWO 'O', 'N'          \                <255> <247> OBTA<240>[196]<245> TECH
+ ECHR ' '               \                 <229><250>L 2 <253> <216>O<250>.<215>
+ ECHR 'F'               \                {19}<255> {1}I.F.F.{13} SY<222>EM W
+ ECHR 'R'               \                <220>L <241>SP<249>Y <241>FFE<242>NT TY
+ ECHR 'I'               \                P<237> OF OBJECT <240> <241>FFE<242>NT
+ ETWO 'E', 'N'          \                 COL<217>RS <223> [147]<248>D<238>
+ ECHR 'D'               \                 <241>SP<249>Y.<215>{19}<218>E {19}C
+ ECHR ' '               \                <223>TROLS ({19}COMB<245>)[177]"
  ETWO 'O', 'R'
  ECHR ' '
  ECHR 'F'
@@ -22800,27 +22803,27 @@ ENDMACRO
  ETOK 177
  EQUB VE
 
- EJMP 14
- EJMP 19
- ETWO 'A', 'N'
- ECHR ' '
- ECHR 'E'
- ETWO 'L', 'E'
- ECHR 'C'
- ECHR 'T'
- ECHR 'R'
- ETWO 'O', 'N'
- ECHR 'I'
- ECHR 'C'
- ECHR ' '
- ECHR 'C'
- ETWO 'O', 'U'
- ECHR 'N'
- ECHR 'T'
- ETWO 'E', 'R'
- ECHR ' '
- ECHR 'M'
- ECHR 'E'
+ EJMP 14                \ Token 110:    "{justify}{single cap}AN ELECTRONIC
+ EJMP 19                \                COUNTER MEASURES SYSTEM MAY BE BOUGHT
+ ETWO 'A', 'N'          \                AT ANY SYSTEM OF TECH LEVEL 3 OR
+ ECHR ' '               \                HIGHER.{crlf}
+ ECHR 'E'               \                {single cap}WHEN ACTIVATED, THE {all
+ ETWO 'L', 'E'          \                caps}E.C.M.{lower case} SYSTEM WILL
+ ECHR 'C'               \                DISRUPT THE GUIDANCE SYSTEMS OF ALL
+ ECHR 'T'               \                MISSILES IN THE VICINITY, MAKING THEM
+ ECHR 'R'               \                SELF DESTRUCT.{cr}
+ ETWO 'O', 'N'          \                {left align}"
+ ECHR 'I'               \
+ ECHR 'C'               \ Encoded as:   "{14}{19}<255> E<229>CTR<223>IC C<217>NT
+ ECHR ' '               \                <244> MEASUR<237> SY<222>EM <239>Y
+ ECHR 'C'               \                 <247> B<217>GHT <245> <255>Y SY<222>EM
+ ETWO 'O', 'U'          \                 OF TECH <229><250>L 3 <253> HIGH<244>.
+ ECHR 'N'               \                <215>{19}WH<246> AC<251>V<245><252>,
+ ECHR 'T'               \                 [147]{1}E.C.M.{13} SY<222>EM W<220>L
+ ETWO 'E', 'R'          \                 <241>SRUPT [147]GUID<255><233> SY<222>
+ ECHR ' '               \                EMS OF <228>L MISS<220><237> <240>
+ ECHR 'M'               \                 [147]VIC<240><219>Y, <239>K[195]<226>E
+ ECHR 'E'               \                M <218>LF DE<222>RUCT[177]"
  ECHR 'A'
  ECHR 'S'
  ECHR 'U'
@@ -22978,18 +22981,18 @@ ENDMACRO
  ETOK 177
  EQUB VE
 
- EJMP 14
- EJMP 19
- ECHR 'P'
- ECHR 'U'
- ECHR 'L'
- ETWO 'S', 'E'
- ECHR ' '
- ETWO 'L', 'A'
- ETWO 'S', 'E'
- ECHR 'R'
- ECHR 'S'
- ECHR ' '
+ EJMP 14                \ Token 111:    "{justify}{single cap}PULSE LASERS ARE
+ EJMP 19                \                FOR SALE AT TECH LEVEL 4 OR ABOVE.
+ ECHR 'P'               \                {crlf}
+ ECHR 'U'               \                {single cap}PULSE LASERS FIRE
+ ECHR 'L'               \                INTERMITTENT LASER BEAMS.{cr}
+ ETWO 'S', 'E'          \                {left align}"
+ ECHR ' '               \
+ ETWO 'L', 'A'          \ Encoded as:   "{14}{19}PUL<218> <249><218>RS <238>E
+ ETWO 'S', 'E'          \                 F<253> S<228>E <245> TECH <229><250>L
+ ECHR 'R'               \                 4 <253> <216>O<250>.<215>{19}PUL<218>
+ ECHR 'S'               \                 <249><218>RS FI<242> <240>T<244>M<219>
+ ECHR ' '               \                T<246>T <249><218>R <247>AMS[177]"
  ETWO 'A', 'R'
  ECHR 'E'
  ECHR ' '
@@ -23055,26 +23058,26 @@ ENDMACRO
  ETOK 177
  EQUB VE
 
- EJMP 14
- EJMP 19
- ETWO 'B', 'E'
- ECHR 'A'
- ECHR 'M'
- ECHR ' '
- ETWO 'L', 'A'
- ETWO 'S', 'E'
- ECHR 'R'
- ECHR 'S'
- ECHR ' '
- ETWO 'A', 'R'
- ECHR 'E'
- ECHR ' '
- ECHR 'A'
- ECHR 'V'
- ECHR 'A'
- ETWO 'I', 'L'
- ETWO 'A', 'B'
- ETWO 'L', 'E'
+ EJMP 14                \ Token 112:    "{justify}{single cap}BEAM LASERS ARE
+ EJMP 19                \                AVAILABLE AT SYSTEMS OF TECH LEVEL 5 OR
+ ETWO 'B', 'E'          \                HIGHER.{crlf}
+ ECHR 'A'               \                {single cap}BEAM LASERS FIRE CONTINUOUS
+ ECHR 'M'               \                LASER STRANDS, WITH MANY STRANDS IN
+ ECHR ' '               \                PARALLEL.{crlf}
+ ETWO 'L', 'A'          \                {single cap}BEAM LASERS OVERHEAT MORE
+ ETWO 'S', 'E'          \                RAPIDLY THAN PULSE LASERS.{cr}
+ ECHR 'R'               \                {left align}"
+ ECHR 'S'               \
+ ECHR ' '               \ Encoded as:   "{14}{19}<247>AM <249><218>RS <238>E AVA
+ ETWO 'A', 'R'          \                <220><216><229> <245> SY<222>EMS OF TEC
+ ECHR 'E'               \                H <229><250>L 5 <253> HIGH<244>.<215>
+ ECHR ' '               \                {19}<247>AM <249><218>RS FI<242> C<223>
+ ECHR 'A'               \                <251><225><217>S <249><218>R <222><248>
+ ECHR 'V'               \                NDS, W<219>H <239>NY <222><248>NDS
+ ECHR 'A'               \                 <240> P<238><228><229>L.<215>{19}<247>
+ ETWO 'I', 'L'          \                AM <249><218>RS OV<244>HE<245> MO<242>
+ ETWO 'A', 'B'          \                 <248>PIDLY <226><255> PUL<218> <249>  
+ ETWO 'L', 'E'          \                <218>RS[177]"
  ECHR ' '
  ETWO 'A', 'T'
  ECHR ' '
@@ -23206,30 +23209,30 @@ ENDMACRO
  ETOK 177
  EQUB VE
 
- EJMP 14
- EJMP 19
- ECHR 'F'
- ECHR 'U'
- ECHR 'E'
- ECHR 'L'
- ECHR ' '
- ECHR 'S'
- ECHR 'C'
- ECHR 'O'
- ECHR 'O'
- ECHR 'P'
- ECHR 'S'
- ECHR ' '
- ETWO 'E', 'N'
- ETWO 'A', 'B'
- ETWO 'L', 'E'
- ETOK 208
- ETOK 207
- ETOK 201
- ECHR 'O'
- ECHR 'B'
- ECHR 'T'
- ECHR 'A'
+ EJMP 14                \ Token 113:    "{justify}{single cap}FUEL SCOOPS ENABLE
+ EJMP 19                \                A SHIP TO OBTAIN FREE HYPERSPACE FUEL
+ ECHR 'F'               \                BY 'SUN-SKIMMING' - FLYING CLOSE TO THE
+ ECHR 'U'               \                SUN.{crlf}
+ ECHR 'E'               \                {single cap}FUEL SCOOPS CAN ALSO BE
+ ECHR 'L'               \                USED TO PICK UP SPACE DEBRIS, SUCH AS
+ ECHR ' '               \                CARGO BARRELS OR ASTEROID FRAGMENTS.
+ ECHR 'S'               \                {crlf}
+ ECHR 'C'               \                {single cap}FUEL SCOOPS ARE AVAILABLE
+ ECHR 'O'               \                FROM SYSTEMS OF TECH LEVEL 6 OR ABOVE.
+ ECHR 'O'               \                {cr}
+ ECHR 'P'               \                {left align}"
+ ECHR 'S'               \
+ ECHR ' '               \ Encoded as:   "{14}{19}FUEL SCOOPS <246><216><229>
+ ETWO 'E', 'N'          \                [208][207][201]OBTA<240> F<242>E HYP
+ ETWO 'A', 'B'          \                <244>SPA<233> FUEL BY 'SUN-SKIMM<240>G'
+ ETWO 'L', 'E'          \                 - FLY[195]C<224><218>[201][147]SUN.
+ ETOK 208               \                <215>{19}FUEL SCOOPS C<255> <228><235>
+ ETOK 207               \                 <247> <236>[196]TO PICK UP SPA<233> DE
+ ETOK 201               \                BRIS, SUCH AS C<238>GO B<238><242>LS
+ ECHR 'O'               \                 <253> A<222><244>OID F<248>GM<246>TS.
+ ECHR 'B'               \                <215>{19}FUEL SCOOPS <238>E AVA<220>
+ ECHR 'T'               \                <216><229> FROM SY<222>EMS OF TECH
+ ECHR 'A'               \                 <229><250>L 6 <253> <216>O<250>[177]"
  ETWO 'I', 'N'
  ECHR ' '
  ECHR 'F'
@@ -23253,7 +23256,7 @@ ENDMACRO
  ECHR 'B'
  ECHR 'Y'
  ECHR ' '
- ECHR '''
+ ECHR '`'
  ECHR 'S'
  ECHR 'U'
  ECHR 'N'
@@ -23265,7 +23268,7 @@ ENDMACRO
  ECHR 'M'
  ETWO 'I', 'N'
  ECHR 'G'
- ECHR '''
+ ECHR '`'
  ECHR ' '
  ECHR '-'
  ECHR ' '
@@ -23424,40 +23427,40 @@ ENDMACRO
  ETOK 177
  EQUB VE
 
- EJMP 14
- EJMP 19
- ETWO 'A', 'N'
- ECHR ' '
- ETWO 'E', 'S'
- ECHR 'C'
- ECHR 'A'
- ECHR 'P'
- ECHR 'E'
- ECHR ' '
- ECHR 'P'
- ECHR 'O'
- ECHR 'D'
- ETOK 202
- ETWO 'A', 'N'
- ECHR ' '
- ETWO 'E', 'S'
- ETWO 'S', 'E'
- ECHR 'N'
- ETWO 'T', 'I'
- ETWO 'A', 'L'
- ECHR ' '
- ECHR 'P'
- ECHR 'I'
- ECHR 'E'
- ETWO 'C', 'E'
- ECHR ' '
- ECHR 'O'
- ECHR 'F'
- ECHR ' '
- ECHR 'E'
- ECHR 'Q'
- ECHR 'U'
- ECHR 'I'
+ EJMP 14                \ Token 114:    "{justify}{single cap}AN ESCAPE POD IS
+ EJMP 19                \                AN ESSENTIAL PIECE OF EQUIPMENT FOR
+ ETWO 'A', 'N'          \                MOST SPACESHIPS.{crlf}
+ ECHR ' '               \                {single cap}WHEN EJECTED, THE CAPSULE
+ ETWO 'E', 'S'          \                WILL BE TRACKED TO THE NEAREST SPACE
+ ECHR 'C'               \                STATION.{crlf}
+ ECHR 'A'               \                {single cap}MOST ESCAPE PODS COME WITH
+ ECHR 'P'               \                INSURANCE POLICIES TO REPLACE THE SHIP
+ ECHR 'E'               \                AND EQUIPMENT.{crlf}
+ ECHR ' '               \                {single cap}PENALTIES FOR INTERFERING
+ ECHR 'P'               \                WITH ESCAPE PODS ARE SEVERE IN MOST
+ ECHR 'O'               \                PLANETARY SYSTEMS.{crlf}
+ ECHR 'D'               \                {single cap}ESCAPE PODS MAY BE BOUGHT
+ ETOK 202               \                AT SYSTEMS OF TECH LEVEL 7 OR HIGHER.
+ ETWO 'A', 'N'          \                {cr}
+ ECHR ' '               \                {left align}"
+ ETWO 'E', 'S'          \
+ ETWO 'S', 'E'          \ Encoded as:   "{14}{19}<255> <237>CAPE POD[202]<255>
+ ECHR 'N'               \                 <237><218>N<251><228> PIE<233> OF EQUI
+ ETWO 'T', 'I'          \                PM<246>T F<253> MO<222> SPA<233>[207]S.
+ ETWO 'A', 'L'          \                <215>{19}WH<246> EJECT<252>, [147]CAPSU
+ ECHR ' '               \                <229> W<220>L <247> T<248>CK[196]TO
+ ECHR 'P'               \                 [147]NE<238>E<222> SPA<233> <222><245>
+ ECHR 'I'               \                I<223>.<215>{19}MO<222> <237>CAPE PODS
+ ECHR 'E'               \                 COME W<219>H <240>SU<248>N<233> POLICI
+ ETWO 'C', 'E'          \                <237>[201]<242>P<249><233> [147][207]
+ ECHR ' '               \                [178]EQUIPM<246>T.<215>{19}P<246><228>
+ ECHR 'O'               \                <251><237> F<253> <240>T<244>F<244>
+ ECHR 'F'               \                [195]W<219>H <237>CAPE PODS <238>E 
+ ECHR ' '               \                <218><250><242> <240> MO<222> [145]
+ ECHR 'E'               \                <238>Y SY<222>EMS.<215>{19}<237>CAPE PO
+ ECHR 'Q'               \                DS <239>Y <247> B<217>GHT <245> SY<222>
+ ECHR 'U'               \                EMS OF TECH <229><250>L 7 <253> HIGH
+ ECHR 'I'               \                <244>[177]"
  ECHR 'P'
  ECHR 'M'
  ETWO 'E', 'N'
@@ -23701,39 +23704,39 @@ ENDMACRO
  ETOK 177
  EQUB VE
 
- EJMP 14
- EJMP 19
- ECHR 'A'
- ECHR ' '
- ETWO 'R', 'E'
- ETWO 'C', 'E'
- ECHR 'N'
- ECHR 'T'
- ECHR ' '
- ETWO 'I', 'N'
- ECHR 'V'
- ETWO 'E', 'N'
- ETWO 'T', 'I'
- ETWO 'O', 'N'
- ECHR ','
- ECHR ' '
- ETOK 147
- ECHR 'H'
- ECHR 'Y'
- ECHR 'P'
- ETWO 'E', 'R'
- ECHR 'S'
- ECHR 'P'
- ECHR 'A'
- ETWO 'C', 'E'
- ECHR ' '
- ECHR 'U'
- ECHR 'N'
- ETWO 'I', 'T'
- ETOK 202
- ETWO 'A', 'N'
- ECHR ' '
- ETWO 'A', 'L'
+ EJMP 14                \ Token 115:    "{justify}{single cap}A RECENT
+ EJMP 19                \                INVENTION, THE HYPERSPACE UNIT IS AN
+ ECHR 'A'               \                ALTERNATIVE TO THE ESCAPE POD FOR MANY
+ ECHR ' '               \                TRADERS.{crlf}
+ ETWO 'R', 'E'          \                {single cap}WHEN TRIGGERED, THE
+ ETWO 'C', 'E'          \                HYPERSPACE UNIT WILL USE ITS POWER IN
+ ECHR 'N'               \                EXECUTING A HYPERJUMP AWAY FROM THE
+ ECHR 'T'               \                CURRENT POSITION.{crlf}
+ ECHR ' '               \                {single cap}UNFORTUNATELY, BECAUSE THE
+ ETWO 'I', 'N'          \                HYPERJUMP IS INSTANTANEOUS, THERE IS NO
+ ECHR 'V'               \                CONTROL OF THE DESTINATION POSITION.
+ ETWO 'E', 'N'          \                {crlf}
+ ETWO 'T', 'I'          \                {single cap}A HYPERSPACE UNIT IS
+ ETWO 'O', 'N'          \                AVAILABLE AT TECH LEVEL 8 OR ABOVE.{cr}
+ ECHR ','               \                {left align}"
+ ECHR ' '               \
+ ETOK 147               \ Encoded as:   "{14}{19}A <242><233>NT <240>V<246><251>
+ ECHR 'H'               \                <223>, [147]HYP<244>SPA<233> UN<219>
+ ECHR 'Y'               \                [202]<255> <228>T<244>N<245>I<250> TO
+ ECHR 'P'               \                 [147]<237>CAPE POD F<253> <239>NY T
+ ETWO 'E', 'R'          \                <248>D<244>S.<215>{19}WH<246> TRIG<231>
+ ECHR 'S'               \                <242>D, [147]HYP<244>SPA<233> UN<219> W
+ ECHR 'P'               \                <220>L U<218> <219>S POW<244> <240> E
+ ECHR 'A'               \                <230>CUT[195]A HYP<244>JUMP AWAY FROM
+ ETWO 'C', 'E'          \                 [147]CUR<242>NT POS<219>I<223>.<215>
+ ECHR ' '               \                {19}UNF<253>TUN<245>ELY, <247>CAU<218>
+ ECHR 'U'               \                 [147]HYP<244>JUMP[202]<240><222><255>T
+ ECHR 'N'               \                <255>E<217>S, <226>E<242>[202]<227> C
+ ETWO 'I', 'T'          \                <223>TROL OF [147]DE<222><240><245>I
+ ETOK 202               \                <223> POS<219>I<223>.<215>{19}A HYP
+ ETWO 'A', 'N'          \                <244>SPA<233> UN<219>[202]AVA<220><216>
+ ECHR ' '               \                <229> <245> TECH <229><250>L 8 <253>
+ ETWO 'A', 'L'          \                 <216>O<250>[177]"
  ECHR 'T'
  ETWO 'E', 'R'
  ECHR 'N'
@@ -23974,22 +23977,22 @@ ENDMACRO
  ETOK 177
  EQUB VE
 
- EJMP 14
- EJMP 19
- ETWO 'A', 'N'
- ECHR ' '
- ETWO 'E', 'N'
- ETWO 'E', 'R'
- ECHR 'G'
- ECHR 'Y'
- ECHR ' '
- ECHR 'U'
- ECHR 'N'
- ETWO 'I', 'T'
- ECHR ' '
- ETWO 'I', 'N'
- ECHR 'C'
- ETWO 'R', 'E'
+ EJMP 14                \ Token 116:    "{justify}{single cap}AN ENERGY UNIT
+ EJMP 19                \                INCREASES THE RATE OF RECHARGING OF THE
+ ETWO 'A', 'N'          \                ENERGY BANKS FROM SURFACE RADIATION
+ ECHR ' '               \                ABSORPTION.{crlf}
+ ETWO 'E', 'N'          \                {single cap}ENERGY UNITS ARE AVAILABLE
+ ETWO 'E', 'R'          \                FROM TECH LEVEL 9 UPWARDS.{cr}
+ ECHR 'G'               \                {left align}"
+ ECHR 'Y'               \
+ ECHR ' '               \ Encoded as:   "{14}{19}<255> <246><244>GY UN<219>
+ ECHR 'U'               \                 <240>C<242>A<218>S [147]R<245>E OF
+ ECHR 'N'               \                 <242>CH<238>G[195]OF [147]<246><244>GY
+ ETWO 'I', 'T'          \                 B<255>KS FROM SURFA<233> <248><241>
+ ECHR ' '               \                <245>I<223> <216><235>RP<251><223>.
+ ETWO 'I', 'N'          \                <215>{19}<246><244>GY UN<219>S <238>E
+ ECHR 'C'               \                 AVA<220><216><229> FROM TECH <229>
+ ETWO 'R', 'E'          \                <250>L 9 UPW<238>DS[177]"
  ECHR 'A'
  ETWO 'S', 'E'
  ECHR 'S'
@@ -24094,29 +24097,29 @@ ENDMACRO
  ETOK 177
  EQUB VE
 
- EJMP 14
- EJMP 19
- ECHR 'D'
- ECHR 'O'
- ECHR 'C'
- ECHR 'K'
- ETOK 195
- ECHR 'C'
- ECHR 'O'
- ECHR 'M'
- ECHR 'P'
- ECHR 'U'
- ECHR 'T'
- ETWO 'E', 'R'
- ECHR 'S'
- ECHR ' '
- ETWO 'A', 'R'
- ECHR 'E'
- ECHR ' '
- ETWO 'R', 'E'
- ECHR 'C'
- ECHR 'O'
- ECHR 'M'
+ EJMP 14                \ Token 117:    "{justify}{single cap}DOCKING COMPUTERS
+ EJMP 19                \                ARE RECOMMENDED BY ALL PLANETARY
+ ECHR 'D'               \                GOVERNMENTS AS A SAFE WAY OF REDUCING
+ ECHR 'O'               \                THE NUMBER OF DOCKING ACCIDENTS.{crlf}
+ ECHR 'C'               \                {single cap}DOCKING COMPUTERS WILL
+ ECHR 'K'               \                AUTOMATICALLY DOCK A SHIP WHEN TURNED
+ ETOK 195               \                ON.{crlf}
+ ECHR 'C'               \                {single cap}DOCKING COMPUTERS CAN BE
+ ECHR 'O'               \                BOUGHT AT SYSTEMS OF TECH LEVEL 10 OR
+ ECHR 'M'               \                MORE.{cr}
+ ECHR 'P'               \                {left align}"
+ ECHR 'U'               \
+ ECHR 'T'               \ Encoded as:   "{14}{19}DOCK[195]COMPUT<244>S <238>E
+ ETWO 'E', 'R'          \                 <242>COMM<246>D[196]BY <228>L [145]
+ ECHR 'S'               \                <238>Y GOV<244>NM<246>TS AS[208]SAFE WA
+ ECHR ' '               \                Y OF <242>DUC[195][147]<225>MB<244> OF
+ ETWO 'A', 'R'          \                 DOCK[195]ACCID<246>TS.<215>{19}DOCK
+ ECHR 'E'               \                [195]COMPUT<244>S W<220>L AUTO<239>
+ ECHR ' '               \                <251>C<228>LY DOCK[208][207] WH<246> TU
+ ETWO 'R', 'E'          \                RN[196]<223>.<215>{19}DOCK[195]COMPUT
+ ECHR 'C'               \                <244>S C<255> <247> B<217>GHT <245> SY
+ ECHR 'O'               \                <222>EMS OF TECH <229><250>L 10 <253> M
+ ECHR 'M'               \                O<242>[177]"
  ECHR 'M'
  ETWO 'E', 'N'
  ECHR 'D'
@@ -24292,23 +24295,23 @@ ENDMACRO
  ETOK 177
  EQUB VE
 
- EJMP 14
- EJMP 19
- ECHR 'G'
- ETWO 'A', 'L'
- ECHR 'A'
- ECHR 'C'
- ETWO 'T', 'I'
- ECHR 'C'
- ECHR ' '
- ECHR 'H'
- ECHR 'Y'
- ECHR 'P'
- ETWO 'E', 'R'
- ECHR 'S'
- ECHR 'P'
- ECHR 'A'
- ETWO 'C', 'E'
+ EJMP 14                \ Token 118:    "{justify}{single cap}GALACTIC
+ EJMP 19                \                HYPERSPACE DRIVES ARE OBTAINABLE FROM
+ ECHR 'G'               \                PLANETS OF TECH LEVEL 11 UPWARDS.{crlf}
+ ETWO 'A', 'L'          \                {single cap}WHEN THE INTERGALACTIC
+ ECHR 'A'               \                HYPERDRIVE IS ENGAGED, THE SHIP IS
+ ECHR 'C'               \                HYPERJUMPED INTO THE PRE-PROGRAMMED
+ ETWO 'T', 'I'          \                GALAXY.{cr}
+ ECHR 'C'               \                {left align}"
+ ECHR ' '               \
+ ECHR 'H'               \ Encoded as:   "{14}{19}G<228>AC<251>C HYP<244>SPA<233>
+ ECHR 'Y'               \                 [151]S <238>E OBTA<240><216><229> FROM
+ ECHR 'P'               \                 [145]S OF TECH <229><250>L 11 UPW<238>
+ ETWO 'E', 'R'          \                DS.<215>{19}WH<246> [147]<240>T<244>G
+ ECHR 'S'               \                <228>AC<251>C HYP<244>[151] IS <246>GA
+ ECHR 'P'               \                <231>D, [147][207][202]HYP<244>JUMP
+ ECHR 'A'               \                [196]<240>TO [147]P<242>-PROG<248>MM
+ ETWO 'C', 'E'          \                [196]G<228>AXY[177]"
  ECHR ' '
  ETOK 151
  ECHR 'S'
@@ -24423,29 +24426,29 @@ ENDMACRO
  ETOK 177
  EQUB VE
 
- EJMP 14
- EJMP 19
- ECHR 'M'
- ETWO 'I', 'L'
- ETWO 'I', 'T'
- ETWO 'A', 'R'
- ECHR 'Y'
- ECHR ' '
- ETWO 'L', 'A'
- ETWO 'S', 'E'
- ECHR 'R'
- ECHR 'S'
- ECHR ' '
- ETWO 'A', 'R'
- ECHR 'E'
- ECHR ' '
- ETOK 147
- ECHR 'H'
- ECHR 'E'
- ECHR 'I'
- ECHR 'G'
- ECHR 'H'
- ECHR 'T'
+ EJMP 14                \ Token 119:    "{justify}{single cap}MILITARY LASERS
+ EJMP 19                \                ARE THE HEIGHT OF LASER SOPHISTICATION.
+ ECHR 'M'               \                {crlf}
+ ETWO 'I', 'L'          \                {single cap}THEY USE HIGH ENERGY LASERS
+ ETWO 'I', 'T'          \                FIRING CONTINUOUSLY TO PRODUCE
+ ETWO 'A', 'R'          \                DEVASTATING EFFECTS, BUT ARE PRONE TO
+ ECHR 'Y'               \                OVERHEATING.{crlf}
+ ECHR ' '               \                {single cap}MILITARY LASERS ARE
+ ETWO 'L', 'A'          \                AVAILABLE FROM PLANETS OF TECH LEVEL 12
+ ETWO 'S', 'E'          \                OR MORE.{cr}
+ ECHR 'R'               \                {left align}"
+ ECHR 'S'               \
+ ECHR ' '               \ Encoded as:   "{14}{19}M<220><219><238>Y <249><218>RS
+ ETWO 'A', 'R'          \                 <238>E [147]HEIGHT OF <249><218>R
+ ECHR 'E'               \                 <235>PHI<222>IC<245>I<223>.<215>{19}
+ ECHR ' '               \                <226>EY U<218> HIGH <246><244>GY <249>
+ ETOK 147               \                <218>RS FIR[195]C<223><251><225><217>SL
+ ECHR 'H'               \                Y[201]PRODU<233> DEVA<222><245>[195]EFF
+ ECHR 'E'               \                ECTS, BUT <238>E PR<223>E[201]OV<244>HE
+ ECHR 'I'               \                <245><240>G.<215>{19}M<220><219><238>Y
+ ECHR 'G'               \                 <249><218>RS <238>E AVA<220><216><229>
+ ECHR 'H'               \                 FROM [145]S OF TECH <229><250>L 12
+ ECHR 'T'               \                 <253> MO<242>[177]"
  ECHR ' '
  ECHR 'O'
  ECHR 'F'
@@ -24600,21 +24603,21 @@ ENDMACRO
  ETOK 177
  EQUB VE
 
- EJMP 14
- EJMP 19
- ECHR 'M'
- ETWO 'I', 'N'
- ETOK 195
- ETWO 'L', 'A'
- ETWO 'S', 'E'
- ECHR 'R'
- ECHR 'S'
- ECHR ' '
- ETWO 'A', 'R'
- ECHR 'E'
- ECHR ' '
- ECHR 'H'
- ECHR 'I'
+ EJMP 14                \ Token 120:    "{justify}{single cap}MINING LASERS ARE
+ EJMP 19                \                HIGHLY POWERED, SLOW FIRING PULSE
+ ECHR 'M'               \                LASERS WHICH ARE TUNED TO FRAGMENT
+ ETWO 'I', 'N'          \                ASTEROIDS.{crlf}
+ ETOK 195               \                {single cap}MINING LASERS ARE AVAILABLE
+ ETWO 'L', 'A'          \                FROM TECH LEVEL 12 UPWARDS.{cr}
+ ETWO 'S', 'E'          \                {left align}"
+ ECHR 'R'               \
+ ECHR 'S'               \ Encoded as:   "{14}{19}M<240>[195]<249><218>RS <238>E
+ ECHR ' '               \                 HIGHLY POWE<242>D, S<224>W FIR[195]PUL
+ ETWO 'A', 'R'          \                <218> <249><218>RS WHICH <238>E TUN
+ ECHR 'E'               \                [196]TO F<248>GM<246>T A<222><244>OIDS.
+ ECHR ' '               \                <215>{19}M<240>[195]<249><218>RS <238>E
+ ECHR 'H'               \                 AVA<220><216><229> FROM TECH <229>
+ ECHR 'I'               \                <250>L 12 UPW<238>DS[177]"
  ECHR 'G'
  ECHR 'H'
  ECHR 'L'
@@ -24723,7 +24726,7 @@ ENDMACRO
  ETOK 177
  EQUB VE
 
-\ ******************************************************************************
+ \ ******************************************************************************
 \
 \       Name: MTIN
 \       Type: Variable
