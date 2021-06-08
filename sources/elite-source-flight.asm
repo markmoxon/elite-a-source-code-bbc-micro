@@ -18077,9 +18077,23 @@ LOAD_E% = LOAD% + P% - CODE%
                         \ with an equator and meridian, 130 is a planet with
                         \ a crater)
 
+\ ******************************************************************************
+\
+\       Name: SOLAR
+\       Type: Subroutine
+\   Category: Universe
+\    Summary: Set up various aspects of arriving in a new system
+\
+\ ------------------------------------------------------------------------------
+\
+\ Halve our legal status, update the missile indicators, and set up data blocks
+\ and slots for the planet and sun.
+\
+\ ******************************************************************************
+
 .SOLAR
 
- LDA QQ8
+ LDA QQ8                \ AJD
  LDY #3
 
 .legal_div
@@ -18097,61 +18111,125 @@ LOAD_E% = LOAD% + P% - CODE%
 
  EOR #&FF
  STA FIST
- \	LDA FIST
- \	BEQ legal_over
- \legal_next
- \	DEC FIST
- \	LSR a
- \	BNE legal_next
- \legal_over
- \\	LSR FIST
- JSR ZINF
- LDA &6D
- AND #&03
- ADC #&03
- STA &4E
- ROR A
- STA &48
- STA &4B
- JSR SOS1
- LDA &6F
- AND #&07
- ORA #&81
- STA &4E
- LDA &71
- AND #&03
- STA &48
- STA &47
- LDA #&00
- STA &63
- STA &64
- LDA #&81
- JSR NWSHP
+
+ JSR ZINF               \ Call ZINF to reset the INWK ship workspace, which
+                        \ doesn't affect the C flag
+
+ LDA QQ15+1             \ Fetch s0_hi
+
+ AND #%00000011         \ Extract bits 0-1 (which also help to determine the
+                        \ economy), which will be between 0 and 3
+
+ ADC #3                 \ Add 3 + C, to get a result between 3 and 7, clearing
+                        \ the C flag in the process
+
+ STA INWK+8             \ Store the result in z_sign in byte #6
+
+ ROR A                  \ Halve A, rotating in the C flag (which is clear) and
+ STA INWK+2             \ store in both x_sign and y_sign, moving the planet to
+ STA INWK+5             \ the upper right
+
+ JSR SOS1               \ Call SOS1 to set up the planet's data block and add it
+                        \ to FRIN, where it will get put in the first slot as
+                        \ it's the first one to be added to our local bubble of
+                        \ this new system's universe
+
+ LDA QQ15+3             \ Fetch s1_hi, extract bits 0-2, set bits 0 and 7 and
+ AND #%00000111         \ store in z_sign, so the sun is behind us at a distance
+ ORA #%10000001         \ of 1 to 7
+ STA INWK+8
+
+ LDA QQ15+5             \ Fetch s2_hi, extract bits 0-1 and store in x_sign and
+ AND #%00000011         \ y_sign, so the sun is either dead in our rear laser
+ STA INWK+2             \ crosshairs, or off to the top left by a distance of 1
+ STA INWK+1             \ or 2 when we look out the back
+
+ LDA #0                 \ Set the pitch and roll counters to 0 (no rotation)
+ STA INWK+29
+ STA INWK+30
+
+ LDA #129               \ Set A = 129, the ship type for the sun
+
+ JSR NWSHP              \ Call NWSHP to set up the sun's data block and add it
+                        \ to FRIN, where it will get put in the second slot as
+                        \ it's the second one to be added to our local bubble
+                        \ of this new system's universe
+
+\ ******************************************************************************
+\
+\       Name: NWSTARS
+\       Type: Subroutine
+\   Category: Stardust
+\    Summary: Initialise the stardust field
+\
+\ ------------------------------------------------------------------------------
+\
+\ This routine is called when the space view is initialised in routine LOOK1.
+\
+\ ******************************************************************************
 
 .NWSTARS
 
- LDA &87
- BNE WPSHPS
+ LDA QQ11               \ If this is not a space view, jump to WPSHPS to skip
+ BNE WPSHPS             \ the initialisation of the SX, SY and SZ tables
 
-.l_35b5
+\ ******************************************************************************
+\
+\       Name: nWq
+\       Type: Subroutine
+\   Category: Stardust
+\    Summary: Create a random cloud of stardust
+\
+\ ------------------------------------------------------------------------------
+\
+\ Create a random cloud of stardust containing the correct number of dust
+\ particles, i.e. NOSTM of them, which is 3 in witchspace and 18 (#NOST) in
+\ normal space. Also clears the scanner and initialises the LSO block.
+\
+\ This is called by the DEATH routine when it displays our untimely demise.
+\
+\ ******************************************************************************
 
- LDY &03C3
+.nWq
 
-.l_35b8
+ LDY NOSTM              \ Set Y to the current number of stardust particles, so
+                        \ we can use it as a counter through all the stardust
 
- JSR DORND
- ORA #&08
- STA &0FA8,Y
- STA &88
- JSR DORND
- STA &0F5C,Y
- STA &34
- JSR DORND
- STA &0F82,Y
- STA &35
- JSR PIXEL2
- DEY
- BNE l_35b8
+.SAL4
+
+ JSR DORND              \ Set A and X to random numbers
+
+ ORA #8                 \ Set A so that it's at least 8
+
+ STA SZ,Y               \ Store A in the Y-th particle's z_hi coordinate at
+                        \ SZ+Y, so the particle appears in front of us
+
+ STA ZZ                 \ Set ZZ to the particle's z_hi coordinate
+
+ JSR DORND              \ Set A and X to random numbers
+
+ STA SX,Y               \ Store A in the Y-th particle's x_hi coordinate at
+                        \ SX+Y, so the particle appears in front of us
+
+ STA X1                 \ Set X1 to the particle's x_hi coordinate
+
+ JSR DORND              \ Set A and X to random numbers
+
+ STA SY,Y               \ Store A in the Y-th particle's y_hi coordinate at
+                        \ SY+Y, so the particle appears in front of us
+
+ STA Y1                 \ Set Y1 to the particle's y_hi coordinate
+
+ JSR PIXEL2             \ Draw a stardust particle at (X1,Y1) with distance ZZ
+
+ DEY                    \ Decrement the counter to point to the next particle of
+                        \ stardust
+
+ BNE SAL4               \ Loop back to SAL4 until we have randomised all the
+                        \ stardust particles
+
+                        \ Fall through into WPSHPS to clear the scanner and
+                        \ reset the LSO block
 
 \ ******************************************************************************
 \
@@ -18442,10 +18520,21 @@ LOAD_E% = LOAD% + P% - CODE%
 
  RTS                    \ Return from the subroutine
 
+\ ******************************************************************************
+\
+\       Name: COMPAS
+\       Type: Subroutine
+\   Category: Dashboard
+\    Summary: Update the compass
+\
+\ ******************************************************************************
+
 .COMPAS
 
- JSR DOT
- LDY #&25
+ JSR DOT                \ Call DOT to redraw (i.e. remove) the current compass
+                        \ dot
+
+ LDY #&25               \ AJD
  LDA &0320
  BNE l_station
  LDY &9F	\ finder
@@ -18453,25 +18542,78 @@ LOAD_E% = LOAD% + P% - CODE%
 .l_station
 
  JSR SPS1
- LDA &34
- JSR SPS2
- TXA
- ADC #&C3
- STA &03A8
- LDA &35
- JSR SPS2
- STX &D1
- LDA #&CC
- SBC &D1
- STA &03A9
- LDA #&F0
- LDX &36
- BPL l_3691
- LDA #&FF
 
-.l_3691
+                        \ Fall through into SP2 to draw XX15 on the compass
 
- STA &03C5
+\ ******************************************************************************
+\
+\       Name: SP2
+\       Type: Subroutine
+\   Category: Dashboard
+\    Summary: Draw a dot on the compass, given the planet/station vector
+\
+\ ------------------------------------------------------------------------------
+\
+\ Draw a dot on the compass to represent the planet or station, whose normalised
+\ vector is in XX15.
+\
+\   XX15 to XX15+2      The normalised vector to the planet or space station,
+\                       stored as x in XX15, y in XX15+1 and z in XX15+2
+\
+\ ******************************************************************************
+
+.SP2
+
+ LDA XX15               \ Set A to the x-coordinate of the planet or station to
+                        \ show on the compass, which will be in the range -96 to
+                        \ +96 as the vector has been normalised
+
+ JSR SPS2               \ Set (Y X) = A / 10, so X will be from -9 to +9, which
+                        \ is the x-offset from the centre of the compass of the
+                        \ dot we want to draw. Returns with the C flag clear
+
+ TXA                    \ Set COMX = 195 + X, as 186 is the pixel x-coordinate
+ ADC #195               \ of the leftmost dot possible on the compass, and X can
+ STA COMX               \ be -9, which would be 195 - 9 = 186. This also means
+                        \ that the highest value for COMX is 195 + 9 = 204,
+                        \ which is the pixel x-coordinate of the rightmost dot
+                        \ in the compass... but the compass dot is actually two
+                        \ pixels wide, so the compass dot can overlap the right
+                        \ edge of the compass, but not the left edge
+
+ LDA XX15+1             \ Set A to the y-coordinate of the planet or station to
+                        \ show on the compass, which will be in the range -96 to
+                        \ +96 as the vector has been normalised
+
+ JSR SPS2               \ Set (Y X) = A / 10, so X will be from -9 to +9, which
+                        \ is the y-offset from the centre of the compass of the
+                        \ dot we want to draw. Returns with the C flag clear
+
+ STX T                  \ Set COMY = 204 - X, as 203 is the pixel y-coordinate
+ LDA #204               \ of the centre of the compass, the C flag is clear,
+ SBC T                  \ and the y-axis needs to be flipped around (because
+ STA COMY               \ when the planet or station is above us, and the
+                        \ vector is therefore positive, we want to show the dot
+                        \ higher up on the compass, which has a smaller pixel
+                        \ y-coordinate). So this calculation does this:
+                        \
+                        \   COMY = 204 - X - (1 - 0) = 203 - X
+
+ LDA #&F0               \ Set A to a 4-pixel mode 5 byte row in colour 2
+                        \ (yellow/white), the colour for when the planet or
+                        \ station in the compass is in front of us
+
+ LDX XX15+2             \ If the z-coordinate of the XX15 vector is positive,
+ BPL P%+4               \ skip the following instruction
+
+ LDA #&FF               \ The z-coordinate of XX15 is negative, so the planet or
+                        \ station is behind us and the compass dot should be in
+                        \ green/cyan, so set A to a 4-pixel mode 5 byte row in
+                        \ colour 3
+
+ STA COMC               \ Store the compass colour in COMC
+
+                        \ Fall through into DOT to draw the dot on the compass
 
 .DOT
 
@@ -21847,7 +21989,7 @@ LOAD_E% = LOAD% + P% - CODE%
  JSR DET1
  JSR TT66
  JSR BOX
- JSR l_35b5
+ JSR nWq
  LDA #&0C
  STA YC
  STA XC
