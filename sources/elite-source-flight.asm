@@ -2640,7 +2640,10 @@ LOAD_A% = LOAD%
  LDA XX21-1,Y           \ Fetch the high byte of this particular ship type's
  STA XX0+1              \ blueprint and store it in XX0+1
 
-\ Omit part 5 (energy bomb)
+                        \ We now go straight to part 6, omitting part 5 from the
+                        \ original disc version, as part 5 implements the energy
+                        \ bomb, and Elite-A replaces the energy bomb with the
+                        \ Hyperspace Unit
 
 \ ******************************************************************************
 \
@@ -3194,13 +3197,13 @@ LOAD_A% = LOAD%
  \ hit opponent
  STA &D1                \ AJD
  SEC
- LDY #&0E	\ opponent shield
+ LDY #&0E               \ opponent shield
  LDA (&1E),Y
  AND #&07
  SBC &D1
  BCS n_kill
- \	BCC n_defense
- \	LDA #&FF
+ \BCC n_defense
+ \LDA #&FF
  \n_defense
  CLC
  ADC &69
@@ -8513,7 +8516,7 @@ NEXT
 
  JSR RES2               \ Reset a number of flight variables and workspaces
 
- LDX #ESC	            \ AJD
+ LDX #ESC               \ AJD
  STX &8C
  JSR FRS1
 
@@ -10542,6 +10545,15 @@ LOAD_C% = LOAD% +P% - CODE%
  STX &45
 
  JMP n_sound30          \ AJD
+
+\ ******************************************************************************
+\
+\       Name: anger_8c
+\       Type: Subroutine
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
 
 .anger_8c
 
@@ -13443,6 +13455,15 @@ PRINT "S.ELTC ", ~CODE_C%, " ", ~P%, " ", ~LOAD%, " ", ~LOAD_C%
 
 CODE_D% = P%
 LOAD_D% = LOAD% + P% - CODE%
+
+\ ******************************************************************************
+\
+\       Name: tnpr_FLIGHT
+\       Type: Subroutine
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
 
 .tnpr_FLIGHT
 
@@ -18537,7 +18558,7 @@ LOAD_E% = LOAD% + P% - CODE%
  LDY #&25               \ AJD
  LDA &0320
  BNE l_station
- LDY &9F	\ finder
+ LDY &9F                \ finder
 
 .l_station
 
@@ -18792,9 +18813,18 @@ LOAD_E% = LOAD% + P% - CODE%
 
  RTS                    \ Return from the subroutine
 
+\ ******************************************************************************
+\
+\       Name: OOPS2
+\       Type: Subroutine
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .OOPS2
 
- SEC	\ reduce damage
+ SEC                    \ reduce damage
  SBC new_shields
  BCC n_shok
 
@@ -22627,6 +22657,15 @@ LOAD_F% = LOAD% + P% - CODE%
  EQUB &13,&04,&C2,&FF   \ 64 - E.C.M. on
  EQUB &13,&00,&00,&00   \ 72 - E.C.M. off
 
+\ ******************************************************************************
+\
+\       Name: rand_posn
+\       Type: Subroutine
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .rand_posn
 
  JSR ZINF
@@ -25178,10 +25217,28 @@ LOAD_F% = LOAD% + P% - CODE%
 
  EQUB &37               \ P         KYTB+16     Cancel docking computer
 
+\ ******************************************************************************
+\
+\       Name: b_table
+\       Type: Variable
+\   Category: Elite-A
+\    Summary: Lookup table for Voltmace Delta 14 joystick buttons AJD
+\
+\ ******************************************************************************
+
 .b_table
 
  EQUB &61, &31, &80, &80, &80, &80, &51
  EQUB &64, &34, &32, &62, &52, &54, &58, &38, &68
+
+\ ******************************************************************************
+\
+\       Name: b_14
+\       Type: Subroutine
+\   Category: Elite-A
+\    Summary: Check Voltmace Delta 14 joystick buttons AJD
+\
+\ ******************************************************************************
 
 .b_13
 
@@ -25968,6 +26025,15 @@ LOAD_F% = LOAD% + P% - CODE%
                         \ skip the first instruction by turning it into
                         \ &2C &A9 &6C, or BIT &6CA9, which does nothing apart
                         \ from affect the flags
+
+\ ******************************************************************************
+\
+\       Name: cargo_mtok
+\       Type: Subroutine
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
 
 .cargo_mtok
 
@@ -32227,9 +32293,27 @@ ENDMACRO
 
  RTS                    \ Return from the subroutine
 
+\ ******************************************************************************
+\
+\       Name: iff_xor
+\       Type: Variable
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .iff_xor
 
- EQUB &00, &00, &0F	\, &FF, &F0 overlap
+ EQUB &00, &00, &0F \, &FF, &F0 overlap
+
+\ ******************************************************************************
+\
+\       Name: iff_base
+\       Type: Variable
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
 
 .iff_base
 

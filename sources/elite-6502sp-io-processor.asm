@@ -246,7 +246,7 @@ cursor_y = &9F
  LDY #HI(tube_run)
  JMP OSCLI
 
-tube_brk = &16	\ tube BRK vector
+tube_brk = &16 \ tube BRK vector
 
 .tube_run
 
@@ -270,8 +270,8 @@ tube_brk = &16	\ tube BRK vector
 
 .tube_func
 
- CMP #&9D		\ OUT
- BCS return		\ OUT
+ CMP #&9D  \ OUT
+ BCS return  \ OUT
  ASL A
  TAY
  LDA tube_table,Y
@@ -310,7 +310,7 @@ tube_brk = &16	\ tube BRK vector
 
 .tube_wrch
 
- STA save_a
+ STA save_a             \ Like CHPR
  STX save_x
  STY save_y
  TAY
@@ -348,7 +348,7 @@ tube_brk = &16	\ tube BRK vector
 .wrch_or
 
  LDA (font),Y
- EOR (SC),Y	\ORA (SC),Y
+ EOR (SC),Y \ORA (SC),Y
  STA (SC),Y
  DEY
  BPL wrch_or
@@ -1798,7 +1798,7 @@ tube_brk = &16	\ tube BRK vector
 
 .put_missle
 
- JSR tube_get
+ JSR tube_get           \ Like msblob
  ASL A
  ASL A
  ASL A
@@ -1928,14 +1928,14 @@ tube_brk = &16	\ tube BRK vector
 .Rd2
 
  EOR #&80
- CMP #&37	\ CTRL-P hack for printer
+ CMP #&37 \ CTRL-P hack for printer
  BNE scan_test
  LDX #&01
  JSR DKS4
  BPL scan_p
  JSR printer
  LDA #0
- RTS	
+ RTS
 
 .scan_p
 
@@ -2030,7 +2030,7 @@ tube_brk = &16	\ tube BRK vector
  DEC drawpix_2
  JSR d_36ac
  LDA CTWOS+1,X
- AND drawpix_3	\ iff
+ AND drawpix_3 \ iff
  STA drawpix_3
  LDA CTWOS+1,X
  AND drawpix_4
@@ -2049,8 +2049,8 @@ tube_brk = &16	\ tube BRK vector
 .d_55d1
 
  LDA drawpix_3
- EOR drawpix_4	\ iff
- STA drawpix_3	\ iff
+ EOR drawpix_4 \ iff
+ STA drawpix_3 \ iff
  EOR (SC),Y
  STA (SC),Y
  DEX
@@ -2079,8 +2079,8 @@ tube_brk = &16	\ tube BRK vector
 .d_55ed
 
  LDA drawpix_3
- EOR drawpix_4	\ iff
- STA drawpix_3	\ iff
+ EOR drawpix_4 \ iff
+ STA drawpix_3 \ iff
  EOR (SC),Y
  STA (SC),Y
  INX
@@ -2180,14 +2180,14 @@ tube_brk = &16	\ tube BRK vector
  LDA LIL2+2
  EOR #&40
  STA LIL2+2
- \	LDA LIL3+2
- \	EOR #&40
+ \LDA LIL3+2
+ \EOR #&40
  STA LIL3+2
- \	LDA LIL5+2
- \	EOR #&40
+ \LDA LIL5+2
+ \EOR #&40
  STA LIL5+2
- \	LDA LIL6+2
- \	EOR #&40
+ \LDA LIL6+2
+ \EOR #&40
  STA LIL6+2
  RTS
 
@@ -2439,7 +2439,7 @@ rawrch = &FFBC
  INX
  LDA (SC),Y
  STA print_bits,X
- DEY	
+ DEY
  BPL print_copy
  LDA SC+1
  CMP #&78
@@ -2497,8 +2497,8 @@ rawrch = &FFBC
  BPL print_view
  LDA #3
  JMP print_safe
- \	JSR print_safe
- \	JMP tube_put
+ \JSR print_safe
+ \JMP tube_put
 
 .print_tone
 

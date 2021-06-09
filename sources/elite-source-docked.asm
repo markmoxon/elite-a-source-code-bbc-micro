@@ -5665,15 +5665,15 @@ LOAD_B% = LOAD% + P% - CODE%
 
 .l_1b6b
 
- \	LDA #&71
- \	STA &96
+ \LDA #&71
+ \STA &96
  LDX #&1A
 
 .stqv
 
  STX &93
- \	TAY
- \	LDX FRIN,Y
+ \TAY
+ \LDX FRIN,Y
  LDY LASER,X
  BEQ l_1b78
  TXA
@@ -5683,9 +5683,9 @@ LOAD_B% = LOAD% + P% - CODE%
 
 .l_1b78
 
- \	INC &96
- \	LDA &96
- \	CMP #&75
+ \INC &96
+ \LDA &96
+ \CMP #&75
  LDX &93
  INX
  CPX #&1E
@@ -8834,14 +8834,14 @@ LOAD_C% = LOAD% +P% - CODE%
  LDA LIL2+2             \ AJD
  EOR #&40
  STA LIL2+2
- \	LDA LIL3+2
- \	EOR #&40
+ \LDA LIL3+2
+ \EOR #&40
  STA LIL3+2
- \	LDA LIL5+2
- \	EOR #&40
+ \LDA LIL5+2
+ \EOR #&40
  STA LIL5+2
- \	LDA LIL6+2
- \	EOR #&40
+ \LDA LIL6+2
+ \EOR #&40
  STA LIL6+2
 
 .HA1
@@ -9828,7 +9828,7 @@ LOAD_C% = LOAD% +P% - CODE%
 
  LDA ENGY               \ AJD
  BNE rew_notgot
- DEC new_hold	        \** NOT TRAPPED FOR NO SPACE
+ DEC new_hold           \** NOT TRAPPED FOR NO SPACE
 
 .rew_notgot
 
@@ -10612,7 +10612,7 @@ LOAD_D% = LOAD% + P% - CODE%
                         \ until we have added up all market items from 12
                         \ (minerals) down to 0 (food)
 
- CMP new_hold	        \ New hold size AJD
+ CMP new_hold           \ New hold size AJD
 
 .n_over
 
@@ -12256,7 +12256,7 @@ LOAD_D% = LOAD% + P% - CODE%
  JSR fwl                \ Call fwl to print the fuel and cash levels on two
                         \ separate lines
 
- LDA #&E	            \ print hold size AJD
+ LDA #&E                \ print hold size AJD
  JSR TT68
  LDX new_hold
  DEX
@@ -24480,9 +24480,9 @@ LOAD_G% = LOAD% + P% - CODE%
 
  LDX #&00
  SEC
- LDA #&0F	\LDA #&0D
+ LDA #&0F   \LDA #&0D
  SBC QQ28
- SBC QQ28	\++
+ SBC QQ28   \++
  STA &03AB
 
 .n_bloop
@@ -25042,13 +25042,13 @@ LOAD_G% = LOAD% + P% - CODE%
 .new_offsets
 
  EQUB   0,  13,  26,  39,  52,  65,  78,  91
- EQUB 104, 117, 130, 143, 156, 169, 182	\, 195
+ EQUB 104, 117, 130, 143, 156, 169, 182 \, 195
 
  \ Name
  \ Price
  \ Pulse, Beam, Military, Mining Lasers, Mounts, Missiles
  \ Shields, Energy, Speed, Hold, Range, Costs
- \ Manouvre-h, Manoevre-l	\, Spare, Spare
+ \ Manouvre-h, Manoevre-l \, Spare, Spare
 
 \ ******************************************************************************
 \
@@ -25172,91 +25172,91 @@ ENDIF
 
 .new_details
 
- EQUB &0E, &8E, &92, &19, &02, &02	\ adder
+ EQUB &0E, &8E, &92, &19, &02, &02 \ adder
  EQUB &04, &01,  36, &09,  60, &1A
- EQUB &DF	\, &21, &05, &00
+ EQUB &DF \, &21, &05, &00
 
- EQUB &0E, &8F, &93, &19, &04, &03	\ gecko
+ EQUB &0E, &8F, &93, &19, &04, &03 \ gecko
  EQUB &05, &01,  45, &0A,  70, &1A
- EQUB &EF	\, &11, &06, &00
+ EQUB &EF \, &11, &06, &00
 
- EQUB &10, &8F, &96, &19, &04, &03	\ moray
+ EQUB &10, &8F, &96, &19, &04, &03 \ moray
  EQUB &06, &01,  38, &0C,  80, &68
- EQUB &EF	\, &11, &07, &00
+ EQUB &EF \, &11, &07, &00
 
- EQUB &0E, &8E, &94, &19, &04, &04	\ cobra 1
+ EQUB &0E, &8E, &94, &19, &04, &04 \ cobra 1
  EQUB &05, &01,  39, &0F,  60, &1A
- EQUB &CF	\, &31, &08, &00
+ EQUB &CF \, &31, &08, &00
 
- EQUB &0E, &8E, &94, &19, &04, &04	\ iguana
+ EQUB &0E, &8E, &94, &19, &04, &04 \ iguana
  EQUB &07, &01,  50, &16,  75, &00
- EQUB &DF	\, &21, &08, &00
+ EQUB &DF \, &21, &08, &00
 
- EQUB &0D, &8D, &90, &0C, &01, &03	\ ophidian
+ EQUB &0D, &8D, &90, &0C, &01, &03 \ ophidian
  EQUB &04, &01,  51, &19,  70, &68
- EQUB &FF	\, &01, &06, &00
+ EQUB &FF \, &01, &06, &00
 
- EQUB &10, &8F, &97, &32, &02, &04	\ chameleon
+ EQUB &10, &8F, &97, &32, &02, &04 \ chameleon
  EQUB &08, &01,  43, &24,  80, &68
- EQUB &DF	\, &21, &05, &00
+ EQUB &DF \, &21, &05, &00
 
- EQUB &12, &8F, &98, &32, &04, &05	\ cobra 3
+ EQUB &12, &8F, &98, &32, &04, &05 \ cobra 3
  EQUB &07, &01,  42, &2B,  70, &00
- EQUB &EF	\, &11, &0A, &00
+ EQUB &EF \, &11, &0A, &00
 
 IF _SOURCE_DISC
 
- EQUB &11, &90, &99, &32, &04, &04	\ ghavial
+ EQUB &11, &90, &99, &32, &04, &04 \ ghavial
  EQUB &09, &01,  37, &38,  80, &00
- EQUB &CF	\, &31, &09, &00
+ EQUB &CF \, &31, &09, &00
 
- EQUB &12, &92, &9C, &32, &04, &04	\ fer-de-lance
+ EQUB &12, &92, &9C, &32, &04, &04 \ fer-de-lance
  EQUB &08, &02,  45, &0A,  85, &34
- EQUB &DF	\, &21, &09, &00
+ EQUB &DF \, &21, &09, &00
 
 ELIF _RELEASED
 
- EQUB &12, &92, &9C, &32, &04, &04	\ fer-de-lance
+ EQUB &12, &92, &9C, &32, &04, &04 \ fer-de-lance
  EQUB &08, &02,  45, &0A,  85, &34
- EQUB &DF	\, &21, &09, &00
+ EQUB &DF \, &21, &09, &00
 
- EQUB &11, &90, &99, &32, &04, &04	\ ghavial
+ EQUB &11, &90, &99, &32, &04, &04 \ ghavial
  EQUB &09, &01,  37, &38,  80, &00
- EQUB &CF	\, &31, &09, &00
+ EQUB &CF \, &31, &09, &00
 
 ENDIF
 
- EQUB &18, &93, &9C, &32, &04, &09	\ monitor
+ EQUB &18, &93, &9C, &32, &04, &09 \ monitor
  EQUB &0A, &01,  24, &52, 110, &4E
- EQUB &BF	\, &41, &0C, &00
+ EQUB &BF \, &41, &0C, &00
 
- EQUB &18, &92, &9B, &32, &04, &05	\ python
+ EQUB &18, &92, &9B, &32, &04, &05 \ python
  EQUB &0B, &01,  30, &6B,  80, &1A
- EQUB &AF	\, &51, &09, &00
+ EQUB &AF \, &51, &09, &00
 
- EQUB &14, &8E, &98, &32, &02, &07	\ boa
+ EQUB &14, &8E, &98, &32, &02, &07 \ boa
  EQUB &0A, &01,  36, &85,  90, &00
- EQUB &BF	\, &41, &0A, &00
+ EQUB &BF \, &41, &0A, &00
 
 IF _SOURCE_DISC
 
- EQUB &1C, &90, &7F, &32, &04, &11	\ anaconda
+ EQUB &1C, &90, &7F, &32, &04, &11 \ anaconda
  EQUB &0D, &01,  21, &FE, 100, &4E
- EQUB &AF	\, &51, &0C, &00
+ EQUB &AF \, &51, &0C, &00
 
- EQUB &10, &91, &9F, &0C, &01, &02	\ asp 2
+ EQUB &10, &91, &9F, &0C, &01, &02 \ asp 2
  EQUB &0A, &01,  60, &07, 125, &34
- EQUB &DF	\, &21, &07, &00
+ EQUB &DF \, &21, &07, &00
 
 ELIF _RELEASED
 
- EQUB &10, &91, &9F, &0C, &01, &02	\ asp 2
+ EQUB &10, &91, &9F, &0C, &01, &02 \ asp 2
  EQUB &0A, &01,  60, &07, 125, &34
- EQUB &DF	\, &21, &07, &00
+ EQUB &DF \, &21, &07, &00
 
- EQUB &1C, &90, &7F, &32, &04, &11	\ anaconda
+ EQUB &1C, &90, &7F, &32, &04, &11 \ anaconda
  EQUB &0D, &01,  21, &FE, 100, &4E
- EQUB &AF	\, &51, &0C, &00
+ EQUB &AF \, &51, &0C, &00
 
 ENDIF
 

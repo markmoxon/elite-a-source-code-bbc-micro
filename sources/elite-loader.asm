@@ -204,16 +204,16 @@ OSCLI = &FFF7
  LDX #LO(l_1d44)
  LDY #HI(l_1d44)
  JSR OSCLI
- LDA #&F0	\ set up DDRB
+ LDA #&F0 \ set up DDRB
  STA &FE62
- LDA #0	\ Set up palatte flags
+ LDA #0 \ Set up palatte flags
  STA &348
  STA &346
  LDA #&FF
  STA &386
  SEI 
  LDA &FE44
- \	STA &01
+ \ STA &01
  LDA #&39
  STA &FE4E
  LDA #&7F
@@ -229,12 +229,12 @@ OSCLI = &FFF7
  LDA #&39
  STA &FE45
  CLI 
- LDA #0	\ test for BBC Master
+ LDA #0 \ test for BBC Master
  LDX #1
- JSR OSBYTE	\ get OS version
+ JSR OSBYTE \ get OS version
  CPX #3
  BCC not_master
- LDX #0	\ copy master code to DD00
+ LDX #0 \ copy master code to DD00
 
 .cpmaster
 
@@ -243,14 +243,14 @@ OSCLI = &FFF7
  INX
  CPX #dd00_len
  BNE cpmaster
- LDA #&8F	\ service call
- LDX #&21	\ ?
- LDY #&C0	\ ? top of absolute workspace
- JSR OSBYTE	\ ? in XY
- STX put0+1	\ modify workspace save address
+ LDA #&8F \ service call
+ LDX #&21 \ ?
+ LDY #&C0 \ ? top of absolute workspace
+ JSR OSBYTE \ ? in XY
+ STX put0+1 \ modify workspace save address
  STX put1+1
  STX put2+1
- STX get0+1	\ modify workspace restore address
+ STX get0+1 \ modify workspace restore address
  STX get1+1
  STX get2+1
  STY put0+2
@@ -261,29 +261,29 @@ OSCLI = &FFF7
  INY
  STY put2+2
  STY get2+2
- LDA filev	\ modify address for old FILEV
+ LDA filev \ modify address for old FILEV
  STA old_filev+1
  LDA filev+1
  STA old_filev+2
- LDA fscv	\ modify address for old FSCV
+ LDA fscv \ modify address for old FSCV
  STA old_fscv+1
  LDA fscv+1
  STA old_fscv+2
- LDA bytev	\ modify address for old BYTEV
+ LDA bytev \ modify address for old BYTEV
  STA old_bytev+1
  LDA bytev+1
  STA old_bytev+2
- JSR set_vectors	\ replace FILEV and FSCV
+ JSR set_vectors \ replace FILEV and FSCV
 
 .not_master
 
- LDA #&EA	\ test for tube
+ LDA #&EA \ test for tube
  LDY #&FF
  LDX #&00
  JSR OSBYTE
  TXA
  BNE tube_go
- LDA #&AC	\ keyboard translation table
+ LDA #&AC \ keyboard translation table
  LDX #&00
  LDY #&FF
  JSR OSBYTE
@@ -324,36 +324,36 @@ OSCLI = &FFF7
 
 .tube_go
 
- LDA #&AC	\ keyboard translation table
+ LDA #&AC \ keyboard translation table
  LDX #&00
  LDY #&FF
  JSR OSBYTE
  STX key_tube
  STY key_tube+&01
- \	LDX #LO(tube_400)
- \	LDY #HI(tube_400)
- \	LDA #1
- \	JSR &0406
- \	LDA #LO(to400)
- \	STA &72
- \	LDA #HI(to400)
- \	STA &73
- \	LDX #&04
- \	LDY #&00
- \tube_wr	LDA (&72),Y
- \	JSR tube_wait
- \	BIT tube_r3s
- \	BVC tube_wr
- \	STA tube_r3d
- \	INY
- \	BNE tube_wr
- \	INC &73
- \	DEX
- \	BNE tube_wr
- \	LDA #LO(tube_wrch)
- \	STA wrchv
- \	LDA #HI(tube_wrch)
- \	STA wrchv+&01
+ \ LDX #LO(tube_400)
+ \ LDY #HI(tube_400)
+ \ LDA #1
+ \ JSR &0406
+ \ LDA #LO(to400)
+ \ STA &72
+ \ LDA #HI(to400)
+ \ STA &73
+ \ LDX #&04
+ \ LDY #&00
+ \tube_wr LDA (&72),Y
+ \ JSR tube_wait
+ \ BIT tube_r3s
+ \ BVC tube_wr
+ \ STA tube_r3d
+ \ INY
+ \ BNE tube_wr
+ \ INC &73
+ \ DEX
+ \ BNE tube_wr
+ \ LDA #LO(tube_wrch)
+ \ STA wrchv
+ \ LDA #HI(tube_wrch)
+ \ STA wrchv+&01
  LDX #LO(tube_run)
  LDY #HI(tube_run)
  JMP OSCLI
@@ -362,18 +362,18 @@ OSCLI = &FFF7
 
  EQUS "R.2.H", &0D
 
- \tube_400	EQUD &0400
+ \tube_400 EQUD &0400
 
  \tube_wait
- \	JSR tube_wait2
+ \ JSR tube_wait2
  \tube_wait2
- \	JSR tube_wait3
+ \ JSR tube_wait3
  \tube_wait3
- \	RTS
+ \ RTS
 
 .tod7a
 
- LDX cmdr_iff	\ iff code
+ LDX cmdr_iff \ iff code
  BEQ iff_not
  LDY #&24
  LDA (&20),Y
@@ -387,27 +387,27 @@ OSCLI = &FFF7
  BEQ iff_missle
  CPY #&08
  BCC iff_aster
- INX	\ X=4
+ INX \ X=4
 
 .iff_missle
 
- INX	\ X=3
+ INX \ X=3
 
 .iff_aster
 
- INX	\ X=2
+ INX \ X=2
 
 .iff_cop
 
- INX	\ X=1
+ INX \ X=1
 
 .iff_trade
 
- INX	\ X=0
+ INX \ X=0
 
 .iff_not
 
- RTS	\ X=0
+ RTS \ X=0
 
 .tob00
 
@@ -2402,51 +2402,51 @@ ORG &DD00
 
 .do_filev
 
- JSR restorews	\ restore workspace
+ JSR restorews \ restore workspace
 
 .old_filev
 
- JSR &100	\ address modified by master set-up
+ JSR &100 \ address modified by master set-up
 
 .savews
 
- PHP	\ save workspace, copy in characters
+ PHP \ save workspace, copy in characters
  PHA
  PHX
  PHY
- LDA #8	\ select ROM workspace at &C000
+ LDA #8 \ select ROM workspace at &C000
  TSB &FE34
  LDX #0
 
 .putws
 
- LDA &C000,X	\ save absolute workspace
+ LDA &C000,X \ save absolute workspace
 
 .put0
 
- STA &C000,X	\ address modified by master set-up
+ STA &C000,X \ address modified by master set-up
  LDA &C100,X
 
 .put1
 
- STA &C100,X	\ address modified by master set-up
+ STA &C100,X \ address modified by master set-up
  LDA &C200,X
 
 .put2
 
- STA &C200,X	\ address modified by master set-up
+ STA &C200,X \ address modified by master set-up
  INX
  BNE putws
- LDA &F4	\ save ROM number
+ LDA &F4 \ save ROM number
  PHA
- LDA #&80	\ select RAM from &8000-&8FFF
+ LDA #&80 \ select RAM from &8000-&8FFF
  STA &F4
  STA &FE30
  LDX #0
 
 .copych
 
- LDA &8900,X	\ copy character definitions
+ LDA &8900,X \ copy character definitions
  STA &C000,X
  LDA &8A00,X
  STA &C100,X
@@ -2454,7 +2454,7 @@ ORG &DD00
  STA &C200,X
  INX
  BNE copych
- PLA	\ restore ROM selection
+ PLA \ restore ROM selection
  STA &F4
  STA &FE30
  PLY
@@ -2467,12 +2467,12 @@ ORG &DD00
 
 .do_fscv
 
- JSR restorews	\ restore workspace
+ JSR restorews \ restore workspace
 
 .old_fscv
 
- JSR &100	\ address modified by master setup
- JMP savews	\ save workspace, restore characters
+ JSR &100 \ address modified by master setup
+ JMP savews \ save workspace, restore characters
 
  \ restore ROM workspace
 
@@ -2488,17 +2488,17 @@ ORG &DD00
 
 .get0
 
- LDA &C000,X	\ address modified by master set-up
+ LDA &C000,X \ address modified by master set-up
  STA &C000,X
 
 .get1
 
- LDA &C100,X	\ address modified by master set-up
+ LDA &C100,X \ address modified by master set-up
  STA &C100,X
 
 .get2
 
- LDA &C200,X	\ address modified by master set-up
+ LDA &C200,X \ address modified by master set-up
  STA &C200,X
  INX
  BNE getws
@@ -2510,9 +2510,9 @@ ORG &DD00
 
 .do_bytev
 
- CMP #&8F	\ ROM service request
+ CMP #&8F \ ROM service request
  BNE old_bytev
- CPX #&F	\ vector claim?
+ CPX #&F \ vector claim?
  BNE old_bytev
  JSR old_bytev
 
@@ -2520,15 +2520,15 @@ ORG &DD00
 
  SEI
  PHA
- LDA #LO(do_filev)	\ reset FILEV
+ LDA #LO(do_filev) \ reset FILEV
  STA filev
  LDA #HI(do_filev)
  STA filev+1
- LDA #LO(do_fscv)	\ reset FSCV
+ LDA #LO(do_fscv) \ reset FSCV
  STA fscv
  LDA #HI(do_fscv)
  STA fscv+1
- LDA #LO(do_bytev)	\ replace BYTEV
+ LDA #LO(do_bytev) \ replace BYTEV
  STA bytev
  LDA #HI(do_bytev)
  STA bytev+1
@@ -2538,9 +2538,9 @@ ORG &DD00
 
 .old_bytev
 
- JMP &100	\ address modified by master set_up
+ JMP &100 \ address modified by master set_up
 
-dd00_len = P%-&DD00	\ length of code at DD00
+dd00_len = P%-&DD00 \ length of code at DD00
 
 COPYBLOCK &DD00, P%, to_dd00
 SAVE "output/ELITE.bin", CODE%, to_dd00+dd00_len, LOAD%

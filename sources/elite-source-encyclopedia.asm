@@ -18761,7 +18761,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  STA &03AD
  LDA menu_query,X
  PHA
- LDA menu_title,X	
+ LDA menu_title,X
  PHA
  LDA menu_titlex,X
  PHA
@@ -24815,30 +24815,30 @@ ENDMACRO
 
 .card_pattern
 
- EQUB  1,  3, &25	\ inservice date
+ EQUB  1,  3, &25       \ inservice date
  EQUB  1,  4, &00
- EQUB 24,  6, &26	\ combat factor
+ EQUB 24,  6, &26       \ combat factor
  EQUB 24,  7, &2F
  EQUB 24,  8, &41
  EQUB 26,  8, &00
- EQUB  1,  6, &2B	\ dimensions
+ EQUB  1,  6, &2B       \ dimensions
  EQUB  1,  7, &00
- EQUB  1,  9, &24	\ speed
+ EQUB  1,  9, &24       \ speed
  EQUB  1, 10, &00
- EQUB 24, 10, &27	\ crew
+ EQUB 24, 10, &27       \ crew
  EQUB 24, 11, &00
- EQUB 24, 13, &29	\ range
+ EQUB 24, 13, &29       \ range
  EQUB 24, 14, &00
- EQUB  1, 12, &3D	\ cargo space
+ EQUB  1, 12, &3D       \ cargo space
  EQUB  1, 13, &2D
  EQUB  1, 14, &00
- EQUB  1, 16, &23	\ armaments
+ EQUB  1, 16, &23       \ armaments
  EQUB  1, 17, &00
- EQUB 23, 20, &2C	\ hull
+ EQUB 23, 20, &2C       \ hull
  EQUB 23, 21, &00
- EQUB  1, 20, &28	\ drive motors
+ EQUB  1, 20, &28       \ drive motors
  EQUB  1, 21, &00
- EQUB  1, 20, &2D	\ space
+ EQUB  1, 20, &2D       \ space
  EQUB  1, 21, &00
 
 \ ******************************************************************************
@@ -25014,8 +25014,8 @@ ENDMACRO
  EQUS "1-2"
  EQUB 0, 8
  EQUS "Du", &E4, " 22-18", &B1, &0C, &B0, &AE
- \	EQUB 0, 9
- \	EQUA "3|!R"
+ \EQUB 0, 9
+ \EQUA "3|!R"
  EQUB 0, 10
  EQUS &BC, " Whip", &F9, "sh", &0C, &01, "HT", &02, " ", &B2, &B5
  EQUB 0, 0
@@ -25335,8 +25335,8 @@ ENDMACRO
  EQUS "10", &BE
  EQUB 0, 8
  EQUS &B4, &B1, &B3
- \	EQUB 0, 9
- \	EQUA "8|!S"
+ \EQUB 0, 9
+ \EQUA "8|!S"
  EQUB 0, 10
  EQUS &C7, " Sp", &F0, &CE, " ZX14"
  EQUB 0, 0
@@ -25366,8 +25366,8 @@ ENDMACRO
  EQUS "10", &BE
  EQUB 0, 8
  EQUS &B4, &B1, &B3, &0C, &D6, &B6, " & ", &CF, &AE
- \	EQUB 0, 9
- \	EQUA "7|!R"
+ \EQUB 0, 9
+ \EQUA "7|!R"
  EQUB 0, 10
  EQUS &B6, &B7, " ", &01, "HV", &02, " ", &C2
  EQUB 0, 0
@@ -25554,8 +25554,8 @@ ENDMACRO
  EQUS "1"
  EQUB 0, 8
  EQUS "Du", &E4, " 22-18", &B1
- \	EQUB 0, 9
- \	EQUA "3|!R"
+ \EQUB 0, 9
+ \EQUA "3|!R"
  EQUB 0, 10
  EQUS &C7, " Sp", &F0, &CE, " ", &01, "MV", &02
  EQUB 0, 0
@@ -25583,8 +25583,8 @@ ENDMACRO
  EQUS "Unk", &E3, "wn"
  EQUB 0, 8
  EQUS "Widely v", &EE, "y", &F0, "g"
- \	EQUB 0, 9
- \	EQUA "Unk|!cwn"
+ \EQUB 0, 9
+ \EQUA "Unk|!cwn"
  EQUB 0, 10
  EQUS &9E, " ", &C4
  EQUB 0, 0
@@ -25610,8 +25610,8 @@ ENDMACRO
  EQUS &E3, "ne"
  EQUB 0, 8
  EQUS &9E, &B1
- \	EQUB 0, 9
- \	EQUA "|!cne"
+ \EQUB 0, 9
+ \EQUA "|!cne"
  EQUB 0, 10
  EQUS &9E, " ", &C4
  EQUB 0, 0
@@ -25662,8 +25662,8 @@ ENDMACRO
  EQUS "1-10"
  EQUB 0, 8
  EQUS &B8, " Mega", &CA, &B2, &B1, &0C, &B6, &F4, " X3", &AE
- \	EQUB 0, 9
- \	EQUA "9|!R"
+ \EQUB 0, 9
+ \EQUA "9|!R"
  EQUB 0, 10
  EQUS &C7, " Sup", &F4, " ", &C2, &0C, &01, "VC", &02, "10"
  EQUB 0, 0
@@ -25691,8 +25691,8 @@ ENDMACRO
  EQUS "1"
  EQUB 0, 8
  EQUS &B8, &B2, &B1
- \	EQUB 0, 9
- \	EQUA "3|!R"
+ \EQUB 0, 9
+ \EQUA "3|!R"
  EQUB 0, 10
  EQUS &B6, &B7, " ", &01, "HV", &02, " ", &C2
  EQUB 0, 0

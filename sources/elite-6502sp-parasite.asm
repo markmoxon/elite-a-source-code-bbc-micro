@@ -4535,15 +4535,15 @@ tube_r4d = &FEFF
 
 .l_1b6b
 
- \	LDA #&71
- \	STA &96
+ \LDA #&71
+ \STA &96
  LDX #&1A
 
 .stqv
 
  STX &93
- \	TAY
- \	LDX FRIN,Y
+ \TAY
+ \LDX FRIN,Y
  LDY LASER,X
  BEQ l_1b78
  TXA
@@ -4553,9 +4553,9 @@ tube_r4d = &FEFF
 
 .l_1b78
 
- \	INC &96
- \	LDA &96
- \	CMP #&75
+ \INC &96
+ \LDA &96
+ \CMP #&75
  LDX &93
  INX
  CPX #&1E
@@ -8005,7 +8005,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
  LDA ENGY               \ AJD
  BNE rew_notgot
- DEC new_hold	        \** NOT TRAPPED FOR NO SPACE
+ DEC new_hold           \** NOT TRAPPED FOR NO SPACE
 
 .rew_notgot
 
@@ -8565,7 +8565,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  LDA #&14
  STA YC
  JSR TT67
- LDY #&01	\INY
+ LDY #&01 \INY
  STY XC
  DEY
  LDA #&84
@@ -8650,7 +8650,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
                         \ until we have added up all market items from 12
                         \ (minerals) down to 0 (food)
 
- CMP new_hold	        \ New hold size AJD
+ CMP new_hold           \ New hold size AJD
 
 .n_over
 
@@ -10297,7 +10297,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  JSR fwl                \ Call fwl to print the fuel and cash levels on two
                         \ separate lines
 
- LDA #&E	            \ print hold size AJD
+ LDA #&E                \ print hold size AJD
  JSR TT68
  LDX new_hold
  DEX
@@ -21584,9 +21584,9 @@ ENDMACRO
 
  LDX #&00
  SEC
- LDA #&0F	\LDA #&0D
+ LDA #&0F   \LDA #&0D
  SBC QQ28
- SBC QQ28	\++
+ SBC QQ28   \++
  STA &03AB
 
 .n_bloop
@@ -22207,13 +22207,13 @@ ENDMACRO
 .new_offsets
 
  EQUB   0,  13,  26,  39,  52,  65,  78,  91
- EQUB 104, 117, 130, 143, 156, 169, 182	\, 195
+ EQUB 104, 117, 130, 143, 156, 169, 182 \, 195
 
  \ Name
  \ Price
  \ Pulse, Beam, Military, Mining Lasers, Mounts, Missiles
  \ Shields, Energy, Speed, Hold, Range, Costs
- \ Manouvre-h, Manoevre-l	\, Spare, Spare
+ \ Manouvre-h, Manoevre-l \, Spare, Spare
 
 \ ******************************************************************************
 \
@@ -22337,91 +22337,91 @@ ENDIF
 
 .new_details
 
- EQUB &0E, &8E, &92, &19, &02, &02	\ adder
+ EQUB &0E, &8E, &92, &19, &02, &02 \ adder
  EQUB &04, &01,  36, &09,  60, &1A
- EQUB &DF	\, &21, &05, &00
+ EQUB &DF \, &21, &05, &00
 
- EQUB &0E, &8F, &93, &19, &04, &03	\ gecko
+ EQUB &0E, &8F, &93, &19, &04, &03 \ gecko
  EQUB &05, &01,  45, &0A,  70, &1A
- EQUB &EF	\, &11, &06, &00
+ EQUB &EF \, &11, &06, &00
 
- EQUB &10, &8F, &96, &19, &04, &03	\ moray
+ EQUB &10, &8F, &96, &19, &04, &03 \ moray
  EQUB &06, &01,  38, &0C,  80, &68
- EQUB &EF	\, &11, &07, &00
+ EQUB &EF \, &11, &07, &00
 
- EQUB &0E, &8E, &94, &19, &04, &04	\ cobra 1
+ EQUB &0E, &8E, &94, &19, &04, &04 \ cobra 1
  EQUB &05, &01,  39, &0F,  60, &1A
- EQUB &CF	\, &31, &08, &00
+ EQUB &CF \, &31, &08, &00
 
- EQUB &0E, &8E, &94, &19, &04, &04	\ iguana
+ EQUB &0E, &8E, &94, &19, &04, &04 \ iguana
  EQUB &07, &01,  50, &16,  75, &00
- EQUB &DF	\, &21, &08, &00
+ EQUB &DF \, &21, &08, &00
 
- EQUB &0D, &8D, &90, &0C, &01, &03	\ ophidian
+ EQUB &0D, &8D, &90, &0C, &01, &03 \ ophidian
  EQUB &04, &01,  51, &19,  70, &68
- EQUB &FF	\, &01, &06, &00
+ EQUB &FF \, &01, &06, &00
 
- EQUB &10, &8F, &97, &32, &02, &04	\ chameleon
+ EQUB &10, &8F, &97, &32, &02, &04 \ chameleon
  EQUB &08, &01,  43, &24,  80, &68
- EQUB &DF	\, &21, &05, &00
+ EQUB &DF \, &21, &05, &00
 
- EQUB &12, &8F, &98, &32, &04, &05	\ cobra 3
+ EQUB &12, &8F, &98, &32, &04, &05 \ cobra 3
  EQUB &07, &01,  42, &2B,  70, &00
- EQUB &EF	\, &11, &0A, &00
+ EQUB &EF \, &11, &0A, &00
 
 IF _SOURCE_DISC
 
- EQUB &11, &90, &99, &32, &04, &04	\ ghavial
+ EQUB &11, &90, &99, &32, &04, &04 \ ghavial
  EQUB &09, &01,  37, &38,  80, &00
- EQUB &CF	\, &31, &09, &00
+ EQUB &CF \, &31, &09, &00
 
- EQUB &12, &92, &9C, &32, &04, &04	\ fer-de-lance
+ EQUB &12, &92, &9C, &32, &04, &04 \ fer-de-lance
  EQUB &08, &02,  45, &0A,  85, &34
- EQUB &DF	\, &21, &09, &00
+ EQUB &DF \, &21, &09, &00
 
 ELIF _RELEASED
 
- EQUB &12, &92, &9C, &32, &04, &04	\ fer-de-lance
+ EQUB &12, &92, &9C, &32, &04, &04 \ fer-de-lance
  EQUB &08, &02,  45, &0A,  85, &34
- EQUB &DF	\, &21, &09, &00
+ EQUB &DF \, &21, &09, &00
 
- EQUB &11, &90, &99, &32, &04, &04	\ ghavial
+ EQUB &11, &90, &99, &32, &04, &04 \ ghavial
  EQUB &09, &01,  37, &38,  80, &00
- EQUB &CF	\, &31, &09, &00
+ EQUB &CF \, &31, &09, &00
 
 ENDIF
 
- EQUB &18, &93, &9C, &32, &04, &09	\ monitor
+ EQUB &18, &93, &9C, &32, &04, &09 \ monitor
  EQUB &0A, &01,  24, &52, 110, &4E
- EQUB &BF	\, &41, &0C, &00
+ EQUB &BF \, &41, &0C, &00
 
- EQUB &18, &92, &9B, &32, &04, &05	\ python
+ EQUB &18, &92, &9B, &32, &04, &05 \ python
  EQUB &0B, &01,  30, &6B,  80, &1A
- EQUB &AF	\, &51, &09, &00
+ EQUB &AF \, &51, &09, &00
 
- EQUB &14, &8E, &98, &32, &02, &07	\ boa
+ EQUB &14, &8E, &98, &32, &02, &07 \ boa
  EQUB &0A, &01,  36, &85,  90, &00
- EQUB &BF	\, &41, &0A, &00
+ EQUB &BF \, &41, &0A, &00
 
 IF _SOURCE_DISC
 
- EQUB &1C, &90, &7F, &32, &04, &11	\ anaconda
+ EQUB &1C, &90, &7F, &32, &04, &11 \ anaconda
  EQUB &0D, &01,  21, &FE, 100, &4E
- EQUB &AF	\, &51, &0C, &00
+ EQUB &AF \, &51, &0C, &00
 
- EQUB &10, &91, &9F, &0C, &01, &02	\ asp 2
+ EQUB &10, &91, &9F, &0C, &01, &02 \ asp 2
  EQUB &0A, &01,  60, &07, 125, &34
- EQUB &DF	\, &21, &07, &00
+ EQUB &DF \, &21, &07, &00
 
 ELIF _RELEASED
 
- EQUB &10, &91, &9F, &0C, &01, &02	\ asp 2
+ EQUB &10, &91, &9F, &0C, &01, &02 \ asp 2
  EQUB &0A, &01,  60, &07, 125, &34
- EQUB &DF	\, &21, &07, &00
+ EQUB &DF \, &21, &07, &00
 
- EQUB &1C, &90, &7F, &32, &04, &11	\ anaconda
+ EQUB &1C, &90, &7F, &32, &04, &11 \ anaconda
  EQUB &0D, &01,  21, &FE, 100, &4E
- EQUB &AF	\, &51, &0C, &00
+ EQUB &AF \, &51, &0C, &00
 
 ENDIF
 
@@ -32102,8 +32102,8 @@ ENDMACRO
 
 .jmp_start3_dup
 
- \	JSR dn2
- \	JMP BAY
+ \JSR dn2
+ \JMP BAY
  JMP dn2
 
 .ships_ag
@@ -32251,9 +32251,9 @@ ENDMACRO
 
 .dont_quit
 
- \	CPX #&37
- \	BNE dont_dump
- \	JSR printer
+ \CPX #&37
+ \BNE dont_dump
+ \JSR printer
  \dont_dump
  CPX #&59
  BNE freeze_loop
@@ -32262,7 +32262,7 @@ ENDMACRO
 
  JSR RDKEY
  BNE i_release
- LDX #0	\ no key was pressed
+ LDX #0 \ no key was pressed
 
 .not_freeze
 
@@ -32401,7 +32401,7 @@ ENDMACRO
  STA &03AD
  LDA menu_query,X
  PHA
- LDA menu_title,X	
+ LDA menu_title,X
  PHA
  LDA menu_titlex,X
  PHA
@@ -32542,30 +32542,30 @@ ENDMACRO
 
 .card_pattern
 
- EQUB  1,  3, &25	\ inservice date
+ EQUB  1,  3, &25       \ inservice date
  EQUB  1,  4, &00
- EQUB 24,  6, &26	\ combat factor
+ EQUB 24,  6, &26       \ combat factor
  EQUB 24,  7, &2F
  EQUB 24,  8, &41
  EQUB 26,  8, &00
- EQUB  1,  6, &2B	\ dimensions
+ EQUB  1,  6, &2B       \ dimensions
  EQUB  1,  7, &00
- EQUB  1,  9, &24	\ speed
+ EQUB  1,  9, &24       \ speed
  EQUB  1, 10, &00
- EQUB 24, 10, &27	\ crew
+ EQUB 24, 10, &27       \ crew
  EQUB 24, 11, &00
- EQUB 24, 13, &29	\ range
+ EQUB 24, 13, &29       \ range
  EQUB 24, 14, &00
- EQUB  1, 12, &3D	\ cargo space
+ EQUB  1, 12, &3D       \ cargo space
  EQUB  1, 13, &2D
  EQUB  1, 14, &00
- EQUB  1, 16, &23	\ armaments
+ EQUB  1, 16, &23       \ armaments
  EQUB  1, 17, &00
- EQUB 23, 20, &2C	\ hull
+ EQUB 23, 20, &2C       \ hull
  EQUB 23, 21, &00
- EQUB  1, 20, &28	\ drive motors
+ EQUB  1, 20, &28       \ drive motors
  EQUB  1, 21, &00
- EQUB  1, 20, &2D	\ space
+ EQUB  1, 20, &2D       \ space
  EQUB  1, 21, &00
 
 \ ******************************************************************************
@@ -32741,8 +32741,8 @@ ENDMACRO
  EQUS "1-2"
  EQUB 0, 8
  EQUS "Du", &E4, " 22-18", &B1, &0C, &B0, &AE
- \	EQUB 0, 9
- \	EQUA "3|!R"
+ \EQUB 0, 9
+ \EQUA "3|!R"
  EQUB 0, 10
  EQUS &BC, " Whip", &F9, "sh", &0C, &01, "HT", &02, " ", &B2, &B5
  EQUB 0, 0
@@ -33062,8 +33062,8 @@ ENDMACRO
  EQUS "10", &BE
  EQUB 0, 8
  EQUS &B4, &B1, &B3
- \	EQUB 0, 9
- \	EQUA "8|!S"
+ \EQUB 0, 9
+ \EQUA "8|!S"
  EQUB 0, 10
  EQUS &C7, " Sp", &F0, &CE, " ZX14"
  EQUB 0, 0
@@ -33093,8 +33093,8 @@ ENDMACRO
  EQUS "10", &BE
  EQUB 0, 8
  EQUS &B4, &B1, &B3, &0C, &D6, &B6, " & ", &CF, &AE
- \	EQUB 0, 9
- \	EQUA "7|!R"
+ \EQUB 0, 9
+ \EQUA "7|!R"
  EQUB 0, 10
  EQUS &B6, &B7, " ", &01, "HV", &02, " ", &C2
  EQUB 0, 0
@@ -33281,8 +33281,8 @@ ENDMACRO
  EQUS "1"
  EQUB 0, 8
  EQUS "Du", &E4, " 22-18", &B1
- \	EQUB 0, 9
- \	EQUA "3|!R"
+ \EQUB 0, 9
+ \EQUA "3|!R"
  EQUB 0, 10
  EQUS &C7, " Sp", &F0, &CE, " ", &01, "MV", &02
  EQUB 0, 0
@@ -33310,8 +33310,8 @@ ENDMACRO
  EQUS "Unk", &E3, "wn"
  EQUB 0, 8
  EQUS "Widely v", &EE, "y", &F0, "g"
- \	EQUB 0, 9
- \	EQUA "Unk|!cwn"
+ \EQUB 0, 9
+ \EQUA "Unk|!cwn"
  EQUB 0, 10
  EQUS &9E, " ", &C4
  EQUB 0, 0
@@ -33337,8 +33337,8 @@ ENDMACRO
  EQUS &E3, "ne"
  EQUB 0, 8
  EQUS &9E, &B1
- \	EQUB 0, 9
- \	EQUA "|!cne"
+ \EQUB 0, 9
+ \EQUA "|!cne"
  EQUB 0, 10
  EQUS &9E, " ", &C4
  EQUB 0, 0
@@ -33389,8 +33389,8 @@ ENDMACRO
  EQUS "1-10"
  EQUB 0, 8
  EQUS &B8, " Mega", &CA, &B2, &B1, &0C, &B6, &F4, " X3", &AE
- \	EQUB 0, 9
- \	EQUA "9|!R"
+ \EQUB 0, 9
+ \EQUA "9|!R"
  EQUB 0, 10
  EQUS &C7, " Sup", &F4, " ", &C2, &0C, &01, "VC", &02, "10"
  EQUB 0, 0
@@ -33418,8 +33418,8 @@ ENDMACRO
  EQUS "1"
  EQUB 0, 8
  EQUS &B8, &B2, &B1
- \	EQUB 0, 9
- \	EQUA "3|!R"
+ \EQUB 0, 9
+ \EQUA "3|!R"
  EQUB 0, 10
  EQUS &B6, &B7, " ", &01, "HV", &02, " ", &C2
  EQUB 0, 0
@@ -33448,14 +33448,14 @@ ENDMACRO
  RTS
 
  \printer:
- \	TXA
- \	PHA
- \	LDA #&9C
- \	JSR tube_write
- \	JSR tube_read
- \	PLA
- \	TAX
- \	RTS
+ \ TXA
+ \ PHA
+ \ LDA #&9C
+ \ JSR tube_write
+ \ JSR tube_read
+ \ PLA
+ \ TAX
+ \ RTS
 
 \ a.qcode_5
 
@@ -33992,7 +33992,10 @@ ENDMACRO
  LDA XX21-1,Y           \ Fetch the high byte of this particular ship type's
  STA XX0+1              \ blueprint and store it in XX0+1
 
-\ Omit part 5 (energy bomb)
+                        \ We now go straight to part 6, omitting part 5 from the
+                        \ original disc version, as part 5 implements the energy
+                        \ bomb, and Elite-A replaces the energy bomb with the
+                        \ Hyperspace Unit
 
 \ ******************************************************************************
 \
@@ -34546,13 +34549,13 @@ ENDMACRO
  \ hit opponent
  STA &D1                \ AJD
  SEC
- LDY #&0E	\ opponent shield
+ LDY #&0E               \ opponent shield
  LDA (&1E),Y
  AND #&07
  SBC &D1
  BCS n_kill
- \	BCC n_defense
- \	LDA #&FF
+ \BCC n_defense
+ \LDA #&FF
  \n_defense
  CLC
  ADC &69
@@ -36265,7 +36268,7 @@ ENDMACRO
 
  JSR RES2               \ Reset a number of flight variables and workspaces
 
- LDX #ESC	            \ AJD
+ LDX #ESC               \ AJD
  STX &8C
  JSR FRS1
 
@@ -40391,32 +40394,41 @@ ENDMACRO
                         \ the centre point to (Y, 191), and return from
                         \ the subroutine using a tail call
 
+\ ******************************************************************************
+\
+\       Name: tnpr_FLIGHT
+\       Type: Subroutine
+\   Category: Elite-A
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .tnpr_FLIGHT
 
  CPX #&10
  BEQ n_aliens
  CPX #&0D
- BCS d_2b04
+ BCS l_2b04
 
 .n_aliens
 
- LDY #&0C
+ LDY #&0C               \ Related to tnpr, but not the same
  SEC
  LDA QQ20+&10
 
-.d_2af9
+.l_2af9
 
  ADC QQ20,Y
  BCS n_cargo
  DEY
- BPL d_2af9
+ BPL l_2af9
  CMP new_hold
 
 .n_cargo
 
  RTS
 
-.d_2b04
+.l_2b04
 
  LDA QQ20,X
  ADC #&00
@@ -40707,9 +40719,9 @@ ENDMACRO
  LDA #202               \ Print token 42 ("RANGE") followed by a question mark
  JMP prq                \ and return from the subroutine using a tail call
 
-.hyp1_flight                 \ duplicate of hyp1
+.hyp1_FLIGHT
 
- JSR jmp
+ JSR jmp                \ duplicate of hyp1
  LDX #&05
 
 .d_31b0
@@ -40866,7 +40878,7 @@ ENDMACRO
  CMP #253               \ If A >= 253 (1% chance) then jump to MJP to trigger a
  BCS MJP                \ mis-jump into witchspace
 
- JSR hyp1_flight        \ AJD
+ JSR hyp1_FLIGHT        \ AJD
 
  JSR RES2               \ Reset a number of flight variables and workspaces
 
@@ -41732,7 +41744,7 @@ ENDMACRO
  LDY #&25               \ AJD
  LDA &0320
  BNE l_station
- LDY &9F	\ finder
+ LDY &9F                \ finder
 
 .l_station
 
@@ -41899,7 +41911,7 @@ ENDMACRO
 
 .OOPS2
 
- SEC	\ reduce damage
+ SEC \ reduce damage
  SBC new_shields
  BCC n_shok
 
@@ -44565,12 +44577,12 @@ NEXT
  LDA &0341
  BNE d_3fd1
  JSR DORND
- CMP #&33	\ trader fraction
+ CMP #&33 \ trader fraction
  BCS MTT1
  LDA &033E
  CMP #&03
  BCS MTT1
- JSR rand_posn	\ IN
+ JSR rand_posn \ IN
  BVS MTT4
  ORA #&6F
  STA &63
@@ -44887,12 +44899,12 @@ NEXT
  JSR COMPAS
  LDA &87
  BEQ d_40f8
- \	AND PATG
- \	LSR A
- \	BCS d_40f8
+ \ AND PATG
+ \ LSR A
+ \ BCS d_40f8
  LDY #&02
  JSR DELAY
- \	JSR WSCAN
+ \ JSR WSCAN
 
 .d_40f8
 
@@ -45441,7 +45453,7 @@ NEXT
 .LSHIPS
 
  LDA #0
- STA &9F	\ reset finder
+ STA &9F \ reset finder
 
 .SHIPinA
 
@@ -45465,7 +45477,7 @@ NEXT
 .mix_match
 
  JSR DORND
- CMP #ship_total	\ # POSSIBLE SHIPS
+ CMP #ship_total \ # POSSIBLE SHIPS
  BCS mix_match
  ASL A
  ASL A
@@ -45479,15 +45491,15 @@ NEXT
  BCC mix_byte2
  CPY #24
  BCC mix_byte3
- INX	\24-28
+ INX \24-28
 
 .mix_byte3
 
- INX	\16-23
+ INX \16-23
 
 .mix_byte2
 
- INX	\8-15
+ INX \8-15
  AND ship_bits,X
  BEQ mix_fail
 
@@ -45507,9 +45519,9 @@ NEXT
 .mix_ok
 
  STY &36
- CPX #52		\ ANACONDA?
+ CPX #52  \ ANACONDA?
  BEQ mix_anaconda
- CPX #116	\ DRAGON?
+ CPX #116 \ DRAGON?
  BEQ mix_dragon
  TXA
  LSR A
@@ -46126,7 +46138,7 @@ NEXT
  ORA #&80
  STA &5C
  STA &8C
- LDA &7D	\ ? Too Fast
+ LDA &7D \ ? Too Fast
  STA &61
  JSR DOCKIT
  LDA &61
@@ -46260,9 +46272,9 @@ NEXT
 
 .d_4586
 
- \	CPX #&37
- \	BNE dont_dump
- \	JSR printer
+ \ CPX #&37
+ \ BNE dont_dump
+ \ JSR printer
  \dont_dump
  CPX #&59
  BNE d_455f
@@ -47603,7 +47615,7 @@ NEXT
 
 .iff_xor
 
- EQUB &00, &00, &0F	\, &FF, &F0 overlap
+ EQUB &00, &00, &0F \, &FF, &F0 overlap
 
 .iff_base
 
@@ -47620,7 +47632,7 @@ NEXT
  BEQ d_5557
  LDA &8C
  BMI d_5557
- LDX CRGO	\ iff code
+ LDX CRGO \ iff code
  BEQ iff_not
  LDY #&24
  LDA (&20),Y
@@ -47634,23 +47646,23 @@ NEXT
  BEQ iff_missle
  CPY #&08
  BCC iff_aster
- INX	\ X=4
+ INX \ X=4
 
 .iff_missle
 
- INX	\ X=3
+ INX \ X=3
 
 .iff_aster
 
- INX	\ X=2
+ INX \ X=2
 
 .iff_cop
 
- INX	\ X=1
+ INX \ X=1
 
 .iff_trade
 
- INX	\ X=0
+ INX \ X=0
 
 .iff_not
 
@@ -48140,7 +48152,7 @@ NEXT
  EQUB &00, &10, &1F, &00, &40, &10, &1F, &20, &00, &00, &5F, &00
  EQUB &20, &00, &9F, &20, &00, &00, &1F, &00, &20, &00, &3F, &00
  EQUB &00, &B0
- 	
+ 
 
 .s_viper
 
@@ -48631,91 +48643,91 @@ ship_total = 38
 
 .ship_list
 
- EQUW	s_dodo,	s_coriolis,	s_escape,	s_alloys
- EQUW	s_barrel,	s_boulder,	s_asteroid,	s_minerals
- EQUW	s_shuttle1,	s_transporter,	s_cobra3,	s_python
- EQUW	s_boa,	s_anaconda,	s_worm,	s_missile
- EQUW	s_viper,	s_sidewinder,	s_mamba,	s_krait
- EQUW	s_adder,	s_gecko,	s_cobra1,	s_asp
- EQUW	s_ferdelance,	s_moray,	s_thargoid,	s_thargon
- EQUW	s_constrictor,	s_dragon,	s_monitor,	s_ophidian
- EQUW	s_ghavial,	s_bushmaster,	s_rattler,	s_iguana
- EQUW	s_shuttle2,	s_chameleon
+ EQUW s_dodo, s_coriolis, s_escape, s_alloys
+ EQUW s_barrel, s_boulder, s_asteroid, s_minerals
+ EQUW s_shuttle1, s_transporter, s_cobra3, s_python
+ EQUW s_boa, s_anaconda, s_worm, s_missile
+ EQUW s_viper, s_sidewinder, s_mamba, s_krait
+ EQUW s_adder, s_gecko, s_cobra1, s_asp
+ EQUW s_ferdelance, s_moray, s_thargoid, s_thargon
+ EQUW s_constrictor, s_dragon, s_monitor, s_ophidian
+ EQUW s_ghavial, s_bushmaster, s_rattler, s_iguana
+ EQUW s_shuttle2, s_chameleon
 
  EQUW &0000
 
 .ship_data
 
- EQUW	0
+ EQUW 0
 
 .XX21
 
- EQUW	s_missile,	0,	s_escape
- EQUW	s_alloys,	s_barrel,	s_boulder,	s_asteroid
- EQUW	s_minerals,	0,	s_transporter,	0
- EQUW	0,	0,	0,	0
- EQUW	s_viper,	0,	0,	0
- EQUW 0,	0,	0,	0
- EQUW	0,	0,	0,	0
- EQUW	0,	s_thargoid,	s_thargon,	s_constrictor
- 	
+ EQUW s_missile, 0, s_escape
+ EQUW s_alloys, s_barrel, s_boulder, s_asteroid
+ EQUW s_minerals, 0, s_transporter, 0
+ EQUW 0, 0, 0, 0
+ EQUW s_viper, 0, 0, 0
+ EQUW 0, 0, 0, 0
+ EQUW 0, 0, 0, 0
+ EQUW 0, s_thargoid, s_thargon, s_constrictor
+ 
 
 .ship_flags
 
- EQUB	&00
+ EQUB &00
 
 .E%
- EQUB	&00,	&40,	&41
- EQUB	&00,	&00,	&00,	&00
- EQUB	&00,	&21,	&61,	&20
- EQUB	&21,	&20,	&A1,	&0C
- EQUB	&C2,	&0C,	&0C,	&04
- EQUB	&0C,	&04,	&0C,	&04
- EQUB	&0C,	&02,	&22,	&02
- EQUB	&22,	&0C,	&04,	&8C
+ EQUB &00, &40, &41
+ EQUB &00, &00, &00, &00
+ EQUB &00, &21, &61, &20
+ EQUB &21, &20, &A1, &0C
+ EQUB &C2, &0C, &0C, &04
+ EQUB &0C, &04, &0C, &04
+ EQUB &0C, &02, &22, &02
+ EQUB &22, &0C, &04, &8C
 
 .ship_bits
 
-	EQUD %00000000000000000000000000000100
-	EQUD %00000000000000000000000000000100
-	EQUD %00000000000000000000000000001000
-	EQUD %00000000000000000000000000010000
-	EQUD %00000000000000000000000000100000
-	EQUD %00000000000000000000000001000000
-	EQUD %00000000000000000000000010000000
-	EQUD %00000000000000000000000100000000
-	EQUD %00000000000000000000001000000000
-	EQUD %00000000000000000000010000000000
-	EQUD %00011111111000000011100000000000
-	EQUD %00011001110000000011100000000000
-	EQUD %00000000000000000011100000000000
-	EQUD %00000000000000000100000000000000
-	EQUD %00000001110000001000000000000000
-	EQUD %00000000000000000000000000000010
-	EQUD %00000000000000010000000000000000
-	EQUD %00010001111111101000000000000000
-	EQUD %00010001111111100000000000000000
-	EQUD %00010001111111100000000000000000
-	EQUD %00011001111110000011000000000000
-	EQUD %00011001111111100000000000000000
-	EQUD %00011001111111100010000000000000
-	EQUD %00011001000000000000000000000000
-	EQUD %00011111000000000010000000000000
-	EQUD %00011001110000000011000000000000
-	EQUD %00100000000000000000000000000000
-	EQUD %01000000000000000000000000000000
-	EQUD %10000000000000000000000000000000
-	EQUD %00000000000000000100000000000000
-	EQUD %00010001000000000011100000000000
-	EQUD %00010001111000000011000000000000
-	EQUD %00010000000000000011100000000000
-	EQUD %00011101111100000000000000000000
-	EQUD %00010001110000000011000000000000
-	EQUD %00011101111100000010000000000000
-	EQUD %00000000000000000000011000000000
-	EQUD %00010001110000000011000000000000
+ EQUD %00000000000000000000000000000100
+ EQUD %00000000000000000000000000000100
+ EQUD %00000000000000000000000000001000
+ EQUD %00000000000000000000000000010000
+ EQUD %00000000000000000000000000100000
+ EQUD %00000000000000000000000001000000
+ EQUD %00000000000000000000000010000000
+ EQUD %00000000000000000000000100000000
+ EQUD %00000000000000000000001000000000
+ EQUD %00000000000000000000010000000000
+ EQUD %00011111111000000011100000000000
+ EQUD %00011001110000000011100000000000
+ EQUD %00000000000000000011100000000000
+ EQUD %00000000000000000100000000000000
+ EQUD %00000001110000001000000000000000
+ EQUD %00000000000000000000000000000010
+ EQUD %00000000000000010000000000000000
+ EQUD %00010001111111101000000000000000
+ EQUD %00010001111111100000000000000000
+ EQUD %00010001111111100000000000000000
+ EQUD %00011001111110000011000000000000
+ EQUD %00011001111111100000000000000000
+ EQUD %00011001111111100010000000000000
+ EQUD %00011001000000000000000000000000
+ EQUD %00011111000000000010000000000000
+ EQUD %00011001110000000011000000000000
+ EQUD %00100000000000000000000000000000
+ EQUD %01000000000000000000000000000000
+ EQUD %10000000000000000000000000000000
+ EQUD %00000000000000000100000000000000
+ EQUD %00010001000000000011100000000000
+ EQUD %00010001111000000011000000000000
+ EQUD %00010000000000000011100000000000
+ EQUD %00011101111100000000000000000000
+ EQUD %00010001110000000011000000000000
+ EQUD %00011101111100000010000000000000
+ EQUD %00000000000000000000011000000000
+ EQUD %00010001110000000011000000000000
 
-	EQUD %00011111111111100111111000000000
+ EQUD %00011111111111100111111000000000
 
 .ship_bytes
 
