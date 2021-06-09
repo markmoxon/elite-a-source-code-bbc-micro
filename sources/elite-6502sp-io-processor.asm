@@ -293,7 +293,7 @@ tube_brk = &16	\ tube BRK vector
  EQUW CLYNS, sync_in, draw_bar, draw_angle
  EQUW put_missle, scan_fire, write_fe4e, scan_xin
  EQUW scan_10in, get_key, write_xyc, write_pod
- EQUW draw_blob, draw_tail, draw_S, draw_E
+ EQUW draw_blob, draw_tail, SPBLB, ECBLB
  EQUW draw_mode, write_crtc, scan_y, write_0346
  EQUW read_0346, return, picture_h, picture_v
 
@@ -2087,20 +2087,20 @@ tube_brk = &16	\ tube BRK vector
  BNE d_55e4
  RTS
 
-.draw_E
+.ECBLB
 
  LDA #&38
- LDX #LO(d_3832)
- LDY #HI(d_3832)
- JMP draw_let
+ LDX #LO(ECBT)
+ LDY #HI(ECBT)
+ JMP BULB
 
-.draw_S
+.SPBLB
 
  LDA #&C0
- LDX #<(d_3832+3)
- LDY #>(d_3832+3)
+ LDX #<(SPBT)
+ LDY #>(SPBT)
 
-.draw_let
+.BULB
 
  STA SC
  LDA #&7D
@@ -2109,18 +2109,71 @@ tube_brk = &16	\ tube BRK vector
  STY font+1
  LDY #&07
 
-.draw_eor
+.ECBLBor
 
  LDA (font),Y
  EOR (SC),Y
  STA (SC),Y
  DEY
- BPL draw_eor
+ BPL ECBLBor
  RTS
 
-.d_3832
+\ ******************************************************************************
+\
+\       Name: ECBT
+\       Type: Variable
+\   Category: Dashboard
+\    Summary: The character bitmap for the E.C.M. indicator bulb
+\
+\ ------------------------------------------------------------------------------
+\
+\ The character bitmap for the E.C.M. indicator's "E" bulb that gets displayed
+\ on the dashboard.
+\
+\ The E.C.M. indicator uses the first 5 rows of the space station's "S" bulb
+\ below, as the bottom 5 rows of the "E" match the top 5 rows of the "S".
+\
+\ Each pixel is in mode 5 colour 2 (%10), which is yellow/white.
+\
+\ ******************************************************************************
 
- EQUB &E0, &E0, &80, &E0, &E0, &80, &E0, &E0, &20, &E0, &E0
+.ECBT
+
+ EQUB %11100000         \ x x x .
+ EQUB %11100000         \ x x x .
+ EQUB %10000000         \ x . . .
+                        \ x x x .
+                        \ x x x .
+                        \ x . . .
+                        \ x x x .
+                        \ x x x .
+
+\ ******************************************************************************
+\
+\       Name: SPBT
+\       Type: Variable
+\   Category: Dashboard
+\    Summary: The bitmap definition for the space station indicator bulb
+\
+\ ------------------------------------------------------------------------------
+\
+\ The bitmap definition for the space station indicator's "S" bulb that gets
+\ displayed on the dashboard.
+\
+\ Each pixel is in mode 5 colour 2 (%10), which is yellow/white.
+\
+\ ******************************************************************************
+
+.SPBT
+
+ EQUB %11100000         \ x x x .
+ EQUB %11100000         \ x x x .
+ EQUB %10000000         \ x . . .
+ EQUB %11100000         \ x x x .
+ EQUB %11100000         \ x x x .
+ EQUB %00100000         \ . . x .
+ EQUB %11100000         \ x x x .
+ EQUB %11100000         \ x x x .
 
 .draw_mode
 
@@ -2148,10 +2201,51 @@ tube_brk = &16	\ tube BRK vector
  CLI
  RTS
 
-.d_4419
+\ ******************************************************************************
+\
+\       Name: KYTB
+\       Type: Variable
+\   Category: Keyboard
+\    Summary: Lookup table for in-flight keyboard controls
+\  Deep dive: The key logger
+\
+\ ------------------------------------------------------------------------------
+\
+\ Keyboard table for in-flight controls. This table contains the internal key
+\ codes for the flight keys (see p.142 of the Advanced User Guide for a list of
+\ internal key numbers).
+\
+\ The pitch, roll, speed and laser keys (i.e. the seven primary flight
+\ control keys) have bit 7 set, so they have 128 added to their internal
+\ values. This doesn't appear to be used anywhere.
+\
+\ ******************************************************************************
 
- EQUB &E8, &E2, &E6, &E7, &C2, &D1, &C1
- EQUB &60, &70, &23, &35, &65, &22, &45, &63, &37
+.KYTB
+
+                        \ These are the primary flight controls (pitch, roll,
+                        \ speed and lasers):
+
+ EQUB &68 + 128         \ ?         KYTB+1      Slow down
+ EQUB &62 + 128         \ Space     KYTB+2      Speed up
+ EQUB &66 + 128         \ <         KYTB+3      Roll left
+ EQUB &67 + 128         \ >         KYTB+4      Roll right
+ EQUB &42 + 128         \ X         KYTB+5      Pitch up
+ EQUB &51 + 128         \ S         KYTB+6      Pitch down
+ EQUB &41 + 128         \ A         KYTB+7      Fire lasers
+
+                        \ These are the secondary flight controls:
+
+ EQUB &60               \ TAB       KYTB+8      Energy bomb
+ EQUB &70               \ ESCAPE    KYTB+9      Launch escape pod
+ EQUB &23               \ T         KYTB+10     Arm missile
+ EQUB &35               \ U         KYTB+11     Unarm missile
+ EQUB &65               \ M         KYTB+12     Fire missile
+ EQUB &22               \ E         KYTB+13     E.C.M.
+ EQUB &45               \ J         KYTB+14     In-system jump
+ EQUB &63               \ AJD
+
+ EQUB &37               \ P         KYTB+16     Cancel docking computer
 
 .b_table
 
@@ -2181,7 +2275,7 @@ tube_brk = &16	\ tube BRK vector
  TAY
  JSR tube_get
  BMI b_14
- LDX d_4419-1,Y
+ LDX KYTB-1,Y
  JSR DKS4
  BPL b_quit
 
