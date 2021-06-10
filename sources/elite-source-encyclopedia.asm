@@ -69,39 +69,16 @@ THG = 29                \ Ship type for a Thargoid
 TGL = 30                \ Ship type for a Thargon
 CON = 31                \ Ship type for a Constrictor
 
-JL = ESC                \ Junk is defined as starting from the escape pod
-
-JH = SHU+2              \ Junk is defined as ending before the Cobra Mk III
-                        \
-                        \ So junk is defined as the following: escape pod,
-                        \ alloy plate, cargo canister, asteroid, splinter,
-                        \ Shuttle or Transporter
-
-PACK = SH3              \ The first of the eight pack-hunter ships, which tend
-                        \ to spawn in groups. With the default value of PACK the
-                        \ pack-hunters are the Sidewinder, Mamba, Krait, Adder,
-                        \ Gecko, Cobra Mk I, Worm and Cobra Mk III (pirate)
-
-POW = 15                \ Pulse laser power
-
-Mlas = 50               \ Mining laser power
-
-Armlas = INT(128.5+1.5*POW) \ Military laser power
-
 NI% = 37                \ The number of bytes in each ship's data block (as
                         \ stored in INWK and K%)
 
 OSBYTE = &FFF4          \ The address for the OSBYTE routine
 OSWORD = &FFF1          \ The address for the OSWORD routine
-OSFILE = &FFDD          \ The address for the OSFILE routine
-OSWRCH = &FFEE          \ The address for the OSWRCH routine
 OSCLI = &FFF7           \ The address for the OSCLI routine
 
 VIA = &FE00             \ Memory-mapped space for accessing internal hardware,
                         \ such as the video ULA, 6845 CRTC and 6522 VIAs (also
                         \ known as SHEILA)
-
-VSCAN = 57              \ Defines the split position in the split-screen mode
 
 X = 128                 \ The centre x-coordinate of the 256 x 192 space view
 Y = 96                  \ The centre y-coordinate of the 256 x 192 space view
@@ -128,36 +105,27 @@ LL = 30                 \ The length of lines (in characters) of justified text
                         \ in the extended tokens system
 
 QQ18 = &0400            \ The address of the text token table, as set in
-                        \ elite-loader3.asm
+                        \ elite-loader.asm
 
 SNE = &07C0             \ The address of the sine lookup table, as set in
-                        \ elite-loader3.asm
-
-ACT = &07E0             \ The address of the arctan lookup table, as set in
-                        \ elite-loader3.asm
+                        \ elite-loader.asm
 
 QQ16_FLIGHT = &0880     \ The address of the two-letter text token table in the
                         \ flight code (this gets populated by the docked code at
                         \ the start of the game)
 
-CATD = &0D7A            \ The address of the CATD routine that is put in place
-                        \ by the third loader, as set in elite-loader3.asm
-
 IRQ1 = &114B            \ The address of the IRQ1 routine that implements the
                         \ split screen interrupt handler, as set in
-                        \ elite-loader3.asm
-
-BRBR1 = &11D5           \ The address of the main break handler, which BRKV
-                        \ points to as set in elite-loader3.asm
+                        \ elite-loader.asm
 
 NA% = &1181             \ The address of the data block for the last saved
-                        \ commander, as set in elite-loader3.asm
+                        \ commander, as set in elite-loader.asm
 
 CHK2 = &11D3            \ The address of the second checksum byte for the saved
-                        \ commander data file, as set in elite-loader3.asm
+                        \ commander data file, as set in elite-loader.asm
 
 CHK = &11D4             \ The address of the first checksum byte for the saved
-                        \ commander data file, as set in elite-loader3.asm
+                        \ commander data file, as set in elite-loader.asm
 
 XX21 = &5600            \ The address of the ship blueprints lookup table, where
                         \ the chosen ship blueprints file is loaded
@@ -166,12 +134,11 @@ E% = &563E              \ The address of the default NEWB ship bytes within the
                         \ loaded ship blueprints file
 
 SHIP_MISSILE = &7F00    \ The address of the missile ship blueprint, as set in
-                        \ elite-loader3.asm
+                        \ elite-loader.asm
 
-save_lock = &233        \ IND2V+1
-new_file = &234         \ IND3V
-new_posn = &235         \ IND3V+1
-new_name = &74D
+save_lock = &233        \ AJD, shares location with IND2V+1
+
+new_name = &74D         \ AJD
 
 \ ******************************************************************************
 \
