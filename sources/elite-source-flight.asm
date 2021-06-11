@@ -10506,7 +10506,7 @@ LOAD_C% = LOAD% +P% - CODE%
 \
 \       Name: anger_8c
 \       Type: Subroutine
-\   Category: Elite-A
+\   Category: Elite-A: Tactics
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -13416,7 +13416,7 @@ LOAD_D% = LOAD% + P% - CODE%
 \
 \       Name: tnpr_FLIGHT
 \       Type: Subroutine
-\   Category: Elite-A
+\   Category: Elite-A: Market
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -18773,7 +18773,7 @@ LOAD_E% = LOAD% + P% - CODE%
 \
 \       Name: OOPS2
 \       Type: Subroutine
-\   Category: Elite-A
+\   Category: Elite-A: Flight
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -22617,7 +22617,7 @@ LOAD_F% = LOAD% + P% - CODE%
 \
 \       Name: rand_posn
 \       Type: Subroutine
-\   Category: Elite-A
+\   Category: Elite-A: Universe
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -25177,7 +25177,7 @@ LOAD_F% = LOAD% + P% - CODE%
 \
 \       Name: b_table
 \       Type: Variable
-\   Category: Elite-A
+\   Category: Elite-A: Keyboard
 \    Summary: Lookup table for Voltmace Delta 14 joystick buttons AJD
 \
 \ ******************************************************************************
@@ -25191,7 +25191,7 @@ LOAD_F% = LOAD% + P% - CODE%
 \
 \       Name: b_14
 \       Type: Subroutine
-\   Category: Elite-A
+\   Category: Elite-A: Keyboard
 \    Summary: Check Voltmace Delta 14 joystick buttons AJD
 \
 \ ******************************************************************************
@@ -25986,7 +25986,7 @@ LOAD_F% = LOAD% + P% - CODE%
 \
 \       Name: cargo_mtok
 \       Type: Subroutine
-\   Category: Elite-A
+\   Category: Elite-A: Text
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -32253,7 +32253,7 @@ ENDMACRO
 \
 \       Name: iff_xor
 \       Type: Variable
-\   Category: Elite-A
+\   Category: Elite-A: Dashboard
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -32266,7 +32266,7 @@ ENDMACRO
 \
 \       Name: iff_base
 \       Type: Variable
-\   Category: Elite-A
+\   Category: Elite-A: Dashboard
 \    Summary: AJD
 \
 \ ******************************************************************************

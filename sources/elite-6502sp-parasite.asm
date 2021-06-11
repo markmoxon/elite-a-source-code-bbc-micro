@@ -2232,6 +2232,15 @@ ENDIF
 
  EQUB &58               \ The checksum value for the default commander, #75
 
+\ ******************************************************************************
+\
+\       Name: tube_write
+\       Type: Subroutine
+\   Category: Elite-A: Tube
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .tube_write
 
  BIT tube_r1s
@@ -2239,6 +2248,15 @@ ENDIF
  BVC tube_write
  STA tube_r1d
  RTS
+
+\ ******************************************************************************
+\
+\       Name: tube_read
+\       Type: Subroutine
+\   Category: Elite-A: Tube
+\    Summary: AJD
+\
+\ ******************************************************************************
 
 .tube_read
 
@@ -2408,7 +2426,7 @@ ENDIF
 \
 \       Name: scramble
 \       Type: Subroutine
-\   Category: Elite-A
+\   Category: Elite-A: Loader
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -2439,7 +2457,7 @@ ENDIF
 \
 \       Name: write_msg3
 \       Type: Subroutine
-\   Category: Elite-A
+\   Category: Elite-A: Text
 \    Summary: Print an extended recursive token from the msg_3 token table
 \  Deep dive: Extended text tokens
 \
@@ -4054,6 +4072,15 @@ ENDIF
 
  RTS                    \ Return from the subroutine
 
+\ ******************************************************************************
+\
+\       Name: LL30
+\       Type: Subroutine
+\   Category: Elite-A: Drawing lines
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .LOIN
 .LL30
 
@@ -4231,6 +4258,15 @@ ENDIF
                         \ Fall through into HLOIN to draw a horizontal line from
                         \ (X1, Y) to (X2, Y)
 
+\ ******************************************************************************
+\
+\       Name: HLOIN
+\       Type: Subroutine
+\   Category: Elite-A: Drawing lines
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .HLOIN
 
  LDA #&81
@@ -4241,6 +4277,15 @@ ENDIF
  JSR tube_write
  LDA &36
  JMP tube_write
+
+\ ******************************************************************************
+\
+\       Name: PIXEL
+\       Type: Subroutine
+\   Category: Elite-A: Drawing pixels
+\    Summary: AJD
+\
+\ ******************************************************************************
 
 .PIXEL
 
@@ -6605,6 +6650,15 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
  RTS                    \ Return from the subroutine
 
+\ ******************************************************************************
+\
+\       Name: DIL2
+\       Type: Subroutine
+\   Category: Elite-A: Dashboard
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .DIL2
 
  PHA
@@ -7012,6 +7066,15 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
                         \ Fall through into HANGER to draw the hanger background
 
+\ ******************************************************************************
+\
+\       Name: HANGER
+\       Type: Subroutine
+\   Category: Elite-A: Ship hanger
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .HANGER
 
  LDX #&02
@@ -7209,6 +7272,15 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 .HA1
 
  RTS                    \ Return from the subroutine
+
+\ ******************************************************************************
+\
+\       Name: UNWISE
+\       Type: Subroutine
+\   Category: Elite-A: Ship hanger
+\    Summary: AJD
+\
+\ ******************************************************************************
 
 .UNWISE
 
@@ -8748,6 +8820,15 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
  RTS                    \ Return from the subroutine
 
+\ ******************************************************************************
+\
+\       Name: CLYNS
+\       Type: Subroutine
+\   Category: Elite-A: Utility routines
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .CLYNS
 
  LDA #&FF
@@ -8760,6 +8841,15 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  DEY
  LDA #&84
  JMP tube_write
+
+\ ******************************************************************************
+\
+\       Name: WSCAN
+\       Type: Subroutine
+\   Category: Elite-A: Screen mode
+\    Summary: AJD
+\
+\ ******************************************************************************
 
 .WSCAN
 
@@ -10084,7 +10174,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 \
 \       Name: sell_yn
 \       Type: Subroutine
-\   Category: Elite-A
+\   Category: Elite-A: Text
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -10236,7 +10326,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 \
 \       Name: sell_jump
 \       Type: Subroutine
-\   Category: Elite-A
+\   Category: Elite-A: Buying ships
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -12005,6 +12095,15 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
  RTS                    \ Return from the subroutine
 
+\ ******************************************************************************
+\
+\       Name: update_pod
+\       Type: Subroutine
+\   Category: Elite-A: Dashboard
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .update_pod
 
  LDA #&8F
@@ -13750,6 +13849,15 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
  RTS                    \ Return from the subroutine
 
+\ ******************************************************************************
+\
+\       Name: MSBAR
+\       Type: Subroutine
+\   Category: Elite-A: Dashboard
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .MSBAR
 
  LDA #&88
@@ -15410,6 +15518,15 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
  EQUB 0
 
+\ ******************************************************************************
+\
+\       Name: INBAY
+\       Type: Subroutine
+\   Category: Elite-A: Loader
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .INBAY
 
  \dead entry
@@ -15419,6 +15536,15 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  JSR BRKBK
  JSR RES2
  JMP BR1
+
+\ ******************************************************************************
+\
+\       Name: boot_in
+\       Type: Subroutine
+\   Category: Elite-A: Loader
+\    Summary: AJD
+\
+\ ******************************************************************************
 
 .boot_in
 
@@ -16663,7 +16789,7 @@ ENDIF
 \
 \       Name: confirm
 \       Type: Subroutine
-\   Category: Elite-A
+\   Category: Elite-A: Save and load
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -17008,11 +17134,29 @@ ENDIF
 
  RTS                    \ Return from the subroutine
 
+\ ******************************************************************************
+\
+\       Name: scan_fire
+\       Type: Subroutine
+\   Category: Elite-A: Keyboard
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .scan_fire
 
  LDA #&89
  JSR tube_write
  JMP tube_read
+
+\ ******************************************************************************
+\
+\       Name: RDKEY
+\       Type: Subroutine
+\   Category: Elite-A: Keyboard
+\    Summary: AJD
+\
+\ ******************************************************************************
 
 .RDKEY
 
@@ -17198,6 +17342,15 @@ ENDIF
 
  LDX #1                 \ Set X to the internal key number for CTRL and fall
                         \ through to DKS4 to scan the keyboard
+
+\ ******************************************************************************
+\
+\       Name: DKS4
+\       Type: Subroutine
+\   Category: Elite-A: Keyboard
+\    Summary: AJD
+\
+\ ******************************************************************************
 
 .DKS4
 
@@ -17465,6 +17618,15 @@ ENDIF
                         \ logger for keys that are being pressed
 
  RTS                    \ Return from the subroutine
+
+\ ******************************************************************************
+\
+\       Name: TT217
+\       Type: Subroutine
+\   Category: Elite-A: Keyboard
+\    Summary: AJD
+\
+\ ******************************************************************************
 
 .TT217
 
@@ -21765,7 +21927,7 @@ ENDMACRO
 \
 \       Name: n_buyship
 \       Type: Subroutine
-\   Category: Elite-A
+\   Category: Elite-A: Buying ships
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -21885,7 +22047,7 @@ ENDMACRO
 \
 \       Name: n_load
 \       Type: Subroutine
-\   Category: Elite-A
+\   Category: Elite-A: Buying ships
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -21934,7 +22096,7 @@ ENDMACRO
 \
 \       Name: count_offs
 \       Type: Variable
-\   Category: Elite-A
+\   Category: Elite-A: Buying ships
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -21947,7 +22109,7 @@ ENDMACRO
 \
 \       Name: n_name
 \       Type: Subroutine
-\   Category: Elite-A
+\   Category: Elite-A: Buying ships
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -21974,7 +22136,7 @@ ENDMACRO
 \
 \       Name: n_price
 \       Type: Subroutine
-\   Category: Elite-A
+\   Category: Elite-A: Buying ships
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -21998,7 +22160,7 @@ ENDMACRO
 \
 \       Name: cour_buy
 \       Type: Subroutine
-\   Category: Elite-A
+\   Category: Elite-A: Buying ships
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -22213,7 +22375,7 @@ ENDMACRO
 \
 \       Name: cour_dock
 \       Type: Subroutine
-\   Category: Elite-A
+\   Category: Elite-A: Buying ships
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -22266,7 +22428,7 @@ ENDMACRO
 \
 \       Name: stay_here
 \       Type: Subroutine
-\   Category: Elite-A
+\   Category: Elite-A: Buying ships
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -22389,7 +22551,7 @@ ENDMACRO
 \
 \       Name: new_offsets
 \       Type: Variable
-\   Category: Elite-A
+\   Category: Elite-A: Buying ships
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -22409,7 +22571,7 @@ ENDMACRO
 \
 \       Name: new_ships
 \       Type: Variable
-\   Category: Elite-A
+\   Category: Elite-A: Buying ships
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -22520,7 +22682,7 @@ ENDIF
 \
 \       Name: new_details
 \       Type: Variable
-\   Category: Elite-A
+\   Category: Elite-A: Buying ships
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -26894,7 +27056,7 @@ ENDMACRO
 \
 \       Name: msg_3
 \       Type: Variable
-\   Category: Elite-A
+\   Category: Elite-A: Text
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -32330,7 +32492,7 @@ NEXT
 \
 \       Name: encyclopedia
 \       Type: Subroutine
-\   Category: Elite-A
+\   Category: Elite-A: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -32375,7 +32537,7 @@ NEXT
 \
 \       Name: ships_ag
 \       Type: Subroutine
-\   Category: Elite-A
+\   Category: Elite-A: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -32460,7 +32622,7 @@ NEXT
 \
 \       Name: controls
 \       Type: Subroutine
-\   Category: Elite-A
+\   Category: Elite-A: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -32491,7 +32653,7 @@ NEXT
 \
 \       Name: equip_data
 \       Type: Subroutine
-\   Category: Elite-A
+\   Category: Elite-A: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -32526,7 +32688,7 @@ NEXT
 \
 \       Name: trading
 \       Type: Subroutine
-\   Category: Elite-A
+\   Category: Elite-A: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -32540,6 +32702,15 @@ NEXT
  BEQ l_restart
 
  JMP BAY
+
+\ ******************************************************************************
+\
+\       Name: check_keys
+\       Type: Subroutine
+\   Category: Elite-A: Keyboard
+\    Summary: AJD
+\
+\ ******************************************************************************
 
 .check_keys
 
@@ -32579,7 +32750,7 @@ NEXT
 \
 \       Name: write_card
 \       Type: Subroutine
-\   Category: Elite-A
+\   Category: Elite-A: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -32681,7 +32852,7 @@ NEXT
 \
 \       Name: ship_posn
 \       Type: Variable
-\   Category: Elite-A
+\   Category: Elite-A: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -32697,7 +32868,7 @@ NEXT
 \
 \       Name: ship_dist
 \       Type: Variable
-\   Category: Elite-A
+\   Category: Elite-A: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -32713,7 +32884,7 @@ NEXT
 \
 \       Name: menu
 \       Type: Subroutine
-\   Category: Elite-A
+\   Category: Elite-A: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -32782,7 +32953,7 @@ NEXT
 \
 \       Name: menu_title
 \       Type: Variable
-\   Category: Elite-A
+\   Category: Elite-A: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -32795,7 +32966,7 @@ NEXT
 \
 \       Name: menu_titlex
 \       Type: Variable
-\   Category: Elite-A
+\   Category: Elite-A: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -32808,7 +32979,7 @@ NEXT
 \
 \       Name: menu_offset
 \       Type: Variable
-\   Category: Elite-A
+\   Category: Elite-A: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -32821,7 +32992,7 @@ NEXT
 \
 \       Name: menu_entry
 \       Type: Variable
-\   Category: Elite-A
+\   Category: Elite-A: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -32834,7 +33005,7 @@ NEXT
 \
 \       Name: menu_query
 \       Type: Variable
-\   Category: Elite-A
+\   Category: Elite-A: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -32847,7 +33018,7 @@ NEXT
 \
 \       Name: ship_centre
 \       Type: Variable
-\   Category: Elite-A
+\   Category: Elite-A: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -32863,7 +33034,7 @@ NEXT
 \
 \       Name: card_pattern
 \       Type: Variable
-\   Category: Elite-A
+\   Category: Elite-A: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -32900,7 +33071,7 @@ NEXT
 \
 \       Name: card_addr
 \       Type: Variable
-\   Category: Elite-A
+\   Category: Elite-A: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -32918,7 +33089,7 @@ NEXT
 \
 \       Name: adder
 \       Type: Variable
-\   Category: Elite-A
+\   Category: Elite-A: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -32951,7 +33122,7 @@ NEXT
 \
 \       Name: anaconda
 \       Type: Variable
-\   Category: Elite-A
+\   Category: Elite-A: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -32984,7 +33155,7 @@ NEXT
 \
 \       Name: asp_2
 \       Type: Variable
-\   Category: Elite-A
+\   Category: Elite-A: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -33017,7 +33188,7 @@ NEXT
 \
 \       Name: boa
 \       Type: Variable
-\   Category: Elite-A
+\   Category: Elite-A: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -33050,7 +33221,7 @@ NEXT
 \
 \       Name: bushmaster
 \       Type: Variable
-\   Category: Elite-A
+\   Category: Elite-A: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -33079,7 +33250,7 @@ NEXT
 \
 \       Name: chameleon
 \       Type: Variable
-\   Category: Elite-A
+\   Category: Elite-A: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -33112,7 +33283,7 @@ NEXT
 \
 \       Name: cobra_1
 \       Type: Variable
-\   Category: Elite-A
+\   Category: Elite-A: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -33145,7 +33316,7 @@ NEXT
 \
 \       Name: cobra_3
 \       Type: Variable
-\   Category: Elite-A
+\   Category: Elite-A: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -33178,7 +33349,7 @@ NEXT
 \
 \       Name: coriolis
 \       Type: Variable
-\   Category: Elite-A
+\   Category: Elite-A: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -33197,7 +33368,7 @@ NEXT
 \
 \       Name: dodecagon
 \       Type: Variable
-\   Category: Elite-A
+\   Category: Elite-A: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -33216,7 +33387,7 @@ NEXT
 \
 \       Name: escape_pod
 \       Type: Variable
-\   Category: Elite-A
+\   Category: Elite-A: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -33237,7 +33408,7 @@ NEXT
 \
 \       Name: fer_de_lance
 \       Type: Variable
-\   Category: Elite-A
+\   Category: Elite-A: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -33270,7 +33441,7 @@ NEXT
 \
 \       Name: gecko
 \       Type: Variable
-\   Category: Elite-A
+\   Category: Elite-A: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -33303,7 +33474,7 @@ NEXT
 \
 \       Name: ghavial
 \       Type: Variable
-\   Category: Elite-A
+\   Category: Elite-A: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -33336,7 +33507,7 @@ NEXT
 \
 \       Name: iguana
 \       Type: Variable
-\   Category: Elite-A
+\   Category: Elite-A: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -33369,7 +33540,7 @@ NEXT
 \
 \       Name: krait
 \       Type: Variable
-\   Category: Elite-A
+\   Category: Elite-A: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -33400,7 +33571,7 @@ NEXT
 \
 \       Name: mamba
 \       Type: Variable
-\   Category: Elite-A
+\   Category: Elite-A: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -33431,7 +33602,7 @@ NEXT
 \
 \       Name: monitor
 \       Type: Variable
-\   Category: Elite-A
+\   Category: Elite-A: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -33464,7 +33635,7 @@ NEXT
 \
 \       Name: moray
 \       Type: Variable
-\   Category: Elite-A
+\   Category: Elite-A: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -33497,7 +33668,7 @@ NEXT
 \
 \       Name: ophidian
 \       Type: Variable
-\   Category: Elite-A
+\   Category: Elite-A: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -33530,7 +33701,7 @@ NEXT
 \
 \       Name: python
 \       Type: Variable
-\   Category: Elite-A
+\   Category: Elite-A: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -33563,7 +33734,7 @@ NEXT
 \
 \       Name: shuttle
 \       Type: Variable
-\   Category: Elite-A
+\   Category: Elite-A: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -33590,7 +33761,7 @@ NEXT
 \
 \       Name: sidewinder
 \       Type: Variable
-\   Category: Elite-A
+\   Category: Elite-A: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -33619,7 +33790,7 @@ NEXT
 \
 \       Name: thargoid
 \       Type: Variable
-\   Category: Elite-A
+\   Category: Elite-A: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -33648,7 +33819,7 @@ NEXT
 \
 \       Name: thargon
 \       Type: Variable
-\   Category: Elite-A
+\   Category: Elite-A: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -33675,7 +33846,7 @@ NEXT
 \
 \       Name: transporter
 \       Type: Variable
-\   Category: Elite-A
+\   Category: Elite-A: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -33698,7 +33869,7 @@ NEXT
 \
 \       Name: viper
 \       Type: Variable
-\   Category: Elite-A
+\   Category: Elite-A: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -33727,7 +33898,7 @@ NEXT
 \
 \       Name: worm
 \       Type: Variable
-\   Category: Elite-A
+\   Category: Elite-A: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -33751,6 +33922,15 @@ NEXT
  EQUB 0, 10
  EQUS &B6, &B7, " ", &01, "HV", &02, " ", &C2
  EQUB 0, 0
+
+\ ******************************************************************************
+\
+\       Name: install_ship
+\       Type: Subroutine
+\   Category: Elite-A: Universe
+\    Summary: AJD
+\
+\ ******************************************************************************
 
 .install_ship
 
@@ -33785,10 +33965,28 @@ NEXT
  \ TAX
  \ RTS
 
+\ ******************************************************************************
+\
+\       Name: DOENTRY_FLIGHT
+\       Type: Subroutine
+\   Category: Elite-A: Loader
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .DOENTRY_FLIGHT
 
  JSR RES2
  JMP DOENTRY
+
+\ ******************************************************************************
+\
+\       Name: DEATH2_FLIGHT
+\       Type: Subroutine
+\   Category: Elite-A: Start and end
+\    Summary: AJD
+\
+\ ******************************************************************************
 
 .DEATH2_FLIGHT
 
@@ -38679,7 +38877,7 @@ NEXT
 \
 \       Name: anger_8c
 \       Type: Subroutine
-\   Category: Elite-A
+\   Category: Elite-A: Tactics
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -39119,6 +39317,15 @@ NEXT
                         \ in the much rounder hyperspace rings)
 
                         \ Fall through into HFS2 to draw the launch tunnel rings
+
+\ ******************************************************************************
+\
+\       Name: HFS2
+\       Type: Subroutine
+\   Category: Elite-A: Drawing circles
+\    Summary: AJD
+\
+\ ******************************************************************************
 
 .HFS2
 
@@ -40808,7 +41015,7 @@ NEXT
 \
 \       Name: tnpr_FLIGHT
 \       Type: Subroutine
-\   Category: Elite-A
+\   Category: Elite-A: Market
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -41129,6 +41336,15 @@ NEXT
  LDA #202               \ Print token 42 ("RANGE") followed by a question mark
  JMP prq                \ and return from the subroutine using a tail call
 
+\ ******************************************************************************
+\
+\       Name: hyp1_FLIGHT
+\       Type: Subroutine
+\   Category: Elite-A: Universe
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .hyp1_FLIGHT
 
  JSR jmp                \ duplicate of hyp1
@@ -41418,6 +41634,15 @@ NEXT
 
  JMP TT23               \ Jump to TT23 to display the Short-range Chart
 
+\ ******************************************************************************
+\
+\       Name: write_0346
+\       Type: Subroutine
+\   Category: Elite-A: Tube
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .write_0346
 
  PHA
@@ -41425,6 +41650,15 @@ NEXT
  JSR tube_write
  PLA
  JMP tube_write
+
+\ ******************************************************************************
+\
+\       Name: read_0346
+\       Type: Subroutine
+\   Category: Elite-A: Tube
+\    Summary: AJD
+\
+\ ******************************************************************************
 
 .read_0346
 
@@ -41999,9 +42233,27 @@ NEXT
                         \ Fall through into WPSHPS to clear the scanner and
                         \ reset the LSO block
 
+\ ******************************************************************************
+\
+\       Name: WPSHPS2
+\       Type: Subroutine
+\   Category: Elite-A: Dashboard
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .WPSHPS2
 
  JMP WPSHPS
+
+\ ******************************************************************************
+\
+\       Name: DET1
+\       Type: Subroutine
+\   Category: Elite-A: Screen mode
+\    Summary: AJD
+\
+\ ******************************************************************************
 
 .DET1
 
@@ -42308,6 +42560,15 @@ NEXT
                         \ dash on the pixel row above the first one, to create a
                         \ double-height dot
 
+\ ******************************************************************************
+\
+\       Name: CPIX2
+\       Type: Subroutine
+\   Category: Elite-A: Drawing pixels
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .CPIX2
 
  LDA #&90
@@ -42323,7 +42584,7 @@ NEXT
 \
 \       Name: OOPS2
 \       Type: Subroutine
-\   Category: Elite-A
+\   Category: Elite-A: Flight
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -43012,15 +43273,42 @@ NEXT
 
                         \ Fall through into ECBLB to light up the E.C.M. bulb
 
+\ ******************************************************************************
+\
+\       Name: ECBLB
+\       Type: Subroutine
+\   Category: Elite-A: Dashboard
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .ECBLB
 
  LDA #&93
  JMP tube_write
 
+\ ******************************************************************************
+\
+\       Name: SPBLB
+\       Type: Subroutine
+\   Category: Elite-A: Dashboard
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .SPBLB
 
  LDA #&92
  JMP tube_write
+
+\ ******************************************************************************
+\
+\       Name: MSBAR2
+\       Type: Subroutine
+\   Category: Elite-A: Dashboard
+\    Summary: AJD
+\
+\ ******************************************************************************
 
 .MSBAR2
 
@@ -44279,6 +44567,15 @@ NEXT
 
  RTS                    \ Return from the subroutine
 
+\ ******************************************************************************
+\
+\       Name: PL21_FLIGHT
+\       Type: Subroutine
+\   Category: Elite-A: Drawing planets
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .PL21_FLIGHT
 
  SEC
@@ -44785,7 +45082,7 @@ NEXT
 \
 \       Name: rand_posn
 \       Type: Subroutine
-\   Category: Elite-A
+\   Category: Elite-A: Universe
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -44900,6 +45197,15 @@ NEXT
                         \ Fall through into DORND2 to set A, X and the C flag
                         \ randomly
 
+\ ******************************************************************************
+\
+\       Name: DORND2
+\       Type: Subroutine
+\   Category: Elite-A: Utility routines
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .DORND2
 
  CLC
@@ -44974,6 +45280,15 @@ NEXT
  LDX #&03
 
  JMP hordes
+
+\ ******************************************************************************
+\
+\       Name: Main game loop (Part 2 of 6)
+\       Type: Subroutine
+\   Category: Elite-A: Main loop
+\    Summary: AJD
+\
+\ ******************************************************************************
 
 .d_3fc0
 
@@ -45313,6 +45628,15 @@ NEXT
                         \ otherwise we are done spawning, so fall through into
                         \ the end of the main loop at MLOOP
 
+\ ******************************************************************************
+\
+\       Name: Main game loop (Part 5 of 6)
+\       Type: Subroutine
+\   Category: Elite-A: Main loop
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .MLOOP_FLIGHT
 
  LDX #&FF               \ Like main game loop 5
@@ -45338,6 +45662,15 @@ NEXT
 
  JSR DOKEY_FLIGHT
  JSR chk_dirn
+
+\ ******************************************************************************
+\
+\       Name: Main game loop (Part 6 of 6)
+\       Type: Subroutine
+\   Category: Elite-A: Main loop
+\    Summary: AJD
+\
+\ ******************************************************************************
 
 .FRCE_FLIGHT
 
@@ -45878,6 +46211,15 @@ NEXT
  JMP FRCE_FLIGHT        \ the key "pressed" to red key f0 (so we launch from the
                         \ station)
 
+\ ******************************************************************************
+\
+\       Name: LSHIPS
+\       Type: Subroutine
+\   Category: Elite-A: Loader
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .LSHIPS
 
  LDA #0
@@ -45992,6 +46334,15 @@ NEXT
  LDX #17
  LDY #15
  JMP mix_install
+
+\ ******************************************************************************
+\
+\       Name: mix_bits
+\       Type: Variable
+\   Category: Elite-A: Loader
+\    Summary: AJD
+\
+\ ******************************************************************************
 
 .mix_bits
 
@@ -46488,6 +46839,15 @@ NEXT
 
  JMP NOISE              \ AJD
 
+\ ******************************************************************************
+\
+\       Name: DKS1
+\       Type: Subroutine
+\   Category: Elite-A: Keyboard
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .DKS1
 
  LDA #&96
@@ -46593,6 +46953,15 @@ NEXT
                         \ therefore don't use the key logger)
 
  RTS                    \ Return from the subroutine
+
+\ ******************************************************************************
+\
+\       Name: DOKEY_FLIGHT
+\       Type: Subroutine
+\   Category: Elite-A: Keyboard
+\    Summary: AJD
+\
+\ ******************************************************************************
 
 .DOKEY_FLIGHT
 
@@ -46717,7 +47086,16 @@ NEXT
 
 .d_4552
 
- STX JSTY               \ End copy of DOKEY
+ STX JSTY
+
+\ ******************************************************************************
+\
+\       Name: DK4_FLIGHT
+\       Type: Subroutine
+\   Category: Elite-A: Keyboard
+\    Summary: AJD
+\
+\ ******************************************************************************
 
 .DK4_FLIGHT
 
@@ -46779,7 +47157,7 @@ NEXT
 
 .DK5
 
- RTS                    \ End copy of DK4
+ RTS
 
 \ ******************************************************************************
 \
@@ -46821,7 +47199,7 @@ NEXT
 \
 \       Name: cargo_mtok
 \       Type: Subroutine
-\   Category: Elite-A
+\   Category: Elite-A: Text
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -46954,6 +47332,15 @@ NEXT
                         \ followed by " DESTROYED", and return from the
                         \ subroutine using a tail call
 
+\ ******************************************************************************
+\
+\       Name: LL9_FLIGHT
+\       Type: Subroutine
+\   Category: Elite-A: Drawing ships
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .d_4889
 
  JMP PLANET
@@ -46963,6 +47350,15 @@ NEXT
  LDA &8C
  BMI d_4889
  JMP LL9
+
+\ ******************************************************************************
+\
+\       Name: MVEIT_FLIGHT
+\       Type: Subroutine
+\   Category: Elite-A: Moving
+\    Summary: AJD
+\
+\ ******************************************************************************
 
 .MVEIT_FLIGHT
 
@@ -48179,7 +48575,7 @@ NEXT
 \
 \       Name: iff_xor
 \       Type: Variable
-\   Category: Elite-A
+\   Category: Elite-A: Dashboard
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -48192,7 +48588,7 @@ NEXT
 \
 \       Name: iff_base
 \       Type: Variable
-\   Category: Elite-A
+\   Category: Elite-A: Dashboard
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -51886,6 +52282,15 @@ ENDMACRO
  FACE      -57,      -76,      -11,         31    \ Face 11
  FACE        0,        0,      -96,         31    \ Face 12
 
+\ ******************************************************************************
+\
+\       Name: ship_list
+\       Type: Variable
+\   Category: Elite-A: Drawing ships
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .ship_list
 
  EQUW SHIP_DODO, SHIP_CORIOLIS, SHIP_ESCAPE_POD, SHIP_PLATE
@@ -51900,6 +52305,15 @@ ENDMACRO
  EQUW ship_shuttle2, ship_chameleon
 
  EQUW 0
+
+\ ******************************************************************************
+\
+\       Name: ship_data
+\       Type: Variable
+\   Category: Elite-A: Drawing ships
+\    Summary: AJD
+\
+\ ******************************************************************************
 
 .ship_data
 
@@ -51948,7 +52362,15 @@ ENDMACRO
  EQUW SHIP_THARGON      \ TGL  = 30 = Thargon
  EQUW SHIP_CONSTRICTOR  \ CON  = 31 = Constrictor
 
- 
+\ ******************************************************************************
+\
+\       Name: ship_flags
+\       Type: Variable
+\   Category: Elite-A: Drawing ships
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .ship_flags
 
  EQUB 0
@@ -52021,6 +52443,15 @@ ENDMACRO
  EQUB %00000100         \ Thargon                                        Hostile
  EQUB %10001100         \ Constrictor                Hostile, pirate, escape pod
 
+\ ******************************************************************************
+\
+\       Name: ship_bits
+\       Type: Variable
+\   Category: Elite-A: Drawing ships
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .ship_bits
 
  EQUD %00000000000000000000000000000100
@@ -52063,6 +52494,15 @@ ENDMACRO
  EQUD %00010001110000000011000000000000
 
  EQUD %00011111111111100111111000000000
+
+\ ******************************************************************************
+\
+\       Name: ship_bytes
+\       Type: Variable
+\   Category: Elite-A: Drawing ships
+\    Summary: AJD
+\
+\ ******************************************************************************
 
 .ship_bytes
 

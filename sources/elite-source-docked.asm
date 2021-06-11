@@ -2017,7 +2017,7 @@ BRKV = P% - 2           \ The address of the destination address in the above
 \
 \       Name: INBAY
 \       Type: Subroutine
-\   Category: Elite-A
+\   Category: Elite-A: Loader
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -2217,7 +2217,7 @@ BRKV = P% - 2           \ The address of the destination address in the above
 \
 \       Name: scramble
 \       Type: Subroutine
-\   Category: Elite-A
+\   Category: Elite-A: Loader
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -11822,7 +11822,7 @@ LOAD_D% = LOAD% + P% - CODE%
 \
 \       Name: sell_yn
 \       Type: Subroutine
-\   Category: Elite-A
+\   Category: Elite-A: Text
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -11974,7 +11974,7 @@ LOAD_D% = LOAD% + P% - CODE%
 \
 \       Name: sell_jump
 \       Type: Subroutine
-\   Category: Elite-A
+\   Category: Elite-A: Buying ships
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -13595,7 +13595,7 @@ LOAD_D% = LOAD% + P% - CODE%
 \
 \       Name: encyclopedia
 \       Type: Subroutine
-\   Category: Elite-A
+\   Category: Elite-A: Loader
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -19074,7 +19074,7 @@ ENDIF
 \
 \       Name: confirm
 \       Type: Subroutine
-\   Category: Elite-A
+\   Category: Elite-A: Save and load
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -24440,7 +24440,7 @@ LOAD_G% = LOAD% + P% - CODE%
 \
 \       Name: n_buyship
 \       Type: Subroutine
-\   Category: Elite-A
+\   Category: Elite-A: Buying ships
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -24558,7 +24558,7 @@ LOAD_G% = LOAD% + P% - CODE%
 \
 \       Name: n_load
 \       Type: Subroutine
-\   Category: Elite-A
+\   Category: Elite-A: Buying ships
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -24607,7 +24607,7 @@ LOAD_G% = LOAD% + P% - CODE%
 \
 \       Name: count_offs
 \       Type: Variable
-\   Category: Elite-A
+\   Category: Elite-A: Buying ships
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -24620,7 +24620,7 @@ LOAD_G% = LOAD% + P% - CODE%
 \
 \       Name: n_name
 \       Type: Subroutine
-\   Category: Elite-A
+\   Category: Elite-A: Buying ships
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -24647,7 +24647,7 @@ LOAD_G% = LOAD% + P% - CODE%
 \
 \       Name: n_price
 \       Type: Subroutine
-\   Category: Elite-A
+\   Category: Elite-A: Buying ships
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -24671,7 +24671,7 @@ LOAD_G% = LOAD% + P% - CODE%
 \
 \       Name: cour_buy
 \       Type: Subroutine
-\   Category: Elite-A
+\   Category: Elite-A: Buying ships
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -24885,7 +24885,7 @@ LOAD_G% = LOAD% + P% - CODE%
 \
 \       Name: cour_dock
 \       Type: Subroutine
-\   Category: Elite-A
+\   Category: Elite-A: Buying ships
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -24938,7 +24938,7 @@ LOAD_G% = LOAD% + P% - CODE%
 \
 \       Name: stay_here
 \       Type: Subroutine
-\   Category: Elite-A
+\   Category: Elite-A: Buying ships
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -25003,7 +25003,7 @@ LOAD_G% = LOAD% + P% - CODE%
 \
 \       Name: new_offsets
 \       Type: Variable
-\   Category: Elite-A
+\   Category: Elite-A: Buying ships
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -25023,7 +25023,7 @@ LOAD_G% = LOAD% + P% - CODE%
 \
 \       Name: new_ships
 \       Type: Variable
-\   Category: Elite-A
+\   Category: Elite-A: Buying ships
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -25134,7 +25134,7 @@ ENDIF
 \
 \       Name: new_details
 \       Type: Variable
-\   Category: Elite-A
+\   Category: Elite-A: Buying ships
 \    Summary: AJD
 \
 \ ******************************************************************************
