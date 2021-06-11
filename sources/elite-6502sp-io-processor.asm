@@ -1554,10 +1554,6 @@ tube_brk = &16 \ tube BRK vector
 \
 \   Y                   Y is preserved
 \
-\ Other entry points:
-\
-\   PX4                 Contains an RTS
-\
 \ ******************************************************************************
 
 .PIXEL

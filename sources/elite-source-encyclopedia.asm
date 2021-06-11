@@ -18406,6 +18406,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  JSR TT66
  JSR MT1
  LDX &8C
+
  LDA ship_file,X
  CMP ship_load+&04
  BEQ ship_skip
@@ -18434,6 +18435,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  STA QQ17
  LDA &8C
  JSR write_card
+
  LDX &8C
  LDA ship_posn,X
  JSR NWSHP
@@ -18461,8 +18463,10 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  STA &49
  JSR LL9
  DEC &8A
+
  JSR WSCAN
  JSR RDKEY
+
  BEQ l_395a
  JMP BAY
 
@@ -18546,6 +18550,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 .l_restart
 
  JSR PAUSE2
+
  JMP BAY
 
 \ ******************************************************************************
@@ -18740,9 +18745,11 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  PLA
  JSR write_msg3
  JSR NLIN4
+
  JSR MT2
  LDA #&80
  STA QQ17
+
  INC YC
  LDX #&00
 
@@ -18755,6 +18762,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  CLC
  JSR pr2
  JSR TT162
+
  CLC
  LDA &89
  ADC &03AD
