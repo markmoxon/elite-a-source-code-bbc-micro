@@ -136,9 +136,9 @@ E% = &563E              \ The address of the default NEWB ship bytes within the
 SHIP_MISSILE = &7F00    \ The address of the missile ship blueprint, as set in
                         \ elite-loader.asm
 
-save_lock = &233        \ AJD, shares location with IND2V+1
+save_lock = &0233       \ AJD, shares location with IND2V+1
 
-new_name = &74D         \ AJD
+new_name = &074D        \ AJD
 
 \ ******************************************************************************
 \

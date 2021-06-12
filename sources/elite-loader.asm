@@ -38,31 +38,32 @@ _SOURCE_DISC            = (_RELEASE = 2)
 \
 \ ******************************************************************************
 
- Q% = _REMOVE_CHECKSUMS \ Set Q% to TRUE to max out the default commander, FALSE
+Q% = _REMOVE_CHECKSUMS  \ Set Q% to TRUE to max out the default commander, FALSE
                         \ for the standard default commander (this is set to
                         \ TRUE if checksums are disabled, just for convenience)
-
-CODE% = &1900
-ORG CODE%
-LOAD% = &1900
-\EXEC = l_197b
 
 key_io = &04
 key_tube = &90
 
-brkv = &0202
-irq1v = &0204
-bytev = &020A
-wrchv = &020E
-filev = &0212
-fscv = &021E
-netv = &0224
-ind2v = &0232
+BRKV = &0202
+IRQ1V = &0204
+BYTEV = &020A
+WRCHV = &020E
+FILEV = &0212
+FSCV = &021E
+NETV = &0224
+IND2V = &0232
 cmdr_iff = &036E
 OSWRCH = &FFEE
 OSWORD = &FFF1
 OSBYTE = &FFF4
 OSCLI = &FFF7
+
+CODE% = &1900
+LOAD% = &1900
+\EXEC = l_197b
+
+ORG CODE%
 
 .l_1900
 
@@ -93,8 +94,6 @@ OSCLI = &FFF7
  EQUB &04, &01, &04, &F8, &2C, &04, &06, &08, &16, &00, &00, &81
  EQUB &7E, &00
 
-\OPT NOCMOS
-
 .l_197b
 
  CLI
@@ -120,11 +119,11 @@ OSCLI = &FFF7
  LDX #&02
  JSR OSBYTE
  LDA #&60
- STA ind2v
- LDA #HI(ind2v)
- STA netv+&01
- LDA #LO(ind2v)
- STA netv
+ STA IND2V
+ LDA #HI(IND2V)
+ STA NETV+&01
+ LDA #LO(IND2V)
+ STA NETV
  LDA #&BE
  LDX #&08
  JSR osb_set
@@ -159,9 +158,9 @@ OSCLI = &FFF7
  STA &73
  JSR decode
  LDA #&EE
- STA brkv
+ STA BRKV
  LDA #&11
- STA brkv+&01
+ STA BRKV+&01
  LDA #&00
  STA &70
  LDA #&78
@@ -228,14 +227,14 @@ OSCLI = &FFF7
  STA &FE4E
  LDA #&7F
  STA &FE6E
- LDA irq1v
+ LDA IRQ1V
  STA &7FFE
- LDA irq1v+&01
+ LDA IRQ1V+&01
  STA &7FFF
  LDA #&4B
- STA irq1v
+ STA IRQ1V
  LDA #&11
- STA irq1v+&01
+ STA IRQ1V+&01
  LDA #&39
  STA &FE45
  CLI 
@@ -271,18 +270,18 @@ OSCLI = &FFF7
  INY
  STY put2+2
  STY get2+2
- LDA filev \ modify address for old FILEV
- STA old_filev+1
- LDA filev+1
- STA old_filev+2
- LDA fscv \ modify address for old FSCV
- STA old_fscv+1
- LDA fscv+1
- STA old_fscv+2
- LDA bytev \ modify address for old BYTEV
- STA old_bytev+1
- LDA bytev+1
- STA old_bytev+2
+ LDA FILEV \ modify address for old FILEV
+ STA old_FILEV+1
+ LDA FILEV+1
+ STA old_FILEV+2
+ LDA FSCV \ modify address for old FSCV
+ STA old_FSCV+1
+ LDA FSCV+1
+ STA old_FSCV+2
+ LDA BYTEV \ modify address for old BYTEV
+ STA old_BYTEV+1
+ LDA BYTEV+1
+ STA old_BYTEV+2
  JSR set_vectors \ replace FILEV and FSCV
 
 .not_master
@@ -310,9 +309,9 @@ OSCLI = &FFF7
  LDX #&04
  JSR decodex
  LDA #&E9
- STA wrchv
+ STA WRCHV
  LDA #&11
- STA wrchv+&01
+ STA WRCHV+&01
  LDA #&00
  STA &70
  LDA #&0B
@@ -361,9 +360,9 @@ OSCLI = &FFF7
  \ DEX
  \ BNE tube_wr
  \ LDA #LO(tube_wrch)
- \ STA wrchv
+ \ STA WRCHV
  \ LDA #HI(tube_wrch)
- \ STA wrchv+&01
+ \ STA WRCHV+&01
  LDX #LO(tube_run)
  LDY #HI(tube_run)
  JMP OSCLI
@@ -2620,11 +2619,11 @@ ORG &DD00
 
  \ trap FILEV
 
-.do_filev
+.do_FILEV
 
  JSR restorews \ restore workspace
 
-.old_filev
+.old_FILEV
 
  JSR &100 \ address modified by master set-up
 
@@ -2685,11 +2684,11 @@ ORG &DD00
 
  \ trap FILEV
 
-.do_fscv
+.do_FSCV
 
  JSR restorews \ restore workspace
 
-.old_fscv
+.old_FSCV
 
  JSR &100 \ address modified by master setup
  JMP savews \ save workspace, restore characters
@@ -2728,35 +2727,35 @@ ORG &DD00
 
  \ trap BYTEV
 
-.do_bytev
+.do_BYTEV
 
  CMP #&8F \ ROM service request
- BNE old_bytev
+ BNE old_BYTEV
  CPX #&F \ vector claim?
- BNE old_bytev
- JSR old_bytev
+ BNE old_BYTEV
+ JSR old_BYTEV
 
 .set_vectors
 
  SEI
  PHA
- LDA #LO(do_filev) \ reset FILEV
- STA filev
- LDA #HI(do_filev)
- STA filev+1
- LDA #LO(do_fscv) \ reset FSCV
- STA fscv
- LDA #HI(do_fscv)
- STA fscv+1
- LDA #LO(do_bytev) \ replace BYTEV
- STA bytev
- LDA #HI(do_bytev)
- STA bytev+1
+ LDA #LO(do_FILEV) \ reset FILEV
+ STA FILEV
+ LDA #HI(do_FILEV)
+ STA FILEV+1
+ LDA #LO(do_FSCV) \ reset FSCV
+ STA FSCV
+ LDA #HI(do_FSCV)
+ STA FSCV+1
+ LDA #LO(do_BYTEV) \ replace BYTEV
+ STA BYTEV
+ LDA #HI(do_BYTEV)
+ STA BYTEV+1
  PLA
  CLI
  RTS
 
-.old_bytev
+.old_BYTEV
 
  JMP &100 \ address modified by master set_up
 

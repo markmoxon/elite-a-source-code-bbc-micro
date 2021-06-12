@@ -38,7 +38,7 @@ _SOURCE_DISC            = (_RELEASE = 2)
 \
 \ ******************************************************************************
 
- Q% = _REMOVE_CHECKSUMS \ Set Q% to TRUE to max out the default commander, FALSE
+Q% = _REMOVE_CHECKSUMS  \ Set Q% to TRUE to max out the default commander, FALSE
                         \ for the standard default commander (this is set to
                         \ TRUE if checksums are disabled, just for convenience)
 
@@ -83,17 +83,6 @@ JH = SHU+2              \ Junk is defined as ending before the Cobra Mk III
                         \ alloy plate, cargo canister, asteroid, splinter,
                         \ Shuttle or Transporter
 
-PACK = SH3              \ The first of the eight pack-hunter ships, which tend
-                        \ to spawn in groups. With the default value of PACK the
-                        \ pack-hunters are the Sidewinder, Mamba, Krait, Adder,
-                        \ Gecko, Cobra Mk I, Worm and Cobra Mk III (pirate)
-
-POW = 15                \ Pulse laser power
-
-Mlas = 50               \ Mining laser power
-
-Armlas = INT(128.5+1.5*POW) \ Military laser power
-
 NI% = 37                \ The number of bytes in each ship's data block (as
                         \ stored in INWK and K%)
 
@@ -107,7 +96,7 @@ VIA = &FE00             \ Memory-mapped space for accessing internal hardware,
                         \ such as the video ULA, 6845 CRTC and 6522 VIAs (also
                         \ known as SHEILA)
 
-VSCAN = 57              \ Defines the split position in the split-screen mode
+BRKV = &0202            \ The address of the break vector
 
 X = 128                 \ The centre x-coordinate of the 256 x 192 space view
 Y = 96                  \ The centre y-coordinate of the 256 x 192 space view
@@ -133,28 +122,9 @@ VE = 0                  \ The obfuscation byte used to hide the extended tokens
 LL = 30                 \ The length of lines (in characters) of justified text
                         \ in the extended tokens system
 
-QQ16_FLIGHT = &0880     \ The address of the two-letter text token table in the
-                        \ flight code (this gets populated by the docked code at
-                        \ the start of the game)
+save_lock = &0233       \ AJD, shares location with IND2V+1
 
-CATD = &0D7A            \ The address of the CATD routine that is put in place
-                        \ by the third loader, as set in elite-loader3.asm
-
-IRQ1 = &114B            \ The address of the IRQ1 routine that implements the
-                        \ split screen interrupt handler, as set in
-                        \ elite-loader3.asm
-
-BRBR1 = &11D5           \ The address of the main break handler, which BRKV
-                        \ points to as set in elite-loader3.asm
-
-save_lock = &233        \ IND2V+1
-new_file = &234         \ IND3V
-new_posn = &235         \ IND3V+1
-
-dockedp = &A0
-BRKV = &202
-
-tube_r1s = &FEF8
+tube_r1s = &FEF8        \ AJD
 tube_r1d = &FEF9
 tube_r2s = &FEFA
 tube_r2d = &FEFB
@@ -724,6 +694,12 @@ ORG &0000
 .K2
 
  SKIP 4                 \ Temporary storage, used in a number of places
+
+ SKIP 1                 \ This byte appears to be unused
+
+.dockedp
+
+ SKIP 1                 \ AJD
 
 ORG &00D1
 
@@ -4074,6 +4050,31 @@ ENDIF
 
 \ ******************************************************************************
 \
+\ Save output/ELTA.bin
+\
+\ ******************************************************************************
+
+PRINT "ELITE A"
+PRINT "Assembled at ", ~CODE%
+PRINT "Ends at ", ~P%
+PRINT "Code size is ", ~(P% - CODE%)
+PRINT "Execute at ", ~LOAD%
+PRINT "Reload at ", ~LOAD_A%
+
+PRINT "S.2.ELTA ", ~CODE%, " ", ~P%, " ", ~LOAD%, " ", ~LOAD_A%
+\SAVE "output/2.ELTA.bin", CODE%, P%, LOAD%
+
+\ ******************************************************************************
+\
+\ ELITE B FILE
+\
+\ ******************************************************************************
+
+CODE_B% = P%
+LOAD_B% = LOAD% + P% - CODE%
+
+\ ******************************************************************************
+\
 \       Name: LL30
 \       Type: Subroutine
 \   Category: Elite-A: Drawing lines
@@ -6799,6 +6800,31 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
 \ ******************************************************************************
 \
+\ Save output/ELTB.bin
+\
+\ ******************************************************************************
+
+PRINT "ELITE B"
+PRINT "Assembled at ", ~CODE_B%
+PRINT "Ends at ", ~P%
+PRINT "Code size is ", ~(P% - CODE_B%)
+PRINT "Execute at ", ~LOAD%
+PRINT "Reload at ", ~LOAD_B%
+
+PRINT "S.2.ELTB ", ~CODE_B%, " ", ~P%, " ", ~LOAD%, " ", ~LOAD_B%
+\SAVE "output/2.ELTB.bin", CODE_B%, P%, LOAD%
+
+\ ******************************************************************************
+\
+\ ELITE C FILE
+\
+\ ******************************************************************************
+
+CODE_C% = P%
+LOAD_C% = LOAD% +P% - CODE%
+
+\ ******************************************************************************
+\
 \       Name: HATB
 \       Type: Variable
 \   Category: Ship hanger
@@ -8856,6 +8882,31 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  LDA #&85
  JSR tube_write
  JMP tube_read
+
+\ ******************************************************************************
+\
+\ Save output/ELTC.bin
+\
+\ ******************************************************************************
+
+PRINT "ELITE C"
+PRINT "Assembled at ", ~CODE_C%
+PRINT "Ends at ", ~P%
+PRINT "Code size is ", ~(P% - CODE_C%)
+PRINT "Execute at ", ~LOAD%
+PRINT "Reload at ", ~LOAD_C%
+
+PRINT "S.2.ELTC ", ~CODE_C%, " ", ~P%, " ", ~LOAD%, " ", ~LOAD_C%
+\SAVE "output/2.ELTC.bin", CODE_C%, P%, LOAD%
+
+\ ******************************************************************************
+\
+\ ELITE D FILE
+\
+\ ******************************************************************************
+
+CODE_D% = P%
+LOAD_D% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
 \
@@ -12796,6 +12847,31 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
 \ ******************************************************************************
 \
+\ Save output/ELTD.bin
+\
+\ ******************************************************************************
+
+PRINT "ELITE D"
+PRINT "Assembled at ", ~CODE_D%
+PRINT "Ends at ", ~P%
+PRINT "Code size is ", ~(P% - CODE_D%)
+PRINT "Execute at ", ~LOAD%
+PRINT "Reload at ", ~LOAD_D%
+
+PRINT "S.2.ELTD ", ~CODE_D%, " ", ~P%, " ", ~LOAD%, " ", ~LOAD_D%
+\SAVE "output/2.ELTD.bin", CODE_D%, P%, LOAD%
+
+\ ******************************************************************************
+\
+\ ELITE E FILE
+\
+\ ******************************************************************************
+
+CODE_E% = P%
+LOAD_E% = LOAD% + P% - CODE%
+
+\ ******************************************************************************
+\
 \       Name: cpl
 \       Type: Subroutine
 \   Category: Text
@@ -15008,6 +15084,31 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  BPL pl1                \ Loop back for the next byte to copy
 
  RTS                    \ Return from the subroutine
+
+\ ******************************************************************************
+\
+\ Save output/ELTE.bin
+\
+\ ******************************************************************************
+
+PRINT "ELITE E"
+PRINT "Assembled at ", ~CODE_E%
+PRINT "Ends at ", ~P%
+PRINT "Code size is ", ~(P% - CODE_E%)
+PRINT "Execute at ", ~LOAD%
+PRINT "Reload at ", ~LOAD_E%
+
+PRINT "S.2.ELTE ", ~CODE_E%, " ", ~P%, " ", ~LOAD%, " ", ~LOAD_E%
+\SAVE "output/2.ELTE.bin", CODE_E%, P%, LOAD%
+
+\ ******************************************************************************
+\
+\ ELITE F FILE
+\
+\ ******************************************************************************
+
+CODE_F% = P%
+LOAD_F% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
 \
@@ -18158,6 +18259,31 @@ ENDMACRO
  ORA T                  \ Set A to the correct sign bit that we set in T above
 
  RTS                    \ Return from the subroutine
+
+\ ******************************************************************************
+\
+\ Save output/ELTF.bin
+\
+\ ******************************************************************************
+
+PRINT "ELITE F"
+PRINT "Assembled at ", ~CODE_F%
+PRINT "Ends at ", ~P%
+PRINT "Code size is ", ~(P% - CODE_F%)
+PRINT "Execute at ", ~LOAD%
+PRINT "Reload at ", ~LOAD_F%
+
+PRINT "S.2.ELTF ", ~CODE_F%, " ", ~P%, " ", ~LOAD%, " ", ~LOAD_F%
+\SAVE "output/2.ELTF.bin", CODE_F%, P%, LOAD%
+
+\ ******************************************************************************
+\
+\ ELITE G FILE
+\
+\ ******************************************************************************
+
+CODE_G% = P%
+LOAD_G% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
 \
@@ -22776,6 +22902,31 @@ ELIF _RELEASED
  EQUB &AF \, &51, &0C, &00
 
 ENDIF
+
+\ ******************************************************************************
+\
+\ Save output/ELTG.bin
+\
+\ ******************************************************************************
+
+PRINT "ELITE G"
+PRINT "Assembled at ", ~CODE_G%
+PRINT "Ends at ", ~P%
+PRINT "Code size is ", ~(P% - CODE_G%)
+PRINT "Execute at ", ~LOAD%
+PRINT "Reload at ", ~LOAD_G%
+
+PRINT "S.2.ELTG ", ~CODE_G%, " ", ~P%, " ", ~LOAD%, " ", ~LOAD_G%
+\SAVE "output/2.ELTG.bin", CODE_G%, P%, LOAD%
+
+\ ******************************************************************************
+\
+\ ELITE H FILE
+\
+\ ******************************************************************************
+
+CODE_H% = P%
+LOAD_H% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
 \
@@ -32490,6 +32641,31 @@ NEXT
 
 \ ******************************************************************************
 \
+\ Save output/ELTH.bin
+\
+\ ******************************************************************************
+
+PRINT "ELITE H"
+PRINT "Assembled at ", ~CODE_H%
+PRINT "Ends at ", ~P%
+PRINT "Code size is ", ~(P% - CODE_H%)
+PRINT "Execute at ", ~LOAD%
+PRINT "Reload at ", ~LOAD_H%
+
+PRINT "S.2.ELTH ", ~CODE_H%, " ", ~P%, " ", ~LOAD%, " ", ~LOAD_H%
+\SAVE "versions/disc/output/2.ELTH.bin", CODE_H%, P%, LOAD%
+
+\ ******************************************************************************
+\
+\ ELITE I FILE
+\
+\ ******************************************************************************
+
+CODE_I% = P%
+LOAD_I% = LOAD% + P% - CODE%
+
+\ ******************************************************************************
+\
 \       Name: encyclopedia
 \       Type: Subroutine
 \   Category: Elite-A: Encyclopedia
@@ -33992,6 +34168,31 @@ NEXT
 
  JSR RES2
  JMP INBAY
+
+\ ******************************************************************************
+\
+\ Save output/ELTI.bin
+\
+\ ******************************************************************************
+
+PRINT "ELITE I"
+PRINT "Assembled at ", ~CODE_I%
+PRINT "Ends at ", ~P%
+PRINT "Code size is ", ~(P% - CODE_I%)
+PRINT "Execute at ", ~LOAD%
+PRINT "Reload at ", ~LOAD_I%
+
+PRINT "S.2.ELTI ", ~CODE_I%, " ", ~P%, " ", ~LOAD%, " ", ~LOAD_I%
+\SAVE "versions/disc/output/2.ELTI.bin", CODE_I%, P%, LOAD%
+
+\ ******************************************************************************
+\
+\ ELITE J FILE
+\
+\ ******************************************************************************
+
+CODE_J% = P%
+LOAD_J% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
 \
@@ -36925,6 +37126,31 @@ NEXT
  JMP GOIN               \ Go to the docking bay (i.e. show the ship hanger
                         \ screen) and return from the subroutine with a tail
                         \ call
+
+\ ******************************************************************************
+\
+\ Save output/ELTJ.bin
+\
+\ ******************************************************************************
+
+PRINT "ELITE J"
+PRINT "Assembled at ", ~CODE_J%
+PRINT "Ends at ", ~P%
+PRINT "Code size is ", ~(P% - CODE_J%)
+PRINT "Execute at ", ~LOAD%
+PRINT "Reload at ", ~LOAD_J%
+
+PRINT "S.2.ELTJ ", ~CODE_J%, " ", ~P%, " ", ~LOAD%, " ", ~LOAD_J%
+\SAVE "versions/disc/output/2.ELTJ.bin", CODE_J%, P%, LOAD%
+
+\ ******************************************************************************
+\
+\ ELITE K FILE
+\
+\ ******************************************************************************
+
+CODE_K% = P%
+LOAD_K% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
 \
@@ -41013,6 +41239,31 @@ NEXT
 
 \ ******************************************************************************
 \
+\ Save output/ELTK.bin
+\
+\ ******************************************************************************
+
+PRINT "ELITE K"
+PRINT "Assembled at ", ~CODE_K%
+PRINT "Ends at ", ~P%
+PRINT "Code size is ", ~(P% - CODE_K%)
+PRINT "Execute at ", ~LOAD%
+PRINT "Reload at ", ~LOAD_K%
+
+PRINT "S.2.ELTK ", ~CODE_K%, " ", ~P%, " ", ~LOAD%, " ", ~LOAD_K%
+\SAVE "versions/disc/output/2.ELTK.bin", CODE_K%, P%, LOAD%
+
+\ ******************************************************************************
+\
+\ ELITE L FILE
+\
+\ ******************************************************************************
+
+CODE_L% = P%
+LOAD_L% = LOAD% + P% - CODE%
+
+\ ******************************************************************************
+\
 \       Name: tnpr_FLIGHT
 \       Type: Subroutine
 \   Category: Elite-A: Market
@@ -45080,6 +45331,31 @@ NEXT
 
 \ ******************************************************************************
 \
+\ Save output/ELTL.bin
+\
+\ ******************************************************************************
+
+PRINT "ELITE L"
+PRINT "Assembled at ", ~CODE_L%
+PRINT "Ends at ", ~P%
+PRINT "Code size is ", ~(P% - CODE_L%)
+PRINT "Execute at ", ~LOAD%
+PRINT "Reload at ", ~LOAD_L%
+
+PRINT "S.2.ELTL ", ~CODE_L%, " ", ~P%, " ", ~LOAD%, " ", ~LOAD_L%
+\SAVE "versions/disc/output/2.ELTL.bin", CODE_L%, P%, LOAD%
+
+\ ******************************************************************************
+\
+\ ELITE M FILE
+\
+\ ******************************************************************************
+
+CODE_M% = P%
+LOAD_M% = LOAD% + P% - CODE%
+
+\ ******************************************************************************
+\
 \       Name: rand_posn
 \       Type: Subroutine
 \   Category: Elite-A: Universe
@@ -48852,6 +49128,31 @@ NEXT
 
 \ ******************************************************************************
 \
+\ Save output/ELTM.bin
+\
+\ ******************************************************************************
+
+PRINT "ELITE M"
+PRINT "Assembled at ", ~CODE_M%
+PRINT "Ends at ", ~P%
+PRINT "Code size is ", ~(P% - CODE_M%)
+PRINT "Execute at ", ~LOAD%
+PRINT "Reload at ", ~LOAD_M%
+
+PRINT "S.2.ELTM ", ~CODE_M%, " ", ~P%, " ", ~LOAD%, " ", ~LOAD_M%
+\SAVE "versions/disc/output/2.ELTM.bin", CODE_M%, P%, LOAD%
+
+\ ******************************************************************************
+\
+\ ELITE SHIP BLUEPRINTS FILE
+\
+\ ******************************************************************************
+
+CODE_SHIPS% = P%
+LOAD_SHIPS% = LOAD% + P% - CODE%
+
+\ ******************************************************************************
+\
 \       Name: VERTEX
 \       Type: Macro
 \   Category: Drawing ships
@@ -52306,15 +52607,6 @@ ENDMACRO
 
  EQUW 0
 
-\ ******************************************************************************
-\
-\       Name: ship_data
-\       Type: Variable
-\   Category: Elite-A: Drawing ships
-\    Summary: AJD
-\
-\ ******************************************************************************
-
 .ship_data
 
  EQUW 0
@@ -52364,19 +52656,6 @@ ENDMACRO
 
 \ ******************************************************************************
 \
-\       Name: ship_flags
-\       Type: Variable
-\   Category: Elite-A: Drawing ships
-\    Summary: AJD
-\
-\ ******************************************************************************
-
-.ship_flags
-
- EQUB 0
-
-\ ******************************************************************************
-\
 \       Name: E%
 \       Type: Variable
 \   Category: Drawing ships
@@ -52408,6 +52687,10 @@ ENDMACRO
 \ how this works.
 \
 \ ******************************************************************************
+
+.ship_flags
+
+ EQUB 0
 
 .E%
 
