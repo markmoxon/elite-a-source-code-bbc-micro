@@ -2,10 +2,10 @@
 \
 \ ELITE-A LOADER SOURCE
 \
-\ Elite-A was written by Angus Duggan, and is an extended version of the BBC
-\ Micro disc version of Elite; the extra code is copyright Angus Duggan
+\ Elite-A is an extended version of BBC Micro Elite, written by Angus Duggan
 \
-\ Elite was written by Ian Bell and David Braben and is copyright Acornsoft 1984
+\ The original Elite was written by Ian Bell and David Braben and is copyright
+\ Acornsoft 1984, and the extra code in Elite-A is copyright Angus Duggan
 \
 \ The code on this site is identical to Angus Duggan's source discs (it's just
 \ been reformatted and variable names changed to be more readable)

@@ -2,10 +2,10 @@
 \
 \ ELITE-A FLIGHT SOURCE
 \
-\ Elite-A was written by Angus Duggan, and is an extended version of the BBC
-\ Micro disc version of Elite; the extra code is copyright Angus Duggan
+\ Elite-A is an extended version of BBC Micro Elite, written by Angus Duggan
 \
-\ Elite was written by Ian Bell and David Braben and is copyright Acornsoft 1984
+\ The original Elite was written by Ian Bell and David Braben and is copyright
+\ Acornsoft 1984, and the extra code in Elite-A is copyright Angus Duggan
 \
 \ The code on this site is identical to Angus Duggan's source discs (it's just
 \ been reformatted and variable names changed to be more readable)
@@ -8606,8 +8606,8 @@ LOAD_C% = LOAD% +P% - CODE%
 
  JSR EXNO3              \ Make the sound of the missile exploding
 
- LDA #250               \ Call OOPS2 to AJD
- JMP OOPS2
+ LDA #250               \ Call n_oops to AJD
+ JMP n_oops
 
 .TA18
 
@@ -8697,7 +8697,7 @@ LOAD_C% = LOAD% +P% - CODE%
                         \ ship, so jump to TA87 to skip damaging our ship
 
  LDA #80                \ AJD
- JSR OOPS2
+ JSR n_oops
 
 .TA87
 
@@ -9271,7 +9271,7 @@ LOAD_C% = LOAD% +P% - CODE%
                         \ the laser power and number of missiles) to get the
                         \ amount of damage we should take
 
- JSR OOPS2              \ AJD
+ JSR n_oops             \ AJD
 
  DEC INWK+28            \ Halve the attacking ship's acceleration in byte #28
 
@@ -18771,14 +18771,14 @@ LOAD_E% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
 \
-\       Name: OOPS2
+\       Name: n_oops
 \       Type: Subroutine
 \   Category: Elite-A: Flight
 \    Summary: AJD
 \
 \ ******************************************************************************
 
-.OOPS2
+.n_oops
 
  SEC                    \ reduce damage
  SBC new_shields

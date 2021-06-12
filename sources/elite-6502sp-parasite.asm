@@ -2,10 +2,10 @@
 \
 \ ELITE-A GAME SOURCE (PARASITE)
 \
-\ Elite-A was written by Angus Duggan, and is an extended version of the BBC
-\ Micro disc version of Elite; the extra code is copyright Angus Duggan
+\ Elite-A is an extended version of BBC Micro Elite, written by Angus Duggan
 \
-\ Elite was written by Ian Bell and David Braben and is copyright Acornsoft 1984
+\ The original Elite was written by Ian Bell and David Braben and is copyright
+\ Acornsoft 1984, and the extra code in Elite-A is copyright Angus Duggan
 \
 \ The code on this site is identical to Angus Duggan's source discs (it's just
 \ been reformatted and variable names changed to be more readable)
@@ -34485,7 +34485,7 @@ LOAD_J% = LOAD% + P% - CODE%
 
  LDY #&E0               \ AJD
  DEX
- JSR MSBAR2
+ JSR MSBAR_FLIGHT
 
 .MA25
 
@@ -37203,8 +37203,8 @@ LOAD_K% = LOAD% + P% - CODE%
 
  JSR EXNO3              \ Make the sound of the missile exploding
 
- LDA #250               \ Call OOPS2 to AJD
- JMP OOPS2
+ LDA #250               \ Call n_oops to AJD
+ JMP n_oops
 
 .TA18
 
@@ -37294,7 +37294,7 @@ LOAD_K% = LOAD% + P% - CODE%
                         \ ship, so jump to TA87 to skip damaging our ship
 
  LDA #80                \ AJD
- JSR OOPS2
+ JSR n_oops
 
 .TA87
 
@@ -37868,7 +37868,7 @@ LOAD_K% = LOAD% + P% - CODE%
                         \ the laser power and number of missiles) to get the
                         \ amount of damage we should take
 
- JSR OOPS2              \ AJD
+ JSR n_oops             \ AJD
 
  DEC INWK+28            \ Halve the attacking ship's acceleration in byte #28
 
@@ -42423,8 +42423,8 @@ LOAD_L% = LOAD% + P% - CODE%
 
 .NWSTARS
 
- LDA QQ11               \ If this is not a space view, jump to WPSHPS2 to skip
- BNE WPSHPS2            \ the initialisation of the SX, SY and SZ tables
+ LDA QQ11               \ If this is not a space view, jump to WPSHPS_FLIGHT to
+ BNE WPSHPS_FLIGHT      \ skip the initialisation of the SX, SY and SZ tables
 
 \ ******************************************************************************
 \
@@ -42486,14 +42486,14 @@ LOAD_L% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
 \
-\       Name: WPSHPS2
+\       Name: WPSHPS_FLIGHT
 \       Type: Subroutine
 \   Category: Elite-A: Dashboard
 \    Summary: AJD
 \
 \ ******************************************************************************
 
-.WPSHPS2
+.WPSHPS_FLIGHT
 
  JMP WPSHPS
 
@@ -42833,14 +42833,14 @@ LOAD_L% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
 \
-\       Name: OOPS2
+\       Name: n_oops
 \       Type: Subroutine
 \   Category: Elite-A: Flight
 \    Summary: AJD
 \
 \ ******************************************************************************
 
-.OOPS2
+.n_oops
 
  SEC                    \ reduce damage
  SBC new_shields
@@ -43493,7 +43493,7 @@ NEXT
 
  LDX NOMSL              \ AJD
  DEX
- JSR MSBAR2
+ JSR MSBAR_FLIGHT
 
  STY MSAR               \ Set MSAR = 0 to indicate that the leftmost missile
                         \ is no longer seeking a target lock
@@ -43554,14 +43554,14 @@ NEXT
 
 \ ******************************************************************************
 \
-\       Name: MSBAR2
+\       Name: MSBAR_FLIGHT
 \       Type: Subroutine
 \   Category: Elite-A: Dashboard
 \    Summary: AJD
 \
 \ ******************************************************************************
 
-.MSBAR2
+.MSBAR_FLIGHT
 
  CPX #4
  BCC n_mok
@@ -48803,7 +48803,7 @@ LOAD_M% = LOAD% + P% - CODE%
  JSR FLIP               \ Swap the x- and y-coordinates of all the stardust
                         \ particles
 
- JSR WPSHPS2            \ Wipe all the ships from the scanner
+ JSR WPSHPS_FLIGHT      \ Wipe all the ships from the scanner
 
                         \ And fall through into SIGHT to draw the laser
                         \ crosshairs
