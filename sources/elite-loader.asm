@@ -2,7 +2,7 @@
 \
 \ ELITE-A LOADER SOURCE
 \
-\ Elite-A is an extended version of BBC Micro Elite, written by Angus Duggan
+\ Elite-A is an extended version of BBC Micro Elite by Angus Duggan
 \
 \ The original Elite was written by Ian Bell and David Braben and is copyright
 \ Acornsoft 1984, and the extra code in Elite-A is copyright Angus Duggan
@@ -45,6 +45,8 @@ Q% = _REMOVE_CHECKSUMS  \ Set Q% to TRUE to max out the default commander, FALSE
 key_io = &04
 key_tube = &90
 
+VIA = &FE00
+
 BRKV = &0202
 IRQ1V = &0204
 BYTEV = &020A
@@ -59,51 +61,209 @@ OSWORD = &FFF1
 OSBYTE = &FFF4
 OSCLI = &FFF7
 
+\EXEC = ENTRY
+
+ZP = &70
+T = &75
+P = &72
+Q = &73
+YY = &74
+CHKSM = &78
+DL = &8B
+
+VSCAN = 57
+
+LASCT = &0346
+HFX = &0348
+ESCP = &0386
+VEC = &7FFE
+
+\ ******************************************************************************
+\
+\ ELITE LOADER
+\
+\ ******************************************************************************
+
 CODE% = &1900
 LOAD% = &1900
-\EXEC = l_197b
 
 ORG CODE%
 
-.l_1900
+\ ******************************************************************************
+\
+\       Name: B%
+\       Type: Variable
+\   Category: Screen mode
+\    Summary: VDU commands for setting the square mode 4 screen
+\  Deep dive: The split-screen mode
+\             Drawing monochrome pixels in mode 4
+\
+\ ------------------------------------------------------------------------------
+\
+\ This block contains the bytes that get written by OSWRCH to set up the screen
+\ mode (this is equivalent to using the VDU statement in BASIC).
+\
+\ It defines the whole screen using a square, monochrome mode 4 configuration;
+\ the mode 5 part for the dashboard is implemented in the IRQ1 routine.
+\
+\ The top part of Elite's screen mode is based on mode 4 but with the following
+\ differences:
+\
+\   * 32 columns, 31 rows (256 x 248 pixels) rather than 40, 32
+\
+\   * The horizontal sync position is at character 45 rather than 49, which
+\     pushes the screen to the right (which centres it as it's not as wide as
+\     the normal screen modes)
+\
+\   * Screen memory goes from &6000 to &7EFF, which leaves another whole page
+\     for code (i.e. 256 bytes) after the end of the screen. This is where the
+\     Python ship blueprint slots in
+\
+\   * The text window is 1 row high and 13 columns wide, and is at (2, 16)
+\
+\   * The cursor is disabled
+\
+\ This almost-square mode 4 variant makes life a lot easier when drawing to the
+\ screen, as there are 256 pixels on each row (or, to put it in screen memory
+\ terms, there's one page of memory per row of pixels). For more details of the
+\ screen mode, see the deep dive on "Drawing monochrome pixels in mode 4".
+\
+\ There is also an interrupt-driven routine that switches the bytes-per-pixel
+\ setting from that of mode 4 to that of mode 5, when the raster reaches the
+\ split between the space view and the dashboard. See the deep dive on "The
+\ split-screen mode" for details.
+\
+\ ******************************************************************************
 
- EQUB &16, &04, &1C, &02, &11, &0F, &10, &17, &00, &06, &1F, &00
- EQUB &00, &00, &00, &00, &00, &17, &00, &0C, &0C, &00, &00, &00
- EQUB &00, &00, &00, &17, &00, &0D, &00, &00, &00, &00, &00, &00
- EQUB &00, &17, &00, &01, &20, &00, &00, &00, &00, &00, &00, &17
- EQUB &00, &02, &2D, &00, &00, &00, &00, &00, &00, &17, &00, &0A
- EQUB &20, &00, &00, &00, &00, &00, &00
+.B%
 
-.envelope1
+ EQUB 22, 4             \ Switch to screen mode 4
 
- EQUB &01, &01, &00, &6F, &F8, &04, &01, &08, &08, &FE, &00, &FF
- EQUB &7E, &2C
+ EQUB 28                \ Define a text window as follows:
+ EQUB 2, 17, 15, 16     \
+                        \   * Left = 2
+                        \   * Right = 15
+                        \   * Top = 16
+                        \   * Bottom = 17
+                        \
+                        \ i.e. 1 row high, 13 columns wide at (2, 16)
 
-.envelope2
+ EQUB 23, 0, 6, 31      \ Set 6845 register R6 = 31
+ EQUB 0, 0, 0           \
+ EQUB 0, 0, 0           \ This is the "vertical displayed" register, and sets
+                        \ the number of displayed character rows to 31. For
+                        \ comparison, this value is 32 for standard modes 4 and
+                        \ 5, but we claw back the last row for storing code just
+                        \ above the end of screen memory
 
- EQUB &02, &01, &0E, &EE, &FF, &2C, &20, &32, &06, &01, &00, &FE
- EQUB &78, &7E
+ EQUB 23, 0, 12, &0C    \ Set 6845 register R12 = &0C and R13 = &00
+ EQUB 0, 0, 0           \
+ EQUB 0, 0, 0           \ This sets 6845 registers (R12 R13) = &0C00 to point
+ EQUB 23, 0, 13, &00    \ to the start of screen memory in terms of character
+ EQUB 0, 0, 0           \ rows. There are 8 pixel lines in each character row,
+ EQUB 0, 0, 0           \ so to get the actual address of the start of screen
+                        \ memory, we multiply by 8:
+                        \
+                        \   &0C00 * 8 = &6000
+                        \
+                        \ So this sets the start of screen memory to &6000
 
-.envelope3
+ EQUB 23, 0, 1, 32      \ Set 6845 register R1 = 32
+ EQUB 0, 0, 0           \
+ EQUB 0, 0, 0           \ This is the "horizontal displayed" register, which
+                        \ defines the number of character blocks per horizontal
+                        \ character row. For comparison, this value is 40 for
+                        \ modes 4 and 5, but our custom screen is not as wide at
+                        \ only 32 character blocks across
 
- EQUB &03, &01, &01, &FF, &FD, &11, &20, &80, &01, &00, &00, &FF
- EQUB &01, &01
+ EQUB 23, 0, 2, 45      \ Set 6845 register R2 = 45
+ EQUB 0, 0, 0           \
+ EQUB 0, 0, 0           \ This is the "horizontal sync position" register, which
+                        \ defines the position of the horizontal sync pulse on
+                        \ the horizontal line in terms of character widths from
+                        \ the left-hand side of the screen. For comparison this
+                        \ is 49 for modes 4 and 5, but needs to be adjusted for
+                        \ our custom screen's width
 
-.envelope4
+ EQUB 23, 0, 10, 32     \ Set 6845 register R10 = 32
+ EQUB 0, 0, 0           \
+ EQUB 0, 0, 0           \ This is the "cursor start" register, so this sets the
+                        \ cursor start line at 0, effectively disabling the
+                        \ cursor
 
- EQUB &04, &01, &04, &F8, &2C, &04, &06, &08, &16, &00, &00, &81
- EQUB &7E, &00
+\ ******************************************************************************
+\
+\       Name: E%
+\       Type: Variable
+\   Category: Sound
+\    Summary: Sound envelope definitions
+\
+\ ------------------------------------------------------------------------------
+\
+\ This table contains the sound envelope data, which is passed to OSWORD by the
+\ FNE macro to create the four sound envelopes used in-game. Refer to chapter 30
+\ of the BBC Micro User Guide for details of sound envelopes and what all the
+\ parameters mean.
+\
+\ The envelopes are as follows:
+\
+\   * Envelope 1 is the sound of our own laser firing
+\
+\   * Envelope 2 is the sound of lasers hitting us, or hyperspace
+\
+\   * Envelope 3 is the first sound in the two-part sound of us dying, or the
+\     second sound in the two-part sound of us making hitting or killing an
+\     enemy ship
+\
+\   * Envelope 4 is the sound of E.C.M. firing
+\
+\ ******************************************************************************
 
-.l_197b
+.E%
+
+ EQUB 1, 1, 0, 111, -8, 4, 1, 8, 8, -2, 0, -1, 126, 44
+ EQUB 2, 1, 14, -18, -1, 44, 32, 50, 6, 1, 0, -2, 120, 126
+ EQUB 3, 1, 1, -1, -3, 17, 32, 128, 1, 0, 0, -1, 1, 1
+ EQUB 4, 1, 4, -8, 44, 4, 6, 8, 22, 0, 0, -127, 126, 0
+
+\ ******************************************************************************
+\
+\       Name: FNE
+\       Type: Macro
+\   Category: Sound
+\    Summary: Macro definition for defining a sound envelope
+\
+\ ------------------------------------------------------------------------------
+\
+\ The following macro is used to define the four sound envelopes used in the
+\ game. It uses OSWORD 8 to create an envelope using the 14 parameters in the
+\ the I%-th block of 14 bytes at location E%. This OSWORD call is the same as
+\ BBC BASIC's ENVELOPE command.
+\
+\ See variable E% for more details of the envelopes themselves.
+\
+\ ******************************************************************************
+
+MACRO FNE I%
+
+  LDX #LO(E%+I%*14)     \ Set (Y X) to point to the I%-th set of envelope data
+  LDY #HI(E%+I%*14)     \ in E%
+
+  LDA #8                \ Call OSWORD with A = 8 to set up sound envelope I%
+  JSR OSWORD
+
+ENDMACRO
+
+.ENTRY
 
  CLI
  LDA #&90
  LDX #&FF
  LDY #&01
  JSR OSBYTE
- LDA #LO(l_1900)
+ LDA #LO(B%)
  STA &70
- LDA #HI(l_1900)
+ LDA #HI(B%)
  STA &71
  LDY #&00
 
@@ -114,7 +274,7 @@ ORG CODE%
  INY 
  CPY #&43
  BNE vdu_loop
- JSR seed
+ JSR PLL1
  LDA #&10
  LDX #&02
  JSR OSBYTE
@@ -126,25 +286,25 @@ ORG CODE%
  STA NETV
  LDA #&BE
  LDX #&08
- JSR osb_set
+ JSR OSB
  LDA #&C8
  LDX #&03
- JSR osb_set
+ JSR OSB
  LDA #&0D
  LDX #&00
- JSR osb_set
+ JSR OSB
  LDA #&E1
  LDX #&80
- JSR osb_set
+ JSR OSB
  LDA #&0D
  LDX #&02
- JSR osb_set
+ JSR OSB
  LDA #&04
  LDX #&01
- JSR osb_set
+ JSR OSB
  LDA #&09
  LDX #&00
- JSR osb_set
+ JSR OSB
  LDA #&77
  JSR OSBYTE
  JSR or789
@@ -152,11 +312,11 @@ ORG CODE%
  STA &70
  LDA #&11
  STA &71
- LDA #LO(to1100)
+ LDA #LO(TVT1code)
  STA &72
- LDA #HI(to1100)
+ LDA #HI(TVT1code)
  STA &73
- JSR decode
+ JSR MVPG
  LDA #&EE
  STA BRKV
  LDA #&11
@@ -165,53 +325,43 @@ ORG CODE%
  STA &70
  LDA #&78
  STA &71
- LDA #LO(to7800)
+ LDA #LO(DIALS)
  STA &72
- LDA #HI(to7800)
+ LDA #HI(DIALS)
  STA &73
  LDX #&08
- JSR decodex
+ JSR MVBL
  LDA #&00
  STA &70
  LDA #&61
  STA &71
- LDA #LO(to6100)
+ LDA #LO(ASOFT)
  STA &72
- LDA #HI(to6100)
+ LDA #HI(ASOFT)
  STA &73
- JSR decode
+ JSR MVPG
  LDA #&63
  STA &71
- LDA #LO(to6300)
+ LDA #LO(ELITE)
  STA &72
- LDA #HI(to6300)
+ LDA #HI(ELITE)
  STA &73
- JSR decode
+ JSR MVPG
  LDA #&76
  STA &71
- LDA #LO(to7600)
+ LDA #LO(CpASOFT)
  STA &72
- LDA #HI(to7600)
+ LDA #HI(CpASOFT)
  STA &73
- JSR decode
- LDX #LO(envelope1)
- LDY #HI(envelope1)
- LDA #&08
- JSR OSWORD
- LDX #LO(envelope2)
- LDY #HI(envelope2)
- LDA #&08
- JSR OSWORD
- LDX #LO(envelope3)
- LDY #HI(envelope3)
- LDA #&08
- JSR OSWORD
- LDX #LO(envelope4)
- LDY #HI(envelope4)
- LDA #&08
- JSR OSWORD
- LDX #LO(l_1d44)
- LDY #HI(l_1d44)
+ JSR MVPG
+
+ FNE 0                  \ Set up sound envelopes 0-3 using the FNE macro
+ FNE 1
+ FNE 2
+ FNE 3
+
+ LDX #LO(MESS1)
+ LDY #HI(MESS1)
  JSR OSCLI
  LDA #&F0 \ set up DDRB
  STA &FE62
@@ -302,12 +452,12 @@ ORG CODE%
  STA &70
  LDA #&04
  STA &71
- LDA #LO(to400)
+ LDA #LO(WORDS)
  STA &72
- LDA #HI(to400)
+ LDA #HI(WORDS)
  STA &73
  LDX #&04
- JSR decodex
+ JSR MVBL
  LDA #&E9
  STA WRCHV
  LDA #&11
@@ -320,7 +470,7 @@ ORG CODE%
  STA &72
  LDA #HI(tob00)
  STA &73
- JSR decode
+ JSR MVPG
  LDY #&23
 
 .copy_d7a
@@ -343,9 +493,9 @@ ORG CODE%
  \ LDY #HI(tube_400)
  \ LDA #1
  \ JSR &0406
- \ LDA #LO(to400)
+ \ LDA #LO(WORDS)
  \ STA &72
- \ LDA #HI(to400)
+ \ LDA #HI(WORDS)
  \ STA &73
  \ LDX #&04
  \ LDY #&00
@@ -429,225 +579,578 @@ ORG CODE%
 
  EQUS "L.1.D", &0D
 
-.seed
+\ ******************************************************************************
+\
+\       Name: PLL1
+\       Type: Subroutine
+\   Category: Drawing planets
+\    Summary: Draw Saturn on the loading screen
+\  Deep dive: Drawing Saturn on the loading screen
+\
+\ ******************************************************************************
 
- LDA &FE44
- STA tlo_copy
- JSR swap
- JSR abs
- STA &71
- LDA &72
- STA &70
- JSR swap
- STA &74
- JSR abs
- TAX 
- LDA &72
- ADC &70
- STA &70
- TXA 
- ADC &71
- BCS l_1bd3
- STA &71
- LDA #&01
- SBC &70
- STA &70
- LDA #&40
- SBC &71
- STA &71
- BCC l_1bd3
- JSR l_1cef
- LDA &70
- LSR A
- TAX 
- LDA &74
- CMP #&80
- ROR A
- JSR power_tab
+.PLL1
 
-.l_1bd3
+                        \ The following loop iterates CNT(1 0) times, i.e. &300
+                        \ or 768 times, and draws the planet part of the
+                        \ loading screen's Saturn
 
- DEC count
- BNE seed
- DEC count+&01
- BNE seed
+ LDA VIA+&44            \ Read the 6522 System VIA T1C-L timer 1 low-order
+ STA RAND+1             \ counter (SHEILA &44), which increments 1000 times a
+                        \ second so this will be pretty random, and store it in
+                        \ RAND+1 among the hard-coded random seeds in RAND
 
-.l_1bdd
+ JSR DORND              \ Set A and X to random numbers, say A = r1
 
- JSR swap
- TAX 
- JSR abs
- STA &71
- JSR swap
- STA &74
- JSR abs
- ADC &71
- CMP #&11
- BCC l_1bf9
- LDA &74
- JSR power_tab
+ JSR SQUA2              \ Set (A P) = A * A
+                        \           = r1^2
 
-.l_1bf9
+ STA ZP+1               \ Set ZP(1 0) = (A P)
+ LDA P                  \             = r1^2
+ STA ZP
 
- DEC count2
- BNE l_1bdd
- DEC count2+&01
- BNE l_1bdd
+ JSR DORND              \ Set A and X to random numbers, say A = r2
 
-.l_1c03
+ STA YY                 \ Set YY = A
+                        \        = r2
 
- JSR swap
- STA &70
- JSR abs
- STA &71
- JSR swap
- STA &74
- JSR abs
- STA &75
- ADC &71
- STA &71
- LDA &70
- CMP #&80
- ROR A
- CMP #&80
- ROR A
- ADC &74
- TAX 
- JSR abs
- TAY 
- ADC &71
- BCS l_1c4b
- CMP #&50
- BCS l_1c4b
- CMP #&20
- BCC l_1c4b
- TYA 
- ADC &75
- CMP #&10
- BCS l_1c46
- LDA &70
- BPL l_1c4b
+ JSR SQUA2              \ Set (A P) = A * A
+                        \           = r2^2
 
-.l_1c46
+ TAX                    \ Set (X P) = (A P)
+                        \           = r2^2
 
- LDA &74
- JSR power_tab
+ LDA P                  \ Set (A ZP) = (X P) + ZP(1 0)
+ ADC ZP                 \
+ STA ZP                 \ first adding the low bytes
 
-.l_1c4b
+ TXA                    \ And then adding the high bytes
+ ADC ZP+1
 
- DEC count3
- BNE l_1c03
- DEC count3+&01
- BNE l_1c03
- LDA #&00
- STA &70
+ BCS PLC1               \ If the addition overflowed, jump down to PLC1 to skip
+                        \ to the next pixel
+
+ STA ZP+1               \ Set ZP(1 0) = (A ZP)
+                        \             = r1^2 + r2^2
+
+ LDA #1                 \ Set ZP(1 0) = &4001 - ZP(1 0) - (1 - C)
+ SBC ZP                 \             = 128^2 - ZP(1 0)
+ STA ZP                 \
+                        \ (as the C flag is clear), first subtracting the low
+                        \ bytes
+
+ LDA #&40               \ And then subtracting the high bytes
+ SBC ZP+1
+ STA ZP+1
+
+ BCC PLC1               \ If the subtraction underflowed, jump down to PLC1 to
+                        \ skip to the next pixel
+
+                        \ If we get here, then both calculations fitted into
+                        \ 16 bits, and we have:
+                        \
+                        \   ZP(1 0) = 128^2 - (r1^2 + r2^2)
+                        \
+                        \ where ZP(1 0) >= 0
+
+ JSR ROOT               \ Set ZP = SQRT(ZP(1 0))
+
+ LDA ZP                 \ Set X = ZP >> 1
+ LSR A                  \       = SQRT(128^2 - (a^2 + b^2)) / 2
+ TAX
+
+ LDA YY                 \ Set A = YY
+                        \       = r2
+
+ CMP #128               \ If YY >= 128, set the C flag (so the C flag is now set
+                        \ to bit 7 of A)
+
+ ROR A                  \ Rotate A and set the sign bit to the C flag, so bits
+                        \ 6 and 7 are now the same, i.e. A is a random number in
+                        \ one of these ranges:
+                        \
+                        \   %00000000 - %00111111  = 0 to 63    (r2 = 0 - 127)
+                        \   %11000000 - %11111111  = 192 to 255 (r2 = 128 - 255)
+                        \
+                        \ The PIX routine flips bit 7 of A before drawing, and
+                        \ that makes -A in these ranges:
+                        \
+                        \   %10000000 - %10111111  = 128-191
+                        \   %01000000 - %01111111  = 64-127
+                        \
+                        \ so that's in the range 64 to 191
+
+ JSR PIX                \ Draw a pixel at screen coordinate (X, -A), i.e. at
+                        \
+                        \   (ZP / 2, -A)
+                        \
+                        \ where ZP = SQRT(128^2 - (r1^2 + r2^2))
+                        \
+                        \ So this is the same as plotting at (x, y) where:
+                        \
+                        \   r1 = random number from 0 to 255
+                        \   r1 = random number from 0 to 255
+                        \   (r1^2 + r1^2) < 128^2
+                        \
+                        \   y = r2, squished into 64 to 191 by negation
+                        \
+                        \   x = SQRT(128^2 - (r1^2 + r1^2)) / 2
+                        \
+                        \ which is what we want
+
+.PLC1
+
+ DEC CNT                \ Decrement the counter in CNT (the low byte)
+
+ BNE PLL1               \ Loop back to PLL1 until CNT = 0
+
+ DEC CNT+1              \ Decrement the counter in CNT+1 (the high byte)
+
+ BNE PLL1               \ Loop back to PLL1 until CNT+1 = 0
+
+                        \ The following loop iterates CNT2(1 0) times, i.e. &1DD
+                        \ or 477 times, and draws the background stars on the
+                        \ loading screen
+
+.PLL2
+
+ JSR DORND              \ Set A and X to random numbers, say A = r3
+
+ TAX                    \ Set X = A
+                        \       = r3
+
+ JSR SQUA2              \ Set (A P) = A * A
+                        \           = r3^2
+
+ STA ZP+1               \ Set ZP+1 = A
+                        \          = r3^2 / 256
+
+ JSR DORND              \ Set A and X to random numbers, say A = r4
+
+ STA YY                 \ Set YY = r4
+
+ JSR SQUA2              \ Set (A P) = A * A
+                        \           = r4^2
+
+ ADC ZP+1               \ Set A = A + r3^2 / 256
+                        \       = r4^2 / 256 + r3^2 / 256
+                        \       = (r3^2 + r4^2) / 256
+
+ CMP #&11               \ If A < 17, jump down to PLC2 to skip to the next pixel
+ BCC PLC2
+
+ LDA YY                 \ Set A = r4
+
+ JSR PIX                \ Draw a pixel at screen coordinate (X, -A), i.e. at
+                        \ (r3, -r4), where (r3^2 + r4^2) / 256 >= 17
+                        \
+                        \ Negating a random number from 0 to 255 still gives a
+                        \ random number from 0 to 255, so this is the same as
+                        \ plotting at (x, y) where:
+                        \
+                        \   x = random number from 0 to 255
+                        \   y = random number from 0 to 255
+                        \   (x^2 + y^2) div 256 >= 17
+                        \
+                        \ which is what we want
+
+.PLC2
+
+ DEC CNT2               \ Decrement the counter in CNT2 (the low byte)
+
+ BNE PLL2               \ Loop back to PLL2 until CNT2 = 0
+
+ DEC CNT2+1             \ Decrement the counter in CNT2+1 (the high byte)
+
+ BNE PLL2               \ Loop back to PLL2 until CNT2+1 = 0
+
+                        \ The following loop iterates CNT3(1 0) times, i.e. &333
+                        \ or 819 times, and draws the rings around the loading
+                        \ screen's Saturn
+
+.PLL3
+
+ JSR DORND              \ Set A and X to random numbers, say A = r5
+
+ STA ZP                 \ Set ZP = r5
+
+ JSR SQUA2              \ Set (A P) = A * A
+                        \           = r5^2
+
+ STA ZP+1               \ Set ZP+1 = A
+                        \          = r5^2 / 256
+
+ JSR DORND              \ Set A and X to random numbers, say A = r6
+
+ STA YY                 \ Set YY = r6
+
+ JSR SQUA2              \ Set (A P) = A * A
+                        \           = r6^2
+
+ STA T                  \ Set T = A
+                        \       = r6^2 / 256
+
+ ADC ZP+1               \ Set ZP+1 = A + r5^2 / 256
+ STA ZP+1               \          = r6^2 / 256 + r5^2 / 256
+                        \          = (r5^2 + r6^2) / 256
+
+ LDA ZP                 \ Set A = ZP
+                        \       = r5
+
+ CMP #128               \ If A >= 128, set the C flag (so the C flag is now set
+                        \ to bit 7 of ZP, i.e. bit 7 of A)
+
+ ROR A                  \ Rotate A and set the sign bit to the C flag, so bits
+                        \ 6 and 7 are now the same
+
+ CMP #128               \ If A >= 128, set the C flag (so again, the C flag is
+                        \ set to bit 7 of A)
+
+ ROR A                  \ Rotate A and set the sign bit to the C flag, so bits
+                        \ 5-7 are now the same, i.e. A is a random number in one
+                        \ of these ranges:
+                        \
+                        \   %00000000 - %00011111  = 0-31
+                        \   %11100000 - %11111111  = 224-255
+                        \
+                        \ In terms of signed 8-bit integers, this is a random
+                        \ number from -32 to 31. Let's call it r7
+
+ ADC YY                 \ Set X = A + YY
+ TAX                    \       = r7 + r6
+
+ JSR SQUA2              \ Set (A P) = r7 * r7
+
+ TAY                    \ Set Y = A
+                        \       = r7 * r7 / 256
+
+ ADC ZP+1               \ Set A = A + ZP+1
+                        \       = r7^2 / 256 + (r5^2 + r6^2) / 256
+                        \       = (r5^2 + r6^2 + r7^2) / 256
+
+ BCS PLC3               \ If the addition overflowed, jump down to PLC3 to skip
+                        \ to the next pixel
+
+ CMP #80                \ If A >= 80, jump down to PLC3 to skip to the next
+ BCS PLC3               \ pixel
+
+ CMP #32                \ If A < 32, jump down to PLC3 to skip to the next pixel
+ BCC PLC3
+
+ TYA                    \ Set A = Y + T
+ ADC T                  \       = r7^2 / 256 + r6^2 / 256
+                        \       = (r6^2 + r7^2) / 256
+
+ CMP #16                \ If A > 16, skip to PL1 to plot the pixel
+ BCS PL1
+
+ LDA ZP                 \ If ZP is positive (50% chance), jump down to PLC3 to
+ BPL PLC3               \ skip to the next pixel
+
+.PL1
+
+ LDA YY                 \ Set A = YY
+                        \       = r6
+
+ JSR PIX                \ Draw a pixel at screen coordinate (X, -A), where:
+                        \
+                        \   X = (random -32 to 31) + r6
+                        \   A = r6
+                        \
+                        \ Negating a random number from 0 to 255 still gives a
+                        \ random number from 0 to 255, so this is the same as
+                        \ plotting at (x, y) where:
+                        \
+                        \   r5 = random number from 0 to 255
+                        \   r6 = random number from 0 to 255
+                        \   r7 = r5, squashed into -32 to 31
+                        \
+                        \   x = r5 + r7
+                        \   y = r5
+                        \
+                        \   32 <= (r5^2 + r6^2 + r7^2) / 256 <= 79
+                        \   Draw 50% fewer pixels when (r6^2 + r7^2) / 256 <= 16
+                        \
+                        \ which is what we want
+
+.PLC3
+
+ DEC CNT3               \ Decrement the counter in CNT3 (the low byte)
+
+ BNE PLL3               \ Loop back to PLL3 until CNT3 = 0
+
+ DEC CNT3+1             \ Decrement the counter in CNT3+1 (the high byte)
+
+ BNE PLL3               \ Loop back to PLL3 until CNT3+1 = 0
+
+ LDA #&00               \ Set ZP(1 0) = &6300
+ STA ZP
  LDA #&63
- STA &71
- LDA #&62
- STA &72
+ STA ZP+1
+
+ LDA #&62               \ Set P(1 0) = &2A62
+ STA P
  LDA #&2A
- STA &73
- LDX #&08
- JSR decode
+ STA P+1
 
-.swap
+ LDX #8                 \ Call MVPG with X = 8 to copy 8 pages of memory from
+ JSR MVPG               \ the address in P(1 0) to the address in ZP(1 0)
 
- LDA tlo_copy
- TAX 
- ADC tlo_inc
- STA tlo_copy
- STX tlo_inc
- LDA thi_copy
- TAX 
- ADC thi_inc
- STA thi_copy
- STX thi_inc
- RTS 
+\ ******************************************************************************
+\
+\       Name: DORND
+\       Type: Subroutine
+\   Category: Utility routines
+\    Summary: Generate random numbers
+\  Deep dive: Generating random numbers
+\
+\ ------------------------------------------------------------------------------
+\
+\ Set A and X to random numbers. The C and V flags are also set randomly.
+\
+\ This is a simplified version of the DORND routine in the main game code. It
+\ swaps the two calculations around and omits the ROL A instruction, but is
+\ otherwise very similar. See the DORND routine in the main game code for more
+\ details.
+\
+\ ******************************************************************************
 
-.thi_copy
+.DORND
 
- EQUB &49
+ LDA RAND+1             \ r1´ = r1 + r3 + C
+ TAX                    \ r3´ = r1
+ ADC RAND+3
+ STA RAND+1
+ STX RAND+3
 
-.tlo_copy
+ LDA RAND               \ X = r2´ = r0
+ TAX                    \ A = r0´ = r0 + r2
+ ADC RAND+2
+ STA RAND
+ STX RAND+2
 
- EQUB &53
+ RTS                    \ Return from the subroutine
 
-.thi_inc
+\ ******************************************************************************
+\
+\       Name: RAND
+\       Type: Variable
+\   Category: Drawing planets
+\    Summary: The random number seed used for drawing Saturn
+\
+\ ******************************************************************************
 
- EQUB &78
+.RAND
 
-.tlo_inc
+ EQUD &34785349
 
- EQUB &34
+\ ******************************************************************************
+\
+\       Name: SQUA2
+\       Type: Subroutine
+\   Category: Maths (Arithmetic)
+\    Summary: Calculate (A P) = A * A
+\
+\ ------------------------------------------------------------------------------
+\
+\ Do the following multiplication of unsigned 8-bit numbers:
+\
+\   (A P) = A * A
+\
+\ This uses the same approach as routine SQUA2 in the main game code, which
+\ itself uses the MU11 routine to do the multiplication. See those routines for
+\ more details.
+\
+\ ******************************************************************************
 
-.abs
+.SQUA2
 
- BPL notneg
- EOR #&FF
- CLC 
- ADC #&01
+ BPL SQUA               \ If A > 0, jump to SQUA
 
-.notneg
+ EOR #&FF               \ Otherwise we need to negate A for the SQUA algorithm
+ CLC                    \ to work, so we do this using two's complement, by
+ ADC #1                 \ setting A = ~A + 1
 
- STA &73
- STA &72
- LDA #&00
- LDY #&08
- LSR &72
+.SQUA
 
-.l_1c9a
+ STA Q                  \ Set Q = A and P = A
 
- BCC l_1c9f
- CLC 
- ADC &73
+ STA P                  \ Set P = A
 
-.l_1c9f
+ LDA #0                 \ Set A = 0 so we can start building the answer in A
 
- ROR A
- ROR &72
- DEY 
- BNE l_1c9a
- RTS 
+ LDY #8                 \ Set up a counter in Y to count the 8 bits in P
 
-.power_tab
+ LSR P                  \ Set P = P >> 1
+                        \ and C flag = bit 0 of P
 
- TAY 
- EOR #&80
+.SQL1
+
+ BCC SQ1                \ If C (i.e. the next bit from P) is set, do the
+ CLC                    \ addition for this bit of P:
+ ADC Q                  \
+                        \   A = A + Q
+
+.SQ1
+
+ ROR A                  \ Shift A right to catch the next digit of our result,
+                        \ which the next ROR sticks into the left end of P while
+                        \ also extracting the next bit of P
+
+ ROR P                  \ Add the overspill from shifting A to the right onto
+                        \ the start of P, and shift P right to fetch the next
+                        \ bit for the calculation into the C flag
+
+ DEY                    \ Decrement the loop counter
+
+ BNE SQL1               \ Loop back for the next bit until P has been rotated
+                        \ all the way
+
+ RTS                    \ Return from the subroutine
+
+\ ******************************************************************************
+\
+\       Name: PIX
+\       Type: Subroutine
+\   Category: Drawing pixels
+\    Summary: Draw a single pixel at a specific coordinate
+\
+\ ------------------------------------------------------------------------------
+\
+\ Draw a pixel at screen coordinate (X, -A). The sign bit of A gets flipped
+\ before drawing, and then the routine uses the same approach as the PIXEL
+\ routine in the main game code, except it plots a single pixel from TWOS
+\ instead of a two pixel dash from TWOS2. This applies to the top part of the
+\ screen (the monochrome mode 4 space view).
+\
+\ See the PIXEL routine in the main game code for more details.
+\
+\ Arguments:
+\
+\   X                   The screen x-coordinate of the pixel to draw
+\
+\   A                   The screen y-coordinate of the pixel to draw, negated
+\
+\ Other entry points:
+\
+\   out                 Contains an RTS
+\
+\ ******************************************************************************
+
+.PIX
+
+ TAY                    \ Copy A into Y, for use later
+
+ EOR #%10000000         \ Flip the sign of A
+
+ LSR A                  \ Set A = A >> 3
  LSR A
  LSR A
- LSR A
- LSR &79
- ORA #&60
- STA &71
- TXA 
- EOR #&80
- AND #&F8
- STA &70
- TYA 
- AND #&07
- TAY 
- TXA 
- AND #&07
- TAX 
- LDA l_1cc7,X
- STA (&70),Y
- RTS 
 
-.l_1cc7
+ LSR CHKSM+1            \ Rotate the high byte of CHKSM+1 to the right, as part
+                        \ of the copy protection
 
- EQUB &80, &40, &20, &10, &08, &04, &02, &01
+ ORA #&60               \ Set ZP+1 = &60 + A >> 3
+ STA ZP+1
 
-.count
+ TXA                    \ Set ZP = (X >> 3) * 8
+ EOR #%10000000
+ AND #%11111000
+ STA ZP
 
- EQUW &0300
+ TYA                    \ Set Y = Y AND %111
+ AND #%00000111
+ TAY
 
-.count2
+ TXA                    \ Set X = X AND %111
+ AND #%00000111
+ TAX
 
- EQUW &01DD
+ LDA TWOS,X             \ Fetch a pixel from TWOS and poke it into ZP+Y
+ STA (ZP),Y
 
-.count3
+.out
 
- EQUW &0333
+ RTS                    \ Return from the subroutine
+
+\ ******************************************************************************
+\
+\       Name: TWOS
+\       Type: Variable
+\   Category: Drawing pixels
+\    Summary: Ready-made single-pixel character row bytes for mode 4
+\
+\ ------------------------------------------------------------------------------
+\
+\ Ready-made bytes for plotting one-pixel points in mode 4 (the top part of the
+\ split screen). See the PIX routine for details.
+\
+\ ******************************************************************************
+
+.TWOS
+
+ EQUB %10000000
+ EQUB %01000000
+ EQUB %00100000
+ EQUB %00010000
+ EQUB %00001000
+ EQUB %00000100
+ EQUB %00000010
+ EQUB %00000001
+
+\ ******************************************************************************
+\
+\       Name: CNT
+\       Type: Variable
+\   Category: Drawing planets
+\    Summary: A counter for use in drawing Saturn's planetary body
+\
+\ ------------------------------------------------------------------------------
+\
+\ Defines the number of iterations of the PLL1 loop, which draws the planet part
+\ of the loading screen's Saturn.
+\
+\ ******************************************************************************
+
+.CNT
+
+ EQUW &0300             \ The number of iterations of the PLL1 loop (768)
+
+\ ******************************************************************************
+\
+\       Name: CNT2
+\       Type: Variable
+\   Category: Drawing planets
+\    Summary: A counter for use in drawing Saturn's background stars
+\
+\ ------------------------------------------------------------------------------
+\
+\ Defines the number of iterations of the PLL2 loop, which draws the background
+\ stars on the loading screen.
+\
+\ ******************************************************************************
+
+.CNT2
+
+ EQUW &01DD             \ The number of iterations of the PLL2 loop (477)
+
+\ ******************************************************************************
+\
+\       Name: CNT3
+\       Type: Variable
+\   Category: Drawing planets
+\    Summary: A counter for use in drawing Saturn's rings
+\
+\ ------------------------------------------------------------------------------
+\
+\ Defines the number of iterations of the PLL3 loop, which draws the rings
+\ around the loading screen's Saturn.
+\
+\ ******************************************************************************
+
+.CNT3
+
+ EQUW &0333             \ The number of iterations of the PLL3 loop (819)
 
 .or789
 
@@ -658,1650 +1161,475 @@ ORG CODE%
  STA &78
  RTS 
 
-.l_1cef
-
- LDY &71
- LDA &70
- STA &73
- LDX #&00
- STX &70
- LDA #&08
- STA &72
-
-.l_1cfd
-
- CPX &70
- BCC l_1d0f
- BNE l_1d07
- CPY #&40
- BCC l_1d0f
-
-.l_1d07
-
- TYA 
- SBC #&40
- TAY 
- TXA 
- SBC &70
- TAX 
-
-.l_1d0f
-
- ROL &70
- ASL &73
- TYA 
- ROL A
- TAY 
- TXA 
- ROL A
- TAX 
- ASL &73
- TYA 
- ROL A
- TAY 
- TXA 
- ROL A
- TAX 
- DEC &72
- BNE l_1cfd
- RTS 
-
-.osb_set
-
- LDY #&00
- JMP OSBYTE
-
-.decode
-
- LDY #&00
-
-.l_1d2e
-
- LDA (&72),Y
- STA (&70),Y
- DEY 
- BNE l_1d2e
- RTS 
-
-.decodex
-
- JSR decode
- INC &71
- INC &73
- DEX 
- BNE decodex
- RTS 
-
-.l_1d44
-
- EQUS "DIR e", &0D
-
-.to7800
-
- EQUB &F0, &80, &87, &84, &87, &84, &84, &80, &F0, &00, &06, &04
- EQUB &06, &02, &06, &00, &F0, &00, &00, &00, &00, &00, &00, &FF
- EQUB &F0, &00, &00, &00, &00, &00, &00, &FF, &F0, &00, &00, &00
- EQUB &00, &00, &00, &FF, &F0, &00, &00, &00, &00, &00, &00, &FF
- EQUB &F0, &96, &A4, &C0, &80, &80, &80, &80, &F0, &00, &00, &00
- EQUB &00, &00, &00, &00, &F0, &00, &00, &00, &00, &00, &00, &00
- EQUB &F0, &00, &00, &00, &00, &00, &00, &00, &F0, &00, &00, &00
- EQUB &00, &00, &00, &00, &F0, &00, &00, &00, &00, &00, &00, &00
- EQUB &F0, &00, &00, &00, &00, &00, &00, &00, &F0, &00, &00, &00
- EQUB &00, &00, &00, &00, &F0, &00, &00, &00, &00, &00, &00, &00
- EQUB &F0, &00, &00, &00, &00, &00, &00, &00, &F0, &00, &00, &00
- EQUB &00, &00, &00, &00, &F0, &00, &00, &00, &00, &00, &00, &00
- EQUB &F0, &00, &00, &00, &00, &00, &00, &00, &F0, &00, &00, &00
- EQUB &00, &00, &00, &00, &F0, &00, &00, &00, &00, &00, &00, &00
- EQUB &F0, &00, &00, &00, &00, &00, &00, &00, &F0, &00, &00, &00
- EQUB &00, &00, &00, &00, &F0, &96, &A4, &C0, &C0, &C0, &C0, &80
- EQUB &F0, &02, &00, &06, &00, &06, &00, &06, &F0, &96, &52, &70
- EQUB &30, &30, &10, &10, &F0, &00, &00, &00, &00, &00, &55, &FF
- EQUB &F0, &00, &00, &00, &00, &00, &55, &FF, &F0, &00, &00, &00
- EQUB &00, &00, &55, &FF, &F0, &00, &00, &00, &00, &00, &55, &FF
- EQUB &F0, &00, &06, &04, &06, &02, &06, &00, &F0, &10, &1E, &1A
- EQUB &1E, &18, &18, &10, &80, &87, &85, &85, &87, &85, &80, &80
- EQUB &00, &06, &04, &06, &02, &06, &00, &00, &00, &00, &00, &00
- EQUB &00, &00, &00, &FF, &00, &00, &00, &00, &00, &00, &00, &FF
- EQUB &00, &00, &00, &00, &00, &00, &00, &FF, &00, &00, &00, &00
- EQUB &00, &00, &00, &FF, &80, &80, &80, &80, &80, &80, &80, &80
- EQUB &00, &00, &00, &00, &00, &00, &00, &00, &00, &00, &00, &00
- EQUB &00, &00, &00, &00, &00, &00, &00, &00, &00, &00, &00, &00
- EQUB &00, &00, &00, &00, &00, &00, &01, &06, &00, &00, &00, &00
- EQUB &00, &00, &06, &00, &00, &00, &00, &00, &01, &0C, &02, &00
- EQUB &00, &00, &00, &00, &06, &88, &00, &00, &00, &00, &00, &00
- EQUB &0B, &00, &00, &00, &00, &00, &00, &00, &07, &00, &02, &00
- EQUB &00, &00, &00, &00, &0A, &00, &00, &00, &00, &00, &00, &00
- EQUB &0D, &00, &00, &00, &00, &00, &00, &00, &04, &8A, &02, &00
- EQUB &00, &00, &00, &00, &00, &0C, &01, &00, &00, &00, &00, &00
- EQUB &00, &00, &08, &03, &00, &00, &00, &00, &00, &00, &00, &00
- EQUB &00, &00, &00, &00, &00, &00, &00, &00, &80, &80, &82, &80
- EQUB &80, &80, &80, &C0, &00, &00, &09, &00, &00, &06, &00, &06
- EQUB &10, &10, &14, &10, &10, &10, &10, &10, &00, &00, &00, &00
- EQUB &00, &00, &22, &FF, &00, &00, &00, &00, &00, &00, &AA, &FF
- EQUB &88, &88, &00, &00, &00, &88, &AA, &FF, &00, &00, &00, &00
- EQUB &00, &00, &AA, &FF, &00, &00, &06, &05, &07, &06, &05, &00
- EQUB &10, &10, &14, &14, &14, &14, &16, &10, &80, &86, &84, &86
- EQUB &84, &84, &80, &80, &00, &0A, &0A, &0A, &0A, &04, &00, &00
- EQUB &00, &00, &00, &00, &00, &00, &99, &FF, &00, &00, &00, &00
- EQUB &00, &00, &22, &FF, &00, &00, &00, &00, &00, &00, &44, &FF
- EQUB &00, &00, &00, &00, &00, &00, &99, &FF, &80, &80, &80, &80
- EQUB &80, &80, &80, &80, &00, &00, &00, &00, &00, &00, &01, &02
- EQUB &00, &00, &00, &03, &04, &08, &00, &00, &01, &06, &08, &02
- EQUB &00, &00, &00, &00, &00, &00, &00, &0A, &00, &00, &00, &00
- EQUB &00, &00, &00, &0A, &01, &00, &02, &00, &04, &00, &08, &0A
- EQUB &00, &00, &00, &00, &22, &00, &00, &0A, &00, &00, &00, &00
- EQUB &00, &00, &00, &8A, &00, &00, &22, &00, &02, &00, &02, &08
- EQUB &02, &00, &02, &00, &00, &00, &00, &0A, &00, &00, &22, &00
- EQUB &22, &00, &00, &8A, &00, &00, &00, &00, &01, &00, &00, &0A
- EQUB &00, &00, &00, &00, &00, &00, &08, &02, &04, &00, &02, &00
- EQUB &00, &00, &00, &0A, &00, &00, &00, &00, &08, &03, &00, &0A
- EQUB &00, &00, &00, &00, &00, &00, &08, &06, &01, &00, &00, &00
- EQUB &40, &40, &60, &20, &30, &18, &04, &02, &00, &06, &00, &06
- EQUB &00, &F0, &00, &00, &30, &30, &52, &52, &96, &F0, &10, &10
- EQUB &00, &00, &00, &00, &00, &00, &22, &FF, &00, &00, &00, &00
- EQUB &00, &00, &44, &FF, &88, &88, &00, &00, &00, &88, &99, &FF
- EQUB &00, &00, &00, &00, &00, &00, &22, &FF, &00, &06, &05, &05
- EQUB &05, &06, &00, &00, &10, &16, &14, &14, &14, &16, &10, &10
- EQUB &80, &86, &84, &84, &84, &86, &80, &80, &00, &0E, &04, &04
- EQUB &04, &04, &00, &00, &00, &00, &00, &00, &00, &00, &88, &FF
- EQUB &00, &00, &00, &00, &00, &00, &88, &FF, &00, &00, &00, &00
- EQUB &00, &00, &88, &FF, &00, &00, &00, &00, &00, &00, &88, &FF
- EQUB &80, &80, &80, &80, &80, &80, &80, &80, &00, &04, &04, &08
- EQUB &0A, &00, &08, &00, &00, &00, &00, &00, &0A, &00, &00, &00
- EQUB &00, &00, &00, &00, &0A, &00, &00, &00, &00, &00, &00, &00
- EQUB &0A, &00, &02, &00, &04, &00, &08, &00, &0A, &00, &00, &00
- EQUB &00, &00, &00, &00, &0A, &00, &00, &00, &00, &00, &00, &00
- EQUB &0A, &00, &00, &00, &00, &00, &00, &00, &0A, &00, &00, &00
- EQUB &02, &88, &02, &00, &28, &70, &02, &00, &00, &88, &00, &00
- EQUB &0A, &00, &00, &00, &00, &00, &00, &00, &0A, &00, &00, &00
- EQUB &00, &00, &00, &00, &0A, &00, &00, &00, &01, &00, &00, &00
- EQUB &0A, &00, &00, &00, &00, &00, &08, &00, &0A, &00, &02, &00
- EQUB &00, &00, &00, &00, &0A, &00, &00, &00, &00, &00, &00, &00
- EQUB &0A, &00, &00, &00, &02, &01, &01, &00, &0A, &00, &00, &00
- EQUB &00, &00, &00, &08, &00, &08, &00, &08, &10, &10, &10, &10
- EQUB &10, &10, &10, &10, &00, &00, &00, &00, &00, &00, &00, &FF
- EQUB &00, &00, &00, &00, &00, &00, &00, &FF, &00, &00, &00, &00
- EQUB &00, &00, &00, &FF, &00, &00, &00, &00, &00, &00, &00, &FF
- EQUB &00, &01, &03, &01, &01, &03, &00, &00, &10, &10, &10, &10
- EQUB &10, &18, &10, &10, &80, &84, &84, &84, &84, &86, &80, &80
- EQUB &00, &0E, &04, &04, &04, &04, &00, &00, &00, &00, &00, &00
- EQUB &00, &00, &99, &FF, &00, &00, &00, &00, &00, &00, &22, &FF
- EQUB &00, &00, &00, &00, &00, &00, &44, &FF, &00, &00, &00, &00
- EQUB &00, &00, &88, &FF, &80, &80, &80, &80, &80, &80, &80, &80
- EQUB &08, &04, &04, &02, &02, &01, &00, &00, &00, &00, &00, &00
- EQUB &00, &08, &0A, &04, &00, &00, &00, &00, &01, &00, &0A, &00
- EQUB &04, &00, &08, &00, &00, &00, &0A, &00, &00, &00, &00, &00
- EQUB &00, &00, &0A, &00, &00, &00, &00, &00, &00, &00, &0A, &00
- EQUB &00, &00, &00, &00, &00, &00, &0A, &00, &00, &00, &00, &00
- EQUB &00, &00, &0A, &00, &02, &00, &02, &00, &02, &00, &0A, &00
- EQUB &00, &00, &00, &00, &00, &00, &0A, &00, &00, &00, &00, &00
- EQUB &00, &00, &0A, &00, &00, &00, &00, &00, &00, &00, &0A, &00
- EQUB &00, &00, &00, &00, &00, &00, &0A, &00, &01, &00, &00, &00
- EQUB &00, &00, &0A, &00, &00, &00, &08, &00, &04, &00, &0A, &00
- EQUB &00, &00, &00, &00, &00, &00, &0A, &01, &00, &01, &01, &03
- EQUB &02, &04, &08, &00, &08, &00, &00, &00, &00, &00, &00, &00
- EQUB &10, &10, &10, &10, &10, &10, &10, &10, &00, &00, &00, &00
- EQUB &00, &00, &00, &FF, &00, &00, &00, &00, &00, &00, &00, &FF
- EQUB &00, &00, &00, &00, &00, &00, &00, &FF, &00, &00, &00, &00
- EQUB &00, &00, &00, &FF, &03, &00, &03, &02, &03, &00, &00, &00
- EQUB &18, &18, &18, &10, &18, &10, &10, &10, &80, &87, &85, &87
- EQUB &85, &85, &80, &80, &00, &04, &04, &04, &04, &06, &00, &00
- EQUB &00, &00, &00, &00, &00, &00, &99, &FF, &00, &00, &00, &00
- EQUB &00, &00, &11, &FF, &00, &00, &00, &00, &00, &00, &11, &FF
- EQUB &00, &00, &00, &00, &00, &00, &00, &FF, &80, &80, &80, &80
- EQUB &80, &80, &80, &80, &00, &00, &00, &00, &00, &00, &00, &00
- EQUB &02, &01, &00, &00, &00, &00, &00, &00, &04, &08, &04, &01
- EQUB &00, &00, &00, &00, &00, &00, &00, &08, &06, &00, &00, &00
- EQUB &00, &00, &00, &00, &00, &0C, &01, &00, &00, &00, &00, &00
- EQUB &00, &00, &0A, &00, &00, &00, &00, &00, &00, &00, &00, &0D
- EQUB &00, &00, &00, &00, &00, &00, &00, &06, &02, &00, &02, &00
- EQUB &02, &00, &02, &0B, &00, &00, &00, &00, &00, &00, &00, &05
- EQUB &00, &00, &00, &00, &00, &00, &00, &0A, &00, &00, &00, &00
- EQUB &00, &00, &05, &08, &00, &00, &00, &00, &00, &03, &08, &00
- EQUB &00, &00, &00, &00, &06, &00, &00, &00, &01, &00, &03, &0C
- EQUB &00, &00, &00, &00, &02, &08, &00, &00, &00, &00, &00, &00
- EQUB &00, &00, &00, &00, &00, &00, &00, &00, &00, &00, &00, &00
- EQUB &00, &00, &00, &00, &10, &10, &10, &10, &10, &10, &10, &10
- EQUB &00, &00, &00, &00, &00, &00, &00, &FF, &00, &00, &00, &00
- EQUB &00, &00, &00, &FF, &00, &00, &00, &00, &00, &00, &00, &FF
- EQUB &00, &00, &00, &00, &00, &00, &00, &FF, &03, &00, &03, &00
- EQUB &03, &00, &00, &02, &18, &18, &18, &18, &18, &10, &10, &10
- EQUB &80, &80, &D0, &87, &85, &80, &80, &F0, &00, &00, &C0, &2C
- EQUB &0C, &00, &00, &F0, &00, &00, &00, &00, &00, &00, &00, &F0
- EQUB &00, &00, &00, &00, &00, &00, &00, &F0, &00, &00, &00, &00
- EQUB &00, &00, &00, &F0, &00, &00, &00, &00, &00, &00, &00, &F0
- EQUB &80, &80, &80, &80, &C0, &A4, &96, &F0, &00, &00, &00, &00
- EQUB &00, &00, &00, &F0, &00, &00, &00, &00, &00, &00, &00, &F0
- EQUB &00, &00, &00, &00, &00, &00, &00, &F0, &00, &00, &00, &00
- EQUB &00, &00, &00, &F0, &00, &00, &00, &00, &00, &00, &00, &F0
- EQUB &00, &00, &00, &00, &00, &00, &00, &F0, &00, &33, &22, &33
- EQUB &22, &33, &00, &F0, &00, &AA, &22, &22, &22, &BB, &00, &F0
- EQUB &00, &22, &22, &22, &22, &AA, &00, &F0, &00, &EE, &44, &44
- EQUB &44, &44, &00, &F0, &00, &EE, &88, &CC, &88, &EE, &00, &F0
- EQUB &00, &00, &00, &00, &00, &00, &00, &F0, &00, &00, &00, &00
- EQUB &00, &00, &00, &F0, &00, &00, &00, &00, &00, &00, &00, &F0
- EQUB &00, &00, &00, &00, &00, &00, &00, &F0, &00, &00, &00, &00
- EQUB &00, &00, &00, &F0, &00, &00, &00, &00, &00, &00, &00, &F0
- EQUB &00, &00, &00, &00, &00, &00, &00, &F0, &10, &10, &10, &10
- EQUB &30, &52, &96, &F0, &00, &00, &00, &00, &00, &00, &00, &F0
- EQUB &00, &00, &00, &00, &00, &00, &00, &F0, &00, &00, &00, &00
- EQUB &00, &00, &00, &F0, &00, &00, &00, &00, &00, &00, &00, &F0
- EQUB &02, &02, &02, &03, &00, &00, &00, &F0, &10, &18, &18, &18
- EQUB &18, &10, &10, &F0, &00, &40, &06, &7A, &DA, &51, &00, &0A
- EQUB &66, &18, &00, &00, &24, &0E, &02, &2C, &00, &00, &02, &00
- EQUB &00, &00, &44, &1F, &10, &32, &08, &08, &24, &5F, &21, &54
- EQUB &08, &08, &24, &1F, &32, &74, &08, &08, &24, &9F, &30, &76
- EQUB &08, &08, &24, &DF, &10, &65, &08, &08, &2C, &3F, &74, &88
- EQUB &08, &08, &2C, &7F, &54, &88, &08, &08, &2C, &FF, &65, &88
- EQUB &08, &08, &2C, &BF, &76, &88, &0C, &0C, &2C, &28, &74, &88
- EQUB &0C, &0C, &2C, &68, &54, &88, &0C, &0C, &2C, &E8, &65, &88
- EQUB &0C, &0C, &2C, &A8, &76, &88, &08, &08, &0C, &A8, &76, &77
- EQUB &08, &08, &0C, &E8, &65, &66, &08, &08, &0C, &28, &74, &77
- EQUB &08, &08, &0C, &68, &54, &55, &1F, &21, &00, &04, &1F, &32
- EQUB &00, &08, &1F, &30, &00, &0C, &1F, &10, &00, &10, &1F, &24
- EQUB &04, &08, &1F, &51, &04, &10, &1F, &60, &0C, &10, &1F, &73
- EQUB &08, &0C, &1F, &74, &08, &14, &1F, &54, &04, &18, &1F, &65
- EQUB &10, &1C, &1F, &76, &0C, &20, &1F, &86, &1C, &20, &1F, &87
- EQUB &14, &20, &1F, &84, &14, &18, &1F, &85, &18, &1C, &08, &85
- EQUB &18, &28, &08, &87, &14, &24, &08, &87, &20, &30, &08, &85
- EQUB &1C, &2C, &08, &74, &24, &3C, &08, &54, &28, &40, &08, &76
- EQUB &30, &34, &08, &65, &2C, &38, &9F, &40, &00, &10, &5F, &00
- EQUB &40, &10, &1F, &40, &00, &10, &1F, &00, &40, &10, &1F, &20
- EQUB &00, &00, &5F, &00, &20, &00, &9F, &20, &00, &00, &1F, &00
- EQUB &20, &00, &3F, &00, &00, &B0, &00, &00
-
-.to400
-
 \ ******************************************************************************
 \
-\       Name: CHAR
-\       Type: Macro
-\   Category: Text
-\    Summary: Macro definition for characters in the recursive token table
-\  Deep dive: Printing text tokens
+\       Name: ROOT
+\       Type: Subroutine
+\   Category: Maths (Arithmetic)
+\    Summary: Calculate ZP = SQRT(ZP(1 0))
 \
 \ ------------------------------------------------------------------------------
 \
-\ The following macro is used when building the recursive token table:
+\ Calculate the following square root:
 \
-\   CHAR 'x'            Insert ASCII character "x"
+\   ZP = SQRT(ZP(1 0))
 \
-\ To include an apostrophe, use a backtick character, as in CHAR '`'.
-\
-\ See the deep dive on "Printing text tokens" for details on how characters are
-\ stored in the recursive token table.
-\
-\ Arguments:
-\
-\   'x'                 The character to insert into the table
+\ This routine is identical to LL5 in the main game code - it even has the same
+\ label names. The only difference is that LL5 calculates Q = SQRT(R Q), but
+\ apart from the variables used, the instructions are identical, so see the LL5
+\ routine in the main game code for more details on the algorithm used here.
 \
 \ ******************************************************************************
 
-MACRO CHAR x
+.ROOT
 
-  IF x = '`'
-    EQUB 39 EOR 35
-  ELSE
-    EQUB x EOR 35
-  ENDIF
+ LDY ZP+1               \ Set (Y Q) = ZP(1 0)
+ LDA ZP
+ STA Q
 
-ENDMACRO
+                        \ So now to calculate ZP = SQRT(Y Q)
+
+ LDX #0                 \ Set X = 0, to hold the remainder
+
+ STX ZP                 \ Set ZP = 0, to hold the result
+
+ LDA #8                 \ Set P = 8, to use as a loop counter
+ STA P
+
+.LL6
+
+ CPX ZP                 \ If X < ZP, jump to LL7
+ BCC LL7
+
+ BNE LL8                \ If X > ZP, jump to LL8
+
+ CPY #64                \ If Y < 64, jump to LL7 with the C flag clear,
+ BCC LL7                \ otherwise fall through into LL8 with the C flag set
+
+.LL8
+
+ TYA                    \ Set Y = Y - 64
+ SBC #64                \
+ TAY                    \ This subtraction will work as we know C is set from
+                        \ the BCC above, and the result will not underflow as we
+                        \ already checked that Y >= 64, so the C flag is also
+                        \ set for the next subtraction
+
+ TXA                    \ Set X = X - ZP
+ SBC ZP
+ TAX
+
+.LL7
+
+ ROL ZP                 \ Shift the result in Q to the left, shifting the C flag
+                        \ into bit 0 and bit 7 into the C flag
+
+ ASL Q                  \ Shift the dividend in (Y S) to the left, inserting
+ TYA                    \ bit 7 from above into bit 0
+ ROL A
+ TAY
+
+ TXA                    \ Shift the remainder in X to the left
+ ROL A
+ TAX
+
+ ASL Q                  \ Shift the dividend in (Y S) to the left
+ TYA
+ ROL A
+ TAY
+
+ TXA                    \ Shift the remainder in X to the left
+ ROL A
+ TAX
+
+ DEC P                  \ Decrement the loop counter
+
+ BNE LL6                \ Loop back to LL6 until we have done 8 loops
+
+ RTS                    \ Return from the subroutine
 
 \ ******************************************************************************
 \
-\       Name: TWOK
-\       Type: Macro
-\   Category: Text
-\    Summary: Macro definition for two-letter tokens in the token table
-\  Deep dive: Printing text tokens
+\       Name: OSB
+\       Type: Subroutine
+\   Category: Utility routines
+\    Summary: A convenience routine for calling OSBYTE with Y = 0
+\
+\ ******************************************************************************
+
+.OSB
+
+ LDY #0                 \ Call OSBYTE with Y = 0, returning from the subroutine
+ JMP OSBYTE             \ using a tail call (so we can call OSB to call OSBYTE
+                        \ for when we know we want Y set to 0)
+
+\ ******************************************************************************
+\
+\       Name: MVPG
+\       Type: Subroutine
+\   Category: Utility routines
+\    Summary: Decrypt and move a page of memory
 \
 \ ------------------------------------------------------------------------------
 \
-\ The following macro is used when building the recursive token table:
-\
-\   TWOK 'x', 'y'       Insert two-letter token "xy"
-\
-\ See the deep dive on "Printing text tokens" for details on how two-letter
-\ tokens are stored in the recursive token table.
-\
 \ Arguments:
 \
-\   'x'                 The first letter of the two-letter token to insert into
-\                       the table
+\   P(1 0)              The source address of the page to move
 \
-\   'y'                 The second letter of the two-letter token to insert into
-\                       the table
+\   ZP(1 0)             The destination address of the page to move
 \
 \ ******************************************************************************
 
-MACRO TWOK t, k
+.MVPG
 
-  IF t = 'A' AND k = 'L' : EQUB 128 EOR 35 : ENDIF
-  IF t = 'L' AND k = 'E' : EQUB 129 EOR 35 : ENDIF
-  IF t = 'X' AND k = 'E' : EQUB 130 EOR 35 : ENDIF
-  IF t = 'G' AND k = 'E' : EQUB 131 EOR 35 : ENDIF
-  IF t = 'Z' AND k = 'A' : EQUB 132 EOR 35 : ENDIF
-  IF t = 'C' AND k = 'E' : EQUB 133 EOR 35 : ENDIF
-  IF t = 'B' AND k = 'I' : EQUB 134 EOR 35 : ENDIF
-  IF t = 'S' AND k = 'O' : EQUB 135 EOR 35 : ENDIF
-  IF t = 'U' AND k = 'S' : EQUB 136 EOR 35 : ENDIF
-  IF t = 'E' AND k = 'S' : EQUB 137 EOR 35 : ENDIF
-  IF t = 'A' AND k = 'R' : EQUB 138 EOR 35 : ENDIF
-  IF t = 'M' AND k = 'A' : EQUB 139 EOR 35 : ENDIF
-  IF t = 'I' AND k = 'N' : EQUB 140 EOR 35 : ENDIF
-  IF t = 'D' AND k = 'I' : EQUB 141 EOR 35 : ENDIF
-  IF t = 'R' AND k = 'E' : EQUB 142 EOR 35 : ENDIF
-  IF t = 'A' AND k = '?' : EQUB 143 EOR 35 : ENDIF
-  IF t = 'E' AND k = 'R' : EQUB 144 EOR 35 : ENDIF
-  IF t = 'A' AND k = 'T' : EQUB 145 EOR 35 : ENDIF
-  IF t = 'E' AND k = 'N' : EQUB 146 EOR 35 : ENDIF
-  IF t = 'B' AND k = 'E' : EQUB 147 EOR 35 : ENDIF
-  IF t = 'R' AND k = 'A' : EQUB 148 EOR 35 : ENDIF
-  IF t = 'L' AND k = 'A' : EQUB 149 EOR 35 : ENDIF
-  IF t = 'V' AND k = 'E' : EQUB 150 EOR 35 : ENDIF
-  IF t = 'T' AND k = 'I' : EQUB 151 EOR 35 : ENDIF
-  IF t = 'E' AND k = 'D' : EQUB 152 EOR 35 : ENDIF
-  IF t = 'O' AND k = 'R' : EQUB 153 EOR 35 : ENDIF
-  IF t = 'Q' AND k = 'U' : EQUB 154 EOR 35 : ENDIF
-  IF t = 'A' AND k = 'N' : EQUB 155 EOR 35 : ENDIF
-  IF t = 'T' AND k = 'E' : EQUB 156 EOR 35 : ENDIF
-  IF t = 'I' AND k = 'S' : EQUB 157 EOR 35 : ENDIF
-  IF t = 'R' AND k = 'I' : EQUB 158 EOR 35 : ENDIF
-  IF t = 'O' AND k = 'N' : EQUB 159 EOR 35 : ENDIF
+ LDY #0                 \ We want to move one page of memory, so set Y as a byte
+                        \ counter
 
-ENDMACRO
+.MPL
+
+ LDA (P),Y              \ Fetch the Y-th byte of the P(1 0) memory block
+
+ STA (ZP),Y             \ Store the decrypted result in the Y-th byte of the
+                        \ ZP(1 0) memory block
+
+ DEY                    \ Decrement the byte counter
+
+ BNE MPL                \ Loop back to copy the next byte until we have done a
+                        \ whole page of 256 bytes
+
+ RTS                    \ Return from the subroutine
 
 \ ******************************************************************************
 \
-\       Name: CONT
-\       Type: Macro
-\   Category: Text
-\    Summary: Macro definition for control codes in the recursive token table
-\  Deep dive: Printing text tokens
+\       Name: MVBL
+\       Type: Subroutine
+\   Category: Utility routines
+\    Summary: Decrypt and move a multi-page block of memory
 \
 \ ------------------------------------------------------------------------------
 \
-\ The following macro is used when building the recursive token table:
-\
-\   CONT n              Insert control code token {n}
-\
-\ See the deep dive on "Printing text tokens" for details on how characters are
-\ stored in the recursive token table.
-\
 \ Arguments:
 \
-\   n                   The control code to insert into the table
+\   P(1 0)              The source address of the block to move
+\
+\   ZP(1 0)             The destination address of the block to move
+\
+\   X                   Number of pages of memory to move (1 page = 256 bytes)
 \
 \ ******************************************************************************
 
-MACRO CONT n
+.MVBL
 
-  EQUB n EOR 35
+ JSR MVPG               \ Call MVPG above to copy one page of memory from the
+                        \ address in P(1 0) to the address in ZP(1 0)
 
-ENDMACRO
+ INC ZP+1               \ Increment the high byte of the source address to point
+                        \ to the next page
 
-\ ******************************************************************************
-\
-\       Name: RTOK
-\       Type: Macro
-\   Category: Text
-\    Summary: Macro definition for recursive tokens in the recursive token table
-\  Deep dive: Printing text tokens
-\
-\ ------------------------------------------------------------------------------
-\
-\ The following macro is used when building the recursive token table:
-\
-\   RTOK n              Insert recursive token [n]
-\
-\                         * Tokens 0-95 get stored as n + 160
-\
-\                         * Tokens 128-145 get stored as n - 114
-\
-\                         * Tokens 96-127 get stored as n
-\
-\ See the deep dive on "Printing text tokens" for details on how recursive
-\ tokens are stored in the recursive token table.
-\
-\ Arguments:
-\
-\   n                   The number of the recursive token to insert into the
-\                       table, in the range 0 to 145
-\
-\ ******************************************************************************
+ INC P+1                \ Increment the high byte of the destination address to
+                        \ point to the next page
 
-MACRO RTOK n
+ DEX                    \ Decrement the page counter
 
-  IF n >= 0 AND n <= 95
-    t = n + 160
-  ELIF n >= 128
-    t = n - 114
-  ELSE
-    t = n
-  ENDIF
+ BNE MVBL               \ Loop back to copy the next page until we have done X
+                        \ pages
 
-  EQUB t EOR 35
-
-ENDMACRO
+ RTS                    \ Return from the subroutine
 
 \ ******************************************************************************
 \
-\       Name: QQ18
+\       Name: MESS1
 \       Type: Variable
-\   Category: Text
-\    Summary: The recursive token table for tokens 0-148
-\  Deep dive: Printing text tokens
-\
-\ ------------------------------------------------------------------------------
-\
-\ Other entry points:
-\
-\   new_name            AJD
+\   Category: Loader
+\    Summary: The OS command string for changing the disc directory to E
 \
 \ ******************************************************************************
 
-.QQ18
-
- RTOK 111               \ Token 0:      "FUEL SCOOPS ON {beep}"
- RTOK 131               \
- CONT 7                 \ Encoded as:   "[111][131]{7}"
- EQUB 0
-
- CHAR ' '               \ Token 1:      " CHART"
- CHAR 'C'               \
- CHAR 'H'               \ Encoded as:   " CH<138>T"
- TWOK 'A', 'R'
- CHAR 'T'
- EQUB 0
-
- CHAR 'G'               \ Token 2:      "GOVERNMENT"
- CHAR 'O'               \
- TWOK 'V', 'E'          \ Encoded as:   "GO<150>RNM<146>T"
- CHAR 'R'
- CHAR 'N'
- CHAR 'M'
- TWOK 'E', 'N'
- CHAR 'T'
- EQUB 0
-
- CHAR 'D'               \ Token 3:      "DATA ON {selected system name}"
- TWOK 'A', 'T'          \
- CHAR 'A'               \ Encoded as:   "D<145>A[131]{3}"
- RTOK 131
- CONT 3
- EQUB 0
-
- TWOK 'I', 'N'          \ Token 4:      "INVENTORY{cr}
- TWOK 'V', 'E'          \               "
- CHAR 'N'               \
- CHAR 'T'               \ Encoded as:   "<140><150>NT<153>Y{12}"
- TWOK 'O', 'R'
- CHAR 'Y'
- CONT 12
- EQUB 0
-
- CHAR 'S'               \ Token 5:      "SYSTEM"
- CHAR 'Y'               \
- CHAR 'S'               \ Encoded as:   "SYS<156>M"
- TWOK 'T', 'E'
- CHAR 'M'
- EQUB 0
-
- CHAR 'P'               \ Token 6:      "PRICE"
- TWOK 'R', 'I'          \
- TWOK 'C', 'E'          \ Encoded as:   "P<158><133>"
- EQUB 0
-
- CONT 2                 \ Token 7:      "{current system name} MARKET PRICES"
- CHAR ' '               \
- TWOK 'M', 'A'          \ Encoded as:   "{2} <139>RKET [6]S"
- CHAR 'R'
- CHAR 'K'
- CHAR 'E'
- CHAR 'T'
- CHAR ' '
- RTOK 6
- CHAR 'S'
- EQUB 0
-
- TWOK 'I', 'N'          \ Token 8:      "INDUSTRIAL"
- CHAR 'D'               \
- TWOK 'U', 'S'          \ Encoded as:   "<140>D<136>T<158><128>"
- CHAR 'T'
- TWOK 'R', 'I'
- TWOK 'A', 'L'
- EQUB 0
-
- CHAR 'A'               \ Token 9:      "AGRICULTURAL"
- CHAR 'G'               \
- TWOK 'R', 'I'          \ Encoded as:   "AG<158>CULTU<148>L"
- CHAR 'C'
- CHAR 'U'
- CHAR 'L'
- CHAR 'T'
- CHAR 'U'
- TWOK 'R', 'A'
- CHAR 'L'
- EQUB 0
-
- TWOK 'R', 'I'          \ Token 10:     "RICH "
- CHAR 'C'               \
- CHAR 'H'               \ Encoded as:   "<158>CH "
- CHAR ' '
- EQUB 0
-
- CHAR 'A'               \ Token 11:     "AVERAGE "
- TWOK 'V', 'E'          \
- TWOK 'R', 'A'          \ Encoded as:   "A<150><148><131> "
- TWOK 'G', 'E'
- CHAR ' '
- EQUB 0
-
- CHAR 'P'               \ Token 12:     "POOR "
- CHAR 'O'               \
- TWOK 'O', 'R'          \ Encoded as:   "PO<153> "
- CHAR ' '
- EQUB 0
-
- TWOK 'M', 'A'          \ Token 13:     "MAINLY "
- TWOK 'I', 'N'          \
- CHAR 'L'               \ Encoded as:   "<139><140>LY "
- CHAR 'Y'
- CHAR ' '
- EQUB 0
-
- CHAR 'U'               \ Token 14:     "UNIT"
- CHAR 'N'               \
- CHAR 'I'               \ Encoded as:   "UNIT"
- CHAR 'T'
- EQUB 0
-
- CHAR 'V'               \ Token 15:     "VIEW "
- CHAR 'I'               \
- CHAR 'E'               \ Encoded as:   "VIEW "
- CHAR 'W'
- CHAR ' '
- EQUB 0
-
- TWOK 'Q', 'U'          \ Token 16:     "QUANTITY"
- TWOK 'A', 'N'          \
- TWOK 'T', 'I'          \ Encoded as:   "<154><155><151>TY"
- CHAR 'T'
- CHAR 'Y'
- EQUB 0
-
- TWOK 'A', 'N'          \ Token 17:     "ANARCHY"
- TWOK 'A', 'R'          \
- CHAR 'C'               \ Encoded as:   "<155><138>CHY"
- CHAR 'H'
- CHAR 'Y'
- EQUB 0
-
- CHAR 'F'               \ Token 18:     "FEUDAL"
- CHAR 'E'               \
- CHAR 'U'               \ Encoded as:   "FEUD<128>"
- CHAR 'D'
- TWOK 'A', 'L'
- EQUB 0
-
- CHAR 'M'               \ Token 19:     "MULTI-GOVERNMENT"
- CHAR 'U'               \
- CHAR 'L'               \ Encoded as:   "MUL<151>-[2]"
- TWOK 'T', 'I'
- CHAR '-'
- RTOK 2
- EQUB 0
-
- TWOK 'D', 'I'          \ Token 20:     "DICTATORSHIP"
- CHAR 'C'               \
- CHAR 'T'               \ Encoded as:   "<141>CT<145><153>[25]"
- TWOK 'A', 'T'
- TWOK 'O', 'R'
- RTOK 25
- EQUB 0
-
- RTOK 91                \ Token 21:     "COMMUNIST"
- CHAR 'M'               \
- CHAR 'U'               \ Encoded as:   "[91]MUN<157>T"
- CHAR 'N'
- TWOK 'I', 'S'
- CHAR 'T'
- EQUB 0
-
- CHAR 'C'               \ Token 22:     "CONFEDERACY"
- TWOK 'O', 'N'          \
- CHAR 'F'               \ Encoded as:   "C<159>F<152><144>ACY"
- TWOK 'E', 'D'
- TWOK 'E', 'R'
- CHAR 'A'
- CHAR 'C'
- CHAR 'Y'
- EQUB 0
-
- CHAR 'D'               \ Token 23:     "DEMOCRACY"
- CHAR 'E'               \
- CHAR 'M'               \ Encoded as:   "DEMOC<148>CY"
- CHAR 'O'
- CHAR 'C'
- TWOK 'R', 'A'
- CHAR 'C'
- CHAR 'Y'
- EQUB 0
-
- CHAR 'C'               \ Token 24:     "CORPORATE STATE"
- TWOK 'O', 'R'          \
- CHAR 'P'               \ Encoded as:   "C<153>P<153><145>E [43]<145>E"
- TWOK 'O', 'R'
- TWOK 'A', 'T'
- CHAR 'E'
- CHAR ' '
- RTOK 43
- TWOK 'A', 'T'
- CHAR 'E'
- EQUB 0
-
- CHAR 'S'               \ Token 25:     "SHIP"
- CHAR 'H'               \
- CHAR 'I'               \ Encoded as:   "SHIP"
- CHAR 'P'
- EQUB 0
-
- CHAR 'P'               \ Token 26:     "PRODUCT"
- RTOK 94                \
- CHAR 'D'               \ Encoded as:   "P[94]]DUCT"
- CHAR 'U'
- CHAR 'C'
- CHAR 'T'
- EQUB 0
-
- CHAR ' '               \ Token 27:     " LASER"
- TWOK 'L', 'A'          \
- CHAR 'S'               \ Encoded as:   " <149>S<144>"
- TWOK 'E', 'R'
- EQUB 0
-
- CHAR 'H'               \ Token 28:     "HUMAN COLONIAL"
- CHAR 'U'               \
- CHAR 'M'               \ Encoded as:   "HUM<155> COL<159>I<128>"
- TWOK 'A', 'N'
- CHAR ' '
- CHAR 'C'
- CHAR 'O'
- CHAR 'L'
- TWOK 'O', 'N'
- CHAR 'I'
- TWOK 'A', 'L'
- EQUB 0
-
- CHAR 'H'               \ Token 29:     "HYPERSPACE "
- CHAR 'Y'               \
- CHAR 'P'               \ Encoded as:   "HYP<144>[128] "
- TWOK 'E', 'R'
- RTOK 128
- CHAR ' '
- EQUB 0
-
- CHAR 'S'               \ Token 30:     "SHORT RANGE CHART"
- CHAR 'H'               \
- TWOK 'O', 'R'          \ Encoded as:   "SH<153>T [42][1]"
- CHAR 'T'
- CHAR ' '
- RTOK 42
- RTOK 1
- EQUB 0
-
- TWOK 'D', 'I'          \ Token 31:     "DISTANCE"
- RTOK 43                \
- TWOK 'A', 'N'          \ Encoded as:   "<141>[43]<155><133>"
- TWOK 'C', 'E'
- EQUB 0
-
- CHAR 'P'               \ Token 32:     "POPULATION"
- CHAR 'O'               \
- CHAR 'P'               \ Encoded as:   "POPUL<145>I<159>"
- CHAR 'U'
- CHAR 'L'
- TWOK 'A', 'T'
- CHAR 'I'
- TWOK 'O', 'N'
- EQUB 0
-
- CHAR 'G'               \ Token 33:     "GROSS PRODUCTIVITY"
- RTOK 94                \
- CHAR 'S'               \ Encoded as:   "G[94]SS [26]IVITY"
- CHAR 'S'
- CHAR ' '
- RTOK 26
- CHAR 'I'
- CHAR 'V'
- CHAR 'I'
- CHAR 'T'
- CHAR 'Y'
- EQUB 0
-
- CHAR 'E'               \ Token 34:     "ECONOMY"
- CHAR 'C'               \
- TWOK 'O', 'N'          \ Encoded as:   "EC<159>OMY"
- CHAR 'O'
- CHAR 'M'
- CHAR 'Y'
- EQUB 0
-
- CHAR ' '               \ Token 35:     " LIGHT YEARS"
- CHAR 'L'               \
- CHAR 'I'               \ Encoded as:   " LIGHT YE<138>S"
- CHAR 'G'
- CHAR 'H'
- CHAR 'T'
- CHAR ' '
- CHAR 'Y'
- CHAR 'E'
- TWOK 'A', 'R'
- CHAR 'S'
- EQUB 0
-
- TWOK 'T', 'E'          \ Token 36:     "TECH.LEVEL"
- CHAR 'C'               \
- CHAR 'H'               \ Encoded as:   "<156>CH.<129><150>L"
- CHAR '.'
- TWOK 'L', 'E'
- TWOK 'V', 'E'
- CHAR 'L'
- EQUB 0
-
- CHAR 'C'               \ Token 37:     "CASH"
- CHAR 'A'               \
- CHAR 'S'               \ Encoded as:   "CASH"
- CHAR 'H'
- EQUB 0
-
- CHAR ' '               \ Token 38:     " BILLION"
- TWOK 'B', 'I'          \
- RTOK 129               \ Encoded as:   " <134>[129]I<159>"
- CHAR 'I'
- TWOK 'O', 'N'
- EQUB 0
-
- RTOK 122               \ Token 39:     "GALACTIC CHART{galaxy number}"
- RTOK 1                 \
- CONT 1                 \ Encoded as:   "[122][1]{1}"
- EQUB 0
-
- CHAR 'T'               \ Token 40:     "TARGET LOST"
- TWOK 'A', 'R'          \
- TWOK 'G', 'E'          \ Encoded as:   "T<138><131>T LO[43]"
- CHAR 'T'
- CHAR ' '
- CHAR 'L'
- CHAR 'O'
- RTOK 43
- EQUB 0
-
- RTOK 106               \ Token 41:     "MISSILE JAMMED"
- CHAR ' '               \
- CHAR 'J'               \ Encoded as:   "[106] JAMM<152>"
- CHAR 'A'
- CHAR 'M'
- CHAR 'M'
- TWOK 'E', 'D'
- EQUB 0
-
- CHAR 'R'               \ Token 42:     "RANGE"
- TWOK 'A', 'N'          \
- TWOK 'G', 'E'          \ Encoded as:   "R<155><131>"
- EQUB 0
-
- CHAR 'S'               \ Token 43:     "ST"
- CHAR 'T'               \
- EQUB 0                 \ Encoded as:   "ST"
-
- RTOK 16                \ Token 44:     "QUANTITY OF "
- CHAR ' '               \
- CHAR 'O'               \ Encoded as:   "[16] OF "
- CHAR 'F'
- CHAR ' '
- EQUB 0
-
- CHAR 'S'               \ Token 45:     "SELL"
- CHAR 'E'               \
- RTOK 129               \ Encoded as:   "SE[129]"
- EQUB 0
-
- CHAR ' '               \ Token 46:     " CARGO{sentence case}"
- CHAR 'C'               \
- TWOK 'A', 'R'          \ Encoded as:   " C<138>GO{6}"
- CHAR 'G'
- CHAR 'O'
- CONT 6
- EQUB 0
-
- CHAR 'E'               \ Token 47:     "EQUIP"
- TWOK 'Q', 'U'          \
- CHAR 'I'               \ Encoded as:   "E<154>IP"
- CHAR 'P'
- EQUB 0
-
- CHAR 'F'               \ Token 48:     "FOOD"
- CHAR 'O'               \
- CHAR 'O'               \ Encoded as:   "FOOD"
- CHAR 'D'
- EQUB 0
-
- TWOK 'T', 'E'          \ Token 49:     "TEXTILES"
- CHAR 'X'               \
- TWOK 'T', 'I'          \ Encoded as:   "<156>X<151>L<137>"
- CHAR 'L'
- TWOK 'E', 'S'
- EQUB 0
-
- TWOK 'R', 'A'          \ Token 50:     "RADIOACTIVES"
- TWOK 'D', 'I'          \
- CHAR 'O'               \ Encoded as:   "<148><141>OAC<151><150>S"
- CHAR 'A'
- CHAR 'C'
- TWOK 'T', 'I'
- TWOK 'V', 'E'
- CHAR 'S'
- EQUB 0
-
- CHAR 'S'               \ Token 51:     "SLAVES"
- TWOK 'L', 'A'          \
- TWOK 'V', 'E'          \ Encoded as:   "S<149><150>S"
- CHAR 'S'
- EQUB 0
-
- CHAR 'L'               \ Token 52:     "LIQUOR/WINES"
- CHAR 'I'               \
- TWOK 'Q', 'U'          \ Encoded as:   "LI<154><153>/W<140><137>"
- TWOK 'O', 'R'
- CHAR '/'
- CHAR 'W'
- TWOK 'I', 'N'
- TWOK 'E', 'S'
- EQUB 0
-
- CHAR 'L'               \ Token 53:     "LUXURIES"
- CHAR 'U'               \
- CHAR 'X'               \ Encoded as:   "LUXU<158><137>"
- CHAR 'U'
- TWOK 'R', 'I'
- TWOK 'E', 'S'
- EQUB 0
-
- CHAR 'N'               \ Token 54:     "NARCOTICS"
- TWOK 'A', 'R'          \
- CHAR 'C'               \ Encoded as:   "N<138>CO<151>CS"
- CHAR 'O'
- TWOK 'T', 'I'
- CHAR 'C'
- CHAR 'S'
- EQUB 0
-
- RTOK 91                \ Token 55:     "COMPUTERS"
- CHAR 'P'               \
- CHAR 'U'               \ Encoded as:   "[91]PUT<144>S"
- CHAR 'T'
- TWOK 'E', 'R'
- CHAR 'S'
- EQUB 0
-
- TWOK 'M', 'A'          \ Token 56:     "MACHINERY"
- CHAR 'C'               \
- CHAR 'H'               \ Encoded as:   "<139>CH<140><144>Y"
- TWOK 'I', 'N'
- TWOK 'E', 'R'
- CHAR 'Y'
- EQUB 0
-
- CHAR 'A'               \ Token 57:     "ALLOYS"
- RTOK 129               \
- CHAR 'O'               \ Encoded as:   "A[129]OYS"
- CHAR 'Y'
- CHAR 'S'
- EQUB 0
-
- CHAR 'F'               \ Token 58:     "FIREARMS"
- CHAR 'I'               \
- TWOK 'R', 'E'          \ Encoded as:   "FI<142><138>MS"
- TWOK 'A', 'R'
- CHAR 'M'
- CHAR 'S'
- EQUB 0
-
- CHAR 'F'               \ Token 59:     "FURS"
- CHAR 'U'               \
- CHAR 'R'               \ Encoded as:   "FURS"
- CHAR 'S'
- EQUB 0
-
- CHAR 'M'               \ Token 60:     "MINERALS"
- TWOK 'I', 'N'          \
- TWOK 'E', 'R'          \ Encoded as:   "M<140><144><128>S"
- TWOK 'A', 'L'
- CHAR 'S'
- EQUB 0
-
- CHAR 'G'               \ Token 61:     "GOLD"
- CHAR 'O'               \
- CHAR 'L'               \ Encoded as:   "GOLD"
- CHAR 'D'
- EQUB 0
-
- CHAR 'P'               \ Token 62:     "PLATINUM"
- CHAR 'L'               \
- TWOK 'A', 'T'          \ Encoded as:   "PL<145><140>UM"
- TWOK 'I', 'N'
- CHAR 'U'
- CHAR 'M'
- EQUB 0
-
- TWOK 'G', 'E'          \ Token 63:     "GEM-STONES"
- CHAR 'M'               \
- CHAR '-'               \ Encoded as:   "<131>M-[43]<159><137>"
- RTOK 43
- TWOK 'O', 'N'
- TWOK 'E', 'S'
- EQUB 0
-
- TWOK 'A', 'L'          \ Token 64:     "ALIEN ITEMS"
- CHAR 'I'               \
- TWOK 'E', 'N'          \ Encoded as:   "<128>I<146> [127]S"
- CHAR ' '
- RTOK 127
- CHAR 'S'
- EQUB 0
-
- CONT 12                \ Token 65:     "{cr}
- CHAR '1'               \                10{cash} CR5{cash} CR"
- CHAR '0'               \
- CONT 0                 \ Encoded as:   "{12}10{0}5{0}"
- CHAR '5'
- CONT 0
- EQUB 0
-
- CHAR ' '               \ Token 66:     " CR"
- CHAR 'C'               \
- CHAR 'R'               \ Encoded as:   " CR"
- EQUB 0
-
- CHAR 'L'               \ Token 67:     "LARGE"
- TWOK 'A', 'R'          \
- TWOK 'G', 'E'          \ Encoded as:   "L<138><131>"
- EQUB 0
-
- CHAR 'F'               \ Token 68:     "FIERCE"
- CHAR 'I'               \
- TWOK 'E', 'R'          \ Encoded as:   "FI<144><133>"
- TWOK 'C', 'E'
- EQUB 0
-
- CHAR 'S'               \ Token 69:     "SMALL"
- TWOK 'M', 'A'          \
- RTOK 129               \ Encoded as:   "S<139>[129]"
- EQUB 0
-
- CHAR 'G'               \ Token 70:     "GREEN"
- TWOK 'R', 'E'          \
- TWOK 'E', 'N'          \ Encoded as:   "G<142><146>"
- EQUB 0
-
- CHAR 'R'               \ Token 71:     "RED"
- TWOK 'E', 'D'          \
- EQUB 0                 \ Encoded as:   "R<152>"
-
- CHAR 'Y'               \ Token 72:     "YELLOW"
- CHAR 'E'               \
- RTOK 129               \ Encoded as:   "YE[129]OW"
- CHAR 'O'
- CHAR 'W'
- EQUB 0
-
- CHAR 'B'               \ Token 73:     "BLUE"
- CHAR 'L'               \
- CHAR 'U'               \ Encoded as:   "BLUE"
- CHAR 'E'
- EQUB 0
-
- CHAR 'B'               \ Token 74:     "BLACK"
- TWOK 'L', 'A'          \
- CHAR 'C'               \ Encoded as:   "B<149>CK"
- CHAR 'K'
- EQUB 0
-
- RTOK 136               \ Token 75:     "HARMLESS"
- EQUB 0                 \
-                        \ Encoded as:   "[136]"
-
- CHAR 'S'               \ Token 76:     "SLIMY"
- CHAR 'L'               \
- CHAR 'I'               \ Encoded as:   "SLIMY"
- CHAR 'M'
- CHAR 'Y'
- EQUB 0
-
- CHAR 'B'               \ Token 77:     "BUG-EYED"
- CHAR 'U'               \
- CHAR 'G'               \ Encoded as:   "BUG-EY<152>"
- CHAR '-'
- CHAR 'E'
- CHAR 'Y'
- TWOK 'E', 'D'
- EQUB 0
-
- CHAR 'H'               \ Token 78:     "HORNED"
- TWOK 'O', 'R'          \
- CHAR 'N'               \ Encoded as:   "H<153>N<152>"
- TWOK 'E', 'D'
- EQUB 0
-
- CHAR 'B'               \ Token 79:     "BONY"
- TWOK 'O', 'N'          \
- CHAR 'Y'               \ Encoded as:   "B<159>Y"
- EQUB 0
-
- CHAR 'F'               \ Token 80:     "FAT"
- TWOK 'A', 'T'          \
- EQUB 0                 \ Encoded as:   "F<145>"
-
- CHAR 'F'               \ Token 81:     "FURRY"
- CHAR 'U'               \
- CHAR 'R'               \ Encoded as:   "FURRY"
- CHAR 'R'
- CHAR 'Y'
- EQUB 0
-
- RTOK 94                \ Token 82:     "RODENT"
- CHAR 'D'               \
- TWOK 'E', 'N'          \ Encoded as:   "[94]D<146>T"
- CHAR 'T'
- EQUB 0
-
- CHAR 'F'               \ Token 83:     "FROG"
- RTOK 94                \
- CHAR 'G'               \ Encoded as:   "F[94]G"
- EQUB 0
-
- CHAR 'L'               \ Token 84:     "LIZARD"
- CHAR 'I'               \
- TWOK 'Z', 'A'          \ Encoded as:   "LI<132>RD"
- CHAR 'R'
- CHAR 'D'
- EQUB 0
-
- CHAR 'L'               \ Token 85:     "LOBSTER"
- CHAR 'O'               \
- CHAR 'B'               \ Encoded as:   "LOB[43]<144>"
- RTOK 43
- TWOK 'E', 'R'
- EQUB 0
-
- TWOK 'B', 'I'          \ Token 86:     "BIRD"
- CHAR 'R'               \
- CHAR 'D'               \ Encoded as:   "<134>RD"
- EQUB 0
-
- CHAR 'H'               \ Token 87:     "HUMANOID"
- CHAR 'U'               \
- CHAR 'M'               \ Encoded as:   "HUM<155>OID"
- TWOK 'A', 'N'
- CHAR 'O'
- CHAR 'I'
- CHAR 'D'
- EQUB 0
-
- CHAR 'F'               \ Token 88:     "FELINE"
- CHAR 'E'               \
- CHAR 'L'               \ Encoded as:   "FEL<140>E"
- TWOK 'I', 'N'
- CHAR 'E'
- EQUB 0
-
- TWOK 'I', 'N'          \ Token 89:     "INSECT"
- CHAR 'S'               \
- CHAR 'E'               \ Encoded as:   "<140>SECT"
- CHAR 'C'
- CHAR 'T'
- EQUB 0
-
- RTOK 11                \ Token 90:     "AVERAGE RADIUS"
- TWOK 'R', 'A'          \
- TWOK 'D', 'I'          \ Encoded as:   "[11]<148><141><136>"
- TWOK 'U', 'S'
- EQUB 0
-
- CHAR 'C'               \ Token 91:     "COM"
- CHAR 'O'               \
- CHAR 'M'               \ Encoded as:   "COM"
- EQUB 0
-
- RTOK 91                \ Token 92:     "COMMANDER"
- CHAR 'M'               \
- TWOK 'A', 'N'          \ Encoded as:   "[91]M<155>D<144>"
- CHAR 'D'
- TWOK 'E', 'R'
- EQUB 0
-
- CHAR ' '               \ Token 93:     " DESTROYED"
- CHAR 'D'               \
- TWOK 'E', 'S'          \ Encoded as:   " D<137>T[94]Y<152>"
- CHAR 'T'
- RTOK 94
- CHAR 'Y'
- TWOK 'E', 'D'
- EQUB 0
-
- CHAR 'R'               \ Token 94:     "RO"
- CHAR 'O'               \
- EQUB 0                 \ Encoded as:   "RO"
-
- RTOK 14                \ Token 95:     "UNIT  QUANTITY{cr}
- CHAR ' '               \                 PRODUCT   UNIT PRICE FOR SALE{cr}{lf}
- CHAR ' '               \               "
- RTOK 16                \
- CONT 12                \ Encoded as:   "[14]  [16]{13} [26]   [14] [6] F<153>
- CHAR ' '               \                 SA<129>{12}{10}"
- RTOK 26
- CHAR ' '
- CHAR ' '
- CHAR ' '
- RTOK 14
- CHAR ' '
- RTOK 6
- CHAR ' '
- CHAR 'F'
- TWOK 'O', 'R'
- CHAR ' '
- CHAR 'S'
- CHAR 'A'
- TWOK 'L', 'E'
- CONT 12
- CONT 10
- EQUB 0
-
- CHAR 'F'               \ Token 96:     "FRONT"
- CHAR 'R'               \
- TWOK 'O', 'N'          \ Encoded as:   "FR<159>T"
- CHAR 'T'
- EQUB 0
-
- TWOK 'R', 'E'          \ Token 97:     "REAR"
- TWOK 'A', 'R'          \
- EQUB 0                 \ Encoded as:   "<142><138>"
-
- TWOK 'L', 'E'          \ Token 98:     "LEFT"
- CHAR 'F'               \
- CHAR 'T'               \ Encoded as:   "<129>FT"
- EQUB 0
-
- TWOK 'R', 'I'          \ Token 99:     "RIGHT"
- CHAR 'G'               \
- CHAR 'H'               \ Encoded as:   "<158>GHT"
- CHAR 'T'
- EQUB 0
-
- RTOK 121               \ Token 100:    "ENERGY LOW{beep}"
- CHAR 'L'               \
- CHAR 'O'               \ Encoded as:   "[121]LOW{7}"
- CHAR 'W'
- CONT 7
- EQUB 0
-
- RTOK 99                \ Token 101:    "RIGHT ON COMMANDER!"
- RTOK 131               \
- RTOK 92                \ Encoded as:   "[99][131][92]!"
- CHAR '!'
- EQUB 0
-
- CHAR 'E'               \ Token 102:    "EXTRA "
- CHAR 'X'               \
- CHAR 'T'               \ Encoded as:   "EXT<148> "
- TWOK 'R', 'A'
- CHAR ' '
- EQUB 0
-
- CHAR 'P'               \ Token 103:    "PULSE LASER"
- CHAR 'U'               \
- CHAR 'L'               \ Encoded as:   "PULSE[27]"
- CHAR 'S'
- CHAR 'E'
- RTOK 27
- EQUB 0
-
- TWOK 'B', 'E'          \ Token 104:    "BEAM LASER"
- CHAR 'A'               \
- CHAR 'M'               \ Encoded as:   "<147>AM[27]"
- RTOK 27
- EQUB 0
-
- CHAR 'F'               \ Token 105:    "FUEL"
- CHAR 'U'               \
- CHAR 'E'               \ Encoded as:   "FUEL"
- CHAR 'L'
- EQUB 0
-
- CHAR 'M'               \ Token 106:    "MISSILE"
- TWOK 'I', 'S'          \
- CHAR 'S'               \ Encoded as:   "M<157>SI<129>"
- CHAR 'I'
- TWOK 'L', 'E'
- EQUB 0
-
- CHAR 'I'               \ Token 107:    "I.F.F.SYSTEM"
- CHAR '.'               \
- CHAR 'F'               \ Encoded as:   "I.F.F.[5]"
- CHAR '.'
- CHAR 'F'
- CHAR '.'
- RTOK 5
- EQUB 0
-
- CHAR 'E'               \ Token 108:    "E.C.M.SYSTEM"
- CHAR '.'               \
- CHAR 'C'               \ Encoded as:   "E.C.M.[5]"
- CHAR '.'
- CHAR 'M'
- CHAR '.'
- RTOK 5
- EQUB 0
-
- RTOK 102               \ Token 109:    "EXTRA PULSE LASERS"
- RTOK 103               \
- CHAR 'S'               \ Encoded as:   "[102][103]S"
- EQUB 0
-
- RTOK 102               \ Token 110:    "EXTRA BEAM LASERS"
- RTOK 104               \
- CHAR 'S'               \ Encoded as:   "[102][104]S"
- EQUB 0
-
- RTOK 105               \ Token 111:    "FUEL SCOOPS"
- CHAR ' '               \
- CHAR 'S'               \ Encoded as:   "[105] SCOOPS"
- CHAR 'C'
- CHAR 'O'
- CHAR 'O'
- CHAR 'P'
- CHAR 'S'
- EQUB 0
-
- TWOK 'E', 'S'          \ Token 112:    "ESCAPE POD"
- CHAR 'C'               \
- CHAR 'A'               \ Encoded as:   "<137>CAPE POD"
- CHAR 'P'
- CHAR 'E'
- CHAR ' '
- CHAR 'P'
- CHAR 'O'
- CHAR 'D'
- EQUB 0
-
- RTOK 29                \ Token 113:    "HYPERSPACE UNIT"
- RTOK 14                \
- EQUB 0                 \ Encoded as:   "[29][14]"
-
- RTOK 121               \ Token 114:    "ENERGY UNIT"
- RTOK 14                \
- EQUB 0                 \ Encoded as:   "[121][14]"
-
- CHAR 'D'               \ Token 115:    "DOCKING COMPUTERS"
- CHAR 'O'               \
- CHAR 'C'               \ Encoded as:   "DOCK<140>G [55]"
- CHAR 'K'
- TWOK 'I', 'N'
- CHAR 'G'
- CHAR ' '
- RTOK 55
- EQUB 0
-
- RTOK 122               \ Token 116:    "GALACTIC HYPERSPACE "
- CHAR ' '               \
- RTOK 29                \ Encoded as:   "[122] [29]"
- EQUB 0
-
- CHAR 'M'               \ Token 117:    "MILITARY LASER"
- CHAR 'I'               \
- CHAR 'L'               \ Encoded as:   "MILIT<138>Y[27]"
- CHAR 'I'
- CHAR 'T'
- TWOK 'A', 'R'
- CHAR 'Y'
- RTOK 27
- EQUB 0
-
- CHAR 'M'               \ Token 118:    "MINING LASER"
- TWOK 'I', 'N'          \
- TWOK 'I', 'N'          \ Encoded as:   "M<140><140>G[27]"
- CHAR 'G'
- RTOK 27
- EQUB 0
-
- RTOK 37                \ Token 119:    "CASH:{cash} CR{cr}
- CHAR ':'               \               "
- CONT 0                 \
- EQUB 0                 \ Encoded as:   "[37]:{0}"
-
- TWOK 'I', 'N'          \ Token 120:    "INCOMING MISSILE"
- RTOK 91                \
- TWOK 'I', 'N'          \ Encoded as:   "<140>[91]<140>G [106]"
- CHAR 'G'
- CHAR ' '
- RTOK 106
- EQUB 0
-
- TWOK 'E', 'N'          \ Token 121:    "ENERGY "
- TWOK 'E', 'R'          \
- CHAR 'G'               \ Encoded as:   "<146><144>GY "
- CHAR 'Y'
- CHAR ' '
- EQUB 0
-
- CHAR 'G'               \ Token 122:    "GALACTIC"
- CHAR 'A'               \
- TWOK 'L', 'A'          \ Encoded as:   "GA<149>C<151>C"
- CHAR 'C'
- TWOK 'T', 'I'
- CHAR 'C'
- EQUB 0
-
- RTOK 115               \ Token 123:    "DOCKING COMPUTERS ON"
- CHAR ' '               \
- TWOK 'O', 'N'          \ Encoded as:   "[115] <159>"
- EQUB 0
-
- CHAR 'A'               \ Token 124:    "ALL"
- RTOK 129               \
- EQUB 0                 \ Encoded as:   "A[129]"
-
- CONT 5                 \ Token 125:    "FUEL: {fuel level} LIGHT YEARS{cr}
- TWOK 'L', 'E'          \                CASH:{cash} CR{cr}
- CHAR 'G'               \                LEGAL STATUS:"
- TWOK 'A', 'L'          \
- CHAR ' '               \ Encoded as:   "{5}<129>G<128> [43]<145><136>:"
- RTOK 43
- TWOK 'A', 'T'
- TWOK 'U', 'S'
- CHAR ':'
- EQUB 0
-
- RTOK 92                \ Token 126:    "COMMANDER {commander name}{cr}
- CHAR ' '               \                {cr}
- CONT 4                 \                {cr}
- CONT 12                \                {sentence case}PRESENT SYSTEM{tab to
- CONT 12                \                column 21}:{current system name}{cr}
- CONT 12                \                HYPERSPACE SYSTEM{tab to column 21}:
- CONT 6                 \                {selected system name}{cr}
- RTOK 145               \                CONDITION{tab to column 21}:"
- CHAR ' '               \
- RTOK 5                 \ Encoded as:   "[92] {4}{12}{12}{12}{6}[145] [5]{9}{2}
- CONT 9                 \                {12}[29][5]{9}{3}{13}C<159><141><151>
- CONT 2                 \                <159>{9}"
- CONT 12
- RTOK 29
- RTOK 5
- CONT 9
- CONT 3
- CONT 12
- CHAR 'C'
- TWOK 'O', 'N'
- TWOK 'D', 'I'
- TWOK 'T', 'I'
- TWOK 'O', 'N'
- CONT 9
- EQUB 0
-
- CHAR 'I'               \ Token 127:    "ITEM"
- TWOK 'T', 'E'          \
- CHAR 'M'               \ Encoded as:   "I<156>M"
- EQUB 0
-
- CHAR 'S'               \ Token 128:    "SPACE"
- CHAR 'P'               \
- CHAR 'A'               \ Encoded as:   "SPA<133>"
- TWOK 'C', 'E'
- EQUB 0
-
- CHAR 'L'               \ Token 129:    "LL"
- CHAR 'L'               \
- EQUB 0                 \ Encoded as:   "LL"
-
- TWOK 'R', 'A'          \ Token 130:    "RATING:"
- TWOK 'T', 'I'          \
- CHAR 'N'               \ Encoded as:   "<148><151>NG:"
- CHAR 'G'
- CHAR ':'
- EQUB 0
-
- CHAR ' '               \ Token 131:    " ON "
- TWOK 'O', 'N'          \
- CHAR ' '               \ Encoded as:   " <159> "
- EQUB 0
-
- CONT 12                \ Token 132:    "{cr}
- RTOK 25                \                SHIP:          "
- CHAR ':'               \
- CHAR ' '               \ Encoded as:   "{12}[25]:          "
-
-.new_name
-
- CHAR ' '
- CHAR ' '
- CHAR ' '
- CHAR ' '
- CHAR ' '
- CHAR ' '
- CHAR ' '
- CHAR ' '
- CHAR ' '
- EQUB 0
-
- CHAR 'C'               \ Token 133:    "CLEAN"
- TWOK 'L', 'E'          \
- TWOK 'A', 'N'          \ Encoded as:   "C<129><155>"
- EQUB 0
-
- CHAR 'O'               \ Token 134:    "OFFENDER"
- CHAR 'F'               \
- CHAR 'F'               \ Encoded as:   "OFF<146>D<144>"
- TWOK 'E', 'N'
- CHAR 'D'
- TWOK 'E', 'R'
- EQUB 0
-
- CHAR 'F'               \ Token 135:    "FUGITIVE"
- CHAR 'U'               \
- CHAR 'G'               \ Encoded as:   "FUGI<151><150>"
- CHAR 'I'
- TWOK 'T', 'I'
- TWOK 'V', 'E'
- EQUB 0
-
- CHAR 'H'               \ Token 136:    "HARMLESS"
- TWOK 'A', 'R'          \
- CHAR 'M'               \ Encoded as:   "H<138>M<129>SS"
- TWOK 'L', 'E'
- CHAR 'S'
- CHAR 'S'
- EQUB 0
-
- CHAR 'M'               \ Token 137:    "MOSTLY HARMLESS"
- CHAR 'O'               \
- RTOK 43                \ Encoded as:   "MO[43]LY [136]"
- CHAR 'L'
- CHAR 'Y'
- CHAR ' '
- RTOK 136
- EQUB 0
-
- RTOK 12                \ Token 138:    "POOR "
- EQUB 0                 \
-                        \ Encoded as:   "[12]"
-
- RTOK 11                \ Token 139:    "AVERAGE "
- EQUB 0                 \
-                        \ Encoded as:   "[11]"
-
- CHAR 'A'               \ Token 140:    "ABOVE AVERAGE "
- CHAR 'B'               \
- CHAR 'O'               \ Encoded as:   "ABO<150> [11]"
- TWOK 'V', 'E'
- CHAR ' '
- RTOK 11
- EQUB 0
-
- RTOK 91                \ Token 141:    "COMPETENT"
- CHAR 'P'               \
- CHAR 'E'               \ Encoded as:   "[91]PET<146>T"
- CHAR 'T'
- TWOK 'E', 'N'
- CHAR 'T'
- EQUB 0
-
- CHAR 'D'               \ Token 142:    "DANGEROUS"
- TWOK 'A', 'N'          \
- TWOK 'G', 'E'          \ Encoded as:   "D<155><131>[94]<136>"
- RTOK 94
- TWOK 'U', 'S'
- EQUB 0
-
- CHAR 'D'               \ Token 143:    "DEADLY"
- CHAR 'E'               \
- CHAR 'A'               \ Encoded as:   "DEADLY"
- CHAR 'D'
- CHAR 'L'
- CHAR 'Y'
- EQUB 0
-
- CHAR '-'               \ Token 144:    "---- E L I T E ----"
- CHAR '-'               \
- CHAR '-'               \ Encoded as:   "---- E L I T E ----"
- CHAR '-'
- CHAR ' '
- CHAR 'E'
- CHAR ' '
- CHAR 'L'
- CHAR ' '
- CHAR 'I'
- CHAR ' '
- CHAR 'T'
- CHAR ' '
- CHAR 'E'
- CHAR ' '
- CHAR '-'
- CHAR '-'
- CHAR '-'
- CHAR '-'
- EQUB 0
-
- CHAR 'P'               \ Token 145:    "PRESENT"
- TWOK 'R', 'E'          \
- CHAR 'S'               \ Encoded as:   "P<142>S<146>T"
- TWOK 'E', 'N'
- CHAR 'T'
- EQUB 0
-
- CONT 8                 \ Token 146:    "{all caps}GAME OVER"
- CHAR 'G'               \
- CHAR 'A'               \ Encoded as:   "{8}GAME O<150>R"
- CHAR 'M'
- CHAR 'E'
- CHAR ' '
- CHAR 'O'
- TWOK 'V', 'E'
- CHAR 'R'
- EQUB 0
-
- SKIP 5                 \ These bytes appear to be unused
-
-.SNE
-
- EQUB &00, &19, &32, &4A, &62, &79, &8E, &A2, &B5, &C6, &D5, &E2
- EQUB &ED, &F5, &FB, &FF, &FF, &FF, &FB, &F5, &ED, &E2, &D5, &C6
- EQUB &B5, &A2, &8E, &79, &62, &4A, &32, &19
-
-.ACT
-
- EQUB &00, &01, &03, &04, &05, &06, &08, &09, &0A, &0B, &0C, &0D
- EQUB &0F, &10, &11, &12, &13, &14, &15, &16, &17, &18, &19, &19
- EQUB &1A, &1B, &1C, &1D, &1D, &1E, &1F, &1F
-
-.to1100
-
- EQUB &D4, &C4, &94, &84
- EQUB &F5, &E5, &B5, &A5
- EQUB &76, &66, &36, &26
- EQUB &E1, &F1, &B1, &A1
- EQUB &F0, &E0, &B0, &A0
- EQUB &D0, &C0, &90, &80
- EQUB &77, &67, &37, &27
-
-.vsync
-
- LDA #&1E
- STA &8B
- STA &FE44
- LDA #&39
- STA &FE45
- LDA &0348
- BNE ulaother
- LDA #&08
- STA &FE20
-
-.ulaloop2
-
- LDA &1110,Y
- STA &FE21
- DEY 
- BPL ulaloop2
- LDA &0346
- BEQ nodec
- DEC &0346
-
-.nodec
-
- PLA 
- TAY 
- LDA &FE41
- LDA &FC
- RTI 
-
-.irq1
-
- TYA 
- PHA 
- LDY #&0B
- LDA #&02
- BIT &FE4D
- BNE vsync
- BVC return
- ASL A
- STA &FE20
- LDA &0386
- BNE ulaother
-
-.ulaloop
-
- LDA &1100,Y
- STA &FE21
- DEY 
- BPL ulaloop
-
-.return
-
- PLA 
- TAY 
- JMP (&7FFE)
-
-.ulaother
-
- LDY #&07
-
-.ulaloop3
-
- LDA &1108,Y
- STA &FE21
- DEY 
- BPL ulaloop3
- BMI return
+.MESS1
+
+ EQUS "DIR e"
+ EQUB 13
+
+\ ******************************************************************************
+\
+\       Name: Elite loader (Part 2 of 3)
+\       Type: Subroutine
+\   Category: Loader
+\    Summary: Include binaries for recursive tokens, Missile blueprint and
+\             images
+\
+\ ------------------------------------------------------------------------------
+\
+\ The loader bundles a number of binary files in with the loader code, and moves
+\ them to their correct memory locations in part 1 above.
+\
+\ This section is encrypted by EOR'ing with &A5. The encryption is done by the
+\ elite-checksum.py script, and decryption is done in part 1 above, at the same
+\ time as each block is moved to its correct location.
+\
+\ There are two files containing code:
+\
+\   * WORDS.bin contains the recursive token table, which is moved to &0400
+\     before the main game is loaded
+\
+\   * MISSILE.bin contains the missile ship blueprint, which gets moved to &7F00
+\     before the main game is loaded
+\
+\ and one file containing an image, which is moved into screen memory by the
+\ loader:
+\
+\   * P.DIALS.bin contains the dashboard, which gets moved to screen address
+\     &7800, which is the starting point of the four-colour mode 5 portion at
+\     the bottom of the split screen
+\
+\ There are three other image binaries bundled into the loader, which are
+\ described in part 3 below.
+\
+\ ******************************************************************************
+
+.DIALS
+
+ INCBIN "binaries/P.DIALS.bin"
+
+.SHIP_MISSILE
+
+ INCBIN "output/MISSILE.bin"
+
+.WORDS
+
+ INCBIN "output/WORDS.bin"
+
+\ ******************************************************************************
+\
+\       Name: TVT1code
+\       Type: Subroutine
+\   Category: Loader
+\    Summary: Code block at &1100-&11E2 that remains resident in both docked and
+\             flight mode (palettes, screen mode routine and commander data)
+\
+\ ------------------------------------------------------------------------------
+\
+\ This section is encrypted by EOR'ing with &A5. The encryption is done by the
+\ elite-checksum.py script, and decryption is done in part 1 above, at the same
+\ time as it is moved to &1000.
+\
+\ ******************************************************************************
+
+.TVT1code
+
+ORG &1100
+
+\ ******************************************************************************
+\
+\       Name: TVT1
+\       Type: Variable
+\   Category: Screen mode
+\    Summary: Palette data for space and the two dashboard colour schemes
+\
+\ ------------------------------------------------------------------------------
+\
+\ Palette bytes for use with the split-screen mode (see IRQ1 below for more
+\ details).
+\
+\ Palette data is given as a set of bytes, with each byte mapping a logical
+\ colour to a physical one. In each byte, the logical colour is given in bits
+\ 4-7 and the physical colour in bits 0-3. See p.379 of the Advanced User Guide
+\ for details of how palette mapping works, as in modes 4 and 5 we have to do
+\ multiple palette commands to change the colours correctly, and the physical
+\ colour value is EOR'd with 7, just to make things even more confusing.
+\
+\ Similarly, the palette at TVT1+16 is for the monochrome space view, where
+\ logical colour 1 is mapped to physical colour 0 EOR 7 = 7 (white), and
+\ logical colour 0 is mapped to physical colour 7 EOR 7 = 0 (black). Each of
+\ these mappings requires six calls to SHEILA &21 - see p.379 of the Advanced
+\ User Guide for an explanation.
+\
+\ The mode 5 palette table has two blocks which overlap. The block used depends
+\ on whether or not we have an escape pod fitted. The block at TVT1 is used for
+\ the standard dashboard colours, while TVT1+8 is used for the dashboard when an
+\ escape pod is fitted. The colours are as follows:
+\
+\                 Normal (TVT1)     Escape pod (TVT1+8)
+\
+\   Colour 0      Black             Black
+\   Colour 1      Red               Red
+\   Colour 2      Yellow            White
+\   Colour 3      Green             Cyan
+\
+\ ******************************************************************************
+
+.TVT1
+
+ EQUB &D4, &C4          \ This block of palette data is used to create two
+ EQUB &94, &84          \ palettes used in three different places, all of them
+ EQUB &F5, &E5          \ redefining four colours in mode 5:
+ EQUB &B5, &A5          \
+                        \ 12 bytes from TVT1 (i.e. the first 6 rows): applied
+ EQUB &76, &66          \ when the T1 timer runs down at the switch from the
+ EQUB &36, &26          \ space view to the dashboard, so this is the standard
+                        \ dashboard palette
+ EQUB &E1, &F1          \
+ EQUB &B1, &A1          \ 8 bytes from TVT1+8 (i.e. the last 4 rows): applied
+                        \ when the T1 timer runs down at the switch from the
+                        \ space view to the dashboard, and we have an escape
+                        \ pod fitted, so this is the escape pod dashboard
+                        \ palette
+                        \
+                        \ 8 bytes from TVT1+8 (i.e. the last 4 rows): applied
+                        \ at vertical sync in LINSCN when HFX is non-zero, to
+                        \ create the hyperspace effect in LINSCN (where the
+                        \ whole screen is switched to mode 5 at vertical sync)
+
+ EQUB &F0, &E0          \ 12 bytes of palette data at TVT1+16, used to set the
+ EQUB &B0, &A0          \ mode 4 palette in LINSCN when we hit vertical sync,
+ EQUB &D0, &C0          \ so the palette is set to monochrome when we start to
+ EQUB &90, &80          \ draw the first row of the screen
+ EQUB &77, &67
+ EQUB &37, &27
+
+\ ******************************************************************************
+\
+\       Name: IRQ1
+\       Type: Subroutine
+\   Category: Screen mode
+\    Summary: The main screen-mode interrupt handler (IRQ1V points here)
+\  Deep dive: The split-screen mode
+\
+\ ------------------------------------------------------------------------------
+\
+\ The main interrupt handler, which implements Elite's split-screen mode (see
+\ the deep dive on "The split-screen mode" for details).
+\
+\ IRQ1V is set to point to IRQ1 by the loading process.
+\
+\ ******************************************************************************
+
+.LINSCN
+
+                        \ This is called from the interrupt handler below, at
+                        \ the start of each vertical sync (i.e. when the screen
+                        \ refresh starts)
+
+ LDA #30                \ Set the line scan counter to a non-zero value, so
+ STA DL                 \ routines like WSCAN can set DL to 0 and then wait for
+                        \ it to change to non-zero to catch the vertical sync
+
+ STA VIA+&44            \ Set 6522 System VIA T1C-L timer 1 low-order counter
+                        \ (SHEILA &44) to 30
+
+ LDA #VSCAN             \ Set 6522 System VIA T1C-L timer 1 high-order counter
+ STA VIA+&45            \ (SHEILA &45) to VSCAN (57) to start the T1 counter
+                        \ counting down from 14622 at a rate of 1 MHz
+
+ LDA HFX                \ If HFX is non-zero, jump to VNT1 to set the mode 5
+ BNE VNT1               \ palette instead of switching to mode 4, which will
+                        \ have the effect of blurring and colouring the top
+                        \ screen. This is how the white hyperspace rings turn
+                        \ to colour when we do a hyperspace jump, and is
+                        \ triggered by setting HFX to 1 in routine LL164
+
+ LDA #%00001000         \ Set the Video ULA control register (SHEILA &20) to
+ STA VIA+&20            \ %00001000, which is the same as switching to mode 4
+                        \ (i.e. the top part of the screen) but with no cursor
+
+.VNT3
+
+ LDA TVT1+16,Y          \ Copy the Y-th palette byte from TVT1+16 to SHEILA &21
+ STA VIA+&21            \ to map logical to actual colours for the bottom part
+                        \ of the screen (i.e. the dashboard)
+
+ DEY                    \ Decrement the palette byte counter
+
+ BPL VNT3               \ Loop back to VNT3 until we have copied all the
+                        \ palette bytes
+
+ LDA LASCT              \ Decrement the value of LASCT, but if we go too far
+ BEQ P%+5               \ and it becomes negative, bump it back up again (this
+ DEC LASCT              \ controls the pulsing of pulse lasers)
+
+ PLA                    \ Otherwise restore Y from the stack
+ TAY
+
+ LDA VIA+&41            \ Read 6522 System VIA input register IRA (SHEILA &41)
+
+ LDA &FC                \ Set A to the interrupt accumulator save register,
+                        \ which restores A to the value it had on entering the
+                        \ interrupt
+
+ RTI                    \ Return from interrupts, so this interrupt is not
+                        \ passed on to the next interrupt handler, but instead
+                        \ the interrupt terminates here
+
+.IRQ1
+
+ TYA                    \ Store Y on the stack
+ PHA
+
+ LDY #11                \ Set Y as a counter for 12 bytes, to use when setting
+                        \ the dashboard palette below
+
+ LDA #%00000010         \ Read the 6522 System VIA status byte bit 1 (SHEILA
+ BIT VIA+&4D            \ &4D), which is set if vertical sync has occurred on
+                        \ the video system
+
+ BNE LINSCN             \ If we are on the vertical sync pulse, jump to LINSCN
+                        \ to set up the timers to enable us to switch the
+                        \ screen mode between the space view and dashboard
+
+ BVC jvec               \ Read the 6522 System VIA status byte bit 6, which is
+                        \ set if timer 1 has timed out. We set the timer in
+                        \ LINSCN above, so this means we only run the next bit
+                        \ if the screen redraw has reached the boundary between
+                        \ the space view and the dashboard. Otherwise bit 6 is
+                        \ clear and we aren't at the boundary, so we jump to
+                        \ jvec to pass control to the next interrupt handler
+
+ ASL A                  \ Double the value in A to 4
+
+ STA VIA+&20            \ Set the Video ULA control register (SHEILA &20) to
+                        \ %00000100, which is the same as switching to mode 5,
+                        \ (i.e. the bottom part of the screen) but with no
+                        \ cursor
+
+ LDA ESCP               \ If an escape pod is fitted, jump to VNT1 to set the
+ BNE VNT1               \ mode 5 palette differently (so the dashboard is a
+                        \ different colour if we have an escape pod)
+
+ LDA TVT1,Y             \ Copy the Y-th palette byte from TVT1 to SHEILA &21
+ STA VIA+&21            \ to map logical to actual colours for the bottom part
+                        \ of the screen (i.e. the dashboard)
+
+ DEY                    \ Decrement the palette byte counter
+
+ BPL P%-7               \ Loop back to the LDA TVT1,Y instruction until we have
+                        \ copied all the palette bytes
+
+.jvec
+
+ PLA                    \ Restore Y from the stack
+ TAY
+
+ JMP (VEC)              \ Jump to the address in VEC, which was set to the
+                        \ original IRQ1V vector by the loading process, so this
+                        \ instruction passes control to the next interrupt
+                        \ handler
+
+.VNT1
+
+ LDY #7                 \ Set Y as a counter for 8 bytes
+
+ LDA TVT1+8,Y           \ Copy the Y-th palette byte from TVT1+8 to SHEILA &21
+ STA VIA+&21            \ to map logical to actual colours for the bottom part
+                        \ of the screen (i.e. the dashboard)
+
+ DEY                    \ Decrement the palette byte counter
+
+ BPL VNT1+2             \ Loop back to the LDA TVT1+8,Y instruction until we
+                        \ have copied all the palette bytes
+
+ BMI jvec               \ Jump up to jvec to pass control to the next interrupt
+                        \ handler (this BMI is effectively a JMP as we didn't
+                        \ loop back with the BPL above, so BMI is always true)
 
 \ ******************************************************************************
 \
@@ -2522,94 +1850,111 @@ ENDIF
 
  EQUB &58               \ The checksum value for the default commander, #75
 
- LDY #&00
- LDA #&0D
+\ ******************************************************************************
+\
+\       Name: BRBR1
+\       Type: Subroutine
+\   Category: Loader
+\    Summary: Loader break handler: print a newline and the error message, and
+\             then hang the computer
+\
+\ ------------------------------------------------------------------------------
+\
+\ This break handler is used during loading and during flight, and is resident
+\ in memory throughout the game's lifecycle. The docked code loads its own
+\ break handler and overrides this one until the flight code is run.
+\
+\ The main difference between the two handlers is that this one display the
+\ error and then hangs, while the docked code displays the error and returns.
+\ This is because the docked code has to cope gracefully with errors from the
+\ disc access menu (such as "File not found"), which we obviously don't want to
+\ terminate the game.
+\
+\ ******************************************************************************
 
-.brkloop
+.BRBR1
 
- JSR OSWRCH
- INY 
- LDA (&FD),Y
- BNE brkloop
+                        \ The following loop prints out the null-terminated
+                        \ message pointed to by (&FD &FE), which is the MOS
+                        \ error message pointer - so this prints the error
+                        \ message on the next line
 
-.halt
+ LDY #0                 \ Set Y = 0 to act as a character counter
 
- BEQ halt
+ LDA #13                \ Set A = 13 so the first character printed is a
+                        \ carriage return
 
-.to6300
+.BRBRLOOP
 
- EQUB &00, &00, &00, &00, &00, &00, &07, &3F, &00, &00, &00, &03
- EQUB &1F, &FF, &FF, &FF, &00, &0F, &7F, &FF, &FF, &FF, &FF, &FF
- EQUB &00, &FF, &FF, &FF, &FF, &E0, &80, &FF, &00, &FF, &E0, &00
- EQUB &FF, &00, &00, &FF, &00, &FF, &00, &00, &FE, &00, &00, &FE
- EQUB &00, &FF, &00, &00, &00, &00, &03, &0F, &00, &E1, &07, &0F
- EQUB &3F, &FF, &FF, &FF, &00, &FF, &FF, &FF, &FF, &FF, &FF, &FF
- EQUB &00, &FF, &FE, &FC, &F0, &E0, &C0, &FF, &00, &00, &00, &00
- EQUB &00, &00, &00, &FF, &00, &00, &00, &00, &00, &00, &00, &FF
- EQUB &00, &00, &00, &00, &00, &00, &00, &83, &00, &3F, &00, &00
- EQUB &00, &00, &00, &FF, &00, &FF, &0F, &0F, &0F, &0F, &1F, &FF
- EQUB &00, &FF, &FF, &FF, &FF, &FF, &FF, &FF, &00, &FF, &FC, &FC
- EQUB &FC, &FC, &FE, &FF, &00, &FF, &00, &00, &00, &00, &00, &FF
- EQUB &00, &87, &00, &00, &00, &00, &00, &E0, &00, &FF, &00, &00
- EQUB &00, &00, &00, &00, &00, &FF, &7F, &7F, &3F, &1F, &0F, &07
- EQUB &00, &FF, &FF, &FF, &FF, &FF, &FF, &FF, &00, &FF, &C0, &E0
- EQUB &F8, &FC, &FE, &FF, &00, &E0, &00, &00, &00, &00, &00, &80
- EQUB &00, &FF, &3F, &1F, &07, &01, &00, &00, &00, &FF, &FF, &FF
- EQUB &FF, &FF, &7F, &1F, &00, &FF, &E0, &F8, &FF, &FF, &FF, &FF
- EQUB &00, &FF, &00, &00, &FF, &C0, &F0, &FF, &00, &FC, &00, &00
- EQUB &FF, &00, &00, &FF, &00, &00, &00, &00, &80, &00, &00, &FF
- EQUB &00, &00, &00, &00, &00, &00, &00, &FE, &00, &00, &00, &00
- EQUB &00, &00, &00, &00
+ JSR OSWRCH             \ Print the character in A (which contains a carriage
+                        \ return on the first loop iteration), and then any
+                        \ characters we fetch from the error message
 
-.to6100
+ INY                    \ Increment the loop counter
 
- EQUB &00, &00, &00, &00, &00, &00, &00, &00, &00, &00, &00, &00
- EQUB &00, &00, &00, &00, &00, &00, &00, &00, &00, &00, &00, &00
- EQUB &00, &00, &00, &00, &00, &00, &00, &00, &00, &00, &00, &00
- EQUB &00, &00, &00, &00, &00, &00, &00, &00, &00, &00, &00, &07
- EQUB &00, &00, &00, &00, &03, &1F, &F8, &C3, &00, &00, &0F, &7C
- EQUB &FF, &0F, &7C, &F0, &00, &3F, &8F, &7C, &F1, &8F, &3F, &3F
- EQUB &00, &C0, &8F, &7C, &F0, &C0, &1F, &F0, &00, &FF, &9F, &00
- EQUB &00, &03, &8F, &07, &00, &01, &1F, &7C, &F8, &E1, &C7, &FE
- EQUB &00, &FE, &1F, &7C, &F8, &F1, &E3, &07, &00, &1F, &3E, &7C
- EQUB &FF, &FB, &F0, &E1, &00, &FC, &3E, &7C, &F0, &E0, &F8, &F8
- EQUB &00, &3E, &3E, &7F, &7F, &7C, &7C, &FC, &00, &7C, &7C, &BE
- EQUB &FE, &FE, &3E, &3F, &00, &3F, &7C, &3E, &0F, &00, &1F, &03
- EQUB &00, &E0, &7C, &00, &F8, &1F, &0F, &FF, &00, &7F, &F8, &3E
- EQUB &1F, &8F, &C7, &00, &00, &83, &F8, &3E, &1F, &87, &E3, &7F
- EQUB &00, &FF, &F8, &3E, &0F, &C7, &F1, &E0, &00, &CF, &00, &00
- EQUB &FE, &E0, &F8, &7E, &00, &FF, &1F, &03, &00, &00, &00, &00
- EQUB &00, &00, &00, &E0, &7C, &1F, &03, &00, &00, &00, &00, &00
- EQUB &00, &80, &F0, &7E, &00, &00, &00, &00, &00, &00, &00, &00
- EQUB &00, &00, &00, &00, &00, &00, &00, &00, &00, &00, &00, &00
- EQUB &00, &00, &00, &00, &00, &00, &00, &00, &00, &00, &00, &00
- EQUB &00, &00, &00, &00, &00, &00, &00, &00, &00, &00, &00, &00
- EQUB &00, &00, &00, &00
+ LDA (&FD),Y            \ Fetch the Y-th byte of the block pointed to by
+                        \ (&FD &FE), so that's the Y-th character of the message
+                        \ pointed to by the MOS error message pointer
 
-.to7600
+ BNE BRBRLOOP           \ If the fetched character is non-zero, loop back to the
+                        \ JSR OSWRCH above to print the it, and keep looping
+                        \ until we fetch a zero (which marks the end of the
+                        \ message)
 
- EQUB &00, &00, &00, &00, &00, &00, &00, &00, &00, &00, &00, &00
- EQUB &00, &00, &00, &00, &00, &00, &00, &00, &00, &00, &00, &00
- EQUB &00, &00, &00, &00, &00, &00, &00, &00, &00, &00, &00, &00
- EQUB &00, &01, &03, &07, &00, &00, &01, &0E, &38, &E0, &C3, &87
- EQUB &00, &38, &C3, &0E, &38, &E0, &9C, &E1, &00, &7C, &B8, &00
- EQUB &03, &07, &38, &C0, &00, &70, &70, &E0, &C0, &00, &00, &00
- EQUB &00, &00, &00, &01, &03, &0F, &1C, &39, &00, &3F, &E7, &DE
- EQUB &FD, &73, &E7, &C7, &00, &00, &00, &7E, &CE, &81, &39, &E1
- EQUB &00, &00, &00, &3F, &E7, &EE, &DE, &F8, &00, &00, &00, &3F
- EQUB &7F, &70, &F0, &E0, &00, &00, &00, &9F, &9D, &3D, &3D, &39
- EQUB &00, &00, &00, &C7, &EE, &E7, &C0, &CF, &00, &00, &00, &F3
- EQUB &07, &E7, &73, &E1, &00, &00, &01, &F1, &B9, &BC, &BC, &F8
- EQUB &00, &F1, &C0, &E1, &F8, &F0, &70, &78, &00, &C0, &E0, &FC
- EQUB &70, &38, &3C, &0F, &00, &00, &00, &00, &00, &00, &00, &80
- EQUB &00, &70, &7C, &0E, &07, &03, &01, &03, &00, &7C, &77, &3D
- EQUB &07, &80, &E0, &FC, &00, &7E, &BB, &DE, &F3, &39, &3C, &7C
- EQUB &00, &0E, &87, &E3, &F3, &DE, &F7, &1F, &00, &00, &80, &E0
- EQUB &F8, &FF, &83, &80, &00, &00, &00, &00, &00, &00, &80, &E0
- EQUB &00, &00, &00, &00, &00, &00, &00, &00, &00, &00, &00, &00
- EQUB &00, &00, &00, &00, &00, &00, &00, &00, &00, &00, &00, &00
- EQUB &00, &00, &00, &00, &00, &00, &00, &00, &00, &00, &00, &00
- EQUB &00, &00, &00, &00
+ BEQ P%                 \ Hang the computer as something has gone wrong
+
+COPYBLOCK TVT1, P%, TVT1code
+
+ORG TVT1code + P% - TVT1
+
+\ ******************************************************************************
+\
+\       Name: Elite loader (Part 3 of 3)
+\       Type: Subroutine
+\   Category: Loader
+\    Summary: Include binaries for the loading screen images
+\
+\ ------------------------------------------------------------------------------
+\
+\ The loader bundles a number of binary files in with the loader code, and moves
+\ them to their correct memory locations in part 1 above.
+\
+\ This section is encrypted by EOR'ing with &A5. The encryption is done by the
+\ elite-checksum.py script, and decryption is done in part 1 above, at the same
+\ time as each block is moved to its correct location.
+\
+\ This part includes three files containing images, which are all moved into
+\ screen memory by the loader:
+\
+\   * P.A-SOFT.bin contains the "ACORNSOFT" title across the top of the loading
+\     screen, which gets moved to screen address &6100, on the second character
+\     row of the monochrome mode 4 screen
+\
+\   * P.ELITE.bin contains the "ELITE" title across the top of the loading
+\     screen, which gets moved to screen address &6300, on the fourth character
+\     row of the monochrome mode 4 screen
+\
+\   * P.(C)ASFT.bin contains the "(C) Acornsoft 1984" title across the bottom
+\     of the loading screen, which gets moved to screen address &7600, the
+\     penultimate character row of the monochrome mode 4 screen, just above the
+\     dashboard
+\
+\ There are three other binaries bundled into the loader, which are described in
+\ part 2 above.
+\
+\ ******************************************************************************
+
+.ELITE
+
+ INCBIN "binaries/P.ELITE.bin"
+
+.ASOFT
+
+ INCBIN "binaries/P.A-SOFT.bin"
+
+.CpASOFT
+
+ INCBIN "binaries/P.(C)ASFT.bin"
 
  \ BBC Master 128 code for save/restore characters
 CPU 1

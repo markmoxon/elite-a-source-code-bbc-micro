@@ -2,7 +2,7 @@
 \
 \ ELITE-A DOCKED SOURCE
 \
-\ Elite-A is an extended version of BBC Micro Elite, written by Angus Duggan
+\ Elite-A is an extended version of BBC Micro Elite by Angus Duggan
 \
 \ The original Elite was written by Ian Bell and David Braben and is copyright
 \ Acornsoft 1984, and the extra code in Elite-A is copyright Angus Duggan
@@ -30586,7 +30586,7 @@ ENDMACRO
  FACE        0,        0,     -160,         31    \ Face 8
  FACE        0,      -27,        0,         31    \ Face 9
 
-SKIP 171
+ SKIP 171
 
 \ ******************************************************************************
 \
