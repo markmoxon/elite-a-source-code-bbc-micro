@@ -30,7 +30,9 @@ build:
 	echo _RELEASE=$(rel-elite-a) >> sources/elite-header.h.asm
 	echo _REMOVE_CHECKSUMS=FALSE >> sources/elite-header.h.asm
 	echo _MATCH_EXTRACTED_BINARIES=TRUE >> sources/elite-header.h.asm
-	$(BEEBASM) -i sources/elite-source-docked.asm -v > output/compile.txt
+	$(BEEBASM) -i sources/elite-text-tokens.asm -v > output/compile.txt
+	$(BEEBASM) -i sources/elite-missile.asm -v >> output/compile.txt
+	$(BEEBASM) -i sources/elite-source-docked.asm -v >> output/compile.txt
 	$(BEEBASM) -i sources/elite-source-flight.asm -v >> output/compile.txt
 	$(BEEBASM) -i sources/elite-source-encyclopedia.asm -v >> output/compile.txt
 	$(BEEBASM) -i sources/elite-6502sp-parasite.asm -v >> output/compile.txt
@@ -44,6 +46,8 @@ encrypt:
 	echo _RELEASE=$(rel-elite-a) >> sources/elite-header.h.asm
 	echo _REMOVE_CHECKSUMS=FALSE >> sources/elite-header.h.asm
 	echo _MATCH_EXTRACTED_BINARIES=TRUE >> sources/elite-header.h.asm
+	$(BEEBASM) -i sources/elite-text-tokens.asm -v > output/compile.txt
+	$(BEEBASM) -i sources/elite-missile.asm -v >> output/compile.txt
 	$(BEEBASM) -i sources/elite-source-docked.asm -v > output/compile.txt
 	$(BEEBASM) -i sources/elite-source-flight.asm -v >> output/compile.txt
 	$(BEEBASM) -i sources/elite-source-encyclopedia.asm -v >> output/compile.txt
