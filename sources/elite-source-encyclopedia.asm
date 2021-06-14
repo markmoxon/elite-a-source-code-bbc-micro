@@ -2049,7 +2049,7 @@ BRKV = P% - 2
 \
 \       Name: launch
 \       Type: Subroutine
-\   Category: Elite-A: Loader
+\   Category: Loader
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -2065,7 +2065,7 @@ BRKV = P% - 2
 \
 \       Name: escape
 \       Type: Subroutine
-\   Category: Elite-A: Start and end
+\   Category: Start and end
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -2080,7 +2080,7 @@ BRKV = P% - 2
 \
 \       Name: DOENTRY
 \       Type: Subroutine
-\   Category: Elite-A: Loader
+\   Category: Loader
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -2113,7 +2113,7 @@ BRKV = P% - 2
 \
 \       Name: write_msg3
 \       Type: Subroutine
-\   Category: Elite-A: Text
+\   Category: Text
 \    Summary: Print an extended recursive token from the msg_3 token table
 \  Deep dive: Extended text tokens
 \
@@ -2656,7 +2656,7 @@ BRKV = P% - 2
 \
 \       Name: column_16
 \       Type: Subroutine
-\   Category: Elite-A: Text
+\   Category: Text
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -2759,7 +2759,7 @@ BRKV = P% - 2
 \
 \       Name: clr_vdustat
 \       Type: Subroutine
-\   Category: Elite-A: Text
+\   Category: Text
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -7708,7 +7708,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
 .BOL1
 
- JSR ZES1               \ Call ZES1  to zero-fill the page in X, which clears
+ JSR ZES1               \ Call ZES1 to zero-fill the page in X, which clears
                         \ that character row on the screen
 
  INX                    \ Increment X to point to the next page, i.e. the next
@@ -9837,7 +9837,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 \
 \       Name: func_tab
 \       Type: Variable
-\   Category: Elite-A: Keyboard
+\   Category: Keyboard
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -9850,7 +9850,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 \
 \       Name: buy_invnt
 \       Type: Subroutine
-\   Category: Elite-A: Buying ships
+\   Category: Buying ships
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -18333,7 +18333,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 \
 \       Name: info_menu
 \       Type: Subroutine
-\   Category: Elite-A: Encyclopedia
+\   Category: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -18379,7 +18379,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 \
 \       Name: ships_ag
 \       Type: Subroutine
-\   Category: Elite-A: Encyclopedia
+\   Category: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -18474,7 +18474,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 \
 \       Name: controls
 \       Type: Subroutine
-\   Category: Elite-A: Encyclopedia
+\   Category: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -18505,7 +18505,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 \
 \       Name: equip_data
 \       Type: Subroutine
-\   Category: Elite-A: Encyclopedia
+\   Category: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -18540,7 +18540,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 \
 \       Name: trading
 \       Type: Subroutine
-\   Category: Elite-A: Encyclopedia
+\   Category: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -18557,7 +18557,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 \
 \       Name: write_card
 \       Type: Subroutine
-\   Category: Elite-A: Encyclopedia
+\   Category: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -18659,7 +18659,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 \
 \       Name: ship_load
 \       Type: Variable
-\   Category: Elite-A: Encyclopedia
+\   Category: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -18672,7 +18672,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 \
 \       Name: ship_file
 \       Type: Variable
-\   Category: Elite-A: Encyclopedia
+\   Category: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -18688,7 +18688,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 \
 \       Name: ship_posn
 \       Type: Variable
-\   Category: Elite-A: Encyclopedia
+\   Category: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -18704,7 +18704,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 \
 \       Name: ship_dist
 \       Type: Variable
-\   Category: Elite-A: Encyclopedia
+\   Category: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -18720,7 +18720,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 \
 \       Name: menu
 \       Type: Subroutine
-\   Category: Elite-A: Encyclopedia
+\   Category: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -18789,7 +18789,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 \
 \       Name: menu_title
 \       Type: Variable
-\   Category: Elite-A: Encyclopedia
+\   Category: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -18802,7 +18802,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 \
 \       Name: menu_titlex
 \       Type: Variable
-\   Category: Elite-A: Encyclopedia
+\   Category: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -18815,7 +18815,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 \
 \       Name: menu_offset
 \       Type: Variable
-\   Category: Elite-A: Encyclopedia
+\   Category: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -18828,7 +18828,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 \
 \       Name: menu_entry
 \       Type: Variable
-\   Category: Elite-A: Encyclopedia
+\   Category: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -18841,7 +18841,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 \
 \       Name: menu_query
 \       Type: Variable
-\   Category: Elite-A: Encyclopedia
+\   Category: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -20806,7 +20806,7 @@ ENDMACRO
 \
 \       Name: msg_3
 \       Type: Variable
-\   Category: Elite-A: Text
+\   Category: Text
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -24767,7 +24767,7 @@ ENDMACRO
 \
 \       Name: ship_centre
 \       Type: Variable
-\   Category: Elite-A: Encyclopedia
+\   Category: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -24783,7 +24783,7 @@ ENDMACRO
 \
 \       Name: card_pattern
 \       Type: Variable
-\   Category: Elite-A: Encyclopedia
+\   Category: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -24820,7 +24820,7 @@ ENDMACRO
 \
 \       Name: card_addr
 \       Type: Variable
-\   Category: Elite-A: Encyclopedia
+\   Category: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -24838,7 +24838,7 @@ ENDMACRO
 \
 \       Name: adder
 \       Type: Variable
-\   Category: Elite-A: Encyclopedia
+\   Category: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -24871,7 +24871,7 @@ ENDMACRO
 \
 \       Name: anaconda
 \       Type: Variable
-\   Category: Elite-A: Encyclopedia
+\   Category: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -24904,7 +24904,7 @@ ENDMACRO
 \
 \       Name: asp_2
 \       Type: Variable
-\   Category: Elite-A: Encyclopedia
+\   Category: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -24937,7 +24937,7 @@ ENDMACRO
 \
 \       Name: boa
 \       Type: Variable
-\   Category: Elite-A: Encyclopedia
+\   Category: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -24970,7 +24970,7 @@ ENDMACRO
 \
 \       Name: bushmaster
 \       Type: Variable
-\   Category: Elite-A: Encyclopedia
+\   Category: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -24999,7 +24999,7 @@ ENDMACRO
 \
 \       Name: chameleon
 \       Type: Variable
-\   Category: Elite-A: Encyclopedia
+\   Category: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -25032,7 +25032,7 @@ ENDMACRO
 \
 \       Name: cobra_1
 \       Type: Variable
-\   Category: Elite-A: Encyclopedia
+\   Category: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -25065,7 +25065,7 @@ ENDMACRO
 \
 \       Name: cobra_3
 \       Type: Variable
-\   Category: Elite-A: Encyclopedia
+\   Category: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -25098,7 +25098,7 @@ ENDMACRO
 \
 \       Name: coriolis
 \       Type: Variable
-\   Category: Elite-A: Encyclopedia
+\   Category: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -25117,7 +25117,7 @@ ENDMACRO
 \
 \       Name: dodecagon
 \       Type: Variable
-\   Category: Elite-A: Encyclopedia
+\   Category: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -25136,7 +25136,7 @@ ENDMACRO
 \
 \       Name: escape_pod
 \       Type: Variable
-\   Category: Elite-A: Encyclopedia
+\   Category: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -25157,7 +25157,7 @@ ENDMACRO
 \
 \       Name: fer_de_lance
 \       Type: Variable
-\   Category: Elite-A: Encyclopedia
+\   Category: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -25190,7 +25190,7 @@ ENDMACRO
 \
 \       Name: gecko
 \       Type: Variable
-\   Category: Elite-A: Encyclopedia
+\   Category: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -25223,7 +25223,7 @@ ENDMACRO
 \
 \       Name: ghavial
 \       Type: Variable
-\   Category: Elite-A: Encyclopedia
+\   Category: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -25256,7 +25256,7 @@ ENDMACRO
 \
 \       Name: iguana
 \       Type: Variable
-\   Category: Elite-A: Encyclopedia
+\   Category: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -25289,7 +25289,7 @@ ENDMACRO
 \
 \       Name: krait
 \       Type: Variable
-\   Category: Elite-A: Encyclopedia
+\   Category: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -25320,7 +25320,7 @@ ENDMACRO
 \
 \       Name: mamba
 \       Type: Variable
-\   Category: Elite-A: Encyclopedia
+\   Category: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -25351,7 +25351,7 @@ ENDMACRO
 \
 \       Name: monitor
 \       Type: Variable
-\   Category: Elite-A: Encyclopedia
+\   Category: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -25384,7 +25384,7 @@ ENDMACRO
 \
 \       Name: moray
 \       Type: Variable
-\   Category: Elite-A: Encyclopedia
+\   Category: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -25417,7 +25417,7 @@ ENDMACRO
 \
 \       Name: ophidian
 \       Type: Variable
-\   Category: Elite-A: Encyclopedia
+\   Category: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -25450,7 +25450,7 @@ ENDMACRO
 \
 \       Name: python
 \       Type: Variable
-\   Category: Elite-A: Encyclopedia
+\   Category: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -25483,7 +25483,7 @@ ENDMACRO
 \
 \       Name: shuttle
 \       Type: Variable
-\   Category: Elite-A: Encyclopedia
+\   Category: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -25510,7 +25510,7 @@ ENDMACRO
 \
 \       Name: sidewinder
 \       Type: Variable
-\   Category: Elite-A: Encyclopedia
+\   Category: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -25539,7 +25539,7 @@ ENDMACRO
 \
 \       Name: thargoid
 \       Type: Variable
-\   Category: Elite-A: Encyclopedia
+\   Category: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -25568,7 +25568,7 @@ ENDMACRO
 \
 \       Name: thargon
 \       Type: Variable
-\   Category: Elite-A: Encyclopedia
+\   Category: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -25595,7 +25595,7 @@ ENDMACRO
 \
 \       Name: transporter
 \       Type: Variable
-\   Category: Elite-A: Encyclopedia
+\   Category: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -25618,7 +25618,7 @@ ENDMACRO
 \
 \       Name: viper
 \       Type: Variable
-\   Category: Elite-A: Encyclopedia
+\   Category: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -25647,7 +25647,7 @@ ENDMACRO
 \
 \       Name: worm
 \       Type: Variable
-\   Category: Elite-A: Encyclopedia
+\   Category: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************

@@ -10506,7 +10506,7 @@ LOAD_C% = LOAD% +P% - CODE%
 \
 \       Name: anger_8c
 \       Type: Subroutine
-\   Category: Elite-A: Tactics
+\   Category: Tactics
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -13416,7 +13416,7 @@ LOAD_D% = LOAD% + P% - CODE%
 \
 \       Name: tnpr_FLIGHT
 \       Type: Subroutine
-\   Category: Elite-A: Market
+\   Category: Market
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -18773,7 +18773,7 @@ LOAD_E% = LOAD% + P% - CODE%
 \
 \       Name: n_oops
 \       Type: Subroutine
-\   Category: Elite-A: Flight
+\   Category: Flight
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -22617,7 +22617,7 @@ LOAD_F% = LOAD% + P% - CODE%
 \
 \       Name: rand_posn
 \       Type: Subroutine
-\   Category: Elite-A: Universe
+\   Category: Universe
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -25177,7 +25177,7 @@ LOAD_F% = LOAD% + P% - CODE%
 \
 \       Name: b_table
 \       Type: Variable
-\   Category: Elite-A: Keyboard
+\   Category: Keyboard
 \    Summary: Lookup table for Voltmace Delta 14 joystick buttons AJD
 \
 \ ******************************************************************************
@@ -25191,7 +25191,7 @@ LOAD_F% = LOAD% + P% - CODE%
 \
 \       Name: b_14
 \       Type: Subroutine
-\   Category: Elite-A: Keyboard
+\   Category: Keyboard
 \    Summary: Check Voltmace Delta 14 joystick buttons AJD
 \
 \ ******************************************************************************
@@ -25211,6 +25211,7 @@ LOAD_F% = LOAD% + P% - CODE%
  BEQ b_pressed
  TXA
  BMI b_13
+
  RTS
 
 \ ******************************************************************************
@@ -25986,7 +25987,7 @@ LOAD_F% = LOAD% + P% - CODE%
 \
 \       Name: cargo_mtok
 \       Type: Subroutine
-\   Category: Elite-A: Text
+\   Category: Text
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -32018,7 +32019,7 @@ ENDMACRO
 
 .BOL1
 
- JSR ZES1               \ Call ZES1  to zero-fill the page in X, which clears
+ JSR ZES1               \ Call ZES1 to zero-fill the page in X, which clears
                         \ that character row on the screen
 
  INX                    \ Increment X to point to the next page, i.e. the next
@@ -32253,7 +32254,7 @@ ENDMACRO
 \
 \       Name: iff_xor
 \       Type: Variable
-\   Category: Elite-A: Dashboard
+\   Category: Dashboard
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -32266,7 +32267,7 @@ ENDMACRO
 \
 \       Name: iff_base
 \       Type: Variable
-\   Category: Elite-A: Dashboard
+\   Category: Dashboard
 \    Summary: AJD
 \
 \ ******************************************************************************

@@ -2212,7 +2212,7 @@ ENDIF
 \
 \       Name: tube_write
 \       Type: Subroutine
-\   Category: Elite-A: Tube
+\   Category: Tube
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -2229,7 +2229,7 @@ ENDIF
 \
 \       Name: tube_read
 \       Type: Subroutine
-\   Category: Elite-A: Tube
+\   Category: Tube
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -2402,7 +2402,7 @@ ENDIF
 \
 \       Name: scramble
 \       Type: Subroutine
-\   Category: Elite-A: Loader
+\   Category: Loader
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -2433,7 +2433,7 @@ ENDIF
 \
 \       Name: write_msg3
 \       Type: Subroutine
-\   Category: Elite-A: Text
+\   Category: Text
 \    Summary: Print an extended recursive token from the msg_3 token table
 \  Deep dive: Extended text tokens
 \
@@ -4077,7 +4077,7 @@ LOAD_B% = LOAD% + P% - CODE%
 \
 \       Name: LL30
 \       Type: Subroutine
-\   Category: Elite-A: Drawing lines
+\   Category: Drawing lines
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -4263,7 +4263,7 @@ LOAD_B% = LOAD% + P% - CODE%
 \
 \       Name: HLOIN
 \       Type: Subroutine
-\   Category: Elite-A: Drawing lines
+\   Category: Drawing lines
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -4283,7 +4283,7 @@ LOAD_B% = LOAD% + P% - CODE%
 \
 \       Name: PIXEL
 \       Type: Subroutine
-\   Category: Elite-A: Drawing pixels
+\   Category: Drawing pixels
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -6655,7 +6655,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 \
 \       Name: DIL2
 \       Type: Subroutine
-\   Category: Elite-A: Dashboard
+\   Category: Dashboard
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -7096,7 +7096,7 @@ LOAD_C% = LOAD% +P% - CODE%
 \
 \       Name: HANGER
 \       Type: Subroutine
-\   Category: Elite-A: Ship hanger
+\   Category: Ship hanger
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -7303,7 +7303,7 @@ LOAD_C% = LOAD% +P% - CODE%
 \
 \       Name: UNWISE
 \       Type: Subroutine
-\   Category: Elite-A: Ship hanger
+\   Category: Ship hanger
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -8850,7 +8850,7 @@ LOAD_C% = LOAD% +P% - CODE%
 \
 \       Name: CLYNS
 \       Type: Subroutine
-\   Category: Elite-A: Utility routines
+\   Category: Utility routines
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -8872,7 +8872,7 @@ LOAD_C% = LOAD% +P% - CODE%
 \
 \       Name: WSCAN
 \       Type: Subroutine
-\   Category: Elite-A: Screen mode
+\   Category: Screen mode
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -10225,7 +10225,7 @@ LOAD_D% = LOAD% + P% - CODE%
 \
 \       Name: sell_yn
 \       Type: Subroutine
-\   Category: Elite-A: Text
+\   Category: Text
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -10377,7 +10377,7 @@ LOAD_D% = LOAD% + P% - CODE%
 \
 \       Name: sell_jump
 \       Type: Subroutine
-\   Category: Elite-A: Buying ships
+\   Category: Buying ships
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -12150,7 +12150,7 @@ LOAD_D% = LOAD% + P% - CODE%
 \
 \       Name: update_pod
 \       Type: Subroutine
-\   Category: Elite-A: Dashboard
+\   Category: Dashboard
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -13929,7 +13929,7 @@ LOAD_E% = LOAD% + P% - CODE%
 \
 \       Name: MSBAR
 \       Type: Subroutine
-\   Category: Elite-A: Dashboard
+\   Category: Dashboard
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -15623,7 +15623,7 @@ LOAD_F% = LOAD% + P% - CODE%
 \
 \       Name: INBAY
 \       Type: Subroutine
-\   Category: Elite-A: Loader
+\   Category: Loader
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -15642,7 +15642,7 @@ LOAD_F% = LOAD% + P% - CODE%
 \
 \       Name: boot_in
 \       Type: Subroutine
-\   Category: Elite-A: Loader
+\   Category: Loader
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -16890,7 +16890,7 @@ ENDIF
 \
 \       Name: confirm
 \       Type: Subroutine
-\   Category: Elite-A: Save and load
+\   Category: Save and load
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -17239,7 +17239,7 @@ ENDIF
 \
 \       Name: scan_fire
 \       Type: Subroutine
-\   Category: Elite-A: Keyboard
+\   Category: Keyboard
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -17254,7 +17254,7 @@ ENDIF
 \
 \       Name: RDKEY
 \       Type: Subroutine
-\   Category: Elite-A: Keyboard
+\   Category: Keyboard
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -17448,7 +17448,7 @@ ENDIF
 \
 \       Name: DKS4
 \       Type: Subroutine
-\   Category: Elite-A: Keyboard
+\   Category: Keyboard
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -17724,7 +17724,7 @@ ENDIF
 \
 \       Name: TT217
 \       Type: Subroutine
-\   Category: Elite-A: Keyboard
+\   Category: Keyboard
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -22053,7 +22053,7 @@ LOAD_G% = LOAD% + P% - CODE%
 \
 \       Name: n_buyship
 \       Type: Subroutine
-\   Category: Elite-A: Buying ships
+\   Category: Buying ships
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -22173,7 +22173,7 @@ LOAD_G% = LOAD% + P% - CODE%
 \
 \       Name: n_load
 \       Type: Subroutine
-\   Category: Elite-A: Buying ships
+\   Category: Buying ships
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -22222,7 +22222,7 @@ LOAD_G% = LOAD% + P% - CODE%
 \
 \       Name: count_offs
 \       Type: Variable
-\   Category: Elite-A: Buying ships
+\   Category: Buying ships
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -22235,7 +22235,7 @@ LOAD_G% = LOAD% + P% - CODE%
 \
 \       Name: n_name
 \       Type: Subroutine
-\   Category: Elite-A: Buying ships
+\   Category: Buying ships
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -22262,7 +22262,7 @@ LOAD_G% = LOAD% + P% - CODE%
 \
 \       Name: n_price
 \       Type: Subroutine
-\   Category: Elite-A: Buying ships
+\   Category: Buying ships
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -22286,7 +22286,7 @@ LOAD_G% = LOAD% + P% - CODE%
 \
 \       Name: cour_buy
 \       Type: Subroutine
-\   Category: Elite-A: Buying ships
+\   Category: Buying ships
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -22501,7 +22501,7 @@ LOAD_G% = LOAD% + P% - CODE%
 \
 \       Name: cour_dock
 \       Type: Subroutine
-\   Category: Elite-A: Buying ships
+\   Category: Buying ships
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -22554,7 +22554,7 @@ LOAD_G% = LOAD% + P% - CODE%
 \
 \       Name: stay_here
 \       Type: Subroutine
-\   Category: Elite-A: Buying ships
+\   Category: Buying ships
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -22677,7 +22677,7 @@ LOAD_G% = LOAD% + P% - CODE%
 \
 \       Name: new_offsets
 \       Type: Variable
-\   Category: Elite-A: Buying ships
+\   Category: Buying ships
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -22697,7 +22697,7 @@ LOAD_G% = LOAD% + P% - CODE%
 \
 \       Name: new_ships
 \       Type: Variable
-\   Category: Elite-A: Buying ships
+\   Category: Buying ships
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -22808,7 +22808,7 @@ ENDIF
 \
 \       Name: new_details
 \       Type: Variable
-\   Category: Elite-A: Buying ships
+\   Category: Buying ships
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -27207,7 +27207,7 @@ ENDMACRO
 \
 \       Name: msg_3
 \       Type: Variable
-\   Category: Elite-A: Text
+\   Category: Text
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -32668,7 +32668,7 @@ LOAD_I% = LOAD% + P% - CODE%
 \
 \       Name: encyclopedia
 \       Type: Subroutine
-\   Category: Elite-A: Encyclopedia
+\   Category: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -32713,7 +32713,7 @@ LOAD_I% = LOAD% + P% - CODE%
 \
 \       Name: ships_ag
 \       Type: Subroutine
-\   Category: Elite-A: Encyclopedia
+\   Category: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -32798,7 +32798,7 @@ LOAD_I% = LOAD% + P% - CODE%
 \
 \       Name: controls
 \       Type: Subroutine
-\   Category: Elite-A: Encyclopedia
+\   Category: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -32829,7 +32829,7 @@ LOAD_I% = LOAD% + P% - CODE%
 \
 \       Name: equip_data
 \       Type: Subroutine
-\   Category: Elite-A: Encyclopedia
+\   Category: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -32864,7 +32864,7 @@ LOAD_I% = LOAD% + P% - CODE%
 \
 \       Name: trading
 \       Type: Subroutine
-\   Category: Elite-A: Encyclopedia
+\   Category: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -32883,7 +32883,7 @@ LOAD_I% = LOAD% + P% - CODE%
 \
 \       Name: check_keys
 \       Type: Subroutine
-\   Category: Elite-A: Keyboard
+\   Category: Keyboard
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -32926,7 +32926,7 @@ LOAD_I% = LOAD% + P% - CODE%
 \
 \       Name: write_card
 \       Type: Subroutine
-\   Category: Elite-A: Encyclopedia
+\   Category: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -33028,7 +33028,7 @@ LOAD_I% = LOAD% + P% - CODE%
 \
 \       Name: ship_posn
 \       Type: Variable
-\   Category: Elite-A: Encyclopedia
+\   Category: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -33044,7 +33044,7 @@ LOAD_I% = LOAD% + P% - CODE%
 \
 \       Name: ship_dist
 \       Type: Variable
-\   Category: Elite-A: Encyclopedia
+\   Category: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -33060,7 +33060,7 @@ LOAD_I% = LOAD% + P% - CODE%
 \
 \       Name: menu
 \       Type: Subroutine
-\   Category: Elite-A: Encyclopedia
+\   Category: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -33129,7 +33129,7 @@ LOAD_I% = LOAD% + P% - CODE%
 \
 \       Name: menu_title
 \       Type: Variable
-\   Category: Elite-A: Encyclopedia
+\   Category: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -33142,7 +33142,7 @@ LOAD_I% = LOAD% + P% - CODE%
 \
 \       Name: menu_titlex
 \       Type: Variable
-\   Category: Elite-A: Encyclopedia
+\   Category: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -33155,7 +33155,7 @@ LOAD_I% = LOAD% + P% - CODE%
 \
 \       Name: menu_offset
 \       Type: Variable
-\   Category: Elite-A: Encyclopedia
+\   Category: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -33168,7 +33168,7 @@ LOAD_I% = LOAD% + P% - CODE%
 \
 \       Name: menu_entry
 \       Type: Variable
-\   Category: Elite-A: Encyclopedia
+\   Category: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -33181,7 +33181,7 @@ LOAD_I% = LOAD% + P% - CODE%
 \
 \       Name: menu_query
 \       Type: Variable
-\   Category: Elite-A: Encyclopedia
+\   Category: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -33194,7 +33194,7 @@ LOAD_I% = LOAD% + P% - CODE%
 \
 \       Name: ship_centre
 \       Type: Variable
-\   Category: Elite-A: Encyclopedia
+\   Category: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -33210,7 +33210,7 @@ LOAD_I% = LOAD% + P% - CODE%
 \
 \       Name: card_pattern
 \       Type: Variable
-\   Category: Elite-A: Encyclopedia
+\   Category: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -33247,7 +33247,7 @@ LOAD_I% = LOAD% + P% - CODE%
 \
 \       Name: card_addr
 \       Type: Variable
-\   Category: Elite-A: Encyclopedia
+\   Category: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -33265,7 +33265,7 @@ LOAD_I% = LOAD% + P% - CODE%
 \
 \       Name: adder
 \       Type: Variable
-\   Category: Elite-A: Encyclopedia
+\   Category: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -33298,7 +33298,7 @@ LOAD_I% = LOAD% + P% - CODE%
 \
 \       Name: anaconda
 \       Type: Variable
-\   Category: Elite-A: Encyclopedia
+\   Category: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -33331,7 +33331,7 @@ LOAD_I% = LOAD% + P% - CODE%
 \
 \       Name: asp_2
 \       Type: Variable
-\   Category: Elite-A: Encyclopedia
+\   Category: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -33364,7 +33364,7 @@ LOAD_I% = LOAD% + P% - CODE%
 \
 \       Name: boa
 \       Type: Variable
-\   Category: Elite-A: Encyclopedia
+\   Category: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -33397,7 +33397,7 @@ LOAD_I% = LOAD% + P% - CODE%
 \
 \       Name: bushmaster
 \       Type: Variable
-\   Category: Elite-A: Encyclopedia
+\   Category: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -33426,7 +33426,7 @@ LOAD_I% = LOAD% + P% - CODE%
 \
 \       Name: chameleon
 \       Type: Variable
-\   Category: Elite-A: Encyclopedia
+\   Category: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -33459,7 +33459,7 @@ LOAD_I% = LOAD% + P% - CODE%
 \
 \       Name: cobra_1
 \       Type: Variable
-\   Category: Elite-A: Encyclopedia
+\   Category: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -33492,7 +33492,7 @@ LOAD_I% = LOAD% + P% - CODE%
 \
 \       Name: cobra_3
 \       Type: Variable
-\   Category: Elite-A: Encyclopedia
+\   Category: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -33525,7 +33525,7 @@ LOAD_I% = LOAD% + P% - CODE%
 \
 \       Name: coriolis
 \       Type: Variable
-\   Category: Elite-A: Encyclopedia
+\   Category: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -33544,7 +33544,7 @@ LOAD_I% = LOAD% + P% - CODE%
 \
 \       Name: dodecagon
 \       Type: Variable
-\   Category: Elite-A: Encyclopedia
+\   Category: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -33563,7 +33563,7 @@ LOAD_I% = LOAD% + P% - CODE%
 \
 \       Name: escape_pod
 \       Type: Variable
-\   Category: Elite-A: Encyclopedia
+\   Category: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -33584,7 +33584,7 @@ LOAD_I% = LOAD% + P% - CODE%
 \
 \       Name: fer_de_lance
 \       Type: Variable
-\   Category: Elite-A: Encyclopedia
+\   Category: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -33617,7 +33617,7 @@ LOAD_I% = LOAD% + P% - CODE%
 \
 \       Name: gecko
 \       Type: Variable
-\   Category: Elite-A: Encyclopedia
+\   Category: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -33650,7 +33650,7 @@ LOAD_I% = LOAD% + P% - CODE%
 \
 \       Name: ghavial
 \       Type: Variable
-\   Category: Elite-A: Encyclopedia
+\   Category: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -33683,7 +33683,7 @@ LOAD_I% = LOAD% + P% - CODE%
 \
 \       Name: iguana
 \       Type: Variable
-\   Category: Elite-A: Encyclopedia
+\   Category: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -33716,7 +33716,7 @@ LOAD_I% = LOAD% + P% - CODE%
 \
 \       Name: krait
 \       Type: Variable
-\   Category: Elite-A: Encyclopedia
+\   Category: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -33747,7 +33747,7 @@ LOAD_I% = LOAD% + P% - CODE%
 \
 \       Name: mamba
 \       Type: Variable
-\   Category: Elite-A: Encyclopedia
+\   Category: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -33778,7 +33778,7 @@ LOAD_I% = LOAD% + P% - CODE%
 \
 \       Name: monitor
 \       Type: Variable
-\   Category: Elite-A: Encyclopedia
+\   Category: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -33811,7 +33811,7 @@ LOAD_I% = LOAD% + P% - CODE%
 \
 \       Name: moray
 \       Type: Variable
-\   Category: Elite-A: Encyclopedia
+\   Category: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -33844,7 +33844,7 @@ LOAD_I% = LOAD% + P% - CODE%
 \
 \       Name: ophidian
 \       Type: Variable
-\   Category: Elite-A: Encyclopedia
+\   Category: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -33877,7 +33877,7 @@ LOAD_I% = LOAD% + P% - CODE%
 \
 \       Name: python
 \       Type: Variable
-\   Category: Elite-A: Encyclopedia
+\   Category: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -33910,7 +33910,7 @@ LOAD_I% = LOAD% + P% - CODE%
 \
 \       Name: shuttle
 \       Type: Variable
-\   Category: Elite-A: Encyclopedia
+\   Category: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -33937,7 +33937,7 @@ LOAD_I% = LOAD% + P% - CODE%
 \
 \       Name: sidewinder
 \       Type: Variable
-\   Category: Elite-A: Encyclopedia
+\   Category: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -33966,7 +33966,7 @@ LOAD_I% = LOAD% + P% - CODE%
 \
 \       Name: thargoid
 \       Type: Variable
-\   Category: Elite-A: Encyclopedia
+\   Category: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -33995,7 +33995,7 @@ LOAD_I% = LOAD% + P% - CODE%
 \
 \       Name: thargon
 \       Type: Variable
-\   Category: Elite-A: Encyclopedia
+\   Category: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -34022,7 +34022,7 @@ LOAD_I% = LOAD% + P% - CODE%
 \
 \       Name: transporter
 \       Type: Variable
-\   Category: Elite-A: Encyclopedia
+\   Category: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -34045,7 +34045,7 @@ LOAD_I% = LOAD% + P% - CODE%
 \
 \       Name: viper
 \       Type: Variable
-\   Category: Elite-A: Encyclopedia
+\   Category: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -34074,7 +34074,7 @@ LOAD_I% = LOAD% + P% - CODE%
 \
 \       Name: worm
 \       Type: Variable
-\   Category: Elite-A: Encyclopedia
+\   Category: Encyclopedia
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -34103,7 +34103,7 @@ LOAD_I% = LOAD% + P% - CODE%
 \
 \       Name: install_ship
 \       Type: Subroutine
-\   Category: Elite-A: Universe
+\   Category: Universe
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -34145,7 +34145,7 @@ LOAD_I% = LOAD% + P% - CODE%
 \
 \       Name: DOENTRY_FLIGHT
 \       Type: Subroutine
-\   Category: Elite-A: Loader
+\   Category: Loader
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -34159,7 +34159,7 @@ LOAD_I% = LOAD% + P% - CODE%
 \
 \       Name: DEATH2_FLIGHT
 \       Type: Subroutine
-\   Category: Elite-A: Start and end
+\   Category: Start and end
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -39103,7 +39103,7 @@ LOAD_K% = LOAD% + P% - CODE%
 \
 \       Name: anger_8c
 \       Type: Subroutine
-\   Category: Elite-A: Tactics
+\   Category: Tactics
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -39548,7 +39548,7 @@ LOAD_K% = LOAD% + P% - CODE%
 \
 \       Name: HFS2
 \       Type: Subroutine
-\   Category: Elite-A: Drawing circles
+\   Category: Drawing circles
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -41266,7 +41266,7 @@ LOAD_L% = LOAD% + P% - CODE%
 \
 \       Name: tnpr_FLIGHT
 \       Type: Subroutine
-\   Category: Elite-A: Market
+\   Category: Market
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -41591,7 +41591,7 @@ LOAD_L% = LOAD% + P% - CODE%
 \
 \       Name: hyp1_FLIGHT
 \       Type: Subroutine
-\   Category: Elite-A: Universe
+\   Category: Universe
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -41889,7 +41889,7 @@ LOAD_L% = LOAD% + P% - CODE%
 \
 \       Name: write_0346
 \       Type: Subroutine
-\   Category: Elite-A: Tube
+\   Category: Tube
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -41906,7 +41906,7 @@ LOAD_L% = LOAD% + P% - CODE%
 \
 \       Name: read_0346
 \       Type: Subroutine
-\   Category: Elite-A: Tube
+\   Category: Tube
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -42488,7 +42488,7 @@ LOAD_L% = LOAD% + P% - CODE%
 \
 \       Name: WPSHPS_FLIGHT
 \       Type: Subroutine
-\   Category: Elite-A: Dashboard
+\   Category: Dashboard
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -42501,7 +42501,7 @@ LOAD_L% = LOAD% + P% - CODE%
 \
 \       Name: DET1
 \       Type: Subroutine
-\   Category: Elite-A: Screen mode
+\   Category: Screen mode
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -42815,7 +42815,7 @@ LOAD_L% = LOAD% + P% - CODE%
 \
 \       Name: CPIX2
 \       Type: Subroutine
-\   Category: Elite-A: Drawing pixels
+\   Category: Drawing pixels
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -42835,7 +42835,7 @@ LOAD_L% = LOAD% + P% - CODE%
 \
 \       Name: n_oops
 \       Type: Subroutine
-\   Category: Elite-A: Flight
+\   Category: Flight
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -43528,7 +43528,7 @@ NEXT
 \
 \       Name: ECBLB
 \       Type: Subroutine
-\   Category: Elite-A: Dashboard
+\   Category: Dashboard
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -43542,7 +43542,7 @@ NEXT
 \
 \       Name: SPBLB
 \       Type: Subroutine
-\   Category: Elite-A: Dashboard
+\   Category: Dashboard
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -43556,7 +43556,7 @@ NEXT
 \
 \       Name: MSBAR_FLIGHT
 \       Type: Subroutine
-\   Category: Elite-A: Dashboard
+\   Category: Dashboard
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -44822,7 +44822,7 @@ NEXT
 \
 \       Name: PL21_FLIGHT
 \       Type: Subroutine
-\   Category: Elite-A: Drawing planets
+\   Category: Drawing planets
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -45358,7 +45358,7 @@ LOAD_M% = LOAD% + P% - CODE%
 \
 \       Name: rand_posn
 \       Type: Subroutine
-\   Category: Elite-A: Universe
+\   Category: Universe
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -45477,7 +45477,7 @@ LOAD_M% = LOAD% + P% - CODE%
 \
 \       Name: DORND2
 \       Type: Subroutine
-\   Category: Elite-A: Utility routines
+\   Category: Utility routines
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -45561,7 +45561,7 @@ LOAD_M% = LOAD% + P% - CODE%
 \
 \       Name: Main game loop (Part 2 of 6)
 \       Type: Subroutine
-\   Category: Elite-A: Main loop
+\   Category: Main loop
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -45908,7 +45908,7 @@ LOAD_M% = LOAD% + P% - CODE%
 \
 \       Name: Main game loop (Part 5 of 6)
 \       Type: Subroutine
-\   Category: Elite-A: Main loop
+\   Category: Main loop
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -45943,7 +45943,7 @@ LOAD_M% = LOAD% + P% - CODE%
 \
 \       Name: Main game loop (Part 6 of 6)
 \       Type: Subroutine
-\   Category: Elite-A: Main loop
+\   Category: Main loop
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -46491,7 +46491,7 @@ LOAD_M% = LOAD% + P% - CODE%
 \
 \       Name: LSHIPS
 \       Type: Subroutine
-\   Category: Elite-A: Loader
+\   Category: Loader
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -46615,7 +46615,7 @@ LOAD_M% = LOAD% + P% - CODE%
 \
 \       Name: mix_bits
 \       Type: Variable
-\   Category: Elite-A: Loader
+\   Category: Loader
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -47119,7 +47119,7 @@ LOAD_M% = LOAD% + P% - CODE%
 \
 \       Name: DKS1
 \       Type: Subroutine
-\   Category: Elite-A: Keyboard
+\   Category: Keyboard
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -47234,7 +47234,7 @@ LOAD_M% = LOAD% + P% - CODE%
 \
 \       Name: DOKEY_FLIGHT
 \       Type: Subroutine
-\   Category: Elite-A: Keyboard
+\   Category: Keyboard
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -47368,7 +47368,7 @@ LOAD_M% = LOAD% + P% - CODE%
 \
 \       Name: DK4_FLIGHT
 \       Type: Subroutine
-\   Category: Elite-A: Keyboard
+\   Category: Keyboard
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -47475,7 +47475,7 @@ LOAD_M% = LOAD% + P% - CODE%
 \
 \       Name: cargo_mtok
 \       Type: Subroutine
-\   Category: Elite-A: Text
+\   Category: Text
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -47612,7 +47612,7 @@ LOAD_M% = LOAD% + P% - CODE%
 \
 \       Name: LL9_FLIGHT
 \       Type: Subroutine
-\   Category: Elite-A: Drawing ships
+\   Category: Drawing ships
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -47631,7 +47631,7 @@ LOAD_M% = LOAD% + P% - CODE%
 \
 \       Name: MVEIT_FLIGHT
 \       Type: Subroutine
-\   Category: Elite-A: Moving
+\   Category: Moving
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -48851,7 +48851,7 @@ LOAD_M% = LOAD% + P% - CODE%
 \
 \       Name: iff_xor
 \       Type: Variable
-\   Category: Elite-A: Dashboard
+\   Category: Dashboard
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -48864,7 +48864,7 @@ LOAD_M% = LOAD% + P% - CODE%
 \
 \       Name: iff_base
 \       Type: Variable
-\   Category: Elite-A: Dashboard
+\   Category: Dashboard
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -48910,7 +48910,7 @@ LOAD_M% = LOAD% + P% - CODE%
                         \ scanner, so return from the subroutine (as SC5
                         \ contains an RTS)
 
- LDX CRGO               \ iff code AJD
+ LDX CRGO               \ iff code AJD, same as loader code, CRGO = cmdr_iff
  BEQ iff_not
  LDY #&24
  LDA (&20),Y
@@ -51782,7 +51782,7 @@ ENDMACRO
 \
 \       Name: ship_dragon
 \       Type: Variable
-\   Category: Elite-A: Drawing ships
+\   Category: Drawing ships
 \    Summary: Ship blueprint for a Dragon
 \  Deep dive: Ship blueprints
 \
@@ -51864,7 +51864,7 @@ ENDMACRO
 \
 \       Name: ship_monitor
 \       Type: Variable
-\   Category: Elite-A: Drawing ships
+\   Category: Drawing ships
 \    Summary: Ship blueprint for a Monitor
 \  Deep dive: Ship blueprints
 \
@@ -51953,7 +51953,7 @@ ENDMACRO
 \
 \       Name: ship_ophidian
 \       Type: Variable
-\   Category: Elite-A: Drawing ships
+\   Category: Drawing ships
 \    Summary: Ship blueprint for an Ophidian
 \  Deep dive: Ship blueprints
 \
@@ -52053,7 +52053,7 @@ ENDMACRO
 \
 \       Name: ship_ghavial
 \       Type: Variable
-\   Category: Elite-A: Drawing ships
+\   Category: Drawing ships
 \    Summary: Ship blueprint for a Ghavial
 \  Deep dive: Ship blueprints
 \
@@ -52137,7 +52137,7 @@ ENDMACRO
 \
 \       Name: ship_bushmaster
 \       Type: Variable
-\   Category: Elite-A: Drawing ships
+\   Category: Drawing ships
 \    Summary: Ship blueprint for a Bushmaster
 \  Deep dive: Ship blueprints
 \
@@ -52215,7 +52215,7 @@ ENDMACRO
 \
 \       Name: ship_rattler
 \       Type: Variable
-\   Category: Elite-A: Drawing ships
+\   Category: Drawing ships
 \    Summary: Ship blueprint for a Rattler
 \  Deep dive: Ship blueprints
 \
@@ -52307,7 +52307,7 @@ ENDMACRO
 \
 \       Name: ship_iguana
 \       Type: Variable
-\   Category: Elite-A: Drawing ships
+\   Category: Drawing ships
 \    Summary: Ship blueprint for an Iguana
 \  Deep dive: Ship blueprints
 \
@@ -52393,7 +52393,7 @@ ENDMACRO
 \
 \       Name: ship_shuttle2
 \       Type: Variable
-\   Category: Elite-A: Drawing ships
+\   Category: Drawing ships
 \    Summary: Ship blueprint for a Shuttle 2 AJD
 \  Deep dive: Ship blueprints
 \
@@ -52489,7 +52489,7 @@ ENDMACRO
 \
 \       Name: ship_chameleon
 \       Type: Variable
-\   Category: Elite-A: Drawing ships
+\   Category: Drawing ships
 \    Summary: Ship blueprint for a Chameleon
 \  Deep dive: Ship blueprints
 \
@@ -52587,7 +52587,7 @@ ENDMACRO
 \
 \       Name: ship_list
 \       Type: Variable
-\   Category: Elite-A: Drawing ships
+\   Category: Drawing ships
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -52615,7 +52615,7 @@ ENDMACRO
 \
 \       Name: XX21
 \       Type: Variable
-\   Category: Elite-A: Drawing ships
+\   Category: Drawing ships
 \    Summary: Ship blueprints lookup table for flight in Elite-A
 \
 \ ******************************************************************************
@@ -52730,7 +52730,7 @@ ENDMACRO
 \
 \       Name: ship_bits
 \       Type: Variable
-\   Category: Elite-A: Drawing ships
+\   Category: Drawing ships
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -52782,7 +52782,7 @@ ENDMACRO
 \
 \       Name: ship_bytes
 \       Type: Variable
-\   Category: Elite-A: Drawing ships
+\   Category: Drawing ships
 \    Summary: AJD
 \
 \ ******************************************************************************
