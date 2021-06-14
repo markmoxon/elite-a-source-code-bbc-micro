@@ -42,41 +42,130 @@ Q% = _REMOVE_CHECKSUMS  \ Set Q% to TRUE to max out the default commander, FALSE
                         \ for the standard default commander (this is set to
                         \ TRUE if checksums are disabled, just for convenience)
 
-key_io = &04
-key_tube = &90
+BRKV = &0202            \ The break vector that we intercept to enable us to
+                        \ handle and display system errors
 
-VIA = &FE00
+IRQ1V = &0204           \ The IRQ1V vector that we intercept to implement the
+                        \ split-sceen mode
 
-BRKV = &0202
-IRQ1V = &0204
-BYTEV = &020A
-WRCHV = &020E
-FILEV = &0212
-FSCV = &021E
-NETV = &0224
-IND2V = &0232
-cmdr_iff = &036E
-OSWRCH = &FFEE
-OSWORD = &FFF1
-OSBYTE = &FFF4
-OSCLI = &FFF7
+WRCHV = &020E           \ The WRCHV vector that we intercept with our custom
+                        \ text printing routine
 
-\EXEC = ENTRY
+BYTEV = &020A           \ The BYTEV vector that we intercept to AJD
 
-ZP = &70
-T = &75
-P = &72
-Q = &73
-YY = &74
-CHKSM = &78
-DL = &8B
+FILEV = &0212           \ The FILEV vector that we intercept to AJD
 
-VSCAN = 57
+FSCV = &021E            \ The FSCV vector that we intercept to AJD
 
-LASCT = &0346
-HFX = &0348
-ESCP = &0386
-VEC = &7FFE
+NETV = &0224            \ The NETV vector that we intercept as part of the copy
+                        \ protection
+
+OSWRCH = &FFEE          \ The address for the OSWRCH routine
+OSBYTE = &FFF4          \ The address for the OSBYTE routine
+OSWORD = &FFF1          \ The address for the OSWORD routine
+OSCLI = &FFF7           \ The address for the OSCLI vector
+
+VIA = &FE00             \ Memory-mapped space for accessing internal hardware,
+                        \ such as the video ULA, 6845 CRTC and 6522 VIAs (also
+                        \ known as SHEILA)
+
+N% = 67                 \ N% is set to the number of bytes in the VDU table, so
+                        \ we can loop through them in part 1 below
+
+VSCAN = 57              \ Defines the split position in the split-screen mode
+
+VEC = &7FFE             \ VEC is where we store the original value of the IRQ1
+                        \ vector, matching the address in the elite-missile.asm
+                        \ source
+
+LASCT = &0346           \ The laser pulse count for the current laser, matching
+                        \ the address in the main game code
+
+HFX = &0348             \ A flag that toggles the hyperspace colour effect,
+                        \ matching the address in the main game code
+
+cmdr_iff = &036E        \ AJD
+
+ESCP = &0386            \ The flag that determines whether we have an escape pod
+                        \ fitted, matching the address in the main game code
+
+S% = &11E3              \ The adress of the main entry point workspace in the
+                        \ main game code
+
+\ ******************************************************************************
+\
+\       Name: ZP
+\       Type: Workspace
+\    Address: &0070 to &008B
+\   Category: Workspaces
+\    Summary: Important variables used by the loader
+\
+\ ******************************************************************************
+
+ORG &0004
+
+.key_io
+
+ SKIP 1                 \ AJD
+
+ORG &0070
+
+.ZP
+
+ SKIP 2                 \ Stores addresses used for moving content around
+
+.P
+
+ SKIP 1                 \ Temporary storage, used in a number of places
+
+.Q
+
+ SKIP 1                 \ Temporary storage, used in a number of places
+
+.YY
+
+ SKIP 1                 \ Temporary storage, used in a number of places
+
+.T
+
+ SKIP 1                 \ Temporary storage, used in a number of places
+
+.SC
+
+ SKIP 1                 \ Screen address (low byte)
+                        \
+                        \ Elite draws on-screen by poking bytes directly into
+                        \ screen memory, and SC(1 0) is typically set to the
+                        \ address of the character block containing the pixel
+                        \ we want to draw (see the deep dives on "Drawing
+                        \ monochrome pixels in mode 4" and "Drawing colour
+                        \ pixels in mode 5" for more details)
+
+.SCH
+
+ SKIP 1                 \ Screen address (high byte)
+
+.CHKSM
+
+ SKIP 2                 \ Used in the copy protection code
+
+ORG &008B
+
+.DL
+
+ SKIP 1                 \ Vertical sync flag
+                        \
+                        \ DL gets set to 30 every time we reach vertical sync on
+                        \ the video system, which happens 50 times a second
+                        \ (50Hz). The WSCAN routine uses this to pause until the
+                        \ vertical sync, by setting DL to 0 and then monitoring
+                        \ its value until it changes to 30
+
+ORG &0090
+
+.key_tube
+
+ SKIP 1                 \ AJD
 
 \ ******************************************************************************
 \
@@ -254,116 +343,165 @@ MACRO FNE I%
 
 ENDMACRO
 
+\ ******************************************************************************
+\
+\       Name: Elite loader (Part 1 of 3)
+\       Type: Subroutine
+\   Category: Loader
+\    Summary: Set up the split screen mode, move code around, set up the sound
+\             envelopes and configure the system
+\
+\ ******************************************************************************
+
 .ENTRY
 
- CLI
+ CLI                    \ AJD
  LDA #&90
  LDX #&FF
  LDY #&01
  JSR OSBYTE
- LDA #LO(B%)
- STA &70
- LDA #HI(B%)
- STA &71
- LDY #&00
 
-.vdu_loop
+ LDA #LO(B%)            \ Set the low byte of ZP(1 0) to point to the VDU code
+ STA ZP                 \ table at B%
 
- LDA (&70),Y
+ LDA #HI(B%)            \ Set the high byte of ZP(1 0) to point to the VDU code
+ STA ZP+1               \ table at B%
+
+ LDY #0                 \ We are now going to send the N% VDU bytes in the table
+                        \ at B% to OSWRCH to set up the special mode 4 screen
+                        \ that forms the basis for the split-screen mode
+
+.loop1
+
+ LDA (ZP),Y             \ Pass the Y-th byte of the B% table to OSWRCH
  JSR OSWRCH
- INY 
- CPY #&43
- BNE vdu_loop
- JSR PLL1
- LDA #&10
- LDX #&02
+
+ INY                    \ Increment the loop counter
+
+ CPY #N%                \ Loop back for the next byte until we have done them
+ BNE loop1              \ all (the number of bytes was set in N% above)
+
+ JSR PLL1               \ Call PLL1 to draw Saturn
+
+ LDA #16                \ Call OSBYTE with A = 16 and X = 2 to set the ADC to
+ LDX #2                 \ sample 2 channels from the joystick
  JSR OSBYTE
- LDA #&60
- STA IND2V
- LDA #HI(IND2V)
- STA NETV+&01
- LDA #LO(IND2V)
+
+ LDA #&60               \ Store an RTS instruction in location &0232
+ STA &0232
+
+ LDA #&02               \ Point the NETV vector to &0232, which we just filled
+ STA NETV+1             \ with an RTS
+ LDA #&32
  STA NETV
- LDA #&BE
- LDX #&08
+
+ LDA #190               \ Call OSBYTE with A = 190, X = 8 and Y = 0 to set the
+ LDX #8                 \ ADC conversion type to 8 bits, for the joystick
  JSR OSB
- LDA #&C8
- LDX #&03
+
+ LDA #200               \ Call OSBYTE with A = 200, X = 3 and Y = 0 to disable
+ LDX #3                 \ the ESCAPE key and clear memory if the BREAK key is
+ JSR OSB                \ pressed
+
+ LDA #13                \ Call OSBYTE with A = 13, X = 0 and Y = 0 to disable
+ LDX #0                 \ the "output buffer empty" event
  JSR OSB
- LDA #&0D
- LDX #&00
+
+ LDA #225               \ Call OSBYTE with A = 225, X = 128 and Y = 0 to set
+ LDX #128               \ the function keys to return ASCII codes for SHIFT-fn
+ JSR OSB                \ keys (i.e. add 128)
+
+ LDA #13                \ Call OSBYTE with A = 13, X = 2 and Y = 0 to disable
+ LDX #2                 \ the "character entering buffer" event
  JSR OSB
- LDA #&E1
- LDX #&80
+
+ LDA #4                 \ Call OSBYTE with A = 4, X = 1 and Y = 0 to disable
+ LDX #1                 \ cursor editing, so the cursor keys return ASCII values
+ JSR OSB                \ and can therefore be used in-game
+
+ LDA #9                 \ Call OSBYTE with A = 9, X = 0 and Y = 0 to disable
+ LDX #0                 \ flashing colours
  JSR OSB
- LDA #&0D
- LDX #&02
- JSR OSB
- LDA #&04
- LDX #&01
- JSR OSB
- LDA #&09
- LDX #&00
- JSR OSB
- LDA #&77
+
+ LDA #&77               \ AJD
  JSR OSBYTE
- JSR or789
- LDA #&00
- STA &70
- LDA #&11
- STA &71
+
+ JSR PROT3              \ Call PROT3 to do more checks on the CHKSM checksum
+
+ LDA #&00               \ Set the following:
+ STA ZP                 \
+ LDA #&11               \   ZP(1 0) = &1100
+ STA ZP+1               \   P(1 0) = TVT1code
  LDA #LO(TVT1code)
- STA &72
+ STA P
  LDA #HI(TVT1code)
- STA &73
- JSR MVPG
- LDA #&EE
+ STA P+1
+
+ JSR MVPG               \ Call MVPG to move and decrypt a page of memory from
+                        \ TVT1code to &1100-&11FF
+
+ LDA #&EE               \ AJD
  STA BRKV
  LDA #&11
- STA BRKV+&01
- LDA #&00
- STA &70
- LDA #&78
- STA &71
- LDA #LO(DIALS)
- STA &72
+ STA BRKV+1
+
+ LDA #&00               \ Set the following:
+ STA ZP                 \
+ LDA #&78               \   ZP(1 0) = &7800
+ STA ZP+1               \   P(1 0) = DIALS
+ LDA #LO(DIALS)         \   X = 8
+ STA P
  LDA #HI(DIALS)
- STA &73
- LDX #&08
- JSR MVBL
- LDA #&00
- STA &70
- LDA #&61
- STA &71
+ STA P+1
+ LDX #8
+
+ JSR MVBL               \ Call MVBL to move and decrypt 8 pages of memory from
+                        \ DIALS to &7800-&7FFF
+
+ LDA #&00               \ Set the following:
+ STA ZP                 \
+ LDA #&61               \   ZP(1 0) = &6100
+ STA ZP+1               \   P(1 0) = ASOFT
  LDA #LO(ASOFT)
- STA &72
+ STA P
  LDA #HI(ASOFT)
- STA &73
- JSR MVPG
- LDA #&63
- STA &71
- LDA #LO(ELITE)
- STA &72
+ STA P+1
+
+ JSR MVPG               \ Call MVPG to move and decrypt a page of memory from
+                        \ ASOFT to &6100-&61FF
+
+ LDA #&63               \ Set the following:
+ STA ZP+1               \
+ LDA #LO(ELITE)         \   ZP(1 0) = &6300
+ STA P                  \   P(1 0) = ELITE
  LDA #HI(ELITE)
- STA &73
- JSR MVPG
- LDA #&76
- STA &71
- LDA #LO(CpASOFT)
- STA &72
+ STA P+1
+
+ JSR MVPG               \ Call MVPG to move and decrypt a page of memory from
+                        \ ELITE to &6300-&63FF
+
+ LDA #&76               \ Set the following:
+ STA ZP+1               \
+ LDA #LO(CpASOFT)       \   ZP(1 0) = &7600
+ STA P                  \   P(1 0) = CpASOFT
  LDA #HI(CpASOFT)
- STA &73
- JSR MVPG
+ STA P+1
+
+ JSR MVPG               \ Call MVPG to move and decrypt a page of memory from
+                        \ CpASOFT to &7600-&76FF
 
  FNE 0                  \ Set up sound envelopes 0-3 using the FNE macro
  FNE 1
  FNE 2
  FNE 3
 
- LDX #LO(MESS1)
+ LDX #LO(MESS1)         \ Set (Y X) to point to MESS1 ("DIR E")
  LDY #HI(MESS1)
- JSR OSCLI
- LDA #&F0 \ set up DDRB
+
+ JSR OSCLI              \ Call OSCLI to run the OS command in MESS1, which
+                        \ changes the disc directory to E
+
+ LDA #&F0               \ set up DDRB AJD
  STA &FE62
  LDA #0 \ Set up palatte flags
  STA &348
@@ -448,35 +586,43 @@ ENDMACRO
  JSR OSBYTE
  STX key_io
  STY key_io+&01
- LDA #&00
- STA &70
- LDA #&04
- STA &71
- LDA #LO(WORDS)
- STA &72
+
+ LDA #&00               \ Set the following:
+ STA ZP                 \
+ LDA #&04               \   ZP(1 0) = &0400
+ STA ZP+1               \   P(1 0) = WORDS
+ LDA #LO(WORDS)         \   X = 4
+ STA P
  LDA #HI(WORDS)
- STA &73
- LDX #&04
- JSR MVBL
- LDA #&E9
- STA WRCHV
- LDA #&11
- STA WRCHV+&01
- LDA #&00
- STA &70
- LDA #&0B
- STA &71
- LDA #LO(tob00)
- STA &72
- LDA #HI(tob00)
- STA &73
- JSR MVPG
- LDY #&23
+ STA P+1
+ LDX #4
+
+ JSR MVBL               \ Call MVBL to move and decrypt 4 pages of memory from
+                        \ WORDS to &0400-&07FF
+
+ LDA #LO(S%+6)          \ Point BRKV to the third entry in the main docked
+ STA WRCHV              \ code's S% workspace, which contains JMP CHPR
+ LDA #HI(S%+6)
+ STA WRCHV+1
+
+ LDA #LO(LOAD)          \ Set the following:
+ STA ZP                 \
+ LDA #HI(LOAD)          \   ZP(1 0) = LOAD
+ STA ZP+1               \   P(1 0) = LOADcode
+ LDA #LO(LOADcode)
+ STA P
+ LDA #HI(LOADcode)
+ STA P+1
+
+ JSR MVPG               \ Call MVPG to move and decrypt a page of memory from
+                        \ LOADcode to LOAD
+
+ LDY #35
 
 .copy_d7a
 
- LDA tod7a,Y
- STA &0D7A,Y
+ LDA iff_index_code,Y
+ STA iff_index,Y
  DEY
  BPL copy_d7a
  JMP &0B00
@@ -530,9 +676,35 @@ ENDMACRO
  \tube_wait3
  \ RTS
 
-.tod7a
+\ ******************************************************************************
+\
+\       Name: iff_index_code
+\       Type: Subroutine
+\   Category: Dashboard
+\    Summary: AJD
+\
+\ ******************************************************************************
 
- LDX cmdr_iff \ iff code
+.iff_index_code
+
+ORG &0D7A
+
+\ ******************************************************************************
+\
+\       Name: iff_index
+\       Type: Subroutine
+\   Category: Dashboard
+\    Summary: AJD
+\
+\ ------------------------------------------------------------------------------
+\
+\ This routine is copied to &0D7A in part 1 above.
+\
+\ ******************************************************************************
+
+.iff_index
+
+ LDX cmdr_iff           \ iff code
  BEQ iff_not
  LDY #&24
  LDA (&20),Y
@@ -568,16 +740,60 @@ ENDMACRO
 
  RTS \ X=0
 
-.tob00
+COPYBLOCK iff_index, P%, iff_index_code
 
- LDX #<(l_tcode-tob00+&B00)
- LDY #>(l_tcode-tob00+&B00)
- JSR OSCLI
- JMP &11E6
+ORG iff_index_code + P% - iff_index
 
-.l_tcode
+\ ******************************************************************************
+\
+\       Name: LOADcode
+\       Type: Subroutine
+\   Category: Loader
+\    Summary: Encrypted LOAD routine, bundled up in the loader so it can be
+\             moved to &0B00 to be run
+\
+\ ------------------------------------------------------------------------------
+\
+\ This section is encrypted by EOR'ing with &18. The encryption is done by the
+\ elite-checksum.py script, and decryption is done in part 1 above, at the same
+\ time as it is moved to &0B00.
+\
+\ ******************************************************************************
 
- EQUS "L.1.D", &0D
+.LOADcode
+
+ORG &0B00
+
+\ ******************************************************************************
+\
+\       Name: LOAD
+\       Type: Subroutine
+\   Category: Loader
+\    Summary: Load the main docked code, set up various vectors, run a checksum
+\             and start the game
+\
+\ ******************************************************************************
+
+.LOAD
+
+ LDX #LO(LTLI)          \ Set (Y X) to point to LTLI ("L.T.CODE")
+ LDY #HI(LTLI)
+
+ JSR OSCLI              \ Call OSCLI to run the OS command in LTLI, which loads
+                        \ the T.CODE binary (the main docked code) to its load
+                        \ address of &11E3
+
+ JMP S%+3               \ Jump to the second entry in the main docked code's S%
+                        \ workspace to start a new game
+
+.LTLI
+
+ EQUS "L.1.D"
+ EQUB 13
+
+COPYBLOCK LOAD, P%, LOADcode
+
+ORG LOADcode + P% - LOAD
 
 \ ******************************************************************************
 \
@@ -1152,14 +1368,24 @@ ENDMACRO
 
  EQUW &0333             \ The number of iterations of the PLL3 loop (819)
 
-.or789
+\ ******************************************************************************
+\
+\       Name: PROT3
+\       Type: Subroutine
+\   Category: Copy protection
+\    Summary: Part of the CHKSM copy protection checksum calculation
+\
+\ ******************************************************************************
 
- LDA &78
- AND &79
+.PROT3
+
+ LDA CHKSM              \ Update the checksum
+ AND CHKSM+1
  ORA #&0C
  ASL A
- STA &78
- RTS 
+ STA CHKSM
+
+ RTS                    \ Return from the subroutine
 
 \ ******************************************************************************
 \
@@ -1956,11 +2182,29 @@ ORG TVT1code + P% - TVT1
 
  INCBIN "binaries/P.(C)ASFT.bin"
 
- \ BBC Master 128 code for save/restore characters
+\ ******************************************************************************
+\
+\       Name: to_dd00
+\       Type: Subroutine
+\   Category: Loader
+\    Summary: BBC Master 128 code for save/restore characters
+\
+\ ******************************************************************************
+
 CPU 1
+
 .to_dd00
 
 ORG &DD00
+
+\ ******************************************************************************
+\
+\       Name: do_FILEV
+\       Type: Subroutine
+\   Category: Loader
+\    Summary: AJD
+\
+\ ******************************************************************************
 
  \ trap FILEV
 
@@ -2027,7 +2271,16 @@ ORG &DD00
  PLP
  RTS
 
- \ trap FILEV
+\ ******************************************************************************
+\
+\       Name: do_FSCV
+\       Type: Subroutine
+\   Category: Loader
+\    Summary: AJD
+\
+\ ******************************************************************************
+
+ \ trap FSCV
 
 .do_FSCV
 
@@ -2070,6 +2323,15 @@ ORG &DD00
  PLA
  RTS
 
+\ ******************************************************************************
+\
+\       Name: do_BYTEV
+\       Type: Subroutine
+\   Category: Loader
+\    Summary: AJD
+\
+\ ******************************************************************************
+
  \ trap BYTEV
 
 .do_BYTEV
@@ -2104,7 +2366,17 @@ ORG &DD00
 
  JMP &100 \ address modified by master set_up
 
-dd00_len = P%-&DD00 \ length of code at DD00
+dd00_len = P% - do_FILEV
 
-COPYBLOCK &DD00, P%, to_dd00
-SAVE "output/ELITE.bin", CODE%, to_dd00+dd00_len, LOAD%
+COPYBLOCK do_FILEV, P%, to_dd00
+
+ORG to_dd00 + P% - do_FILEV
+
+\ ******************************************************************************
+\
+\ Save output/ELITE.bin
+\
+\ ******************************************************************************
+
+PRINT "S.ELITE ", ~CODE%, " ", ~P%, " ", ~LOAD%, " ", ~LOAD%
+SAVE "output/ELITE.bin", CODE%, P%, LOAD%

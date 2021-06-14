@@ -128,7 +128,7 @@ XX21 = &5600            \ The address of the ship blueprints lookup table, where
 E% = &563E              \ The address of the default NEWB ship bytes within the
                         \ loaded ship blueprints file
 
-iff_index = &D7A        \ AJD
+iff_index = &0D7A       \ AJD
 
 \ ******************************************************************************
 \
