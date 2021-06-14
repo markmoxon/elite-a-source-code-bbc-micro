@@ -38,147 +38,20 @@ _SOURCE_DISC            = (_RELEASE = 2)
 \
 \ ******************************************************************************
 
-LS% = &0CFF             \ The start of the descending ship line heap
-
-NOST = 18               \ The number of stardust particles in normal space (this
-                        \ goes down to 3 in witchspace)
-
-NOSH = 12               \ The maximum number of ships in our local bubble of
-                        \ universe
-
-NTY = 31                \ The number of different ship types
-
-MSL = 1                 \ Ship type for a missile
-SST = 2                 \ Ship type for a Coriolis space station
-ESC = 3                 \ Ship type for an escape pod
-PLT = 4                 \ Ship type for an alloy plate
-OIL = 5                 \ Ship type for a cargo canister
-AST = 7                 \ Ship type for an asteroid
-SPL = 8                 \ Ship type for a splinter
-SHU = 9                 \ Ship type for a Shuttle
-CYL = 11                \ Ship type for a Cobra Mk III
-ANA = 14                \ Ship type for an Anaconda
-COPS = 16               \ Ship type for a Viper
-SH3 = 17                \ Ship type for a Sidewinder
-KRA = 19                \ Ship type for a Krait
-ADA = 20                \ Ship type for a Adder
-WRM = 23                \ Ship type for a Worm
-CYL2 = 24               \ Ship type for a Cobra Mk III (pirate)
-ASP = 25                \ Ship type for an Asp Mk II
-THG = 29                \ Ship type for a Thargoid
-TGL = 30                \ Ship type for a Thargon
-CON = 31                \ Ship type for a Constrictor
-
-JL = ESC                \ Junk is defined as starting from the escape pod
-
-JH = SHU+2              \ Junk is defined as ending before the Cobra Mk III
-                        \
-                        \ So junk is defined as the following: escape pod,
-                        \ alloy plate, cargo canister, asteroid, splinter,
-                        \ Shuttle or Transporter
-
-PACK = SH3              \ The first of the eight pack-hunter ships, which tend
-                        \ to spawn in groups. With the default value of PACK the
-                        \ pack-hunters are the Sidewinder, Mamba, Krait, Adder,
-                        \ Gecko, Cobra Mk I, Worm and Cobra Mk III (pirate)
-
-POW = 15                \ Pulse laser power
-
-Mlas = 50               \ Mining laser power
-
-Armlas = INT(128.5+1.5*POW) \ Military laser power
-
-NI% = 37                \ The number of bytes in each ship's data block (as
-                        \ stored in INWK and K%)
-
 OSBYTE = &FFF4          \ The address for the OSBYTE routine
-OSWORD = &FFF1          \ The address for the OSWORD routine
-OSFILE = &FFDD          \ The address for the OSFILE routine
-OSWRCH = &FFEE          \ The address for the OSWRCH routine
 OSCLI = &FFF7           \ The address for the OSCLI routine
 
 VIA = &FE00             \ Memory-mapped space for accessing internal hardware,
                         \ such as the video ULA, 6845 CRTC and 6522 VIAs (also
                         \ known as SHEILA)
 
-VSCAN = 57              \ Defines the split position in the split-screen mode
-
 X = 128                 \ The centre x-coordinate of the 256 x 192 space view
 Y = 96                  \ The centre y-coordinate of the 256 x 192 space view
 
-f0 = &20                \ Internal key number for red key f0 (Launch, Front)
-f1 = &71                \ Internal key number for red key f1 (Buy Cargo, Rear)
-f2 = &72                \ Internal key number for red key f2 (Sell Cargo, Left)
-f3 = &73                \ Internal key number for red key f3 (Equip Ship, Right)
-f4 = &14                \ Internal key number for red key f4 (Long-range Chart)
-f5 = &74                \ Internal key number for red key f5 (Short-range Chart)
-f6 = &75                \ Internal key number for red key f6 (Data on System)
-f7 = &16                \ Internal key number for red key f7 (Market Price)
-f8 = &76                \ Internal key number for red key f8 (Status Mode)
-f9 = &77                \ Internal key number for red key f9 (Inventory)
+BRKV = &0202
+WRCHV = &020E
 
-NRU% = 25               \ The number of planetary systems with extended system
-                        \ description overrides in the RUTOK table
-
-VE = 0                  \ The obfuscation byte used to hide the extended tokens
-                        \ table from crackers viewing the binary code, which is
-                        \ zero in Elite-A as the token table is not obfuscated
-
-LL = 30                 \ The length of lines (in characters) of justified text
-                        \ in the extended tokens system
-
-QQ18 = &0400            \ The address of the text token table, as set in
-                        \ elite-loader3.asm
-
-SNE = &07C0             \ The address of the sine lookup table, as set in
-                        \ elite-loader3.asm
-
-ACT = &07E0             \ The address of the arctan lookup table, as set in
-                        \ elite-loader3.asm
-
-QQ16_FLIGHT = &0880     \ The address of the two-letter text token table in the
-                        \ flight code (this gets populated by the docked code at
-                        \ the start of the game)
-
-CATD = &0D7A            \ The address of the CATD routine that is put in place
-                        \ by the third loader, as set in elite-loader3.asm
-
-IRQ1 = &114B            \ The address of the IRQ1 routine that implements the
-                        \ split screen interrupt handler, as set in
-                        \ elite-loader3.asm
-
-BRBR1 = &11D5           \ The address of the main break handler, which BRKV
-                        \ points to as set in elite-loader3.asm
-
-NA% = &1181             \ The address of the data block for the last saved
-                        \ commander, as set in elite-loader3.asm
-
-CHK2 = &11D3            \ The address of the second checksum byte for the saved
-                        \ commander data file, as set in elite-loader3.asm
-
-CHK = &11D4             \ The address of the first checksum byte for the saved
-                        \ commander data file, as set in elite-loader3.asm
-
-SHIP_MISSILE = &7F00    \ The address of the missile ship blueprint, as set in
-                        \ elite-loader3.asm
-
-\ ******************************************************************************
-\
-\ ELITE A FILE
-\
-\ ******************************************************************************
-
-CODE% = &1200
-LOAD% = &1200
-
-ORG CODE%
-
-LOAD_A% = LOAD%
-
-key_tube = &90
-
-brkv = &0202
-wrchv = &020E
+rawrch = &FFBC
 
 tube_r1s = &FEE0
 tube_r1d = &FEE1
@@ -189,17 +62,23 @@ tube_r3d = &FEE5
 tube_r4s = &FEE6
 tube_r4d = &FEE7
 
+tube_brk = &16 \ tube BRK vector
+
+DL = &8B
+key_tube = &90
+
 SC = &92
 SCH = &93
-
 font = &94
 save_a = &96
 save_x = &97
 save_y = &98
 
+ZZ = &94
 X1 = &94
 Y1 = &95
 X2 = &96
+COL = &96
 Y2 = &97
 P = &98
 Q = &99
@@ -208,20 +87,12 @@ R = &9A
 S = &9B
 SWAP = &9C
 
-ZZ = &94
-drawpix_2 = &95
-drawpix_3 = &96
-drawpix_4 = &97
-drawpix_5 = &98
-
 bar_1 = &94
 bar_2 = &95
 bar_3 = &96
 
 angle_1 = &94
-
 missle_1 = &94
-
 picture_1 = &94
 picture_2 = &95
 
@@ -230,27 +101,57 @@ print_bits = &94
 cursor_x = &9E
 cursor_y = &9F
 
+CODE% = &1200
+LOAD% = &1200
+
+ORG CODE%
+
+\ ******************************************************************************
+\
+\       Name: tube_elite
+\       Type: Subroutine
+\   Category: Tube
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .tube_elite
 
  LDX #&FF
  TXS
  LDA #LO(tube_wrch)
- STA wrchv
+ STA WRCHV
  LDA #HI(tube_wrch)
- STA wrchv+&01
+ STA WRCHV+&01
  LDA #LO(tube_brk)
- STA brkv
+ STA BRKV
  LDA #HI(tube_brk)
- STA brkv+&01
+ STA BRKV+&01
  LDX #LO(tube_run)
  LDY #HI(tube_run)
  JMP OSCLI
 
-tube_brk = &16 \ tube BRK vector
+\ ******************************************************************************
+\
+\       Name: tube_run
+\       Type: Variable
+\   Category: Tube
+\    Summary: AJD
+\
+\ ******************************************************************************
 
 .tube_run
 
  EQUS "R.2.T", &0D
+
+\ ******************************************************************************
+\
+\       Name: tube_get
+\       Type: Subroutine
+\   Category: Tube
+\    Summary: AJD
+\
+\ ******************************************************************************
 
 .tube_get
 
@@ -260,6 +161,15 @@ tube_brk = &16 \ tube BRK vector
  LDA tube_r1d
  RTS
 
+\ ******************************************************************************
+\
+\       Name: tube_put
+\       Type: Subroutine
+\   Category: Tube
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .tube_put
 
  BIT tube_r2s
@@ -267,6 +177,15 @@ tube_brk = &16 \ tube BRK vector
  BVC tube_put
  STA tube_r2d
  RTS
+
+\ ******************************************************************************
+\
+\       Name: tube_func
+\       Type: Subroutine
+\   Category: Tube
+\    Summary: AJD
+\
+\ ******************************************************************************
 
 .tube_func
 
@@ -287,17 +206,35 @@ tube_brk = &16 \ tube BRK vector
 
  RTS
 
+\ ******************************************************************************
+\
+\       Name: tube_table
+\       Type: Variable
+\   Category: Tube
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .tube_table
 
  EQUW LL30, HLOIN, PIXEL, clr_scrn
- EQUW CLYNS, sync_in, draw_bar, draw_angle
- EQUW put_missle, scan_fire, write_fe4e, scan_xin
- EQUW scan_10in, get_key, write_xyc, write_pod
+ EQUW CLYNS, sync_in, draw_bar, DIL2
+ EQUW MSBAR, scan_fire, write_fe4e, scan_xin
+ EQUW scan_10in, get_key, CHPR, write_pod
  EQUW draw_blob, draw_tail, SPBLB, ECBLB
- EQUW draw_mode, write_crtc, scan_y, write_0346
- EQUW read_0346, return, picture_h, picture_v
+ EQUW UNWISE, DET1, scan_y, write_0346
+ EQUW read_0346, return, HANGER, HA2
 
-.write_xyc
+\ ******************************************************************************
+\
+\       Name: CHPR
+\       Type: Subroutine
+\   Category: Text
+\    Summary: AJD
+\
+\ ******************************************************************************
+
+.CHPR
 
  JSR tube_get
  STA cursor_x
@@ -1618,70 +1555,239 @@ tube_brk = &16 \ tube BRK vector
 
  RTS                    \ Return from the subroutine
 
+\ ******************************************************************************
+\
+\       Name: clr_scrn
+\       Type: Subroutine
+\   Category: Utility routines
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .clr_scrn
 
- LDX #&60
+ LDX #&60               \ Set X to the screen memory page for the top row of the
+                        \ screen (as screen memory starts at &6000)
 
-.l_254f
+.BOL1
 
- JSR ZES1
- INX
- CPX #&78
- BNE l_254f
- RTS
+ JSR ZES1               \ Call ZES1 to zero-fill the page in X, which clears
+                        \ that character row on the screen
+
+ INX                    \ Increment X to point to the next page, i.e. the next
+                        \ character row
+
+ CPX #&78               \ Loop back to BOL1 until we have cleared page &7700,
+ BNE BOL1               \ the last character row in the space view part of the
+                        \ screen (the space view)
+
+ RTS                    \ Return from the subroutine
+
+\ ******************************************************************************
+\
+\       Name: ZES1
+\       Type: Subroutine
+\   Category: Utility routines
+\    Summary: Zero-fill the page whose number is in X
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   X                   The page we want to zero-fill
+\
+\ ******************************************************************************
 
 .ZES1
 
- LDY #&00
- STY SC
- TYA
- STX SC+&01
+ LDY #0                 \ If we set Y = SC = 0 and fall through into ZES2
+ STY SC                 \ below, then we will zero-fill 255 bytes starting from
+                        \ SC - in other words, we will zero-fill the whole of
+                        \ page X
 
-.l_3a07
+\ ******************************************************************************
+\
+\       Name: ZES2
+\       Type: Subroutine
+\   Category: Utility routines
+\    Summary: Zero-fill a specific page
+\
+\ ------------------------------------------------------------------------------
+\
+\
+\ Arguments:
+\
+\   Y                   The offset from (X SC) where we start zeroing, counting
+\
+\   SC                  The low byte (i.e. the offset into the page) of the
+\                       starting point of the zero-fill
+\
+\ Returns:
+\
+\   Z flag              Z flag is set
+\
+\ ******************************************************************************
 
- STA (SC),Y
- INY
- BNE l_3a07
- RTS
+.ZES2
+
+ TYA                    \ Load A with the byte we want to fill the memory block
+                        \ with - i.e. zero
+
+ STX SC+1               \ We want to zero-fill page X, so store this in the
+                        \ high byte of SC, so the 16-bit address in SC and
+                        \ SC+1 is now pointing to the SC-th byte of page X
+
+.ZEL1
+
+ STA (SC),Y             \ Zero the Y-th byte of the block pointed to by SC,
+                        \ so that's effectively the Y-th byte before SC
+
+ INY                    \ Increment the loop counter
+
+ BNE ZEL1               \ Loop back to zero the next byte
+
+ RTS                    \ Return from the subroutine
+
+\ ******************************************************************************
+\
+\       Name: CLYNS
+\       Type: Subroutine
+\   Category: Utility routines
+\    Summary: Clear the bottom three text rows of the mode 4 screen
+\
+\ ------------------------------------------------------------------------------
+\
+\ Clear some space at the bottom of the screen and move the text cursor to
+\ column 1, row 21. Specifically, this zeroes the following screen locations:
+\
+\   &7507 to &75F0
+\   &7607 to &76F0
+\   &7707 to &77F0
+\
+\ which clears the three bottom text rows of the mode 4 screen (rows 21 to 23),
+\ clearing each row from text column 1 to 30 (so it doesn't overwrite the box
+\ border in columns 0 and 32, or the last usable column in column 31).
+\
+\ Returns:
+\
+\   A                   A is set to 0
+\
+\   Y                   Y is set to 0
+\
+\ ******************************************************************************
 
 .CLYNS
 
- LDA #&75
- STA SC+&01
- LDA #&07
+ LDA #&75               \ Set the two-byte value in SC to &7507
+ STA SC+1
+ LDA #7
  STA SC
- LDA #&00
+
+ LDA #0                 \ Call LYN to clear the pixels from &7507 to &75F0
  JSR LYN
- INC SC+&01
- JSR LYN
- INC SC+&01
+
+ INC SC+1               \ Increment SC+1 so SC points to &7607
+
+ JSR LYN                \ Call LYN to clear the pixels from &7607 to &76F0
+
+ INC SC+1               \ Increment SC+1 so SC points to &7707
+
+                        \ Fall through into LYN to clear the pixels from &7707
+                        \ to &77F0
+
+\ ******************************************************************************
+\
+\       Name: LYN
+\       Type: Subroutine
+\   Category: Utility routines
+\    Summary: Clear most of a row of pixels
+\
+\ ------------------------------------------------------------------------------
+\
+\ Set pixels 0-233 to the value in A, starting at the pixel pointed to by SC.
+\
+\ Arguments:
+\
+\   A                   The value to store in pixels 1-233 (the only value that
+\                       is actually used is A = 0, which clears those pixels)
+\
+\ Returns:
+\
+\   Y                   Y is set to 0
+\
+\ Other entry points:
+\
+\   SC5                 Contains an RTS
+\
+\ ******************************************************************************
 
 .LYN
 
- LDY #&E9
+ LDY #233               \ Set up a counter in Y to count down from pixel 233
 
-.l_25c8
+.EE2
 
- STA (SC),Y
- DEY
- BNE l_25c8
- RTS
+ STA (SC),Y             \ Store A in the Y-th byte after the address pointed to
+                        \ by SC
+
+ DEY                    \ Decrement Y
+
+ BNE EE2                \ Loop back until Y is zero
+
+.SC5
+
+ RTS                    \ Return from the subroutine
+
+\ ******************************************************************************
+\
+\       Name: sync_in
+\       Type: Subroutine
+\   Category: Screen mode
+\    Summary: Wait for the vertical sync
+\
+\ ******************************************************************************
 
 .sync_in
 
- JSR sync
+ JSR WSCAN              \ AJD
  JMP tube_put
 
-.sync
+\ ******************************************************************************
+\
+\       Name: WSCAN
+\       Type: Subroutine
+\   Category: Screen mode
+\    Summary: Wait for the vertical sync
+\
+\ ------------------------------------------------------------------------------
+\
+\ Wait for vertical sync to occur on the video system - in other words, wait
+\ for the screen to start its refresh cycle, which it does 50 times a second
+\ (50Hz).
+\
+\ ******************************************************************************
 
- LDA #&00
- STA &8B
+.WSCAN
 
-.sync_wait
+ LDA #0                 \ Set DL to 0
+ STA DL
 
- LDA &8B
- BEQ sync_wait
- RTS
+ LDA DL                 \ Loop round these two instructions until DL is no
+ BEQ P%-2               \ longer 0 (DL gets set to 30 in the LINSCN routine,
+                        \ which is run when vertical sync has occurred on the
+                        \ video system, so DL will change to a non-zero value
+                        \ at the start of each screen refresh)
+
+ RTS                    \ Return from the subroutine
+
+\ ******************************************************************************
+\
+\       Name: draw_bar
+\       Type: Subroutine
+\   Category: Dashboard
+\    Summary: AJD
+\
+\ ******************************************************************************
 
 .draw_bar
 
@@ -1747,54 +1853,142 @@ tube_brk = &16 \ tube BRK vector
 
  RTS
 
-.draw_angle
+\ ******************************************************************************
+\
+\       Name: DIL2
+\       Type: Subroutine
+\   Category: Dashboard
+\    Summary: Update the roll or pitch indicator on the dashboard
+\  Deep dive: The dashboard indicators
+\
+\ ------------------------------------------------------------------------------
+\
+\ The indicator can show a vertical bar in 16 positions, with a value of 8
+\ showing the bar in the middle of the indicator.
+\
+\ In practice this routine is only ever called with A in the range 1 to 15, so
+\ the vertical bar never appears in the leftmost position (though it does appear
+\ in the rightmost).
+\
+\ Arguments:
+\
+\   A                   The offset of the vertical bar to show in the indicator,
+\                       from 0 at the far left, to 8 in the middle, and 15 at
+\                       the far right
+\
+\ Returns:
+\
+\   C flag              The C flag is set
+\
+\ ******************************************************************************
 
- JSR tube_get
+.DIL2
+
+ JSR tube_get           \ AJD
  STA angle_1
  JSR tube_get
  STA SC
  JSR tube_get
  STA SC+1
- LDY #&01
 
-.l_1f11
+ LDY #1                 \ We want to start drawing the vertical indicator bar on
+                        \ the second line in the indicator's character block, so
+                        \ set Y to point to that row's offset
 
- SEC
- LDA angle_1
- SBC #&04
- BCS l_1f26
- LDA #&FF
- LDX angle_1
- STA angle_1
- LDA CTWOS,X
- AND #&F0
- JMP l_1f2a
+                        \ We are now going to work our way along the indicator
+                        \ on the dashboard, from left to right, working our way
+                        \ along one character block at a time. Y will be used as
+                        \ a pixel row counter to work our way through the
+                        \ character blocks, so each time we draw a character
+                        \ block, we will increment Y by 8 to move on to the next
+                        \ block (as each character block contains 8 rows)
 
-.l_1f26
+.DLL10
 
- STA angle_1
- LDA #&00
+ SEC                    \ Set A = angle_1 - 4, so that A contains the offset of
+ LDA angle_1            \ the vertical bar from the start of this character
+ SBC #4                 \ block
 
-.l_1f2a
+ BCS DLL11              \ If angle_1 >= 4 then the character block we are drawing
+                        \ does not contain the vertical indicator bar, so jump to
+                        \ DLL11 to draw a blank character block
 
+ LDA #&FF               \ Set A to a high number (and &FF is as high as they go)
+
+ LDX angle_1            \ Set X to the offset of the vertical bar, which we know
+                        \ is within this character block
+
+ STA angle_1            \ Set angle_1 to a high number (&FF, why not) so we will
+                        \ keep drawing blank characters after this one until we
+                        \ reach the end of the indicator row
+
+ LDA CTWOS,X            \ CTWOS is a table of ready-made 1-pixel mode 5 bytes,
+                        \ just like the TWOS and TWOS2 tables for mode 4 (see
+                        \ the PIXEL routine for details of how they work). This
+                        \ fetches a mode 5 1-pixel byte with the pixel position
+                        \ at X, so the pixel is at the offset that we want for
+                        \ our vertical bar
+
+ AND #&F0               \ The 4-pixel mode 5 colour byte &F0 represents four
+                        \ pixels of colour %10 (3), which is yellow in the
+                        \ normal dashboard palette and white if we have an
+                        \ escape pod fitted. We AND this with A so that we only
+                        \ keep the pixel that matches the position of the
+                        \ vertical bar (i.e. A is acting as a mask on the
+                        \ 4-pixel colour byte)
+
+ JMP DLL12              \ Jump to DLL12 to skip the code for drawing a blank,
+                        \ and move on to drawing the indicator
+
+.DLL11
+
+                        \ If we get here then we want to draw a blank for this
+                        \ character block
+
+ STA angle_1            \ Update angle_1 with the new offset of the vertical
+                        \ bar, so it becomes the offset after the character
+                        \ block we are about to draw
+
+ LDA #0                 \ Change the mask so no bits are set, so all of the
+                        \ character blocks we display from now on will be blank
+.DLL12
+
+ STA (SC),Y             \ Draw the shape of the mask on pixel row Y of the
+                        \ character block we are processing
+
+ INY                    \ Draw the next pixel row, incrementing Y
  STA (SC),Y
- INY
- STA (SC),Y
- INY
- STA (SC),Y
- INY
- STA (SC),Y
- TYA
- CLC
- ADC #&05
- TAY
- CPY #&1E
- BCC l_1f11
- RTS
 
-.put_missle
+ INY                    \ And draw the third pixel row, incrementing Y
+ STA (SC),Y
 
- JSR tube_get           \ Like msblob
+ INY                    \ And draw the fourth pixel row, incrementing Y
+ STA (SC),Y
+
+ TYA                    \ Add 5 to Y, so Y is now 8 more than when we started
+ CLC                    \ this loop iteration, so Y now points to the address
+ ADC #5                 \ of the first line of the indicator bar in the next
+ TAY                    \ character block (as each character is 8 bytes of
+                        \ screen memory)
+
+ CPY #30                \ If Y < 30 then we still have some more character
+ BCC DLL10              \ blocks to draw, so loop back to DLL10 to display the
+                        \ next one along
+
+ RTS                    \ Return from the subroutine
+
+\ ******************************************************************************
+\
+\       Name: MSBAR
+\       Type: Subroutine
+\   Category: Dashboard
+\    Summary: AJD
+\
+\ ******************************************************************************
+
+.MSBAR
+
+ JSR tube_get           \ Like MSBAR
  ASL A
  ASL A
  ASL A
@@ -1814,6 +2008,15 @@ tube_brk = &16 \ tube BRK vector
  BNE l_33ba
  RTS
 
+\ ******************************************************************************
+\
+\       Name: scan_fire
+\       Type: Subroutine
+\   Category: Keyboard
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .scan_fire
 
  LDA #&51
@@ -1822,11 +2025,29 @@ tube_brk = &16 \ tube BRK vector
  AND #&10
  JMP tube_put
 
+\ ******************************************************************************
+\
+\       Name: write_fe4e
+\       Type: Subroutine
+\   Category: Keyboard
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .write_fe4e
 
  JSR tube_get
  STA &FE4E
  JMP tube_put
+
+\ ******************************************************************************
+\
+\       Name: scan_xin
+\       Type: Subroutine
+\   Category: Keyboard
+\    Summary: AJD
+\
+\ ******************************************************************************
 
 .scan_xin
 
@@ -1904,34 +2125,80 @@ tube_brk = &16 \ tube BRK vector
 
  RTS                    \ Return from the subroutine
 
+\ ******************************************************************************
+\
+\       Name: scan_10in
+\       Type: Subroutine
+\   Category: Keyboard
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .scan_10in
 
  JSR RDKEY
  JMP tube_put
 
+\ ******************************************************************************
+\
+\       Name: RDKEY
+\       Type: Subroutine
+\   Category: Keyboard
+\    Summary: Scan the keyboard for key presses
+\
+\ ------------------------------------------------------------------------------
+\
+\ Scan the keyboard, starting with internal key number 16 ("Q") and working
+\ through the set of internal key numbers (see p.142 of the Advanced User Guide
+\ for a list of internal key numbers).
+\
+\ This routine is effectively the same as OSBYTE 122, though the OSBYTE call
+\ preserves A, unlike this routine.
+\
+\ Returns:
+\
+\   X                   If a key is being pressed, X contains the internal key
+\                       number, otherwise it contains 0
+\
+\ ******************************************************************************
+
 .RDKEY
 
- LDX #&10
+ LDX #16                \ Start the scan with internal key number 16 ("Q")
 
 .Rd1
 
- JSR DKS4
- BMI Rd2
- INX
- BPL Rd1
- TXA
+ JSR DKS4               \ Scan the keyboard to see if the key in X is currently
+                        \ being pressed, returning the result in A and X
+
+ BMI Rd2                \ Jump to Rd2 if this key is being pressed (in which
+                        \ case DKS4 will have returned the key number with bit
+                        \ 7 set, which is negative)
+
+ INX                    \ Increment the key number, which was unchanged by the
+                        \ above call to DKS4
+
+ BPL Rd1                \ Loop back to test the next key, ending the loop when
+                        \ X is negative (i.e. 128)
+
+ TXA                    \ If we get here, nothing is being pressed, so copy X
+                        \ into A so that X = A = 128 = %10000000
 
 .Rd2
 
- EOR #&80
- CMP #&37 \ CTRL-P hack for printer
+ EOR #%10000000         \ EOR A with #%10000000 to flip bit 7, so A now contains
+                        \ 0 if no key has been pressed, or the internal key
+                        \ number if a key has been pressed
+
+ CMP #&37               \ CTRL-P hack for printer AJD
  BNE scan_test
  LDX #&01
  JSR DKS4
  BPL scan_p
  JSR printer
  LDA #0
- RTS
+
+ RTS                    \ Return from the subroutine
 
 .scan_p
 
@@ -1942,10 +2209,19 @@ tube_brk = &16 \ tube BRK vector
  TAX
  RTS
 
+\ ******************************************************************************
+\
+\       Name: get_key
+\       Type: Subroutine
+\   Category: Keyboard
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .get_key
 
- JSR sync
- JSR sync
+ JSR WSCAN
+ JSR WSCAN
  JSR RDKEY
  BNE get_key
 
@@ -1957,6 +2233,15 @@ tube_brk = &16 \ tube BRK vector
  LDA (key_tube),Y
  JMP tube_put
 
+\ ******************************************************************************
+\
+\       Name: write_pod
+\       Type: Subroutine
+\   Category: Dashboard
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .write_pod
 
  JSR tube_get
@@ -1965,94 +2250,180 @@ tube_brk = &16 \ tube BRK vector
  STA &0348
  RTS
 
+\ ******************************************************************************
+\
+\       Name: draw_blob
+\       Type: Subroutine
+\   Category: Drawing pixels
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .draw_blob
 
  JSR tube_get
- STA ZZ
+ STA X1
  JSR tube_get
- STA drawpix_2
+ STA Y1
  JSR tube_get
- STA drawpix_3
+ STA X2
 
-.d_36ac
+\ ******************************************************************************
+\
+\       Name: CPIX2
+\       Type: Subroutine
+\   Category: Drawing pixels
+\    Summary: Draw a single-height dot on the dashboard
+\  Deep dive: Drawing colour pixels in mode 5
+\
+\ ------------------------------------------------------------------------------
+\
+\ Draw a single-height mode 5 dash (1 pixel high, 2 pixels wide).
+\
+\ Arguments:
+\
+\   X1                  The screen pixel x-coordinate of the dash
+\
+\   Y1                  The screen pixel y-coordinate of the dash
+\
+\   COL                 The colour of the dash as a mode 5 character row byte
+\
+\ ******************************************************************************
 
- LDA drawpix_2
- LSR A
- LSR A
- LSR A
- ORA #&60
- STA SC+&01
- LDA ZZ
- AND #&F8
- STA SC
- LDA drawpix_2
- AND #&07
- TAY
- LDA ZZ
- AND #&06
- LSR A
- TAX
- LDA CTWOS,X
- AND drawpix_3
- EOR (SC),Y
- STA (SC),Y
- LDA CTWOS+1,X
- BPL d_36dd
- LDA SC
- ADC #&08
- STA SC
- LDA CTWOS+1,X
+.CPIX2
 
-.d_36dd
+ LDA Y1                 \ Fetch the y-coordinate into A
 
- AND drawpix_3
- EOR (SC),Y
- STA (SC),Y
- RTS
+ LSR A                  \ Set A = A / 8, so A now contains the character row we
+ LSR A                  \ need to draw in (as each character row contains 8
+ LSR A                  \ pixel rows)
+
+ ORA #&60               \ Each character row in Elite's screen mode takes up one
+                        \ page in memory (256 bytes), so we now OR with &60 to
+                        \ get the page containing the dash (see the comments in
+                        \ routine TT26 for more discussion about calculating
+                        \ screen memory addresses)
+
+ STA SCH                \ Store the screen page in the high byte of SC(1 0)
+
+ LDA X1                 \ Each character block contains 8 pixel rows, so to get
+ AND #%11111000         \ the address of the first byte in the character block
+                        \ that we need to draw into, as an offset from the start
+                        \ of the row, we clear bits 0-2
+
+ STA SC                 \ Store the address of the character block in the low
+                        \ byte of SC(1 0), so now SC(1 0) points to the
+                        \ character block we need to draw into
+
+ LDA Y1                 \ Set Y to just bits 0-2 of the y-coordinate, which will
+ AND #%00000111         \ be the number of the pixel row we need to draw into
+ TAY                    \ within the character block
+
+ LDA X1                 \ Copy bits 0-1 of X1 to bits 1-2 of X, and clear the C
+ AND #%00000110         \ flag in the process (using the LSR). X will now be
+ LSR A                  \ a value between 0 and 3, and will be the pixel number
+ TAX                    \ in the character row for the left pixel in the dash.
+                        \ This is because each character row is one byte that
+                        \ contains 4 pixels, but covers 8 screen coordinates, so
+                        \ this effectively does the division by 2 that we need
+
+ LDA CTWOS,X            \ Fetch a mode 5 1-pixel byte with the pixel position
+ AND COL                \ at X, and AND with the colour byte so that pixel takes
+                        \ on the colour we want to draw (i.e. A is acting as a
+                        \ mask on the colour byte)
+
+ EOR (SC),Y             \ Draw the pixel on-screen using EOR logic, so we can
+ STA (SC),Y             \ remove it later without ruining the background that's
+                        \ already on-screen
+
+ LDA CTWOS+1,X          \ Fetch a mode 5 1-pixel byte with the pixel position
+                        \ at X+1, so we can draw the right pixel of the dash
+
+ BPL CP1                \ The CTWOS table has an extra row at the end of it that
+                        \ repeats the first value, %10001000, so if we have not
+                        \ fetched that value, then the right pixel of the dash
+                        \ is in the same character block as the left pixel, so
+                        \ jump to CP1 to draw it
+
+ LDA SC                 \ Otherwise the left pixel we drew was at the last
+ ADC #8                 \ position of four in this character block, so we add
+ STA SC                 \ 8 to the screen address to move onto the next block
+                        \ along (as there are 8 bytes in a character block).
+                        \ The C flag was cleared above, so this ADC is correct
+
+ LDA CTWOS+1,X          \ Refetch the mode 5 1-pixel byte, as we just overwrote
+                        \ A (the byte will still be the fifth byte from the
+                        \ table, which is correct as we want to draw the
+                        \ leftmost pixel in the next character along as the
+                        \ dash's right pixel)
+
+.CP1
+
+ AND COL                \ Apply the colour mask to the pixel byte, as above
+
+ EOR (SC),Y             \ Draw the dash's right pixel according to the mask in
+ STA (SC),Y             \ A, with the colour in COL, using EOR logic, just as
+                        \ above
+
+ RTS                    \ Return from the subroutine
+
+\ ******************************************************************************
+\
+\       Name: draw_tail
+\       Type: Subroutine
+\   Category: Dashboard
+\    Summary: AJD
+\
+\ ******************************************************************************
 
 .draw_tail
 
  JSR tube_get
- STA ZZ
+ STA X1
  JSR tube_get
- STA drawpix_2
+ STA Y1
  JSR tube_get
- STA drawpix_3
+ STA X2
  JSR tube_get
- STA drawpix_4
+ STA Y2
  JSR tube_get
- STA drawpix_5
- JSR d_36ac
- DEC drawpix_2
- JSR d_36ac
+ STA P
+
+.SC48 
+
+ JSR CPIX2              \ Like SC48 in SCAN
+ DEC Y1
+ JSR CPIX2
+
  LDA CTWOS+1,X
- AND drawpix_3 \ iff
- STA drawpix_3
+ AND COL \ iff
+ STA COL
+
  LDA CTWOS+1,X
- AND drawpix_4
- STA drawpix_4
- LDX drawpix_5
- BEQ d_55da
+ AND Y2 \ COL2?
+ STA Y2
+ LDX P
+ BEQ RTS
  BMI d_55db
 
-.d_55ca
+.VLL1
 
  DEY
- BPL d_55d1
+ BPL VL1
  LDY #&07
  DEC SC+&01
 
-.d_55d1
+.VL1
 
- LDA drawpix_3
- EOR drawpix_4 \ iff
- STA drawpix_3 \ iff
+ LDA COL
+ EOR Y2 \ iff drawpix_4
+ STA COL
  EOR (SC),Y
  STA (SC),Y
  DEX
- BNE d_55ca
+ BNE VLL1
 
-.d_55da
+.RTS
 
  RTS
 
@@ -2060,47 +2431,107 @@ tube_brk = &16 \ tube BRK vector
 
  INY
  CPY #&08
- BNE d_55e4
+ BNE VLL2
  LDY #&00
  INC SC+&01
 
-.d_55e4
+.VLL2
 
  INY
  CPY #&08
- BNE d_55ed
+ BNE VL2
  LDY #&00
  INC SC+&01
 
-.d_55ed
+.VL2
 
- LDA drawpix_3
- EOR drawpix_4 \ iff
- STA drawpix_3 \ iff
+ LDA COL
+ EOR Y2 \ iff drawpix_4
+ STA COL
  EOR (SC),Y
  STA (SC),Y
  INX
- BNE d_55e4
+ BNE VLL2
  RTS
+
+\ ******************************************************************************
+\
+\       Name: ECBLB
+\       Type: Subroutine
+\   Category: Dashboard
+\    Summary: Light up the E.C.M. indicator bulb ("E") on the dashboard
+\
+\ ******************************************************************************
 
 .ECBLB
 
- LDA #&38
- LDX #LO(ECBT)
- LDY #HI(ECBT)
- JMP BULB
+ LDA #7*8               \ The E.C.M. bulb is in character block number 7
+                        \ with each character taking 8 bytes, so this sets the
+                        \ low byte of the screen address of the character block
+                        \ we want to draw to
+
+ LDX #LO(ECBT)          \ Set (Y X) to point to the character definition in
+ LDY #HI(ECBT)          \ ECBT
+
+ JMP BULB               \ Jump down to BULB
+
+\ ******************************************************************************
+\
+\       Name: SPBLB
+\       Type: Subroutine
+\   Category: Dashboard
+\    Summary: Draw (or erase) the space station indicator ("S") on the dashboard
+\
+\ ------------------------------------------------------------------------------
+\
+\ Other entry points:
+\
+\   BULB-2              Set the Y screen address
+\
+\ ******************************************************************************
 
 .SPBLB
 
- LDA #&C0
- LDX #<(SPBT)
- LDY #>(SPBT)
+ LDA #24*8              \ The space station bulb is in character block number 24
+                        \ with each character taking 8 bytes, so this sets the
+                        \ low byte of the screen address of the character block
+                        \ we want to draw to
+
+ LDX #LO(SPBT)          \ Set (Y X) to point to the character definition in SPBT
+ LDY #HI(SPBT)
+
+                        \ Fall through into BULB to draw the space station bulb
+
+\ ******************************************************************************
+\
+\       Name: BULB
+\       Type: Subroutine
+\   Category: Dashboard
+\    Summary: Draw an indicator bulb on the dashboard
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   A                   The y-coordinate of the bulb as a low-byte screen
+\                       address offset within screen page &7D (as both bulbs
+\                       are on this character row in the dashboard)
+\
+\   (Y X)               The address of the character definition of the bulb to
+\                       be drawn (i.e. ECBT for the E.C.M. bulb, or SPBT for the
+\                       space station bulb)
+\
+\ ******************************************************************************
 
 .BULB
 
- STA SC
- LDA #&7D
- STA SC+1
+ STA SC                 \ Store the low byte of the screen address in SC
+
+ LDA #&7D               \ Set A to the high byte of the screen address, which is
+                        \ &7D as the bulbs are both in the character row from
+                        \ &7D00 to &7DFF
+
+ STA SC+1               \ AJD
  STX font
  STY font+1
  LDY #&07
@@ -2171,9 +2602,34 @@ tube_brk = &16 \ tube BRK vector
  EQUB %11100000         \ x x x .
  EQUB %11100000         \ x x x .
 
-.draw_mode
+\ ******************************************************************************
+\
+\       Name: UNWISE
+\       Type: Subroutine
+\   Category: Ship hanger
+\    Summary: Switch the main line-drawing routine between EOR and OR logic
+\
+\ ------------------------------------------------------------------------------
+\
+\ This routine modifies the instructions in the main line-drawing routine at
+\ LOIN/LL30, flipping the drawing logic between the default EOR logic (which
+\ merges with whatever is already on screen, allowing us to erase anything we
+\ draw for animation purposes) and OR logic (which overwrites the screen,
+\ ignoring anything that's already there). We want to use OR logic for drawing
+\ the ship hanger, as it looks better and we don't need to animate it).
+\
+\ The routine name, UNWISE, sums up this approach - if anything goes wrong, the
+\ results would be messy.
+\
+\ Other entry points:
+\
+\   HA1                 Contains an RTS
+\
+\ ******************************************************************************
 
- LDA LIL2+2
+.UNWISE
+
+ LDA LIL2+2             \ AJD
  EOR #&40
  STA LIL2+2
  \LDA LIL3+2
@@ -2185,17 +2641,48 @@ tube_brk = &16 \ tube BRK vector
  \LDA LIL6+2
  \EOR #&40
  STA LIL6+2
- RTS
 
-.write_crtc
+.HA1
 
- JSR tube_get
- LDX #&06
- SEI
- STX &FE00
- STA &FE01
- CLI
- RTS
+ RTS                    \ Return from the subroutine
+
+\ ******************************************************************************
+\
+\       Name: DET1
+\       Type: Subroutine
+\   Category: Screen mode
+\    Summary: Show or hide the dashboard (for when we die)
+\
+\ ------------------------------------------------------------------------------
+\
+\ Set the screen to show the number of text rows given in X. This is used when
+\ we are killed, as reducing the number of rows from the usual 31 to 24 has the
+\ effect of hiding the dashboard, leaving a monochrome image of ship debris and
+\ explosion clouds. Increasing the rows back up to 31 makes the dashboard
+\ reappear, as the dashboard's screen memory doesn't get touched by this
+\ process.
+\
+\ Returns:
+\
+\   A                   A is set to 6
+\
+\ ******************************************************************************
+
+.DET1
+
+ JSR tube_get           \ AJD
+
+ LDX #6                 \ Set X to 6 so we can update 6845 register R6 below
+
+ SEI                    \ Disable interrupts so we can update the 6845
+
+ STX VIA+&00            \ Set 6845 register R6 to the value in A. Register R6
+ STA VIA+&01            \ is the "vertical displayed" register, which sets the
+                        \ number of rows shown on the screen
+
+ CLI                    \ Re-enable interrupts
+
+ RTS                    \ Return from the subroutine
 
 \ ******************************************************************************
 \
@@ -2243,10 +2730,28 @@ tube_brk = &16 \ tube BRK vector
 
  EQUB &37               \ P         KYTB+16     Cancel docking computer
 
+\ ******************************************************************************
+\
+\       Name: b_table
+\       Type: Variable
+\   Category: Keyboard
+\    Summary: Lookup table for Voltmace Delta 14 joystick buttons AJD
+\
+\ ******************************************************************************
+
 .b_table
 
  EQUB &61, &31, &80, &80, &80, &80, &51
  EQUB &64, &34, &32, &62, &52, &54, &58, &38, &68
+
+\ ******************************************************************************
+\
+\       Name: b_14
+\       Type: Subroutine
+\   Category: Keyboard
+\    Summary: Check Voltmace Delta 14 joystick buttons AJD
+\
+\ ******************************************************************************
 
 .b_13
 
@@ -2263,7 +2768,17 @@ tube_brk = &16 \ tube BRK vector
  BEQ b_pressed
  TXA
  BMI b_13
+
  BPL b_quit
+
+\ ******************************************************************************
+\
+\       Name: scan_y
+\       Type: Subroutine
+\   Category: Keyboard
+\    Summary: AJD
+\
+\ ******************************************************************************
 
 .scan_y
 
@@ -2283,18 +2798,45 @@ tube_brk = &16 \ tube BRK vector
 
  JMP tube_put
 
+\ ******************************************************************************
+\
+\       Name: write_0346
+\       Type: Subroutine
+\   Category: Tube
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .write_0346
 
  JSR tube_get
  STA &0346
  RTS
 
+\ ******************************************************************************
+\
+\       Name: read_0346
+\       Type: Subroutine
+\   Category: Tube
+\    Summary: AJD
+\
+\ ******************************************************************************
+
 .read_0346
 
  LDA &0346
  JMP tube_put
 
-.picture_h
+\ ******************************************************************************
+\
+\       Name: HANGER
+\       Type: Subroutine
+\   Category: Ship hanger
+\    Summary: AJD
+\
+\ ******************************************************************************
+
+.HANGER
 
  JSR tube_get
  STA picture_1
@@ -2312,22 +2854,22 @@ tube_brk = &16 \ tube BRK vector
  AND #&07
  STA SC
  LDY #&00
- JSR l_20e8
+ JSR HAS2
  LDA #&04
  LDY #&F8
- JSR l_2101
+ JSR HAS3
  LDY picture_2
  BEQ l_2045
- JSR l_20e8
+ JSR HAS2
  LDY #&80
  LDA #&40
- JSR l_2101
+ JSR HAS3
 
 .l_2045
 
  RTS
 
-.picture_v
+.HA2
 
  JSR tube_get
  AND #&F8
@@ -2337,69 +2879,164 @@ tube_brk = &16 \ tube BRK vector
  LDX #&80
  LDY #&01
 
-.l_205c
+.HAL7
 
  TXA
  AND (SC),Y
- BNE l_2071
+ BNE HA6
  TXA
  ORA (SC),Y
  STA (SC),Y
  INY
  CPY #&08
- BNE l_205c
+ BNE HAL7
  INC SC+&01
  LDY #&00
- BEQ l_205c
+ BEQ HAL7
 
-.l_2071
+.HA6
 
  RTS
 
-.l_20e8
+\ ******************************************************************************
+\
+\       Name: HAS2
+\       Type: Subroutine
+\   Category: Ship hanger
+\    Summary: Draw a hanger background line from left to right
+\
+\ ------------------------------------------------------------------------------
+\
+\ This routine draws a line to the right, starting with the third pixel of the
+\ pixel row at screen address SC(1 0), and aborting if we bump into something
+\ that's already on-screen. HAL2 draws from the left edge of the screen to the
+\ halfway point, and then HAL3 takes over to draw from the halfway point across
+\ the right half of the screen.
+\
+\ Other entry points:
+\
+\   HA3                 Contains an RTS
+\
+\ ******************************************************************************
 
- LDA #&20
+.HAS2
 
-.l_20ea
+ LDA #%00100000         \ Set A to the pixel pattern for a mode 4 character row
+                        \ byte with the third pixel set, so we start drawing the
+                        \ horizontal line just to the right of the 2-pixel
+                        \ border along the edge of the screen
 
- TAX
- AND (SC),Y
- BNE l_2100
- TXA
- ORA (SC),Y
- STA (SC),Y
- TXA
- LSR A
- BCC l_20ea
- TYA
- ADC #&07
+.HAL2
+
+ TAX                    \ Store A in X so we can retrieve it after the following
+                        \ check and again after updating screen memory
+
+ AND (SC),Y             \ If the pixel we want to draw is non-zero (using A as a
+ BNE HA3                \ mask), then this means it already contains something,
+                        \ so we stop drawing because we have run into something
+                        \ that's already on-screen, and return from the
+                        \ subroutine (as HA3 contains an RTS)
+
+ TXA                    \ Retrieve the value of A we stored above, so A now
+                        \ contains the pixel mask again
+
+ ORA (SC),Y             \ OR the byte with the current contents of screen
+                        \ memory, so the pixel we want is set to red (because
+                        \ we know the bits are already 0 from the above test)
+
+ STA (SC),Y             \ Store the updated pixel in screen memory
+
+ TXA                    \ Retrieve the value of A we stored above, so A now
+                        \ contains the pixel mask again
+
+ LSR A                  \ Shift A to the right to move on to the next pixel
+
+ BCC HAL2               \ If bit 0 before the shift was clear (i.e. we didn't
+                        \ just do the fourth pixel in this block), loop back to
+                        \ HAL2 to check and draw the next pixel
+
+ TYA                    \ Set Y = Y + 8 (as we know the C flag is set) to point
+ ADC #7                 \ to the next character block along
  TAY
- LDA #&80
- BCC l_20ea
 
-.l_2100
+ LDA #%10000000         \ Reset the pixel mask in A to the first pixel in the
+                        \ new 8-pixel character block
 
- RTS
+ BCC HAL2               \ If the above addition didn't overflow, jump back to
+                        \ HAL2 to keep drawing the line in the next character
+                        \ block
 
-.l_2101
+.HA3
 
- TAX
- AND (SC),Y
- BNE l_2100
- TXA
- ORA (SC),Y
- STA (SC),Y
- TXA
- ASL A
- BCC l_2101
- TYA
- SBC #&08
+ RTS                    \ The addition overflowed, so we have reached the last
+                        \ character block in this page of memory, which is the
+                        \ end of the line, so we return from the subroutine
+
+\ ******************************************************************************
+\
+\       Name: HAS3
+\       Type: Subroutine
+\   Category: Ship hanger
+\    Summary: Draw a hanger background line from right to left
+\
+\ ------------------------------------------------------------------------------
+\
+\ This routine draws a line to the left, starting with the pixel mask in A at
+\ screen address SC(1 0) and character block offset Y, and aborting if we bump
+\ into something that's already on-screen.
+\
+\ ******************************************************************************
+
+.HAS3
+
+ TAX                    \ Store A in X so we can retrieve it after the following
+                        \ check and again after updating screen memory
+
+ AND (SC),Y             \ If the pixel we want to draw is non-zero (using A as a
+ BNE HA3                \ mask), then this means it already contains something,
+                        \ so we stop drawing because we have run into something
+                        \ that's already on-screen, and return from the
+                        \ subroutine (as HA3 contains an RTS)
+
+ TXA                    \ Retrieve the value of A we stored above, so A now
+                        \ contains the pixel mask again
+
+ ORA (SC),Y             \ OR the byte with the current contents of screen
+                        \ memory, so the pixel we want is set to red (because
+                        \ we know the bits are already 0 from the above test)
+
+ STA (SC),Y             \ Store the updated pixel in screen memory
+
+ TXA                    \ Retrieve the value of A we stored above, so A now
+                        \ contains the pixel mask again
+
+ ASL A                  \ Shift A to the left to move to the next pixel to the
+                        \ left
+
+ BCC HAS3               \ If bit 7 before the shift was clear (i.e. we didn't
+                        \ just do the first pixel in this block), loop back to
+                        \ HAS3 to check and draw the next pixel to the left
+
+ TYA                    \ Set Y = Y - 8 (as we know the C flag is set) to point
+ SBC #8                 \ to the next character block to the left
  TAY
- LDA #&01
- BCS l_2101
- RTS
 
-rawrch = &FFBC
+ LDA #%00000001         \ Set a mask in A to the last pixel in the 8-pixel byte
+
+ BCS HAS3               \ If the above subtraction didn't underflow, jump back
+                        \ to HAS3 to keep drawing the line in the next character
+                        \ block to the left
+
+ RTS                    \ Return from the subroutine
+
+\ ******************************************************************************
+\
+\       Name: printer
+\       Type: Subroutine
+\   Category: Text
+\    Summary: AJD
+\
+\ ******************************************************************************
 
 .printer
 
