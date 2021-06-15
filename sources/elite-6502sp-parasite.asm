@@ -695,7 +695,9 @@ ORG &0000
 
  SKIP 4                 \ Temporary storage, used in a number of places
 
- SKIP 1                 \ This byte appears to be unused
+.finder
+
+ SKIP 1                 \ AJD
 
 .dockedp
 
@@ -4087,13 +4089,13 @@ LOAD_B% = LOAD% + P% - CODE%
 
  LDA #&80
  JSR tube_write
- LDA &34
+ LDA X1
  JSR tube_write
- LDA &35
+ LDA Y1
  JSR tube_write
- LDA &36
+ LDA X2
  JSR tube_write
- LDA &37
+ LDA Y2
  JMP tube_write
 
 \ ******************************************************************************
@@ -4272,11 +4274,11 @@ LOAD_B% = LOAD% + P% - CODE%
 
  LDA #&81
  JSR tube_write
- LDA &34
+ LDA X1
  JSR tube_write
- LDA &35
+ LDA Y1
  JSR tube_write
- LDA &36
+ LDA X2
  JMP tube_write
 
 \ ******************************************************************************
@@ -4297,7 +4299,7 @@ LOAD_B% = LOAD% + P% - CODE%
  JSR tube_write
  PLA
  JSR tube_write
- LDA &88
+ LDA ZZ
  JMP tube_write
 
 \ ******************************************************************************
@@ -4879,7 +4881,7 @@ LOAD_B% = LOAD% + P% - CODE%
  STA XC
  JSR vdu_80
  LDA #&01
- STA &03AB
+ STA QQ25
  JSR sell_yn
  BEQ status_no
  BCS status_no
@@ -6671,7 +6673,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  JSR tube_write
  LDA SC+1
  JSR tube_write
- INC SC+&01
+ INC SC+1
  RTS
 
 \ ******************************************************************************
@@ -7107,18 +7109,18 @@ LOAD_C% = LOAD% +P% - CODE%
 
 .HAL1
 
- STX &84
+ STX XSAV
  LDA #&82
- LDX &84
- STX &81
+ LDX XSAV
+ STX Q
  JSR DVID4
  LDA #&9A
  JSR tube_write
- LDA &1B
+ LDA P
  JSR tube_write
- LDA &85
+ LDA YSAV
  JSR tube_write
- LDX &84
+ LDX XSAV
  INX
  CPX #&0D
  BCC HAL1
@@ -7126,12 +7128,12 @@ LOAD_C% = LOAD% +P% - CODE%
 
 .HAL6
 
- STA &84
+ STA XSAV
  LDA #&9B
  JSR tube_write
- LDA &84
+ LDA XSAV
  JSR tube_write
- LDA &84
+ LDA XSAV
  CLC
  ADC #&10
  BNE HAL6
@@ -10565,8 +10567,8 @@ LOAD_D% = LOAD% + P% - CODE%
  LDA R                  \ Set P to the amount of this item we just bought
  STA P
 
- LDA &03AA              \ AJD
- STA &81
+ LDA QQ24               \ AJD
+ STA Q
  JSR MULTU
  JSR price_xy
  JSR MCASH
@@ -12161,7 +12163,7 @@ LOAD_D% = LOAD% + P% - CODE%
  JSR tube_write
  LDA ESCP
  JSR tube_write
- LDA &0348
+ LDA HFX
  JMP tube_write
 
 \ ******************************************************************************
@@ -15651,8 +15653,8 @@ LOAD_F% = LOAD% + P% - CODE%
 
  LDA #0
  STA save_lock
- STA &0320
- STA &30
+ STA SSPR
+ STA ECMA
  STA dockedp
  JMP BEGIN
 
@@ -22065,30 +22067,30 @@ LOAD_G% = LOAD% + P% - CODE%
  LDA #&0F   \LDA #&0D
  SBC QQ28
  SBC QQ28   \++
- STA &03AB
+ STA QQ25
 
 .n_bloop
 
- STX &89
+ STX XX13
  JSR TT67
- LDX &89
+ LDX XX13
  INX
  CLC
  JSR pr2
  JSR TT162
- LDY &89
+ LDY XX13
  JSR n_name
- LDY &89
+ LDY XX13
  JSR n_price
  LDA #&16
  STA XC
  LDA #&09
- STA &80
+ STA U
  SEC
  JSR BPRNT
- LDX &89
+ LDX XX13
  INX
- CPX &03AB
+ CPX QQ25
  BCC n_bloop
  JSR CLYNS
  LDA #&B9
@@ -22097,12 +22099,12 @@ LOAD_G% = LOAD% + P% - CODE%
  BEQ jmp_start3
  BCS jmp_start3
  SBC #&00
- CMP &03AB
+ CMP QQ25
  BCS jmp_start3
  LDX #&02
  STX XC
  INC YC
- STA &81
+ STA Q
  LDY new_type
  JSR n_price
  CLC
@@ -22111,23 +22113,23 @@ LOAD_G% = LOAD% + P% - CODE%
 .n_addl
 
  LDA CASH,X
- ADC &40,X
- STA &09,X
+ ADC K,X
+ STA XX16,X
  DEX
  BPL n_addl
- LDY &81
+ LDY Q
  JSR n_price
  SEC
  LDX #3
 
 .n_subl
 
- LDA &09,X
- SBC &40,X
- STA &40,X
+ LDA XX16,X
+ SBC K,X
+ STA K,X
  DEX
  BPL n_subl
- LDA &81
+ LDA Q
  BCS n_buy
 
 .cash_query
@@ -22147,7 +22149,7 @@ LOAD_G% = LOAD% + P% - CODE%
 
 .n_cpyl
 
- LDA &40,Y
+ LDA K,Y
  STA CASH,Y
  DEY
  BPL n_cpyl
@@ -22156,7 +22158,7 @@ LOAD_G% = LOAD% + P% - CODE%
 
 .n_wipe
 
- STA &0368,Y
+ STA LASER,Y
  DEY
  BPL n_wipe
  STX new_type
@@ -22245,16 +22247,16 @@ LOAD_G% = LOAD% + P% - CODE%
  \ name ship in 0 <= Y <= &C
  LDX new_offsets,Y
  LDA #9
- STA &41
+ STA K+1
 
 .n_lprint
 
  LDA new_ships,X
- STX &40
+ STX K
  JSR TT27
- LDX &40
+ LDX K
  INX
- DEC &41
+ DEC K+1
  BNE n_lprint
  RTS
 
@@ -22276,7 +22278,7 @@ LOAD_G% = LOAD% + P% - CODE%
 .n_lprice
 
  LDA new_price,X
- STA &40,Y
+ STA K,Y
  INX
  DEY
  BPL n_lprice
@@ -22314,27 +22316,27 @@ LOAD_G% = LOAD% + P% - CODE%
  EOR QQ1
  EOR FIST
  EOR TALLY
- STA &46
+ STA INWK
  SEC
  LDA FIST
  ADC GCNT
  ADC cmdr_ship
- STA &47
- ADC &46
+ STA INWK+1
+ ADC INWK
  SBC cmdr_courx
  SBC cmdr_coury
  AND #&0F
- STA &03AB
+ STA QQ25
  BEQ cour_pres
  LDA #&00
- STA &49
- STA &4C
+ STA INWK+3
+ STA INWK+6
  JSR TT81
 
 .cour_loop
 
- LDA &49
- CMP &03AB
+ LDA INWK+3
+ CMP QQ25
  BCC cour_count
 
 .cour_menu
@@ -22347,12 +22349,12 @@ LOAD_G% = LOAD% + P% - CODE%
  BCS cour_pres
  TAX
  DEX
- CPX &49
+ CPX INWK+3
  BCS cour_pres
  LDA #&02
  STA XC
  INC YC
- STX &46
+ STX INWK
  LDY &0C50,X
  LDA &0C40,X
  TAX
@@ -22362,7 +22364,7 @@ LOAD_G% = LOAD% + P% - CODE%
 
 .cour_cash
 
- LDX &46
+ LDX INWK
  LDA &0C00,X
  STA cmdr_courx
  LDA &0C10,X
@@ -22383,24 +22385,24 @@ LOAD_G% = LOAD% + P% - CODE%
 .cour_count
 
  JSR TT20
- INC &4C
+ INC INWK+6
  BEQ cour_menu
- DEC &46
+ DEC INWK
  BNE cour_count
- LDX &49
- LDA &6F
+ LDX INWK+3
+ LDA QQ15+3
  CMP QQ0
  BNE cour_star
- LDA &6D
+ LDA QQ15+1
  CMP QQ1
  BNE cour_star
  JMP cour_next
 
 .cour_star
 
- LDA &6F
- EOR &71
- EOR &47
+ LDA QQ15+3
+ EOR QQ15+5
+ EOR INWK+1
  CMP FIST
  BCC cour_legal
  LDA #0
@@ -22408,7 +22410,7 @@ LOAD_G% = LOAD% + P% - CODE%
 .cour_legal
 
  STA &0C20,X
- LDA &6F
+ LDA QQ15+3
  STA &0C00,X
  SEC
  SBC QQ0
@@ -22419,11 +22421,11 @@ LOAD_G% = LOAD% + P% - CODE%
 .cour_negx
 
  JSR SQUA2
- STA &41
- LDA &1B
- STA &40
- LDX &49
- LDA &6D
+ STA K+1
+ LDA P
+ STA K
+ LDX INWK+3
+ LDA QQ15+1
  STA &0C10,X
  SEC
  SBC QQ1
@@ -22436,65 +22438,65 @@ LOAD_G% = LOAD% + P% - CODE%
  LSR A
  JSR SQUA2
  PHA
- LDA &1B
+ LDA P
  CLC
- ADC &40
- STA &81
+ ADC K
+ STA Q
  PLA
- ADC &41
- STA &82
+ ADC K+1
+ STA R
  JSR LL5
- LDX &49
- LDA &6D
- EOR &71
- EOR &47
+ LDX INWK+3
+ LDA QQ15+1
+ EOR QQ15+5
+ EOR INWK+1
  LSR A
  LSR A
  LSR A
- CMP &81
+ CMP Q
  BCS cour_dist
- LDA &81
+ LDA Q
 
 .cour_dist
 
  ORA &0C20,X
  STA &0C30,X
- STA &4A
+ STA INWK+4
  LSR A
- ROR &4A
+ ROR INWK+4
  LSR A
- ROR &4A
+ ROR INWK+4
  LSR A
- ROR &4A
- STA &4B
+ ROR INWK+4
+ STA INWK+5
  STA &0C50,X
- LDA &4A
+ LDA INWK+4
  STA &0C40,X
  LDA #&01
  STA XC
  CLC
- LDA &49
+ LDA INWK+3
  ADC #&03
  STA YC
- LDX &49
+ LDX INWK+3
  INX
  CLC
  JSR pr2
  JSR TT162
  JSR cpl
- LDX &4A
- LDY &4B
+ LDX INWK+4
+ LDY INWK+5
  SEC
  LDA #&19
  STA XC
  LDA #&06
  JSR TT11
- INC &49
+ INC INWK+3
 
 .cour_next
 
- LDA &47
- STA &46
+ LDA INWK+1
+ STA INWK
  JMP cour_loop
 
 \ ******************************************************************************
@@ -31259,7 +31261,7 @@ ENDMACRO
  ETOK 177
  EQUB VE
 
- \ ******************************************************************************
+\ ******************************************************************************
 \
 \       Name: CHAR
 \       Type: Macro
@@ -32732,21 +32734,21 @@ LOAD_I% = LOAD% + P% - CODE%
 
 .ship_over
 
- STA &8C
+ STA TYPE
  CLC
  ADC #&07
  PHA
  LDA #&20
  JSR TT66
  JSR MT1
- LDX &8C
+ LDX TYPE
 
  LDA ship_posn,X
  TAX
  LDY #0
  JSR install_ship
 
- LDX &8C
+ LDX TYPE
  LDA ship_centre,X
  STA XC
  PLA
@@ -32754,15 +32756,15 @@ LOAD_I% = LOAD% + P% - CODE%
  JSR NLIN4
  JSR ZINF
  LDA #&60
- STA &54
+ STA INWK+14
  LDA #&B0
- STA &4D
+ STA INWK+7
  LDX #&7F
- STX &63
- STX &64
+ STX INWK+29
+ STX INWK+30
  INX
  STA QQ17
- LDA &8C
+ LDA TYPE
  JSR write_card
 
  LDA #0
@@ -32771,22 +32773,22 @@ LOAD_I% = LOAD% + P% - CODE%
 
 .l_395a
 
- LDX &8C
+ LDX TYPE
  LDA ship_dist,X
- CMP &4D
+ CMP INWK+7
  BEQ l_3962
- DEC &4D
+ DEC INWK+7
 
 .l_3962
 
  JSR MVEIT
  LDA #&80
- STA &4C
+ STA INWK+6
  ASL A
- STA &46
- STA &49
+ STA INWK
+ STA INWK+3
  JSR LL9
- DEC &8A
+ DEC MCNT
 
  JSR check_keys
  CPX #0
@@ -32936,15 +32938,15 @@ LOAD_I% = LOAD% + P% - CODE%
  ASL A
  TAY
  LDA card_addr,Y
- STA &22
+ STA V
  LDA card_addr+1,Y
- STA &23
+ STA V+1
 
 .card_repeat
 
  JSR MT1
  LDY #&00
- LDA (&22),Y
+ LDA (V),Y
  TAX
  BEQ quit_card
  BNE card_check
@@ -32984,7 +32986,7 @@ LOAD_I% = LOAD% + P% - CODE%
 .card_loop
 
  INY
- LDA (&22),Y
+ LDA (V),Y
  BEQ card_end
  BMI card_msg
  CMP #&20
@@ -33014,10 +33016,10 @@ LOAD_I% = LOAD% + P% - CODE%
 
  TYA
  SEC
- ADC &22
- STA &22
+ ADC V
+ STA V
  BCC card_repeat
- INC &23
+ INC V+1
  BCS card_repeat
 
 .quit_card
@@ -33068,9 +33070,9 @@ LOAD_I% = LOAD% + P% - CODE%
 .menu
 
  LDA menu_entry,X
- STA &03AB
+ STA QQ25
  LDA menu_offset,X
- STA &03AD
+ STA QQ29
  LDA menu_query,X
  PHA
  LDA menu_title,X
@@ -33091,9 +33093,9 @@ LOAD_I% = LOAD% + P% - CODE%
 
 .menu_loop
 
- STX &89
+ STX XX13
  JSR TT67
- LDX &89
+ LDX XX13
  INX
  CLC
  JSR pr2
@@ -33104,12 +33106,12 @@ LOAD_I% = LOAD% + P% - CODE%
  STA QQ17
 
  CLC
- LDA &89
- ADC &03AD
+ LDA XX13
+ ADC QQ29
  JSR write_msg3
- LDX &89
+ LDX XX13
  INX
- CPX &03AB
+ CPX QQ25
  BCC menu_loop
  JSR CLYNS
  PLA
@@ -34502,7 +34504,7 @@ LOAD_J% = LOAD% + P% - CODE%
 
 .MA24
 
- LDA &0308              \ AJD
+ LDA KY12               \ AJD
  AND BOMB
  BEQ MA76
 
@@ -34516,16 +34518,16 @@ LOAD_J% = LOAD% + P% - CODE%
 
 .MA76
 
- LDA &030F              \ AJD
+ LDA KY19               \ AJD
  AND DKCMP
  BNE dock_toggle
- LDA &0310
+ LDA KY20
  BEQ MA78
  LDA #&00
 
 .dock_toggle
 
- STA &033F
+ STA auto
 
 .MA78
 
@@ -35020,7 +35022,7 @@ LOAD_J% = LOAD% + P% - CODE%
 \
 \ ******************************************************************************
 
- LDA &033F              \ AJD
+ LDA auto               \ AJD
  AND #&04
  EOR #&05
  BNE MA63
@@ -35275,7 +35277,7 @@ LOAD_J% = LOAD% + P% - CODE%
  STA &D1                \ AJD
  SEC
  LDY #&0E               \ opponent shield
- LDA (&1E),Y
+ LDA (XX0),Y
  AND #&07
  SBC &D1
  BCS n_kill
@@ -37264,7 +37266,7 @@ LOAD_K% = LOAD% + P% - CODE%
 
  LDY #&23               \ missile damage AJD
  SEC
- LDA (&22),Y
+ LDA (V),Y
  SBC #&40
  BCS n_misshit
 
@@ -37407,7 +37409,7 @@ LOAD_K% = LOAD% + P% - CODE%
 
  LDA MANY+SHU+1         \ The station is not hostile, so check how many
 
- ORA &033F              \ AJD no shuttles if docking computer on
+ ORA auto               \ AJD no shuttles if docking computer on
 
  BNE TA1                \ Transporters there are in the vicinity, and if we
                         \ already have one, return from the subroutine (as TA1
@@ -39110,7 +39112,7 @@ LOAD_K% = LOAD% + P% - CODE%
 
 .anger_8c
 
- LDA &8C
+ LDA TYPE
 
 \ ******************************************************************************
 \
@@ -39555,7 +39557,7 @@ LOAD_K% = LOAD% + P% - CODE%
 
 .HFS2
 
- STA &95
+ STA STP
  JSR TTX66
  JMP HFS1
 
@@ -41282,7 +41284,7 @@ LOAD_L% = LOAD% + P% - CODE%
 
  LDY #&0C               \ Related to tnpr, but not the same
  SEC
- LDA QQ20+&10
+ LDA QQ20+16
 
 .l_2af9
 
@@ -41603,12 +41605,12 @@ LOAD_L% = LOAD% + P% - CODE%
 
 .d_31b0
 
- LDA &6C,X
- STA &03B2,X
+ LDA QQ15,X
+ STA QQ2,X
  DEX
  BPL d_31b0
  INX
- STX &0349
+ STX EV
  LDA QQ3
  STA QQ28
  LDA QQ5
@@ -41916,7 +41918,7 @@ LOAD_L% = LOAD% + P% - CODE%
  LDA #&98
  JSR tube_write
  JSR tube_read
- STA &0346
+ STA LASCT
  RTS
 
 \ ******************************************************************************
@@ -42031,7 +42033,8 @@ LOAD_L% = LOAD% + P% - CODE%
 
  AND #%00001000         \ If bit 3 of the ship's byte #31 is clear, then nothing
  BEQ DOEXP-1            \ is being drawn on-screen for this ship anyway, so
-                        \ return from the subroutine (as DOEXP-1 contains an RTS)
+                        \ return from the subroutine (as DOEXP-1 contains an
+                        \ RTS)
 
  LDY #2                 \ Otherwise it's time to draw an explosion cloud, so
  LDA (XX19),Y           \ fetch byte #2 of the ship line heap into Y, which we
@@ -42655,9 +42658,9 @@ LOAD_L% = LOAD% + P% - CODE%
                         \ dot
 
  LDY #&25               \ AJD
- LDA &0320
+ LDA SSPR
  BNE l_station
- LDY &9F                \ finder
+ LDY finder
 
 .l_station
 
@@ -42824,11 +42827,11 @@ LOAD_L% = LOAD% + P% - CODE%
 
  LDA #&90
  JSR tube_write
- LDA &34
+ LDA X1
  JSR tube_write
- LDA &35
+ LDA Y1
  JSR tube_write
- LDA &91
+ LDA COL
  JMP tube_write
 
 \ ******************************************************************************
@@ -45367,22 +45370,22 @@ LOAD_M% = LOAD% + P% - CODE%
 
  JSR ZINF
  JSR DORND
- STA &46
- STX &49
- STA &06
+ STA INWK
+ STX INWK+3
+ STA T1
  LSR A
- ROR &48
+ ROR INWK+2
  LSR A
- ROR &4B
+ ROR INWK+5
  LSR A
- STA &4A
+ STA INWK+4
  TXA
  AND #&1F
- STA &47
+ STA INWK+1
  LDA #&50
- SBC &47
- SBC &4A
- STA &4D
+ SBC INWK+1
+ SBC INWK+4
+ STA INWK+7
  JMP DORND
 
 \ ******************************************************************************
@@ -45569,14 +45572,14 @@ LOAD_M% = LOAD% + P% - CODE%
 .d_3fc0
 
  JSR M%                 \ Like main game loop 2
- DEC &034A
+ DEC DLY
  BEQ d_3f54
  BPL d_3fcd
- INC &034A
+ INC DLY
 
 .d_3fcd
 
- DEC &8A
+ DEC MCNT
  BEQ d_3fd4
 
 .d_3fd1
@@ -45585,38 +45588,38 @@ LOAD_M% = LOAD% + P% - CODE%
 
 .d_3f54
 
- LDA &03A4
+ LDA MCH
  JSR MESS
  LDA #&00
- STA &034A
+ STA DLY
  JMP d_3fcd
 
 .d_3fd4
 
- LDA &0341
+ LDA MJ
  BNE d_3fd1
  JSR DORND
  CMP #&33 \ trader fraction
  BCS MTT1
- LDA &033E
+ LDA JUNK
  CMP #&03
  BCS MTT1
  JSR rand_posn \ IN
  BVS MTT4
  ORA #&6F
- STA &63
- LDA &0320
+ STA INWK+29
+ LDA SSPR
  BNE MLOOPS
  TXA
  BCS d_401e
  AND #&0F
- STA &61
+ STA INWK+27
  BCC d_4022
 
 .d_401e
 
  ORA #&7F
- STA &64
+ STA INWK+30
 
 .d_4022
 
@@ -45893,7 +45896,7 @@ LOAD_M% = LOAD% + P% - CODE%
 
  CMP #&18               \ AJD
  BCS l_40d7
- DEC &0FD2
+ DEC CPIR
  BPL more
 
 .l_40d7
@@ -45925,7 +45928,7 @@ LOAD_M% = LOAD% + P% - CODE%
 
  JSR DIALS
  JSR COMPAS
- LDA &87
+ LDA QQ11
  BEQ d_40f8
  \ AND PATG
  \ LSR A
@@ -45951,7 +45954,7 @@ LOAD_M% = LOAD% + P% - CODE%
 .FRCE_FLIGHT
 
  PHA                \ Like main game loop 6
- LDA &2F
+ LDA QQ22+1
  BNE d_locked
  PLA
  JSR TT102
@@ -46045,9 +46048,9 @@ LOAD_M% = LOAD% + P% - CODE%
 
  LDA dockedp
  BEQ t95
- LDA &9F
+ LDA finder
  EOR #&25
- STA &9F
+ STA finder
  JMP WSCAN
 
 .t95
@@ -46499,7 +46502,7 @@ LOAD_M% = LOAD% + P% - CODE%
 .LSHIPS
 
  LDA #0
- STA &9F \ reset finder
+ STA finder
 
 .SHIPinA
 
@@ -46518,7 +46521,7 @@ LOAD_M% = LOAD% + P% - CODE%
 .mix_retry
 
  LDA #0
- STA &34
+ STA X1
 
 .mix_match
 
@@ -46527,12 +46530,12 @@ LOAD_M% = LOAD% + P% - CODE%
  BCS mix_match
  ASL A
  ASL A
- STA &35
+ STA Y1
  TYA
  AND #&07
  TAX
  LDA mix_bits,X
- LDX &35
+ LDX Y1
  CPY #16
  BCC mix_byte2
  CPY #24
@@ -46552,19 +46555,19 @@ LOAD_M% = LOAD% + P% - CODE%
 .mix_try
 
  JSR DORND
- LDX &35
+ LDX Y1
  CMP ship_bytes,X
  BCC mix_ok
 
 .mix_fail
 
- DEC &34
+ DEC X1
  BNE mix_match
  LDX #ship_total*4
 
 .mix_ok
 
- STY &36
+ STY X2
  CPX #52  \ ANACONDA?
  BEQ mix_anaconda
  CPX #116 \ DRAGON?
@@ -46577,7 +46580,7 @@ LOAD_M% = LOAD% + P% - CODE%
 .mix_install
 
  JSR install_ship
- LDY &36
+ LDY X2
 
 .mix_next
 
@@ -46803,7 +46806,7 @@ LOAD_M% = LOAD% + P% - CODE%
                         \ escape pods and cargo canisters, so to check whether
                         \ we can jump, we first grab the slot contents into A
 
- ORA &033E              \ no jump if any ship AJD
+ ORA JUNK               \ no jump if any ship AJD
 
  ORA SSPR               \ If there is a space station nearby, then SSPR will
                         \ be non-zero, so OR'ing with SSPR will produce a
@@ -47242,7 +47245,7 @@ LOAD_M% = LOAD% + P% - CODE%
 .DOKEY_FLIGHT
 
  JSR U%                 \ Copy of DOKEY
- LDA &2F
+ LDA QQ22+1
  BEQ d_open
  JMP DK4_FLIGHT
 
@@ -47257,51 +47260,51 @@ LOAD_M% = LOAD% + P% - CODE%
  JSR DKS1
  DEY
  BNE d_44bc
- LDA &033F
+ LDA auto
  BEQ d_4526
 
 .auton
 
  JSR ZINF
  LDA #&60
- STA &54
+ STA INWK+14
  ORA #&80
- STA &5C
- STA &8C
- LDA &7D \ ? Too Fast
- STA &61
+ STA INWK+22
+ STA TYPE
+ LDA DELTA \ ? Too Fast
+ STA INWK+27
  JSR DOCKIT
- LDA &61
+ LDA INWK+27
  CMP #&16
  BCC d_44e3
  LDA #&16
 
 .d_44e3
 
- STA &7D
+ STA DELTA
  LDA #&FF
  LDX #&00
- LDY &62
+ LDY INWK+28
  BEQ d_44f3
  BMI d_44f0
  INX
 
 .d_44f0
 
- STA &0301,X
+ STA KY1,X
 
 .d_44f3
 
  LDA #&80
  LDX #&00
- ASL &63
+ ASL INWK+29
  BEQ d_450f
  BCC d_44fe
  INX
 
 .d_44fe
 
- BIT &63
+ BIT INWK+29
  BPL d_4509
  LDA #&40
  STA JSTX
@@ -47309,7 +47312,7 @@ LOAD_M% = LOAD% + P% - CODE%
 
 .d_4509
 
- STA &0303,X
+ STA KY3,X
  LDA JSTX
 
 .d_450f
@@ -47317,14 +47320,14 @@ LOAD_M% = LOAD% + P% - CODE%
  STA JSTX
  LDA #&80
  LDX #&00
- ASL &64
+ ASL INWK+30
  BEQ d_4523
  BCS d_451d
  INX
 
 .d_451d
 
- STA &0305,X
+ STA KY5,X
  LDA JSTY
 
 .d_4523
@@ -47335,13 +47338,13 @@ LOAD_M% = LOAD% + P% - CODE%
 
  LDX JSTX
  LDA #&07
- LDY &0303
+ LDY KY3
  BEQ d_4533
  JSR BUMP2
 
 .d_4533
 
- LDY &0304
+ LDY KY4
  BEQ d_453b
  JSR REDU2
 
@@ -47350,13 +47353,13 @@ LOAD_M% = LOAD% + P% - CODE%
  STX JSTX
  ASL A
  LDX JSTY
- LDY &0305
+ LDY KY5
  BEQ d_454a
  JSR REDU2
 
 .d_454a
 
- LDY &0306
+ LDY KY6
  BEQ d_4552
  JSR BUMP2
 
@@ -47420,7 +47423,7 @@ LOAD_M% = LOAD% + P% - CODE%
 
 .d_459c
 
- LDA &87
+ LDA QQ11
  BNE DK5
  LDY #&10
 
@@ -47623,7 +47626,7 @@ LOAD_M% = LOAD% + P% - CODE%
 
 .LL9_FLIGHT
 
- LDA &8C
+ LDA TYPE
  BMI d_4889
  JMP LL9
 
@@ -47638,11 +47641,11 @@ LOAD_M% = LOAD% + P% - CODE%
 
 .MVEIT_FLIGHT
 
- LDA &65
+ LDA INWK+31
  AND #&A0
  BNE MV30
- LDA &8A
- EOR &84
+ LDA MCNT
+ EOR XSAV
  AND #&0F
  BNE P%+5
  JSR TIDY
@@ -52829,6 +52832,22 @@ ENDMACRO
  EQUB 045, &80, 0, 1
 
  EQUB 255, &00, 0, 0
+
+\ ******************************************************************************
+\
+\ Save output/2.SHIPS.bin
+\
+\ ******************************************************************************
+
+PRINT "SHIPS"
+PRINT "Assembled at ", ~CODE_SHIPS%
+PRINT "Ends at ", ~P%
+PRINT "Code size is ", ~(P% - CODE_SHIPS%)
+PRINT "Execute at ", ~LOAD_SHIPS%
+PRINT "Reload at ", ~LOAD_SHIPS%
+
+PRINT "S.2.SHIPS ", ~CODE_SHIPS%, " ", ~P%, " ", ~LOAD_SHIPS%, " ", ~LOAD_SHIPS%
+\SAVE "output/2.SHIPS.bin", CODE_SHIPS%, P%, LOAD_SHIPS%
 
 \ ******************************************************************************
 \

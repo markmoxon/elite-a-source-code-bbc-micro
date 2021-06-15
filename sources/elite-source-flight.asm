@@ -692,6 +692,10 @@ ORG &0000
 
  SKIP 4                 \ Temporary storage, used in a number of places
 
+.finder
+
+ SKIP 1                 \ AJD
+
 ORG &00D1
 
 .T
@@ -2380,7 +2384,7 @@ LOAD_A% = LOAD%
 
 .MA24
 
- LDA &0308              \ AJD
+ LDA KY12               \ AJD
  AND BOMB
  BEQ MA76
 
@@ -2394,16 +2398,16 @@ LOAD_A% = LOAD%
 
 .MA76
 
- LDA &030F              \ AJD
+ LDA KY19               \ AJD
  AND DKCMP
  BNE dock_toggle
- LDA &0310
+ LDA KY20
  BEQ MA78
  LDA #&00
 
 .dock_toggle
 
- STA &033F
+ STA auto
 
 .MA78
 
@@ -2504,7 +2508,7 @@ LOAD_A% = LOAD%
 
 .ma1
 
- STA &0346              \ AJD
+ STA LASCT              \ AJD
 
 \ ******************************************************************************
 \
@@ -2899,7 +2903,7 @@ LOAD_A% = LOAD%
 \
 \ ******************************************************************************
 
- LDA &033F              \ AJD
+ LDA auto               \ AJD
  AND #&04
  EOR #&05
  BNE MA63
@@ -3154,7 +3158,7 @@ LOAD_A% = LOAD%
  STA &D1                \ AJD
  SEC
  LDY #&0E               \ opponent shield
- LDA (&1E),Y
+ LDA (XX0),Y
  AND #&07
  SBC &D1
  BCS n_kill
@@ -8667,7 +8671,7 @@ LOAD_C% = LOAD% +P% - CODE%
 
  LDY #&23               \ missile damage AJD
  SEC
- LDA (&22),Y
+ LDA (V),Y
  SBC #&40
  BCS n_misshit
 
@@ -8810,7 +8814,7 @@ LOAD_C% = LOAD% +P% - CODE%
 
  LDA MANY+SHU+1         \ The station is not hostile, so check how many
 
- ORA &033F              \ AJD no shuttles if docking computer on
+ ORA auto               \ AJD no shuttles if docking computer on
 
  BNE TA1                \ Transporters there are in the vicinity, and if we
                         \ already have one, return from the subroutine (as TA1
@@ -10513,7 +10517,7 @@ LOAD_C% = LOAD% +P% - CODE%
 
 .anger_8c
 
- LDA &8C
+ LDA TYPE
 
 \ ******************************************************************************
 \
@@ -13432,7 +13436,7 @@ LOAD_D% = LOAD% + P% - CODE%
 
  LDY #&0C               \ Related to tnpr, but not the same
  SEC
- LDA QQ20+&10
+ LDA QQ20+16
 
 .l_2af9
 
@@ -18512,9 +18516,9 @@ LOAD_E% = LOAD% + P% - CODE%
                         \ dot
 
  LDY #&25               \ AJD
- LDA &0320
+ LDA SSPR
  BNE l_station
- LDY &9F                \ finder
+ LDY finder
 
 .l_station
 
@@ -22626,22 +22630,22 @@ LOAD_F% = LOAD% + P% - CODE%
 
  JSR ZINF
  JSR DORND
- STA &46
- STX &49
- STA &06
+ STA INWK
+ STX INWK+3
+ STA T1
  LSR A
- ROR &48
+ ROR INWK+2
  LSR A
- ROR &4B
+ ROR INWK+5
  LSR A
- STA &4A
+ STA INWK+4
  TXA
  AND #&1F
- STA &47
+ STA INWK+1
  LDA #&50
- SBC &47
- SBC &4A
- STA &4D
+ SBC INWK+1
+ SBC INWK+4
+ STA INWK+7
  JMP DORND
 
 \ ******************************************************************************
@@ -23503,7 +23507,7 @@ LOAD_F% = LOAD% + P% - CODE%
 
  CMP #&18               \ AJD
  BCS l_40d7
- DEC &0FD2
+ DEC CPIR
  BPL more
 
 .l_40d7
@@ -23713,9 +23717,9 @@ LOAD_F% = LOAD% + P% - CODE%
  CMP #&43               \ If "F" was not pressed, jump down to HME1, otherwise
  BNE HME1               \ keep going to process searching for systems
 
- LDA &9F                \ AJD
+ LDA finder             \ AJD
  EOR #&25
- STA &9F
+ STA finder
  JMP WSCAN
 
 .HME1
@@ -24134,7 +24138,7 @@ LOAD_F% = LOAD% + P% - CODE%
 .LSHIPS
 
  LDA #0                 \ AJD
- STA &9F                \ reset finder
+ STA finder
 
  JSR THERE              \ Call THERE to see if we are in the Constrictor's
                         \ system in mission 1
@@ -24654,7 +24658,7 @@ LOAD_F% = LOAD% + P% - CODE%
                         \ escape pods and cargo canisters, so to check whether
                         \ we can jump, we first grab the slot contents into A
 
- ORA &033E              \ no jump if any ship AJD
+ ORA JUNK               \ no jump if any ship AJD
 
  ORA SSPR               \ If there is a space station nearby, then SSPR will
                         \ be non-zero, so OR'ing with SSPR will produce a

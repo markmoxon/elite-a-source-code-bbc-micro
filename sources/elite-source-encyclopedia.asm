@@ -702,6 +702,10 @@ ORG &0000
 
  SKIP 4                 \ Temporary storage, used in a number of places
 
+.finder
+
+ SKIP 1                 \ AJD
+
 ORG &00D1
 
 .T
@@ -18398,26 +18402,26 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
 .ship_over
 
- STA &8C
+ STA TYPE
  CLC
  ADC #&07
  PHA
  LDA #&20
  JSR TT66
  JSR MT1
- LDX &8C
+ LDX TYPE
 
  LDA ship_file,X
- CMP ship_load+&04
+ CMP ship_load+4
  BEQ ship_skip
- STA ship_load+&04
+ STA ship_load+4
  LDX #LO(ship_load)
  LDY #HI(ship_load)
  JSR OSCLI
 
 .ship_skip
 
- LDX &8C
+ LDX TYPE
  LDA ship_centre,X
  STA XC
  PLA
@@ -18425,18 +18429,18 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  JSR NLIN4
  JSR ZINF
  LDA #&60
- STA &54
+ STA INWK+14
  LDA #&B0
- STA &4D
+ STA INWK+7
  LDX #&7F
- STX &63
- STX &64
+ STX INWK+29
+ STX INWK+30
  INX
  STA QQ17
- LDA &8C
+ LDA TYPE
  JSR write_card
 
- LDX &8C
+ LDX TYPE
  LDA ship_posn,X
  JSR NWSHP
 
@@ -18447,22 +18451,22 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
 .l_395a
 
- LDX &8C
+ LDX TYPE
  LDA ship_dist,X
- CMP &4D
+ CMP INWK+7
  BEQ l_3962
- DEC &4D
+ DEC INWK+7
 
 .l_3962
 
  JSR MVEIT
  LDA #&80
- STA &4C
+ STA INWK+6
  ASL A
- STA &46
- STA &49
+ STA INWK
+ STA INWK+3
  JSR LL9
- DEC &8A
+ DEC MCNT
 
  JSR WSCAN
  JSR RDKEY
@@ -18567,15 +18571,15 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  ASL A
  TAY
  LDA card_addr,Y
- STA &22
+ STA V
  LDA card_addr+1,Y
- STA &23
+ STA V+1
 
 .card_repeat
 
  JSR MT1
  LDY #&00
- LDA (&22),Y
+ LDA (V),Y
  TAX
  BEQ quit_card
  BNE card_check
@@ -18615,7 +18619,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 .card_loop
 
  INY
- LDA (&22),Y
+ LDA (V),Y
  BEQ card_end
  BMI card_msg
  CMP #&20
@@ -18645,10 +18649,10 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
  TYA
  SEC
- ADC &22
- STA &22
+ ADC V
+ STA V
  BCC card_repeat
- INC &23
+ INC V+1
  BCS card_repeat
 
 .quit_card
@@ -18666,7 +18670,8 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
 .ship_load
 
- EQUS "L.S.0", &0D
+ EQUS "L.S.0"
+ EQUB 13
 
 \ ******************************************************************************
 \
@@ -18728,9 +18733,9 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 .menu
 
  LDA menu_entry,X
- STA &03AB
+ STA QQ25
  LDA menu_offset,X
- STA &03AD
+ STA QQ29
  LDA menu_query,X
  PHA
  LDA menu_title,X
@@ -18755,21 +18760,21 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
 .menu_loop
 
- STX &89
+ STX XX13
  JSR TT67
- LDX &89
+ LDX XX13
  INX
  CLC
  JSR pr2
  JSR TT162
 
  CLC
- LDA &89
- ADC &03AD
+ LDA XX13
+ ADC QQ29
  JSR write_msg3
- LDX &89
+ LDX XX13
  INX
- CPX &03AB
+ CPX QQ25
  BCC menu_loop
  JSR CLYNS
  PLA
@@ -24701,7 +24706,7 @@ ENDMACRO
  ETOK 177
  EQUB VE
 
- \ ******************************************************************************
+\ ******************************************************************************
 \
 \       Name: MTIN
 \       Type: Variable

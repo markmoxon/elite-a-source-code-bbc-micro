@@ -96,7 +96,7 @@ S% = &11E3              \ The adress of the main entry point workspace in the
 \
 \       Name: ZP
 \       Type: Workspace
-\    Address: &0070 to &008B
+\    Address: &0070 to &008C
 \   Category: Workspaces
 \    Summary: Important variables used by the loader
 \
@@ -107,6 +107,14 @@ ORG &0004
 .key_io
 
  SKIP 1                 \ AJD
+
+ORG &0020
+
+.INF
+
+ SKIP 2                 \ Temporary storage, typically used for storing the
+                        \ address of a ship's data block, so it can be copied
+                        \ to and from the internal workspace at INWK
 
 ORG &0070
 
@@ -161,11 +169,20 @@ ORG &008B
                         \ vertical sync, by setting DL to 0 and then monitoring
                         \ its value until it changes to 30
 
+.TYPE
+
+ SKIP 1                 \ The current ship type
+                        \
+                        \ This is where we store the current ship type for when
+                        \ we are iterating through the ships in the local bubble
+                        \ as part of the main flight loop. See the table at XX21
+                        \ for information about ship types
+
 ORG &0090
 
 .key_tube
 
- SKIP 1                 \ AJD
+ SKIP 2                 \ AJD
 
 \ ******************************************************************************
 \
@@ -707,13 +724,13 @@ ORG &0D7A
  LDX cmdr_iff           \ iff code
  BEQ iff_not
  LDY #&24
- LDA (&20),Y
+ LDA (INF),Y
  ASL A
  ASL A
  BCS iff_cop
  ASL A
  BCS iff_trade
- LDY &8C
+ LDY TYPE
  DEY
  BEQ iff_missle
  CPY #&08
@@ -1632,12 +1649,6 @@ ORG LOADcode + P% - LOAD
 \   Category: Loader
 \    Summary: Code block at &1100-&11E2 that remains resident in both docked and
 \             flight mode (palettes, screen mode routine and commander data)
-\
-\ ------------------------------------------------------------------------------
-\
-\ This section is encrypted by EOR'ing with &A5. The encryption is done by the
-\ elite-checksum.py script, and decryption is done in part 1 above, at the same
-\ time as it is moved to &1000.
 \
 \ ******************************************************************************
 

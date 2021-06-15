@@ -48,12 +48,24 @@ VIA = &FE00             \ Memory-mapped space for accessing internal hardware,
 X = 128                 \ The centre x-coordinate of the 256 x 192 space view
 Y = 96                  \ The centre y-coordinate of the 256 x 192 space view
 
-BRKV = &0202
-WRCHV = &020E
+tube_brk = &0016        \ Tube BRK vector AJD
 
-rawrch = &FFBC
+BRKV = &0202            \ The break vector that we intercept to enable us to
+                        \ handle and display system errors
 
-tube_r1s = &FEE0
+WRCHV = &020E           \ The WRCHV vector that we intercept with our custom
+                        \ text printing routine
+
+LASCT = &0346           \ The laser pulse count for the current laser, matching
+                        \ the address in the main game code
+
+HFX = &0348             \ A flag that toggles the hyperspace colour effect,
+                        \ matching the address in the main game code
+
+ESCP = &0386            \ The flag that determines whether we have an escape pod
+                        \ fitted, matching the address in the main game code
+
+tube_r1s = &FEE0        \ AJD
 tube_r1d = &FEE1
 tube_r2s = &FEE2
 tube_r2d = &FEE3
@@ -62,44 +74,143 @@ tube_r3d = &FEE5
 tube_r4s = &FEE6
 tube_r4d = &FEE7
 
-tube_brk = &16 \ tube BRK vector
+rawrch = &FFBC          \ AJD
 
-DL = &8B
-key_tube = &90
+\ ******************************************************************************
+\
+\       Name: ZP
+\       Type: Workspace
+\    Address: &008B to &009F
+\   Category: Workspaces
+\    Summary: Important variables used by the I/O processor
+\
+\ ******************************************************************************
 
-SC = &92
-SCH = &93
-font = &94
-save_a = &96
-save_x = &97
-save_y = &98
+ORG &008B
 
-ZZ = &94
-X1 = &94
-Y1 = &95
-X2 = &96
-COL = &96
-Y2 = &97
-P = &98
-Q = &99
-T = &99    \ Added for HLOIN
-R = &9A
-S = &9B
-SWAP = &9C
+.DL
 
-bar_1 = &94
-bar_2 = &95
-bar_3 = &96
+ SKIP 1                 \ Vertical sync flag
+                        \
+                        \ DL gets set to 30 every time we reach vertical sync on
+                        \ the video system, which happens 50 times a second
+                        \ (50Hz). The WSCAN routine uses this to pause until the
+                        \ vertical sync, by setting DL to 0 and then monitoring
+                        \ its value until it changes to 30
 
-angle_1 = &94
-missle_1 = &94
-picture_1 = &94
-picture_2 = &95
+ORG &0090
 
-print_bits = &94
+.key_tube
 
-cursor_x = &9E
-cursor_y = &9F
+ SKIP 2                 \ AJD
+
+.SC
+
+ SKIP 1                 \ Screen address (low byte)
+                        \
+                        \ Elite draws on-screen by poking bytes directly into
+                        \ screen memory, and SC(1 0) is typically set to the
+                        \ address of the character block containing the pixel
+                        \ we want to draw (see the deep dives on "Drawing
+                        \ monochrome pixels in mode 4" and "Drawing colour
+                        \ pixels in mode 5" for more details)
+
+.SCH
+
+ SKIP 1                 \ Screen address (high byte)
+
+.font
+.ZZ
+.bar_1
+.angle_1
+.missle_1
+.picture_1
+.print_bits
+.X1
+
+ SKIP 1                 \ Temporary storage, typically used for x-coordinates in
+                        \ line-drawing routines
+
+.bar_2
+.picture_2
+.Y1
+
+ SKIP 1                 \ Temporary storage, typically used for y-coordinates in
+                        \ line-drawing routines
+
+.bar_3
+.save_a
+.COL
+.X2
+
+ SKIP 1                 \ Temporary storage, typically used for x-coordinates in
+                        \ line-drawing routines
+
+.save_x
+.Y2
+
+ SKIP 1                 \ Temporary storage, typically used for y-coordinates in
+                        \ line-drawing routines
+
+.save_y
+.P
+
+ SKIP 1                 \ Temporary storage, used in a number of places
+
+.T
+.Q
+
+ SKIP 1                 \ Temporary storage, used in a number of places
+
+.R
+
+ SKIP 1                 \ Temporary storage, used in a number of places
+
+.S
+
+ SKIP 1                 \ Temporary storage, used in a number of places
+
+.SWAP
+
+ SKIP 1                 \ Temporary storage, used to store a flag that records
+                        \ whether or not we had to swap a line's start and end
+                        \ coordinates around when clipping the line in routine
+                        \ LL145 (the flag is used in places like BLINE to swap
+                        \ them back)
+
+ SKIP 1
+
+.XC
+
+ SKIP 1                 \ The x-coordinate of the text cursor (i.e. the text
+                        \ column), which can be from 0 to 32
+                        \
+                        \ A value of 0 denotes the leftmost column and 32 the
+                        \ rightmost column, but because the top part of the
+                        \ screen (the space view) has a white border that
+                        \ clashes with columns 0 and 32, text is only shown
+                        \ in columns 1-31
+
+.YC
+
+ SKIP 1                 \ The y-coordinate of the text cursor (i.e. the text
+                        \ row), which can be from 0 to 23
+                        \
+                        \ The screen actually has 31 character rows if you
+                        \ include the dashboard, but the text printing routines
+                        \ only work on the top part (the space view), so the
+                        \ text cursor only goes up to a maximum of 23, the row
+                        \ just before the screen splits
+                        \
+                        \ A value of 0 denotes the top row, but because the
+                        \ top part of the screen has a white border that clashes
+                        \ with row 0, text is always shown at row 1 or greater
+
+\ ******************************************************************************
+\
+\ ELITE I/O PROCESSOR
+\
+\ ******************************************************************************
 
 CODE% = &1200
 LOAD% = &1200
@@ -218,7 +329,7 @@ ORG CODE%
 .tube_table
 
  EQUW LL30, HLOIN, PIXEL, clr_scrn
- EQUW CLYNS, sync_in, draw_bar, DIL2
+ EQUW CLYNS, sync_in, DILX, DIL2
  EQUW MSBAR, scan_fire, write_fe4e, scan_xin
  EQUW scan_10in, get_key, CHPR, write_pod
  EQUW draw_blob, draw_tail, SPBLB, ECBLB
@@ -237,9 +348,9 @@ ORG CODE%
 .CHPR
 
  JSR tube_get
- STA cursor_x
+ STA XC
  JSR tube_get
- STA cursor_y
+ STA YC
  JSR tube_get
  CMP #&20
  BNE tube_wrch
@@ -267,7 +378,7 @@ ORG CODE%
 
 .wrch_tab
 
- INC cursor_x
+ INC XC
 
 .wrch_quit
 
@@ -279,7 +390,7 @@ ORG CODE%
 .wrch_char
 
  JSR wrch_font
- INC cursor_x
+ INC XC
  LDY #&07
 
 .wrch_or
@@ -293,7 +404,7 @@ ORG CODE%
 
 .wrch_del
 
- DEC cursor_x
+ DEC XC
  LDA #&20
  JSR wrch_font
  LDY #&07
@@ -308,18 +419,18 @@ ORG CODE%
 
 .wrch_nl
 
- INC cursor_y
+ INC YC
  JMP wrch_quit
 
 .wrch_cr
 
  LDA #&01
- STA cursor_x
+ STA XC
  JMP wrch_quit
 
 .wrch_spc
 
- LDA cursor_x
+ LDA XC
  CMP #&20
  BEQ wrch_quit
  CMP #&11
@@ -344,12 +455,12 @@ ORG CODE%
 
  STA font
  STX font+1
- LDA cursor_x
+ LDA XC
  ASL A
  ASL A
  ASL A
  STA SC
- LDA cursor_y
+ LDA YC
  ORA #&60
  STA SC+&01
  RTS
@@ -1782,16 +1893,45 @@ ORG CODE%
 
 \ ******************************************************************************
 \
-\       Name: draw_bar
+\       Name: DILX
 \       Type: Subroutine
 \   Category: Dashboard
-\    Summary: AJD
+\    Summary: Update a bar-based indicator on the dashboard
+\  Deep dive: The dashboard indicators
+\
+\ ------------------------------------------------------------------------------
+\
+\ The range of values shown on the indicator depends on which entry point is
+\ called. For the default entry point of DILX, the range is 0-255 (as the value
+\ passed in A is one byte). The other entry points are shown below.
+\
+\ Arguments:
+\
+\   A                   The value to be shown on the indicator (so the larger
+\                       the value, the longer the bar)
+\
+\   T1                  The threshold at which we change the indicator's colour
+\                       from the low value colour to the high value colour. The
+\                       threshold is in pixels, so it should have a value from
+\                       0-16, as each bar indicator is 16 pixels wide
+\
+\   K                   The colour to use when A is a high value, as a 4-pixel
+\                       mode 5 character row byte
+\
+\   K+1                 The colour to use when A is a low value, as a 4-pixel
+\                       mode 5 character row byte
+\
+\   SC(1 0)             The screen address of the first character block in the
+\                       indicator
+\
+\   DILX+2              The range of the indicator is 0-64 (for the fuel
+\                       indicator)
 \
 \ ******************************************************************************
 
-.draw_bar
+.DILX
 
- JSR tube_get
+ JSR tube_get           \ AJD
  STA bar_1
  JSR tube_get
  STA bar_2
@@ -1799,59 +1939,117 @@ ORG CODE%
  STA SC
  JSR tube_get
  STA SC+1
- LDX #&FF
- STX bar_3
- LDY #&02
- LDX #&03
 
-.bar_byte
+ LDX #&FF               \ Set bar_3 = &FF, to use as a mask for drawing each row
+ STX bar_3              \ of each character block of the bar, starting with a
+                        \ full character's width of 4 pixels
 
- LDA bar_1
- CMP #&04
- BCC bar_part
- SBC #&04
- STA bar_1
- LDA bar_3
+ LDY #2                 \ We want to start drawing the indicator on the third
+                        \ line in this character row, so set Y to point to that
+                        \ row's offset
 
-.l_1edc
+ LDX #3                 \ Set up a counter in X for the width of the indicator,
+                        \ which is 4 characters (each of which is 4 pixels wide,
+                        \ to give a total width of 16 pixels)
 
- AND bar_2
+.DL1
+
+ LDA bar_1              \ Fetch the indicator value (0-15) from bar_1 into A
+
+ CMP #4                 \ If bar_1 < 4, then we need to draw the end cap of the
+ BCC DL2                \ indicator, which is less than a full character's
+                        \ width, so jump down to DL2 to do this
+
+ SBC #4                 \ Otherwise we can draw a 4-pixel wide block, so
+ STA bar_1              \ subtract 4 from bar_1 so it contains the amount of the
+                        \ indicator that's left to draw after this character
+
+ LDA bar_3              \ Fetch the shape of the indicator row that we need to
+                        \ display from bar_3, so we can use it as a mask when
+                        \ painting the indicator. It will be &FF at this point
+                        \ (i.e. a full 4-pixel row)
+
+.DL5
+
+ AND bar_2              \ Fetch the 4-pixel mode 5 colour byte from bar_2, and
+                        \ only keep pixels that have their equivalent bits set
+                        \ in the mask byte in A
+
+ STA (SC),Y             \ Draw the shape of the mask on pixel row Y of the
+                        \ character block we are processing
+
+ INY                    \ Draw the next pixel row, incrementing Y
  STA (SC),Y
- INY
+
+ INY                    \ And draw the third pixel row, incrementing Y
  STA (SC),Y
- INY
- STA (SC),Y
- TYA
- CLC
- ADC #&06
- TAY
- DEX
- BMI l_1f0a
- BPL bar_byte
 
-.bar_part
+ TYA                    \ Add 6 to Y, so Y is now 8 more than when we started
+ CLC                    \ this loop iteration, so Y now points to the address
+ ADC #6                 \ of the first line of the indicator bar in the next
+ TAY                    \ character block (as each character is 8 bytes of
+                        \ screen memory)
 
- EOR #&03
- STA bar_1
- LDA bar_3
+ DEX                    \ Decrement the loop counter for the next character
+                        \ block along in the indicator
 
-.l_1ef6
+ BMI DL6                \ If we just drew the last character block then we are
+                        \ done drawing, so jump down to DL6 to finish off
 
- ASL A
- AND #&EF
- DEC bar_1
- BPL l_1ef6
- PHA
- LDA #&00
- STA bar_3
- LDA #&63
- STA bar_1
- PLA
- JMP l_1edc
+ BPL DL1                \ Loop back to DL1 to draw the next character block of
+                        \ the indicator (this BPL is effectively a JMP as A will
+                        \ never be negative following the previous BMI)
 
-.l_1f0a
+.DL2
 
- RTS
+ EOR #3                 \ If we get here then we are drawing the indicator's end
+ STA bar_1              \ cap, so bar_1 is < 4, and this EOR flips the bits, so
+                        \ instead of containing the number of indicator columns
+                        \ we need to fill in on the left side of the cap's
+                        \ character block, bar_1 now contains the number of
+                        \ blank columns there should be on the right side of the
+                        \ cap's character block
+
+ LDA bar_3              \ Fetch the current mask from bar_3, which will be &FF
+                        \ at this point, so we need to turn bar_1 of the columns
+                        \ on the right side of the mask to black to get the
+                        \ correct end cap shape for the indicator
+
+.DL3
+
+ ASL A                  \ Shift the mask left so bit 0 is cleared, and then
+ AND #%11101111         \ clear bit 4, which has the effect of shifting zeroes
+                        \ from the left into each nibble (i.e. xxxx xxxx becomes
+                        \ xxx0 xxx0, which blanks out the last column in the
+                        \ 4-pixel mode 5 character block)
+
+ DEC bar_1              \ Decrement the counter for the number of columns to
+                        \ blank out
+
+ BPL DL3                \ If we still have columns to blank out in the mask,
+                        \ loop back to DL3 until the mask is correct for the
+                        \ end cap
+
+ PHA                    \ Store the mask byte on the stack while we use the
+                        \ accumulator for a bit
+
+ LDA #0                 \ Change the mask so no bits are set, so the characters
+ STA bar_3              \ after the one we're about to draw will be all blank
+
+ LDA #99                \ Set bar_1 to a high number (99, why not) so we will
+ STA bar_1              \ keep drawing blank characters until we reach the end
+                        \ of the indicator row
+
+ PLA                    \ Restore the mask byte from the stack so we can use it
+                        \ to draw the end cap of the indicator
+
+ JMP DL5                \ Jump back up to DL5 to draw the mask byte on-screen
+
+.DL6
+
+.DL9                    \ This label is not used but is in the original source
+
+ RTS                    \ Return from the subroutine
 
 \ ******************************************************************************
 \
@@ -1909,9 +2107,9 @@ ORG CODE%
  LDA angle_1            \ the vertical bar from the start of this character
  SBC #4                 \ block
 
- BCS DLL11              \ If angle_1 >= 4 then the character block we are drawing
-                        \ does not contain the vertical indicator bar, so jump to
-                        \ DLL11 to draw a blank character block
+ BCS DLL11              \ If angle_1 >= 4 then the character block we are
+                        \ drawing does not contain the vertical indicator bar,
+                        \ so jump to DLL11 to draw a blank character block
 
  LDA #&FF               \ Set A to a high number (and &FF is as high as they go)
 
@@ -2245,9 +2443,9 @@ ORG CODE%
 .write_pod
 
  JSR tube_get
- STA &0386
+ STA ESCP
  JSR tube_get
- STA &0348
+ STA HFX
  RTS
 
 \ ******************************************************************************
@@ -2810,7 +3008,7 @@ ORG CODE%
 .write_0346
 
  JSR tube_get
- STA &0346
+ STA LASCT
  RTS
 
 \ ******************************************************************************
@@ -2824,7 +3022,7 @@ ORG CODE%
 
 .read_0346
 
- LDA &0346
+ LDA LASCT
  JMP tube_put
 
 \ ******************************************************************************
