@@ -38,6 +38,29 @@ build:
 	$(BEEBASM) -i sources/elite-6502sp-parasite.asm -v >> output/compile.txt
 	$(BEEBASM) -i sources/elite-6502sp-io-processor.asm -v >> output/compile.txt
 	$(BEEBASM) -i sources/elite-loader.asm -v >> output/compile.txt
+	$(BEEBASM) -i sources/elite-ships-a.asm -v >> output/compile.txt
+	$(BEEBASM) -i sources/elite-ships-b.asm -v >> output/compile.txt
+	$(BEEBASM) -i sources/elite-ships-c.asm -v >> output/compile.txt
+	$(BEEBASM) -i sources/elite-ships-d.asm -v >> output/compile.txt
+	$(BEEBASM) -i sources/elite-ships-e.asm -v >> output/compile.txt
+	$(BEEBASM) -i sources/elite-ships-f.asm -v >> output/compile.txt
+	$(BEEBASM) -i sources/elite-ships-g.asm -v >> output/compile.txt
+	$(BEEBASM) -i sources/elite-ships-h.asm -v >> output/compile.txt
+	$(BEEBASM) -i sources/elite-ships-i.asm -v >> output/compile.txt
+	$(BEEBASM) -i sources/elite-ships-j.asm -v >> output/compile.txt
+	$(BEEBASM) -i sources/elite-ships-k.asm -v >> output/compile.txt
+	$(BEEBASM) -i sources/elite-ships-l.asm -v >> output/compile.txt
+	$(BEEBASM) -i sources/elite-ships-m.asm -v >> output/compile.txt
+	$(BEEBASM) -i sources/elite-ships-n.asm -v >> output/compile.txt
+	$(BEEBASM) -i sources/elite-ships-o.asm -v >> output/compile.txt
+	$(BEEBASM) -i sources/elite-ships-p.asm -v >> output/compile.txt
+	$(BEEBASM) -i sources/elite-ships-q.asm -v >> output/compile.txt
+	$(BEEBASM) -i sources/elite-ships-r.asm -v >> output/compile.txt
+	$(BEEBASM) -i sources/elite-ships-s.asm -v >> output/compile.txt
+	$(BEEBASM) -i sources/elite-ships-t.asm -v >> output/compile.txt
+	$(BEEBASM) -i sources/elite-ships-u.asm -v >> output/compile.txt
+	$(BEEBASM) -i sources/elite-ships-v.asm -v >> output/compile.txt
+	$(BEEBASM) -i sources/elite-ships-w.asm -v >> output/compile.txt
 	$(BEEBASM) -i sources/elite-disc.asm -do elite-a$(suffix-elite-a).ssd -opt 3
 
 .PHONY:encrypt
@@ -54,6 +77,29 @@ encrypt:
 	$(BEEBASM) -i sources/elite-6502sp-parasite.asm -v >> output/compile.txt
 	$(BEEBASM) -i sources/elite-6502sp-io-processor.asm -v >> output/compile.txt
 	$(BEEBASM) -i sources/elite-loader.asm -v >> output/compile.txt
+	$(BEEBASM) -i sources/elite-ships-a.asm -v >> output/compile.txt
+	$(BEEBASM) -i sources/elite-ships-b.asm -v >> output/compile.txt
+	$(BEEBASM) -i sources/elite-ships-c.asm -v >> output/compile.txt
+	$(BEEBASM) -i sources/elite-ships-d.asm -v >> output/compile.txt
+	$(BEEBASM) -i sources/elite-ships-e.asm -v >> output/compile.txt
+	$(BEEBASM) -i sources/elite-ships-f.asm -v >> output/compile.txt
+	$(BEEBASM) -i sources/elite-ships-g.asm -v >> output/compile.txt
+	$(BEEBASM) -i sources/elite-ships-h.asm -v >> output/compile.txt
+	$(BEEBASM) -i sources/elite-ships-i.asm -v >> output/compile.txt
+	$(BEEBASM) -i sources/elite-ships-j.asm -v >> output/compile.txt
+	$(BEEBASM) -i sources/elite-ships-k.asm -v >> output/compile.txt
+	$(BEEBASM) -i sources/elite-ships-l.asm -v >> output/compile.txt
+	$(BEEBASM) -i sources/elite-ships-m.asm -v >> output/compile.txt
+	$(BEEBASM) -i sources/elite-ships-n.asm -v >> output/compile.txt
+	$(BEEBASM) -i sources/elite-ships-o.asm -v >> output/compile.txt
+	$(BEEBASM) -i sources/elite-ships-p.asm -v >> output/compile.txt
+	$(BEEBASM) -i sources/elite-ships-q.asm -v >> output/compile.txt
+	$(BEEBASM) -i sources/elite-ships-r.asm -v >> output/compile.txt
+	$(BEEBASM) -i sources/elite-ships-s.asm -v >> output/compile.txt
+	$(BEEBASM) -i sources/elite-ships-t.asm -v >> output/compile.txt
+	$(BEEBASM) -i sources/elite-ships-u.asm -v >> output/compile.txt
+	$(BEEBASM) -i sources/elite-ships-v.asm -v >> output/compile.txt
+	$(BEEBASM) -i sources/elite-ships-w.asm -v >> output/compile.txt
 	$(BEEBASM) -i sources/elite-disc.asm -do elite-a$(suffix-elite-a).ssd -opt 3
 
 .PHONY:verify

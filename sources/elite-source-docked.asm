@@ -30530,7 +30530,7 @@ ENDMACRO
  EQUB &00               \ Edges data offset (high) = &007A
  EQUB &00               \ Faces data offset (high) = &00DA
  EQUB 2                 \ Normals are scaled by    = 2^2 = 4
- EQUB %00101111         \ Laser power              = 2
+ EQUB %00101111         \ Laser power              = 5
                         \ Missiles                 = 7
 
 \VERTEX    x,    y,    z, face1, face2, face3, face4, visibility

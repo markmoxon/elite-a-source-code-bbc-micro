@@ -50326,7 +50326,7 @@ ENDMACRO
  EQUB &01               \ Faces data offset (high) = &0154
  EQUB 1                 \ Normals are scaled by    = 2^1 = 2
  EQUB %00100100         \ Laser power              = 4
-                        \ Missiles                 = 5
+                        \ Missiles                 = 4
 
 \VERTEX    x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX   32,    0,   76,    15,     15,   15,    15,         31    \ Vertex 0
@@ -50618,7 +50618,7 @@ ENDMACRO
  EQUB &00               \ Edges data offset (high) = &006E
  EQUB &00               \ Faces data offset (high) = &00D2
  EQUB 1                 \ Normals are scaled by    = 2^1 = 2
- EQUB %01001111         \ Laser power              = 9 AJD
+ EQUB %01001111         \ Laser power              = 9
                         \ Missiles                 = 7
 
 \VERTEX    x,    y,    z, face1, face2, face3, face4, visibility
@@ -51196,7 +51196,7 @@ ENDMACRO
  EQUB &00               \ Edges data offset (high) = &0080
  EQUB &00               \ Faces data offset (high) = &00F4
  EQUB 2                 \ Normals are scaled by    = 2^2 = 4
- EQUB %00100001         \ Laser power              = 2
+ EQUB %00100001         \ Laser power              = 4
                         \ Missiles                 = 1
 
 \VERTEX    x,    y,    z, face1, face2, face3, face4, visibility
@@ -51449,7 +51449,7 @@ ENDMACRO
  EQUB &00               \ Edges data offset (high) = &0086
  EQUB &00               \ Faces data offset (high) = &00F6
  EQUB 1                 \ Normals are scaled by    = 2^1 = 2
- EQUB %01001001         \ Laser power              = 9 AJD
+ EQUB %01001001         \ Laser power              = 9
                         \ Missiles                 = 1
 
 \VERTEX    x,    y,    z, face1, face2, face3, face4, visibility
@@ -51721,8 +51721,8 @@ ENDMACRO
  EQUB &00               \ Edges data offset (high) = &007A
  EQUB &00               \ Faces data offset (high) = &00DA
  EQUB 2                 \ Normals are scaled by    = 2^2 = 4
- EQUB %01000111         \ Laser power              = 8 AJD
-                        \ Missiles                 = 4
+ EQUB %01000111         \ Laser power              = 8
+                        \ Missiles                 = 7
 
 \VERTEX    x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX   20,   -7,   80,     2,      0,    9,     9,         31    \ Vertex 0
@@ -52394,7 +52394,7 @@ ENDMACRO
 
 \ ******************************************************************************
 \
-\       Name: ship_shuttle2
+\       Name: ship_shuttle_2
 \       Type: Variable
 \   Category: Drawing ships
 \    Summary: Ship blueprint for a Shuttle 2 AJD
@@ -52402,7 +52402,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-.ship_shuttle2
+.ship_shuttle_2
 
  EQUB 15                \ Max. canisters on demise = 15
  EQUW 50 * 50           \ Targetable area          = 50 * 50
@@ -52606,7 +52606,7 @@ ENDMACRO
  EQUW SHIP_FER_DE_LANCE, SHIP_MORAY, SHIP_THARGOID, SHIP_THARGON
  EQUW SHIP_CONSTRICTOR, ship_dragon, ship_monitor, ship_ophidian
  EQUW ship_ghavial, ship_bushmaster, ship_rattler, ship_iguana
- EQUW ship_shuttle2, ship_chameleon
+ EQUW ship_shuttle_2, ship_chameleon
 
  EQUW 0
 
