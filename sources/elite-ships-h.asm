@@ -437,7 +437,19 @@ ENDMACRO
  EQUW 0                 \ Bounty                   = 0
  EQUB 16                \ Number of faces          = 16 / 4 = 4
  EQUB 8                 \ Visibility distance      = 8
+
+\ <----------------------------- Code deleted from the original disc version -->
+\
+\  EQUB 17              \ Max. energy              = 17
+\
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  EQUB 8                 \ Max. energy              = 8
+
+\ <------------------------------------------------------- End of added code -->
+
  EQUB 8                 \ Max. speed               = 8
  EQUB &00               \ Edges data offset (high) = &002C
  EQUB &00               \ Faces data offset (high) = &0044
@@ -488,10 +500,34 @@ ENDMACRO
  EQUB 18                \ Explosion count          = 3, as (4 * n) + 6 = 18
  EQUB 60                \ Number of vertices       = 60 / 6 = 10
  EQUB 15                \ Number of edges          = 15
+
+\ <----------------------------- Code deleted from the original disc version -->
+\
+\  EQUW 0               \ Bounty                   = 0
+\
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  EQUW 1                 \ Bounty                   = 1
+
+\ <------------------------------------------------------- End of added code -->
+
  EQUB 28                \ Number of faces          = 28 / 4 = 7
  EQUB 12                \ Visibility distance      = 12
+
+\ <----------------------------- Code deleted from the original disc version -->
+\
+\  EQUB 17              \ Max. energy              = 17
+\
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  EQUB 8                 \ Max. energy              = 8
+
+\ <------------------------------------------------------- End of added code -->
+
  EQUB 15                \ Max. speed               = 15
  EQUB &00               \ Edges data offset (high) = &0050
  EQUB &00               \ Faces data offset (high) = &008C
@@ -560,16 +596,52 @@ ENDMACRO
  EQUB 42                \ Explosion count          = 9, as (4 * n) + 6 = 42
  EQUB 90                \ Number of vertices       = 90 / 6 = 15
  EQUB 20                \ Number of edges          = 20
+
+\ <----------------------------- Code deleted from the original disc version -->
+\
+\  EQUW 0               \ Bounty                   = 0
+\
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  EQUW 0                 \ Bounty                   = 0
+
+\ <------------------------------------------------------- End of added code -->
+
  EQUB 28                \ Number of faces          = 28 / 4 = 7
  EQUB 23                \ Visibility distance      = 23
+
+\ <----------------------------- Code deleted from the original disc version -->
+\
+\  EQUB 100             \ Max. energy              = 100
+\
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  EQUB 91                \ Max. energy              = 91
+
+\ <------------------------------------------------------- End of added code -->
+
  EQUB 32                \ Max. speed               = 32
  EQUB &00               \ Edges data offset (high) = &006E
  EQUB &00               \ Faces data offset (high) = &00BE
  EQUB 1                 \ Normals are scaled by    = 2^1 = 2
+
+\ <----------------------------- Code deleted from the original disc version -->
+\
+\  EQUB %00010001       \ Laser power              = 2
+\                       \ Missiles                 = 1
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  EQUB %00101001         \ Laser power              = 5
                         \ Missiles                 = 1
+
+\ <------------------------------------------------------- End of added code -->
 
 \VERTEX    x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX    0,    0,   72,     1,      2,    3,     4,         31    \ Vertex 0
@@ -640,7 +712,19 @@ ENDMACRO
  EQUB 46                \ Explosion count          = 10, as (4 * n) + 6 = 46
  EQUB 90                \ Number of vertices       = 90 / 6 = 15
  EQUB 25                \ Number of edges          = 25
+
+\ <----------------------------- Code deleted from the original disc version -->
+\
+\  EQUW 0               \ Bounty                   = 0
+\
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  EQUW 350               \ Bounty                   = 350
+
+\ <------------------------------------------------------- End of added code -->
+
  EQUB 48                \ Number of faces          = 48 / 4 = 12
  EQUB 50                \ Visibility distance      = 50
  EQUB 252               \ Max. energy              = 252
@@ -648,8 +732,20 @@ ENDMACRO
  EQUB &00               \ Edges data offset (high) = &006E
  EQUB &00               \ Faces data offset (high) = &00D2
  EQUB 1                 \ Normals are scaled by    = 2^1 = 2
+
+\ <----------------------------- Code deleted from the original disc version -->
+\
+\  EQUB %00111111       \ Laser power              = 7
+\                       \ Missiles                 = 7
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  EQUB %01001111         \ Laser power              = 9
                         \ Missiles                 = 7
+
+\ <------------------------------------------------------- End of added code -->
 
 \VERTEX    x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX    0,    7,  -58,     1,      0,    5,     5,         30    \ Vertex 0
@@ -733,13 +829,37 @@ ENDMACRO
  EQUW 0                 \ Bounty                   = 0
  EQUB 32                \ Number of faces          = 32 / 4 = 8
  EQUB 19                \ Visibility distance      = 19
+
+\ <----------------------------- Code deleted from the original disc version -->
+\
+\  EQUB 30              \ Max. energy              = 30
+\
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  EQUB 32                \ Max. energy              = 32
+
+\ <------------------------------------------------------- End of added code -->
+
  EQUB 23                \ Max. speed               = 23
  EQUB &00               \ Edges data offset (high) = &0050
  EQUB &00               \ Faces data offset (high) = &0090
  EQUB 3                 \ Normals are scaled by    = 2^3 = 8
+
+\ <----------------------------- Code deleted from the original disc version -->
+\
+\  EQUB %00001000       \ Laser power              = 1
+\                       \ Missiles                 = 0
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  EQUB %00011000         \ Laser power              = 3
                         \ Missiles                 = 0
+
+\ <------------------------------------------------------- End of added code -->
 
 \VERTEX    x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX   10,  -10,   35,     2,      0,    7,     7,         31    \ Vertex 0
@@ -805,13 +925,37 @@ ENDMACRO
  EQUW 75                \ Bounty                   = 75
  EQUB 40                \ Number of faces          = 40 / 4 = 10
  EQUB 19                \ Visibility distance      = 19
+
+\ <----------------------------- Code deleted from the original disc version -->
+\
+\  EQUB 90              \ Max. energy              = 90
+\
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  EQUB 81                \ Max. energy              = 81
+
+\ <------------------------------------------------------- End of added code -->
+
  EQUB 26                \ Max. speed               = 26
  EQUB &00               \ Edges data offset (high) = &0056
  EQUB &00               \ Faces data offset (high) = &009E
  EQUB 2                 \ Normals are scaled by    = 2^2 = 4
+
+\ <----------------------------- Code deleted from the original disc version -->
+\
+\  EQUB %00010010       \ Laser power              = 2
+\                       \ Missiles                 = 2
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  EQUB %00100010         \ Laser power              = 4
                         \ Missiles                 = 2
+
+\ <------------------------------------------------------- End of added code -->
 
 \VERTEX    x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX  -18,   -1,   50,     1,      0,    3,     2,         31    \ Vertex 0
@@ -867,6 +1011,8 @@ ENDMACRO
 \  Deep dive: Ship blueprints
 \
 \ ******************************************************************************
+
+\ <----------------------------------------- Whole routine added for Elite-A -->
 
 .ship_rattler
 
@@ -950,6 +1096,8 @@ ENDMACRO
  FACE       26,      -92,        6,         31    \ Face 11
  FACE        0,        0,      -96,         31    \ Face 12
 
+\ <---------------------------------------------------- End of added routine -->
+
 \ ******************************************************************************
 \
 \       Name: SHIP_ADDER
@@ -974,13 +1122,37 @@ ENDMACRO
  EQUW 40                \ Bounty                   = 40
  EQUB 60                \ Number of faces          = 60 / 4 = 15
  EQUB 23                \ Visibility distance      = 23
+
+\ <----------------------------- Code deleted from the original disc version -->
+\
+\  EQUB 85              \ Max. energy              = 85
+\
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  EQUB 72                \ Max. energy              = 72
+
+\ <------------------------------------------------------- End of added code -->
+
  EQUB 24                \ Max. speed               = 24
  EQUB &00               \ Edges data offset (high) = &0080
  EQUB &00               \ Faces data offset (high) = &00F4
  EQUB 2                 \ Normals are scaled by    = 2^2 = 4
+
+\ <----------------------------- Code deleted from the original disc version -->
+\
+\  EQUB %00010000       \ Laser power              = 2
+\                       \ Missiles                 = 0
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  EQUB %00100001         \ Laser power              = 4
                         \ Missiles                 = 1
+
+\ <------------------------------------------------------- End of added code -->
 
 \VERTEX    x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX  -18,    0,   40,     1,      0,   12,    11,         31    \ Vertex 0
@@ -1060,6 +1232,8 @@ ENDMACRO
 \
 \ ******************************************************************************
 
+\ <----------------------------------------- Whole routine added for Elite-A -->
+
 .ship_ghavial
 
  EQUB 3                 \ Max. canisters on demise = 3
@@ -1134,6 +1308,8 @@ ENDMACRO
  FACE      -27,      -55,      -13,         31    \ Face 10
  FACE      -28,      -56,        7,         31    \ Face 11
 
+\ <---------------------------------------------------- End of added routine -->
+
 \ ******************************************************************************
 \
 \       Name: SHIP_PLATE
@@ -1156,10 +1332,34 @@ ENDMACRO
  EQUB 10                \ Explosion count          = 1, as (4 * n) + 6 = 10
  EQUB 24                \ Number of vertices       = 24 / 6 = 4
  EQUB 4                 \ Number of edges          = 4
+
+\ <----------------------------- Code deleted from the original disc version -->
+\
+\  EQUW 0               \ Bounty                   = 0
+\
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  EQUW 1                 \ Bounty                   = 1
+
+\ <------------------------------------------------------- End of added code -->
+
  EQUB 4                 \ Number of faces          = 4 / 4 = 1
  EQUB 5                 \ Visibility distance      = 5
+
+\ <----------------------------- Code deleted from the original disc version -->
+\
+\  EQUB 16              \ Max. energy              = 16
+\
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  EQUB 8                 \ Max. energy              = 8
+
+\ <------------------------------------------------------- End of added code -->
+
  EQUB 16                \ Max. speed               = 16
  EQUB &00               \ Edges data offset (high) = &002C
  EQUB &00               \ Faces data offset (high) = &003C

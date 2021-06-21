@@ -692,9 +692,17 @@ ORG &0000
 
  SKIP 4                 \ Temporary storage, used in a number of places
 
+\ <-------------------------------------------------- Code added for Elite-A -->
+
 .finder
 
+\ <----------------------------------------- Whole routine added for Elite-A -->
+
  SKIP 1                 \ AJD
+
+\ <---------------------------------------------------- End of added routine -->
+
+\ <------------------------------------------------------- End of added code -->
 
 ORG &00D1
 
@@ -750,6 +758,884 @@ ORG &0100
 \ ******************************************************************************
 
 ORG &0300
+
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\ .KL
+\ 
+\  SKIP 1               \ The following bytes implement a key logger that
+\                       \ enables Elite to scan for concurrent key presses of
+\                       \ the primary flight keys, plus a secondary flight key
+\                       \
+\                       \ See the deep dive on "The key logger" for more details
+\                       \
+\                       \ If a key is being pressed that is not in the keyboard
+\                       \ table at KYTB, it can be stored here (as seen in
+\                       \ routine DK4, for example)
+\ 
+\ .KY1
+\ 
+\  SKIP 1               \ "?" is being pressed
+\                       \
+\                       \   * 0 = no
+\                       \
+\                       \   * Non-zero = yes
+\ 
+\ .KY2
+\ 
+\  SKIP 1               \ Space is being pressed
+\                       \
+\                       \   * 0 = no
+\                       \
+\                       \   * Non-zero = yes
+\ 
+\ .KY3
+\ 
+\  SKIP 1               \ "<" is being pressed
+\                       \
+\                       \   * 0 = no
+\                       \
+\                       \   * Non-zero = yes
+\ 
+\ .KY4
+\ 
+\  SKIP 1               \ ">" is being pressed
+\                       \
+\                       \   * 0 = no
+\                       \
+\                       \   * Non-zero = yes
+\ 
+\ .KY5
+\ 
+\  SKIP 1               \ "X" is being pressed
+\                       \
+\                       \   * 0 = no
+\                       \
+\                       \   * Non-zero = yes
+\ 
+\ .KY6
+\ 
+\  SKIP 1               \ "S" is being pressed
+\                       \
+\                       \   * 0 = no
+\                       \
+\                       \   * Non-zero = yes
+\ 
+\ .KY7
+\ 
+\  SKIP 1               \ "A" is being pressed
+\                       \
+\                       \   * 0 = no
+\                       \
+\                       \   * Non-zero = yes
+\                       \
+\                       \ This is also set when the joystick fire button has
+\                       \ been pressed
+\ 
+\ .KY12
+\ 
+\  SKIP 1               \ TAB is being pressed
+\                       \
+\                       \   * 0 = no
+\                       \
+\                       \   * Non-zero = yes
+\ 
+\ .KY13
+\ 
+\  SKIP 1               \ ESCAPE is being pressed
+\                       \
+\                       \   * 0 = no
+\                       \
+\                       \   * Non-zero = yes
+\ 
+\ .KY14
+\ 
+\  SKIP 1               \ "T" is being pressed
+\                       \
+\                       \   * 0 = no
+\                       \
+\                       \   * Non-zero = yes
+\ 
+\ .KY15
+\ 
+\  SKIP 1               \ "U" is being pressed
+\                       \
+\                       \   * 0 = no
+\                       \
+\                       \   * Non-zero = yes
+\ 
+\ .KY16
+\ 
+\  SKIP 1               \ "M" is being pressed
+\                       \
+\                       \   * 0 = no
+\                       \
+\                       \   * Non-zero = yes
+\ 
+\ .KY17
+\ 
+\  SKIP 1               \ "E" is being pressed
+\                       \
+\                       \   * 0 = no
+\                       \
+\                       \   * Non-zero = yes
+\ 
+\ .KY18
+\ 
+\  SKIP 1               \ "J" is being pressed
+\                       \
+\                       \   * 0 = no
+\                       \
+\                       \   * Non-zero = yes
+\ 
+\ .KY19
+\ 
+\  SKIP 1               \ "C" is being pressed
+\                       \
+\                       \   * 0 = no
+\                       \
+\                       \   * Non-zero = yes
+\ 
+\ .KY20
+\ 
+\  SKIP 1               \ "P" is being pressed
+\                       \
+\                       \   * 0 = no
+\                       \
+\                       \   * Non-zero = yes
+\ 
+\ .FRIN
+\ 
+\  SKIP NOSH + 1        \ Slots for the ships in the local bubble of universe
+\                       \
+\                       \ There are #NOSH + 1 slots, but the ship-spawning
+\                       \ routine at NWSHP only populates #NOSH of them, so
+\                       \ there are 13 slots but only 12 are used for ships
+\                       \ (the last slot is effectively used as a null
+\                       \ terminator when shuffling the slots down in the
+\                       \ KILLSHP routine)
+\                       \
+\                       \ See the deep dive on "The local bubble of universe"
+\                       \ for details of how Elite stores the local universe in
+\                       \ FRIN, UNIV and K%
+\ 
+\ .MANY
+\ 
+\  SKIP SST             \ The number of ships of each type in the local bubble
+\                       \ of universe
+\                       \
+\                       \ The number of ships of type X in the local bubble is
+\                       \ stored at MANY+X, so the number of Sidewinders is at
+\                       \ MANY+1, the number of Mambas is at MANY+2, and so on
+\                       \
+\                       \ See the deep dive on "Ship blueprints" for a list of
+\                       \ ship types
+\ 
+\ .SSPR
+\ 
+\  SKIP NTY + 1 - SST   \ "Space station present" flag
+\                       \
+\                       \   * Non-zero if we are inside the space station's safe
+\                       \     zone
+\                       \
+\                       \   * 0 if we aren't (in which case we can show the sun)
+\                       \
+\                       \ This flag is at MANY+SST, which is no coincidence, as
+\                       \ MANY+SST is a count of how many space stations there
+\                       \ are in our local bubble, which is the same as saying
+\                       \ "space station present"
+\ 
+\ .JUNK
+\ 
+\  SKIP 1               \ The amount of junk in the local bubble
+\                       \
+\                       \ "Junk" is defined as being one of these:
+\                       \
+\                       \   * Escape pod
+\                       \   * Alloy plate
+\                       \   * Cargo canister
+\                       \   * Asteroid
+\                       \   * Splinter
+\                       \   * Shuttle
+\                       \   * Transporter
+\                       \
+\                       \ Junk is the range of ship types from #JL to #JH - 1
+\ 
+\ 
+\ .auto
+\ 
+\  SKIP 1               \ Docking computer activation status
+\                       \
+\                       \   * 0 = Docking computer is off
+\                       \
+\                       \   * Non-zero = Docking computer is running
+\ 
+\ .ECMP
+\ 
+\  SKIP 1               \ Our E.C.M. status
+\                       \
+\                       \   * 0 = E.C.M. is off
+\                       \
+\                       \   * Non-zero = E.C.M. is on
+\ 
+\ .MJ
+\ 
+\  SKIP 1               \ Are we in witchspace (i.e. have we mis-jumped)?
+\                       \
+\                       \   * 0 = no, we are in normal space
+\                       \
+\                       \   * &FF = yes, we are in witchspace
+\ 
+\ .CABTMP
+\ 
+\  SKIP 1               \ Cabin temperature
+\                       \
+\                       \ The ambient cabin temperature in deep space is 30,
+\                       \ which is displayed as one notch on the dashboard bar
+\                       \
+\                       \ We get higher temperatures closer to the sun
+\                       \
+\                       \ CABTMP shares a location with MANY, but that's OK as
+\                       \ MANY+0 would contain the number of ships of type 0,
+\                       \ and as there is no ship type 0 (they start at 1), the
+\                       \ byte at MANY+0 is not used for storing a ship type
+\                       \ and can be used for the cabin temperature instead
+\ 
+\ .LAS2
+\ 
+\  SKIP 1               \ Laser power for the current laser
+\                       \
+\                       \   * Bits 0-6 contain the laser power of the current
+\                       \     space view
+\                       \
+\                       \   * Bit 7 denotes whether or not the laser pulses:
+\                       \
+\                       \     * 0 = pulsing laser
+\                       \
+\                       \     * 1 = beam laser (i.e. always on)
+\ 
+\ .MSAR
+\ 
+\  SKIP 1               \ The targeting state of our leftmost missile
+\                       \
+\                       \   * 0 = missile is not looking for a target, or it
+\                       \     already has a target lock (indicator is not
+\                       \     yellow/white)
+\                       \
+\                       \   * Non-zero = missile is currently looking for a
+\                       \     target (indicator is yellow/white)
+\ 
+\ .VIEW
+\ 
+\  SKIP 1               \ The number of the current space view
+\                       \
+\                       \   * 0 = front
+\                       \   * 1 = rear
+\                       \   * 2 = left
+\                       \   * 3 = right
+\ 
+\ .LASCT
+\ 
+\  SKIP 1               \ The laser pulse count for the current laser
+\                       \
+\                       \ This is a counter that defines the gap between the
+\                       \ pulses of a pulse laser. It is set as follows:
+\                       \
+\                       \   * 0 for a beam laser
+\                       \
+\                       \   * 10 for a pulse laser
+\                       \
+\                       \ It gets decremented every vertical sync (in the LINSCN
+\                       \ routine, which is called 50 times a second) and is set
+\                       \ to a non-zero value for pulse lasers only
+\                       \
+\                       \ The laser only fires when the value of LASCT hits
+\                       \ zero, so for pulse lasers with a value of 10, that
+\                       \ means the laser fires once every 10 vertical syncs (or
+\                       \ 5 times a second)
+\                       \
+\                       \ In comparison, beam lasers fire continuously as the
+\                       \ value of LASCT is always 0
+\ 
+\ .GNTMP
+\ 
+\  SKIP 1               \ Laser temperature (or "gun temperature")
+\                       \
+\                       \ If the laser temperature exceeds 242 then the laser
+\                       \ overheats and cannot be fired again until it has
+\                       \ cooled down
+\ 
+\ .HFX
+\ 
+\  SKIP 1               \ A flag that toggles the hyperspace colour effect
+\                       \
+\                       \   * 0 = no colour effect
+\                       \
+\                       \   * Non-zero = hyperspace colour effect enabled
+\                       \
+\                       \ When HFX is set to 1, the mode 4 screen that makes
+\                       \ up the top part of the display is temporarily switched
+\                       \ to mode 5 (the same screen mode as the dashboard),
+\                       \ which has the effect of blurring and colouring the
+\                       \ hyperspace rings in the top part of the screen. The
+\                       \ code to do this is in the LINSCN routine, which is
+\                       \ called as part of the screen mode routine at IRQ1.
+\                       \ It's in LINSCN that HFX is checked, and if it is
+\                       \ non-zero, the top part of the screen is not switched
+\                       \ to mode 4, thus leaving the top part of the screen in
+\                       \ the more colourful mode 5
+\ 
+\ .EV
+\ 
+\  SKIP 1               \ The "extra vessels" spawning counter
+\                       \
+\                       \ This counter is set to 0 on arrival in a system and
+\                       \ following an in-system jump, and is bumped up when we
+\                       \ spawn bounty hunters or pirates (i.e. "extra vessels")
+\                       \
+\                       \ It decreases by 1 each time we consider spawning more
+\                       \ "extra vessels" in part 4 of the main game loop, so
+\                       \ increasing the value of EV has the effect of delaying
+\                       \ the spawning of more vessels
+\                       \
+\                       \ In other words, this counter stops bounty hunters and
+\                       \ pirates from continually appearing, and ensures that
+\                       \ there's a delay between spawnings
+\ 
+\ .DLY
+\ 
+\  SKIP 1               \ In-flight message delay
+\                       \
+\                       \ This counter is used to keep an in-flight message up
+\                       \ for a specified time before it gets removed. The value
+\                       \ in DLY is decremented each time we start another
+\                       \ iteration of the main game loop at TT100
+\ 
+\ .de
+\ 
+\  SKIP 1               \ Equipment destruction flag
+\                       \
+\                       \   * Bit 1 denotes whether or not the in-flight message
+\                       \     about to be shown by the MESS routine is about
+\                       \     destroyed equipment:
+\                       \
+\                       \     * 0 = the message is shown normally
+\                       \
+\                       \     * 1 = the string " DESTROYED" gets added to the
+\                       \       end of the message
+\ 
+\ .JSTX
+\ 
+\  SKIP 1               \ Our current roll rate
+\                       \
+\                       \ This value is shown in the dashboard's RL indicator,
+\                       \ and determines the rate at which we are rolling
+\                       \
+\                       \ The value ranges from from 1 to 255 with 128 as the
+\                       \ centre point, so 1 means roll is decreasing at the
+\                       \ maximum rate, 128 means roll is not changing, and
+\                       \ 255 means roll is increasing at the maximum rate
+\                       \
+\                       \ This value is updated by "<" and ">" key presses, or
+\                       \ if joysticks are enabled, from the joystick. If
+\                       \ keyboard damping is enabled (which it is by default),
+\                       \ the value is slowly moved towards the centre value of
+\                       \ 128 (no roll) if there are no key presses or joystick
+\                       \ movement
+\ 
+\ .JSTY
+\ 
+\  SKIP 1               \ Our current pitch rate
+\                       \
+\                       \ This value is shown in the dashboard's DC indicator,
+\                       \ and determines the rate at which we are pitching
+\                       \
+\                       \ The value ranges from from 1 to 255 with 128 as the
+\                       \ centre point, so 1 means pitch is decreasing at the
+\                       \ maximum rate, 128 means pitch is not changing, and
+\                       \ 255 means pitch is increasing at the maximum rate
+\                       \
+\                       \ This value is updated by "S" and "X" key presses, or
+\                       \ if joysticks are enabled, from the joystick. If
+\                       \ keyboard damping is enabled (which it is by default),
+\                       \ the value is slowly moved towards the centre value of
+\                       \ 128 (no pitch) if there are no key presses or joystick
+\                       \ movement
+\ .XSAV2
+\ 
+\ 
+\  SKIP 1               \ Temporary storage, used for storing the value of the X
+\                       \ register in the TT26 routine
+\ 
+\ 
+\ .YSAV2
+\ 
+\ 
+\  SKIP 1               \ Temporary storage, used for storing the value of the Y
+\                       \ register in the TT26 routine
+\ 
+\ 
+\ .NAME
+\ 
+\  SKIP 8               \ The current commander name
+\                       \
+\                       \ The commander name can be up to 7 characters (the DFS
+\                       \ limit for file names), and is terminated by a carriage
+\                       \ return
+\ 
+\ .TP
+\ 
+\ 
+\  SKIP 1               \ The current mission status
+\                       \
+\                       \   * Bits 0-1 = Mission 1 status
+\                       \
+\                       \     * %00 = Mission not started
+\                       \     * %01 = Mission in progress, hunting for ship
+\                       \     * %11 = Constrictor killed, not debriefed yet
+\                       \     * %10 = Mission and debrief complete
+\                       \
+\                       \   * Bits 2-3 = Mission 2 status
+\                       \
+\                       \     * %00 = Mission not started
+\                       \     * %01 = Mission in progress, plans not picked up
+\                       \     * %10 = Mission in progress, plans picked up
+\                       \     * %11 = Mission complete
+\ 
+\ 
+\ .QQ0
+\ 
+\  SKIP 1               \ The current system's galactic x-coordinate (0-256)
+\ 
+\ .QQ1
+\ 
+\  SKIP 1               \ The current system's galactic y-coordinate (0-256)
+\ 
+\ .QQ21
+\ 
+\  SKIP 6               \ The three 16-bit seeds for the current galaxy
+\                       \
+\                       \ These seeds define system 0 in the current galaxy, so
+\                       \ they can be used as a starting point to generate all
+\                       \ 256 systems in the galaxy
+\                       \
+\                       \ Using a galactic hyperdrive rotates each byte to the
+\                       \ left (rolling each byte within itself) to get the
+\                       \ seeds for the next galaxy, so after eight galactic
+\                       \ jumps, the seeds roll around to the first galaxy again
+\                       \
+\                       \ See the deep dives on "Galaxy and system seeds" and
+\                       \ "Twisting the system seeds" for more details
+\ .CASH
+\ 
+\  SKIP 4               \ Our current cash pot
+\                       \
+\                       \ The cash stash is stored as a 32-bit unsigned integer,
+\                       \ with the most significant byte in CASH and the least
+\                       \ significant in CASH+3. This is big-endian, which is
+\                       \ the opposite way round to most of the numbers used in
+\                       \ Elite - to use our notation for multi-byte numbers,
+\                       \ the amount of cash is CASH(0 1 2 3)
+\ 
+\ .QQ14
+\ 
+\  SKIP 1               \ Our current fuel level (0-70)
+\                       \
+\                       \ The fuel level is stored as the number of light years
+\                       \ multiplied by 10, so QQ14 = 1 represents 0.1 light
+\                       \ years, and the maximum possible value is 70, for 7.0
+\                       \ light years
+\ 
+\ .COK
+\ 
+\  SKIP 1               \ Flags used to generate the competition code
+\                       \
+\                       \ See the deep dive on "The competition code" for
+\                       \ details of these flags and how they are used in
+\                       \ generating and decoding the competition code
+\ 
+\ .GCNT
+\ 
+\  SKIP 1               \ The number of the current galaxy (0-7)
+\                       \
+\                       \ When this is displayed in-game, 1 is added to the
+\                       \ number, so we start in galaxy 1 in-game, but it's
+\                       \ stored as galaxy 0 internally
+\                       \
+\                       \ The galaxy number increases by one every time a
+\                       \ galactic hyperdrive is used, and wraps back round to
+\                       \ the start after eight galaxies
+\ 
+\ .LASER
+\ 
+\  SKIP 4               \ The specifications of the lasers fitted to each of the
+\                       \ four space views:
+\                       \
+\                       \   * Byte #0 = front view (red key f0)
+\                       \   * Byte #1 = rear view (red key f1)
+\                       \   * Byte #2 = left view (red key f2)
+\                       \   * Byte #3 = right view (red key f3)
+\                       \
+\                       \ For each of the views:
+\                       \
+\                       \   * 0 = no laser is fitted to this view
+\                       \
+\                       \   * Non-zero = a laser is fitted to this view, with
+\                       \     the following specification:
+\                       \
+\                       \     * Bits 0-6 contain the laser's power
+\                       \
+\                       \     * Bit 7 determines whether or not the laser pulses
+\                       \       (0 = pulse or mining laser) or is always on
+\                       \       (1 = beam or military laser)
+\ 
+\ 
+\  SKIP 2               \ These bytes appear to be unused (they were originally
+\                       \ used for up/down lasers, but they were dropped)
+\ 
+\ .CRGO
+\ 
+\  SKIP 1               \ Our ship's cargo capacity
+\                       \
+\                       \   * 22 = standard cargo bay of 20 tonnes
+\                       \
+\                       \   * 37 = large cargo bay of 35 tonnes
+\                       \
+\                       \ The value is two greater than the actual capacity to
+\                       \ male the maths in tnpr slightly more efficient
+\ 
+\ .QQ20
+\ 
+\  SKIP 17              \ The contents of our cargo hold
+\                       \
+\                       \ The amount of market item X that we have in our hold
+\                       \ can be found in the X-th byte of QQ20. For example:
+\                       \
+\                       \   * QQ20 contains the amount of food (item 0)
+\                       \
+\                       \   * QQ20+7 contains the amount of computers (item 7)
+\                       \
+\                       \ See QQ23 for a list of market item numbers and their
+\                       \ storage units
+\ 
+\ .ECM
+\ 
+\  SKIP 1               \ E.C.M. system
+\                       \
+\                       \   * 0 = not fitted
+\                       \
+\                       \   * &FF = fitted
+\ 
+\ .BST
+\ 
+\  SKIP 1               \ Fuel scoops (BST stands for "barrel status")
+\                       \
+\                       \   * 0 = not fitted
+\                       \
+\                       \   * &FF = fitted
+\ 
+\ .BOMB
+\ 
+\  SKIP 1               \ Energy bomb
+\                       \
+\                       \   * 0 = not fitted
+\                       \
+\                       \   * &7F = fitted
+\ 
+\ .ENGY
+\ 
+\  SKIP 1               \ Energy unit
+\                       \
+\                       \   * 0 = not fitted
+\                       \
+\                       \   * 1 = fitted
+\ 
+\ .DKCMP
+\ 
+\  SKIP 1               \ Docking computer
+\                       \
+\                       \   * 0 = not fitted
+\                       \
+\                       \   * &FF = fitted
+\ 
+\ .GHYP
+\ 
+\  SKIP 1               \ Galactic hyperdrive
+\                       \
+\                       \   * 0 = not fitted
+\                       \
+\                       \   * &FF = fitted
+\ 
+\ .ESCP
+\ 
+\  SKIP 1               \ Escape pod
+\                       \
+\                       \   * 0 = not fitted
+\                       \
+\                       \   * &FF = fitted
+\ 
+\ 
+\  SKIP 4               \ These bytes appear to be unused
+\ 
+\ .NOMSL
+\ 
+\  SKIP 1               \ The number of missiles we have fitted (0-4)
+\ 
+\ .FIST
+\ 
+\  SKIP 1               \ Our legal status (FIST stands for "fugitive/innocent
+\                       \ status"):
+\                       \
+\                       \   * 0 = Clean
+\                       \
+\                       \   * 1-49 = Offender
+\                       \
+\                       \   * 50+ = Fugitive
+\                       \
+\                       \ You get 64 points if you kill a cop, so that's a fast
+\                       \ ticket to fugitive status
+\ 
+\ .AVL
+\ 
+\  SKIP 17              \ Market availability in the current system
+\                       \
+\                       \ The available amount of market item X is stored in
+\                       \ the X-th byte of AVL, so for example:
+\                       \
+\                       \   * AVL contains the amount of food (item 0)
+\                       \
+\                       \   * AVL+7 contains the amount of computers (item 7)
+\                       \
+\                       \ See QQ23 for a list of market item numbers and their
+\                       \ storage units, and the deep dive on "Market item
+\                       \ prices and availability" for details of the algorithm
+\                       \ used for calculating each item's availability
+\ 
+\ .QQ26
+\ 
+\  SKIP 1               \ A random value used to randomise market data
+\                       \
+\                       \ This value is set to a new random number for each
+\                       \ change of system, so we can add a random factor into
+\                       \ the calculations for market prices (for details of how
+\                       \ this is used, see the deep dive on "Market prices")
+\ 
+\ .TALLY
+\ 
+\  SKIP 2               \ Our combat rank
+\                       \
+\                       \ The combat rank is stored as the number of kills, in a
+\                       \ 16-bit number TALLY(1 0) - so the high byte is in
+\                       \ TALLY+1 and the low byte in TALLY
+\                       \
+\                       \ If the high byte in TALLY+1 is 0 then we have between
+\                       \ 0 and 255 kills, so our rank is Harmless, Mostly
+\                       \ Harmless, Poor, Average or Above Average, according to
+\                       \ the value of the low byte in TALLY:
+\                       \
+\                       \   Harmless        = %00000000 to %00000011 = 0 to 3
+\                       \   Mostly Harmless = %00000100 to %00000111 = 4 to 7
+\                       \   Poor            = %00001000 to %00001111 = 8 to 15
+\                       \   Average         = %00010000 to %00011111 = 16 to 31
+\                       \   Above Average   = %00100000 to %11111111 = 32 to 255
+\                       \
+\                       \ If the high byte in TALLY+1 is non-zero then we are
+\                       \ Competent, Dangerous, Deadly or Elite, according to
+\                       \ the high byte in TALLY+1:
+\                       \
+\                       \   Competent       = 1           = 256 to 511 kills
+\                       \   Dangerous       = 2 to 9      = 512 to 2559 kills
+\                       \   Deadly          = 10 to 24    = 2560 to 6399 kills
+\                       \   Elite           = 25 and up   = 6400 kills and up
+\                       \
+\                       \ You can see the rating calculation in STATUS
+\ 
+\ .SVC
+\ 
+\  SKIP 1               \ The save count
+\                       \
+\                       \ When a new commander is created, the save count gets
+\                       \ set to 128. This value gets halved each time the
+\                       \ commander file is saved, but it is otherwise unused.
+\                       \ It is presumably part of the security system for the
+\                       \ competition, possibly another flag to catch out
+\                       \ entries with manually altered commander files
+\ 
+\  SKIP 2               \ The commander file checksum
+\                       \
+\                       \ These two bytes are reserved for the commander file
+\                       \ checksum, so when the current commander block is
+\                       \ copied from here to the last saved commander block at
+\                       \ NA%, CHK and CHK2 get overwritten
+\ 
+\ 
+\ NT% = SVC + 2 - TP    \ This sets the variable NT% to the size of the current
+\                       \ commander data block, which starts at TP and ends at
+\                       \ SVC+2 (inclusive)
+\ 
+\ 
+\ 
+\ .MCH
+\ 
+\  SKIP 1               \ The text token number of the in-flight message that is
+\                       \ currently being shown, and which will be removed by
+\                       \ the me2 routine when the counter in DLY reaches zero
+\ 
+\ .FSH
+\ 
+\  SKIP 1               \ Forward shield status
+\                       \
+\                       \   * 0 = empty
+\                       \
+\                       \   * &FF = full
+\ 
+\ .ASH
+\ 
+\  SKIP 1               \ Aft shield status
+\                       \
+\                       \   * 0 = empty
+\                       \
+\                       \   * &FF = full
+\ 
+\ .ENERGY
+\ 
+\  SKIP 1               \ Energy bank status
+\                       \
+\                       \   * 0 = empty
+\                       \
+\                       \   * &FF = full
+\ 
+\ .COMX
+\ 
+\  SKIP 1               \ The x-coordinate of the compass dot
+\ 
+\ .COMY
+\ 
+\  SKIP 1               \ The y-coordinate of the compass dot
+\ 
+\ .QQ24
+\ 
+\  SKIP 1               \ Temporary storage, used to store the current market
+\                       \ item's price in routine TT151
+\ 
+\ .QQ25
+\ 
+\  SKIP 1               \ Temporary storage, used to store the current market
+\                       \ item's availability in routine TT151
+\ 
+\ .QQ28
+\ 
+\  SKIP 1               \ Temporary storage, used to store the economy byte of
+\                       \ the current system in routine var
+\ 
+\ .QQ29
+\ 
+\  SKIP 1               \ Temporary storage, used in a number of places
+\ 
+\ .gov
+\ 
+\  SKIP 1               \ The current system's government type (0-7)
+\                       \
+\                       \ See the deep dive on "Generating system data" for
+\                       \ details of the various government types
+\ 
+\ .tek
+\ 
+\  SKIP 1               \ The current system's tech level (0-14)
+\                       \
+\                       \ See the deep dive on "Generating system data" for more
+\                       \ information on tech levels
+\ 
+\ .SLSP
+\ 
+\  SKIP 2               \ The address of the bottom of the ship line heap
+\                       \
+\                       \ The ship line heap is a descending block of memory
+\                       \ that starts at WP and descends down to SLSP. It can be
+\                       \ extended downwards by the NWSHP routine when adding
+\                       \ new ships (and their associated ship line heaps), in
+\                       \ which case SLSP is lowered to provide more heap space,
+\                       \ assuming there is enough free memory to do so
+\ 
+\ .QQ2
+\ 
+\  SKIP 6               \ The three 16-bit seeds for the current system, i.e.
+\                       \ the one we are currently in
+\                       \
+\                       \ See the deep dives on "Galaxy and system seeds" and
+\                       \ "Twisting the system seeds" for more details
+\ 
+\ .QQ3
+\ 
+\  SKIP 1               \ The selected system's economy (0-7)
+\                       \
+\                       \ See the deep dive on "Generating system data" for more
+\                       \ information on economies
+\ 
+\ .QQ4
+\ 
+\  SKIP 1               \ The selected system's government (0-7)
+\                       \
+\                       \ See the deep dive on "Generating system data" for more
+\                       \ details of the various government types
+\ 
+\ .QQ5
+\ 
+\  SKIP 1               \ The selected system's tech level (0-14)
+\                       \
+\                       \ See the deep dive on "Generating system data" for more
+\                       \ information on tech levels
+\ 
+\ .QQ6
+\ 
+\  SKIP 2               \ The selected system's population in billions * 10
+\                       \ (1-71), so the maximum population is 7.1 billion
+\                       \
+\                       \ See the deep dive on "Generating system data" for more
+\                       \ details on population levels
+\ 
+\ .QQ7
+\ 
+\  SKIP 2               \ The selected system's productivity in M CR (96-62480)
+\                       \
+\                       \ See the deep dive on "Generating system data" for more
+\                       \ details about productivity levels
+\ 
+\ .QQ8
+\ 
+\  SKIP 2               \ The distance from the current system to the selected
+\                       \ system in light years * 10, stored as a 16-bit number
+\                       \
+\                       \ The distance will be 0 if the selected sysyem is the
+\                       \ current system
+\                       \
+\                       \ The galaxy chart is 102.4 light years wide and 51.2
+\                       \ light years tall (see the intra-system distance
+\                       \ calculations in routine TT111 for details), which
+\                       \ equates to 1024 x 512 in terms of QQ8
+\ 
+\ .QQ9
+\ 
+\  SKIP 1               \ The galactic x-coordinate of the crosshairs in the
+\                       \ galaxy chart (and, most of the time, the selected
+\                       \ system's galactic x-coordinate)
+\ 
+\ .QQ10
+\ 
+\  SKIP 1               \ The galactic y-coordinate of the crosshairs in the
+\                       \ galaxy chart (and, most of the time, the selected
+\                       \ system's galactic y-coordinate)
+\ 
+\ .NOSTM
+\ 
+\  SKIP 1               \ The number of stardust particles shown on screen,
+\                       \ which is 18 (#NOST) for normal space, and 3 for
+\                       \ witchspace
+\ 
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
 
 .KL
 
@@ -1272,12 +2158,27 @@ ORG &0300
                         \       (0 = pulse or mining laser) or is always on
                         \       (1 = beam or military laser)
 
+\ <----------------------------- Code deleted from the original disc version -->
+
+\ <----------------------------------------- Whole routine added for Elite-A -->
+\ 
+\  SKIP 2               \ These bytes appear to be unused (they were originally
+\                       \ used for up/down lasers, but they were dropped)
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  SKIP 1                 \ This byte appears to be unused
 
 .new_type
 .cmdr_ship
 
  SKIP 1                 \ AJD
+
+\ <------------------------------------------------------- End of added code -->
+
+\ <---------------------------------------------------- End of added routine -->
 
 .CRGO
 
@@ -1362,15 +2263,27 @@ ORG &0300
 
 .cmdr_cour
 
+\ <----------------------------------------- Whole routine added for Elite-A -->
+
  SKIP 2                 \ AJD
+
+\ <---------------------------------------------------- End of added routine -->
 
 .cmdr_courx
 
+\ <----------------------------------------- Whole routine added for Elite-A -->
+
  SKIP 1                 \ AJD
+
+\ <---------------------------------------------------- End of added routine -->
 
 .cmdr_coury
 
+\ <----------------------------------------- Whole routine added for Elite-A -->
+
  SKIP 1                 \ AJD
+
+\ <---------------------------------------------------- End of added routine -->
 
 .NOMSL
 
@@ -1624,6 +2537,154 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
                         \ which is 18 (#NOST) for normal space, and 3 for
                         \ witchspace
 
+\ <------------------------------------------------------- End of added code -->
+
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  SKIP 1               \ This byte appears to be unused
+\ 
+\ .COMC
+\ 
+\  SKIP 1               \ The colour of the dot on the compass
+\                       \
+\                       \   * &F0 = the object in the compass is in front of us,
+\                       \     so the dot is yellow/white
+\                       \
+\                       \   * &FF = the object in the compass is behind us, so
+\                       \     the dot is green/cyan
+\ 
+\ .DNOIZ
+\ 
+\  SKIP 1               \ Sound on/off configuration setting
+\                       \
+\                       \   * 0 = sound is on (default)
+\                       \
+\                       \   * Non-zero = sound is off
+\                       \
+\                       \ Toggled by pressing "S" when paused, see the DK4
+\                       \ routine for details
+\ 
+\ .DAMP
+\ 
+\  SKIP 1               \ Keyboard damping configuration setting
+\                       \
+\                       \   * 0 = damping is enabled (default)
+\                       \
+\                       \   * &FF = damping is disabled
+\                       \
+\                       \ Toggled by pressing CAPS LOCK when paused, see the
+\                       \ DKS3 routine for details
+\ 
+\ .DJD
+\ 
+\  SKIP 1               \ Keyboard auto-recentre configuration setting
+\                       \
+\                       \   * 0 = auto-recentre is enabled (default)
+\                       \
+\                       \   * &FF = auto-recentre is disabled
+\                       \
+\                       \ Toggled by pressing "A" when paused, see the DKS3
+\                       \ routine for details
+\ 
+\ .PATG
+\ 
+\ 
+\  SKIP 1               \ Configuration setting to show the author names on the
+\                       \ start-up screen and enable manual hyperspace mis-jumps
+\                       \
+\                       \   * 0 = no author names or manual mis-jumps (default)
+\                       \
+\                       \   * &FF = show author names and allow manual mis-jumps
+\                       \
+\                       \ Toggled by pressing "X" when paused, see the DKS3
+\                       \ routine for details
+\                       \
+\                       \ This needs to be turned on for manual mis-jumps to be
+\                       \ possible. To do a manual mis-jump, first toggle the
+\                       \ author display by pausing the game (COPY) and pressing
+\                       \ "X", and during the next hyperspace, hold down CTRL to
+\                       \ force a mis-jump. See routine ee5 for the "AND PATG"
+\                       \ instruction that implements this logic
+\ 
+\ 
+\ .FLH
+\ 
+\  SKIP 1               \ Flashing console bars configuration setting
+\                       \
+\                       \   * 0 = static bars (default)
+\                       \
+\                       \   * &FF = flashing bars
+\                       \
+\                       \ Toggled by pressing "F" when paused, see the DKS3
+\                       \ routine for details
+\ 
+\ .JSTGY
+\ 
+\  SKIP 1               \ Reverse joystick Y-channel configuration setting
+\                       \
+\                       \   * 0 = standard Y-channel (default)
+\                       \
+\                       \   * &FF = reversed Y-channel
+\                       \
+\                       \ Toggled by pressing "Y" when paused, see the DKS3
+\                       \ routine for details
+\ 
+\ .JSTE
+\ 
+\  SKIP 1               \ Reverse both joystick channels configuration setting
+\                       \
+\                       \   * 0 = standard channels (default)
+\                       \
+\                       \   * &FF = reversed channels
+\                       \
+\                       \ Toggled by pressing "J" when paused, see the DKS3
+\                       \ routine for details
+\ 
+\ .JSTK
+\ 
+\  SKIP 1               \ Keyboard or joystick configuration setting
+\                       \
+\                       \   * 0 = keyboard (default)
+\                       \
+\                       \   * &FF = joystick
+\                       \
+\                       \ Toggled by pressing "K" when paused, see the DKS3
+\                       \ routine for details
+\ 
+\ .BSTK
+\ 
+\  SKIP 1               \ Bitstik configuration setting
+\                       \
+\                       \   * 0 = keyboard or joystick (default)
+\                       \
+\                       \   * &FF = Bitstik
+\                       \
+\                       \ Toggled by pressing "B" when paused, see the DKS3
+\                       \ routine for details
+\ 
+\ .CATF
+\ 
+\  SKIP 1               \ The disc catalogue flag
+\                       \
+\                       \ Determines whether a disc catalogue is currently in
+\                       \ progress, so the TT26 print routine can format the
+\                       \ output correctly:
+\                       \
+\                       \   * 0 = disc is not currently being catalogued
+\                       \
+\                       \   * 1 = disc is currently being catalogued
+\                       \
+\                       \ Specifically, when CATF is non-zero, TT26 will omit
+\                       \ column 17 from the catalogue so that it will fit
+\                       \ on-screen (column 17 is blank column in the middle
+\                       \ of the catalogue, between the two lists of filenames,
+\                       \ so it can be dropped without affecting the layout)
+\ 
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  SKIP 1                 \ This byte appears to be unused
 
 .COMC
@@ -1763,63 +2824,125 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
 
 .new_pulse
 
+\ <----------------------------------------- Whole routine added for Elite-A -->
+
  SKIP 1                 \ AJD
+
+\ <---------------------------------------------------- End of added routine -->
 
 .new_beam
 
+\ <----------------------------------------- Whole routine added for Elite-A -->
+
  SKIP 1                 \ AJD
+
+\ <---------------------------------------------------- End of added routine -->
 
 .new_military
 
+\ <----------------------------------------- Whole routine added for Elite-A -->
+
  SKIP 1                 \ AJD
+
+\ <---------------------------------------------------- End of added routine -->
 
 .new_mining
 
+\ <----------------------------------------- Whole routine added for Elite-A -->
+
  SKIP 1                 \ AJD
+
+\ <---------------------------------------------------- End of added routine -->
 
 .new_mounts
 
+\ <----------------------------------------- Whole routine added for Elite-A -->
+
  SKIP 1                 \ AJD
+
+\ <---------------------------------------------------- End of added routine -->
 
 .new_missiles
 
+\ <----------------------------------------- Whole routine added for Elite-A -->
+
  SKIP 1                 \ AJD
+
+\ <---------------------------------------------------- End of added routine -->
 
 .new_shields
 
+\ <----------------------------------------- Whole routine added for Elite-A -->
+
  SKIP 1                 \ AJD
+
+\ <---------------------------------------------------- End of added routine -->
 
 .new_energy
 
+\ <----------------------------------------- Whole routine added for Elite-A -->
+
  SKIP 1                 \ AJD
+
+\ <---------------------------------------------------- End of added routine -->
 
 .new_speed
 
+\ <----------------------------------------- Whole routine added for Elite-A -->
+
  SKIP 1                 \ AJD
+
+\ <---------------------------------------------------- End of added routine -->
 
 .new_hold
 
+\ <----------------------------------------- Whole routine added for Elite-A -->
+
  SKIP 1                 \ AJD
+
+\ <---------------------------------------------------- End of added routine -->
 
 .new_range
 
+\ <----------------------------------------- Whole routine added for Elite-A -->
+
  SKIP 1                 \ AJD
+
+\ <---------------------------------------------------- End of added routine -->
 
 .new_costs
 
+\ <----------------------------------------- Whole routine added for Elite-A -->
+
  SKIP 1                 \ AJD
+
+\ <---------------------------------------------------- End of added routine -->
 
 .new_max
 
+\ <----------------------------------------- Whole routine added for Elite-A -->
+
  SKIP 1                 \ AJD
+
+\ <---------------------------------------------------- End of added routine -->
 
 .new_min
 
+\ <----------------------------------------- Whole routine added for Elite-A -->
+
  SKIP 1                 \ AJD
+
+\ <---------------------------------------------------- End of added routine -->
 
 .new_space
 
+\ <----------------------------------------- Whole routine added for Elite-A -->
+
  SKIP 1                 \ AJD
+
+\ <---------------------------------------------------- End of added routine -->
+
+\ <------------------------------------------------------- End of added code -->
 
 \ ******************************************************************************
 \
@@ -1996,9 +3119,21 @@ LOAD_A% = LOAD%
 
 .S%
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  JMP scramble         \ Decrypt the main flight code and join the main loop
+\ 
+\  JMP scramble         \ Decrypt the main flight code and start a new game
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  JMP RSHIPS             \ AJD
 
  JMP RSHIPS
+
+\ <------------------------------------------------------- End of added code -->
 
  JMP TT26               \ WRCHV is set to point here by elite-loader3.asm
 
@@ -2034,8 +3169,19 @@ LOAD_A% = LOAD%
 
 .LTLI
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  EQUS "L.T.CODE"
+\  EQUB 13
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  EQUS "L.1.D"
  EQUB 13
+
+\ <------------------------------------------------------- End of added code -->
 
 \ ******************************************************************************
 \
@@ -2074,7 +3220,20 @@ LOAD_A% = LOAD%
                         \ and fall through into the entry code for the game
                         \ to restart from the title screen
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  JSR CATD             \ Call CATD to reload the disc catalogue
+\ 
+\  BNE INBAY            \ Jump to INBAY to load the docked code (this BNE is
+\                       \ effectively a JMP)
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  BMI INBAY              \ AJD
+
+\ <------------------------------------------------------- End of added code -->
 
 \ ******************************************************************************
 \
@@ -2137,6 +3296,16 @@ LOAD_A% = LOAD%
 \
 \ ******************************************************************************
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  LDX JSTX             \ Set X to the current rate of roll in JSTX, and
+\  JSR cntr             \ apply keyboard damping twice (if enabled) so the roll
+\  JSR cntr             \ rate in X creeps towards the centre by 2
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  LDX JSTX               \ AJD
  CPX new_max
  BCC n_highx
@@ -2152,6 +3321,8 @@ LOAD_A% = LOAD%
 
  JSR cntr
  JSR cntr
+
+\ <------------------------------------------------------- End of added code -->
 
                         \ The roll rate in JSTX increases if we press ">" (and
                         \ the RL indicator on the dashboard goes to the right).
@@ -2208,6 +3379,16 @@ LOAD_A% = LOAD%
  ORA ALP2               \ Store A in ALPHA, but with the sign set to ALP2 (so
  STA ALPHA              \ ALPHA has a different sign to the actual roll rate)
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  LDX JSTY             \ Set X to the current rate of pitch in JSTY, and
+\  JSR cntr             \ apply keyboard damping so the pitch rate in X creeps
+\                       \ towards the centre by 1
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  LDX JSTY               \ AJD
  CPX new_max
  BCC n_highy
@@ -2222,6 +3403,8 @@ LOAD_A% = LOAD%
 .n_lowy
 
  JSR cntr
+
+\ <------------------------------------------------------- End of added code -->
 
  TXA                    \ Set A and Y to the pitch rate but with the sign bit
  EOR #%10000000         \ flipped
@@ -2273,6 +3456,43 @@ LOAD_A% = LOAD%
  ORA BET2               \ Store A in BETA, but with the sign set to BET2 (so
  STA BETA               \ BETA has the same sign as the actual pitch rate)
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  LDA BSTK             \ If BSTK = 0 then the Bitstik is not configured, so
+\  BEQ BS2              \ jump to BS2 to skip the following
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  LDX #3               \ Call OSBYTE 128 to fetch the 16-bit value from ADC
+\  LDA #128             \ channel 3 (the Bitstik rotation value), returning the
+\  JSR OSBYTE           \ value in (Y X)
+\ 
+\  TYA                  \ Copy Y to A, so the result is now in (A X)
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  LSR A                \ Divide A by 4
+\  LSR A
+\ 
+\  CMP #40              \ If A < 40, skip the following instruction
+\  BCC P%+4
+\ 
+\  LDA #40              \ Set A = 40, which ensures a maximum speed of 40
+\ 
+\  STA DELTA            \ Update our speed in DELTA
+\ 
+\  BNE MA4              \ If the speed we just set is non-zero, then jump to MA4
+\                       \ to skip the following, as we don't need to check the
+\                       \ keyboard for speed keys, otherwise do check the
+\                       \ keyboard (so Bitstik users can still use the keyboard
+\                       \ for speed adjustments if they twist the stick to zero)
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
 \ ******************************************************************************
 \
 \       Name: Main flight loop (Part 3 of 16)
@@ -2306,12 +3526,34 @@ LOAD_A% = LOAD%
 \
 \ ******************************************************************************
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\ .BS2
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
  LDA KY2                \ If Space is being pressed, keep going, otherwise jump
  BEQ MA17               \ down to MA17 to skip the following
+
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  LDA DELTA            \ The "go faster" key is being pressed, so first we
+\  CMP #40              \ fetch the current speed from DELTA into A, and if
+\  BCS MA17             \ A >= 40, we are already going at full pelt, so jump
+\                       \ down to MA17 to skip the following
+\ 
+\  INC DELTA            \ We can go a bit faster, so increment the speed in
+\                       \ location DELTA
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
 
  LDA &7D                \ AJD
  CMP new_speed
  BCC speed_up
+
+\ <------------------------------------------------------- End of added code -->
 
 .MA17
 
@@ -2323,7 +3565,11 @@ LOAD_A% = LOAD%
 
  BNE MA4                \ If the speed is still greater than zero, jump to MA4
 
+\ <-------------------------------------------------- Code added for Elite-A -->
+
 .speed_up
+
+\ <------------------------------------------------------- End of added code -->
 
  INC DELTA              \ Otherwise we just braked a little too hard, so bump
                         \ the speed back up to the minimum value of 1
@@ -2338,8 +3584,25 @@ LOAD_A% = LOAD%
  JSR ABORT              \ ABORT to disarm the missile and update the missile
                         \ indicators on the dashboard to green/cyan (Y = &EE)
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  LDA #40              \ Call the NOISE routine with A = 40 to make a low,
+\  JSR NOISE            \ long beep to indicate the missile is now disarmed
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  JSR WA1                \ Call the WA1 routine to make a low, long beep to
                         \ indicate the missile is now disarmed
+
+\ <------------------------------------------------------- End of added code -->
+
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\ .MA31
+\ 
+\ <----------------------------------------------------- End of deleted code -->
 
  LDA #0                 \ Set MSAR to 0 to indicate that no missiles are
  STA MSAR               \ currently armed
@@ -2365,9 +3628,24 @@ LOAD_A% = LOAD%
                         \ value &FF, as we just loaded it from MSTG and checked
                         \ that it was negative)
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  LDY #&E0             \ Change the leftmost missile indicator to yellow/white
+\  JSR MSBAR            \ on the missile bar (this call changes the leftmost
+\                       \ indicator because we set X to the number of missiles
+\                       \ in NOMSL above, and the indicators are numbered from
+\                       \ right to left, so X is the number of the leftmost
+\                       \ indicator)
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  LDY #&E0               \ AJD
  DEX
  JSR MSBAR
+
+\ <------------------------------------------------------- End of added code -->
 
 .MA25
 
@@ -2384,9 +3662,35 @@ LOAD_A% = LOAD%
 
 .MA24
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  LDA KY12             \ If TAB is being pressed, keep going, otherwise jump
+\  BEQ MA76             \ jump down to MA76 to skip the following
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  LDA KY12               \ AJD
  AND BOMB
  BEQ MA76
+
+\ <------------------------------------------------------- End of added code -->
+
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  ASL BOMB             \ The "energy bomb" key is being pressed, so double
+\                       \ the value in BOMB. If we have an energy bomb fitted,
+\                       \ BOMB will contain &7F (%01111111) before this shift
+\                       \ and will contain &FE (%11111110) after the shift; if
+\                       \ we don't have an energy bomb fitted, BOMB will still
+\                       \ contain 0. The bomb explosion is dealt with in the
+\                       \ MAL1 routine below - this just registers the fact that
+\                       \ we've set the bomb ticking
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
 
  INC BOMB               \ AJD
  INC new_hold
@@ -2396,7 +3700,23 @@ LOAD_A% = LOAD%
  JSR TT111
  JSR hyper_snap
 
+\ <------------------------------------------------------- End of added code -->
+
 .MA76
+
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  LDA KY20             \ If "P" is being pressed, keep going, otherwise skip
+\  BEQ MA78             \ the next two instructions
+\ 
+\  LDA #0               \ The "cancel docking computer" key is bring pressed,
+\  STA auto             \ so turn it off by setting auto to 0
+\ 
+\ .MA78
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
 
  LDA KY19               \ AJD
  AND DKCMP
@@ -2410,6 +3730,8 @@ LOAD_A% = LOAD%
  STA auto
 
 .MA78
+
+\ <------------------------------------------------------- End of added code -->
 
  LDA KY13               \ If ESCAPE is being pressed and we have an escape pod
  AND ESCP               \ fitted, keep going, otherwise jump to noescp to skip
@@ -2448,6 +3770,17 @@ LOAD_A% = LOAD%
 
 .MA64
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  LDA KY19             \ If "C" is being pressed, and we have a docking
+\  AND DKCMP            \ computer fitted, keep going, otherwise jump down to
+\  BEQ MA68             \ MA68 to skip the following
+\ 
+\  STA auto             \ Set auto to the non-zero value of A, so the docking
+\                       \ computer is activated
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
 .MA68
 
  LDA #0                 \ Set LAS = 0, to switch the laser off while we do the
@@ -2485,9 +3818,21 @@ LOAD_A% = LOAD%
 
  PHA                    \ Store the current view's laser power on the stack
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  AND #%01111111       \ Set LAS and LAS2 to bits 0-6 of the laser power
+\  STA LAS
+\  STA LAS2
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  AND #%01111111         \ Set LAS and LAS2 to bits 0-6 of the laser power
  STA LAS2
  STA LAS
+
+\ <------------------------------------------------------- End of added code -->
 
  LDA #0                 \ Call the NOISE routine with A = 0 to make the sound
  JSR NOISE              \ of our laser firing
@@ -2508,7 +3853,21 @@ LOAD_A% = LOAD%
 
 .ma1
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\ 
+\  AND #%11111010       \ LASCT will be set to 0 for beam lasers, and to the
+\  STA LASCT            \ laser power AND %11111010 for pulse lasers, which
+\                       \ comes to 10 (as pulse lasers have a power of 15). See
+\                       \ MA23 below for more on laser pulsing and LASCT
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  STA LASCT              \ AJD
+
+\ <------------------------------------------------------- End of added code -->
 
 \ ******************************************************************************
 \
@@ -2600,10 +3959,14 @@ LOAD_A% = LOAD%
  LDA XX21-1,Y           \ Fetch the high byte of this particular ship type's
  STA XX0+1              \ blueprint and store it in XX0+1
 
+\ <-------------------------------------------------- Code added for Elite-A -->
+
                         \ We now go straight to part 6, omitting part 5 from the
                         \ original disc version, as part 5 implements the energy
                         \ bomb, and Elite-A replaces the energy bomb with the
                         \ Hyperspace Unit
+
+\ <------------------------------------------------------- End of added code -->
 
 \ ******************************************************************************
 \
@@ -2774,17 +4137,83 @@ LOAD_A% = LOAD%
 
 .oily
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  JSR DORND            \ Set A and X to random numbers and reduce A to a
+\  AND #7               \ random number in the range 0-7
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  JSR DORND              \ Set A and X to random numbers and reduce A to a
  AND #15                \ random number in the range 0-15 AJD
+
+\ <------------------------------------------------------- End of added code -->
 
 .slvy2
 
                         \ By the time we get here, we are scooping, and A
                         \ contains the type of item we are scooping (a random
+
+\ <----------------------------- Code deleted from the original disc version -->
+\
+\                       \ number 0-7 if we are scooping a cargo canister, 3 if
+\                       \ we are scooping an escape pod, or 16 if we are
+\                       \ scooping a Thargon). These numbers correspond to the
+\                       \ relevant market items (see QQ23 for a list), so a
+\                       \ cargo canister can contain anything from food to
+\                       \ computers, while escape pods contain slaves, and
+\                       \ Thargons become alien items when scooped
+\
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
                         \ AJD
+
+\ <------------------------------------------------------- End of added code -->
+
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  JSR tnpr1            \ Call tnpr1 with the scooped cargo type stored in A
+\                       \ to work out whether we have room in the hold for one
+\                       \ tonne of this cargo (A is set to 1 by this call, and
+\                       \ the C flag contains the result)
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
 
  TAX                    \ AJD
  JSR tnpr_FLIGHT
+
+\ <------------------------------------------------------- End of added code -->
+
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  LDY #78              \ This instruction has no effect, so presumably it used
+\                       \ to do something, but didn't get removed
+\ 
+\  BCS MA59             \ If the C flag is set then we have no room in the hold
+\                       \ for the scooped item, so jump down to MA59 make a
+\                       \ sound to indicate failure, before destroying the
+\                       \ canister
+\ 
+\  LDY QQ29             \ Scooping was successful, so set Y to the type of
+\                       \ item we just scooped, which we stored in QQ29 above
+\ 
+\  ADC QQ20,Y           \ Add A (which we set to 1 above) to the number of items
+\  STA QQ20,Y           \ of type Y in the cargo hold, as we just successfully
+\                       \ scooped one canister of type Y
+\ 
+\  TYA                  \ Print recursive token 48 + A as an in-flight token,
+\  ADC #208             \ which will be in the range 48 ("FOOD") to 64 ("ALIEN
+\  JSR MESS             \ ITEMS"), so this prints the scooped item's name
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
 
  BCS MA58               \ AJD
  INC QQ20,X
@@ -2792,7 +4221,21 @@ LOAD_A% = LOAD%
  ADC #&D0
  JSR MESS
 
+\ <------------------------------------------------------- End of added code -->
+
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  ASL NEWB             \ The item has now been scooped, so set bit 7 of its
+\  SEC                  \ NEWB flags to indicate this
+\  ROR NEWB
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  JSR top_6a             \ AJD
+
+\ <------------------------------------------------------- End of added code -->
 
 .MA65
 
@@ -2842,7 +4285,11 @@ LOAD_A% = LOAD%
  CMP #214               \ docking, as the angle of approach is greater than 26
  BCC MA62               \ degrees
 
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  LDY #&25               \ AJD
+
+\ <------------------------------------------------------- End of added code -->
 
  JSR SPS1               \ Call SPS1 to calculate the vector to the planet and
                         \ store it in XX15
@@ -2877,9 +4324,24 @@ LOAD_A% = LOAD%
 
                         \ If we arrive here, docking has just failed
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  LDA DELTA            \ If the ship's speed is < 5, jump to MA67 to register
+\  CMP #5               \ some damage, but not a huge amount
+\  BCC MA67
+\ 
+\  JMP DEATH            \ Otherwise we have just crashed into the station, so
+\                       \ process our death
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  LDA &7D                \ AJD
  CMP #5
  BCS n_crunch
+
+\ <------------------------------------------------------- End of added code -->
 
 \ ******************************************************************************
 \
@@ -2903,6 +4365,61 @@ LOAD_A% = LOAD%
 \
 \ ******************************************************************************
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\ .MA59
+\ 
+\                       \ If we get here then scooping failed
+\ 
+\  JSR EXNO3            \ Make the sound of the cargo canister being destroyed
+\                       \ and fall through into MA60 to remove the canister
+\                       \ from our local bubble
+\ 
+\ .MA60
+\ 
+\                       \ If we get here then scooping was successful
+\ 
+\  ASL INWK+31          \ Set bit 7 of the scooped or destroyed item, to denote
+\  SEC                  \ that it has been killed and should be removed from
+\  ROR INWK+31          \ the local bubble
+\ 
+\ .MA61                 \ This label is not used but is in the original source
+\ 
+\  BNE MA26             \ Jump to MA26 to skip over the collision routines and
+\                       \ to move on to missile targeting (this BNE is
+\                       \ effectively a JMP as A will never be zero)
+\ 
+\ .MA67
+\ 
+\                       \ If we get here then we have collided with something,
+\                       \ but not fatally
+\ 
+\  LDA #1               \ Set the speed in DELTA to 1 (i.e. a sudden stop)
+\  STA DELTA
+\ 
+\  LDA #5               \ Set the amount of damage in A to 5 (a small dent) and
+\  BNE MA63             \ jump down to MA63 to process the damage (this BNE is
+\                       \ effectively a JMP as A will never be zero)
+\ 
+\ .MA58
+\ 
+\                       \ If we get here, we have collided with something in a
+\                       \ potentially fatal way
+\ 
+\  ASL INWK+31          \ Set bit 7 of the ship we just collided with, to
+\  SEC                  \ denote that it has been killed and should be removed
+\  ROR INWK+31          \ from the local bubble
+\ 
+\  LDA INWK+35          \ Load A with the energy level of the ship we just hit
+\ 
+\  SEC                  \ Set the amount of damage in A to 128 + A / 2, so
+\  ROR A                \ this is quite a big dent, and colliding with higher
+\                       \ energy ships will cause more damage
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  LDA auto               \ AJD
  AND #&04
  EOR #&05
@@ -2917,6 +4434,8 @@ LOAD_A% = LOAD%
 .n_crunch
 
  LDA #&80
+
+\ <------------------------------------------------------- End of added code -->
 
 .MA63
 
@@ -3007,11 +4526,46 @@ LOAD_A% = LOAD%
  JSR EXNO               \ the crosshairs, so call EXNO to make the sound of
                         \ us making a laser strike on another ship
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  LDA TYPE             \ Did we just hit the space station? If so, jump to
+\  CMP #SST             \ MA14+2 to make the station hostile, skipping the
+\  BEQ MA14+2           \ following as we can't destroy a space station
+\ 
+\  CMP #CON             \ If the ship we hit is not a Constrictor, jump to BURN
+\  BNE BURN             \ to skip the following
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  LDA &44                \ AJD
 
  LDY TYPE               \ Did we just hit the space station? If so, jump to
  CPY #SST               \ MA14 to AJD
  BEQ MA14
+
+\ <------------------------------------------------------- End of added code -->
+
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  LDA LAS              \ Set A to the power of the laser we just used to hit
+\                       \ the ship (i.e. the laser in the current view)
+\ 
+\  CMP #(Armlas AND 127)\ If the laser is not a military laser, jump to MA8
+\  BNE MA8              \ to skip the following, as only military lasers have
+\                       \ any effect on the Constrictor
+\ 
+\  LSR LAS              \ Divide the laser power of the current view by 4, so
+\  LSR LAS              \ the damage inflicted on the super-ship is a quarter of
+\                       \ the damage our military lasers would inflict on a
+\                       \ normal ship
+\ 
+\ .BURN
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
 
  CPY #&1F
  BNE BURN
@@ -3021,8 +4575,58 @@ LOAD_A% = LOAD%
 
  LSR A
 
+\ <------------------------------------------------------- End of added code -->
+
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  LDA INWK+35          \ Fetch the hit ship's energy from byte #35 and subtract
+\  SEC                  \ our current laser power, and if the result is greater
+\  SBC LAS              \ than zero, the other ship has survived the hit, so
+\  BCS MA14             \ jump down to MA14
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  JSR n_hit              \ hit enemy AJD
  BCS MA14
+
+\ <------------------------------------------------------- End of added code -->
+
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  ASL INWK+31          \ Set bit 7 of the ship byte #31 to indicate that it has
+\  SEC                  \ now been killed
+\  ROR INWK+31
+\ 
+\  LDA TYPE             \ Did we just kill an asteroid? If not, jump to nosp,
+\  CMP #AST             \ otherwise keep going
+\  BNE nosp
+\ 
+\  LDA LAS              \ Did we kill the asteroid using mining lasers? If not,
+\  CMP #Mlas            \ jump to nosp, otherwise keep going
+\  BNE nosp
+\ 
+\  JSR DORND            \ Set A and X to random numbers
+\ 
+\  LDX #SPL             \ Set X to the ship type for a splinter
+\ 
+\  AND #3               \ Reduce the random number in A to the range 0-3
+\ 
+\  JSR SPIN2            \ Call SPIN2 to spawn A items of type X (i.e. spawn
+\                       \ 0-3 spliters)
+\ 
+\ .nosp
+\ 
+\  LDY #PLT             \ Randomly spawn some alloy plates
+\  JSR SPIN
+\ 
+\  LDY #OIL             \ Randomly spawn some cargo canisters
+\  JSR SPIN
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
 
  LDA TYPE               \ Did we just kill an asteroid? If not, jump to nosp,
  CMP #AST               \ otherwise keep going
@@ -3049,13 +4653,28 @@ LOAD_A% = LOAD%
  LDY #OIL               \ Randomly spawn some cargo canisters
  JSR SPIN
 
+\ <------------------------------------------------------- End of added code -->
+
  JSR EXNO2              \ Call EXNO2 to process the fact that we have killed a
                         \ ship (so increase the kill tally, make an explosion
                         \ sound and so on)
 
 .MA14
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  STA INWK+35          \ Store the hit ship's updated energy in ship byte #35
+\ 
+\  LDA TYPE             \ Call ANGRY to make this ship hostile, now that we
+\  JSR ANGRY            \ have hit it
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  JSR anger_8c           \ AJD
+
+\ <------------------------------------------------------- End of added code -->
 
 \ ******************************************************************************
 \
@@ -3105,6 +4724,22 @@ LOAD_A% = LOAD%
  BEQ MAC1               \ ship is no longer exploding, so jump to MAC1 to skip
                         \ the following
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  LDA NEWB             \ Extract bit 6 of the ship's NEWB flags, so A = 64 if
+\  AND #%01000000       \ bit 6 is set, or 0 if it is clear. Bit 6 is set if
+\                       \ this ship is a cop, so A = 64 if we just killed a
+\                       \ policeman, otherwise it is 0
+\ 
+\  ORA FIST             \ Update our FIST flag ("fugitive/innocent status") to
+\  STA FIST             \ at least the value in A, which will instantly make us
+\                       \ a fugitive if we just shot the sheriff, but won't
+\                       \ affect our status if the enemy wasn't a copper
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  BIT &6A                \ AJD
  BVS n_badboy
  BEQ n_goodboy
@@ -3127,13 +4762,28 @@ LOAD_A% = LOAD%
 
 .n_goodboy
 
+\ <------------------------------------------------------- End of added code -->
+
  LDA DLY                \ If we already have an in-flight message on-screen (in
  ORA MJ                 \ which case DLY > 0), or we are in witchspace (in
  BNE KS1S               \ which case MJ > 0), jump to KS1S to skip showing an
                         \ on-screen bounty for this kill
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  LDY #10              \ Fetch byte #10 of the ship's blueprint, which is the
+\  LDA (XX0),Y          \ low byte of the bounty awarded when this ship is
+\  BEQ KS1S             \ killed (in Cr * 10), and if it's zero jump to KS1S as
+\                       \ there is no on-screen bounty to display
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  LDY #10                \ AJD
  LDA (XX0),Y
+
+\ <------------------------------------------------------- End of added code -->
 
  TAX                    \ Put the low byte of the bounty into X
 
@@ -3151,6 +4801,8 @@ LOAD_A% = LOAD%
  JMP KS1                \ Process the killing of this ship (which removes this
                         \ ship from its slot and shuffles all the other ships
                         \ down to close up the gap)
+
+\ <-------------------------------------------------- Code added for Elite-A -->
 
 .n_hit
 
@@ -3175,6 +4827,8 @@ LOAD_A% = LOAD%
 
  \ C clear if dead
  RTS
+
+\ <------------------------------------------------------- End of added code -->
 
 .MAC1
 
@@ -3222,6 +4876,46 @@ LOAD_A% = LOAD%
 \ ******************************************************************************
 
 .MA18
+
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  LDA BOMB             \ If we set off our energy bomb (see MA24 above), then
+\  BPL MA77             \ BOMB is now negative, so this skips to MA21 if our
+\                       \ energy bomb is not going off
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  ASL BOMB             \ We set off our energy bomb, so rotate BOMB to the
+\                       \ left by one place. BOMB was rotated left once already
+\                       \ during this iteration of the main loop, back at MA24,
+\                       \ so if this is the first pass it will already be
+\                       \ %11111110, and this will shift it to %11111100 - so
+\                       \ if we set off an energy bomb, it stays activated
+\                       \ (BOMB > 0) for four iterations of the main loop
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  JSR WSCAN            \ Call WSCAN to wait for the vertical sync, so the whole
+\                       \ screen gets drawn and the following palette change
+\                       \ won't kick in while the screen is still refreshing
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  LDA #%00110000       \ Set the palette byte at SHEILA &21 to map logical
+\  STA VIA+&21          \ colour 0 to physical colour 7 (white), but with only
+\                       \ one mapping (rather than the 7 mappings required to
+\                       \ do the mapping properly). This makes the space screen
+\                       \ flash with black and white stripes. See p.382 of the
+\                       \ Advanced User Guide for details of why this single
+\                       \ palette change creates a special effect
+\ 
+\ <----------------------------------------------------- End of deleted code -->
 
 .MA77
 
@@ -3489,6 +5183,85 @@ LOAD_A% = LOAD%
 
 .MA33
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  CMP #20              \ If this is the 20th iteration in this block of 32,
+\  BNE MA23             \ do the following, otherwise jump to MA23 to skip the
+\                       \ sun altitude check
+\ 
+\  LDA #30              \ Set CABTMP to 30, the cabin temperature in deep space
+\  STA CABTMP           \ (i.e. one notch on the dashboard bar)
+\ 
+\  LDA SSPR             \ If we are inside the space station safe zone, jump to
+\  BNE MA23             \ MA23 to skip the following, as we can't have both the
+\                       \ sun and space station at the same time, so we clearly
+\                       \ can't be flying near the sun
+\ 
+\  LDY #NI%             \ Set Y to NI%, which is the offset in K% for the sun's
+\                       \ data block, as the second block at K% is reserved for
+\                       \ the sun (or space station)
+\ 
+\  JSR MAS2             \ Call MAS2 to calculate the largest distance to the
+\  BNE MA23             \ sun in any of the three axes, and if it's non-zero,
+\                       \ jump to MA23 to skip the following, as we are too far
+\                       \ from the sun for scooping or temperature changes
+\ 
+\  JSR MAS3             \ Set A = x_hi^2 + y_hi^2 + z_hi^2, so using Pythagoras
+\                       \ we now know that A now contains the square of the
+\                       \ distance between our ship (at the origin) and the
+\                       \ heart of the sun at (x_hi, y_hi, z_hi)
+\ 
+\  EOR #%11111111       \ Invert A, so A is now small if we are far from the
+\                       \ sun and large if we are close to the sun, in the
+\                       \ range 0 = far away to &FF = extremely close, ouch,
+\                       \ hot, hot, hot!
+\ 
+\  ADC #30              \ Add the minimum cabin temperature of 30, so we get
+\                       \ one of the following:
+\                       \
+\                       \   * If the C flag is clear, A contains the cabin
+\                       \     temperature, ranging from 30 to 255, that's hotter
+\                       \     the closer we are to the sun
+\                       \
+\                       \   * If the C flag is set, the addition has rolled over
+\                       \     and the cabin temperature is over 255
+\ 
+\  STA CABTMP           \ Store the updated cabin temperature
+\ 
+\  BCS MA28             \ If the C flag is set then jump to MA28 to die, as
+\                       \ our temperature is off the scale
+\ 
+\  CMP #&E0             \ If the cabin temperature < 224 then jump to MA23 to
+\  BCC MA23             \ to skip fuel scooping, as we aren't close enough
+\ 
+\  LDA BST              \ If we don't have fuel scoops fitted, jump to BA23 to
+\  BEQ MA23             \ skip fuel scooping, as we can't scoop without fuel
+\                       \ scoops
+\ 
+\  LDA DELT4+1          \ We are now successfully fuel scooping, so it's time
+\  LSR A                \ to work out how much fuel we're scooping. Fetch the
+\                       \ high byte of DELT4, which contains our current speed
+\                       \ divided by 4, and halve it to get our current speed
+\                       \ divided by 8 (so it's now a value between 1 and 5, as
+\                       \ our speed is normally between 1 and 40). This gives
+\                       \ us the amount of fuel that's being scooped in A, so
+\                       \ the faster we go, the more fuel we scoop, and because
+\                       \ the fuel levels are stored as 10 * the fuel in light
+\                       \ years, that means we just scooped between 0.1 and 0.5
+\                       \ light years of free fuel
+\ 
+\  ADC QQ14             \ Set A = A + the current fuel level * 10 (from QQ14)
+\ 
+\  CMP #70              \ If A > 70 then set A = 70 (as 70 is the maximum fuel
+\  BCC P%+4             \ level, or 7.0 light years)
+\  LDA #70
+\ 
+\  STA QQ14             \ Store the updated fuel level in QQ14
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  CMP #20                \ If this is the 20th iteration in this block of 32,
  BNE MA23               \ do the following, otherwise jump to MA23 to skip the
                         \ sun altitude check
@@ -3561,6 +5334,8 @@ LOAD_A% = LOAD%
  LDA new_range
 
  STA QQ14               \ Store the updated fuel level in QQ14
+
+\ <------------------------------------------------------- End of added code -->
 
  LDA #160               \ Set A to token 160 ("FUEL SCOOPS ON")
 
@@ -5143,9 +6918,15 @@ NEXT
 
 .PIXEL
 
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  STY T1                 \ Store Y in T1
 
  TAY                    \ Copy A into Y, for use later
+
+\ <------------------------------------------------------- End of added code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
 
  LSR A                  \ Set SCH = &60 + A >> 3
  LSR A
@@ -5157,6 +6938,26 @@ NEXT
  AND #%11111000
  STA SC
 
+\ <------------------------------------------------------- End of added code -->
+
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  STY T1               \ Store Y in T1
+\ 
+\  TAY                  \ Copy A into Y, for use later
+\ 
+\  LSR A                \ Set SCH = &60 + A >> 3
+\  LSR A
+\  LSR A
+\  ORA #&60
+\  STA SCH
+\ 
+\  TXA                  \ Set SC = (X >> 3) * 8
+\  AND #%11111000
+\  STA SC
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
  TYA                    \ Set Y = Y AND %111
  AND #%00000111
  TAY
@@ -5165,6 +6966,16 @@ NEXT
  AND #%00000111
  TAX
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  LDA ZZ               \ If distance in ZZ >= 144, then this point is a very
+\  CMP #144             \ long way away, so jump to PX3 to fetch a 1-pixel point
+\  BCS PX3              \ from TWOS and EOR it into SC+Y
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  LDA ZZ                 \ AJD
  CMP #144
  BCC thick_dot
@@ -5172,6 +6983,8 @@ NEXT
  BCS PX14+3
 
 .thick_dot
+
+\ <------------------------------------------------------- End of added code -->
 
  LDA TWOS2,X            \ Otherwise fetch a 2-pixel dash from TWOS2 and EOR it
  EOR (SC),Y             \ into SC+Y
@@ -6140,11 +7953,29 @@ NEXT
  DEY                    \ Decrement the loop counter to point to the next
                         \ stardust particle
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  BEQ ST3              \ If we have just done the last particle, skip the next
+\                       \ instruction to return from the subroutine
+\ 
+\  JMP STL6             \ We have more stardust to process, so jump back up to
+\                       \ STL6 for the next particle
+\ 
+\ .ST3
+\ 
+\  RTS                  \ Return from the subroutine
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  BEQ MA9                \ If we have just done the last particle, return from
                         \ the subroutine (as MA9 contains an RTS)
 
  JMP STL6               \ We have more stardust to process, so jump back up to
                         \ STL6 for the next particle
+
+\ <------------------------------------------------------- End of added code -->
 
 .KILL6
 
@@ -6588,6 +8419,20 @@ NEXT
                         \
                         \ followed by a newline and an indent of 6 characters
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  LDA CRGO             \ If our ship's cargo capacity is < 26 (i.e. we do not
+\  CMP #26              \ have a cargo bay extension), skip the following two
+\  BCC P%+7             \ instructions
+\ 
+\  LDA #107             \ We do have a cargo bay extension, so print recursive
+\  JSR plf2             \ token 107 ("LARGE CARGO{sentence case} BAY"), followed
+\                       \ by a newline and an indent of 6 characters
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
 .sell_equip
 
  LDA CRGO               \ AJD
@@ -6596,6 +8441,59 @@ NEXT
  JSR plf2
 
 .l_1ce7
+
+\ <------------------------------------------------------- End of added code -->
+
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  LDA BST              \ If we don't have fuel scoops fitted, skip the
+\  BEQ P%+7             \ following two instructions
+\ 
+\  LDA #111             \ We do have a fuel scoops fitted, so print recursive
+\  JSR plf2             \ token 111 ("FUEL SCOOPS"), followed by a newline and
+\                       \ an indent of 6 characters
+\ 
+\  LDA ECM              \ If we don't have an E.C.M. fitted, skip the following
+\  BEQ P%+7             \ two instructions
+\ 
+\  LDA #108             \ We do have an E.C.M. fitted, so print recursive token
+\  JSR plf2             \ 108 ("E.C.M.SYSTEM"), followed by a newline and an
+\                       \ indent of 6 characters
+\ 
+\  LDA #113             \ We now cover the four pieces of equipment whose flags
+\  STA XX4              \ are stored in BOMB through BOMB+3, and whose names
+\                       \ correspond with text tokens 113 through 116:
+\                       \
+\                       \   BOMB+0 = BOMB  = token 113 = Energy bomb
+\                       \   BOMB+1 = ENGY  = token 114 = Energy unit
+\                       \   BOMB+2 = DKCMP = token 115 = Docking computer
+\                       \   BOMB+3 = GHYP  = token 116 = Galactic hyperdrive
+\                       \
+\                       \ We can print these out using a loop, so we set XX4 to
+\                       \ 113 as a counter (and we also set A as well, to pass
+\                       \ through to plf2)
+\ 
+\ .stqv
+\ 
+\  TAY                  \ Fetch byte BOMB+0 through BOMB+4 for values of XX4
+\  LDX BOMB-113,Y       \ from 113 through 117
+\ 
+\  BEQ P%+5             \ If it is zero then we do not own that piece of
+\                       \ equipment, so skip the next instruction
+\ 
+\  JSR plf2             \ Print the recursive token in A from 113 ("ENERGY
+\                       \ BOMB") through 116 ("GALACTIC HYPERSPACE "), followed
+\                       \ by a newline and an indent of 6 characters
+\ 
+\  INC XX4              \ Increment the counter (and A as well)
+\  LDA XX4
+\ 
+\  CMP #117             \ If A < 117, loop back up to stqv to print the next
+\  BCC stqv             \ piece of equipment
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
 
  LDA BST
  BEQ l_1cf1
@@ -6628,6 +8526,8 @@ NEXT
  CMP #&75
  BCC stqv
 
+\ <------------------------------------------------------- End of added code -->
+
  LDX #0                 \ Now to print our ship's lasers, so set a counter in X
                         \ to count through the four views (0 = front, 1 = rear,
                         \ 2 = left, 3 = right)
@@ -6640,11 +8540,51 @@ NEXT
  BEQ st1                \ have a laser fitted to that view, jump to st1 to move
                         \ on to the next one
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  TXA                  \ Print recursive token 96 + X, which will print from 96
+\  CLC                  \ ("FRONT") through to 99 ("RIGHT"), followed by a space
+\  ADC #96
+\  JSR spc
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  TXA                    \ AJD
  ORA #&60
  JSR spc
 
+\ <------------------------------------------------------- End of added code -->
+
  LDA #103               \ Set A to token 103 ("PULSE LASER")
+
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  LDX CNT              \ Set Y = the laser power for view X
+\  LDY LASER,X
+\ 
+\  CPY #128+POW         \ If the laser power for view X is not #POW+128 (beam
+\  BNE P%+4             \ laser), skip the next LDA instruction
+\ 
+\  LDA #104             \ This sets A = 104 if the laser in view X is a beam
+\                       \ laser (token 104 is "BEAM LASER")
+\ 
+\  CPY #Armlas          \ If the laser power for view X is not #Armlas (military
+\  BNE P%+4             \ laser), skip the next LDA instruction
+\ 
+\  LDA #117             \ This sets A = 117 if the laser in view X is a military
+\                       \ laser (token 117 is "MILITARY  LASER")
+\ 
+\  CPY #Mlas            \ If the laser power for view X is not #Mlas (mining
+\  BNE P%+4             \ laser), skip the next LDA instruction
+\ 
+\  LDA #118             \ This sets A = 118 if the laser in view X is a mining
+\                       \ laser (token 118 is "MINING  LASER")
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
 
  LDX &93                \ AJD
  LDY LASER,X
@@ -6665,6 +8605,8 @@ NEXT
  LDA #&76
 
 .l_1ba9
+
+\ <------------------------------------------------------- End of added code -->
 
  JSR plf2               \ Print the text token in A (which contains our legal
                         \ status) followed by a newline and an indent of 6
@@ -6702,10 +8644,23 @@ NEXT
 
  JSR plf                \ Print the text token in A followed by a newline
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  LDX #6               \ Move the text cursor to column 6
+\  STX XC
+\ 
+\  RTS                  \ Return from the subroutine
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  LDX #8                 \ Move the text cursor to column 8
  STX XC
 
  RTS                    \ Return from the subroutine
+
+\ <------------------------------------------------------- End of added code -->
 
 \ ******************************************************************************
 \
@@ -7072,7 +9027,11 @@ NEXT
 \
 \ ******************************************************************************
 
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  CLC
+
+\ <------------------------------------------------------- End of added code -->
 
 .pr2
 
@@ -8476,9 +10435,52 @@ NEXT
 
  JSR RES2               \ Reset a number of flight variables and workspaces
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  LDX #CYL             \ Set the current ship type to a Cobra Mk III, so we
+\  STX TYPE             \ can show our ship disappear into the distance when we
+\                       \ eject in our pod
+\ 
+\  JSR FRS1             \ Call FRS1 to launch the Cobra Mk III straight ahead,
+\                       \ like a missile launch, but with our ship instead
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  LDX #ESC               \ AJD
  STX &8C
  JSR FRS1
+
+\ <------------------------------------------------------- End of added code -->
+
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  BCS ES1              \ If the Cobra was successfully added to the local
+\                       \ bubble, jump to ES1 to skip the following instructions
+\ 
+\  LDX #CYL2            \ The Cobra wasn't added to the local bubble for some
+\  JSR FRS1             \ reason, so try launching a pirate Cobra Mk III instead
+\ 
+\ .ES1
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  LDA #8               \ Set the Cobra's byte #27 (speed) to 8
+\  STA INWK+27
+\ 
+\  LDA #194             \ Set the Cobra's byte #30 (pitch counter) to 194, so it
+\  STA INWK+30          \ pitches as we pull away
+\ 
+\  LSR A                \ Set the Cobra's byte #32 (AI flag) to %01100001, so it
+\  STA INWK+32          \ has no AI, and we can use this value as a counter to
+\                       \ do the following loop 97 times
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
 
  LDA #&10               \ AJD
  STA &61
@@ -8487,9 +10489,21 @@ NEXT
  LSR A
  STA &66
 
+\ <------------------------------------------------------- End of added code -->
+
 .ESL1
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  JSR MVEIT            \ Call MVEIT to move the Cobra in space
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  JSR MVEIT              \ Call MVEIT to move the escape pod in space AJD
+
+\ <------------------------------------------------------- End of added code -->
 
  JSR LL9                \ Call LL9 to draw the Cobra on-screen
 
@@ -8504,8 +10518,20 @@ NEXT
  LDA #0                 \ Set A = 0 so we can use it to zero the contents of
                         \ the cargo hold
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  LDX #16              \ We lose all our cargo when using our escape pod, so
+\                       \ up a counter in X so we can zero the 17 cargo slots
+\                       \ in QQ20
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  STA QQ20+&10           \ AJD
  LDX #&0C               \ LDX #&10 save gold/plat/gems
+
+\ <------------------------------------------------------- End of added code -->
 
 .ESL2
 
@@ -8523,12 +10549,24 @@ NEXT
  STA ESCP               \ The escape pod is a one-use item, so set ESCP to 0 so
                         \ we no longer have one fitted
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  LDA #70              \ Our replacement ship is delivered with a full tank of
+\  STA QQ14             \ fuel, so set the current fuel level in QQ14 to 70, or
+\                       \ 7.0 light years
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  INC new_hold           \ AJD
  LDA new_range
  STA QQ14
  JSR ping
  JSR TT111
  JSR jmp
+
+\ <------------------------------------------------------- End of added code -->
 
  JMP GOIN               \ Go to the docking bay (i.e. show the ship hanger
                         \ screen) and return from the subroutine with a tail
@@ -8610,8 +10648,20 @@ LOAD_C% = LOAD% +P% - CODE%
 
  JSR EXNO3              \ Make the sound of the missile exploding
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  LDA #250             \ Call OOPS to damage the ship by 250, which is a pretty
+\  JMP OOPS             \ big hit, and return from the subroutine using a tail
+\                       \ call
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  LDA #250               \ Call n_oops to AJD
  JMP n_oops
+
+\ <------------------------------------------------------- End of added code -->
 
 .TA18
 
@@ -8669,11 +10719,15 @@ LOAD_C% = LOAD% +P% - CODE%
  BEQ TA35               \ space station), jump to TA35 to destroy this missile,
                         \ as the space station ain't kidding around
 
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  LDY #&23               \ missile damage AJD
  SEC
  LDA (V),Y
  SBC #&40
  BCS n_misshit
+
+\ <------------------------------------------------------- End of added code -->
 
  LDY #31                \ Fetch byte #31 (the exploding flag) of the target ship
  LDA (V),Y              \ into A
@@ -8685,11 +10739,22 @@ LOAD_C% = LOAD% +P% - CODE%
  BNE TA35               \ If the target ship is already exploding, jump to TA35
                         \ to destroy this missile
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  ORA #%10000000       \ Otherwise set bit 7 of the target's byte #31 to mark
+\  STA (V),Y            \ the ship as having been killed, so it explodes
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  ORA #%10000000         \ Otherwise set bit 7 of the target's byte #31 to mark
 
 .n_misshit
 
  STA (V),Y              \ the ship as having been killed, so it explodes
+
+\ <------------------------------------------------------- End of added code -->
 
 .TA35
 
@@ -8700,8 +10765,21 @@ LOAD_C% = LOAD% +P% - CODE%
  BNE TA87               \ If A is non-zero then the missile is not near our
                         \ ship, so jump to TA87 to skip damaging our ship
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  LDA #80              \ Otherwise the missile just got destroyed near us, so
+\  JSR OOPS             \ call OOPS to damage the ship by 80, which is nowhere
+\                       \ near as bad as the 250 damage from a missile slamming
+\                       \ straight into us, but it's still pretty nasty
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  LDA #80                \ AJD
  JSR n_oops
+
+\ <------------------------------------------------------- End of added code -->
 
 .TA87
 
@@ -8808,6 +10886,41 @@ LOAD_C% = LOAD% +P% - CODE%
  CPX #SST               \ If this is not the space station, jump down to TA13
  BNE TA13
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  LDA NEWB             \ This is the space station, so check whether bit 2 of
+\  AND #%00000100       \ the ship's NEWB flags is set, and if it is (i.e. the
+\  BNE TN5              \ station is hostile), jump to TN5 to spawn some cops
+\ 
+\  LDA MANY+SHU+1       \ The station is not hostile, so check how many
+\  BNE TA1              \ Transporters there are in the vicinity, and if we
+\                       \ already have one, return from the subroutine (as TA1
+\                       \ contains an RTS)
+\ 
+\                       \ If we get here then the station is not hostile, so we
+\                       \ can consider spawning a Transporter or Shuttle
+\ 
+\  JSR DORND            \ Set A and X to random numbers
+\ 
+\  CMP #253             \ If A < 253 (99.2% chance), return from the subroutine
+\  BCC TA1              \ (as TA1 contains an RTS)
+\ 
+\  AND #1               \ Set A = a random number that's either 0 or 1
+\ 
+\  ADC #SHU-1           \ The C flag is set (as we didn't take the BCC above),
+\  TAX                  \ so this sets X to a value of either #SHU or #SHU + 1,
+\                       \ which is the ship type for a Shuttle or a Transporter
+\ 
+\  BNE TN6              \ Jump to TN6 to spawn this ship type and return from
+\                       \ the subroutine using a tail call (this BNE is
+\                       \ effectively a JMP as A is never zero)
+\ 
+\ .TN5
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  LDA NEWB               \ This is the space station, so check whether bit 2 of
  AND #%00000100         \ the ship's NEWB flags is set, and if it is (i.e. the
  BNE TN5                \ station is hostile), jump to TN5 to spawn some cops
@@ -8840,6 +10953,8 @@ LOAD_C% = LOAD% +P% - CODE%
 
 .TN5
 
+\ <------------------------------------------------------- End of added code -->
+
                         \ We only call the tactics routine for the space station
                         \ when it is hostile, so if we get here then this is the
                         \ station, and we already know it's hostile, so we need
@@ -8850,9 +10965,21 @@ LOAD_C% = LOAD% +P% - CODE%
  CMP #240               \ If A < 240 (93.8% chance), return from the subroutine
  BCC TA1                \ (as TA1 contains an RTS)
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  LDA MANY+COPS        \ Check how many cops there are in the vicinity already,
+\  CMP #4               \ and if there are 4 or more, return from the subroutine
+\  BCS TA22             \ (as TA22 contains an RTS)
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  LDA MANY+COPS          \ Check how many cops there are in the vicinity already,
  CMP #7                 \ and if there are 7 or more, return from the subroutine
  BCS TA22               \ (as TA22 contains an RTS)
+
+\ <------------------------------------------------------- End of added code -->
 
  LDX #COPS              \ Set X to the ship type for a cop
 
@@ -8942,6 +11069,68 @@ LOAD_C% = LOAD% +P% - CODE%
  CPX #100               \ This is a trader, so if X >= 100 (61% chance), return
  BCS TA22               \ from the subroutine (as TA22 contains an RTS)
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\ .TN1
+\ 
+\  LSR A                \ Extract bit 1 of the ship's NEWB flags into the C flag
+\  BCC TN2              \ and jump to TN2 if it is clear (i.e. if this is not a
+\                       \ bounty hunter)
+\ 
+\  LDX FIST             \ This is a bounty hunter, so check whether our FIST
+\  CPX #40              \ rating is < 40 (where 50 is a fugitive), and jump to
+\  BCC TN2              \ TN2 if we are not 100% evil
+\ 
+\  LDA NEWB             \ We are a fugitive or a bad offender, and this ship is
+\  ORA #%00000100       \ a bounty hunter, so set bit 2 of the ship's NEWB flags
+\  STA NEWB             \ to make it hostile
+\ 
+\  LSR A                \ Shift A right twice so the next test in TN2 will check
+\  LSR A                \ bit 2
+\ 
+\ .TN2
+\ 
+\  LSR A                \ Extract bit 2 of the ship's NEWB flags into the C flag
+\  BCS TN3              \ and jump to TN3 if it is set (i.e. if this ship is
+\                       \ hostile)
+\ 
+\  LSR A                \ The ship is not hostile, so extract bit 4 of the
+\  LSR A                \ ship's NEWB flags into the C flag, and jump to GOPL if
+\  BCC GOPL             \ it is clear (i.e. if this ship is not docking)
+\ 
+\  JMP DOCKIT           \ The ship is not hostile and is docking, so jump to
+\                       \ DOCKIT to apply the docking algorithm to this ship
+\ 
+\ .GOPL
+\ 
+\  JSR SPS1             \ The ship is not hostile and it is not docking, so call
+\                       \ SPS1 to calculate the vector to the planet and store
+\                       \ it in XX15
+\ 
+\  JMP TA151            \ Jump to TA151 to make the ship head towards the planet
+\ 
+\ .TN3
+\ 
+\  LSR A                \ Extract bit 2 of the ship's NEWB flags into the C flag
+\  BCC TN4              \ and jump to TN4 if it is clear (i.e. if this ship is
+\                       \ not a pirate)
+\ 
+\  LDA SSPR             \ If we are not inside the space station safe zone, jump
+\  BEQ TN4              \ to TN4
+\ 
+\                       \ If we get here then this is a pirate and we are inside
+\                       \ the space station safe zone
+\ 
+\  LDA INWK+32          \ Set bits 0 and 7 of the AI flag in byte #32 (has AI
+\  AND #%10000001       \ enabled and has an E.C.M.)
+\  STA INWK+32
+\ 
+\ .TN4
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
 .TN1
 
  LSR A                  \ Extract bit 1 of the ship's NEWB flags into the C flag
@@ -8999,6 +11188,8 @@ LOAD_C% = LOAD% +P% - CODE%
  STA INWK+32
 
 .TN4
+
+\ <------------------------------------------------------- End of added code -->
 
  LDX #8                 \ We now want to copy the ship's x, y and z coordinates
                         \ from INWK to K3, so set up a counter for 9 bytes
@@ -9078,11 +11269,26 @@ LOAD_C% = LOAD% +P% - CODE%
  CMP #200               \ If A < 200 (78% chance), jump down to TN7 to skip the
  BCC TN7                \ following
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  LDX #WRM             \ Set X to the ship type for a Worm
+\ 
+\  JMP TN6              \ Jump to TN6 to spawn the Worm and return from
+\                       \ the subroutine using a tail call
+\ 
+\ .TN7
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  LDX #15                \ AJD
 
  JMP TN6                \ Jump to TN6 to AJD
 
 .TN7
+
+\ <------------------------------------------------------- End of added code -->
 
  JSR DORND              \ Set A and X to random numbers
 
@@ -9164,7 +11370,17 @@ LOAD_C% = LOAD% +P% - CODE%
 
  JSR DORND              \ Set A and X to random numbers
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  AND #31              \ Restrict A to a random number in the range 0-31
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  AND #15                \ Restrict A to a random number in the range 0-15
+
+\ <------------------------------------------------------- End of added code -->
 
  CMP T                  \ If A >= T, which is quite likely, though less likely
  BCS TA3                \ with higher numbers of missiles, jump to TA3
@@ -9275,7 +11491,20 @@ LOAD_C% = LOAD% +P% - CODE%
                         \ the laser power and number of missiles) to get the
                         \ amount of damage we should take
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  JSR OOPS             \ Call OOPS to take some damage, which could do anything
+\                       \ from reducing the shields and energy, all the way to
+\                       \ losing cargo or dying (if the latter, we don't come
+\                       \ back from this subroutine)
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  JSR n_oops             \ AJD
+
+\ <------------------------------------------------------- End of added code -->
 
  DEC INWK+28            \ Halve the attacking ship's acceleration in byte #28
 
@@ -9854,7 +12083,11 @@ LOAD_C% = LOAD% +P% - CODE%
                         \ code that gets skipped if K3+10 is non-zero, but as
                         \ to what this means... that's not yet clear
 
+\ <-------------------------------------------------- Code added for Elite-A -->
+
 .top_6a
+
+\ <------------------------------------------------------- End of added code -->
 
  ASL NEWB               \ Set bit 7 of the ship's NEWB flags to indicate that
  SEC                    \ the ship has now docked, which only has meaning if
@@ -10498,13 +12731,37 @@ LOAD_C% = LOAD% +P% - CODE%
 
  JSR ANGRY              \ Call ANGRY to make the target ship hostile
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  LDY #0               \ We have just launched a missile, so we need to remove
+\  JSR ABORT            \ missile lock and hide the leftmost indicator on the
+\                       \ dashboard by setting it to black (Y = 0)
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
  DEC NOMSL              \ Reduce the number of missiles we have by 1
+
+\ <-------------------------------------------------- Code added for Elite-A -->
 
  JSR msblob             \ AJD redraw missiles
  STY MSAR
  STX &45
 
+\ <------------------------------------------------------- End of added code -->
+
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  LDA #48              \ Call the NOISE routine with A = 48 to make the sound
+\  JMP NOISE            \ of a missile launch, returning from the subroutine
+\                       \ using a tail call
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  JMP n_sound30          \ AJD
+
+\ <------------------------------------------------------- End of added code -->
 
 \ ******************************************************************************
 \
@@ -10515,9 +12772,13 @@ LOAD_C% = LOAD% +P% - CODE%
 \
 \ ******************************************************************************
 
+\ <----------------------------------------- Whole routine added for Elite-A -->
+
 .anger_8c
 
  LDA TYPE
+
+\ <---------------------------------------------------- End of added routine -->
 
 \ ******************************************************************************
 \
@@ -10940,7 +13201,18 @@ LOAD_C% = LOAD% +P% - CODE%
 
 .LAUN
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  LDA #48              \ Call the NOISE routine with A = 48 to make the sound
+\  JSR NOISE            \ of the ship launching from the station
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  JSR n_sound30          \ AJD
+
+\ <------------------------------------------------------- End of added code -->
 
  LDA #8                 \ Set the step size for the launch tunnel rings to 8, so
                         \ there are fewer sections in the rings and they are
@@ -11386,6 +13658,17 @@ LOAD_C% = LOAD% +P% - CODE%
 
 .MU5
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  STA K                \ Set K(3 2 1 0) to (A A A A)
+\  STA K+1
+\  STA K+2
+\  STA K+3
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  STA K                  \ Set K(3 2 1 0) to (A A A A), starting with the lowest
                         \ byte
 
@@ -11394,6 +13677,8 @@ LOAD_C% = LOAD% +P% - CODE%
  STA K+1                \ And then the high bytes
  STA K+2
  STA K+3
+
+\ <------------------------------------------------------- End of added code -->
 
  CLC                    \ Clear the C flag
 
@@ -12026,6 +14311,18 @@ LOAD_C% = LOAD% +P% - CODE%
 \ ******************************************************************************
 
 {
+
+\ <----------------------------- Code deleted from the original disc version -->
+\
+\  LDX Q
+\  BEQ MU1
+\  DEX
+\  STX T
+\  LDA #0
+\  LDX #8
+\  LSR P
+\ 
+\ <----------------------------------------------------- End of deleted code -->
 
 .MUL6
 
@@ -12893,8 +15190,21 @@ LOAD_C% = LOAD% +P% - CODE%
                         \ The result of our division is now in R, so we just
                         \ need to shift it back by the scale factor in Y
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  LDA #0               \ Set K(3 2 1) = 0 to hold the result (we populate K
+\  STA K+1              \ next)
+\  STA K+2
+\  STA K+3
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  LDA #0                 \ AJD
  JSR n_store
+
+\ <------------------------------------------------------- End of added code -->
 
  TYA                    \ If Y is positive, jump to DV12
  BPL DV12
@@ -13425,6 +15735,8 @@ LOAD_D% = LOAD% + P% - CODE%
 \
 \ ******************************************************************************
 
+\ <----------------------------------------- Whole routine added for Elite-A -->
+
 .tnpr_FLIGHT
 
  CPX #&10
@@ -13455,6 +15767,8 @@ LOAD_D% = LOAD% + P% - CODE%
  LDA QQ20,X
  ADC #&00
  RTS
+
+\ <---------------------------------------------------- End of added routine -->
 
 \ ******************************************************************************
 \
@@ -13636,7 +15950,18 @@ LOAD_D% = LOAD% + P% - CODE%
 
 .TT69
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  LDA #%10000000       \ Set bit 7 of QQ17 to switch to Sentence Case
+\  STA QQ17
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  JSR vdu_80             \ AJD
+
+\ <------------------------------------------------------- End of added code -->
 
                         \ Fall through into TT67 to print a newline
 
@@ -13820,7 +16145,19 @@ LOAD_D% = LOAD% + P% - CODE%
  INX                    \ is stored in the range 0-14 but the displayed range
                         \ should be 1-15
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  CLC                  \ Call pr2 to print the technology level as a 3-digit
+\  JSR pr2              \ number without a decimal point (by clearing the C
+\                       \ flag)
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  JSR pr2-1              \ AJD
+
+\ <------------------------------------------------------- End of added code -->
 
  JSR TTX69              \ Print a paragraph break and set Sentence Case
 
@@ -13946,7 +16283,18 @@ LOAD_D% = LOAD% + P% - CODE%
 
  JSR TT162              \ Print a space
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  LDA #0               \ Set QQ17 = 0 to switch to ALL CAPS
+\  STA QQ17
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  JSR vdu_00             \ AJD
+
+\ <------------------------------------------------------- End of added code -->
 
  LDA #'M'               \ Print "M"
  JSR TT27
@@ -14454,6 +16802,22 @@ LOAD_D% = LOAD% + P% - CODE%
  LDA QQ19+1             \ Set K4 = the y-coordinate of the centre
  STA K4
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  LDX #0               \ Set the high bytes of K3(1 0) and K4(1 0) to 0
+\  STX K4+1
+\  STX K3+1
+\ 
+\  INX                  \ Set LSP = 1 to reset the ball line heap
+\  STX LSP
+\ 
+\  LDX #2               \ Set STP = 2, the step size for the circle
+\  STX STP
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  LDX #0                 \ Set the high bytes of K3(1 0) and K4(1 0) to 0
  STX K4+1
  STX K3+1
@@ -14464,9 +16828,24 @@ LOAD_D% = LOAD% + P% - CODE%
  INX                    \ Set STP = 2, the step size for the circle
  STX STP
 
+\ <------------------------------------------------------- End of added code -->
+
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  JSR CIRCLE2          \ Call CIRCLE2 to draw a circle with the centre at
+\                       \ (K3(1 0), K4(1 0)) and radius K
+\ 
+\  RTS                  \ Return from the subroutine
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  JMP CIRCLE2            \ Jump to CIRCLE2 to draw a circle with the centre at
                         \ (K3(1 0), K4(1 0)) and radius K, returning from the
                         \ subroutine using a tail call
+
+\ <------------------------------------------------------- End of added code -->
 
 \ ******************************************************************************
 \
@@ -14533,8 +16912,19 @@ LOAD_D% = LOAD% + P% - CODE%
  PLA                    \ Restore the amount of item in the hold into X
  TAX
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  CLC                  \ Print the 8-bit number in X to 3 digits, without a
+\  JSR pr2              \ decimal point
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  JSR pr2-1              \ Print the 8-bit number in X to 3 digits, without a
                         \ decimal point
+
+\ <------------------------------------------------------- End of added code -->
 
  JSR TT152              \ Print the unit ("t", "kg" or "g") for the market item
                         \ whose byte #1 from the market prices table is in
@@ -14579,12 +16969,27 @@ LOAD_D% = LOAD% + P% - CODE%
  JSR fwl                \ Call fwl to print the fuel and cash levels on two
                         \ separate lines
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  LDA CRGO             \ If our ship's cargo capacity is < 26 (i.e. we do not
+\  CMP #26              \ have a cargo bay extension), skip the following two
+\  BCC P%+7             \ instructions
+\ 
+\  LDA #107             \ We do have a cargo bay extension, so print recursive
+\  JSR TT27             \ token 107 ("LARGE CARGO{sentence case} BAY")
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  LDA #&0E               \ AJD
  JSR TT68
  LDX new_hold
  DEX
  JSR pr2-1
  JSR TT160
+
+\ <------------------------------------------------------- End of added code -->
 
  JMP TT210              \ Jump to TT210 to print the contents of our cargo bay
                         \ and return from the subroutine using a tail call
@@ -14617,6 +17022,14 @@ LOAD_D% = LOAD% + P% - CODE%
  TYA                    \ (let's call this the y-delta)
  EOR #&FF
  PHA
+
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  JSR WSCAN            \ Call WSCAN to wait for the vertical sync, so the whole
+\                       \ screen gets drawn and we can move the crosshairs with
+\                       \ no screen flicker
+\ 
+\ <----------------------------------------------------- End of deleted code -->
 
  JSR TT103              \ Draw small crosshairs at coordinates (QQ9, QQ10),
                         \ which will erase the crosshairs currently there
@@ -14886,7 +17299,11 @@ LOAD_D% = LOAD% + P% - CODE%
  SEC                    \ (s1_hi, s0_hi) and (QQ0, QQ1)
  SBC QQ0
 
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  STA &3A                \ AJD
+
+\ <------------------------------------------------------- End of added code -->
 
  BCS TT184              \ If a borrow didn't occur, i.e. s1_hi >= QQ0, then the
                         \ result is positive, so jump to TT184 and skip the
@@ -14906,7 +17323,11 @@ LOAD_D% = LOAD% + P% - CODE%
  SEC                    \ (s1_hi, s0_hi) and (QQ0, QQ1)
  SBC QQ1
 
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  STA &E0                \ AJD
+
+\ <------------------------------------------------------- End of added code -->
 
  BCS TT186              \ If a borrow didn't occur, i.e. s0_hi >= QQ1, then the
                         \ result is positive, so jump to TT186 and skip the
@@ -14927,7 +17348,24 @@ LOAD_D% = LOAD% + P% - CODE%
                         \ and set up the various variables we need to draw the
                         \ system's filled circle on the chart
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  LDA QQ15+3           \ Set A = s1_hi - QQ0, the horizontal distance between
+\  SEC                  \ this system and the current system, where |A| < 20.
+\  SBC QQ0              \ Let's call this the x-delta, as it's the horizontal
+\                       \ difference between the current system at the centre of
+\                       \ the chart, and this system (and this time we keep the
+\                       \ sign of A, so it can be negative if it's to the left
+\                       \ of the chart's centre, or positive if it's to the
+\                       \ right)
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  LDA &3A                \ AJD
+
+\ <------------------------------------------------------- End of added code -->
 
  ASL A                  \ Set XX12 = 104 + x-delta * 4
  ASL A                  \
@@ -14941,7 +17379,23 @@ LOAD_D% = LOAD% + P% - CODE%
  STA XC
  INC XC
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  LDA QQ15+1           \ Set A = s0_hi - QQ1, the vertical distance between
+\  SEC                  \ this system and the current system, where |A| < 38.
+\  SBC QQ1              \ Let's call this the y-delta, as it's the vertical
+\                       \ difference between the current system at the centre of
+\                       \ the chart, and this system (and this time we keep the
+\                       \ sign of A, so it can be negative if it's above the
+\                       \ chart's centre, or positive if it's below)
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  LDA &E0                \ AJD
+
+\ <------------------------------------------------------- End of added code -->
 
  ASL A                  \ Set K4 = 90 + y-delta * 2
  ADC #90                \
@@ -14993,7 +17447,18 @@ LOAD_D% = LOAD% + P% - CODE%
  STA INWK,Y             \ occupied so we don't try to print another system's
                         \ label on this row
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  LDA #%10000000       \ Set bit 7 of QQ17 to switch to Sentence Case
+\  STA QQ17
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  JSR vdu_80             \ AJD
+
+\ <------------------------------------------------------- End of added code -->
 
  JSR cpl                \ Call cpl to print out the system name for the seeds
                         \ in QQ15 (which now contains the seeds for the current
@@ -15406,10 +17871,23 @@ LOAD_D% = LOAD% + P% - CODE%
  BMI Ghy                \ If it is, then the galactic hyperdrive has been
                         \ activated, so jump to Ghy to process it
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  LDA QQ11             \ If the current view is 0 (i.e. the space view) then
+\  BNE P%+5             \ jump to TTX110, which calls TT111 to set the current
+\  JMP TTX110           \ system to the nearest system to (QQ9, QQ10), and jumps
+\                       \ back into this routine at TTX111 below
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  LDA QQ11               \ AJD
  BNE P%+8
  JSR TT111
  JMP TTX111
+
+\ <------------------------------------------------------- End of added code -->
 
  JSR hm                 \ This is a chart view, so call hm to redraw the chart
                         \ crosshairs
@@ -15429,7 +17907,18 @@ LOAD_D% = LOAD% + P% - CODE%
  LDA #23
  STA YC
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  LDA #0               \ Set QQ17 = 0 to switch to ALL CAPS
+\  STA QQ17
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  JSR vdu_00             \ AJD
+
+\ <------------------------------------------------------- End of added code -->
 
  LDA #189               \ Print recursive token 29 ("HYPERSPACE ")
  JSR TT27
@@ -15484,10 +17973,23 @@ LOAD_D% = LOAD% + P% - CODE%
                         \ to 5, so setting QQ22 to 15 here makes the first tick
                         \ of the hyperspace counter longer than subsequent ticks
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  TAX                  \ Print the 8-bit number in X (i.e. 15) at text location
+\  JMP ee3              \ (0, 1), padded to 5 digits, so it appears in the top
+\                       \ left corner of the screen, and return from the
+\                       \ subroutine using a tail call
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  TAX                    \ Print the 8-bit number in X (i.e. 15) at text location
  BNE ee3                \ (0, 1), padded to 5 digits, so it appears in the top
                         \ left corner of the screen, and return from the
                         \ subroutine using a tail call AJD
+
+\ <------------------------------------------------------- End of added code -->
 
 \ ******************************************************************************
 \
@@ -15523,6 +18025,19 @@ LOAD_D% = LOAD% + P% - CODE%
 
 .Ghy
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  LDX GHYP             \ Fetch GHYP, which tells us whether we own a galactic
+\  BEQ zZ+1             \ hyperdrive, and if it is zero, which means we don't,
+\                       \ return from the subroutine (as zZ+1 contains an RTS)
+\ 
+\  INX                  \ We own a galactic hyperdrive, so X is &FF, so this
+\                       \ instruction sets X = 0
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  LDX GHYP               \ Fetch GHYP, which tells us whether we own a galactic
  BEQ zZ+1               \ hyperdrive, and if it is zero, which means we don't,
                         \ return from the subroutine (as zZ+1 contains an RTS)
@@ -15532,14 +18047,20 @@ LOAD_D% = LOAD% + P% - CODE%
  INX                    \ We own a galactic hyperdrive, so X is &FF, so this
                         \ instruction sets X = 0
 
+\ <------------------------------------------------------- End of added code -->
+
  STX GHYP               \ The galactic hyperdrive is a one-use item, so set GHYP
                         \ to 0 so we no longer have one fitted
 
  STX FIST               \ Changing galaxy also clears our criminal record, so
                         \ set our legal status in FIST to 0 ("clean")
 
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  STX cmdr_cour          \ AJD
  STX cmdr_cour+1
+
+\ <------------------------------------------------------- End of added code -->
 
  JSR wW                 \ Call wW to start the hyperspace countdown
 
@@ -16056,7 +18577,18 @@ LOAD_D% = LOAD% + P% - CODE%
 
 .TT168
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  LDX #%10000000       \ Set bit 7 of QQ17 to switch to Sentence Case, with the
+\  STX QQ17             \ next letter in capitals
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  JSR vdu_80             \ AJD
+
+\ <------------------------------------------------------- End of added code -->
 
  JSR TT151              \ Call TT151 to print the item name, market price and
                         \ availability of the current item, and set QQ24 to the
@@ -16171,6 +18703,13 @@ LOAD_D% = LOAD% + P% - CODE%
 \ ******************************************************************************
 
 .hyp1
+
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  JSR TT111            \ Select the system closest to galactic coordinates
+\                       \ (QQ9, QQ10)
+\ 
+\ <----------------------------------------------------- End of deleted code -->
 
  JSR jmp                \ Set the current system to the selected system
 
@@ -16366,6 +18905,16 @@ LOAD_D% = LOAD% + P% - CODE%
 \
 \ ******************************************************************************
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\ .ptg
+\ 
+\  LSR COK              \ Set bit 0 of the competition flags in COK, so that the
+\  SEC                  \ copmpetition code will include the fact that we have
+\  ROL COK              \ manually forced a mis-jump into witchspace
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
 .MJP
 
  LDA #3                 \ Call SHIPinA to load ship blueprints file D, which is
@@ -16404,7 +18953,11 @@ LOAD_D% = LOAD% + P% - CODE%
  STA QQ1                \ vicinity of our original destination, but above or
                         \ below it in the galactic chart
 
+\ <-------------------------------------------------- Code added for Elite-A -->
+
 .RTS111
+
+\ <------------------------------------------------------- End of added code -->
 
  RTS                    \ Return from the subroutine
 
@@ -16434,7 +18987,11 @@ LOAD_D% = LOAD% + P% - CODE%
 
  STA QQ14               \ Store the updated fuel amount in QQ14
 
+\ <-------------------------------------------------- Code added for Elite-A -->
+
 .hyper_snap
+
+\ <------------------------------------------------------- End of added code -->
 
  LDA QQ11               \ If the current view is not a space view, jump to ee5
  BNE ee5                \ to skip the following
@@ -16448,12 +19005,52 @@ LOAD_D% = LOAD% + P% - CODE%
 
 .ee5
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  JSR CTRL             \ Scan the keyboard to see if CTRL is currently pressed,
+\                       \ returning a negative value in A if it is
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  AND PATG             \ If the game is configured to show the author's names
+\                       \ on the start-up screen, then PATG will contain &FF,
+\                       \ otherwise it will be 0
+\ 
+\  BMI ptg              \ By now, A will be negative if we are holding down CTRL
+\                       \ and author names are configured, which is what we have
+\                       \ to do in order to trigger a manual mis-jump, so jump
+\                       \ to ptg to do a mis-jump (ptg not only mis-jumps, but
+\                       \ updates the competition flags, so Acornsoft could tell
+\                       \ from the competition code whether this feature had
+\                       \ been used)
+\ 
+\  JSR DORND            \ Set A and X to random numbers
+\ 
+\  CMP #253             \ If A >= 253 (1% chance) then jump to MJP to trigger a
+\  BCS MJP              \ mis-jump into witchspace
+\ 
+\ \JSR TT111            \ This instruction is commented out in the original
+\                       \ source. It finds the closest system to coordinates
+\                       \ (QQ9, QQ10), but we don't need to do this as the
+\                       \ crosshairs will already be on a system by this point
+\ 
+\  JSR hyp1+3           \ Jump straight to the system at (QQ9, QQ10) without
+\                       \ first calculating which system is closest
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  JSR DORND              \ Set A and X to random numbers
 
  CMP #253               \ If A >= 253 (1% chance) then jump to MJP to trigger a
  BCS MJP                \ mis-jump into witchspace
 
  JSR hyp1               \ AJD
+
+\ <------------------------------------------------------- End of added code -->
 
  JSR RES2               \ Reset a number of flight variables and workspaces
 
@@ -16463,9 +19060,21 @@ LOAD_D% = LOAD% + P% - CODE%
 
  JSR LSHIPS             \ Call LSHIPS to load a new ship blueprints file
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  LDA QQ11             \ If the current view in QQ11 is not a space view (0) or
+\  AND #%00111111       \ one of the charts (64 or 128), return from the
+\  BNE TT113            \ subroutine (as TT113 contains an RTS)
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  LDA QQ11               \ If the current view in QQ11 is not a space view (0) or
  AND #%00111111         \ one of the charts (64 or 128), return from the
  BNE RTS111             \ subroutine (as RTS111 contains an RTS)
+
+\ <------------------------------------------------------- End of added code -->
 
  JSR TTX66              \ Otherwise clear the screen and draw a white border
 
@@ -16614,12 +19223,28 @@ LOAD_D% = LOAD% + P% - CODE%
  ADC CASH+2             \
  STA CASH+2             \   CASH+2 = CASH+2 + Y
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  LDA CASH+1           \ Then the third most significant bytes (which are 0):
+\  ADC #0               \
+\  STA CASH+1           \   CASH+1 = CASH+1 + 0
+\ 
+\  LDA CASH             \ And finally the most significant bytes (which are 0):
+\  ADC #0               \
+\  STA CASH             \   CASH = CASH + 0
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  BCC TT113              \ AJD
  INC CASH+1
  BNE n_addmny
  INC CASH
 
 .n_addmny
+
+\ <------------------------------------------------------- End of added code -->
 
  CLC                    \ Clear the C flag, so if the above was done following
                         \ a failed LCASH call, the C flag correctly indicates
@@ -16655,7 +19280,11 @@ LOAD_D% = LOAD% + P% - CODE%
  ASL P
  ROL A
 
+\ <-------------------------------------------------- Code added for Elite-A -->
+
 .price_xy
+
+\ <------------------------------------------------------- End of added code -->
 
  TAY                    \ Set (Y X) = (A P)
  LDX P
@@ -16908,13 +19537,34 @@ LOAD_E% = LOAD% + P% - CODE%
 
 .tal
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  CLC                  \ We don't want to print the galaxy number with a
+\                       \ decimal point, so clear the C flag for pr2 to take as
+\                       \ an argument
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
  LDX GCNT               \ Load the current galaxy number from GCNT into X
 
  INX                    \ Add 1 to the galaxy number, as the galaxy numbers
                         \ are 0-7 internally, but we want to display them as
                         \ galaxy 1 through 8
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  JMP pr2              \ Jump to pr2, which prints the number in X to a width
+\                       \ of 3 figures, left-padding with spaces to a width of
+\                       \ 3, and once done, return from the subroutine (as pr2
+\                       \ ends with an RTS)
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  JMP pr2-1              \ AJD
+
+\ <------------------------------------------------------- End of added code -->
 
 \ ******************************************************************************
 \
@@ -17112,6 +19762,23 @@ LOAD_E% = LOAD% + P% - CODE%
  DEX                    \ If token = 5, this is control code 5 (fuel, newline,
  BEQ fwl                \ cash, newline), so jump to fwl
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  DEX                  \ If token > 6, skip the following 3 instructions
+\  BNE P%+7
+\ 
+\  LDA #%10000000       \ This token is control code 6 (switch to Sentence
+\  STA QQ17             \ Case), so set bit 7 of QQ17 to switch to Sentence Case
+\  RTS                  \ and return from the subroutine as we are done
+\ 
+\  DEX                  \ If token > 8, skip the following 2 instructions
+\  DEX
+\  BNE P%+5
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  DEX                    \ AJD
  BNE l_33b9
 
@@ -17124,15 +19791,21 @@ LOAD_E% = LOAD% + P% - CODE%
 
  LDX #&00
 
+\ <------------------------------------------------------- End of added code -->
+
  STX QQ17               \ This token is control code 8 (switch to ALL CAPS), so
  RTS                    \ set QQ17 to 0 to switch to ALL CAPS and return from
                         \ the subroutine as we are done
+
+\ <-------------------------------------------------- Code added for Elite-A -->
 
 .l_33b9
 
  DEX                    \ AJD
  DEX
  BEQ vdu_00
+
+\ <------------------------------------------------------- End of added code -->
 
  DEX                    \ If token = 9, this is control code 9 (tab to column
  BEQ crlf               \ 21 and print a colon), so jump to crlf
@@ -17547,10 +20220,26 @@ LOAD_E% = LOAD% + P% - CODE%
 
  TAX                    \ Copy the token number into X
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  LDA #LO(QQ18)        \ Set V, V+1 to point to the recursive token table at
+\  STA V                \ location QQ18
+\  LDA #HI(QQ18)
+\  STA V+1
+\ 
+\  LDY #0               \ Set a counter Y to point to the character offset
+\                       \ as we scan through the table
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  LDY #LO(QQ18)          \ Set V, V+1 to point to the recursive token table at
  STY V                  \ location QQ18, and because QQ18 starts on a page
  LDA #HI(QQ18)          \ boundary, the lower byte of the address is 0, so this
  STA V+1                \ also sets Y = 0
+
+\ <------------------------------------------------------- End of added code -->
 
  TXA                    \ Copy the token number back into A, so both A and X
                         \ now contain the token number we want to print
@@ -18074,6 +20763,17 @@ LOAD_E% = LOAD% + P% - CODE%
 
 .SOLAR
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  LSR FIST             \ Halve our legal status in FIST, making us less bad,
+\                       \ and moving bit 0 into the C flag (so every time we
+\                       \ arrive in a new system, our legal status improves a
+\                       \ bit)
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  LDA QQ8                \ AJD
  LDY #3
 
@@ -18092,6 +20792,8 @@ LOAD_E% = LOAD% + P% - CODE%
 
  EOR #&FF
  STA FIST
+
+\ <------------------------------------------------------- End of added code -->
 
  JSR ZINF               \ Call ZINF to reset the INWK ship workspace, which
                         \ doesn't affect the C flag
@@ -18515,6 +21217,19 @@ LOAD_E% = LOAD% + P% - CODE%
  JSR DOT                \ Call DOT to redraw (i.e. remove) the current compass
                         \ dot
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  LDA SSPR             \ If we are inside the space station safe zone, jump to
+\  BNE SP1              \ SP1 to draw the space station on the compass
+\ 
+\  JSR SPS1             \ Otherwise we need to draw the planet on the compass,
+\                       \ so first call SPS1 to calculate the vector to the
+\                       \ planet and store it in XX15
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  LDY #&25               \ AJD
  LDA SSPR
  BNE l_station
@@ -18524,7 +21239,20 @@ LOAD_E% = LOAD% + P% - CODE%
 
  JSR SPS1
 
+\ <------------------------------------------------------- End of added code -->
+
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  JMP SP2              \ Jump to SP2 to draw XX15 on the compass, returning
+\                       \ from the subroutine using a tail call
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
                         \ Fall through into SP2 to draw XX15 on the compass
+
+\ <------------------------------------------------------- End of added code -->
 
 \ ******************************************************************************
 \
@@ -18782,11 +21510,15 @@ LOAD_E% = LOAD% + P% - CODE%
 \
 \ ******************************************************************************
 
+\ <----------------------------------------- Whole routine added for Elite-A -->
+
 .n_oops
 
  SEC                    \ reduce damage
  SBC new_shields
  BCC n_shok
+
+\ <---------------------------------------------------- End of added routine -->
 
 \ ******************************************************************************
 \
@@ -18834,7 +21566,11 @@ LOAD_E% = LOAD% + P% - CODE%
 
  STA FSH                \ Store the new value of the forward shield in FSH
 
+\ <-------------------------------------------------- Code added for Elite-A -->
+
 .n_shok
+
+\ <------------------------------------------------------- End of added code -->
 
  RTS                    \ Return from the subroutine
 
@@ -18930,18 +21666,46 @@ LOAD_E% = LOAD% + P% - CODE%
 
 .SPS3
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  LDA K%+1,X           \ Copy x_hi into K3+X
+\  STA K3,X
+\ 
+\  LDA K%+2,X           \ Set A = Y = x_sign
+\  TAY
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  LDA K%+1,Y             \ Copy x_hi into K3+X
  STA K3,X
 
  LDA K%+2,Y             \ Set A = x_sign and store it on the stack
  PHA
 
+\ <------------------------------------------------------- End of added code -->
+
  AND #%01111111         \ Set K3+1 = |x_sign|
  STA K3+1,X
+
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  TYA                  \ Set K3+2 = the sign of x_sign
+\  AND #%10000000
+\  STA K3+2,X
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
 
  PLA                    \ Set K3+2 = the sign of x_sign
  AND #%10000000
  STA K3+2,X
+
+\ <------------------------------------------------------- End of added code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
 
  INY                    \ AJD, update header above and all calls to SPS3
  INY
@@ -18949,6 +21713,8 @@ LOAD_E% = LOAD% + P% - CODE%
  INX
  INX
  INX
+
+\ <------------------------------------------------------- End of added code -->
 
  RTS                    \ Return from the subroutine
 
@@ -18999,12 +21765,29 @@ LOAD_E% = LOAD% + P% - CODE%
 
  JSR SPBLB              \ Light up the space station bulb on the dashboard
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  LDX #%10000001       \ Set the AI flag in byte #32 to %10000001 (hostile,
+\  STX INWK+32          \ no AI, has an E.C.M.)
+\ 
+\  LDX #0               \ Set pitch counter to 0 (no pitch, roll only)
+\  STX INWK+30
+\ 
+\  STX NEWB             \ Set NEWB to %00000000, though this gets overridden by
+\                       \ the default flags from E% in NWSHP below
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  LDX #&81               \ AJD
  STX &66
  LDX #&FF
  STX &63
  INX
  STX &64
+
+\ <------------------------------------------------------- End of added code -->
 
 \STX INWK+31            \ This instruction is commented out in the original
                         \ source. It would set the exploding state and missile
@@ -19013,6 +21796,15 @@ LOAD_E% = LOAD% + P% - CODE%
  STX FRIN+1             \ Set the sun/space station slot at FRIN+1 to 0, to
                         \ indicate we should show the space station rather than
                         \ the sun
+
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  DEX                  \ Set roll counter to 255 (maximum roll with no
+\  STX INWK+29          \ damping)
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
 
  STX &67                \ AJD
  LDA FIST
@@ -19023,14 +21815,29 @@ LOAD_E% = LOAD% + P% - CODE%
 
  STX &6A
 
+\ <------------------------------------------------------- End of added code -->
+
  LDX #10                \ Call NwS1 to flip the sign of nosev_x_hi (byte #10)
  JSR NwS1
 
  JSR NwS1               \ And again to flip the sign of nosev_y_hi (byte #12)
 
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  STX &68                \ AJD
 
+\ <------------------------------------------------------- End of added code -->
+
  JSR NwS1               \ And again to flip the sign of nosev_z_hi (byte #14)
+
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  LDA #LO(LSO)         \ Set bytes #33 and #34 to point to LSO for the ship
+\  STA INWK+33          \ line heap for the space station
+\  LDA #HI(LSO)
+\  STA INWK+34
+\ 
+\ <----------------------------------------------------- End of deleted code -->
 
  LDA #SST               \ Set A to the space station type, and fall through
                         \ into NWSHP to finish adding the space station to the
@@ -19411,9 +22218,20 @@ LOAD_E% = LOAD% + P% - CODE%
 
  STX MSTG               \ Store the target of our missile lock in MSTG
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  LDX NOMSL            \ Call MSBAR to update the leftmost indicator in the
+\  JSR MSBAR            \ dashboard's missile bar, which returns with Y = 0
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  LDX NOMSL              \ AJD
  DEX
  JSR MSBAR
+
+\ <------------------------------------------------------- End of added code -->
 
  STY MSAR               \ Set MSAR = 0 to indicate that the leftmost missile
                         \ is no longer seeking a target lock
@@ -19519,12 +22337,27 @@ LOAD_E% = LOAD% + P% - CODE%
 
  STA SC                 \ Store the low byte of the screen address in SC
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  STX P+1              \ Set P(2 1) = (Y X)
+\  STY P+2
+\ 
+\  LDA #&7D             \ Set A to the high byte of the screen address, which is
+\                       \ &7D as the bulbs are both in the character row from
+\                       \ &7D00 to &7DFF
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  LDA #&7D               \ Set A to the high byte of the screen address, which is
                         \ &7D as the bulbs are both in the character row from
                         \ &7D00 to &7DFF
 
  STX P+1                \ Set P(2 1) = (Y X)
  STY P+2
+
+\ <------------------------------------------------------- End of added code -->
 
  JMP RREN               \ Call RREN to print the character definition pointed to
                         \ by P(2 1) at the screen address pointed to by (A SC),
@@ -19625,11 +22458,31 @@ LOAD_E% = LOAD% + P% - CODE%
 
 .MSBAR
 
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  CPX #4
  BCC n_mok
  LDX #3
 
 .n_mok
+
+\ <------------------------------------------------------- End of added code -->
+
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  TXA                  \ Set T = X * 8
+\  ASL A
+\  ASL A
+\  ASL A
+\  STA T
+\ 
+\  LDA #49              \ Set SC = 49 - T
+\  SBC T                \        = 48 + 1 - (X * 8)
+\  STA SC
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
 
  TXA                    \ Set T = X * 8
  ASL A
@@ -19640,6 +22493,8 @@ LOAD_E% = LOAD% + P% - CODE%
  LDA #41                \ Set SC = 41 - T
  SBC T                  \        = 40 + 1 - (X * 8) AJD
  STA SC
+
+\ <------------------------------------------------------- End of added code -->
 
                         \ So the low byte of SC(1 0) contains the row address
                         \ for the rightmost missile indicator, made up as
@@ -20515,10 +23370,25 @@ LOAD_E% = LOAD% + P% - CODE%
                         \ of the screen (so we don't need to draw its bottom
                         \ half)
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  TXA                  \ Negate X using two's complement, so X = ~X + 1
+\  EOR #%11111111       \
+\  CLC                  \ We do this because X is negative at this point, as it
+\  ADC #1               \ is calculated as 191 - the y-coordinate of the sun's
+\  TAX                  \ centre, and the centre is off the bottom of the
+\                       \ screen, past 191. So we negate it to make it positive
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  TXA                    \ AJD
  EOR #&FF
  TAX
  INX
+
+\ <------------------------------------------------------- End of added code -->
 
 .PLF17
 
@@ -21441,7 +24311,26 @@ LOAD_E% = LOAD% + P% - CODE%
  LDA YY+1               \ And then subtracting the high bytes
  SBC #0
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  BNE ED3              \ If the high byte subtraction is non-zero, then skip
+\                       \ to ED3
+\ 
+\  CLC                  \ Otherwise the high byte of the subtraction was zero,
+\                       \ so the line fits on-screen and we clear the C flag to
+\                       \ indicate success
+\ 
+\  RTS                  \ Return from the subroutine
+\ 
+\ .ED3
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  BEQ P%+8               \ AJD
+
+\ <------------------------------------------------------- End of added code -->
 
  BPL ED1                \ If the addition is positive then the calculation has
                         \ underflowed, so jump to ED1 to return a failure
@@ -22626,6 +25515,8 @@ LOAD_F% = LOAD% + P% - CODE%
 \
 \ ******************************************************************************
 
+\ <----------------------------------------- Whole routine added for Elite-A -->
+
 .rand_posn
 
  JSR ZINF
@@ -22647,6 +25538,8 @@ LOAD_F% = LOAD% + P% - CODE%
  SBC INWK+4
  STA INWK+7
  JMP DORND
+
+\ <---------------------------------------------------- End of added routine -->
 
 \ ******************************************************************************
 \
@@ -22916,13 +25809,65 @@ LOAD_F% = LOAD% + P% - CODE%
 
 .msblob
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  LDX #4               \ Set up a loop counter in X to count through all four
+\                       \ missile indicators
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  LDX #3                 \ AJD
 
+\ <------------------------------------------------------- End of added code -->
+
 .ss
+
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  CPX NOMSL            \ If the counter is equal to the number of missiles,
+\  BEQ SAL8             \ jump down to SQL8 to draw remaining the missiles, as
+\                       \ the rest of them are present and should be drawn in
+\                       \ green/cyan
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
 
  LDY #0                 \ AJD
  CPX NOMSL
  BCS miss_miss
+
+\ <------------------------------------------------------- End of added code -->
+
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  LDY #0               \ Draw the missile indicator at position X in black
+\  JSR MSBAR
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  DEX                  \ Decrement the counter to point to the next missile
+\ 
+\  BNE ss               \ Loop back to ss if we still have missiles to draw
+\ 
+\  RTS                  \ Return from the subroutine
+\ 
+\ .SAL8
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  LDY #&EE             \ Draw the missile indicator at position X in green/cyan
+\  JSR MSBAR
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
 
  LDY #&EE               \ AJD
 
@@ -22930,9 +25875,21 @@ LOAD_F% = LOAD% + P% - CODE%
 
  JSR MSBAR
 
+\ <------------------------------------------------------- End of added code -->
+
  DEX                    \ Decrement the counter to point to the next missile
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  BNE SAL8             \ Loop back to SAL8 if we still have missiles to draw
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  BPL ss                 \ AJD
+
+\ <------------------------------------------------------- End of added code -->
 
  RTS                    \ Return from the subroutine
 
@@ -22983,9 +25940,51 @@ LOAD_F% = LOAD% + P% - CODE%
 
 .Ze
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  JSR ZINF             \ Call ZINF to reset the INWK ship workspace
+\ 
+\  JSR DORND            \ Set A and X to random numbers
+\ 
+\  STA T1               \ Store A in T1
+\ 
+\  AND #%10000000       \ Extract the sign of A and store in x_sign
+\  STA INWK+2
+\ 
+\  TXA                  \ Extract the sign of X and store in y_sign
+\  AND #%10000000
+\  STA INWK+5
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  JSR rand_posn          \ AJD
 
+\ <------------------------------------------------------- End of added code -->
+
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  LDA #25              \ Set x_hi = y_hi = z_hi = 25, a fair distance away
+\  STA INWK+1
+\  STA INWK+4
+\  STA INWK+7
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  JSR DORND            \ Set A and X to random numbers
+\ 
+\  CMP #245             \ Set the C flag if X >= 245 (4% chance)
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  CMP #245               \ Set the C flag if X >= 245 (4% chance)
+
+\ <------------------------------------------------------- End of added code -->
 
  ROL A                  \ Set bit 0 of A to the C flag (i.e. there's a 4%
                         \ chance of this ship having E.C.M.)
@@ -23082,8 +26081,54 @@ LOAD_F% = LOAD% + P% - CODE%
                         \ C flag was set), giving the ship either no missiles or
                         \ one missile
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  AND #15              \ Set the ship speed to our random number, set to a
+\  ORA #16              \ minimum of 16 and a maximum of 31
+\  STA INWK+27
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  AND #15                \ AJD
  STA INWK+27
+
+\ <------------------------------------------------------- End of added code -->
+
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  JSR DORND            \ Set A and X to random numbers, plus the C flag
+\ 
+\  BMI nodo             \ If A is negative (50% chance), jump to nodo to skip
+\                       \ the following
+\ 
+\                       \ If we get here then we are going to spawn a ship that
+\                       \ is minding its own business and trying to dock
+\ 
+\  LDA INWK+32          \ Set bits 6 and 7 of the ship's AI flag, to make it
+\  ORA #%11000000       \ aggressive if attacked, and enable its AI
+\  STA INWK+32
+\ 
+\  LDX #%00010000       \ Set bit 4 of the ship's NEWB flags, to indicate that
+\  STX NEWB             \ this ship is docking
+\ 
+\ .nodo
+\ 
+\  AND #2               \ If we jumped here with a random value of A from the
+\                       \ BMI above, then this reduces A to a random value of
+\                       \ either 0 or 2; if we didn't take the BMI and made the
+\                       \ ship hostile, then A will be 0
+\ 
+\  ADC #CYL             \ Set A = A + C + #CYL
+\                       \
+\                       \ where A is 0 or 2 and C is 0 or 1, so this gives us a
+\                       \ ship type from the following: Cobra Mk III, Python,
+\                       \ Boa or Anaconda
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
 
  JSR DORND              \ Set A and X to random numbers, plus the C flag
 
@@ -23105,7 +26150,20 @@ LOAD_F% = LOAD% + P% - CODE%
  LDA #&0B               \ AJD
  LDX #&03
 
+\ <------------------------------------------------------- End of added code -->
+
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  JSR NWSHP            \ Add a new ship of type A to the local bubble and fall
+\                       \ through into the main game loop again
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  JMP hordes
+
+\ <------------------------------------------------------- End of added code -->
 
 \ ******************************************************************************
 \
@@ -23186,15 +26244,133 @@ LOAD_F% = LOAD% + P% - CODE%
 
  JSR DORND              \ Set A and X to random numbers
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  CMP #35              \ If A >= 35 (87% chance), jump down to MTT1 to skip
+\  BCS MTT1             \ the spawning of an asteroid or cargo canister and
+\                       \ potentially spawn something else
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  CMP #&33               \ trader fraction AJD
  BCS MTT1
+
+\ <------------------------------------------------------- End of added code -->
 
  LDA JUNK               \ If we already have 3 or more bits of junk in the local
  CMP #3                 \ bubble, jump down to MTT1 to skip the following and
  BCS MTT1               \ potentially spawn something else
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  JSR ZINF             \ Call ZINF to reset the INWK ship workspace
+\ 
+\  LDA #38              \ Set z_hi = 38 (far away)
+\  STA INWK+7
+\ 
+\  JSR DORND            \ Set A, X and C flag to random numbers
+\ 
+\  STA INWK             \ Set x_lo = random
+\ 
+\  STX INWK+3           \ Set y_lo = random
+\ 
+\  AND #%10000000       \ Set x_sign = bit 7 of x_lo
+\  STA INWK+2
+\ 
+\  TXA                  \ Set y_sign = bit 7 of y_lo
+\  AND #%10000000
+\  STA INWK+5
+\ 
+\  ROL INWK+1           \ Set bit 2 of x_hi to the C flag, which is random, so
+\  ROL INWK+1           \ this randomly moves us slightly off-centre
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  JSR DORND            \ Set A, X and V flag to random numbers
+\ 
+\  BVS MTT4             \ If V flag is set (50% chance), jump up to MTT4 to
+\                       \ spawn a trader
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  JSR rand_posn          \ AJD
  BVS MTT4
+
+\ <------------------------------------------------------- End of added code -->
+
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\ IF _STH_DISC
+\ 
+\  NOP                  \ In the first version of disc Elite, asteroids never
+\  NOP                  \ appeared. It turned out that the authors had put in a
+\  NOP                  \ jump to force traders to spawn, so they could test
+\                       \ that part of the code, but had forgotten to remove it,
+\                       \ so this was fixed in later versions by replacing the
+\                       \ JMP instruction with NOPs... and this is where that
+\                       \ was done
+\ 
+\ ELIF _IB_DISC
+\ 
+\  JMP MTT4             \ In the first version of disc Elite, asteroids never
+\                       \ appeared. It turned out that the authors had put in a
+\                       \ jump to force traders to spawn, so they could test
+\                       \ that part of the code, but had forgotten to remove it,
+\                       \ so this was fixed in later versions by replacing the
+\                       \ JMP instruction with NOPs. The version on Ian Bell's
+\                       \ site still contains the test jump, so asteroids never
+\                       \ appear in this version
+\ 
+\ ENDIF
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  ORA #%01101111       \ Take the random number in A and set bits 0-3 and 5-6,
+\  STA INWK+29          \ so the result has a 50% chance of being positive or
+\                       \ negative, and a 50% chance of bits 0-6 being 127.
+\                       \ Storing this number in the roll counter therefore
+\                       \ gives our new ship a fast roll speed with a 50%
+\                       \ chance of having no damping, plus a 50% chance of
+\                       \ rolling clockwise or anti-clockwise
+\ 
+\  LDA SSPR             \ If we are inside the space station safe zone, jump
+\  BNE MTT1             \ down to MTT1 to skip the following and potentially
+\                       \ spawn something else
+\ 
+\  TXA                  \ Set A to the random X we set above, which we haven't
+\  BCS MTT2             \ used yet, and if the C flag is set (50% chance) jump
+\                       \ down to MTT2 to skip the following
+\ 
+\  AND #31              \ Set the ship speed to our random number, set to a
+\  ORA #16              \ minimum of 16 and a maximum of 31
+\  STA INWK+27
+\ 
+\  BCC MTT3             \ Jump down to MTT3, skipping the following (this BCC
+\                       \ is effectively a JMP as we know the C flag is clear,
+\                       \ having passed through the BCS above)
+\ 
+\ .MTT2
+\ 
+\  ORA #%01111111       \ Set bits 0-6 of A to 127, leaving bit 7 as random, so
+\  STA INWK+30          \ storing this number in the pitch counter means we have
+\                       \ full pitch with no damping, with a 50% chance of
+\                       \ pitching up or down
+\ 
+\ .MTT3
+\ 
+\  JSR DORND            \ Set A and X to random numbers
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
 
  ORA #%01101111         \ Take the random number in A and set bits 0-3 and 5-6,
  STA INWK+29            \ so the result has a 50% chance of being positive or
@@ -23229,6 +26405,8 @@ LOAD_F% = LOAD% + P% - CODE%
 
  JSR DORND              \ Set A and X to random numbers
 
+\ <------------------------------------------------------- End of added code -->
+
  CMP #10                \ If random A >= 10 (96% of the time), set the C flag
 
  AND #1                 \ Reduce A to a random number that's 0 or 1
@@ -23238,7 +26416,17 @@ LOAD_F% = LOAD% + P% - CODE%
                         \ us spawning either a boulder (#OIL + 1) or an asteroid
                         \ (#OIL + 2)
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  JSR NWSHP            \ Add our new asteroid or canister to the universe
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  BNE horde_plain        \ AJD
+
+\ <------------------------------------------------------- End of added code -->
 
 \ ******************************************************************************
 \
@@ -23289,6 +26477,22 @@ LOAD_F% = LOAD% + P% - CODE%
  JSR Ze                 \ Call Ze to initialise INWK to a potentially hostile
                         \ ship, and set A and X to random values
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  CMP T                \ If the random value in A >= our badness level, which
+\  BCS P%+7             \ will be the case unless we have been really, really
+\                       \ bad, then skip the following two instructions (so if
+\                       \ we are really bad, there's a higher chance of
+\                       \ spawning a cop, otherwise we got away with it, for
+\                       \ now)
+\ 
+\  LDA #COPS            \ Add a new police ship to the local bubble
+\  JSR NWSHP
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  CMP T                  \ If the random value in A >= our badness level, which
  BCS l_4050             \ will be the case unless we have been really, really
                         \ bad, then skip the following two instructions (so if
@@ -23304,6 +26508,8 @@ LOAD_F% = LOAD% + P% - CODE%
  BEQ hordes
 
 .l_4050
+
+\ <------------------------------------------------------- End of added code -->
 
  LDA MANY+COPS          \ If we now have at least one cop in the local bubble,
  BNE MLOOPS             \ jump down to MLOOPS, otherwise fall through into the
@@ -23383,11 +26589,77 @@ LOAD_F% = LOAD% + P% - CODE%
                         \ Now to spawn a lone bounty hunter, a Thargoid or a
                         \ group of pirates
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  JSR Ze               \ Call Ze to initialise INWK to a potentially hostile
+\                       \ ship, and set A and X to random values
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  CMP #100             \ If the random number in A >= 100 (61% chance), jump
+\  BCS mt1              \ to mt1 to spawn pirates, otherwise keep going to
+\                       \ spawn a lone bounty hunter or a Thargoid
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  CPX #&64               \ AJD
  BCS mt1
 
+\ <------------------------------------------------------- End of added code -->
+
  INC EV                 \ Increase the extra vessels spawning counter, to
                         \ prevent the next attempt to spawn extra vessels
+
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  AND #3               \ Set A = random number in the range 0-3, which we
+\                       \ will now use to determine the type of ship
+\ 
+\  ADC #CYL2            \ Add A to #CYL2 (we know the C flag is clear as we
+\                       \ passed through the BCS above), so A is now one of the
+\                       \ lone bounty hunter ships, i.e. Cobra Mk III (pirate),
+\                       \ Asp Mk II, Python (pirate) or Fer-de-lance
+\ 
+\  TAY                  \ Copy the new ship type to Y
+\ 
+\  JSR THERE            \ Call THERE to see if we are in the Constrictor's
+\                       \ system in mission 1
+\ 
+\  BCC NOCON            \ If the C flag is clear then we are not in the
+\                       \ Constrictor's system, so skip to NOCON
+\ 
+\  LDA #%11111001       \ Set the AI flag of this ship so that it has E.C.M.,
+\  STA INWK+32          \ has a very high aggression level of 28 out of 31, is
+\                       \ hostile, and has AI enabled - nasty stuff!
+\ 
+\  LDA TP               \ Fetch bits 0 and 1 of TP, which contain the status of
+\  AND #%00000011       \ mission 1
+\ 
+\  LSR A                \ Shift bit 0 into the C flag
+\ 
+\  BCC NOCON            \ If bit 0 is clear, skip to NOCON as mission 1 is not
+\                       \ in progress
+\ 
+\  ORA MANY+CON         \ Bit 0 of A now contains bit 1 of TP, so this will be
+\                       \ set if we have already completed mission 1, so this OR
+\                       \ will be non-zero if we have either completed mission
+\                       \ 1, or there is already a Constrictor in our local
+\                       \ bubble of universe (in which case MANY+CON will be
+\                       \ non-zero)
+\ 
+\  BEQ YESCON           \ If A = 0 then mission 1 is in progress, we haven't
+\                       \ completed it yet, and there is no Constrictor in the
+\                       \ vicinity, so jump to YESCON to spawn the Constrictor
+\ 
+\ .NOCON
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
 
  AND #3                 \ Set A = random number in the range 0-3, which we
                         \ will now use to determine the type of ship
@@ -23430,6 +26702,8 @@ LOAD_F% = LOAD% + P% - CODE%
 
 .NOCON
 
+\ <------------------------------------------------------- End of added code -->
+
  TYA
 
  EQUB &2C               \ Skip the next instruction by turning it into
@@ -23452,6 +26726,25 @@ LOAD_F% = LOAD% + P% - CODE%
  JMP MLOOP              \ Jump down to MLOOP, as we are done spawning ships
 
 .mt1
+
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  AND #3               \ It's time to spawn a group of pirates, so set A to a
+\                       \ random number in the range 0-3, which will be the
+\                       \ loop counter for spawning pirates below (so we will
+\                       \ spawn 1-4 pirates)
+\ 
+\  STA EV               \ Delay further spawnings by this number
+\ 
+\  STA XX13             \ Store the number in XX13, the pirate counter
+\ 
+\ .mt3
+\ 
+\  JSR DORND            \ Set A and X to random numbers
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
 
  LDA #&11
  LDX #&07
@@ -23488,11 +26781,39 @@ LOAD_F% = LOAD% + P% - CODE%
 
  AND #&FF
 
+\ <------------------------------------------------------- End of added code -->
+
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  STA T                \ Set T to a random number
+\ 
+\  JSR DORND            \ Set A and X to random numbers
+\ 
+\  AND T                \ Set A to the AND of two random numbers, so each bit
+\                       \ has 25% chance of being set which makes the chances
+\                       \ of a smaller number higher
+\ 
+\  AND #7               \ Reduce A to a random number in the range 0-7, though
+\                       \ with a bigger chance of a smaller number in this range
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
  STA CPIR               \ Set CPIR to this random number in the range 0-7
 
 .more
 
  LDA CPIR               \ Set A to the ship type in CPIR
+
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  ADC #PACK            \ #PACK is set to #SH3, the ship type for a Sidewinder,
+\                       \ so this sets our new ship type to one of the pack
+\                       \ hunters, namely a Sidewinder, Mamba, Krait, Adder,
+\                       \ Gecko, Cobra Mk I, Worm or Cobra Mk III (pirate)
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
 
  CLC                    \ AJD
 
@@ -23503,7 +26824,29 @@ LOAD_F% = LOAD% + P% - CODE%
  INC &47
  INC &4A
 
+\ <------------------------------------------------------- End of added code -->
+
  JSR NWSHP              \ Try adding a new ship of type A to the local bubble
+
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  BCS P%+7             \ If the ship was successfully added, skip the following
+\                       \ two instructions
+\ 
+\  DEC CPIR             \ The ship wasn't added, which might be because the ship
+\                       \ blueprint for this ship type isn't in the currently
+\                       \ loaded ship blueprints file, so decrement CPIR to
+\                       \ point to the previous ship type, so we can try
+\                       \ spawning that type of pirate instead
+\ 
+\  BPL more             \ Loop back to more to have another go at spawning this
+\                       \ pirate, until we have tried spawning a Sidewinder
+\                       \ CPIR is 0, in which case give up and move on to the
+\                       \ next pirate to spawn
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
 
  CMP #&18               \ AJD
  BCS l_40d7
@@ -23511,6 +26854,8 @@ LOAD_F% = LOAD% + P% - CODE%
  BPL more
 
 .l_40d7
+
+\ <------------------------------------------------------- End of added code -->
 
  DEC XX13               \ Decrement the pirate counter
 
@@ -23561,6 +26906,22 @@ LOAD_F% = LOAD% + P% - CODE%
 
  JSR DIALS              \ Call DIALS to update the dashboard
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  LDA QQ11             \ If this is a space view, skip the following five
+\  BEQ P%+13            \ instructions (i.e. jump to JSR TT17 below)
+\ 
+\  AND PATG             \ If PATG = &FF (author names are shown on start-up)
+\  LSR A                \ and bit 0 of QQ11 is 1 (the current view is type 1),
+\  BCS P%+7             \ then skip the following two instructions
+\ 
+\  LDY #2               \ Wait for 2/50 of a second (0.04 seconds), to slow the
+\  JSR DELAY            \ main loop down a bit
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  LDA QQ11               \ If this is a space view, skip the following two
  BEQ l_40f8             \ instructions (i.e. jump to JSR TT17 below)
 
@@ -23568,6 +26929,8 @@ LOAD_F% = LOAD% + P% - CODE%
  JSR DELAY              \ main loop down a bit
 
 .l_40f8
+
+\ <------------------------------------------------------- End of added code -->
 
  JSR TT17               \ Scan the keyboard for the cursor keys or joystick,
                         \ returning the cursor's delta values in X and Y and
@@ -23605,21 +26968,29 @@ LOAD_F% = LOAD% + P% - CODE%
 
 .FRCE
 
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  PHA                    \ AJD
  LDA &2F
  BNE l_locked
  PLA
+
+\ <------------------------------------------------------- End of added code -->
 
  JSR TT102              \ Call TT102 to process the key pressed in A
 
  JMP TT100              \ Otherwise jump to TT100 to restart the main loop from
                         \ the start
 
+\ <-------------------------------------------------- Code added for Elite-A -->
+
 .l_locked
 
  PLA                    \ AJD
  JSR TT107
  JMP TT100
+
+\ <------------------------------------------------------- End of added code -->
 
 \ ******************************************************************************
 \
@@ -23714,8 +27085,14 @@ LOAD_F% = LOAD% + P% - CODE%
  CMP #&32               \ If "D" was pressed, jump to T95 to print the distance
  BEQ T95                \ to a system (if we are in one of the chart screens)
 
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  CMP #&43               \ If "F" was not pressed, jump down to HME1, otherwise
  BNE HME1               \ keep going to process searching for systems
+
+\ <------------------------------------------------------- End of added code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
 
  LDA finder             \ AJD
  EOR #&25
@@ -23724,17 +27101,46 @@ LOAD_F% = LOAD% + P% - CODE%
 
 .HME1
 
+\ <------------------------------------------------------- End of added code -->
+
  STA T1                 \ Store A (the key that's been pressed) in T1
+
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  LDA QQ11             \ If the current view is a chart (QQ11 = 64 or 128),
+\  AND #%11000000       \ keep going, otherwise jump down to TT107 to skip the
+\  BEQ TT107            \ following
+\ 
+\  LDA QQ22+1           \ If the on-screen hyperspace counter is non-zero,
+\  BNE TT107            \ then we are already counting down, so jump to TT107
+\                       \ to skip the following
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
 
  LDA QQ11               \ If the current view is a chart (QQ11 = 64 or 128),
  AND #%11000000         \ keep going, otherwise jump down to TT107 to skip the
  BEQ TT107              \ following AJD
 
+\ <------------------------------------------------------- End of added code -->
+
  LDA T1                 \ Restore the original value of A (the key that's been
                         \ pressed) from T1
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  CMP #&36             \ If "O" was pressed, do the following three jumps,
+\  BNE ee2              \ otherwise skip to ee2 to continue
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  CMP #&36               \ If "O" was pressed, do the following three jumps,
  BNE not_home           \ otherwise skip to not_home to continue AJD
+
+\ <------------------------------------------------------- End of added code -->
 
  JSR TT103              \ Draw small crosshairs at coordinates (QQ9, QQ10),
                         \ which will erase the crosshairs currently there
@@ -23743,10 +27149,22 @@ LOAD_F% = LOAD% + P% - CODE%
                         \ will move the location in (QQ9, QQ10) to the current
                         \ home system
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  JSR TT103            \ Draw small crosshairs at coordinates (QQ9, QQ10),
+\                       \ which will draw the crosshairs at our current home
+\                       \ system
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  JMP TT103              \ Draw small crosshairs at coordinates (QQ9, QQ10),
                         \ which will draw the crosshairs at our current home
                         \ system, and return from the subroutine using a tail
                         \ call
+
+\ <------------------------------------------------------- End of added code -->
 
 .ee2
 
@@ -23800,6 +27218,8 @@ LOAD_F% = LOAD% + P% - CODE%
                         \ to do a hyperspace jump, returning from the subroutine
                         \ using a tail call
 
+\ <-------------------------------------------------- Code added for Elite-A -->
+
 .BAD
 
  LDA QQ20+&03           \ AJD
@@ -23808,18 +27228,30 @@ LOAD_F% = LOAD% + P% - CODE%
  ASL A
  ADC QQ20+&0A
 
+\ <------------------------------------------------------- End of added code -->
+
 .t95
 
  RTS                    \ Return from the subroutine
+
+\ <-------------------------------------------------- Code added for Elite-A -->
 
 .not_home
 
  CMP #&21               \ AJD
  BNE ee2
 
+\ <------------------------------------------------------- End of added code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  LDA cmdr_cour
  ORA cmdr_cour+1
  BEQ ee2
+
+\ <------------------------------------------------------- End of added code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
 
  JSR TT103              \ AJD
  LDA cmdr_courx
@@ -23827,6 +27259,8 @@ LOAD_F% = LOAD% + P% - CODE%
  LDA cmdr_coury
  STA QQ10
  JSR TT103
+
+\ <------------------------------------------------------- End of added code -->
 
 .T95
 
@@ -23845,7 +27279,18 @@ LOAD_F% = LOAD% + P% - CODE%
 
  JSR cpl                \ Print control code 3 (the selected system name)
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  LDA #%10000000       \ Set bit 7 of QQ17 to switch to Sentence Case, with the
+\  STA QQ17             \ next letter in capitals
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  JSR vdu_80             \ AJD
+
+\ <------------------------------------------------------- End of added code -->
 
  LDA #1                 \ Move the text cursor to column 1 and down one line
  STA XC                 \ (in other words, to the start of the next line)
@@ -24137,8 +27582,12 @@ LOAD_F% = LOAD% + P% - CODE%
 
 .LSHIPS
 
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  LDA #0                 \ AJD
  STA finder
+
+\ <------------------------------------------------------- End of added code -->
 
  JSR THERE              \ Call THERE to see if we are in the Constrictor's
                         \ system in mission 1
@@ -24160,7 +27609,29 @@ LOAD_F% = LOAD% + P% - CODE%
  CPX #10                \ 0 of A, otherwise shift a 1
  ROL A
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\                       \ By this point, A is:
+\                       \
+\                       \   * Bit 0    = 0 for low tech level (Coriolis station)
+\                       \                1 for high tech level (Dodo station)
+\                       \   * Bit 1    = 0 for more dangerous systems
+\                       \                1 for safer systems
+\                       \   * Bit 2    = random
+\                       \   * Bit 3    = random
+\                       \   * Bits 4-7 = 0
+\                       \
+\                       \ So A is in the range 0-15, which corresponds to the
+\                       \ appropriate ship blueprints file (where 0 is file
+\                       \ D.MOA and 15 is file D.MOP)
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  ADC GCNT               \ 16+7 -> 23 files ! AJD
+
+\ <------------------------------------------------------- End of added code -->
 
  TAX                    \ Store A in X so we can retrieve it after the mission 2
                         \ progress check
@@ -24189,7 +27660,22 @@ LOAD_F% = LOAD% + P% - CODE%
  CLC                    \ Convert A from 0-15 to 'A' to 'P'
  ADC #'A'
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  STA SHIPI+6          \ Store the letter of the ship blueprints file we want
+\                       \ in the sixth byte of the command string at SHIPI, so
+\                       \ it overwrites the "0" in "D.MO0" with the file letter
+\                       \ to load, from D.MOA to D.MOP
+\ 
+\  JSR CATD             \ Call CATD to reload the disc catalogue
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  STA SHIPI+4            \ AJD
+
+\ <------------------------------------------------------- End of added code -->
 
  LDX #LO(SHIPI)         \ Set (Y X) to point to the OS command at SHIPI, which
  LDY #HI(SHIPI)         \ loads the relevant ship blueprints file
@@ -24209,8 +27695,19 @@ LOAD_F% = LOAD% + P% - CODE%
 
 .SHIPI
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  EQUS "L.D.MO0"
+\  EQUB 13
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  EQUS "L.S.0"
  EQUB 13
+
+\ <------------------------------------------------------- End of added code -->
 
 \ ******************************************************************************
 \
@@ -24332,12 +27829,29 @@ LOAD_F% = LOAD% + P% - CODE%
 
 .SPS1
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  LDX #0               \ Copy the two high bytes of the planet's x-coordinate
+\  JSR SPS3             \ into K3(2 1 0), separating out the sign bit into K3+2
+\ 
+\  LDX #3               \ Copy the two high bytes of the planet's y-coordinate
+\  JSR SPS3             \ into K3(5 4 3), separating out the sign bit into K3+5
+\ 
+\  LDX #6               \ Copy the two high bytes of the planet's z-coordinate
+\  JSR SPS3             \ into K3(8 7 6), separating out the sign bit into K3+8
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  LDX #0                 \ Copy the two high bytes of the planet's x-coordinate
  JSR SPS3               \ into K3(2 1 0), separating out the sign bit into K3+2
 
  JSR SPS3               \ AJD
 
  JSR SPS3               \ AJD
+
+\ <------------------------------------------------------- End of added code -->
 
                         \ Fall through into TAS2 to build XX15 from K3
 
@@ -24504,29 +28018,73 @@ LOAD_F% = LOAD% + P% - CODE%
 
  JSR SQUA               \ Set (A P) = A * A = y^2
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  STA T                \ Set (T P) = (A P) = y^2
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  TAY                    \ AJD
+
+\ <------------------------------------------------------- End of added code -->
 
  LDA P                  \ Set (R Q) = (R Q) + (T P) = x^2 + y^2
  ADC Q                  \
  STA Q                  \ First, doing the low bytes, Q = Q + P
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  LDA T                \ And then the high bytes, R = R + T
+\  ADC R
+\  STA R
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  TYA                    \ AJD
  ADC R
  STA R
+
+\ <------------------------------------------------------- End of added code -->
 
  LDA XX15+2             \ Fetch the z-coordinate into A
 
  JSR SQUA               \ Set (A P) = A * A = z^2
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  STA T                \ Set (T P) = (A P) = z^2
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  TAY                    \ AJD
+
+\ <------------------------------------------------------- End of added code -->
 
  LDA P                  \ Set (R Q) = (R Q) + (T P) = x^2 + y^2 + z^2
  ADC Q                  \
  STA Q                  \ First, doing the low bytes, Q = Q + P
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  LDA T                \ And then the high bytes, R = R + T
+\  ADC R
+\  STA R
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  TYA                    \ AJD
  ADC R
  STA R
+
+\ <------------------------------------------------------- End of added code -->
 
  JSR LL5                \ We now have the following:
                         \
@@ -24658,7 +28216,11 @@ LOAD_F% = LOAD% + P% - CODE%
                         \ escape pods and cargo canisters, so to check whether
                         \ we can jump, we first grab the slot contents into A
 
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  ORA JUNK               \ no jump if any ship AJD
+
+\ <------------------------------------------------------- End of added code -->
 
  ORA SSPR               \ If there is a space station nearby, then SSPR will
                         \ be non-zero, so OR'ing with SSPR will produce a
@@ -24839,12 +28401,28 @@ LOAD_F% = LOAD% + P% - CODE%
 
 .EXNO3
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  LDA #16              \ Call the NOISE routine with A = 16 to make the first
+\  JSR NOISE            \ death sound
+\ 
+\  LDA #24              \ Call the NOISE routine with A = 24 to make the second
+\  BNE NOISE            \ death sound and return from the subroutine using a
+\                       \ tail call (this BNE is effectively a JMP as A will
+\                       \ never be zero)
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  JSR n_sound10          \ AJD
 
  LDA #24                \ Call the NOISE routine with A = 24 to make the
  BNE NOISE              \ death sound and return from the subroutine using a
                         \ tail call (this BNE is effectively a JMP as A will
                         \ never be zero)
+
+\ <------------------------------------------------------- End of added code -->
 
 \ ******************************************************************************
 \
@@ -24893,7 +28471,11 @@ LOAD_F% = LOAD% + P% - CODE%
  LDA #120               \ Print recursive token 120 ("INCOMING MISSILE") as an
  JSR MESS               \ in-flight message
 
+\ <-------------------------------------------------- Code added for Elite-A -->
+
 .n_sound30
+
+\ <------------------------------------------------------- End of added code -->
 
  LDA #48                \ Call the NOISE routine with A = 48 to make the sound
  BNE NOISE              \ of the missile being launched and return from the
@@ -24975,6 +28557,45 @@ LOAD_F% = LOAD% + P% - CODE%
  JSR NOS1               \ kill (part 1 of the explosion), and call NOS1 to set
                         \ up the sound block in XX16
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  LDA INWK+7           \ Fetch z_hi, the distance of the ship being hit in
+\  LSR A                \ terms of the z-axis (in and out of the screen), and
+\  LSR A                \ divide by 4. If z_hi has either bit 6 or 7 set then
+\                       \ that ship is too far away to be shown on the scanner
+\                       \ (as per the SCAN routine), so we know the maximum
+\                       \ z_hi at this point is %00111111, and shifting z_hi
+\                       \ to the right twice gives us a maximum value of
+\                       \ %00001111
+\ 
+\  AND T                \ This reduces A to a maximum of X; X can be either
+\                       \ 7 = %0111 or 15 = %1111, so AND'ing with 15 will
+\                       \ not affect A, while AND'ing with 7 will clear bit
+\                       \ 3, reducing the maximum value in A to 7
+\ 
+\  ORA #%11110001       \ The SOUND statement's amplitude ranges from 0 (for no
+\                       \ sound) to -15 (full volume), so we can set bits 0 and
+\                       \ 4-7 in A, and keep bits 1-3 from the above to get
+\                       \ a value between -15 (%11110001) and -1 (%11111111),
+\                       \ with lower values of z_hi and argument X leading
+\                       \ to a more negative, or quieter number (so the closer
+\                       \ the ship, i.e. the smaller the value of X, the louder
+\                       \ the sound)
+\ 
+\  STA XX16+2           \ The amplitude byte of the sound block in XX16 is in
+\                       \ byte #3 (where it's the low byte of the amplitude), so
+\                       \ this sets the amplitude to the value in A
+\ 
+\  JSR NO3              \ Make the sound from our updated sound block in XX16
+\ 
+\  LDA #16              \ Set A = 16 to denote we have made a hit or kill
+\                       \ (part 2 of the explosion), and fall through into NOISE
+\                       \ to make the sound
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  LDA INWK+7             \ Fetch z_hi, the distance of the ship being hit in
  LSR A                  \ terms of the z-axis (in and out of the screen), and
  LSR A                  \ divide by 4. If z_hi has either bit 6 or 7 set then
@@ -25009,6 +28630,8 @@ LOAD_F% = LOAD% + P% - CODE%
  LDA #16                \ Set A = 16 to denote we have made a hit or kill
                         \ (part 2 of the explosion), and fall through into NOISE
                         \ to make the sound
+
+\ <------------------------------------------------------- End of added code -->
 
 \ ******************************************************************************
 \
@@ -25048,12 +28671,33 @@ LOAD_F% = LOAD% + P% - CODE%
 
 .NO3
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  LDX DNOIZ            \ Set X to the DNOIZ configuration setting
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  LDY DNOIZ              \ Set Y to the DNOIZ configuration setting
+
+\ <------------------------------------------------------- End of added code -->
 
  BNE KYTB               \ If DNOIZ is non-zero, then sound is disabled, so
                         \ return from the subroutine (as KYTB contains an RTS)
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  LDX #LO(XX16)        \ Otherwise set (Y X) to point to the sound block in
+\  LDY #HI(XX16)        \ XX16
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  LDX #LO(XX16)          \ AJD
+
+\ <------------------------------------------------------- End of added code -->
 
  LDA #7                 \ Call OSWORD 7 to makes the sound, as described in the
  JMP OSWORD             \ documentation for variable SFX, and return from the
@@ -25153,6 +28797,34 @@ LOAD_F% = LOAD% + P% - CODE%
  RTS                    \ Return from the subroutine (used as an entry point and
                         \ a fall-through from above)
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\                       \ These are the primary flight controls (pitch, roll,
+\                       \ speed and lasers):
+\ 
+\  EQUB &68 + 128       \ ?         KYTB+1      Slow down
+\  EQUB &62 + 128       \ Space     KYTB+2      Speed up
+\  EQUB &66 + 128       \ <         KYTB+3      Roll left
+\  EQUB &67 + 128       \ >         KYTB+4      Roll right
+\  EQUB &42 + 128       \ X         KYTB+5      Pitch up
+\  EQUB &51 + 128       \ S         KYTB+6      Pitch down
+\  EQUB &41 + 128       \ A         KYTB+7      Fire lasers
+\ 
+\                       \ These are the secondary flight controls:
+\ 
+\  EQUB &60             \ TAB       KYTB+8      Energy bomb
+\  EQUB &70             \ ESCAPE    KYTB+9      Launch escape pod
+\  EQUB &23             \ T         KYTB+10     Arm missile
+\  EQUB &35             \ U         KYTB+11     Unarm missile
+\  EQUB &65             \ M         KYTB+12     Fire missile
+\  EQUB &22             \ E         KYTB+13     E.C.M.
+\  EQUB &45             \ J         KYTB+14     In-system jump
+\  EQUB &52             \ C         KYTB+15     Docking computer
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
                         \ These are the primary flight controls (pitch, roll,
                         \ speed and lasers):
 
@@ -25175,6 +28847,8 @@ LOAD_F% = LOAD% + P% - CODE%
  EQUB &45               \ J         KYTB+14     In-system jump
  EQUB &63               \ AJD
 
+\ <------------------------------------------------------- End of added code -->
+
  EQUB &37               \ P         KYTB+16     Cancel docking computer
 
 \ ******************************************************************************
@@ -25186,10 +28860,14 @@ LOAD_F% = LOAD% + P% - CODE%
 \
 \ ******************************************************************************
 
+\ <----------------------------------------- Whole routine added for Elite-A -->
+
 .b_table
 
  EQUB &61, &31, &80, &80, &80, &80, &51
  EQUB &64, &34, &32, &62, &52, &54, &58, &38, &68
+
+\ <---------------------------------------------------- End of added routine -->
 
 \ ******************************************************************************
 \
@@ -25199,6 +28877,8 @@ LOAD_F% = LOAD% + P% - CODE%
 \    Summary: Check Voltmace Delta 14 joystick buttons AJD
 \
 \ ******************************************************************************
+
+\ <----------------------------------------- Whole routine added for Elite-A -->
 
 .b_13
 
@@ -25216,7 +28896,13 @@ LOAD_F% = LOAD% + P% - CODE%
  TXA
  BMI b_13
 
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  RTS
+
+\ <------------------------------------------------------- End of added code -->
+
+\ <---------------------------------------------------- End of added routine -->
 
 \ ******************************************************************************
 \
@@ -25246,8 +28932,12 @@ LOAD_F% = LOAD% + P% - CODE%
 
 .DKS1
 
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  LDA BSTK               \ AJD
  BMI b_14
+
+\ <------------------------------------------------------- End of added code -->
 
  LDX KYTB,Y             \ Get the internal key number from the Y-th byte of the
                         \ KYTB table above
@@ -25255,15 +28945,30 @@ LOAD_F% = LOAD% + P% - CODE%
  JSR DKS4               \ Call DKS4, which will set A and X to a negative value
                         \ if the key is being pressed
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  BPL DKS2-1           \ The key is not being pressed, so return from the
+\                       \ subroutine (as DKS2-1 contains an RTS)
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  BPL b_quit             \ The key is not being pressed, so return from the
                         \ subroutine (as b_quit contains an RTS)
 
 .b_pressed
 
+\ <------------------------------------------------------- End of added code -->
+
  LDA #&FF               \ Store &FF in the Y-th byte of the key logger at KL
  STA KL,Y
 
+\ <-------------------------------------------------- Code added for Elite-A -->
+
 .b_quit
+
+\ <------------------------------------------------------- End of added code -->
 
  RTS                    \ Return from the subroutine
 
@@ -25504,6 +29209,20 @@ LOAD_F% = LOAD% + P% - CODE%
  BNE auton              \ currently activated, so jump to auton in DOKEY so the
                         \ docking computer can "press" the flight keys for us
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  LDY #1               \ Update the key logger for key 1 in the KYTB table, so
+\  JSR DKS1             \ KY1 will be &FF if "?" (slow down) is being pressed
+\ 
+\  INY                  \ Update the key logger for key 2 in the KYTB table, so
+\  JSR DKS1             \ KY2 will be &FF if Space (speed up) is being pressed
+\ 
+\  LDA VIA+&40          \ Read 6522 System VIA input register IRB (SHEILA &40)
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  LDY #1                 \ Update the key logger for key 1 in the KYTB table, so
  JSR DKS1               \ KY1 will be &FF if "?" (slow down) is being pressed
 
@@ -25514,6 +29233,8 @@ LOAD_F% = LOAD% + P% - CODE%
  STA &FE60
 
  LDA VIA+&40            \ Read 6522 System VIA input register IRB (SHEILA &40)
+
+\ <------------------------------------------------------- End of added code -->
 
  TAX                    \ This instruction doesn't seem to have any effect, as
                         \ X is overwritten in a few instructions. When the
@@ -25623,6 +29344,19 @@ LOAD_F% = LOAD% + P% - CODE%
 
 .DOKEY
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  JSR U%               \ Call U% to clear the key logger
+\ 
+\  LDA JSTK             \ If JSTK is non-zero, then we are configured to use
+\  BNE DKJ1             \ the joystick rather than keyboard, so jump to DKJ1
+\                       \ to read the joystick flight controls, before jumping
+\                       \ to DK4 below
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  JSR U%                 \ Call U% to clear the key logger
 
  LDA &2F                \ AJD
@@ -25635,6 +29369,14 @@ LOAD_F% = LOAD% + P% - CODE%
  BNE DKJ1               \ the joystick rather than keyboard, so jump to DKJ1
                         \ to read the joystick flight controls, before jumping
                         \ to DK4 below
+
+\ <------------------------------------------------------- End of added code -->
+
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  STA BSTK             \ Set BSTK = 0 to disable the Bitstik
+\ 
+\ <----------------------------------------------------- End of deleted code -->
 
  LDY #7                 \ We're going to work our way through the primary flight
                         \ control keys (pitch, roll, speed and laser), so set a
@@ -25899,7 +29641,18 @@ LOAD_F% = LOAD% + P% - CODE%
 
  INY                    \ Increment Y to point to the next toggle key
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  CPY #&47             \ The last toggle key is &46 (K), so check whether we
+\                       \ have just done that one
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  CPY #&48               \ AJD
+
+\ <------------------------------------------------------- End of added code -->
 
  BNE DKL4               \ If not, loop back to check for the next toggle key
 
@@ -25919,6 +29672,34 @@ LOAD_F% = LOAD% + P% - CODE%
  JMP DEATH2             \ ESCAPE is being pressed, so jump to DEATH2 to end
                         \ the game
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  CPX #&64             \ If "B" is not being pressed, skip to DK7
+\  BNE nobit
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  LDA BSTK             \ Toggle the value of BSTK between 0 and &FF
+\  EOR #&FF
+\  STA BSTK
+\ 
+\  STA JSTK             \ Configure JSTK to the same value, so when the Bitstik
+\                       \ is enabled, so is the joystick
+\ 
+\  STA JSTE             \ Configure JSTE to the same value, so when the Bitstik
+\                       \ is enabled, the joystick is configured with reversed
+\                       \ channels
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\ .nobit
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
  CPX #&59               \ If DELETE is not being pressed, we are still paused,
  BNE FREEZE             \ so loop back up to keep listening for configuration
                         \ keys, otherwise fall through into the rest of the
@@ -25937,6 +29718,41 @@ LOAD_F% = LOAD% + P% - CODE%
                         \ to KL+16. So set a decreasing counter in Y for the
                         \ index, starting at 16, so we can loop through them
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  LDA #&FF             \ Set A to &FF so we can store this in the keyboard
+\                       \ logger for keys that are being pressed
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\ .DKL1
+\ 
+\  LDX KYTB,Y           \ Get the internal key number of the Y-th flight key
+\                       \ the KYTB keyboard table
+\ 
+\  CPX KL               \ We stored the key that's being pressed in KL above,
+\                       \ so check to see if the Y-th flight key is being
+\                       \ pressed
+\ 
+\  BNE DK1              \ If it is not being pressed, skip to DK1 below
+\ 
+\  STA KL,Y             \ The Y-th flight key is being pressed, so set that
+\                       \ key's location in the key logger to &FF
+\ 
+\ .DK1
+\ 
+\  DEY                  \ Decrement the loop counter
+\ 
+\  CPY #7               \ Have we just done the last key?
+\ 
+\  BNE DKL1             \ If not, loop back to process the next key
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
 .DKL1
 
  JSR DKS1               \ AJD
@@ -25946,6 +29762,8 @@ LOAD_F% = LOAD% + P% - CODE%
  CPY #7                 \ Have we just done the last key?
 
  BNE DKL1               \ If not, loop back to process the next key
+
+\ <------------------------------------------------------- End of added code -->
 
 .DK5
 
@@ -25996,9 +29814,13 @@ LOAD_F% = LOAD% + P% - CODE%
 \
 \ ******************************************************************************
 
+\ <----------------------------------------- Whole routine added for Elite-A -->
+
 .cargo_mtok
 
  ADC #&D0
+
+\ <---------------------------------------------------- End of added routine -->
 
 \ ******************************************************************************
 \
@@ -26020,7 +29842,18 @@ LOAD_F% = LOAD% + P% - CODE%
 
 .MESS
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  LDX #0               \ Set QQ17 = 0 to switch to ALL CAPS
+\  STX QQ17
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  JSR vdu_00             \ AJD
+
+\ <------------------------------------------------------- End of added code -->
 
  LDY #9                 \ Move the text cursor to column 9, row 22, at the
  STY XC                 \ bottom middle of the screen, and set Y = 22
@@ -26079,6 +29912,27 @@ LOAD_F% = LOAD% + P% - CODE%
 
  JSR DORND              \ Set A and X to random numbers
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  BMI DK5              \ If A < 0 (50% chance), return from the subroutine
+\                       \ (as DK5 contains an RTS)
+\ 
+\  CPX #22              \ If X >= 22 (89% chance), return from the subroutine
+\  BCS DK5              \ (as DK5 contains an RTS)
+\ 
+\  LDA QQ20,X           \ If we do not have any of item QQ20+X, return from the
+\  BEQ DK5              \ subroutine (as DK5 contains an RTS). X is in the range
+\                       \ 0-21, so this not only checks for cargo, but also for
+\                       \ E.C.M., fuel scoops, energy bomb, energy unit and
+\                       \ docking computer, all of which can be destroyed
+\ 
+\  LDA DLY              \ If there is already an in-flight message on-screen,
+\  BNE DK5              \ return from the subroutine (as DK5 contains an RTS)
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  BMI DK5                \ If A < 0 (50% chance), return from the subroutine
                         \ (as DK5 contains an RTS)
 
@@ -26091,9 +29945,24 @@ LOAD_F% = LOAD% + P% - CODE%
  LDA DLY                \ If there is already an in-flight message on-screen,
  BNE DK5                \ return from the subroutine (as DK5 contains an RTS)
 
+\ <------------------------------------------------------- End of added code -->
+
  LDY #3                 \ Set bit 1 of de, the equipment destruction flag, so
  STY de                 \ that when we call MESS below, " DESTROYED" is appended
                         \ to the in-flight message
+
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  STA QQ20,X           \ A is 0 (as we didn't branch with the BNE above), so
+\                       \ this sets QQ20+X to 0, which destroys any cargo or
+\                       \ equipment we have of that type
+\ 
+\  CPX #17              \ If X >= 17 then we just lost a piece of equipment, so
+\  BCS ou1              \ jump to ou1 to print the relevant message
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
 
  STA CRGO,X             \ AJD
  DEX
@@ -26102,6 +29971,21 @@ LOAD_F% = LOAD% + P% - CODE%
  CPX #17                \ If X = 17 then AJD
  BEQ ou1
 
+\ <------------------------------------------------------- End of added code -->
+
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  TXA                  \ Print recursive token 48 + A as an in-flight token,
+\  ADC #208             \ which will be in the range 48 ("FOOD") to 64 ("ALIEN
+\  BNE MESS             \ ITEMS") as the C flag is clear, so this prints the
+\                       \ destroyed item's name, followed by " DESTROYED" (as we
+\                       \ set bit 1 of the de flag above), and returns from the
+\                       \ subroutine using a tail call
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  TXA                    \ AJD
  BCC cargo_mtok
 
@@ -26109,7 +29993,31 @@ LOAD_F% = LOAD% + P% - CODE%
  BNE equip_mtok
  LDA #&6F-&6B-1
 
+\ <------------------------------------------------------- End of added code -->
+
 .ou1
+
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  BEQ ou2              \ If X = 17, jump to ou2 to print "E.C.M.SYSTEM
+\                       \ DESTROYED" and return from the subroutine using a tail
+\                       \ call
+\ 
+\  CPX #18              \ If X = 18, jump to ou3 to print "FUEL SCOOPS
+\  BEQ ou3              \ DESTROYED" and return from the subroutine using a tail
+\                       \ call
+\ 
+\  TXA                  \ Otherwise X is in the range 19 to 21 and the C flag is
+\  ADC #113-20          \ set (as we got here via a BCS to ou1), so we set A as
+\                       \ follows:
+\                       \
+\                       \   A = 113 - 20 + X + C
+\                       \     = 113 - 19 + X
+\                       \     = 113 to 115
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
 
  ADC #&6B-&5D           \ AJD
 
@@ -26117,6 +30025,8 @@ LOAD_F% = LOAD% + P% - CODE%
 
  ADC #&5D
  INC new_hold
+
+\ <------------------------------------------------------- End of added code -->
 
  BNE MESS               \ Print recursive token A ("ENERGY BOMB", "ENERGY UNIT"
                         \ or "DOCKING COMPUTERS") as an in-flight message,
@@ -32004,7 +35914,18 @@ ENDMACRO
 
 .TTX66
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  LDA #%10000000       \ Set bit 7 of QQ17 to switch to Sentence Case
+\  STA QQ17
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  JSR vdu_80             \ AJD
+
+\ <------------------------------------------------------- End of added code -->
 
  JSR FLFLLS             \ Call FLFLLS to reset the LSO block
 
@@ -32263,9 +36184,13 @@ ENDMACRO
 \
 \ ******************************************************************************
 
+\ <----------------------------------------- Whole routine added for Elite-A -->
+
 .iff_xor
 
  EQUB &00, &00, &0F \, &FF, &F0 overlap
+
+\ <---------------------------------------------------- End of added routine -->
 
 \ ******************************************************************************
 \
@@ -32276,9 +36201,13 @@ ENDMACRO
 \
 \ ******************************************************************************
 
+\ <----------------------------------------- Whole routine added for Elite-A -->
+
 .iff_base
 
  EQUB &FF, &F0, &FF, &F0, &FF
+
+\ <---------------------------------------------------- End of added routine -->
 
 \ ******************************************************************************
 \
@@ -32313,11 +36242,42 @@ ENDMACRO
                         \ scanner, so return from the subroutine (as SC5
                         \ contains an RTS)
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  LDX #&FF             \ Set X to the default scanner colour of green/cyan
+\                       \ (a 4-pixel mode 5 byte in colour 3)
+\ 
+\ \CMP #TGL             \ These instructions are commented out in the original
+\ \BEQ SC49             \ source. Along with the block just below, they would
+\                       \ set X to colour 1 (red) for asteroids, cargo canisters
+\                       \ and escape pods, rather than green/cyan. Presumably
+\                       \ they decided it didn't work that well against the red
+\                       \ ellipse and took this code out for release
+\ 
+\  CMP #MSL             \ If this is not a missile, skip the following
+\  BNE P%+4             \ instruction
+\ 
+\  LDX #&F0             \ This is a missile, so set X to colour 2 (yellow/white)
+\ 
+\ \CMP #AST             \ These instructions are commented out in the original
+\ \BCC P%+4             \ source. See above for an explanation of what they do
+\ \LDX #&0F
+\ \.SC49
+\ 
+\  STX COL              \ Store X, the colour of this ship on the scanner, in
+\                       \ COL
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  JSR iff_index          \ AJD
  LDA iff_base,X
  STA &91
  LDA iff_xor,X
  STA &37
+
+\ <------------------------------------------------------- End of added code -->
 
  LDA INWK+1             \ If any of x_hi, y_hi and z_hi have a 1 in bit 6 or 7,
  ORA INWK+4             \ then the ship is too far away to be shown on the
@@ -32480,6 +36440,13 @@ ENDMACRO
                         \
                         \ and we can get on with drawing the dot and stick
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  PHP                  \ Store the flags (specifically the C flag) from the
+\                       \ above subtraction
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
 .SC48
 
  PHA                    \ Store the stick height in A on the stack
@@ -32499,6 +36466,19 @@ ENDMACRO
                         \ We can use there as the starting point for drawing the
                         \ stick, if there is one
 
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  LDA CTWOS+1,X        \ Load the same mode 5 1-pixel byte that we just used
+\  AND COL              \ for the top-right pixel, and mask it with the same
+\  STA X1               \ colour, storing the result in X1, so we can use it as
+\                       \ the character row byte for the stick
+\ 
+\  PLA                  \ Restore the stick height from the stack into A
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
  LDA TWOS+&11,X         \ AJD
  TAX
  AND &91                \ iff
@@ -32507,6 +36487,44 @@ ENDMACRO
  AND &37
  STA &35
  PLA
+
+\ <------------------------------------------------------- End of added code -->
+
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  PLP                  \ Restore the flags from above, so the C flag once again
+\                       \ reflects the sign of the stick height
+\ 
+\  TAX                  \ Copy the stick height into X
+\ 
+\  BEQ RTS              \ If the stick height is zero, then there is no stick to
+\                       \ draw, so return from the subroutine (as RTS contains
+\                       \ an RTS)
+\ 
+\  BCC RTS+1            \ If the C flag is clear then the stick height in A is
+\                       \ negative, so jump down to RTS+1
+\ 
+\ .VLL1
+\ 
+\                       \ If we get here then the stick length is positive (so
+\                       \ the dot is below the ellipse and the stick is above
+\                       \ the dot, and we need to draw the stick upwards from
+\                       \ the dot)
+\ 
+\  DEY                  \ We want to draw the stick upwards, so decrement the
+\                       \ pixel row in Y
+\ 
+\  BPL VL1              \ If Y is still positive then it correctly points at the
+\                       \ line above, so jump to VL1 to skip the following
+\ 
+\  LDY #7               \ We just decremented Y up through the top of the
+\                       \ character block, so we need to move it to the last row
+\                       \ in the character above, so set Y to 7, the number of
+\                       \ the last row
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
 
  TAX                    \ Copy the stick height into X
 
@@ -32534,8 +36552,40 @@ ENDMACRO
                         \ in the character above, so set Y to 7, the number of
                         \ the last row
 
+\ <------------------------------------------------------- End of added code -->
+
  DEC SC+1               \ Decrement the high byte of the screen address to move
                         \ to the character block above
+
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\ .VL1
+\ 
+\  LDA X1               \ Set A to the character row byte for the stick, which
+\                       \ we stored in X1 above, and which has the same pixel
+\                       \ pattern as the bottom-right pixel of the dot (so the
+\                       \ stick comes out of the right side of the dot)
+\ 
+\  EOR (SC),Y           \ Draw the stick on row Y of the character block using
+\  STA (SC),Y           \ EOR logic
+\ 
+\  DEX                  \ Decrement the (positive) stick height in X
+\ 
+\  BNE VLL1             \ If we still have more stick to draw, jump up to VLL1
+\                       \ to draw the next pixel
+\ 
+\ .RTS
+\ 
+\  RTS                  \ Return from the subroutine
+\ 
+\                       \ If we get here then the stick length is negative (so
+\                       \ the dot is above the ellipse and the stick is below
+\                       \ the dot, and we need to draw the stick downwards from
+\                       \ the dot)
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
 
 .VL1
 
@@ -32563,6 +36613,65 @@ ENDMACRO
                         \ the dot is above the ellipse and the stick is below
                         \ the dot, and we need to draw the stick downwards from
                         \ the dot)
+
+\ <------------------------------------------------------- End of added code -->
+
+\ <----------------------------- Code deleted from the original disc version -->
+\ 
+\  INY                  \ We want to draw the stick downwards, so we first
+\                       \ increment the row counter so that it's pointing to the
+\                       \ bottom-right pixel in the dot (as opposed to the top-
+\                       \ right pixel that the call to CPIX4 finished on)
+\ 
+\  CPY #8               \ If the row number in Y is less than 8, then it
+\  BNE P%+6             \ correctly points at the next line down, so jump to
+\                       \ VLL2 to skip the following
+\ 
+\  LDY #0               \ We just incremented Y down through the bottom of the
+\                       \ character block, so we need to move it to the first
+\                       \ row in the character below, so set Y to 0, the number
+\                       \ of the first row
+\ 
+\  INC SC+1             \ Increment the high byte of the screen address to move
+\                       \ to the character block above
+\ 
+\ .VLL2
+\ 
+\  INY                  \ We want to draw the stick itself, heading downwards,
+\                       \ so increment the pixel row in Y
+\ 
+\  CPY #8               \ If the row number in Y is less than 8, then it
+\  BNE VL2              \ correctly points at the next line down, so jump to
+\                       \ VL2 to skip the following
+\ 
+\  LDY #0               \ We just incremented Y down through the bottom of the
+\                       \ character block, so we need to move it to the first
+\                       \ row in the character below, so set Y to 0, the number
+\                       \ of the first row
+\ 
+\  INC SC+1             \ Increment the high byte of the screen address to move
+\                       \ to the character block above
+\ 
+\ .VL2
+\ 
+\  LDA X1               \ Set A to the character row byte for the stick, which
+\                       \ we stored in X1 above, and which has the same pixel
+\                       \ pattern as the bottom-right pixel of the dot (so the
+\                       \ stick comes out of the right side of the dot)
+\ 
+\  EOR (SC),Y           \ Draw the stick on row Y of the character block using
+\  STA (SC),Y           \ EOR logic
+\ 
+\  INX                  \ Increment the (negative) stick height in X
+\ 
+\  BNE VLL2             \ If we still have more stick to draw, jump up to VLL2
+\                       \ to draw the next pixel
+\ 
+\  RTS                  \ Return from the subroutine
+\ 
+\ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
 
  INY                    \ We want to draw the stick downwards, so we first
                         \ increment the row counter so that it's pointing to the
@@ -32617,6 +36726,8 @@ ENDMACRO
                         \ to draw the next pixel
 
  RTS                    \ Return from the subroutine
+
+\ <------------------------------------------------------- End of added code -->
 
 \ ******************************************************************************
 \
