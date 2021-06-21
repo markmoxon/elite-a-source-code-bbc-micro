@@ -8405,7 +8405,6 @@ LOAD_C% = LOAD% +P% - CODE%
  LDA #64                \ Set the main loop counter to 64, so the ship rotates
  STA MCNT               \ for 64 iterations through MVEIT
  
-
 .BRL1
 
  LDX #%01111111         \ Set the ship's roll counter to a positive roll that

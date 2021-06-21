@@ -621,8 +621,7 @@ ENDMACRO
 \
 \  EQUB %00010001       \ Laser power              = 2
 \                       \ Missiles                 = 1
-\ 
-\ <----------------------------------------------------- End of deleted code -->
+\\ <----------------------------------------------------- End of deleted code -->
 
 \ <-------------------------------------------------- Code added for Elite-A -->
 
@@ -725,8 +724,7 @@ ENDMACRO
 \
 \  EQUB %00010000       \ Laser power              = 2
 \                       \ Missiles                 = 0
-\ 
-\ <----------------------------------------------------- End of deleted code -->
+\\ <----------------------------------------------------- End of deleted code -->
 
 \ <-------------------------------------------------- Code added for Elite-A -->
 
@@ -792,8 +790,6 @@ ENDMACRO
 \  Deep dive: Ship blueprints
 \
 \ ******************************************************************************
-
-\ <----------------------------------------- Whole routine added for Elite-A -->
 
 .ship_shuttle_2
 
@@ -880,8 +876,6 @@ ENDMACRO
  FACE       66,      -66,      -22,         31    \ Face 10
  FACE       66,       66,      -22,         31    \ Face 11
  FACE        0,        0,      -96,         31    \ Face 12
-
-\ <---------------------------------------------------- End of added routine -->
 
 \ ******************************************************************************
 \
@@ -1011,8 +1005,7 @@ ENDMACRO
 \
 \  EQUB %00010000       \ Laser power              = 2
 \                       \ Missiles                 = 0
-\ 
-\ <----------------------------------------------------- End of deleted code -->
+\\ <----------------------------------------------------- End of deleted code -->
 
 \ <-------------------------------------------------- Code added for Elite-A -->
 
@@ -1339,8 +1332,7 @@ ENDMACRO
 \
 \  EQUB %00010010       \ Laser power              = 2
 \                       \ Missiles                 = 2
-\ 
-\ <----------------------------------------------------- End of deleted code -->
+\\ <----------------------------------------------------- End of deleted code -->
 
 \ <-------------------------------------------------- Code added for Elite-A -->
 
@@ -1452,8 +1444,7 @@ ENDMACRO
 \
 \  EQUB %00011011       \ Laser power              = 3
 \                       \ Missiles                 = 3
-\ 
-\ <----------------------------------------------------- End of deleted code -->
+\\ <----------------------------------------------------- End of deleted code -->
 
 \ <-------------------------------------------------- Code added for Elite-A -->
 
@@ -1465,26 +1456,20 @@ ENDMACRO
 \VERTEX    x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX    0,    0,  224,     0,      1,    2,     3,         31    \ Vertex 0
 
-\ <-------------------------------------------------- Code added for Elite-A -->
-
- VERTEX    0,   48,   48,     0,      1,    4,     5,         30    \ Vertex 1
-
-\ <------------------------------------------------------- End of added code -->
-
 \ <----------------------------- Code deleted from the original disc version -->
 \
 \  VERTEX    0,   48,   48,     0,      1,    4,     5,         31  \ Vertex 1
 \
 \ <----------------------------------------------------- End of deleted code -->
 
- VERTEX   96,    0,  -16,    15,     15,   15,    15,         31    \ Vertex 2
- VERTEX  -96,    0,  -16,    15,     15,   15,    15,         31    \ Vertex 3
-
 \ <-------------------------------------------------- Code added for Elite-A -->
 
- VERTEX    0,   48,  -32,     4,      5,    8,     9,         30    \ Vertex 4
+ VERTEX    0,   48,   48,     0,      1,    4,     5,         30    \ Vertex 1
 
 \ <------------------------------------------------------- End of added code -->
+
+ VERTEX   96,    0,  -16,    15,     15,   15,    15,         31    \ Vertex 2
+ VERTEX  -96,    0,  -16,    15,     15,   15,    15,         31    \ Vertex 3
 
 \ <----------------------------- Code deleted from the original disc version -->
 \
@@ -1492,17 +1477,15 @@ ENDMACRO
 \
 \ <----------------------------------------------------- End of deleted code -->
 
+\ <-------------------------------------------------- Code added for Elite-A -->
+
+ VERTEX    0,   48,  -32,     4,      5,    8,     9,         30    \ Vertex 4
+
+\ <------------------------------------------------------- End of added code -->
+
  VERTEX    0,   24, -112,     9,      8,   12,    12,         31    \ Vertex 5
  VERTEX  -48,    0, -112,     8,     11,   12,    12,         31    \ Vertex 6
  VERTEX   48,    0, -112,     9,     10,   12,    12,         31    \ Vertex 7
-
-\ <-------------------------------------------------- Code added for Elite-A -->
-
- VERTEX    0,  -48,   48,     2,      3,    6,     7,         30    \ Vertex 8
- VERTEX    0,  -48,  -32,     6,      7,   10,    11,         30    \ Vertex 9
- VERTEX    0,  -24, -112,    10,     11,   12,    12,         30    \ Vertex 10
-
-\ <------------------------------------------------------- End of added code -->
 
 \ <----------------------------- Code deleted from the original disc version -->
 \
@@ -1512,13 +1495,15 @@ ENDMACRO
 \
 \ <----------------------------------------------------- End of deleted code -->
 
-\EDGE vertex1, vertex2, face1, face2, visibility
-
 \ <-------------------------------------------------- Code added for Elite-A -->
 
- EDGE       0,       8,     2,     3,         30    \ Edge 0
+ VERTEX    0,  -48,   48,     2,      3,    6,     7,         30    \ Vertex 8
+ VERTEX    0,  -48,  -32,     6,      7,   10,    11,         30    \ Vertex 9
+ VERTEX    0,  -24, -112,    10,     11,   12,    12,         30    \ Vertex 10
 
 \ <------------------------------------------------------- End of added code -->
+
+\EDGE vertex1, vertex2, face1, face2, visibility
 
 \ <----------------------------- Code deleted from the original disc version -->
 \
@@ -1526,26 +1511,14 @@ ENDMACRO
 \
 \ <----------------------------------------------------- End of deleted code -->
 
- EDGE       0,       3,     0,     2,         31    \ Edge 1
- EDGE       0,       2,     1,     3,         31    \ Edge 2
-
 \ <-------------------------------------------------- Code added for Elite-A -->
 
- EDGE       0,       1,     0,     1,         30    \ Edge 3
- EDGE       2,       4,     9,     5,         29    \ Edge 4
- EDGE       1,       2,     1,     5,         29    \ Edge 5
- EDGE       2,       8,     7,     3,         29    \ Edge 6
- EDGE       1,       3,     0,     4,         29    \ Edge 7
- EDGE       3,       8,     2,     6,         29    \ Edge 8
- EDGE       2,       9,     7,    10,         29    \ Edge 9
- EDGE       3,       4,     4,     8,         29    \ Edge 10
- EDGE       3,       9,     6,    11,         29    \ Edge 11
- EDGE       3,       5,     8,     8,          5    \ Edge 12
- EDGE       3,      10,    11,    11,          5    \ Edge 13
- EDGE       2,       5,     9,     9,          5    \ Edge 14
- EDGE       2,      10,    10,    10,          5    \ Edge 15
+ EDGE       0,       8,     2,     3,         30    \ Edge 0
 
 \ <------------------------------------------------------- End of added code -->
+
+ EDGE       0,       3,     0,     2,         31    \ Edge 1
+ EDGE       0,       2,     1,     3,         31    \ Edge 2
 
 \ <----------------------------- Code deleted from the original disc version -->
 \
@@ -1565,21 +1538,28 @@ ENDMACRO
 \
 \ <----------------------------------------------------- End of deleted code -->
 
+\ <-------------------------------------------------- Code added for Elite-A -->
+
+ EDGE       0,       1,     0,     1,         30    \ Edge 3
+ EDGE       2,       4,     9,     5,         29    \ Edge 4
+ EDGE       1,       2,     1,     5,         29    \ Edge 5
+ EDGE       2,       8,     7,     3,         29    \ Edge 6
+ EDGE       1,       3,     0,     4,         29    \ Edge 7
+ EDGE       3,       8,     2,     6,         29    \ Edge 8
+ EDGE       2,       9,     7,    10,         29    \ Edge 9
+ EDGE       3,       4,     4,     8,         29    \ Edge 10
+ EDGE       3,       9,     6,    11,         29    \ Edge 11
+ EDGE       3,       5,     8,     8,          5    \ Edge 12
+ EDGE       3,      10,    11,    11,          5    \ Edge 13
+ EDGE       2,       5,     9,     9,          5    \ Edge 14
+ EDGE       2,      10,    10,    10,          5    \ Edge 15
+
+\ <------------------------------------------------------- End of added code -->
+
  EDGE       2,       7,     9,    10,         31    \ Edge 16
  EDGE       3,       6,     8,    11,         31    \ Edge 17
  EDGE       5,       6,     8,    12,         31    \ Edge 18
  EDGE       5,       7,     9,    12,         31    \ Edge 19
-
-\ <-------------------------------------------------- Code added for Elite-A -->
-
- EDGE       7,      10,    12,    10,         29    \ Edge 20
- EDGE       6,      10,    11,    12,         29    \ Edge 21
- EDGE       4,       5,     8,     9,         29    \ Edge 22
- EDGE       9,      10,    10,    11,         29    \ Edge 23
- EDGE       1,       4,     4,     5,         29    \ Edge 24
- EDGE       8,       9,     6,     7,         29    \ Edge 25
-
-\ <------------------------------------------------------- End of added code -->
 
 \ <----------------------------- Code deleted from the original disc version -->
 \
@@ -1590,9 +1570,30 @@ ENDMACRO
 \  EDGE       1,       4,     4,     5,         31  \ Edge 24
 \  EDGE       8,       9,     6,     7,         31  \ Edge 25
 \
-\ <----------------------------------------------------- End of deleted code -->
+\\ \FACE normal_x, normal_y, normal_z, visibility
+\  FACE      -27,       40,       11,        31  \ Face 0
+\  FACE       27,       40,       11,        31  \ Face 1
+\  FACE      -27,      -40,       11,        31  \ Face 2
+\  FACE       27,      -40,       11,        31  \ Face 3
+\  FACE      -19,       38,        0,        31  \ Face 4
+\  FACE       19,       38,        0,        31  \ Face 5
+\  FACE      -19,      -38,        0,        31  \ Face 6
+\  FACE       19,      -38,        0,        31  \ Face 7
+\  FACE      -25,       37,      -11,        31  \ Face 8
+\  FACE       25,       37,      -11,        31  \ Face 9
+\  FACE       25,      -37,      -11,        31  \ Face 10
+\  FACE      -25,      -37,      -11,        31  \ Face 11
+\  FACE        0,        0,     -112,        31  \ Face 12
+\\ <----------------------------------------------------- End of deleted code -->
 
 \ <-------------------------------------------------- Code added for Elite-A -->
+
+ EDGE       7,      10,    12,    10,         29    \ Edge 20
+ EDGE       6,      10,    11,    12,         29    \ Edge 21
+ EDGE       4,       5,     8,     9,         29    \ Edge 22
+ EDGE       9,      10,    10,    11,         29    \ Edge 23
+ EDGE       1,       4,     4,     5,         29    \ Edge 24
+ EDGE       8,       9,     6,     7,         29    \ Edge 25
 
 \FACE normal_x, normal_y, normal_z, visibility
  FACE      -27,       40,       11,         30    \ Face 0
@@ -1610,25 +1611,6 @@ ENDMACRO
  FACE        0,        0,     -112,         30    \ Face 12
 
 \ <------------------------------------------------------- End of added code -->
-
-\ <----------------------------- Code deleted from the original disc version -->
-\ 
-\ \FACE normal_x, normal_y, normal_z, visibility
-\  FACE      -27,       40,       11,        31  \ Face 0
-\  FACE       27,       40,       11,        31  \ Face 1
-\  FACE      -27,      -40,       11,        31  \ Face 2
-\  FACE       27,      -40,       11,        31  \ Face 3
-\  FACE      -19,       38,        0,        31  \ Face 4
-\  FACE       19,       38,        0,        31  \ Face 5
-\  FACE      -19,      -38,        0,        31  \ Face 6
-\  FACE       19,      -38,        0,        31  \ Face 7
-\  FACE      -25,       37,      -11,        31  \ Face 8
-\  FACE       25,       37,      -11,        31  \ Face 9
-\  FACE       25,      -37,      -11,        31  \ Face 10
-\  FACE      -25,      -37,      -11,        31  \ Face 11
-\  FACE        0,        0,     -112,        31  \ Face 12
-\ 
-\ <----------------------------------------------------- End of deleted code -->
 
  EQUB 3                 \ AJD
 

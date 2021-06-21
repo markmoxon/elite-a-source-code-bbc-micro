@@ -9940,7 +9940,6 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  CMP #10                \ If A >= 10, jump to buy_invnt to AJD
  BCS buy_invnt
  
-
  STA S                  \ Store the numeric value of the key pressed in S
 
  LDA R                  \ Fetch the result so far into A

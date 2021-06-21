@@ -302,19 +302,19 @@ ENDMACRO
  FACE        0,      -32,        0,         31    \ Face 5
  FACE      -32,        0,        0,         31    \ Face 6
 
-\ <-------------------------------------------------- Code added for Elite-A -->
-
- FACE        0,       32,        0,         31    \ Face 7
- FACE        0,        0,     -176,         31    \ Face 8
-
-\ <------------------------------------------------------- End of added code -->
-
 \ <----------------------------- Code deleted from the original disc version -->
 \
 \  FACE        0,      160,      110,         31  \ Face 7
 \  FACE        0,       64,        4,          0  \ Face 8
 \
 \ <----------------------------------------------------- End of deleted code -->
+
+\ <-------------------------------------------------- Code added for Elite-A -->
+
+ FACE        0,       32,        0,         31    \ Face 7
+ FACE        0,        0,     -176,         31    \ Face 8
+
+\ <------------------------------------------------------- End of added code -->
 
 \ ******************************************************************************
 \
@@ -327,6 +327,16 @@ ENDMACRO
 
 .VEC
 
+\ <----------------------------- Code deleted from the original disc version -->
+\\  EQUW &0004           \ VEC = &7FFE
+\                       \
+\                       \ This gets set to the value of the original IRQ1 vector
+\                       \ by the loading process
+\                       \
+\                       \ This default value is presumably noise included at the
+\                       \ time of compilation, as it gets overwritten
+\\ <----------------------------------------------------- End of deleted code -->
+
 \ <-------------------------------------------------- Code added for Elite-A -->
 
  SKIP 2                 \ VEC = &7FFE
@@ -335,18 +345,6 @@ ENDMACRO
                         \ by the loading process
 
 \ <------------------------------------------------------- End of added code -->
-
-\ <----------------------------- Code deleted from the original disc version -->
-\ 
-\  EQUW &0004           \ VEC = &7FFE
-\                       \
-\                       \ This gets set to the value of the original IRQ1 vector
-\                       \ by the loading process
-\                       \
-\                       \ This default value is presumably noise included at the
-\                       \ time of compilation, as it gets overwritten
-\ 
-\ <----------------------------------------------------- End of deleted code -->
 
 \ ******************************************************************************
 \
