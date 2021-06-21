@@ -474,8 +474,8 @@ ENDMACRO
  TWOK 'A', 'L'
  EQUB 0
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  CHAR 'H'             \ Token 29:     "HYPERSPACE "
 \  CHAR 'Y'             \
 \  CHAR 'P'             \ Encoded as:   "HYP<144>SPA<133> "
@@ -486,10 +486,8 @@ ENDMACRO
 \  TWOK 'C', 'E'
 \  CHAR ' '
 \  EQUB 0
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- And replaced by the following: -------------------
 
  CHAR 'H'               \ Token 29:     "HYPERSPACE "
  CHAR 'Y'               \
@@ -499,7 +497,7 @@ ENDMACRO
  CHAR ' '
  EQUB 0
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
  CHAR 'S'               \ Token 30:     "SHORT RANGE CHART"
  CHAR 'H'               \
@@ -713,8 +711,8 @@ ENDMACRO
  CHAR 'Y'
  EQUB 0
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  CHAR 'A'             \ Token 57:     "ALLOYS"
 \  CHAR 'L'             \
 \  CHAR 'L'             \ Encoded as:   "ALLOYS"
@@ -722,10 +720,8 @@ ENDMACRO
 \  CHAR 'Y'
 \  CHAR 'S'
 \  EQUB 0
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- And replaced by the following: -------------------
 
  CHAR 'A'               \ Token 57:     "ALLOYS"
  RTOK 129               \
@@ -734,7 +730,7 @@ ENDMACRO
  CHAR 'S'
  EQUB 0
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
  CHAR 'F'               \ Token 58:     "FIREARMS"
  CHAR 'I'               \
@@ -1062,8 +1058,8 @@ ENDMACRO
  TWOK 'L', 'E'
  EQUB 0
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  RTOK 67              \ Token 107:    "LARGE CARGO{sentence case} BAY"
 \  RTOK 46              \
 \  CHAR ' '             \ Encoded as:   "[67][46] BAY"
@@ -1071,10 +1067,8 @@ ENDMACRO
 \  CHAR 'A'
 \  CHAR 'Y'
 \  EQUB 0
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- And replaced by the following: -------------------
 
  CHAR 'I'               \ Token 107:    "I.F.F.SYSTEM"
  CHAR '.'               \
@@ -1085,7 +1079,7 @@ ENDMACRO
  RTOK 5
  EQUB 0
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
  CHAR 'E'               \ Token 108:    "E.C.M.SYSTEM"
  CHAR '.'               \
@@ -1127,24 +1121,22 @@ ENDMACRO
  CHAR 'D'
  EQUB 0
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  RTOK 121             \ Token 113:    "ENERGY BOMB"
 \  CHAR 'B'             \
 \  CHAR 'O'             \ Encoded as:   "[121]BOMB"
 \  CHAR 'M'
 \  CHAR 'B'
 \  EQUB 0
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- And replaced by the following: -------------------
 
  RTOK 29                \ Token 113:    "HYPERSPACE UNIT"
  RTOK 14                \
  EQUB 0                 \ Encoded as:   "[29][14]"
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
  RTOK 121               \ Token 114:    "ENERGY UNIT"
  RTOK 14                \
@@ -1165,8 +1157,8 @@ ENDMACRO
  RTOK 29                \ Encoded as:   "[122] [29]"
  EQUB 0
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  CHAR 'M'             \ Token 117:    "MILITARY  LASER"
 \  CHAR 'I'             \
 \  CHAR 'L'             \ Encoded as:   "MILIT<138>Y [27]"
@@ -1177,7 +1169,7 @@ ENDMACRO
 \  CHAR ' '
 \  RTOK 27
 \  EQUB 0
-\
+
 \  CHAR 'M'             \ Token 118:    "MINING  LASER"
 \  TWOK 'I', 'N'        \
 \  TWOK 'I', 'N'        \ Encoded as:   "M<140><140>G [27]"
@@ -1185,10 +1177,8 @@ ENDMACRO
 \  CHAR ' '
 \  RTOK 27
 \  EQUB 0
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- And replaced by the following: -------------------
 
  CHAR 'M'               \ Token 117:    "MILITARY LASER"
  CHAR 'I'               \
@@ -1207,7 +1197,7 @@ ENDMACRO
  RTOK 27
  EQUB 0
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
  RTOK 37                \ Token 119:    "CASH:{cash} CR{cr}
  CHAR ':'               \               "
@@ -1237,24 +1227,22 @@ ENDMACRO
  CHAR 'C'
  EQUB 0
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  RTOK 115             \ Token 123:    "DOCKING COMPUTERS ON"
 \  CHAR ' '             \
 \  CHAR 'O'             \ Encoded as:   "[115] ON"
 \  CHAR 'N'
 \  EQUB 0
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- And replaced by the following: -------------------
 
  RTOK 115               \ Token 123:    "DOCKING COMPUTERS ON"
  CHAR ' '               \
  TWOK 'O', 'N'          \ Encoded as:   "[115] <159>"
  EQUB 0
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
  CHAR 'A'               \ Token 124:    "ALL"
  RTOK 129               \
@@ -1302,15 +1290,13 @@ ENDMACRO
  CHAR 'M'               \ Encoded as:   "I<156>M"
  EQUB 0
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  EQUB 0               \ Token 128:    ""
 \                       \
 \                       \ Encoded as:   ""
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- And replaced by the following: -------------------
 
  CHAR 'S'               \ Token 128:    "SPACE"
  CHAR 'P'               \
@@ -1318,7 +1304,7 @@ ENDMACRO
  TWOK 'C', 'E'
  EQUB 0
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
  CHAR 'L'               \ Token 129:    "LL"
  CHAR 'L'               \
@@ -1336,8 +1322,8 @@ ENDMACRO
  CHAR ' '               \ Encoded as:   " <159> "
  EQUB 0
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  CONT 12              \ Token 132:    "{cr}
 \  CONT 8               \                {all caps}EQUIPMENT: {sentence case}"
 \  RTOK 47              \
@@ -1347,10 +1333,8 @@ ENDMACRO
 \  CHAR ':'
 \  CONT 6
 \  EQUB 0
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- And replaced by the following: -------------------
 
  CONT 12                \ Token 132:    "{cr}
  RTOK 25                \                SHIP:          "
@@ -1370,7 +1354,7 @@ ENDMACRO
  CHAR ' '
  EQUB 0
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
  CHAR 'C'               \ Token 133:    "CLEAN"
  TWOK 'L', 'E'          \

@@ -9939,7 +9939,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
  CMP #10                \ If A >= 10, jump to buy_invnt to AJD
  BCS buy_invnt
- 
+
  STA S                  \ Store the numeric value of the key pressed in S
 
  LDA R                  \ Fetch the result so far into A
@@ -21362,7 +21362,7 @@ ENDMACRO
  ECHR ' '               \ Token 67:     " SHIP"
  ETOK 207               \
  EQUB VE                \ Encoded as:   " [207]"
- 
+
  ETWO 'I', 'N'          \ Token 68:     "INVENTION"
  ECHR 'V'               \
  ETWO 'E', 'N'          \ Encoded as:   "<240>V<246><251><223>"

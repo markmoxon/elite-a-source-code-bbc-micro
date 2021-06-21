@@ -8404,7 +8404,7 @@ LOAD_C% = LOAD% +P% - CODE%
 
  LDA #64                \ Set the main loop counter to 64, so the ship rotates
  STA MCNT               \ for 64 iterations through MVEIT
- 
+
 .BRL1
 
  LDX #%01111111         \ Set the ship's roll counter to a positive roll that
@@ -27760,7 +27760,7 @@ ENDMACRO
  ECHR ' '               \ Token 67:     " SHIP"
  ETOK 207               \
  EQUB VE                \ Encoded as:   " [207]"
- 
+
  ETWO 'I', 'N'          \ Token 68:     "INVENTION"
  ECHR 'V'               \
  ETWO 'E', 'N'          \ Encoded as:   "<240>V<246><251><223>"

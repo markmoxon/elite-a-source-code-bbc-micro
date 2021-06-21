@@ -698,13 +698,13 @@ ORG &0000
 
  SKIP 4                 \ Temporary storage, used in a number of places
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- Code added for Elite-A: --------------------------
 
 .finder
 
  SKIP 1                 \ AJD
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of added code --------------------------------
 
 ORG &00D1
 
@@ -761,10 +761,10 @@ ORG &0100
 
 ORG &0300
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \ .KL
-\
+
 \  SKIP 1               \ The following bytes implement a key logger that
 \                       \ enables Elite to scan for concurrent key presses of
 \                       \ the primary flight keys, plus a secondary flight key
@@ -774,57 +774,57 @@ ORG &0300
 \                       \ If a key is being pressed that is not in the keyboard
 \                       \ table at KYTB, it can be stored here (as seen in
 \                       \ routine DK4, for example)
-\
+
 \ .KY1
-\
+
 \  SKIP 1               \ "?" is being pressed
 \                       \
 \                       \   * 0 = no
 \                       \
 \                       \   * Non-zero = yes
-\
+
 \ .KY2
-\
+
 \  SKIP 1               \ Space is being pressed
 \                       \
 \                       \   * 0 = no
 \                       \
 \                       \   * Non-zero = yes
-\
+
 \ .KY3
-\
+
 \  SKIP 1               \ "<" is being pressed
 \                       \
 \                       \   * 0 = no
 \                       \
 \                       \   * Non-zero = yes
-\
+
 \ .KY4
-\
+
 \  SKIP 1               \ ">" is being pressed
 \                       \
 \                       \   * 0 = no
 \                       \
 \                       \   * Non-zero = yes
-\
+
 \ .KY5
-\
+
 \  SKIP 1               \ "X" is being pressed
 \                       \
 \                       \   * 0 = no
 \                       \
 \                       \   * Non-zero = yes
-\
+
 \ .KY6
-\
+
 \  SKIP 1               \ "S" is being pressed
 \                       \
 \                       \   * 0 = no
 \                       \
 \                       \   * Non-zero = yes
-\
+
 \ .KY7
-\
+
 \  SKIP 1               \ "A" is being pressed
 \                       \
 \                       \   * 0 = no
@@ -833,81 +833,81 @@ ORG &0300
 \                       \
 \                       \ This is also set when the joystick fire button has
 \                       \ been pressed
-\
+
 \ .KY12
-\
+
 \  SKIP 1               \ TAB is being pressed
 \                       \
 \                       \   * 0 = no
 \                       \
 \                       \   * Non-zero = yes
-\
+
 \ .KY13
-\
+
 \  SKIP 1               \ ESCAPE is being pressed
 \                       \
 \                       \   * 0 = no
 \                       \
 \                       \   * Non-zero = yes
-\
+
 \ .KY14
-\
+
 \  SKIP 1               \ "T" is being pressed
 \                       \
 \                       \   * 0 = no
 \                       \
 \                       \   * Non-zero = yes
-\
+
 \ .KY15
-\
+
 \  SKIP 1               \ "U" is being pressed
 \                       \
 \                       \   * 0 = no
 \                       \
 \                       \   * Non-zero = yes
-\
+
 \ .KY16
-\
+
 \  SKIP 1               \ "M" is being pressed
 \                       \
 \                       \   * 0 = no
 \                       \
 \                       \   * Non-zero = yes
-\
+
 \ .KY17
-\
+
 \  SKIP 1               \ "E" is being pressed
 \                       \
 \                       \   * 0 = no
 \                       \
 \                       \   * Non-zero = yes
-\
+
 \ .KY18
-\
+
 \  SKIP 1               \ "J" is being pressed
 \                       \
 \                       \   * 0 = no
 \                       \
 \                       \   * Non-zero = yes
-\
+
 \ .KY19
-\
+
 \  SKIP 1               \ "C" is being pressed
 \                       \
 \                       \   * 0 = no
 \                       \
 \                       \   * Non-zero = yes
-\
+
 \ .KY20
-\
+
 \  SKIP 1               \ "P" is being pressed
 \                       \
 \                       \   * 0 = no
 \                       \
 \                       \   * Non-zero = yes
-\
+
 \ .FRIN
-\
+
 \  SKIP NOSH + 1        \ Slots for the ships in the local bubble of universe
 \                       \
 \                       \ There are #NOSH + 1 slots, but the ship-spawning
@@ -920,9 +920,9 @@ ORG &0300
 \                       \ See the deep dive on "The local bubble of universe"
 \                       \ for details of how Elite stores the local universe in
 \                       \ FRIN, UNIV and K%
-\
+
 \ .MANY
-\
+
 \  SKIP SST             \ The number of ships of each type in the local bubble
 \                       \ of universe
 \                       \
@@ -932,9 +932,9 @@ ORG &0300
 \                       \
 \                       \ See the deep dive on "Ship blueprints" for a list of
 \                       \ ship types
-\
+
 \ .SSPR
-\
+
 \  SKIP NTY + 1 - SST   \ "Space station present" flag
 \                       \
 \                       \   * Non-zero if we are inside the space station's safe
@@ -946,9 +946,9 @@ ORG &0300
 \                       \ MANY+SST is a count of how many space stations there
 \                       \ are in our local bubble, which is the same as saying
 \                       \ "space station present"
-\
+
 \ .JUNK
-\
+
 \  SKIP 1               \ The amount of junk in the local bubble
 \                       \
 \                       \ "Junk" is defined as being one of these:
@@ -962,34 +962,33 @@ ORG &0300
 \                       \   * Transporter
 \                       \
 \                       \ Junk is the range of ship types from #JL to #JH - 1
-\
-\
+
 \ .auto
-\
+
 \  SKIP 1               \ Docking computer activation status
 \                       \
 \                       \   * 0 = Docking computer is off
 \                       \
 \                       \   * Non-zero = Docking computer is running
-\
+
 \ .ECMP
-\
+
 \  SKIP 1               \ Our E.C.M. status
 \                       \
 \                       \   * 0 = E.C.M. is off
 \                       \
 \                       \   * Non-zero = E.C.M. is on
-\
+
 \ .MJ
-\
+
 \  SKIP 1               \ Are we in witchspace (i.e. have we mis-jumped)?
 \                       \
 \                       \   * 0 = no, we are in normal space
 \                       \
 \                       \   * &FF = yes, we are in witchspace
-\
+
 \ .CABTMP
-\
+
 \  SKIP 1               \ Cabin temperature
 \                       \
 \                       \ The ambient cabin temperature in deep space is 30,
@@ -1002,9 +1001,9 @@ ORG &0300
 \                       \ and as there is no ship type 0 (they start at 1), the
 \                       \ byte at MANY+0 is not used for storing a ship type
 \                       \ and can be used for the cabin temperature instead
-\
+
 \ .LAS2
-\
+
 \  SKIP 1               \ Laser power for the current laser
 \                       \
 \                       \   * Bits 0-6 contain the laser power of the current
@@ -1015,9 +1014,9 @@ ORG &0300
 \                       \     * 0 = pulsing laser
 \                       \
 \                       \     * 1 = beam laser (i.e. always on)
-\
+
 \ .MSAR
-\
+
 \  SKIP 1               \ The targeting state of our leftmost missile
 \                       \
 \                       \   * 0 = missile is not looking for a target, or it
@@ -1026,18 +1025,18 @@ ORG &0300
 \                       \
 \                       \   * Non-zero = missile is currently looking for a
 \                       \     target (indicator is yellow/white)
-\
+
 \ .VIEW
-\
+
 \  SKIP 1               \ The number of the current space view
 \                       \
 \                       \   * 0 = front
 \                       \   * 1 = rear
 \                       \   * 2 = left
 \                       \   * 3 = right
-\
+
 \ .LASCT
-\
+
 \  SKIP 1               \ The laser pulse count for the current laser
 \                       \
 \                       \ This is a counter that defines the gap between the
@@ -1058,17 +1057,17 @@ ORG &0300
 \                       \
 \                       \ In comparison, beam lasers fire continuously as the
 \                       \ value of LASCT is always 0
-\
+
 \ .GNTMP
-\
+
 \  SKIP 1               \ Laser temperature (or "gun temperature")
 \                       \
 \                       \ If the laser temperature exceeds 242 then the laser
 \                       \ overheats and cannot be fired again until it has
 \                       \ cooled down
-\
+
 \ .HFX
-\
+
 \  SKIP 1               \ A flag that toggles the hyperspace colour effect
 \                       \
 \                       \   * 0 = no colour effect
@@ -1086,9 +1085,9 @@ ORG &0300
 \                       \ non-zero, the top part of the screen is not switched
 \                       \ to mode 4, thus leaving the top part of the screen in
 \                       \ the more colourful mode 5
-\
+
 \ .EV
-\
+
 \  SKIP 1               \ The "extra vessels" spawning counter
 \                       \
 \                       \ This counter is set to 0 on arrival in a system and
@@ -1103,18 +1102,18 @@ ORG &0300
 \                       \ In other words, this counter stops bounty hunters and
 \                       \ pirates from continually appearing, and ensures that
 \                       \ there's a delay between spawnings
-\
+
 \ .DLY
-\
+
 \  SKIP 1               \ In-flight message delay
 \                       \
 \                       \ This counter is used to keep an in-flight message up
 \                       \ for a specified time before it gets removed. The value
 \                       \ in DLY is decremented each time we start another
 \                       \ iteration of the main game loop at TT100
-\
+
 \ .de
-\
+
 \  SKIP 1               \ Equipment destruction flag
 \                       \
 \                       \   * Bit 1 denotes whether or not the in-flight message
@@ -1125,9 +1124,9 @@ ORG &0300
 \                       \
 \                       \     * 1 = the string " DESTROYED" gets added to the
 \                       \       end of the message
-\
+
 \ .JSTX
-\
+
 \  SKIP 1               \ Our current roll rate
 \                       \
 \                       \ This value is shown in the dashboard's RL indicator,
@@ -1144,9 +1143,9 @@ ORG &0300
 \                       \ the value is slowly moved towards the centre value of
 \                       \ 128 (no roll) if there are no key presses or joystick
 \                       \ movement
-\
+
 \ .JSTY
-\
+
 \  SKIP 1               \ Our current pitch rate
 \                       \
 \                       \ This value is shown in the dashboard's DC indicator,
@@ -1164,30 +1163,25 @@ ORG &0300
 \                       \ 128 (no pitch) if there are no key presses or joystick
 \                       \ movement
 \ .XSAV2
-\
-\
+
 \  SKIP 1               \ Temporary storage, used for storing the value of the X
 \                       \ register in the TT26 routine
-\
-\
+
 \ .YSAV2
-\
-\
+
 \  SKIP 1               \ Temporary storage, used for storing the value of the Y
 \                       \ register in the TT26 routine
-\
-\
+
 \ .NAME
-\
+
 \  SKIP 8               \ The current commander name
 \                       \
 \                       \ The commander name can be up to 7 characters (the DFS
 \                       \ limit for file names), and is terminated by a carriage
 \                       \ return
-\
+
 \ .TP
-\
-\
+
 \  SKIP 1               \ The current mission status
 \                       \
 \                       \   * Bits 0-1 = Mission 1 status
@@ -1203,18 +1197,17 @@ ORG &0300
 \                       \     * %01 = Mission in progress, plans not picked up
 \                       \     * %10 = Mission in progress, plans picked up
 \                       \     * %11 = Mission complete
-\
-\
+
 \ .QQ0
-\
+
 \  SKIP 1               \ The current system's galactic x-coordinate (0-256)
-\
+
 \ .QQ1
-\
+
 \  SKIP 1               \ The current system's galactic y-coordinate (0-256)
-\
+
 \ .QQ21
-\
+
 \  SKIP 6               \ The three 16-bit seeds for the current galaxy
 \                       \
 \                       \ These seeds define system 0 in the current galaxy, so
@@ -1229,7 +1222,7 @@ ORG &0300
 \                       \ See the deep dives on "Galaxy and system seeds" and
 \                       \ "Twisting the system seeds" for more details
 \ .CASH
-\
+
 \  SKIP 4               \ Our current cash pot
 \                       \
 \                       \ The cash stash is stored as a 32-bit unsigned integer,
@@ -1238,26 +1231,26 @@ ORG &0300
 \                       \ the opposite way round to most of the numbers used in
 \                       \ Elite - to use our notation for multi-byte numbers,
 \                       \ the amount of cash is CASH(0 1 2 3)
-\
+
 \ .QQ14
-\
+
 \  SKIP 1               \ Our current fuel level (0-70)
 \                       \
 \                       \ The fuel level is stored as the number of light years
 \                       \ multiplied by 10, so QQ14 = 1 represents 0.1 light
 \                       \ years, and the maximum possible value is 70, for 7.0
 \                       \ light years
-\
+
 \ .COK
-\
+
 \  SKIP 1               \ Flags used to generate the competition code
 \                       \
 \                       \ See the deep dive on "The competition code" for
 \                       \ details of these flags and how they are used in
 \                       \ generating and decoding the competition code
-\
+
 \ .GCNT
-\
+
 \  SKIP 1               \ The number of the current galaxy (0-7)
 \                       \
 \                       \ When this is displayed in-game, 1 is added to the
@@ -1267,9 +1260,9 @@ ORG &0300
 \                       \ The galaxy number increases by one every time a
 \                       \ galactic hyperdrive is used, and wraps back round to
 \                       \ the start after eight galaxies
-\
+
 \ .LASER
-\
+
 \  SKIP 4               \ The specifications of the lasers fitted to each of the
 \                       \ four space views:
 \                       \
@@ -1290,13 +1283,12 @@ ORG &0300
 \                       \     * Bit 7 determines whether or not the laser pulses
 \                       \       (0 = pulse or mining laser) or is always on
 \                       \       (1 = beam or military laser)
-\
-\
+
 \  SKIP 2               \ These bytes appear to be unused (they were originally
 \                       \ used for up/down lasers, but they were dropped)
-\
+
 \ .CRGO
-\
+
 \  SKIP 1               \ Our ship's cargo capacity
 \                       \
 \                       \   * 22 = standard cargo bay of 20 tonnes
@@ -1305,9 +1297,9 @@ ORG &0300
 \                       \
 \                       \ The value is two greater than the actual capacity to
 \                       \ male the maths in tnpr slightly more efficient
-\
+
 \ .QQ20
-\
+
 \  SKIP 17              \ The contents of our cargo hold
 \                       \
 \                       \ The amount of market item X that we have in our hold
@@ -1319,72 +1311,71 @@ ORG &0300
 \                       \
 \                       \ See QQ23 for a list of market item numbers and their
 \                       \ storage units
-\
+
 \ .ECM
-\
+
 \  SKIP 1               \ E.C.M. system
 \                       \
 \                       \   * 0 = not fitted
 \                       \
 \                       \   * &FF = fitted
-\
+
 \ .BST
-\
+
 \  SKIP 1               \ Fuel scoops (BST stands for "barrel status")
 \                       \
 \                       \   * 0 = not fitted
 \                       \
 \                       \   * &FF = fitted
-\
+
 \ .BOMB
-\
+
 \  SKIP 1               \ Energy bomb
 \                       \
 \                       \   * 0 = not fitted
 \                       \
 \                       \   * &7F = fitted
-\
+
 \ .ENGY
-\
+
 \  SKIP 1               \ Energy unit
 \                       \
 \                       \   * 0 = not fitted
 \                       \
 \                       \   * 1 = fitted
-\
+
 \ .DKCMP
-\
+
 \  SKIP 1               \ Docking computer
 \                       \
 \                       \   * 0 = not fitted
 \                       \
 \                       \   * &FF = fitted
-\
+
 \ .GHYP
-\
+
 \  SKIP 1               \ Galactic hyperdrive
 \                       \
 \                       \   * 0 = not fitted
 \                       \
 \                       \   * &FF = fitted
-\
+
 \ .ESCP
-\
+
 \  SKIP 1               \ Escape pod
 \                       \
 \                       \   * 0 = not fitted
 \                       \
 \                       \   * &FF = fitted
-\
-\
+
 \  SKIP 4               \ These bytes appear to be unused
-\
+
 \ .NOMSL
-\
+
 \  SKIP 1               \ The number of missiles we have fitted (0-4)
-\
+
 \ .FIST
-\
+
 \  SKIP 1               \ Our legal status (FIST stands for "fugitive/innocent
 \                       \ status"):
 \                       \
@@ -1396,9 +1387,9 @@ ORG &0300
 \                       \
 \                       \ You get 64 points if you kill a cop, so that's a fast
 \                       \ ticket to fugitive status
-\
+
 \ .AVL
-\
+
 \  SKIP 17              \ Market availability in the current system
 \                       \
 \                       \ The available amount of market item X is stored in
@@ -1412,18 +1403,18 @@ ORG &0300
 \                       \ storage units, and the deep dive on "Market item
 \                       \ prices and availability" for details of the algorithm
 \                       \ used for calculating each item's availability
-\
+
 \ .QQ26
-\
+
 \  SKIP 1               \ A random value used to randomise market data
 \                       \
 \                       \ This value is set to a new random number for each
 \                       \ change of system, so we can add a random factor into
 \                       \ the calculations for market prices (for details of how
 \                       \ this is used, see the deep dive on "Market prices")
-\
+
 \ .TALLY
-\
+
 \  SKIP 2               \ Our combat rank
 \                       \
 \                       \ The combat rank is stored as the number of kills, in a
@@ -1451,9 +1442,9 @@ ORG &0300
 \                       \   Elite           = 25 and up   = 6400 kills and up
 \                       \
 \                       \ You can see the rating calculation in STATUS
-\
+
 \ .SVC
-\
+
 \  SKIP 1               \ The save count
 \                       \
 \                       \ When a new commander is created, the save count gets
@@ -1462,94 +1453,91 @@ ORG &0300
 \                       \ It is presumably part of the security system for the
 \                       \ competition, possibly another flag to catch out
 \                       \ entries with manually altered commander files
-\
+
 \  SKIP 2               \ The commander file checksum
 \                       \
 \                       \ These two bytes are reserved for the commander file
 \                       \ checksum, so when the current commander block is
 \                       \ copied from here to the last saved commander block at
 \                       \ NA%, CHK and CHK2 get overwritten
-\
-\
+
 \ NT% = SVC + 2 - TP    \ This sets the variable NT% to the size of the current
 \                       \ commander data block, which starts at TP and ends at
 \                       \ SVC+2 (inclusive)
-\
-\
-\
+
 \ .MCH
-\
+
 \  SKIP 1               \ The text token number of the in-flight message that is
 \                       \ currently being shown, and which will be removed by
 \                       \ the me2 routine when the counter in DLY reaches zero
-\
+
 \ .FSH
-\
+
 \  SKIP 1               \ Forward shield status
 \                       \
 \                       \   * 0 = empty
 \                       \
 \                       \   * &FF = full
-\
+
 \ .ASH
-\
+
 \  SKIP 1               \ Aft shield status
 \                       \
 \                       \   * 0 = empty
 \                       \
 \                       \   * &FF = full
-\
+
 \ .ENERGY
-\
+
 \  SKIP 1               \ Energy bank status
 \                       \
 \                       \   * 0 = empty
 \                       \
 \                       \   * &FF = full
-\
+
 \ .COMX
-\
+
 \  SKIP 1               \ The x-coordinate of the compass dot
-\
+
 \ .COMY
-\
+
 \  SKIP 1               \ The y-coordinate of the compass dot
-\
+
 \ .QQ24
-\
+
 \  SKIP 1               \ Temporary storage, used to store the current market
 \                       \ item's price in routine TT151
-\
+
 \ .QQ25
-\
+
 \  SKIP 1               \ Temporary storage, used to store the current market
 \                       \ item's availability in routine TT151
-\
+
 \ .QQ28
-\
+
 \  SKIP 1               \ Temporary storage, used to store the economy byte of
 \                       \ the current system in routine var
-\
+
 \ .QQ29
-\
+
 \  SKIP 1               \ Temporary storage, used in a number of places
-\
+
 \ .gov
-\
+
 \  SKIP 1               \ The current system's government type (0-7)
 \                       \
 \                       \ See the deep dive on "Generating system data" for
 \                       \ details of the various government types
-\
+
 \ .tek
-\
+
 \  SKIP 1               \ The current system's tech level (0-14)
 \                       \
 \                       \ See the deep dive on "Generating system data" for more
 \                       \ information on tech levels
-\
+
 \ .SLSP
-\
+
 \  SKIP 2               \ The address of the bottom of the ship line heap
 \                       \
 \                       \ The ship line heap is a descending block of memory
@@ -1558,53 +1546,53 @@ ORG &0300
 \                       \ new ships (and their associated ship line heaps), in
 \                       \ which case SLSP is lowered to provide more heap space,
 \                       \ assuming there is enough free memory to do so
-\
+
 \ .QQ2
-\
+
 \  SKIP 6               \ The three 16-bit seeds for the current system, i.e.
 \                       \ the one we are currently in
 \                       \
 \                       \ See the deep dives on "Galaxy and system seeds" and
 \                       \ "Twisting the system seeds" for more details
-\
+
 \ .QQ3
-\
+
 \  SKIP 1               \ The selected system's economy (0-7)
 \                       \
 \                       \ See the deep dive on "Generating system data" for more
 \                       \ information on economies
-\
+
 \ .QQ4
-\
+
 \  SKIP 1               \ The selected system's government (0-7)
 \                       \
 \                       \ See the deep dive on "Generating system data" for more
 \                       \ details of the various government types
-\
+
 \ .QQ5
-\
+
 \  SKIP 1               \ The selected system's tech level (0-14)
 \                       \
 \                       \ See the deep dive on "Generating system data" for more
 \                       \ information on tech levels
-\
+
 \ .QQ6
-\
+
 \  SKIP 2               \ The selected system's population in billions * 10
 \                       \ (1-71), so the maximum population is 7.1 billion
 \                       \
 \                       \ See the deep dive on "Generating system data" for more
 \                       \ details on population levels
-\
+
 \ .QQ7
-\
+
 \  SKIP 2               \ The selected system's productivity in M CR (96-62480)
 \                       \
 \                       \ See the deep dive on "Generating system data" for more
 \                       \ details about productivity levels
-\
+
 \ .QQ8
-\
+
 \  SKIP 2               \ The distance from the current system to the selected
 \                       \ system in light years * 10, stored as a 16-bit number
 \                       \
@@ -1615,29 +1603,26 @@ ORG &0300
 \                       \ light years tall (see the intra-system distance
 \                       \ calculations in routine TT111 for details), which
 \                       \ equates to 1024 x 512 in terms of QQ8
-\
+
 \ .QQ9
-\
+
 \  SKIP 1               \ The galactic x-coordinate of the crosshairs in the
 \                       \ galaxy chart (and, most of the time, the selected
 \                       \ system's galactic x-coordinate)
-\
+
 \ .QQ10
-\
+
 \  SKIP 1               \ The galactic y-coordinate of the crosshairs in the
 \                       \ galaxy chart (and, most of the time, the selected
 \                       \ system's galactic y-coordinate)
-\
+
 \ .NOSTM
-\
+
 \  SKIP 1               \ The number of stardust particles shown on screen,
 \                       \ which is 18 (#NOST) for normal space, and 3 for
 \                       \ witchspace
-\
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- And replaced by the following: -------------------
 
 .KL
 
@@ -2172,7 +2157,7 @@ ORG &0300
 
  SKIP 1                 \ AJD
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
 .CRGO
 
@@ -2519,12 +2504,12 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
                         \ which is 18 (#NOST) for normal space, and 3 for
                         \ witchspace
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  SKIP 1               \ This byte appears to be unused
-\
+
 \ .COMC
-\
+
 \  SKIP 1               \ The colour of the dot on the compass
 \                       \
 \                       \   * &F0 = the object in the compass is in front of us,
@@ -2532,9 +2517,9 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
 \                       \
 \                       \   * &FF = the object in the compass is behind us, so
 \                       \     the dot is green/cyan
-\
+
 \ .DNOIZ
-\
+
 \  SKIP 1               \ Sound on/off configuration setting
 \                       \
 \                       \   * 0 = sound is on (default)
@@ -2543,9 +2528,9 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
 \                       \
 \                       \ Toggled by pressing "S" when paused, see the DK4
 \                       \ routine for details
-\
+
 \ .DAMP
-\
+
 \  SKIP 1               \ Keyboard damping configuration setting
 \                       \
 \                       \   * 0 = damping is enabled (default)
@@ -2554,9 +2539,9 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
 \                       \
 \                       \ Toggled by pressing CAPS LOCK when paused, see the
 \                       \ DKS3 routine for details
-\
+
 \ .DJD
-\
+
 \  SKIP 1               \ Keyboard auto-recentre configuration setting
 \                       \
 \                       \   * 0 = auto-recentre is enabled (default)
@@ -2565,10 +2550,9 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
 \                       \
 \                       \ Toggled by pressing "A" when paused, see the DKS3
 \                       \ routine for details
-\
+
 \ .PATG
-\
-\
+
 \  SKIP 1               \ Configuration setting to show the author names on the
 \                       \ start-up screen and enable manual hyperspace mis-jumps
 \                       \
@@ -2585,10 +2569,9 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
 \                       \ "X", and during the next hyperspace, hold down CTRL to
 \                       \ force a mis-jump. See routine ee5 for the "AND PATG"
 \                       \ instruction that implements this logic
-\
-\
+
 \ .FLH
-\
+
 \  SKIP 1               \ Flashing console bars configuration setting
 \                       \
 \                       \   * 0 = static bars (default)
@@ -2597,9 +2580,9 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
 \                       \
 \                       \ Toggled by pressing "F" when paused, see the DKS3
 \                       \ routine for details
-\
+
 \ .JSTGY
-\
+
 \  SKIP 1               \ Reverse joystick Y-channel configuration setting
 \                       \
 \                       \   * 0 = standard Y-channel (default)
@@ -2608,9 +2591,9 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
 \                       \
 \                       \ Toggled by pressing "Y" when paused, see the DKS3
 \                       \ routine for details
-\
+
 \ .JSTE
-\
+
 \  SKIP 1               \ Reverse both joystick channels configuration setting
 \                       \
 \                       \   * 0 = standard channels (default)
@@ -2619,9 +2602,9 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
 \                       \
 \                       \ Toggled by pressing "J" when paused, see the DKS3
 \                       \ routine for details
-\
+
 \ .JSTK
-\
+
 \  SKIP 1               \ Keyboard or joystick configuration setting
 \                       \
 \                       \   * 0 = keyboard (default)
@@ -2630,9 +2613,9 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
 \                       \
 \                       \ Toggled by pressing "K" when paused, see the DKS3
 \                       \ routine for details
-\
+
 \ .BSTK
-\
+
 \  SKIP 1               \ Bitstik configuration setting
 \                       \
 \                       \   * 0 = keyboard or joystick (default)
@@ -2641,9 +2624,9 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
 \                       \
 \                       \ Toggled by pressing "B" when paused, see the DKS3
 \                       \ routine for details
-\
+
 \ .CATF
-\
+
 \  SKIP 1               \ The disc catalogue flag
 \                       \
 \                       \ Determines whether a disc catalogue is currently in
@@ -2659,11 +2642,8 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
 \                       \ on-screen (column 17 is blank column in the middle
 \                       \ of the catalogue, between the two lists of filenames,
 \                       \ so it can be dropped without affecting the layout)
-\
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- And replaced by the following: -------------------
 
  SKIP 1                 \ This byte appears to be unused
 
@@ -2862,7 +2842,7 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
 
  SKIP 1                 \ AJD
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
 \ ******************************************************************************
 \
@@ -3047,17 +3027,15 @@ LOAD_A% = LOAD%
 
  EQUW IRQ1              \ IRQ1V is set to point here by elite-loader3.asm
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
-\  JMP BRBR1            \ BRKV is set to point here by elite-loader3.asm
-\
-\ <----------------------------------------------------- End of deleted code -->
+                        \ --- Original Acornsoft code removed from Elite-A: ----
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+\  JMP BRBR1            \ BRKV is set to point here by elite-loader3.asm
+
+                        \ --- And replaced by the following: -------------------
 
  JMP BRBR               \ AJD
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
 BRKV = P% - 2           \ The address of the destination address in the above
                         \ JMP BRBR1 instruction. This ensures that any code that
@@ -3072,8 +3050,7 @@ BRKV = P% - 2           \ The address of the destination address in the above
 \    Summary: AJD
 \
 \ ******************************************************************************
-
-\ <----------------------------------------- Whole routine added for Elite-A -->
+                        \ --- Routine added for Elite-A: -----------------------
 
 .INBAY
 
@@ -3087,8 +3064,7 @@ BRKV = P% - 2           \ The address of the destination address in the above
  JSR RES2
  JMP TT170
 
-\ <---------------------------------------------------- End of added routine -->
-
+                        \ --- End of added routine -----------------------------
 \ ******************************************************************************
 \
 \       Name: DOBEGIN
@@ -3101,11 +3077,11 @@ BRKV = P% - 2           \ The address of the destination address in the above
 
 .DOBEGIN
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- Code added for Elite-A: --------------------------
 
  LDA #0                 \ AJD
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of added code --------------------------------
 
  JSR scramble           \ Decrypt the main docked code between &1300 and &5FFF
 
@@ -3124,13 +3100,13 @@ BRKV = P% - 2           \ The address of the destination address in the above
 
 .DOENTRY
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- Code added for Elite-A: --------------------------
 
  LDA KL+1               \ AJD
  BNE INBAY
  LDA #&FF
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of added code --------------------------------
 
  JSR scramble           \ Decrypt the newly loaded code
 
@@ -3143,11 +3119,11 @@ BRKV = P% - 2           \ The address of the destination address in the above
  LDY #44                \ Wait for 44/50 of a second (0.88 seconds)
  JSR DELAY
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- Code added for Elite-A: --------------------------
 
  JSR cour_dock          \ AJD
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of added code --------------------------------
 
  LDA TP                 \ Fetch bits 0 and 1 of TP, and if they are non-zero
  AND #%00000011         \ (i.e. mission 1 is either in progress or has been
@@ -3270,13 +3246,13 @@ BRKV = P% - 2           \ The address of the destination address in the above
                         \ galactic coordinates (63, 72), so we jump to DEBRIEF2
                         \ to end the mission and get our reward
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- Code added for Elite-A: --------------------------
 
 .icode_set
 
  JSR RES2               \ AJD
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of added code --------------------------------
 
 .EN4
 
@@ -3292,15 +3268,13 @@ BRKV = P% - 2           \ The address of the destination address in the above
 \    Summary: AJD
 \
 \ ******************************************************************************
-
-\ <----------------------------------------- Whole routine added for Elite-A -->
+                        \ --- Routine added for Elite-A: -----------------------
 
 .scramble
 
  STA save_lock
 
-\ <---------------------------------------------------- End of added routine -->
-
+                        \ --- End of added routine -----------------------------
 \ ******************************************************************************
 \
 \       Name: BRKBK
@@ -3440,13 +3414,13 @@ BRKV = P% - 2           \ The address of the destination address in the above
  CLC                    \ range 220-221, as this is only called in galaxies 0
  ADC GCNT               \ and 1
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  BNE DETOK            \ Jump to DETOK to print extended token 220-221,
 \                       \ returning from the subroutine using a tail call (this
 \                       \ BNE is effectively a JMP as A is never zero)
-\
-\ <----------------------------------------------------- End of deleted code -->
+
+                        \ --- End of removed code ------------------------------
 
 \ ******************************************************************************
 \
@@ -3517,13 +3491,13 @@ BRKV = P% - 2           \ The address of the destination address in the above
  LDA (V),Y              \ Load the character at offset Y in the token table,
                         \ which is the next character from the token table
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  EOR #VE              \ Tokens are stored in memory having been EOR'd with
 \                       \ #VE, so we repeat the EOR to get the actual character
 \                       \ in this token
-\
-\ <----------------------------------------------------- End of deleted code -->
+
+                        \ --- End of removed code ------------------------------
 
  BNE DT1                \ If the result is non-zero, then this is a character
                         \ in a token rather than the delimiter (which is #VE),
@@ -3567,13 +3541,13 @@ BRKV = P% - 2           \ The address of the destination address in the above
                         \ which is the next character from the token we want to
                         \ print
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  EOR #VE              \ Tokens are stored in memory having been EOR'd with
 \                       \ #VE, so we repeat the EOR to get the actual character
 \                       \ in this token
-\
-\ <----------------------------------------------------- End of deleted code -->
+
+                        \ --- End of removed code ------------------------------
 
  BEQ DTEX               \ If the result is zero, then this is the delimiter at
                         \ the end of the token to print (which is #VE), so jump
@@ -3679,11 +3653,11 @@ BRKV = P% - 2           \ The address of the destination address in the above
                         \ If we get here then A >= 215, so this is a two-letter
                         \ token from the extended TKN2/QQ16 table
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- Code added for Elite-A: --------------------------
 
 .msg_pairs
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of added code --------------------------------
 
  SBC #215               \ Subtract 215 to get a token number in the range 0-12
                         \ (the C flag is set as we passed through the BCC above,
@@ -4001,11 +3975,11 @@ BRKV = P% - 2           \ The address of the destination address in the above
  LDA #%10000000         \ Set bit 7 of QQ17 to switch standard tokens to
  STA QQ17               \ Sentence Case
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- Code added for Elite-A: --------------------------
 
 .set_token
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of added code --------------------------------
 
  LDA #%11111111         \ Set A = %11111111, so when we fall through into MT5,
                         \ DTW3 gets set to %11111111 and calls to DETOK print
@@ -4581,27 +4555,24 @@ BRKV = P% - 2           \ The address of the destination address in the above
 
 .MV5
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  LDA INWK+31          \ Fetch the ship's exploding/killed state from byte #31
-\
-\
+
 \  AND #%00100000       \ If we are exploding then jump to MVD1 to remove it
 \  BNE MVD1             \ from the scanner permanently
-\
-\
+
 \  LDA INWK+31          \ Set bit 4 to keep the ship visible on the scanner
 \  ORA #%00010000
 \  STA INWK+31
-\
-\
+
 \ .MVD1
-\
+
 \  LDA INWK+31          \ Clear bit 4 to hide the ship on the scanner
 \  AND #%11101111
 \  STA INWK+31
-\
-\ <----------------------------------------------------- End of deleted code -->
+
+                        \ --- End of removed code ------------------------------
 
  RTS                    \ Return from the subroutine
 
@@ -6548,8 +6519,8 @@ LOAD_B% = LOAD% + P% - CODE%
 
 .PRXS
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  EQUW 1               \ 0  Fuel, calculated in EQSHP  140.0 Cr (full tank)
 \  EQUW 300             \ 1  Missile                     30.0 Cr
 \  EQUW 4000            \ 2  Large Cargo Bay            400.0 Cr
@@ -6562,14 +6533,10 @@ LOAD_B% = LOAD% + P% - CODE%
 \  EQUW 15000           \ 9  Energy Unit               1500.0 Cr
 \  EQUW 10000           \ 10 Docking Computer          1000.0 Cr
 \  EQUW 50000           \ 11 Galactic Hyperspace       5000.0 Cr
-\
-\
 \  EQUW 60000           \ 12 Extra Military Lasers     6000.0 Cr
 \  EQUW 8000            \ 13 Extra Mining Lasers        800.0 Cr
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- And replaced by the following: -------------------
 
  EQUW &0001
  \ 00 Cobra 3, Boa
@@ -6588,7 +6555,7 @@ LOAD_B% = LOAD% + P% - CODE%
  EQUW   250,  1500,  3000,  3500,  7000,  4500, 2500
  EQUW  4500,  7000,  7000, 30000, 19000,  2500
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
 \ ******************************************************************************
 \
@@ -6762,31 +6729,30 @@ LOAD_B% = LOAD% + P% - CODE%
                         \
                         \ followed by a newline and an indent of 6 characters
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  LDA CRGO             \ If our ship's cargo capacity is < 26 (i.e. we do not
 \  CMP #26              \ have a cargo bay extension), skip the following two
 \  BCC P%+7             \ instructions
-\
+
 \  LDA #107             \ We do have a cargo bay extension, so print recursive
 \  JSR plf2             \ token 107 ("LARGE CARGO{sentence case} BAY"), followed
 \                       \ by a newline and an indent of 6 characters
-\
-\
+
 \  LDA BST              \ If we don't have fuel scoops fitted, skip the
 \  BEQ P%+7             \ following two instructions
-\
+
 \  LDA #111             \ We do have a fuel scoops fitted, so print recursive
 \  JSR plf2             \ token 111 ("FUEL SCOOPS"), followed by a newline and
 \                       \ an indent of 6 characters
-\
+
 \  LDA ECM              \ If we don't have an E.C.M. fitted, skip the following
 \  BEQ P%+7             \ two instructions
-\
+
 \  LDA #108             \ We do have an E.C.M. fitted, so print recursive token
 \  JSR plf2             \ 108 ("E.C.M.SYSTEM"), followed by a newline and an
 \                       \ indent of 6 characters
-\
+
 \  LDA #113             \ We now cover the four pieces of equipment whose flags
 \  STA XX4              \ are stored in BOMB through BOMB+3, and whose names
 \                       \ correspond with text tokens 113 through 116:
@@ -6799,28 +6765,26 @@ LOAD_B% = LOAD% + P% - CODE%
 \                       \ We can print these out using a loop, so we set XX4 to
 \                       \ 113 as a counter (and we also set A as well, to pass
 \                       \ through to plf2)
-\
+
 \ .stqv
-\
+
 \  TAY                  \ Fetch byte BOMB+0 through BOMB+4 for values of XX4
 \  LDX BOMB-113,Y       \ from 113 through 117
-\
+
 \  BEQ P%+5             \ If it is zero then we do not own that piece of
 \                       \ equipment, so skip the next instruction
-\
+
 \  JSR plf2             \ Print the recursive token in A from 113 ("ENERGY
 \                       \ BOMB") through 116 ("GALACTIC HYPERSPACE "), followed
 \                       \ by a newline and an indent of 6 characters
-\
+
 \  INC XX4              \ Increment the counter (and A as well)
 \  LDA XX4
-\
+
 \  CMP #117             \ If A < 117, loop back up to stqv to print the next
 \  BCC stqv             \ piece of equipment
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- And replaced by the following: -------------------
 
 .sell_equip
 
@@ -6874,7 +6838,7 @@ LOAD_B% = LOAD% + P% - CODE%
  CPX #&1E
  BCC stqv
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
  LDX #0                 \ Now to print our ship's lasers, so set a counter in X
                         \ to count through the four views (0 = front, 1 = rear,
@@ -6888,51 +6852,47 @@ LOAD_B% = LOAD% + P% - CODE%
  BEQ st1                \ have a laser fitted to that view, jump to st1 to move
                         \ on to the next one
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  TXA                  \ Print recursive token 96 + X, which will print from 96
 \  CLC                  \ ("FRONT") through to 99 ("RIGHT"), followed by a space
 \  ADC #96
 \  JSR spc
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- And replaced by the following: -------------------
 
  TXA                    \ AJD
  ORA #&60
  JSR spc
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
  LDA #103               \ Set A to token 103 ("PULSE LASER")
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  LDX CNT              \ Set Y = the laser power for view X
 \  LDY LASER,X
-\
+
 \  CPY #128+POW         \ If the laser power for view X is not #POW+128 (beam
 \  BNE P%+4             \ laser), skip the next LDA instruction
-\
+
 \  LDA #104             \ This sets A = 104 if the laser in view X is a beam
 \                       \ laser (token 104 is "BEAM LASER")
-\
+
 \  CPY #Armlas          \ If the laser power for view X is not #Armlas (military
 \  BNE P%+4             \ laser), skip the next LDA instruction
-\
+
 \  LDA #117             \ This sets A = 117 if the laser in view X is a military
 \                       \ laser (token 117 is "MILITARY  LASER")
-\
+
 \  CPY #Mlas            \ If the laser power for view X is not #Mlas (mining
 \  BNE P%+4             \ laser), skip the next LDA instruction
-\
+
 \  LDA #118             \ This sets A = 118 if the laser in view X is a mining
 \                       \ laser (token 118 is "MINING  LASER")
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- And replaced by the following: -------------------
 
  LDX &93                \ AJD
  LDY LASER,X
@@ -6954,7 +6914,7 @@ LOAD_B% = LOAD% + P% - CODE%
 
 .l_1ba9
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
  JSR plf2               \ Print the text token in A (which contains our legal
                         \ status) followed by a newline and an indent of 6
@@ -6990,19 +6950,16 @@ LOAD_B% = LOAD% + P% - CODE%
 
 .plf2
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  JSR plf              \ Print the text token in A followed by a newline
-\
-\
+
 \  LDX #6               \ Move the text cursor to column 6
 \  STX XC
-\
-\  RTS                  \ Return from the subroutine
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+\  RTS                  \ Return from the subroutine
+
+                        \ --- And replaced by the following: -------------------
 
  STX &93                \ AJD
  STA &96
@@ -7048,7 +7005,7 @@ LOAD_B% = LOAD% + P% - CODE%
  LDA #&0A
  JMP TT27
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
 \ ******************************************************************************
 \
@@ -8560,25 +8517,23 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 \
 \ ******************************************************************************
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  LDA #0               \ Set R = P = 0 for the low bytes in the call to the ADD
 \  STA R                \ routine below
 \  STA P
-\
-\
+
 \  LDA #8               \ Set S = 8, which is the value of the centre of the
 \  STA S                \ roll indicator
-\
+
 \  LDA ALP1             \ Fetch the roll angle alpha as a value between 0 and
 \  LSR A                \ 31, and divide by 4 to get a value of 0 to 7
 \  LSR A
-\
+
 \  ORA ALP2             \ Apply the roll sign to the value, and flip the sign,
 \  EOR #%10000000       \ so it's now in the range -7 to +7, with a positive
 \                       \ roll angle alpha giving a negative value in A
-\
-\
+
 \  JSR ADD              \ We now add A to S to give us a value in the range 1 to
 \                       \ 15, which we can pass to DIL2 to draw the vertical
 \                       \ bar on the indicator at this position. We use the ADD
@@ -8591,48 +8546,43 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 \                       \ sign bit and does the arithmetic using absolute values
 \                       \ and separate sign bits, which we want here rather than
 \                       \ the two's complement that ADC uses
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- And replaced by the following: -------------------
 
  LDA #&10               \ AJD
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
  JSR DIL2               \ Draw a vertical bar on the roll indicator at offset A
                         \ and increment SC to point to the next indicator (the
                         \ pitch indicator)
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  LDA BETA             \ Fetch the pitch angle beta as a value between -8 and
 \                       \ +8
-\
+
 \  LDX BET1             \ Fetch the magnitude of the pitch angle beta, and if it
 \  BEQ P%+4             \ is 0 (i.e. we are not pitching), skip the next
 \                       \ instruction
-\
+
 \  SBC #1               \ The pitch angle beta is non-zero, so set A = A - 1
 \                       \ (the C flag is set by the call to DIL2 above, so we
 \                       \ don't need to do a SEC). This gives us a value of A
 \                       \ from -7 to +7 because these are magnitude-based
 \                       \ numbers with sign bits, rather than two's complement
 \                       \ numbers
-\
-\
+
 \  JSR ADD              \ We now add A to S to give us a value in the range 1 to
 \                       \ 15, which we can pass to DIL2 to draw the vertical
 \                       \ bar on the indicator at this position (see the JSR ADD
 \                       \ above for more on this)
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- And replaced by the following: -------------------
 
  LDA #&10               \ AJD
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
  JSR DIL2               \ Draw a vertical bar on the pitch indicator at offset A
                         \ and increment SC to point to the next indicator (the
@@ -8696,19 +8646,17 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
                         \ bank indicators, so we can calculate each of the four
                         \ energy banks' values and store them in XX12
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  LDA ENERGY           \ Set A = Q = ENERGY / 4, so they are both now in the
 \  LSR A                \ range 0-63 (so that's a maximum of 16 in each of the
 \  LSR A                \ banks, and a maximum of 15 in the top bank)
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- And replaced by the following: -------------------
 
  LDA #&3F               \ AJD
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
  STA Q                  \ Set Q to A, so we can use Q to hold the remaining
                         \ energy as we work our way through each bank, from the
@@ -8788,19 +8736,17 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  LDA #&10               \ top indicator in the left part of the dashboard, the
  STA SC                 \ one showing the forward shield
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  LDA FSH              \ Draw the forward shield indicator using a range of
 \  JSR DILX             \ 0-255, and increment SC to point to the next indicator
 \                       \ (the aft shield)
-\
+
 \  LDA ASH              \ Draw the aft shield indicator using a range of 0-255,
 \  JSR DILX             \ and increment SC to point to the next indicator (the
 \                       \ fuel level)
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- And replaced by the following: -------------------
 
  LDA #255               \ Draw the forward shield indicator as fully charged,
  JSR DILX               \ and increment SC to point to the next indicator (the
@@ -8810,7 +8756,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  JSR DILX               \ increment SC to point to the next indicator (the fuel
                         \ level)
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
  LDA QQ14               \ Draw the fuel level indicator using a range of 0-63,
  JSR DILX+2             \ and increment SC to point to the next indicator (the
@@ -8892,35 +8838,32 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
  LDX #&F0               \ Set X to dashboard colour 2 (yellow/white)
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  LDA MCNT             \ A will be non-zero for 8 out of every 16 main loop
 \  AND #%00001000       \ counts, when bit 4 is set, so this is what we use to
 \                       \ flash the "danger" colour
-\
+
 \  AND FLH              \ A will be zeroed if flashing colours are disabled
-\
-\
+
 \  BEQ P%+4             \ If A is zero, skip to the LDA instruction below
-\
+
 \  TXA                  \ Otherwise flashing colours are enabled and it's the
 \                       \ main loop iteration where we flash them, so set A to
 \                       \ colour 2 (yellow/white) and use the BIT trick below to
 \                       \ return from the subroutine
-\
+
 \  EQUB &2C             \ Skip the next instruction by turning it into
 \                       \ &2C &A9 &0F, or BIT &0FA9, which does nothing apart
 \                       \ from affect the flags
-\
-\  LDA #&0F             \ Set A to dashboard colour 1 (red)
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+\  LDA #&0F             \ Set A to dashboard colour 1 (red)
+
+                        \ --- And replaced by the following: -------------------
 
  LDA #&0F               \ Set A to dashboard colour 1 (red)
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
  RTS                    \ Return from the subroutine
 
@@ -8990,28 +8933,26 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  STX R                  \ each character block of the bar, starting with a full
                         \ character's width of 4 pixels
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  CMP T1               \ If A >= T1 then we have passed the threshold where we
 \  BCS DL30             \ change bar colour, so jump to DL30 to set A to the
 \                       \ "high value" colour
-\
+
 \  LDA K+1              \ Set A to K+1, the "low value" colour to use
-\
+
 \  BNE DL31             \ Jump down to DL31 (this BNE is effectively a JMP as A
 \                       \ will never be zero)
-\
-\ .DL30
-\
-\  LDA K                \ Set A to K, the "high value" colour to use
-\
-\ .DL31
-\
-\  STA COL              \ Store the colour of the indicator in COL
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+\ .DL30
+
+\  LDA K                \ Set A to K, the "high value" colour to use
+
+\ .DL31
+
+\  STA COL              \ Store the colour of the indicator in COL
+
+                        \ --- And replaced by the following: -------------------
 
  CMP T1                 \ If A >= T1 then we have passed the threshold where we
  BCS DL30               \ change bar colour, so jump to DL30 to set A to the
@@ -9029,7 +8970,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
  STA COL                \ Store the colour of the indicator in COL
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
  LDY #2                 \ We want to start drawing the indicator on the third
                         \ line in this character row, so set Y to point to that
@@ -10221,27 +10162,25 @@ LOAD_C% = LOAD% +P% - CODE%
 
 .UNWISE
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  LDA LIL2+2           \ Flip bit 6 of LIL2+2 to change the EOR (SC),Y in LIL2
 \  EOR #%01000000       \ to an ORA (SC),Y (or back again)
 \  STA LIL2+2
-\
+
 \  LDA LIL3+2           \ Flip bit 6 of LIL3+2 to change the EOR (SC),Y in LIL3
 \  EOR #%01000000       \ to an ORA (SC),Y (or back again)
 \  STA LIL3+2
-\
+
 \  LDA LIL5+2           \ Flip bit 6 of LIL2+2 to change the EOR (SC),Y in LIL5
 \  EOR #%01000000       \ to an ORA (SC),Y (or back again)
 \  STA LIL5+2
-\
+
 \  LDA LIL6+2           \ Flip bit 6 of LIL2+2 to change the EOR (SC),Y in LIL6
 \  EOR #%01000000       \ to an ORA (SC),Y (or back again)
 \  STA LIL6+2
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- And replaced by the following: -------------------
 
  LDA LIL2+2             \ AJD
  EOR #&40
@@ -10256,7 +10195,7 @@ LOAD_C% = LOAD% +P% - CODE%
  \EOR #&40
  STA LIL6+2
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
 .HA1
 
@@ -10287,22 +10226,20 @@ LOAD_C% = LOAD% +P% - CODE%
 \
 \ ******************************************************************************
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \ .HFS2
-\
+
 \  STA STP              \ Store the step size in A
-\
-\
+
 \  JSR TTX66            \ Clear the screen and draw a white border
-\
-\
+
 \  JSR HFS1             \ Call HFS1 below and then fall through into the same
 \                       \ routine, so this effectively runs HFS1 twice, and as
 \                       \ HFS1 draws 8 concentric rings, this means we draw 16
 \                       \ of them in all
-\
-\ <----------------------------------------------------- End of deleted code -->
+
+                        \ --- End of removed code ------------------------------
 
 .HFS1
 
@@ -11257,7 +11194,7 @@ LOAD_C% = LOAD% +P% - CODE%
  ORA #%00000100         \ both bits 2 and 3 are now set)
  STA TP
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- Code added for Elite-A: --------------------------
 
  LDA ENGY               \ AJD
  BNE rew_notgot
@@ -11265,7 +11202,7 @@ LOAD_C% = LOAD% +P% - CODE%
 
 .rew_notgot
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of added code --------------------------------
 
  LDA #2                 \ Set ENGY to 2 so our energy banks recharge at twice
  STA ENGY               \ the speed, as our mission reward is a special navy
@@ -11372,7 +11309,7 @@ LOAD_C% = LOAD% +P% - CODE%
 
  LDA #64                \ Set the main loop counter to 64, so the ship rotates
  STA MCNT               \ for 64 iterations through MVEIT
- 
+
 .BRL1
 
  LDX #%01111111         \ Set the ship's roll counter to a positive roll that
@@ -12017,22 +11954,22 @@ LOAD_D% = LOAD% + P% - CODE%
 
 .tnpr
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  PHA                  \ Store A on the stack
-\
-\ <----------------------------------------------------- End of deleted code -->
+
+                        \ --- End of removed code ------------------------------
 
  LDX #12                \ If QQ29 > 12 then jump to kg below, as this cargo
  CPX QQ29               \ type is gold, platinum, gem-stones or alien items,
  BCC kg                 \ and they have different cargo limits to the standard
                         \ tonne canisters
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- Code added for Elite-A: --------------------------
 
  CLC                    \ AJD
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of added code --------------------------------
 
 .Tml
 
@@ -12048,11 +11985,11 @@ LOAD_D% = LOAD% + P% - CODE%
                         \ is to count the number of tonne canisters in the hold,
                         \ and add 1
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- Code added for Elite-A: --------------------------
 
  BCS n_over             \ AJD
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of added code --------------------------------
 
  DEX                    \ Decrement the loop counter
 
@@ -12060,8 +11997,8 @@ LOAD_D% = LOAD% + P% - CODE%
                         \ until we have added up all market items from 12
                         \ (minerals) down to 0 (food)
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  CMP CRGO             \ If A < CRGO then the C flag will be clear (we have
 \                       \ room in the hold)
 \                       \
@@ -12080,18 +12017,16 @@ LOAD_D% = LOAD% + P% - CODE%
 \                       \ So this is why the value in CRGO is 2 higher than the
 \                       \ actual cargo bay size, i.e. it's 22 for the standard
 \                       \ 20-tonne bay, and 37 for the large 35-tonne bay
-\
-\  PLA                  \ Restore A from the stack
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+\  PLA                  \ Restore A from the stack
+
+                        \ --- And replaced by the following: -------------------
 
  CMP new_hold           \ New hold size AJD
 
 .n_over
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
  RTS                    \ Return from the subroutine
 
@@ -12106,8 +12041,8 @@ LOAD_D% = LOAD% + P% - CODE%
  ADC QQ20,Y             \ Set A = A + the number of units of this item that we
                         \ already have in the hold
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  CMP #200             \ Is the result greater than 200 (the limit on
 \                       \ individual stocks of gold, platinum, gem-stones and
 \                       \ alien items)?
@@ -12115,10 +12050,10 @@ LOAD_D% = LOAD% + P% - CODE%
 \                       \ If so, this sets the C flag (no room)
 \                       \
 \                       \ Otherwise it is clear (we have room)
-\
+
 \  PLA                  \ Restore A from the stack
-\
-\ <----------------------------------------------------- End of deleted code -->
+
+                        \ --- End of removed code ------------------------------
 
  RTS                    \ Return from the subroutine
 
@@ -12389,7 +12324,7 @@ LOAD_D% = LOAD% + P% - CODE%
 
 .TT25
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- Code added for Elite-A: --------------------------
 
  JSR CTRL               \ AJD
  BPL not_cyclop
@@ -12397,7 +12332,7 @@ LOAD_D% = LOAD% + P% - CODE%
 
 .not_cyclop
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of added code --------------------------------
 
  LDA #1                 \ Clear the top part of the screen, draw a white border,
  JSR TT66               \ and set the current view type in QQ11 to 1
@@ -12684,14 +12619,14 @@ LOAD_D% = LOAD% + P% - CODE%
                         \ description, returning from the subroutine using a
                         \ tail call
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \                       \ The following code doesn't appear to be called from
 \                       \ anywhere, so it's presumably a remnant of code from
 \                       \ an earlier version of the extended description code
-\
+
 \  LDX ZZ               \ Fetch the system number from ZZ into X
-\
+
 \ \LDY #LO(PTEXT)       \ These instructions are commented out in the original
 \ \STY INWK             \ source. The variable PTEXT doesn't exist, so it isn't
 \ \LDY #HI(PTEXT)-1     \ entirely obvious what this code does, though it looks
@@ -12715,10 +12650,10 @@ LOAD_D% = LOAD% + P% - CODE%
 \ \JSR TT27
 \ \LDY INWK+2
 \ \JMP PDT2
-\
+
 \  RTS                  \ Return from the subroutine
-\
-\ <----------------------------------------------------- End of deleted code -->
+
+                        \ --- End of removed code ------------------------------
 
 \ ******************************************************************************
 \
@@ -13178,21 +13113,19 @@ LOAD_D% = LOAD% + P% - CODE%
  LDA QQ19+1             \ Set K4 = the y-coordinate of the centre
  STA K4
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  LDX #0               \ Set the high bytes of K3(1 0) and K4(1 0) to 0
 \  STX K4+1
 \  STX K3+1
-\
+
 \  INX                  \ Set LSP = 1 to reset the ball line heap
 \  STX LSP
-\
+
 \  LDX #2               \ Set STP = 2, the step size for the circle
 \  STX STP
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- And replaced by the following: -------------------
 
  LDX #0                 \ Set the high bytes of K3(1 0) and K4(1 0) to 0
  STX K4+1
@@ -13204,7 +13137,7 @@ LOAD_D% = LOAD% + P% - CODE%
  INX                    \ Set STP = 2, the step size for the circle
  STX STP
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
  JMP CIRCLE2            \ Jump to CIRCLE2 to draw a circle with the centre at
                         \ (K3(1 0), K4(1 0)) and radius K, returning from the
@@ -13233,7 +13166,7 @@ LOAD_D% = LOAD% + P% - CODE%
  JSR TT66               \ Clear the top part of the screen, draw a white border,
                         \ and set the current view type in QQ11 to 2
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- Code added for Elite-A: --------------------------
 
  JSR CTRL               \ AJD
  BPL buy_ctrl
@@ -13241,22 +13174,20 @@ LOAD_D% = LOAD% + P% - CODE%
 
 .buy_ctrl
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of added code --------------------------------
 
  JSR TT163              \ Print the column headers for the prices table
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  LDA #%10000000       \ Set bit 7 of QQ17 to switch to Sentence Case, with the
 \  STA QQ17             \ next letter in capitals
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- And replaced by the following: -------------------
 
  JSR vdu_80             \ AJD
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
  JSR FLKB               \ Flush the keyboard buffer
 
@@ -13320,14 +13251,14 @@ LOAD_D% = LOAD% + P% - CODE%
 
  JSR TT67               \ Print a newline
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  LDX #0               \ These instructions have no effect, as they are
 \  STX R                \ repeated at the start of gnum, which we call next.
 \  LDX #12              \ Perhaps they were left behind when code was moved from
 \  STX T1               \ here into gnum, and weren't deleted?
-\
-\ <----------------------------------------------------- End of deleted code -->
+
+                        \ --- End of removed code ------------------------------
 
  JSR gnum               \ Call gnum to get a number from the keyboard, which
                         \ will be the quantity of this item we want to purchase,
@@ -13430,8 +13361,7 @@ LOAD_D% = LOAD% + P% - CODE%
 \    Summary: AJD
 \
 \ ******************************************************************************
-
-\ <----------------------------------------- Whole routine added for Elite-A -->
+                        \ --- Routine added for Elite-A: -----------------------
 
 .sell_yn
 
@@ -13440,8 +13370,7 @@ LOAD_D% = LOAD% + P% - CODE%
  LDA #&CE
  JSR DETOK
 
-\ <---------------------------------------------------- End of added routine -->
-
+                        \ --- End of added routine -----------------------------
 \ ******************************************************************************
 \
 \       Name: gnum
@@ -13586,8 +13515,7 @@ LOAD_D% = LOAD% + P% - CODE%
 \    Summary: AJD
 \
 \ ******************************************************************************
-
-\ <----------------------------------------- Whole routine added for Elite-A -->
+                        \ --- Routine added for Elite-A: -----------------------
 
 .sell_jump
 
@@ -13607,8 +13535,7 @@ LOAD_D% = LOAD% + P% - CODE%
 
  JMP BAY
 
-\ <---------------------------------------------------- End of added routine -->
-
+                        \ --- End of added routine -----------------------------
 \ ******************************************************************************
 \
 \       Name: NWDAV4
@@ -13655,12 +13582,12 @@ LOAD_D% = LOAD% + P% - CODE%
  LDA #205               \ Print recursive token 45 ("SELL")
  JSR TT27
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- Code added for Elite-A: --------------------------
 
  JSR CTRL               \ AJD
  BMI sell_jump
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of added code --------------------------------
 
  LDA #206               \ Print recursive token 46 (" CARGO{sentence case}")
  JSR NLIN3              \ draw a horizontal line at pixel row 19 to box in the
@@ -13755,39 +13682,37 @@ LOAD_D% = LOAD% + P% - CODE%
  CMP #4                 \ screen), jump to TT212 to skip the option to sell
  BNE TT212              \ items
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \ \JSRTT162             \ This instruction is commented out in the original
 \                       \ source
-\
+
 \  LDA #205             \ Print recursive token 45 ("SELL")
 \  JSR TT27
-\
+
 \  LDA #206             \ Print extended token 206 ("{all caps}(Y/N)?")
 \  JSR DETOK
-\
+
 \  JSR gnum             \ Call gnum to get a number from the keyboard, which
 \                       \ will be the number of the item we want to sell,
 \                       \ returning the number entered in A and R, and setting
 \                       \ the C flag if the number is bigger than the available
 \                       \ amount of this item in QQ25
-\
+
 \  BEQ TT212            \ If no number was entered, jump to TT212 to move on to
 \                       \ the next item
-\
+
 \  BCS NWDAV4           \ If the number entered was too big, jump to NWDAV4 to
 \                       \ print an "ITEM?" error, make a beep and rejoin the
 \                       \ routine at NWDAVxx above
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- And replaced by the following: -------------------
 
  JSR sell_yn            \ AJD
  BEQ TT212
  BCS NWDAV4
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
  LDA QQ29               \ We are selling this item, so fetch the item number
                         \ from QQ29
@@ -13808,11 +13733,11 @@ LOAD_D% = LOAD% + P% - CODE%
  LDA R                  \ Set P to the amount of this item we just bought
  STA P
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  LDA QQ24             \ Set Q to the item's price / 4
 \  STA Q
-\
+
 \  JSR GCASH            \ Call GCASH to calculate
 \                       \
 \                       \   (Y X) = P * Q * 4
@@ -13820,12 +13745,10 @@ LOAD_D% = LOAD% + P% - CODE%
 \                       \ which will be the total price we make from this sale
 \                       \ (as P contains the quantity we're selling and Q
 \                       \ contains the item's price / 4)
-\
-\  JSR MCASH            \ Add (Y X) cash to the cash pot in CASH
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+\  JSR MCASH            \ Add (Y X) cash to the cash pot in CASH
+
+                        \ --- And replaced by the following: -------------------
 
  LDA QQ24               \ AJD
  STA Q
@@ -13836,7 +13759,7 @@ LOAD_D% = LOAD% + P% - CODE%
  JSR MCASH
  JSR MCASH
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
  LDA #0                 \ We've made the sale, so set the amount
 
@@ -13892,18 +13815,16 @@ LOAD_D% = LOAD% + P% - CODE%
  JSR fwl                \ Call fwl to print the fuel and cash levels on two
                         \ separate lines
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  LDA CRGO             \ If our ship's cargo capacity is < 26 (i.e. we do not
 \  CMP #26              \ have a cargo bay extension), skip the following two
 \  BCC P%+7             \ instructions
-\
+
 \  LDA #107             \ We do have a cargo bay extension, so print recursive
 \  JSR TT27             \ token 107 ("LARGE CARGO{sentence case} BAY")
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- And replaced by the following: -------------------
 
  LDA #&E                \ print hold size AJD
  JSR TT68
@@ -13913,7 +13834,7 @@ LOAD_D% = LOAD% + P% - CODE%
  JSR pr2
  JSR TT160
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
  JMP TT210              \ Jump to TT210 to print the contents of our cargo bay
                         \ and return from the subroutine using a tail call
@@ -14219,11 +14140,11 @@ LOAD_D% = LOAD% + P% - CODE%
  SEC                    \ (s1_hi, s0_hi) and (QQ0, QQ1)
  SBC QQ0
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- Code added for Elite-A: --------------------------
 
  STA &3A                \ AJD
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of added code --------------------------------
 
  BCS TT184              \ If a borrow didn't occur, i.e. s1_hi >= QQ0, then the
                         \ result is positive, so jump to TT184 and skip the
@@ -14243,11 +14164,11 @@ LOAD_D% = LOAD% + P% - CODE%
  SEC                    \ (s1_hi, s0_hi) and (QQ0, QQ1)
  SBC QQ1
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- Code added for Elite-A: --------------------------
 
  STA &E0                \ AJD
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of added code --------------------------------
 
  BCS TT186              \ If a borrow didn't occur, i.e. s0_hi >= QQ1, then the
                         \ result is positive, so jump to TT186 and skip the
@@ -14268,8 +14189,8 @@ LOAD_D% = LOAD% + P% - CODE%
                         \ and set up the various variables we need to draw the
                         \ system's filled circle on the chart
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  LDA QQ15+3           \ Set A = s1_hi - QQ0, the horizontal distance between
 \  SEC                  \ this system and the current system, where |A| < 20.
 \  SBC QQ0              \ Let's call this the x-delta, as it's the horizontal
@@ -14278,14 +14199,12 @@ LOAD_D% = LOAD% + P% - CODE%
 \                       \ sign of A, so it can be negative if it's to the left
 \                       \ of the chart's centre, or positive if it's to the
 \                       \ right)
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- And replaced by the following: -------------------
 
  LDA &3A                \ AJD
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
  ASL A                  \ Set XX12 = 104 + x-delta * 4
  ASL A                  \
@@ -14299,8 +14218,8 @@ LOAD_D% = LOAD% + P% - CODE%
  STA XC
  INC XC
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  LDA QQ15+1           \ Set A = s0_hi - QQ1, the vertical distance between
 \  SEC                  \ this system and the current system, where |A| < 38.
 \  SBC QQ1              \ Let's call this the y-delta, as it's the vertical
@@ -14308,14 +14227,12 @@ LOAD_D% = LOAD% + P% - CODE%
 \                       \ the chart, and this system (and this time we keep the
 \                       \ sign of A, so it can be negative if it's above the
 \                       \ chart's centre, or positive if it's below)
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- And replaced by the following: -------------------
 
  LDA &E0                \ AJD
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
  ASL A                  \ Set K4 = 90 + y-delta * 2
  ADC #90                \
@@ -14367,18 +14284,16 @@ LOAD_D% = LOAD% + P% - CODE%
  STA INWK,Y             \ occupied so we don't try to print another system's
                         \ label on this row
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  LDA #%10000000       \ Set bit 7 of QQ17 to switch to Sentence Case
 \  STA QQ17
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- And replaced by the following: -------------------
 
  JSR vdu_80             \ AJD
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
  JSR cpl                \ Call cpl to print out the system name for the seeds
                         \ in QQ15 (which now contains the seeds for the current
@@ -15164,18 +15079,16 @@ LOAD_D% = LOAD% + P% - CODE%
 
 .TT168
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  LDX #%10000000       \ Set bit 7 of QQ17 to switch to Sentence Case, with the
 \  STX QQ17             \ next letter in capitals
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- And replaced by the following: -------------------
 
  JSR vdu_80             \ AJD
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
  JSR TT151              \ Call TT151 to print the item name, market price and
                         \ availability of the current item, and set QQ24 to the
@@ -15344,16 +15257,14 @@ LOAD_D% = LOAD% + P% - CODE%
 \    Summary: AJD
 \
 \ ******************************************************************************
-
-\ <----------------------------------------- Whole routine added for Elite-A -->
+                        \ --- Routine added for Elite-A: -----------------------
 
 .encyclopedia
 
  LDA #'E'
  STA RDLI+4
 
-\ <---------------------------------------------------- End of added routine -->
-
+                        \ --- End of added routine -----------------------------
 \ ******************************************************************************
 \
 \       Name: TT110
@@ -15373,34 +15284,32 @@ LOAD_D% = LOAD% + P% - CODE%
 
 .TT110
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  LDX #63              \ Before loading the flight code, we need to copy the
 \                       \ two-letter token table from QQ16 to QQ16_FLIGHT, so
 \                       \ we set a counter in X for the 64 bytes in the table
-\
+
 \ .eny1
-\
+
 \  LDA QQ16,X           \ Copy the X-th byte of QQ16 to the X-th byte of
 \  STA QQ16_FLIGHT,X    \ QQ16_FLIGHT
-\
+
 \  DEX                  \ Decrement the loop counter
-\
+
 \  BPL eny1             \ Loop back to copy the next byte until we have copied
 \                       \ the whole table
-\
+
 \  JSR CATD             \ Call CATD to reload the disc catalogue
-\
+
 \  LDX #LO(RDLI)        \ Set (Y X) to point to RDLI ("R.D.CODE")
 \  LDY #HI(RDLI)
-\
+
 \  JMP OSCLI            \ Call OSCLI to run the OS command in RDLI, which *RUNs
 \                       \ the main flight code in D.CODE, returning from the
 \                       \ subroutine using a tail call
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- And replaced by the following: -------------------
 
  LDX #63                \ Before loading the flight code, we need to copy the
                         \ two-letter token table from QQ16 to QQ16_FLIGHT, so
@@ -15423,7 +15332,7 @@ LOAD_D% = LOAD% + P% - CODE%
                         \ the main flight code in D.CODE, returning from the
                         \ subroutine using a tail call
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
 \ ******************************************************************************
 \
@@ -15572,11 +15481,11 @@ LOAD_D% = LOAD% + P% - CODE%
  ASL P
  ROL A
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- Code added for Elite-A: --------------------------
 
 .price_xy
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of added code --------------------------------
 
  TAY                    \ Set (Y X) = (A P)
  LDX P
@@ -15594,19 +15503,17 @@ LOAD_D% = LOAD% + P% - CODE%
 
 .RDLI
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  EQUS "R.D.CODE"
 \  EQUB 13
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- And replaced by the following: -------------------
 
  EQUS "R.1.F"
  EQUB 13
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
 \ ******************************************************************************
 \
@@ -15626,14 +15533,14 @@ LOAD_D% = LOAD% + P% - CODE%
 \
 \ ******************************************************************************
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \ .bay
-\
+
 \  JMP BAY              \ Go to the docking bay (i.e. show the Status Mode
 \                       \ screen)
-\
-\ <----------------------------------------------------- End of deleted code -->
+
+                        \ --- End of removed code ------------------------------
 
 .EQSHP
 
@@ -15652,35 +15559,30 @@ LOAD_D% = LOAD% + P% - CODE%
  LDA #185               \ Print recursive token 25 ("SHIP") and draw a
  JSR NLIN3              \ horizontal line at pixel row 19 to box in the title
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  LDA #%10000000       \ Set bit 7 of QQ17 to switch to Sentence Case, with the
 \  STA QQ17             \ next letter in capitals
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- And replaced by the following: -------------------
 
  JSR vdu_80             \ AJD
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
  INC YC                 \ Move the text cursor down one line
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  LDA tek              \ Fetch the tech level of the current system from tek
 \  CLC                  \ and add 3 (the tech level is stored as 0-14, so A is
 \  ADC #3               \ now set to between 3 and 17)
-\
-\
+
 \  CMP #12              \ If A >= 12 then set A = 14, so A is now set to between
 \  BCC P%+4             \ 3 and 14
 \  LDA #14
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- And replaced by the following: -------------------
 
  JSR CTRL               \ AJD
  BPL n_eqship
@@ -15701,7 +15603,7 @@ LOAD_D% = LOAD% + P% - CODE%
  BCC P%+4               \ 2 and 14
  LDA #14
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
  STA Q                  \ Set QQ25 = A (so QQ25 is in the range 3-12 and
  STA QQ25               \ represents number of the most advanced item available
@@ -15711,21 +15613,19 @@ LOAD_D% = LOAD% + P% - CODE%
                         \ Set Q = A + 1 (so Q is in the range 4-13 and contains
                         \ QQ25 + 1, i.e. the highest item number on sale + 1)
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  LDA #70              \ Set A = 70 - QQ14, where QQ14 contains the current
 \  SEC                  \ level in light years * 10, so this leaves the amount
 \  SBC QQ14             \ of fuel we need to fill 'er up (in light years * 10)
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- And replaced by the following: -------------------
 
  LDA new_range          \ AJD
  SEC
  SBC QQ14
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
  ASL A                  \ The price of fuel is always 2 Cr per light year, so we
  STA PRXS               \ double A and store it in PRXS, as the first price in
@@ -15734,13 +15634,13 @@ LOAD_D% = LOAD% + P% - CODE%
                         \ in the right format (so a full tank, or 7.0 light
                         \ years, would be 14.0 Cr, or a PRXS value of 140)
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- Code added for Elite-A: --------------------------
 
  LDA #0                 \ AJD
  ROL A
  STA PRXS+1
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of added code --------------------------------
 
  LDX #1                 \ We are now going to work our way through the equipment
                         \ price list at PRXS, printing out the equipment that is
@@ -15815,17 +15715,15 @@ LOAD_D% = LOAD% + P% - CODE%
 
  INC YC                 \ Move the text cursor down one line
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  PHA                  \ While preserving the value in A, call eq to subtract
 \  JSR eq               \ the price of the item we want to buy (which is in A)
 \  PLA                  \ from our cash pot, but only if we have enough cash in
 \                       \ the pot. If we don't have enough cash, exit to the
 \                       \ docking bay (i.e. show the Status Mode screen)
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- And replaced by the following: -------------------
 
  PHA                    \ AJD
  CMP #&02
@@ -15849,26 +15747,24 @@ LOAD_D% = LOAD% + P% - CODE%
  JSR eq
  PLA
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
  BNE et0                \ If A is not 0 (i.e. the item we've just bought is not
                         \ fuel), skip to et0
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  LDX #70              \ And set the current fuel level * 10 in QQ14 to 70, or
 \  STX QQ14             \ 7.0 light years (a full tank)
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- And replaced by the following: -------------------
 
  LDX new_range          \ AJD
  STX QQ14
  JSR DIALS
  LDA #&00
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
 .et0
 
@@ -15881,22 +15777,20 @@ LOAD_D% = LOAD% + P% - CODE%
 
  LDY #124               \ Set Y to recursive token 124 ("ALL")
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  CPX #5               \ If buying this missile would give us 5 missiles, this
 \  BCS pres             \ is more than the maximum of 4 missiles that we can
 \                       \ fit, so jump to pres to show the error "All Present",
 \                       \ beep and exit to the docking bay (i.e. show the Status
 \                       \ Mode screen)
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- And replaced by the following: -------------------
 
  CPX new_missiles       \ AJD
  BCS pres+3
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
  STX NOMSL              \ Otherwise update the number of missiles in NOMSL
 
@@ -15911,26 +15805,24 @@ LOAD_D% = LOAD% + P% - CODE%
  CMP #2                 \ If A is not 2 (i.e. the item we've just bought is not
  BNE et2                \ a large cargo bay), skip to et2
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  LDX #37              \ If our current cargo capacity in CRGO is 37, then we
 \  CPX CRGO             \ already have a large cargo bay fitted, so jump to pres
 \  BEQ pres             \ to show the error "Large Cargo Bay Present", beep and
 \                       \ exit to the docking bay (i.e. show the Status Mode
 \                       \ screen)
-\
+
 \  STX CRGO             \ Otherwise we just scored ourselves a large cargo bay,
 \                       \ so update our current cargo capacity in CRGO to 37
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- And replaced by the following: -------------------
 
  LDX CRGO               \ AJD
  BNE pres
  DEC CRGO
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
 .et2
 
@@ -15953,51 +15845,44 @@ LOAD_D% = LOAD% + P% - CODE%
  CMP #4                 \ If A is not 4 (i.e. the item we've just bought is not
  BNE et4                \ an extra pulse laser), skip to et4
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  JSR qv               \ Print a menu listing the four views, with a "View ?"
 \                       \ prompt, and ask for a view number, which is returned
 \                       \ in X (which now contains 0-3)
-\
-\
+
 \  LDA #POW             \ Call refund with A set to the power of the new pulse
 \  JSR refund           \ laser to install the new laser and process a refund if
 \                       \ we already have a laser fitted to this view
-\
-\
+
 \  LDA #4               \ Set A to 4 as we just overwrote the original value,
 \                       \ and we still need it set correctly so we can continue
 \                       \ through the conditional statements for all the other
 \                       \ equipment
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- And replaced by the following: -------------------
 
  LDY new_pulse          \ AJD
  BNE equip_leap
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
 .et4
 
  CMP #5                 \ If A is not 5 (i.e. the item we've just bought is not
  BNE et5                \ an extra beam laser), skip to et5
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  JSR qv               \ Print a menu listing the four views, with a "View ?"
 \                       \ prompt, and ask for a view number, which is returned
 \                       \ in X (which now contains 0-3)
-\
-\
+
 \  LDA #POW+128         \ Call refund with A set to the power of the new beam
 \  JSR refund           \ laser to install the new laser and process a refund if
 \                       \ we already have a laser fitted to this view
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- And replaced by the following: -------------------
 
  LDY new_beam           \ AJD
 
@@ -16005,7 +15890,7 @@ LOAD_D% = LOAD% + P% - CODE%
 
  BNE equip_frog
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
 .et5
 
@@ -16022,11 +15907,11 @@ LOAD_D% = LOAD% + P% - CODE%
 
 .pres
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- Code added for Elite-A: --------------------------
 
  INC new_hold           \ AJD
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of added code --------------------------------
 
                         \ If we get here we need to show an error to say that
                         \ item number A is already present, where the item's
@@ -16088,18 +15973,16 @@ LOAD_D% = LOAD% + P% - CODE%
                         \ Bomb Present", beep and exit to the docking bay (i.e.
                         \ show the Status Mode screen)
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  LDX #&7F             \ Otherwise we just bought an energy bomb, so set BOMB
 \  STX BOMB             \ to &7F
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- And replaced by the following: -------------------
 
  DEC BOMB               \ AJD
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
 .et8
 
@@ -16113,19 +15996,17 @@ LOAD_D% = LOAD% + P% - CODE%
                         \ Present", beep and exit to the docking bay (i.e. show
                         \ the Status Mode screen)
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  INC ENGY             \ Otherwise we just picked up an energy unit, so set
 \                       \ ENGY to 1 (as ENGY was 0 before the INC instruction)
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- And replaced by the following: -------------------
 
  LDX new_energy         \ AJD
  STX ENGY
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
 .etA
 
@@ -16152,16 +16033,14 @@ LOAD_D% = LOAD% + P% - CODE%
  CMP #11                \ If A is not 11 (i.e. the item we've just bought is not
  BNE et9                \ a galactic hyperdrive), skip to et9
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  LDX GHYP             \ If we already have a galactic hyperdrive fitted (i.e.
 \  BNE pres             \ GHYP is non-zero), jump to pres to show the error
 \                       \ "Galactic Hyperspace Present", beep and exit to the
 \                       \ docking bay (i.e. show the Status Mode screen)
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- And replaced by the following: -------------------
 
  LDX GHYP               \ AJD
 
@@ -16169,7 +16048,7 @@ LOAD_D% = LOAD% + P% - CODE%
 
  BNE pres
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
  DEC GHYP               \ Otherwise we just splashed out on a galactic
                         \ hyperdrive, so set GHYP to &FF (as GHYP was 0 before
@@ -16177,41 +16056,39 @@ LOAD_D% = LOAD% + P% - CODE%
 
 .et9
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  INY                  \ Increment Y to recursive token 117 ("MILITARY  LASER")
-\
+
 \  CMP #12              \ If A is not 12 (i.e. the item we've just bought is not
 \  BNE et10             \ a military laser), skip to et10
-\
+
 \  JSR qv               \ Print a menu listing the four views, with a "View ?"
 \                       \ prompt, and ask for a view number, which is returned
 \                       \ in X (which now contains 0-3)
-\
+
 \  LDA #Armlas          \ Call refund with A set to the power of the new
 \  JSR refund           \ military laser to install the new laser and process a
 \                       \ refund if we already have a laser fitted to this view
-\
+
 \ .et10
-\
+
 \  INY                  \ Increment Y to recursive token 118 ("MINING  LASER")
-\
+
 \  CMP #13              \ If A is not 13 (i.e. the item we've just bought is not
 \  BNE et11             \ a mining laser), skip to et11
-\
+
 \  JSR qv               \ Print a menu listing the four views, with a "View ?"
 \                       \ prompt, and ask for a view number, which is returned
 \                       \ in X (which now contains 0-3)
-\
+
 \  LDA #Mlas            \ Call refund with A set to the power of the new mining
 \  JSR refund           \ laser to install the new laser and process a refund if
 \                       \ we already have a laser fitted to this view
-\
-\ .et11
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+\ .et11
+
+                        \ --- And replaced by the following: -------------------
 
  INY
  CMP #&0C
@@ -16249,7 +16126,7 @@ LOAD_D% = LOAD% + P% - CODE%
 
 .et11
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
  JSR dn                 \ We are done buying equipment, so print the amount of
                         \ cash left in the cash pot, then make a short, high
@@ -16330,15 +16207,13 @@ LOAD_D% = LOAD% + P% - CODE%
                         \ the transaction, so jump to c to return from the
                         \ subroutine (as c contains an RTS)
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  LDA #197             \ Otherwise we don't have enough cash to but this piece
 \  JSR prq              \ of equipment, so print recursive token 37 ("CASH")
 \                       \ followed by a question mark
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- And replaced by the following: -------------------
 
  LDA #&C5               \ AJD
 
@@ -16346,7 +16221,7 @@ LOAD_D% = LOAD% + P% - CODE%
 
  JSR prq
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
  JMP err                \ Jump to err to beep, pause and go to the docking bay
                         \ (i.e. show the Status Mode screen)
@@ -16384,14 +16259,12 @@ LOAD_D% = LOAD% + P% - CODE%
 
 .prx
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  ASL A                \ Set Y = A * 2, so it can act as an index into the
 \  TAY                  \ PRXS table, which has two bytes per entry
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- And replaced by the following: -------------------
 
  ASL A                  \ AJD
  BEQ n_fcost
@@ -16401,7 +16274,7 @@ LOAD_D% = LOAD% + P% - CODE%
 
  TAY
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
  LDX PRXS,Y             \ Fetch the low byte of the price into X
 
@@ -16457,17 +16330,15 @@ LOAD_D% = LOAD% + P% - CODE%
  LDX #12                \ Move the text cursor to column 12
  STX XC
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
-\  TYA                  \ Transfer the counter value from Y to A
-\
-\ <----------------------------------------------------- End of deleted code -->
+                        \ --- Original Acornsoft code removed from Elite-A: ----
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+\  TYA                  \ Transfer the counter value from Y to A
+
+                        \ --- And replaced by the following: -------------------
 
  LDA YC                 \ AJD
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
  CLC                    \ Print ASCII character "0" - 16 + A, so as A goes from
  ADC #'0'-16            \ 16 to 20, this prints "0" through "3" followed by a
@@ -16480,23 +16351,21 @@ LOAD_D% = LOAD% + P% - CODE%
 
  INC YC                 \ Move the text cursor down a row
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  LDY YC               \ Update Y with the incremented counter in YC
-\
+
 \  CPY #20              \ If Y < 20 then loop back up to qv1 to print the next
 \  BCC qv1              \ view in the menu
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- And replaced by the following: -------------------
 
  LDA new_mounts         \ AJD
  ORA #&10
  CMP YC
  BNE qv1
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
  JSR CLYNS              \ Clear the bottom three text rows of the upper screen,
                         \ and move the text cursor to column 1 on row 21, i.e.
@@ -16513,22 +16382,20 @@ LOAD_D% = LOAD% + P% - CODE%
  SEC                    \ Subtract ASCII '0' from the key pressed, to leave the
  SBC #'0'               \ numeric value of the key in A (if it was a number key)
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  CMP #4               \ If the number entered in A < 4, then it is a valid
 \  BCC qv3              \ view number, so jump down to qv3 as we are done
-\
+
 \  JSR CLYNS            \ Otherwise we didn't get a valid view number, so clear
 \                       \ the bottom three text rows of the upper screen, and
 \                       \ move the text cursor to column 1 on row 21
-\
-\  JMP qv2              \ Jump back to qv2 to try again
-\
-\ .qv3
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+\  JMP qv2              \ Jump back to qv2 to try again
+
+\ .qv3
+
+                        \ --- And replaced by the following: -------------------
 
  CMP new_mounts         \ AJD
  BCC qv3
@@ -16537,7 +16404,7 @@ LOAD_D% = LOAD% + P% - CODE%
 
 .qv3
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
  TAX                    \ We have a valid view number, so transfer it to X
 
@@ -17001,22 +16868,20 @@ LOAD_E% = LOAD% + P% - CODE%
  DEX                    \ If token = 5, this is control code 5 (fuel, newline,
  BEQ fwl                \ cash, newline), so jump to fwl
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  DEX                  \ If token > 6, skip the following 3 instructions
 \  BNE P%+7
-\
+
 \  LDA #%10000000       \ This token is control code 6 (switch to Sentence
 \  STA QQ17             \ Case), so set bit 7 of QQ17 to switch to Sentence Case
 \  RTS                  \ and return from the subroutine as we are done
-\
+
 \  DEX                  \ If token > 8, skip the following 2 instructions
 \  DEX
 \  BNE P%+5
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- And replaced by the following: -------------------
 
  DEX                    \ AJD
  BEQ vdu_80
@@ -17031,17 +16896,17 @@ LOAD_E% = LOAD% + P% - CODE%
 
  LDX #&80
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
  STX QQ17               \ This token is control code 8 (switch to ALL CAPS), so
  RTS                    \ set QQ17 to 0 to switch to ALL CAPS and return from
                         \ the subroutine as we are done
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- Code added for Elite-A: --------------------------
 
 .l_31d2
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of added code --------------------------------
 
  DEX                    \ If token = 9, this is control code 9 (tab to column
  BEQ crlf               \ 21 and print a colon), so jump to crlf
@@ -17456,26 +17321,24 @@ LOAD_E% = LOAD% + P% - CODE%
 
  TAX                    \ Copy the token number into X
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  LDA #LO(QQ18)        \ Set V, V+1 to point to the recursive token table at
 \  STA V                \ location QQ18
 \  LDA #HI(QQ18)
 \  STA V+1
-\
+
 \  LDY #0               \ Set a counter Y to point to the character offset
 \                       \ as we scan through the table
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- And replaced by the following: -------------------
 
  LDY #LO(QQ18)          \ Set V, V+1 to point to the recursive token table at
  STY V                  \ location QQ18, and because QQ18 starts on a page
  LDA #HI(QQ18)          \ boundary, the lower byte of the address is 0, so this
  STA V+1                \ also sets Y = 0
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
  TXA                    \ Copy the token number back into A, so both A and X
                         \ now contain the token number we want to print
@@ -18015,21 +17878,19 @@ LOAD_E% = LOAD% + P% - CODE%
 
 .MSBAR
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  TXA                  \ Set T = X * 8
 \  ASL A
 \  ASL A
 \  ASL A
 \  STA T
-\
+
 \  LDA #49              \ Set SC = 49 - T
 \  SBC T                \        = 48 + 1 - (X * 8)
 \  STA SC
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- And replaced by the following: -------------------
 
  TXA                    \ Set T = X * 8
  ASL A
@@ -18041,7 +17902,7 @@ LOAD_E% = LOAD% + P% - CODE%
  SBC T                  \        = 40 + 1 - (X * 8) AJD
  STA SC
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
                         \ So the low byte of SC(1 0) contains the row address
                         \ for the rightmost missile indicator, made up as
@@ -19519,48 +19380,41 @@ LOAD_F% = LOAD% + P% - CODE%
 
 .msblob
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  LDX #4               \ Set up a loop counter in X to count through all four
 \                       \ missile indicators
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- And replaced by the following: -------------------
 
  LDX #3                 \ AJD
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
 .ss
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  CPX NOMSL            \ If the counter is equal to the number of missiles,
 \  BEQ SAL8             \ jump down to SQL8 to draw remaining the missiles, as
 \                       \ the rest of them are present and should be drawn in
 \                       \ green/cyan
-\
-\
+
 \  LDY #0               \ Draw the missile indicator at position X in black
 \  JSR MSBAR
-\
-\
+
 \  DEX                  \ Decrement the counter to point to the next missile
-\
+
 \  BNE ss               \ Loop back to ss if we still have missiles to draw
-\
+
 \  RTS                  \ Return from the subroutine
-\
+
 \ .SAL8
-\
-\
+
 \  LDY #&EE             \ Draw the missile indicator at position X in green/cyan
 \  JSR MSBAR
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- And replaced by the following: -------------------
 
  LDY #0                 \ AJD
  CPX NOMSL
@@ -19572,21 +19426,19 @@ LOAD_F% = LOAD% + P% - CODE%
 
  JSR MSBAR
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
  DEX                    \ Decrement the counter to point to the next missile
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
-\  BNE SAL8             \ Loop back to SAL8 if we still have missiles to draw
-\
-\ <----------------------------------------------------- End of deleted code -->
+                        \ --- Original Acornsoft code removed from Elite-A: ----
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+\  BNE SAL8             \ Loop back to SAL8 if we still have missiles to draw
+
+                        \ --- And replaced by the following: -------------------
 
  BPL ss                 \ AJD
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
  RTS                    \ Return from the subroutine
 
@@ -19625,13 +19477,13 @@ LOAD_F% = LOAD% + P% - CODE%
 \
 \ ******************************************************************************
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \ .DORND2
-\
+
 \  CLC                  \ This ensures that bit 0 of r2 is 0
-\
-\ <----------------------------------------------------- End of deleted code -->
+
+                        \ --- End of removed code ------------------------------
 
 .DORND
 
@@ -19698,19 +19550,19 @@ LOAD_F% = LOAD% + P% - CODE%
 
  DEC MCNT               \ Decrement the main loop counter in MCNT
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  BEQ P%+5             \ If the counter has reached zero, which it will do
 \                       \ every 256 main loops, skip the next JMP instruction
 \                       \ (or to put it another way, if the counter hasn't
 \                       \ reached zero, jump down to MLOOP, skipping all the
 \                       \ following checks)
-\
+
 \ .ytq
-\
+
 \  JMP MLOOP            \ Jump down to MLOOP to do some end-of-loop tidying and
 \                       \ restart the main loop
-\
+
 \                       \ We only get here once every 256 iterations of the
 \                       \ main loop. If we aren't in witchspace and don't
 \                       \ already have 3 or more asteroids in our local bubble,
@@ -19723,46 +19575,41 @@ LOAD_F% = LOAD% + P% - CODE%
 \                       \ be a Cobra Mk III trader, and the other 50% of the
 \                       \ time it will either be an asteroid (98.5% chance) or,
 \                       \ very rarely, a cargo canister (1.5% chance)
-\
-\
+
 \  LDA MJ               \ If we are in witchspace following a mis-jump, skip the
 \  BNE ytq              \ following by jumping down to MLOOP (via ytq above)
-\
-\
+
 \  JSR DORND            \ Set A and X to random numbers
-\
-\
+
 \  CMP #35              \ If A >= 35 (87% chance), jump down to MLOOP to skip
 \  BCS MLOOP            \ the following
-\
-\
+
 \  LDA MANY+AST         \ If we already have 3 or more asteroids in the local
 \  CMP #3               \ bubble, jump down to MLOOP to skip the following
 \  BCS MLOOP
-\
-\
+
 \  JSR ZINF             \ Call ZINF to reset the INWK ship workspace
-\
+
 \  LDA #38              \ Set z_hi = 38 (far away)
 \  STA INWK+7
-\
+
 \  JSR DORND            \ Set A, X and C flag to random numbers
-\
+
 \  STA INWK             \ Set x_lo = random
-\
+
 \  STX INWK+3           \ Set y_lo = random
-\
+
 \  AND #%10000000       \ Set x_sign = bit 7 of x_lo
 \  STA INWK+2
-\
+
 \  TXA                  \ Set y_sign = bit 7 of y_lo
 \  AND #%10000000
 \  STA INWK+5
-\
+
 \  ROL INWK+1           \ Set bit 2 of x_hi to the C flag, which is random, so
 \  ROL INWK+1           \ this randomly moves us slightly off-centre
-\
-\ <----------------------------------------------------- End of deleted code -->
+
+                        \ --- End of removed code ------------------------------
 
                         \ Fall through into part 5 (parts 3 and 4 are not
                         \ required when we are docked)
@@ -19802,32 +19649,28 @@ LOAD_F% = LOAD% + P% - CODE%
  TXS                    \ location for the 6502 stack, so this instruction
                         \ effectively resets the stack
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  LDX GNTMP            \ If the laser temperature in GNTMP is non-zero,
 \  BEQ EE20             \ decrement it (i.e. cool it down a bit)
 \  DEC GNTMP
-\
+
 \ .EE20
-\
-\
+
 \  JSR DIALS            \ Call DIALS to update the dashboard
-\
-\
+
 \  LDA QQ11             \ If this is a space view, skip the following two
 \  BEQ P%+7             \ instructions (i.e. jump to JSR TT17 below)
-\
+
 \  LDY #2               \ Wait for 2/50 of a second (0.04 seconds), to slow the
 \  JSR DELAY            \ main loop down a bit
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- And replaced by the following: -------------------
 
  LDY #2                 \ Wait for 2/50 of a second (0.04 seconds), to slow the
  JSR DELAY              \ main loop down a bit
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
  JSR TT17               \ Scan the keyboard for the cursor keys or joystick,
                         \ returning the cursor's delta values in X and Y and
@@ -19942,15 +19785,13 @@ LOAD_F% = LOAD% + P% - CODE%
  BNE P%+5               \ Market Price screen, returning from the subroutine
  JMP TT167              \ using a tail call
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  CMP #f0              \ If red key f0 was pressed, jump to TT110 to launch our
 \  BNE fvw              \ ship (if docked), returning from the subroutine using
 \  JMP TT110            \ a tail call
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- And replaced by the following: -------------------
 
  CMP #f0                \ AJD
  BNE fvw
@@ -19964,7 +19805,7 @@ LOAD_F% = LOAD% + P% - CODE%
 
  JMP stay_here
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
 .fvw
 
@@ -20043,19 +19884,17 @@ LOAD_F% = LOAD% + P% - CODE%
  LDA T1                 \ Restore the original value of A (the key that's been
                         \ pressed) from T1
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  CMP #&36             \ If "O" was pressed, do the following three jumps,
 \  BNE ee2              \ otherwise skip to ee2 to continue
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- And replaced by the following: -------------------
 
  CMP #&36               \ If "O" was pressed, do the following three jumps,
  BNE not_home           \ otherwise skip to not_home to continue AJD
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
  JSR TT103              \ Draw small crosshairs at coordinates (QQ9, QQ10),
                         \ which will erase the crosshairs currently there
@@ -20078,7 +19917,7 @@ LOAD_F% = LOAD% + P% - CODE%
 
  RTS                    \ Return from the subroutine
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- Code added for Elite-A: --------------------------
 
 .not_home
 
@@ -20096,7 +19935,7 @@ LOAD_F% = LOAD% + P% - CODE%
  STA QQ10
  JSR TT103
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of added code --------------------------------
 
 .T95
 
@@ -20115,18 +19954,16 @@ LOAD_F% = LOAD% + P% - CODE%
 
  JSR cpl                \ Print control code 3 (the selected system name)
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  LDA #%10000000       \ Set bit 7 of QQ17 to switch to Sentence Case, with the
 \  STA QQ17             \ next letter in capitals
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- And replaced by the following: -------------------
 
  JSR vdu_80             \ AJD
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
  LDA #1                 \ Move the text cursor to column 1 and down one line
  STA XC                 \ (in other words, to the start of the next line)
@@ -20237,12 +20074,12 @@ LOAD_F% = LOAD% + P% - CODE%
  BPL BEL1               \ Loop back to BEL1 to zero the next byte, until we have
                         \ zeroed them all
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- Code added for Elite-A: --------------------------
 
  LDA #&7F               \ AJD
  STA BSTK
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of added code --------------------------------
 
                         \ Fall through into TT170 to start the game
 
@@ -20421,59 +20258,53 @@ ELSE
 
 ENDIF
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \ \JSR BELL             \ This instruction is commented out in the original
 \                       \ source. It would make a standard system beep
-\
-\
+
 \                       \ The checksum CHK is correct, so now we check whether
 \                       \ CHK2 = CHK EOR A9, and if this check fails, bit 7 of
 \                       \ the competition flags at COK gets set, to indicate
 \                       \ to Acornsoft via the competition code that there has
 \                       \ been some hacking going on with this competition entry
-\
+
 \  EOR #&A9             \ X = checksum EOR &A9
 \  TAX
-\
+
 \  LDA COK              \ Set A to the competition flags in COK
-\
+
 \  CPX CHK2             \ If X = CHK2, then skip the next instruction
 \  BEQ tZ
-\
+
 \  ORA #%10000000       \ Set bit 7 of A to indicate this commander file has
 \                       \ been tampered with
-\
+
 \ .tZ
-\
-\
+
 \ IF _STH_DISC
-\
+
 \  ORA #%00100000       \ Set bit 5 of A to denote that this is the disc version
 \                       \ with the refund bug fixed (in versions before the bug
 \                       \ was fixed, bit 2 is set)
-\
+
 \ ELIF _IB_DISC
-\
+
 \  ORA #%00000100       \ Set bit 2 of A to denote that this is the disc version
 \                       \ but before the refund bug was fixed (in versions after
 \                       \ the bug was fixed, bit 5 is set)
-\
-\ ENDIF
-\
-\
-\  STA COK              \ Store the updated competition flags in COK
-\
-\
-\  RTS                  \ Return from the subroutine
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+\ ENDIF
+
+\  STA COK              \ Store the updated competition flags in COK
+
+\  RTS                  \ Return from the subroutine
+
+                        \ --- And replaced by the following: -------------------
 
  JMP n_load             \ AJD load ship details
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
 \ ******************************************************************************
 \
@@ -20521,28 +20352,26 @@ ENDIF
  LDA #96                \ Set nosev_z hi = 96 (96 is the value of unity in the
  STA INWK+14            \ rotation vector)
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  LDA &9F              \ As part of the copy protection, location &9F is set to
 \  CMP #219             \ 219 in the OSBmod routine in elite-loader3.asm. This
 \  BEQ tiwe             \ jumps to tiwe if the value is unchanged, otherwise it
 \                       \ crashes the game with the following (as presumably
 \                       \ the game code has been tampered with)
-\
+
 \  LDA #&10             \ Modify the STA DELTA instruction in RES2 to &10 &FE,
 \  STA modify+2         \ which is a BPL P%-2 instruction, to create an infinite
 \  LDA #&FE             \ loop and hang the game
 \  STA modify+3
-\
-\ .tiwe
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+\ .tiwe
+
+                        \ --- And replaced by the following: -------------------
 
  LDA #&DB               \ AJD
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
  STA INWK+7             \ Set z_hi, the high byte of the ship's z-coordinate,
                         \ to 96, which is the distance at which the rotating
@@ -20552,19 +20381,17 @@ ENDIF
  STX INWK+29            \ Set roll counter = 127, so don't dampen the roll
  STX INWK+30            \ Set pitch counter = 127, so don't dampen the pitch
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  INX                  \ Set QQ17 to 128 (so bit 7 is set) to switch to
 \  STX QQ17             \ Sentence Case, with the next letter printing in upper
 \                       \ case
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- And replaced by the following: -------------------
 
  JSR vdu_80             \ AJD
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
  LDA TYPE               \ Set up a new ship, using the ship type in TYPE
  JSR NWSHP
@@ -20587,7 +20414,7 @@ ENDIF
  LDA #13                \ Print extended token 13 ("BY D.BRABEN & I.BELL")
  JSR DETOK
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- Code added for Elite-A: --------------------------
 
  INC YC                 \ AJD
  INC YC
@@ -20598,7 +20425,7 @@ ENDIF
  LDA #&72
  JSR DETOK
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of added code --------------------------------
 
 .awe
 
@@ -20685,12 +20512,12 @@ ENDIF
 
  DEC MCNT               \ Decrement the main loop counter
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- Code added for Elite-A: --------------------------
 
  LDA #&51               \ AJD
  STA &FE60
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of added code --------------------------------
 
  LDA VIA+&40            \ Read 6522 System VIA input register IRB (SHEILA &40)
 
@@ -20742,18 +20569,16 @@ ENDIF
  LDX #NT%-2             \ Set X to the size of the commander data block, less
                         \ 2 (to omit the checksum bytes and the save count)
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  CLC                  \ Clear the C flag so we can do addition without the
 \                       \ C flag affecting the result
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- And replaced by the following: -------------------
 
  SEC                    \ AJD
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
  TXA                    \ Seed the checksum calculation by setting A to the
                         \ size of the commander data block, less 2
@@ -21117,19 +20942,17 @@ ENDIF
 
 .CTLI
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  EQUS ".0"            \ The "0" part of the string is overwritten with the
 \  EQUB 13              \ actual drive number by the CATS routine
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- And replaced by the following: -------------------
 
  EQUS ".:0"             \ The "0" part of the string is overwritten with the
  EQUB 13                \ actual drive number by the CATS routine AJD
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
 \ ******************************************************************************
 \
@@ -21142,19 +20965,17 @@ ENDIF
 
 .DELI
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  EQUS "DE.:0.E.1234567"
 \  EQUB 13
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- And replaced by the following: -------------------
 
  EQUS "DEL.:0.E.1234567"
  EQUB 13
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
 \ ******************************************************************************
 \
@@ -21179,28 +21000,26 @@ ENDIF
 
 .CATS
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  JSR GTDRV            \ Get an ASCII disc drive drive number from the keyboard
 \                       \ in A, setting the C flag if an invalid drive number
 \                       \ was entered
-\
+
 \  BCS DELT-1           \ If the C flag is set, then an invalid drive number was
 \                       \ entered, so return from the subroutine (as DELT-1
 \                       \ contains an RTS)
-\
+
 \  STA CTLI+1           \ Store the drive number in the second byte of the
 \                       \ command string at CTLI, so it overwrites the "0" in
 \                       \ ".0" with the drive number to catalogue
-\
+
 \  STA DTW7             \ Store the drive number in DTW7, so printing extended
 \                       \ token 4 will show the correct drive number (as token 4
 \                       \ contains the {drive number} jump code, which calls
 \                       \ MT16 to print the character in DTW7)
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- And replaced by the following: -------------------
 
  JSR GTDRV              \ Get an ASCII disc drive drive number from the keyboard
                         \ in A, setting the C flag if an invalid drive number
@@ -21219,26 +21038,24 @@ ENDIF
                         \ contains the {drive number} jump code, which calls
                         \ MT16 to print the character in DTW7)
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
  LDA #4                 \ Print extended token 4, which clears the screen and
  JSR DETOK              \ prints the boxed-out title "DRIVE {drive number}
                         \ CATALOGUE"
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  LDA #1               \ Set the CATF flag to 1, so that the TT26 routine will
 \  STA CATF             \ print out the disc catalogue correctly
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- And replaced by the following: -------------------
 
  LDA #&01               \ AJD
  STA NAME+5
  STA CATF
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
  STA XC                 \ Move the text cursor to column 1
 
@@ -21250,14 +21067,12 @@ ENDIF
  JSR OSCLI              \ Call OSCLI to execute the OS command at (Y X), which
                         \ catalogues the disc
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  DEC CATF             \ Decrement the CATF flag back to 0, so the TT26 routine
 \                       \ reverts to standard formatting
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- And replaced by the following: -------------------
 
  DEC CATF               \ Decrement the CATF flag back to 0, so the TT26 routine
                         \ reverts to standard formatting
@@ -21265,7 +21080,7 @@ ENDIF
  LDA NA%+5              \ AJD
  STA NAME+5
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
  CLC                    \ Clear the C flag
 
@@ -21302,23 +21117,21 @@ ENDIF
                         \ entered as part of the catalogue process, so jump to
                         \ SVE to display the disc access menu
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  LDA CTLI+1           \ The call to CATS above put the drive number into
 \  STA DELI+4           \ CTLI+1, so copy the drive number into DELI+4 so that
 \                       \ the drive number in the "DE.:0.E.1234567" string
 \                       \ gets updated (i.e. the number after the colon)
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- And replaced by the following: -------------------
 
  LDA CTLI+2             \ The call to CATS above put the drive number into
  STA DELI+5             \ CTLI+2, so copy the drive number into DELI+5 so that
                         \ the drive number in the "DEL.:0.E.1234567" string
                         \ gets updated (i.e. the number after the colon)
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
  LDA #9                 \ Print extended token 9 ("{clear bottom of screen}FILE
  JSR DETOK              \ TO DELETE?")
@@ -21339,19 +21152,17 @@ ENDIF
 
 .DELL1
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  LDA INWK+4,X         \ Copy the X-th byte of INWK+4 to the X-th byte of
 \  STA DELI+5,X         \ DELI+5
-\
+
 \  DEX                  \ Decrement the loop counter
-\
+
 \  BNE DELL1            \ Loop back to DELL1 to copy the next character until we
 \                       \ have copied the whole filename
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- And replaced by the following: -------------------
 
  LDA INWK+4,X           \ Copy the X-th byte of INWK+4 to the X-th byte of
  STA DELI+6,X           \ DELI+6 AJD
@@ -21361,7 +21172,7 @@ ENDIF
  BNE DELL1              \ Loop back to DELL1 to copy the next character until we
                         \ have copied the whole filename
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
  LDX #LO(DELI)          \ Set (Y X) to point to the OS command at DELI, which
  LDY #HI(DELI)          \ contains the DFS command for deleting this file
@@ -21403,21 +21214,19 @@ ENDIF
 
 .MEBRK
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  LDX stack            \ Set the stack pointer to the value that we stored in
 \  TXS                  \ location stack, so that's back to the value it had
 \                       \ before we set BRKV to point to MEBRK in the SVE
 \                       \ routine
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- And replaced by the following: -------------------
 
  LDX #&FF               \ AJD
  TXS
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
  LDY #0                 \ Set Y to 0 to use as a loop counter below
 
@@ -21493,30 +21302,28 @@ ENDIF
 
 .SVE
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  JSR ZEBC             \ Call ZEBC to zero-fill pages &B and &C
-\
+
 \  TSX                  \ Transfer the stack pointer to X and store it in stack,
 \  STX stack            \ so we can restore it in the MRBRK routine
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- And replaced by the following: -------------------
 
  JSR ZEBC               \ AJD
  TSX
  STX MEBRK+&01
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
  LDA #LO(MEBRK)         \ Set BRKV to point to the MEBRK routine, which is the
  STA BRKV               \ BRKV handler for disc access operations, and replaces
  LDA #HI(MEBRK)         \ the standard BRKV handler in BRBR while disc access
  STA BRKV+1             \ operations are happening
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  LDA #1               \ Print extended token 1, the disc access menu, which
 \  JSR DETOK            \ presents these options:
 \                       \
@@ -21525,45 +21332,43 @@ ENDIF
 \                       \   3. Catalogue
 \                       \   4. Delete A File
 \                       \   5. Exit
-\
+
 \  JSR t                \ Scan the keyboard until a key is pressed, returning
 \                       \ the ASCII code in A and X
-\
+
 \  CMP #'1'             \ If A < ASCII "1", jump to SVEX to exit as the key
 \  BCC SVEX             \ press doesn't match a menu option
-\
+
 \  CMP #'4'             \ If "4" was pressed, jump to DELT to process option 4
 \  BEQ DELT             \ (delete a file)
-\
+
 \  BCS SVEX             \ If A >= ASCII "4", jump to SVEX to exit as the key
 \                       \ press is either option 5 (exit), or it doesn't match a
 \                       \ menu option (as we already checked for "4" above)
-\
+
 \  CMP #'2'             \ If A >= ASCII "2" (i.e. save or catalogue), skip to
 \  BCS SV1              \ SV1
-\
+
 \  JSR GTNMEW           \ If we get here then option 1 (load) was chosen, so
 \                       \ call GTNMEW to fetch the name of the commander file
 \                       \ to load (including drive number and directory) into
 \                       \ INWK
-\
+
 \  JSR LOD              \ Call LOD to load the commander file
-\
+
 \  JSR TRNME            \ Transfer the commander filename from INWK to NA%
-\
+
 \  SEC                  \ Set the C flag to indicate we loaded a new commander
 \  BCS SVEX+1           \ file, and return from the subroutine (as SVEX+1
 \                       \ contains an RTS)
-\
+
 \ .SV1
-\
+
 \  BNE CAT              \ We get here following the CMP #'2' above, so this
 \                       \ jumps to CAT if option 2 was not chosen - in other
 \                       \ words, if option 3 (catalogue) was chosen
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- And replaced by the following: -------------------
 
  LDA #1                 \ Print extended token 1, the disc access menu, which
  JSR DETOK              \ presents these options:
@@ -21617,7 +21422,7 @@ ENDIF
  JSR confirm
  BNE SVEX
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
  JSR GTNMEW             \ If we get here then option 2 (save) was chosen, so
                         \ call GTNMEW to fetch the name of the commander file
@@ -21626,15 +21431,14 @@ ENDIF
 
  JSR TRNME              \ Transfer the commander filename from INWK to NA%
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  LSR SVC              \ Halve the save count value in SVC
-\
-\
+
 \  LDA #3               \ Print extended token 3 ("COMPETITION NUMBER:")
 \  JSR DETOK
-\
-\ <----------------------------------------------------- End of deleted code -->
+
+                        \ --- End of removed code ------------------------------
 
  LDX #NT%               \ We now want to copy the current commander data block
                         \ from location TP to the last saved commander block at
@@ -21662,42 +21466,38 @@ ENDIF
  STA CHK                \ Store the checksum in CHK, which is at the end of the
                         \ last saved commander block
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  PHA                  \ Store the checksum on the stack
-\
+
 \  ORA #%10000000       \ Set K = checksum with bit 7 set
 \  STA K
-\
+
 \  EOR COK              \ Set K+2 = K EOR COK (the competition flags)
 \  STA K+2
-\
+
 \  EOR CASH+2           \ Set K+1 = K+2 EOR CASH+2 (the third cash byte)
 \  STA K+1
-\
+
 \  EOR #&5A             \ Set K+3 = K+1 EOR &5A EOR TALLY+1 (the high byte of
 \  EOR TALLY+1          \ the kill tally)
 \  STA K+3
-\
-\
+
 \  CLC                  \ Clear the C flag so the call to BPRNT does not include
 \                       \ a decimal point
-\
-\
+
 \  JSR BPRNT            \ Print the competition number stored in K to K+3. The
 \                       \ value of U might affect how this is printed, and as
 \                       \ it's a temporary variable in zero page that isn't
 \                       \ reset by ZERO, it might have any value, but as the
 \                       \ competition code is a 10-digit number, this just means
 \                       \ it may or may not have an extra space of padding
-\
-\
+
 \  JSR TT67             \ Print a newline
-\
-\
+
 \  PLA                  \ Restore the checksum from the stack
-\
-\ <----------------------------------------------------- End of deleted code -->
+
+                        \ --- End of removed code ------------------------------
 
  STA &0B00+NT%          \ Store the checksum in the last byte of the save file
                         \ at &0B00 (the equivalent of CHK in the last saved
@@ -21739,8 +21539,7 @@ ENDIF
 \    Summary: AJD
 \
 \ ******************************************************************************
-
-\ <----------------------------------------- Whole routine added for Elite-A -->
+                        \ --- Routine added for Elite-A: -----------------------
 
 .confirm
 
@@ -21761,8 +21560,7 @@ ENDIF
 
  RTS
 
-\ <---------------------------------------------------- End of added routine -->
-
+                        \ --- End of added routine -----------------------------
 \ ******************************************************************************
 \
 \       Name: QUS1
@@ -21809,11 +21607,11 @@ ENDIF
  BCS QUR                \ If the C flag is set, then an invalid drive number was
                         \ entered, so jump to QUR to return from the subroutine
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- Code added for Elite-A: --------------------------
 
  STA save_lock          \ AJD
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of added code --------------------------------
 
  LDX #INWK              \ Store a pointer to INWK at the start of the block at
  STX &0C00              \ &0C00, storing #INWK in the low byte because INWK is
@@ -21931,24 +21729,22 @@ ENDIF
 
  BPL LOL1               \ Loop back until we have copied all NT% bytes
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \ .LOR
-\
+
 \  SEC                  \ Set the C flag
-\
+
 \  RTS                  \ Return from the subroutine
-\
+
 \ .ELT2F
-\
+
 \  BRK                  \ The error that is printed if we try to load an
 \  EQUS "IIllegal "     \ invalid commander file with bit 7 of byte #0 set
 \  EQUS "ELITE II file" \ (the spelling mistake is in the original source)
 \  BRK
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- And replaced by the following: -------------------
 
 .LOR
 
@@ -21963,7 +21759,7 @@ ENDIF
  EQUS "Not ELITE III file"
  BRK
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
 \ ******************************************************************************
 \
@@ -22202,21 +21998,19 @@ ENDIF
 
 .BEEP
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  LDA #32              \ Call the NOISE routine with A = 32 to make a short,
 \  BNE NOISE            \ high beep, returning from the subroutine using a tail
 \                       \ call (this BNE is effectively a JMP as A will never be
 \                       \ zero)
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- And replaced by the following: -------------------
 
  LDA #32                \ Set A = 32 to denote a short, high beep, and fall
                         \ through into the NOISE routine to make the sound
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
 \ ******************************************************************************
 \
@@ -22555,27 +22349,25 @@ ENDIF
 
 .DOKEY
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  LDA JSTK             \ If JSTK is zero, then we are configured to use the
 \  BEQ DK9              \ keyboard rather than the joystick, so jump to DK9 to
 \                       \ make sure the Bitstik is disabled as well (DK9 then
 \                       \ jumps to DK4 below)
-\
+
 \  LDX #1               \ Call DKS2 to fetch the value of ADC channel 1 (the
 \  JSR DKS2             \ joystick X value) into (A X), and OR A with 1. This
 \  ORA #1               \ ensures that the high byte is at least 1, and then we
 \  STA JSTX             \ store the result in JSTX
-\
+
 \  LDX #2               \ Call DKS2 to fetch the value of ADC channel 2 (the
 \  JSR DKS2             \ joystick Y value) into (A X), and EOR A with JSTGY.
 \  EOR JSTGY            \ JSTGY will be &FF if the game is configured to
 \  STA JSTY             \ reverse the joystick Y channel, so this EOR does
 \                       \ exactly that, and then we store the result in JSTY
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- And replaced by the following: -------------------
 
  LDA JSTK               \ If JSTK is zero, then we are configured to use the
  BEQ DK4                \ keyboard rather than the joystick, so jump to DK4
@@ -22591,7 +22383,7 @@ ENDIF
  STA JSTY               \ reverse the joystick Y channel, so this EOR does
                         \ exactly that, and then we store the result in JSTY
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
                         \ Fall through into DK4 to scan for other keys
 
@@ -22663,18 +22455,16 @@ ENDIF
 
  INY                    \ Increment Y to point to the next toggle key
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  CPY #&47             \ The last toggle key is &46 (K), so check whether we
 \                       \ have just done that one
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- And replaced by the following: -------------------
 
  CPY #&48               \ AJD
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
  BNE DKL4               \ If not, loop back to check for the next toggle key
 
@@ -22694,27 +22484,25 @@ ENDIF
  JMP BR1                \ ESCAPE is being pressed, so jump to BR1 to end the
                         \ game
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  CPX #&64             \ If "B" is not being pressed, skip to DK7
 \  BNE nobit
-\
-\
+
 \  LDA BSTK             \ Toggle the value of BSTK between 0 and &FF
 \  EOR #&FF
 \  STA BSTK
-\
+
 \  STA JSTK             \ Configure JSTK to the same value, so when the Bitstik
 \                       \ is enabled, so is the joystick
-\
+
 \  STA JSTE             \ Configure JSTE to the same value, so when the Bitstik
 \                       \ is enabled, the joystick is configured with reversed
 \                       \ channels
-\
-\
+
 \ .nobit
-\
-\ <----------------------------------------------------- End of deleted code -->
+
+                        \ --- End of removed code ------------------------------
 
  CPX #&59               \ If DELETE is not being pressed, we are still paused,
  BNE FREEZE             \ so loop back up to keep listening for configuration
@@ -22737,26 +22525,26 @@ ENDIF
  LDA #&FF               \ Set A to &FF so we can store this in the keyboard
                         \ logger for keys that are being pressed
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \ .DK5
-\
-\ <----------------------------------------------------- End of deleted code -->
+
+                        \ --- End of removed code ------------------------------
 
  RTS                    \ Return from the subroutine
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \ .DK9
-\
+
 \  STA BSTK             \ DK9 is called from DOKEY using a BEQ, so we know A is
 \                       \ 0, so this disables the Bitstik and switched to
 \                       \ keyboard or joystick
-\
+
 \  BEQ DK4              \ Jump back to DK4 in DOKEY (this BEQ is effectively a
 \                       \ JMP as A is always zero)
-\
-\ <----------------------------------------------------- End of deleted code -->
+
+                        \ --- End of removed code ------------------------------
 
 \ ******************************************************************************
 \
@@ -24088,19 +23876,17 @@ LOAD_G% = LOAD% + P% - CODE%
  AND #%11110111         \ byte #31 to denote that the ship is no longer being
  STA XX1+31             \ drawn on-screen
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  JMP DOEXP            \ Jump to DOEXP to return from the subroutine using a
 \                       \ tail call, as in the docked code DOEXP just contains
 \                       \ an RTS
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- And replaced by the following: -------------------
 
  JMP TT48               \ AJD
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
 .EE51
 
@@ -25773,18 +25559,16 @@ LOAD_G% = LOAD% + P% - CODE%
  ORA #8                 \ #31 to denote that we are drawing something on-screen
  STA XX1+31             \ for this ship
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  JMP DOEXP            \ Jump to DOEXP to display the explosion cloud,
 \                       \ returning from the subroutine using a tail call
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- And replaced by the following: -------------------
 
  JMP TT48               \ AJD
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
 .EE31
 
@@ -27246,8 +27030,7 @@ LOAD_G% = LOAD% + P% - CODE%
 \    Summary: AJD
 \
 \ ******************************************************************************
-
-\ <----------------------------------------- Whole routine added for Elite-A -->
+                        \ --- Routine added for Elite-A: -----------------------
 
 .n_buyship
 
@@ -27358,8 +27141,7 @@ LOAD_G% = LOAD% + P% - CODE%
 
  JMP BAY
 
-\ <---------------------------------------------------- End of added routine -->
-
+                        \ --- End of added routine -----------------------------
 \ ******************************************************************************
 \
 \       Name: n_load
@@ -27368,8 +27150,7 @@ LOAD_G% = LOAD% + P% - CODE%
 \    Summary: AJD
 \
 \ ******************************************************************************
-
-\ <----------------------------------------- Whole routine added for Elite-A -->
+                        \ --- Routine added for Elite-A: -----------------------
 
 .n_load
 
@@ -27411,8 +27192,7 @@ LOAD_G% = LOAD% + P% - CODE%
  BPL count_lasers
  RTS
 
-\ <---------------------------------------------------- End of added routine -->
-
+                        \ --- End of added routine -----------------------------
 \ ******************************************************************************
 \
 \       Name: count_offs
@@ -27434,8 +27214,7 @@ LOAD_G% = LOAD% + P% - CODE%
 \    Summary: AJD
 \
 \ ******************************************************************************
-
-\ <----------------------------------------- Whole routine added for Elite-A -->
+                        \ --- Routine added for Elite-A: -----------------------
 
 .n_name
 
@@ -27455,8 +27234,7 @@ LOAD_G% = LOAD% + P% - CODE%
  BNE n_lprint
  RTS
 
-\ <---------------------------------------------------- End of added routine -->
-
+                        \ --- End of added routine -----------------------------
 \ ******************************************************************************
 \
 \       Name: n_price
@@ -27465,8 +27243,7 @@ LOAD_G% = LOAD% + P% - CODE%
 \    Summary: AJD
 \
 \ ******************************************************************************
-
-\ <----------------------------------------- Whole routine added for Elite-A -->
+                        \ --- Routine added for Elite-A: -----------------------
 
 .n_price
 
@@ -27483,8 +27260,7 @@ LOAD_G% = LOAD% + P% - CODE%
  BPL n_lprice
  RTS
 
-\ <---------------------------------------------------- End of added routine -->
-
+                        \ --- End of added routine -----------------------------
 \ ******************************************************************************
 \
 \       Name: cour_buy
@@ -27493,8 +27269,7 @@ LOAD_G% = LOAD% + P% - CODE%
 \    Summary: AJD
 \
 \ ******************************************************************************
-
-\ <----------------------------------------- Whole routine added for Elite-A -->
+                        \ --- Routine added for Elite-A: -----------------------
 
 .cour_buy
 
@@ -27511,11 +27286,11 @@ LOAD_G% = LOAD% + P% - CODE%
  JSR DETOK
  JSR NLIN4
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- Code added for Elite-A: --------------------------
 
  JSR vdu_80
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of added code --------------------------------
 
  LDA QQ26
  EOR QQ0
@@ -27705,8 +27480,7 @@ LOAD_G% = LOAD% + P% - CODE%
  STA INWK
  JMP cour_loop
 
-\ <---------------------------------------------------- End of added routine -->
-
+                        \ --- End of added routine -----------------------------
 \ ******************************************************************************
 \
 \       Name: cour_dock
@@ -27715,8 +27489,7 @@ LOAD_G% = LOAD% + P% - CODE%
 \    Summary: AJD
 \
 \ ******************************************************************************
-
-\ <----------------------------------------- Whole routine added for Elite-A -->
+                        \ --- Routine added for Elite-A: -----------------------
 
 .cour_dock
 
@@ -27762,8 +27535,7 @@ LOAD_G% = LOAD% + P% - CODE%
 
  RTS
 
-\ <---------------------------------------------------- End of added routine -->
-
+                        \ --- End of added routine -----------------------------
 \ ******************************************************************************
 \
 \       Name: stay_here
@@ -27772,8 +27544,7 @@ LOAD_G% = LOAD% + P% - CODE%
 \    Summary: AJD
 \
 \ ******************************************************************************
-
-\ <----------------------------------------- Whole routine added for Elite-A -->
+                        \ --- Routine added for Elite-A: -----------------------
 
 .stay_here
 
@@ -27785,7 +27556,7 @@ LOAD_G% = LOAD% + P% - CODE%
  JSR DORND
  STA QQ26
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- Code added for Elite-A: --------------------------
 
  LDX #&00
  STX XX4
@@ -27829,14 +27600,13 @@ LOAD_G% = LOAD% + P% - CODE%
  CMP #&3F
  BCC d_31d8
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of added code --------------------------------
 
 .stay_quit
 
  JMP BAY
 
-\ <---------------------------------------------------- End of added routine -->
-
+                        \ --- End of added routine -----------------------------
 \ ******************************************************************************
 \
 \       Name: new_offsets
@@ -28435,8 +28205,8 @@ ENDMACRO
  ECHR '?'
  EQUB VE
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  ECHR 'C'             \ Token 3:      "COMPETITION NUMBER:"
 \  ECHR 'O'             \
 \  ECHR 'M'             \ Encoded as:   "COMPE<251><251><223> <225>MB<244>:"
@@ -28452,10 +28222,8 @@ ENDMACRO
 \  ETWO 'E', 'R'
 \  ECHR ':'
 \  EQUB VE
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- And replaced by the following: -------------------
 
  ETWO 'A', 'R'          \ Token 3:      "ARE YOU SURE?"
  ECHR 'E'               \
@@ -28468,7 +28236,7 @@ ENDMACRO
  ECHR '?'
  EQUB VE
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
  ETOK 150               \ Token 4:      "{clear screen}
  ETOK 151               \                {draw box around title}
@@ -29901,15 +29669,13 @@ ENDMACRO
  ETOK 209
  EQUB VE
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  EQUB VE              \ Token 111:    ""
 \                       \
 \                       \ Encoded as:   ""
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- And replaced by the following: -------------------
 
  EJMP 1                 \ Token 111:    "{all caps}SPECIAL CARGO"
  ECHR 'S'               \
@@ -29925,25 +29691,23 @@ ENDMACRO
  ECHR 'O'
  EQUB VE
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
  EQUB VE                \ Token 112:    ""
                         \
                         \ Encoded as:   ""
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  EQUB VE              \ Token 113:    ""
 \                       \
 \                       \ Encoded as:   ""
-\
+
 \  EQUB VE              \ Token 114:    ""
 \                       \
 \                       \ Encoded as:   ""
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- And replaced by the following: -------------------
 
  ECHR 'C'               \ Token 113:    "CARGO VALUE:"
  ETWO 'A', 'R'          \
@@ -29981,7 +29745,7 @@ ENDMACRO
  ETWO 'A', 'N'
  EQUB VE
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
  ECHR 'W'               \ Token 115:    "WASP"
  ECHR 'A'               \
@@ -30836,8 +30600,8 @@ ENDMACRO
  ECHR 'A'               \                {wait for key press}"
  ECHR 'V'               \
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  ECHR 'A'             \ Encoded as:   "{25}{9}{29}{14}{2}GOOD DAY [154]
 \  ECHR 'L'             \                 {4}[204]I{13} AM {19}AG<246>T {19}B
 \  ECHR ' '             \                <249>KE OF {19}NAVAL {19}<240>TEL<229>
@@ -30851,8 +30615,6 @@ ENDMACRO
 \  ETWO 'E', 'N'        \                <253>[208]PUSH RIGHT[201][147]HOME
 \  ETWO 'C', 'E'        \                 SYSTEM OF <226>O<218> MO<226><244>S
 \  ETOK 204             \                [204]{24}{9}{29}I{13} HA<250> OBTA
-\
-\
 \  ECHR 'A'             \                <240>[196][147]DEF<246><233> P<249>NS F
 \  ECHR 'S'             \                <253> <226>EIR {19}HI<250> {19}W<253>LD
 \  ECHR ' '             \                S[204][147]<247><221><229>S K<227>W WE
@@ -30869,10 +30631,8 @@ ENDMACRO
 \  ECHR 'A'             \                 <247> PAID[204]    {19}GOOD LUCK [154]
 \  ECHR 'V'             \                [212]{24}"
 \  ECHR 'Y'
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- And replaced by the following: -------------------
 
  ETWO 'A', 'L'          \ Encoded as:   "{25}{9}{29}{14}{2}GOOD DAY [154] {4}
  ECHR ' '               \                [204]I{13} AM {19}AG<246>T {19}B<249>
@@ -30887,7 +30647,6 @@ ENDMACRO
  ETWO 'C', 'E'          \                <253>[208]P<236>H RIGHT[201][147]HOME
  ETOK 204               \                 SY<222>EM OF <226>O<218> MO<226><244>S
  ECHR 'A'               \                [204]{24}{9}{29}I{13} HA<250> OBTA
-
  ECHR 'S'               \                <240>[196][147]DEF<246><233> P<249>NS F
  ECHR ' '               \                <253> <226>EIR {19}HI<250> {19}W<253>LD
  ETOK 179               \                S[204][147]<247><221><229>S K<227>W WE
@@ -30904,7 +30663,7 @@ ENDMACRO
  ECHR 'V'               \                 <247> PAID[204]    {19}GOOD LUCK [154]
  ECHR 'Y'               \                [212]{24}"
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
  ECHR ' '
  ECHR 'H'
@@ -31016,18 +30775,16 @@ ENDMACRO
  ETOK 208
  ECHR 'P'
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  ECHR 'U'
 \  ECHR 'S'
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- And replaced by the following: -------------------
 
  ETWO 'U', 'S'
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
  ECHR 'H'
  ECHR ' '
@@ -31046,18 +30803,16 @@ ENDMACRO
  ECHR 'S'
  ECHR 'Y'
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  ECHR 'S'
 \  ECHR 'T'
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- And replaced by the following: -------------------
 
  ETWO 'S', 'T'
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
  ECHR 'E'
  ECHR 'M'
@@ -31342,8 +31097,8 @@ ENDMACRO
  ECHR 'A'               \ Encoded as:   "{25}{9}{29}{8}{14}{13}{19}WELL D
  ETWO 'V', 'E'          \                <223>E [154][204][179] HA<250> <218>RV
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  ECHR ' '             \                [196]US WELL[178]WE SH<228>L <242>MEMB
 \  ETWO 'S', 'E'        \                <244>[204]WE DID <227>T EXPECT [147]
 \  ECHR 'R'             \                {19}<226><238>GOIDS[201]F<240>D <217>T
@@ -31352,10 +31107,8 @@ ENDMACRO
 \  ECHR 'U'             \                NAVY {6}[114]{5} AS PAYM<246>T[212]
 \  ECHR 'S'             \                {24}"
 \  ECHR ' '
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- And replaced by the following: -------------------
 
  ECHR ' '               \                [196]<236> WELL[178]WE SH<228>L <242>ME
  ETWO 'S', 'E'          \                MB<244>[204]WE <241>D <227>T EXPECT
@@ -31365,7 +31118,7 @@ ENDMACRO
  ETWO 'U', 'S'          \                 [148]{19}NAVY {6}[114]{5} AS PAYM<246>
  ECHR ' '               \                T[212]{24}"
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
  ECHR 'W'
  ECHR 'E'
@@ -31391,18 +31144,16 @@ ENDMACRO
  ECHR 'E'
  ECHR ' '
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  ECHR 'D'
 \  ECHR 'I'
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- And replaced by the following: -------------------
 
  ETWO 'D', 'I'
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
  ECHR 'D'
  ECHR ' '
@@ -31434,18 +31185,16 @@ ENDMACRO
  ECHR 'T'
  ECHR ' '
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  ECHR 'A'
 \  ECHR 'B'
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- And replaced by the following: -------------------
 
  ETWO 'A', 'B'
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
  ETWO 'O', 'U'
  ECHR 'T'
@@ -31512,24 +31261,22 @@ ENDMACRO
  ETWO 'S', 'T'          \ Encoded as:   "<247>A<222>"
  EQUB VE
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  ECHR 'B'             \ Token 227:    "BISON"
 \  ECHR 'I'             \
 \  ECHR 'S'             \ Encoded as:   "BIS<223>"
 \  ETWO 'O', 'N'
 \  EQUB VE
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- And replaced by the following: -------------------
 
  ETWO 'B', 'I'          \ Token 227:    "BISON"
  ECHR 'S'               \
  ETWO 'O', 'N'          \ Encoded as:   "<234>IS<223>"
  EQUB VE
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
  ECHR 'S'               \ Token 228:    "SNAKE"
  ECHR 'N'               \
@@ -31945,17 +31692,15 @@ ENDMACRO
  ERND 23                \
  ECHR ' '               \ Encoded as:   "A [23?] <224>OK[195][207] <229>FT HE
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
-\  ETWO 'L', 'O'        \                <242>[208]WHI<229> BACK. LOOK[196]B
-\
-\ <----------------------------------------------------- End of deleted code -->
+                        \ --- Original Acornsoft code removed from Elite-A: ----
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+\  ETWO 'L', 'O'        \                <242>[208]WHI<229> BACK. LOOK[196]B
+
+                        \ --- And replaced by the following: -------------------
 
  ETWO 'L', 'O'          \                <242>[208]WHI<229> BACK. <224>OK[196]B
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
  ECHR 'O'               \                <217>ND F<253> <238>E<230>"
  ECHR 'K'
@@ -31982,18 +31727,16 @@ ENDMACRO
  ECHR '.'
  ECHR ' '
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  ECHR 'L'
 \  ECHR 'O'
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- And replaced by the following: -------------------
 
  ETWO 'L', 'O'
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
  ECHR 'O'
  ECHR 'K'
@@ -32126,19 +31869,17 @@ ENDMACRO
  ETOK 207               \
  ECHR ' '               \ Encoded as:   "[24?] [207] W<246>T F<253> ME <245>
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  ECHR 'W'             \                 A<236><238>. MY <249>S<244>S DIDN[39]T
 \  ETWO 'E', 'N'        \                 EV<246> SC<248>TCH [147][24?]"
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- And replaced by the following: -------------------
 
  ECHR 'W'               \                 A<236><238>. MY <249>S<244>S <241>DN
  ETWO 'E', 'N'          \                 [39]TEV<246> SC<248>TCH [147][24?]"
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
  ECHR 'T'
  ECHR ' '
@@ -32164,18 +31905,16 @@ ENDMACRO
  ECHR 'S'
  ECHR ' '
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  ECHR 'D'
 \  ECHR 'I'
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- And replaced by the following: -------------------
 
  ETWO 'D', 'I'
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
  ECHR 'D'
  ECHR 'N'
@@ -32346,21 +32085,19 @@ ENDMACRO
  ETWO 'R', 'A'
  EQUB VE
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  EJMP 1               \ Token 9:      "{all caps}COMING SOON: ELITE II"
 \  ECHR 'C'             \
 \  ECHR 'O'             \ Encoded as:   "{1}COM[195]<235><223>: EL<219>E II"
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- And replaced by the following: -------------------
 
  EJMP 1                 \ Token 9:      "{all caps}COMING SOON: ELITE III"
  ECHR 'C'               \
  ECHR 'O'               \ Encoded as:   "{1}COM[195]<235><223>: EL<219>E III"
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
  ECHR 'M'
  ETOK 195
@@ -32376,11 +32113,10 @@ ENDMACRO
  ECHR 'I'
  ECHR 'I'
 
-\ <-------------------------------------------------- Code added for Elite-A -->
-
+                        \ --- Code added for Elite-A: --------------------------
  ECHR 'I'
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of added code --------------------------------
 
  EQUB VE
 
@@ -32486,8 +32222,8 @@ ENDMACRO
  ECHR 'E'
  EQUB VE
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  ETOK 147             \ Token 25:     "THE INHABITANTS OF [86-90] ARE SO
 \  ETOK 193             \                AMAZINGLY PRIMITIVE THAT THEY STILL
 \  ECHR 'S'             \                THINK {single cap}A*****R IS A PRETTY
@@ -32498,10 +32234,8 @@ ENDMACRO
 \  ERND 18              \                <245> <226>EY <222><220>L <226><240>K
 \  ECHR ' '             \                 {19}A*****R[202]A P<242>TTY NE<245>
 \  ECHR 'A'             \                 GAME"
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- And replaced by the following: -------------------
 
  ETOK 147               \ Token 25:     "THE INHABITANTS OF [86-90] ARE SO
  ETOK 193               \                AMAZINGLY PRIMITIVE THAT THEY STILL
@@ -32514,7 +32248,7 @@ ENDMACRO
  ECHR ' '               \                 {19}EL<219>E[202]A P<242>TTY NE<245>
  ECHR 'A'               \                 GAME"
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
  ETWO 'R', 'E'
  ECHR ' '
@@ -32553,8 +32287,8 @@ ENDMACRO
  ECHR ' '
  EJMP 19
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  ECHR 'A'
 \  ECHR '*'
 \  ECHR '*'
@@ -32580,10 +32314,8 @@ ENDMACRO
 \  ECHR 'M'
 \  ECHR 'E'
 \  EQUB VE
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- And replaced by the following: -------------------
 
  ECHR 'E'
  ECHR 'L'
@@ -32608,7 +32340,7 @@ ENDMACRO
  ECHR 'E'
  EQUB VE
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
 \ ******************************************************************************
 \
@@ -32990,17 +32722,15 @@ ENDMACRO
  EQUB 28                \ Number of faces          = 28 / 4 = 7
  EQUB 12                \ Visibility distance      = 12
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
-\  EQUB 17              \ Max. energy              = 17
-\
-\ <----------------------------------------------------- End of deleted code -->
+                        \ --- Original Acornsoft code removed from Elite-A: ----
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+\  EQUB 17              \ Max. energy              = 17
+
+                        \ --- And replaced by the following: -------------------
 
  EQUB 8                 \ Max. energy              = 8
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
  EQUB 15                \ Max. speed               = 15
  EQUB &00               \ Edges data offset (high) = &0050
@@ -33309,17 +33039,15 @@ ENDMACRO
  EQUB 52                \ Number of faces          = 52 / 4 = 13
  EQUB 50                \ Visibility distance      = 50
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
-\  EQUB 150             \ Max. energy              = 150
-\
-\ <----------------------------------------------------- End of deleted code -->
+                        \ --- Original Acornsoft code removed from Elite-A: ----
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+\  EQUB 150             \ Max. energy              = 150
+
+                        \ --- And replaced by the following: -------------------
 
  EQUB 98                \ Max. energy              = 98
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
  EQUB 28                \ Max. speed               = 28
  EQUB &00               \ Edges data offset (high) = &00BC
@@ -33438,17 +33166,15 @@ ENDMACRO
  EQUB 52                \ Number of faces          = 52 / 4 = 13
  EQUB 40                \ Visibility distance      = 40
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
-\  EQUB 250             \ Max. energy              = 250
-\
-\ <----------------------------------------------------- End of deleted code -->
+                        \ --- Original Acornsoft code removed from Elite-A: ----
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+\  EQUB 250             \ Max. energy              = 250
+
+                        \ --- And replaced by the following: -------------------
 
  EQUB 125               \ Max. energy              = 125
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
  EQUB 20                \ Max. speed               = 20
  EQUB &00               \ Edges data offset (high) = &0056
@@ -33534,23 +33260,19 @@ ENDMACRO
  EQUB 42                \ Explosion count          = 9, as (4 * n) + 6 = 42
  EQUB 90                \ Number of vertices       = 90 / 6 = 15
  EQUB 20                \ Number of edges          = 20
-
  EQUW 0                 \ Bounty                   = 0
-
  EQUB 28                \ Number of faces          = 28 / 4 = 7
  EQUB 23                \ Visibility distance      = 23
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
-\  EQUB 100             \ Max. energy              = 100
-\
-\ <----------------------------------------------------- End of deleted code -->
+                        \ --- Original Acornsoft code removed from Elite-A: ----
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+\  EQUB 100             \ Max. energy              = 100
+
+                        \ --- And replaced by the following: -------------------
 
  EQUB 91                \ Max. energy              = 91
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
  EQUB 32                \ Max. speed               = 32
  EQUB &00               \ Edges data offset (high) = &006E
@@ -33631,38 +33353,31 @@ ENDMACRO
  EQUW 100               \ Bounty                   = 100
  EQUB 24                \ Number of faces          = 24 / 4 = 6
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
-\  EQUB 20              \ Visibility distance      = 20
-\
-\
-\  EQUB 80              \ Max. energy              = 80
-\
-\ <----------------------------------------------------- End of deleted code -->
+                        \ --- Original Acornsoft code removed from Elite-A: ----
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+\  EQUB 20              \ Visibility distance      = 20
+\  EQUB 80              \ Max. energy              = 80
+
+                        \ --- And replaced by the following: -------------------
 
  EQUB 25                \ Visibility distance      = 25
-
  EQUB 73                \ Max. energy              = 73
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
  EQUB 30                \ Max. speed               = 30
  EQUB &00               \ Edges data offset (high) = &007A
  EQUB &00               \ Faces data offset (high) = &00CE
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
-\  EQUB 2               \ Normals are scaled by    = 2^2 = 4
-\
-\ <----------------------------------------------------- End of deleted code -->
+                        \ --- Original Acornsoft code removed from Elite-A: ----
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+\  EQUB 2               \ Normals are scaled by    = 2^2 = 4
+
+                        \ --- And replaced by the following: -------------------
 
  EQUB 1                 \ Normals are scaled by    = 2^1 = 2
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
  EQUB %00010000         \ Laser power              = 2
                         \ Missiles                 = 0
@@ -33674,19 +33389,17 @@ ENDMACRO
  VERTEX   90,    0,   -3,     1,      0,    4,     4,         31    \ Vertex 3
  VERTEX  -90,    0,   -3,     3,      2,    5,     5,         31    \ Vertex 4
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  VERTEX   90,    0,   87,     1,     0,     1,     1,         28   \ Vertex 5
 \  VERTEX  -90,    0,   87,     3,     2,     3,     3,         28   \ Vertex 6
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- And replaced by the following: -------------------
 
  VERTEX   90,    0,   87,     1,      0,    1,     1,         30    \ Vertex 5
  VERTEX  -90,    0,   87,     3,      2,    3,     3,         30    \ Vertex 6
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
  VERTEX    0,    5,   53,     0,      0,    3,     3,          9    \ Vertex 7
  VERTEX    0,    7,   38,     0,      0,    3,     3,          6    \ Vertex 8
@@ -33709,21 +33422,19 @@ ENDMACRO
  EDGE       2,       3,     4,     1,         31    \ Edge 6
  EDGE       3,       1,     4,     0,         31    \ Edge 7
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  EDGE       3,       5,     1,     0,         28  \ Edge 8
 \  EDGE       4,       6,     3,     2,         28  \ Edge 9
 \  EDGE       1,       2,     5,     4,          5  \ Edge 10
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- And replaced by the following: -------------------
 
  EDGE       3,       5,     1,     0,         30    \ Edge 8
  EDGE       4,       6,     3,     2,         30    \ Edge 9
  EDGE       1,       2,     5,     4,          8    \ Edge 10
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
  EDGE       7,      10,     0,     0,          9    \ Edge 11
  EDGE       8,      10,     0,     0,          6    \ Edge 12
@@ -33736,8 +33447,8 @@ ENDMACRO
  EDGE      15,      16,     5,     5,          8    \ Edge 19
  EDGE      16,      14,     5,     5,          8    \ Edge 20
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \ \FACE normal_x, normal_y, normal_z, visibility
 \  FACE        7,       48,        6,         31  \ Face 0
 \  FACE        7,      -48,        6,         31  \ Face 1
@@ -33745,10 +33456,8 @@ ENDMACRO
 \  FACE       -7,       48,        6,         31  \ Face 3
 \  FACE       77,        0,     -154,         31  \ Face 4
 \  FACE      -77,        0,     -154,         31  \ Face 5
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- And replaced by the following: -------------------
 
 \FACE normal_x, normal_y, normal_z, visibility
  FACE        3,       24,        3,         31    \ Face 0
@@ -33758,7 +33467,7 @@ ENDMACRO
  FACE       38,        0,      -77,         31    \ Face 4
  FACE      -38,        0,      -77,         31    \ Face 5
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
 \ ******************************************************************************
 \
@@ -33786,19 +33495,17 @@ ENDMACRO
  EQUB 40                \ Number of faces          = 40 / 4 = 10
  EQUB 45                \ Visibility distance      = 45
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
 \  EQUB 200             \ Max. energy              = 200
 \  EQUB 55              \ Max. speed               = 55
-\
-\ <----------------------------------------------------- End of deleted code -->
 
-\ <-------------------------------------------------- Code added for Elite-A -->
+                        \ --- And replaced by the following: -------------------
 
  EQUB 118               \ Max. energy              = 118
  EQUB 55                \ Max. speed               = 55
 
-\ <------------------------------------------------------- End of added code -->
+                        \ --- End of replacement code --------------------------
 
  EQUB &00               \ Edges data offset (high) = &007A
  EQUB &00               \ Faces data offset (high) = &00DA
