@@ -621,7 +621,7 @@ ENDMACRO
 \
 \  EQUB %00010001       \ Laser power              = 2
 \                       \ Missiles                 = 1
-\\ <----------------------------------------------------- End of deleted code -->
+\ \ <----------------------------------------------------- End of deleted code -->
 
 \ <-------------------------------------------------- Code added for Elite-A -->
 
@@ -736,7 +736,7 @@ ENDMACRO
 \
 \  EQUB %01000111       \ Laser power              = 8
 \                       \ Missiles                 = 7
-\\ <----------------------------------------------------- End of deleted code -->
+\ \ <----------------------------------------------------- End of deleted code -->
 
 \ <-------------------------------------------------- Code added for Elite-A -->
 
@@ -853,7 +853,7 @@ ENDMACRO
 \
 \  EQUB %00010000       \ Laser power              = 2
 \                       \ Missiles                 = 0
-\\ <----------------------------------------------------- End of deleted code -->
+\ \ <----------------------------------------------------- End of deleted code -->
 
 \ <-------------------------------------------------- Code added for Elite-A -->
 
@@ -958,7 +958,7 @@ ENDMACRO
 \
 \  EQUB %00010000       \ Laser power              = 2
 \                       \ Missiles                 = 0
-\\ <----------------------------------------------------- End of deleted code -->
+\ \ <----------------------------------------------------- End of deleted code -->
 
 \ <-------------------------------------------------- Code added for Elite-A -->
 
@@ -1075,7 +1075,7 @@ ENDMACRO
 \
 \  EQUB %00010010       \ Laser power              = 2
 \                       \ Missiles                 = 2
-\\ <----------------------------------------------------- End of deleted code -->
+\ \ <----------------------------------------------------- End of deleted code -->
 
 \ <-------------------------------------------------- Code added for Elite-A -->
 
@@ -1191,7 +1191,7 @@ ENDMACRO
                         \ Missiles                 = 0
 
 \ <----------------------------- Code deleted from the original disc version -->
-\\ \VERTEX    x,    y,    z, face1, face2, face3, face4, visibility
+\ \ \VERTEX    x,    y,    z, face1, face2, face3, face4, visibility
 \  VERTEX    0,   10,  -26,     6,      0,    7,     7,         31  \ Vertex 0
 \  VERTEX  -25,    4,  -26,     1,      0,    7,     7,         31  \ Vertex 1
 \  VERTEX  -28,   -3,  -26,     1,      0,    2,     2,         31  \ Vertex 2
@@ -1229,7 +1229,7 @@ ENDMACRO
 \  VERTEX   13,   -3,  -26,     0,      0,    0,     0,          8  \ Vertex 34
 \  VERTEX    9,    3,  -26,     0,      0,    0,     0,          5  \ Vertex 35
 \  VERTEX   -8,    3,  -26,     0,      0,    0,     0,          5  \ Vertex 36
-\\ <----------------------------------------------------- End of deleted code -->
+\ \ <----------------------------------------------------- End of deleted code -->
 
 \ <-------------------------------------------------- Code added for Elite-A -->
 
@@ -1501,7 +1501,7 @@ ENDMACRO
 \
 \  EQUB %00010010       \ Laser power              = 2
 \                       \ Missiles                 = 2
-\\ <----------------------------------------------------- End of deleted code -->
+\ \ <----------------------------------------------------- End of deleted code -->
 
 \ <-------------------------------------------------- Code added for Elite-A -->
 

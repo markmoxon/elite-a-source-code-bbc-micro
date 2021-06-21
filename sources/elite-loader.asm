@@ -373,11 +373,11 @@ ENDMACRO
 .ENTRY
 
 \ <----------------------------- Code deleted from the original disc version -->
-\\  JSR PROT1            \ Call PROT1 to calculate checksums into CHKSM
-\\  LDA #144             \ Call OSBYTE with A = 144, X = 255 and Y = 0 to move
+\ \  JSR PROT1            \ Call PROT1 to calculate checksums into CHKSM
+\ \  LDA #144             \ Call OSBYTE with A = 144, X = 255 and Y = 0 to move
 \  LDX #255             \ the screen down one line and turn screen interlace on
 \  JSR OSB
-\\ <----------------------------------------------------- End of deleted code -->
+\ \ <----------------------------------------------------- End of deleted code -->
 
 \ <-------------------------------------------------- Code added for Elite-A -->
 
@@ -412,10 +412,10 @@ ENDMACRO
  JSR PLL1               \ Call PLL1 to draw Saturn
 
 \ <----------------------------- Code deleted from the original disc version -->
-\\  LDA #16              \ Call OSBYTE with A = 16 and X = 3 to set the ADC to
+\ \  LDA #16              \ Call OSBYTE with A = 16 and X = 3 to set the ADC to
 \  LDX #3               \ sample 3 channels from the joystick/Bitstik
 \  JSR OSBYTE
-\\ <----------------------------------------------------- End of deleted code -->
+\ \ <----------------------------------------------------- End of deleted code -->
 
 \ <-------------------------------------------------- Code added for Elite-A -->
 
@@ -438,10 +438,10 @@ ENDMACRO
  JSR OSB
 
 \ <----------------------------- Code deleted from the original disc version -->
-\\  LDA #200             \ Call OSBYTE with A = 200, X = 0 and Y = 0 to enable
+\ \  LDA #200             \ Call OSBYTE with A = 200, X = 0 and Y = 0 to enable
 \  LDX #0               \ the ESCAPE key and disable memory clearing if the
 \  JSR OSB              \ BREAK key is pressed
-\\ <----------------------------------------------------- End of deleted code -->
+\ \ <----------------------------------------------------- End of deleted code -->
 
 \ <-------------------------------------------------- Code added for Elite-A -->
 
@@ -460,16 +460,16 @@ ENDMACRO
  JSR OSB                \ keys (i.e. add 128)
 
 \ <----------------------------- Code deleted from the original disc version -->
-\\  LDA #12              \ Set A = 12 and  X = 0 to pretend that this is an to
+\ \  LDA #12              \ Set A = 12 and  X = 0 to pretend that this is an to
 \  LDX #0               \ innocent call to OSBYTE to reset the keyboard delay
 \                       \ and auto-repeat rate to the default, when in reality
 \                       \ the OSB address in the next instruction gets modified
 \                       \ to point to OSBmod
-\\ .OSBjsr
-\\  JSR OSB              \ This JSR gets modified by code inserted into PLL1 so
+\ \ .OSBjsr
+\ \  JSR OSB              \ This JSR gets modified by code inserted into PLL1 so
 \                       \ that it points to OSBmod instead of OSB, so this
 \                       \ actually calls OSBmod to calculate some checksums
-\\ <----------------------------------------------------- End of deleted code -->
+\ \ <----------------------------------------------------- End of deleted code -->
 
  LDA #13                \ Call OSBYTE with A = 13, X = 2 and Y = 0 to disable
  LDX #2                 \ the "character entering buffer" event
@@ -527,31 +527,31 @@ ENDMACRO
                         \ DIALS to &7800-&7FFF
 
 \ <----------------------------- Code deleted from the original disc version -->
-\\  SEI                  \ Disable interrupts while we set up our interrupt
+\ \  SEI                  \ Disable interrupts while we set up our interrupt
 \                       \ handler to support the split-screen mode
-\\  LDA VIA+&44          \ Read the 6522 System VIA T1C-L timer 1 low-order
+\ \  LDA VIA+&44          \ Read the 6522 System VIA T1C-L timer 1 low-order
 \  STA &0001            \ counter (SHEILA &44), which increments 1000 times a
 \                       \ second so this will be pretty random, and store it in
 \                       \ &0001 among the random number seeds at &0000
-\\  LDA #%00111001       \ Set 6522 System VIA interrupt enable register IER
+\ \  LDA #%00111001       \ Set 6522 System VIA interrupt enable register IER
 \  STA VIA+&4E          \ (SHEILA &4E) bits 0 and 3-5 (i.e. disable the Timer1,
 \                       \ CB1, CB2 and CA2 interrupts from the System VIA)
-\\  LDA #%01111111       \ Set 6522 User VIA interrupt enable register IER
+\ \  LDA #%01111111       \ Set 6522 User VIA interrupt enable register IER
 \  STA VIA+&6E          \ (SHEILA &6E) bits 0-7 (i.e. disable all hardware
 \                       \ interrupts from the User VIA)
-\\  LDA IRQ1V            \ Copy the current IRQ1V vector address into VEC(1 0)
+\ \  LDA IRQ1V            \ Copy the current IRQ1V vector address into VEC(1 0)
 \  STA VEC
 \  LDA IRQ1V+1
 \  STA VEC+1
-\\  LDA #LO(IRQ1)        \ Set the IRQ1V vector to IRQ1, so IRQ1 is now the
+\ \  LDA #LO(IRQ1)        \ Set the IRQ1V vector to IRQ1, so IRQ1 is now the
 \  STA IRQ1V            \ interrupt handler
 \  LDA #HI(IRQ1)
 \  STA IRQ1V+1
-\\  LDA #VSCAN           \ Set 6522 System VIA T1C-L timer 1 high-order counter
+\ \  LDA #VSCAN           \ Set 6522 System VIA T1C-L timer 1 high-order counter
 \  STA VIA+&45          \ (SHEILA &45) to VSCAN (57) to start the T1 counter
 \                       \ counting down from 14622 at a rate of 1 MHz
-\\  CLI                  \ Re-enable interrupts
-\\ <----------------------------------------------------- End of deleted code -->
+\ \  CLI                  \ Re-enable interrupts
+\ \ <----------------------------------------------------- End of deleted code -->
 
  LDA #&00               \ Set the following:
  STA ZP                 \
@@ -586,7 +586,7 @@ ENDMACRO
                         \ CpASOFT to &7600-&76FF
 
 \ <----------------------------- Code deleted from the original disc version -->
-\\  LDA #&00             \ Set the following:
+\ \  LDA #&00             \ Set the following:
 \  STA ZP               \
 \  LDA #&04             \   ZP(1 0) = &0400
 \  STA ZP+1             \   P(1 0) = WORDS
@@ -595,20 +595,20 @@ ENDMACRO
 \  LDA #HI(WORDS)
 \  STA P+1
 \  LDX #4
-\\  JSR MVBL             \ Call MVBL to move and decrypt 4 pages of memory from
+\ \  JSR MVBL             \ Call MVBL to move and decrypt 4 pages of memory from
 \                       \ WORDS to &0400-&07FF
-\\  LDX #35              \ We now want to copy the disc catalogue routine from
+\ \  LDX #35              \ We now want to copy the disc catalogue routine from
 \                       \ CATDcode to CATD, so set a counter in X for the 36
 \                       \ bytes to copy
-\\ .loop2
-\\  LDA CATDcode,X       \ Copy the X-th byte of CATDcode to the X-th byte of
+\ \ .loop2
+\ \  LDA CATDcode,X       \ Copy the X-th byte of CATDcode to the X-th byte of
 \  STA CATD,X           \ CATD
-\\  DEX                  \ Decrement the loop counter
-\\  BPL loop2            \ Loop back to copy the next byte until they are all
+\ \  DEX                  \ Decrement the loop counter
+\ \  BPL loop2            \ Loop back to copy the next byte until they are all
 \                       \ done
-\\  LDA &76              \ Set the drive number in the CATD routine to the
+\ \  LDA &76              \ Set the drive number in the CATD routine to the
 \  STA CATBLOCK         \ contents of &76, which gets set in ELITE3
-\\ <----------------------------------------------------- End of deleted code -->
+\ \ <----------------------------------------------------- End of deleted code -->
 
  FNE 0                  \ Set up sound envelopes 0-3 using the FNE macro
  FNE 1
@@ -622,7 +622,7 @@ ENDMACRO
                         \ changes the disc directory to E
 
 \ <----------------------------- Code deleted from the original disc version -->
-\\  LDA #LO(LOAD)        \ Set the following:
+\ \  LDA #LO(LOAD)        \ Set the following:
 \  STA ZP               \
 \  LDA #HI(LOAD)        \   ZP(1 0) = LOAD
 \  STA ZP+1             \   P(1 0) = LOADcode
@@ -630,18 +630,18 @@ ENDMACRO
 \  STA P
 \  LDA #HI(LOADcode)
 \  STA P+1
-\\  LDY #0               \ We now want to move and decrypt one page of memory
+\ \  LDY #0               \ We now want to move and decrypt one page of memory
 \                       \ from LOADcode to LOAD, so set Y as a byte counter
-\\ .loop3
-\\  LDA (P),Y            \ Fetch the Y-th byte of the P(1 0) memory block
-\\  EOR #&18             \ Decrypt it by EOR'ing with &18
-\\  STA (ZP),Y           \ Store the decrypted result in the Y-th byte of the
+\ \ .loop3
+\ \  LDA (P),Y            \ Fetch the Y-th byte of the P(1 0) memory block
+\ \  EOR #&18             \ Decrypt it by EOR'ing with &18
+\ \  STA (ZP),Y           \ Store the decrypted result in the Y-th byte of the
 \                       \ ZP(1 0) memory block
-\\  DEY                  \ Decrement the byte counter
-\\  BNE loop3            \ Loop back to copy the next byte until we have done a
+\ \  DEY                  \ Decrement the byte counter
+\ \  BNE loop3            \ Loop back to copy the next byte until we have done a
 \                       \ whole page of 256 bytes
-\\  JMP LOAD             \ Jump to the start of the routine we just decrypted
-\\ <----------------------------------------------------- End of deleted code -->
+\ \  JMP LOAD             \ Jump to the start of the routine we just decrypted
+\ \ <----------------------------------------------------- End of deleted code -->
 
 \ <-------------------------------------------------- Code added for Elite-A -->
 
@@ -938,43 +938,43 @@ ORG &0B00
                         \ address of &11E3
 
 \ <----------------------------- Code deleted from the original disc version -->
-\\  LDA #LO(S%+11)       \ Point BRKV to the fifth entry in the main docked
+\ \  LDA #LO(S%+11)       \ Point BRKV to the fifth entry in the main docked
 \  STA BRKV             \ code's S% workspace, which contains JMP BRBR1
 \  LDA #HI(S%+11)
 \  STA BRKV+1
-\\  LDA #LO(S%+6)        \ Point BRKV to the third entry in the main docked
+\ \  LDA #LO(S%+6)        \ Point BRKV to the third entry in the main docked
 \  STA WRCHV            \ code's S% workspace, which contains JMP CHPR
 \  LDA #HI(S%+6)
 \  STA WRCHV+1
-\\  SEC                  \ Set the C flag so the checksum we calculate in A
+\ \  SEC                  \ Set the C flag so the checksum we calculate in A
 \                       \ starts with an initial value of 18 (17 plus carry)
-\\  LDY #&00             \ Set Y = 0 to act as a byte pointer
-\\  STY ZP               \ Set the low byte of ZP(1 0) to 0, so ZP(1 0) always
+\ \  LDY #&00             \ Set Y = 0 to act as a byte pointer
+\ \  STY ZP               \ Set the low byte of ZP(1 0) to 0, so ZP(1 0) always
 \                       \ points to the start of a page
-\\  LDX #&11             \ Set X = &11, so ZP(1 0) will point to &1100 when we
+\ \  LDX #&11             \ Set X = &11, so ZP(1 0) will point to &1100 when we
 \                       \ stick X in ZP+1 below
-\\  TXA                  \ Set A = &11 = 17, to set the intial value of the
+\ \  TXA                  \ Set A = &11 = 17, to set the intial value of the
 \                       \ checksum to 18 (17 plus carry)
-\\ .l1
-\\  STX ZP+1             \ Set the high byte of ZP(1 0) to the page number in X
-\\  ADC (ZP),Y           \ Set A = A + the Y-th byte of ZP(1 0)
-\\  DEY                  \ Decrement the byte pointer
-\\  BNE l1               \ Loop back to add the next byte until we have added the
+\ \ .l1
+\ \  STX ZP+1             \ Set the high byte of ZP(1 0) to the page number in X
+\ \  ADC (ZP),Y           \ Set A = A + the Y-th byte of ZP(1 0)
+\ \  DEY                  \ Decrement the byte pointer
+\ \  BNE l1               \ Loop back to add the next byte until we have added the
 \                       \ whole page
-\\  INX                  \ Increment the page number in X
-\\  CPX #&54             \ Loop back to checksum the next page until we have
+\ \  INX                  \ Increment the page number in X
+\ \  CPX #&54             \ Loop back to checksum the next page until we have
 \  BCC l1               \ checked up to (but not including) page &54
-\\  CMP &55FF            \ Compare the checksum with the value in &55FF, which is
+\ \  CMP &55FF            \ Compare the checksum with the value in &55FF, which is
 \                       \ in the docked file we just loaded, in the byte before
 \                       \ the ship hanger blueprints at XX21
-\\ IF _REMOVE_CHECKSUMS
-\\  NOP                  \ If we have disabled checksums, then ignore the result
+\ \ IF _REMOVE_CHECKSUMS
+\ \  NOP                  \ If we have disabled checksums, then ignore the result
 \  NOP                  \ of the checksum comparison
-\\ ELSE
-\\  BNE P%               \ If the checksums don't match then enter an infinite
+\ \ ELSE
+\ \  BNE P%               \ If the checksums don't match then enter an infinite
 \                       \ loop, which hangs the computer
-\\ ENDIF
-\\ <----------------------------------------------------- End of deleted code -->
+\ \ ENDIF
+\ \ <----------------------------------------------------- End of deleted code -->
 
  JMP S%+3               \ Jump to the second entry in the main docked code's S%
                         \ workspace to start a new game
@@ -982,9 +982,9 @@ ORG &0B00
 .LTLI
 
 \ <----------------------------- Code deleted from the original disc version -->
-\\  EQUS "L.T.CODE"
+\ \  EQUS "L.T.CODE"
 \  EQUB 13
-\\\  EQUB &44, &6F, &65   \ These bytes appear to be unused
+\ \ \  EQUB &44, &6F, &65   \ These bytes appear to be unused
 \  EQUB &73, &20, &79
 \  EQUB &6F, &75, &72
 \  EQUB &20, &6D, &6F
@@ -996,7 +996,7 @@ ORG &0B00
 \  EQUB &6F, &20, &74
 \  EQUB &68, &69, &73
 \  EQUB &3F
-\\ <----------------------------------------------------- End of deleted code -->
+\ \ <----------------------------------------------------- End of deleted code -->
 
 \ <-------------------------------------------------- Code added for Elite-A -->
 
@@ -1040,11 +1040,11 @@ ORG LOADcode + P% - LOAD
  STA ZP
 
 \ <----------------------------- Code deleted from the original disc version -->
-\\  LDA #LO(OSBmod)      \ As part of the copy protection, the JSR OSB
+\ \  LDA #LO(OSBmod)      \ As part of the copy protection, the JSR OSB
 \  STA OSBjsr+1         \ instruction at OSBjsr gets modified to point to OSBmod
 \                       \ instead of OSB, and this is where we modify the low
 \                       \ byte of the destination address
-\\ <----------------------------------------------------- End of deleted code -->
+\ \ <----------------------------------------------------- End of deleted code -->
 
  JSR DORND              \ Set A and X to random numbers, say A = r2
 
@@ -1218,11 +1218,11 @@ ORG LOADcode + P% - LOAD
                         \          = r5^2 / 256
 
 \ <----------------------------- Code deleted from the original disc version -->
-\\  LDA #HI(OSBmod)      \ As part of the copy protection, the JSR OSB
+\ \  LDA #HI(OSBmod)      \ As part of the copy protection, the JSR OSB
 \  STA OSBjsr+2         \ instruction at OSBjsr gets modified to point to OSBmod
 \                       \ instead of OSB, and this is where we modify the high
 \                       \ byte of the destination address
-\\ <----------------------------------------------------- End of deleted code -->
+\ \ <----------------------------------------------------- End of deleted code -->
 
  JSR DORND              \ Set A and X to random numbers, say A = r6
 
@@ -1616,9 +1616,9 @@ ORG LOADcode + P% - LOAD
  RTS                    \ Return from the subroutine
 
 \ <----------------------------- Code deleted from the original disc version -->
-\\  JMP P%               \ This would hang the computer, but we never get here as
+\ \  JMP P%               \ This would hang the computer, but we never get here as
 \                       \ the checksum code has been disabled
-\\ <----------------------------------------------------- End of deleted code -->
+\ \ <----------------------------------------------------- End of deleted code -->
 
 \ ******************************************************************************
 \
@@ -1749,8 +1749,8 @@ ORG LOADcode + P% - LOAD
  LDA (P),Y              \ Fetch the Y-th byte of the P(1 0) memory block
 
 \ <----------------------------- Code deleted from the original disc version -->
-\\  EOR #&A5             \ Decrypt it by EOR'ing with &A5
-\\ <----------------------------------------------------- End of deleted code -->
+\ \  EOR #&A5             \ Decrypt it by EOR'ing with &A5
+\ \ <----------------------------------------------------- End of deleted code -->
 
  STA (ZP),Y             \ Store the decrypted result in the Y-th byte of the
                         \ ZP(1 0) memory block
@@ -1811,9 +1811,9 @@ ORG LOADcode + P% - LOAD
 .MESS1
 
 \ <----------------------------- Code deleted from the original disc version -->
-\\  EQUS "*DIR E"
+\ \  EQUS "*DIR E"
 \  EQUB 13
-\\ <----------------------------------------------------- End of deleted code -->
+\ \ <----------------------------------------------------- End of deleted code -->
 
 \ <-------------------------------------------------- Code added for Elite-A -->
 
@@ -1860,13 +1860,13 @@ ORG LOADcode + P% - LOAD
 \ ******************************************************************************
 
 \ <----------------------------- Code deleted from the original disc version -->
-\\ .DIALS
-\\  INCBIN "versions/disc/binaries/P.DIALS.bin"
-\\ .SHIP_MISSILE
-\\  INCBIN "versions/disc/output/MISSILE.bin"
-\\ .WORDS
-\\  INCBIN "versions/disc/output/WORDS.bin"
-\\ <----------------------------------------------------- End of deleted code -->
+\ \ .DIALS
+\ \  INCBIN "versions/disc/binaries/P.DIALS.bin"
+\ \ .SHIP_MISSILE
+\ \  INCBIN "versions/disc/output/MISSILE.bin"
+\ \ .WORDS
+\ \  INCBIN "versions/disc/output/WORDS.bin"
+\ \ <----------------------------------------------------- End of deleted code -->
 
 \ <-------------------------------------------------- Code added for Elite-A -->
 
@@ -2164,12 +2164,12 @@ ORG &1100
 .NA%
 
 \ <----------------------------- Code deleted from the original disc version -->
-\\  EQUS "JAMESON"       \ The current commander name, which defaults to JAMESON
+\ \  EQUS "JAMESON"       \ The current commander name, which defaults to JAMESON
 \  EQUB 13              \
 \                       \ The commander name can be up to 7 characters (the DFS
 \                       \ limit for file names), and is terminated by a carriage
 \                       \ return
-\\ <----------------------------------------------------- End of deleted code -->
+\ \ <----------------------------------------------------- End of deleted code -->
 
 \ <-------------------------------------------------- Code added for Elite-A -->
 
@@ -2205,13 +2205,13 @@ ORG &1100
  EQUW &B753             \ QQ21 = Seed s2 for system 0, galaxy 0 (Tibedied), #7-8
 
 \ <----------------------------- Code deleted from the original disc version -->
-\\ IF Q%
+\ \ IF Q%
 \  EQUD &00CA9A3B       \ CASH = Amount of cash (100,000,000 Cr), #9-12
 \ ELSE
 \  EQUD &E8030000       \ CASH = Amount of cash (100 Cr), #9-12
 \ ENDIF
-\\  EQUB 70              \ QQ14 = Fuel level, #13
-\\ <----------------------------------------------------- End of deleted code -->
+\ \  EQUB 70              \ QQ14 = Fuel level, #13
+\ \ <----------------------------------------------------- End of deleted code -->
 
 \ <-------------------------------------------------- Code added for Elite-A -->
 
@@ -2230,9 +2230,9 @@ ENDIF
  EQUB 0                 \ GCNT = Galaxy number, 0-7, #15
 
 \ <----------------------------- Code deleted from the original disc version -->
-\\  EQUB POW+(128 AND Q%)\ LASER = Front laser, #16
-\\  EQUB (POW+128) AND Q%\ LASER+1 = Rear laser, #17
-\\ <----------------------------------------------------- End of deleted code -->
+\ \  EQUB POW+(128 AND Q%)\ LASER = Front laser, #16
+\ \  EQUB (POW+128) AND Q%\ LASER+1 = Rear laser, #17
+\ \ <----------------------------------------------------- End of deleted code -->
 
 \ <-------------------------------------------------- Code added for Elite-A -->
 
@@ -2251,8 +2251,8 @@ ENDIF
                         \ #20-21
 
 \ <----------------------------- Code deleted from the original disc version -->
-\\  EQUB 22+(15 AND Q%)  \ CRGO = Cargo capacity, #22
-\\ <----------------------------------------------------- End of deleted code -->
+\ \  EQUB 22+(15 AND Q%)  \ CRGO = Cargo capacity, #22
+\ \ <----------------------------------------------------- End of deleted code -->
 
 \ <-------------------------------------------------- Code added for Elite-A -->
 
@@ -2295,8 +2295,8 @@ ENDIF
  EQUD 0                 \ These four bytes appear to be unused, #47-50
 
 \ <----------------------------- Code deleted from the original disc version -->
-\\  EQUB 3+(Q% AND 1)    \ NOMSL = Number of missiles, #51
-\\ <----------------------------------------------------- End of deleted code -->
+\ \  EQUB 3+(Q% AND 1)    \ NOMSL = Number of missiles, #51
+\ \ <----------------------------------------------------- End of deleted code -->
 
 \ <-------------------------------------------------- Code added for Elite-A -->
 
@@ -2307,7 +2307,7 @@ ENDIF
  EQUB 0                 \ FIST = Legal status ("fugitive/innocent status"), #52
 
 \ <----------------------------- Code deleted from the original disc version -->
-\\  EQUB 16              \ AVL+0  = Market availability of Food, #53
+\ \  EQUB 16              \ AVL+0  = Market availability of Food, #53
 \
 \ <----------------------------------------------------- End of deleted code -->
 
@@ -2340,8 +2340,8 @@ ENDIF
  EQUW 0                 \ TALLY = Number of kills, #71-72
 
 \ <----------------------------- Code deleted from the original disc version -->
-\\  EQUB 128             \ SVC = Save count, #73
-\\ <----------------------------------------------------- End of deleted code -->
+\ \  EQUB 128             \ SVC = Save count, #73
+\ \ <----------------------------------------------------- End of deleted code -->
 
 \ <-------------------------------------------------- Code added for Elite-A -->
 
@@ -2371,10 +2371,10 @@ ENDIF
 .CHK2
 
 \ <----------------------------- Code deleted from the original disc version -->
-\\  EQUB &03 EOR &A9     \ The checksum value for the default commander, EOR'd
+\ \  EQUB &03 EOR &A9     \ The checksum value for the default commander, EOR'd
 \                       \ with &A9 to make it harder to tamper with the checksum
 \                       \ byte, #74
-\\ <----------------------------------------------------- End of deleted code -->
+\ \ <----------------------------------------------------- End of deleted code -->
 
 \ <-------------------------------------------------- Code added for Elite-A -->
 
@@ -2406,8 +2406,8 @@ ENDIF
 .CHK
 
 \ <----------------------------- Code deleted from the original disc version -->
-\\  EQUB &03             \ The checksum value for the default commander, #75
-\\ <----------------------------------------------------- End of deleted code -->
+\ \  EQUB &03             \ The checksum value for the default commander, #75
+\ \ <----------------------------------------------------- End of deleted code -->
 
 \ <-------------------------------------------------- Code added for Elite-A -->
 
@@ -2469,7 +2469,7 @@ ENDIF
  BEQ P%                 \ Hang the computer as something has gone wrong
 
 \ <----------------------------- Code deleted from the original disc version -->
-\\  EQUB &64, &5F, &61   \ These bytes appear to be unused
+\ \  EQUB &64, &5F, &61   \ These bytes appear to be unused
 \  EQUB &74, &74, &72
 \  EQUB &69, &62, &75
 \  EQUB &74, &65, &73
@@ -2479,7 +2479,7 @@ ENDIF
 \  EQUB &64, &69, &73
 \  EQUB &63, &00, &B6
 \  EQUB &3C, &C6
-\\ <----------------------------------------------------- End of deleted code -->
+\ \ <----------------------------------------------------- End of deleted code -->
 
 COPYBLOCK TVT1, P%, TVT1code
 
@@ -2523,13 +2523,13 @@ ORG TVT1code + P% - TVT1
 \ ******************************************************************************
 
 \ <----------------------------- Code deleted from the original disc version -->
-\\ .ELITE
-\\  INCBIN "versions/disc/binaries/P.ELITE.bin"
-\\ .ASOFT
-\\  INCBIN "versions/disc/binaries/P.A-SOFT.bin"
-\\ .CpASOFT
-\\  INCBIN "versions/disc/binaries/P.(C)ASFT.bin"
-\\ <----------------------------------------------------- End of deleted code -->
+\ \ .ELITE
+\ \  INCBIN "versions/disc/binaries/P.ELITE.bin"
+\ \ .ASOFT
+\ \  INCBIN "versions/disc/binaries/P.A-SOFT.bin"
+\ \ .CpASOFT
+\ \  INCBIN "versions/disc/binaries/P.(C)ASFT.bin"
+\ \ <----------------------------------------------------- End of deleted code -->
 
 \ <-------------------------------------------------- Code added for Elite-A -->
 
