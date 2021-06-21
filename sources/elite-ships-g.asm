@@ -585,17 +585,7 @@ ENDMACRO
  EQUB 90                \ Number of vertices       = 90 / 6 = 15
  EQUB 20                \ Number of edges          = 20
 
-\ <----------------------------- Code deleted from the original disc version -->
-\
-\  EQUW 0               \ Bounty                   = 0
-\
-\ <----------------------------------------------------- End of deleted code -->
-
-\ <-------------------------------------------------- Code added for Elite-A -->
-
  EQUW 0                 \ Bounty                   = 0
-
-\ <------------------------------------------------------- End of added code -->
 
  EQUB 28                \ Number of faces          = 28 / 4 = 7
  EQUB 23                \ Visibility distance      = 23
@@ -621,7 +611,8 @@ ENDMACRO
 \
 \  EQUB %00010001       \ Laser power              = 2
 \                       \ Missiles                 = 1
-\ \ <----------------------------------------------------- End of deleted code -->
+\
+\ <----------------------------------------------------- End of deleted code -->
 
 \ <-------------------------------------------------- Code added for Elite-A -->
 
@@ -937,7 +928,8 @@ ENDMACRO
 \
 \  EQUB %00010000       \ Laser power              = 2
 \                       \ Missiles                 = 0
-\ \ <----------------------------------------------------- End of deleted code -->
+\
+\ <----------------------------------------------------- End of deleted code -->
 
 \ <-------------------------------------------------- Code added for Elite-A -->
 
@@ -1264,7 +1256,8 @@ ENDMACRO
 \
 \  EQUB %00001000       \ Laser power              = 1
 \                       \ Missiles                 = 0
-\ \ <----------------------------------------------------- End of deleted code -->
+\
+\ <----------------------------------------------------- End of deleted code -->
 
 \ <-------------------------------------------------- Code added for Elite-A -->
 
@@ -1359,7 +1352,8 @@ ENDMACRO
 \
 \  EQUB %00010000       \ Laser power              = 2
 \                       \ Missiles                 = 0
-\ \ <----------------------------------------------------- End of deleted code -->
+\
+\ <----------------------------------------------------- End of deleted code -->
 
 \ <-------------------------------------------------- Code added for Elite-A -->
 
@@ -1470,7 +1464,8 @@ ENDMACRO
 \
 \  EQUB %00011100       \ Laser power              = 3
 \                       \ Missiles                 = 4
-\ \ <----------------------------------------------------- End of deleted code -->
+\
+\ <----------------------------------------------------- End of deleted code -->
 
 \ <-------------------------------------------------- Code added for Elite-A -->
 

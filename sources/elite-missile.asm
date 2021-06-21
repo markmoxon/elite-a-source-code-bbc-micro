@@ -328,14 +328,16 @@ ENDMACRO
 .VEC
 
 \ <----------------------------- Code deleted from the original disc version -->
-\ \  EQUW &0004           \ VEC = &7FFE
+\
+\  EQUW &0004           \ VEC = &7FFE
 \                       \
 \                       \ This gets set to the value of the original IRQ1 vector
 \                       \ by the loading process
 \                       \
 \                       \ This default value is presumably noise included at the
 \                       \ time of compilation, as it gets overwritten
-\ \ <----------------------------------------------------- End of deleted code -->
+\
+\ <----------------------------------------------------- End of deleted code -->
 
 \ <-------------------------------------------------- Code added for Elite-A -->
 

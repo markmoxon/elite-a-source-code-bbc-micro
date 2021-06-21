@@ -475,7 +475,8 @@ ENDMACRO
  EQUB 0
 
 \ <----------------------------- Code deleted from the original disc version -->
-\ \  CHAR 'H'             \ Token 29:     "HYPERSPACE "
+\
+\  CHAR 'H'             \ Token 29:     "HYPERSPACE "
 \  CHAR 'Y'             \
 \  CHAR 'P'             \ Encoded as:   "HYP<144>SPA<133> "
 \  TWOK 'E', 'R'
@@ -485,7 +486,8 @@ ENDMACRO
 \  TWOK 'C', 'E'
 \  CHAR ' '
 \  EQUB 0
-\ \ <----------------------------------------------------- End of deleted code -->
+\
+\ <----------------------------------------------------- End of deleted code -->
 
 \ <-------------------------------------------------- Code added for Elite-A -->
 
@@ -712,14 +714,16 @@ ENDMACRO
  EQUB 0
 
 \ <----------------------------- Code deleted from the original disc version -->
-\ \  CHAR 'A'             \ Token 57:     "ALLOYS"
+\
+\  CHAR 'A'             \ Token 57:     "ALLOYS"
 \  CHAR 'L'             \
 \  CHAR 'L'             \ Encoded as:   "ALLOYS"
 \  CHAR 'O'
 \  CHAR 'Y'
 \  CHAR 'S'
 \  EQUB 0
-\ \ <----------------------------------------------------- End of deleted code -->
+\
+\ <----------------------------------------------------- End of deleted code -->
 
 \ <-------------------------------------------------- Code added for Elite-A -->
 
@@ -1059,14 +1063,16 @@ ENDMACRO
  EQUB 0
 
 \ <----------------------------- Code deleted from the original disc version -->
-\ \  RTOK 67              \ Token 107:    "LARGE CARGO{sentence case} BAY"
+\
+\  RTOK 67              \ Token 107:    "LARGE CARGO{sentence case} BAY"
 \  RTOK 46              \
 \  CHAR ' '             \ Encoded as:   "[67][46] BAY"
 \  CHAR 'B'
 \  CHAR 'A'
 \  CHAR 'Y'
 \  EQUB 0
-\ \ <----------------------------------------------------- End of deleted code -->
+\
+\ <----------------------------------------------------- End of deleted code -->
 
 \ <-------------------------------------------------- Code added for Elite-A -->
 
@@ -1122,13 +1128,15 @@ ENDMACRO
  EQUB 0
 
 \ <----------------------------- Code deleted from the original disc version -->
-\ \  RTOK 121             \ Token 113:    "ENERGY BOMB"
+\
+\  RTOK 121             \ Token 113:    "ENERGY BOMB"
 \  CHAR 'B'             \
 \  CHAR 'O'             \ Encoded as:   "[121]BOMB"
 \  CHAR 'M'
 \  CHAR 'B'
 \  EQUB 0
-\ \ <----------------------------------------------------- End of deleted code -->
+\
+\ <----------------------------------------------------- End of deleted code -->
 
 \ <-------------------------------------------------- Code added for Elite-A -->
 
@@ -1158,7 +1166,8 @@ ENDMACRO
  EQUB 0
 
 \ <----------------------------- Code deleted from the original disc version -->
-\ \  CHAR 'M'             \ Token 117:    "MILITARY  LASER"
+\
+\  CHAR 'M'             \ Token 117:    "MILITARY  LASER"
 \  CHAR 'I'             \
 \  CHAR 'L'             \ Encoded as:   "MILIT<138>Y [27]"
 \  CHAR 'I'
@@ -1168,14 +1177,16 @@ ENDMACRO
 \  CHAR ' '
 \  RTOK 27
 \  EQUB 0
-\ \  CHAR 'M'             \ Token 118:    "MINING  LASER"
+\
+\  CHAR 'M'             \ Token 118:    "MINING  LASER"
 \  TWOK 'I', 'N'        \
 \  TWOK 'I', 'N'        \ Encoded as:   "M<140><140>G [27]"
 \  CHAR 'G'
 \  CHAR ' '
 \  RTOK 27
 \  EQUB 0
-\ \ <----------------------------------------------------- End of deleted code -->
+\
+\ <----------------------------------------------------- End of deleted code -->
 
 \ <-------------------------------------------------- Code added for Elite-A -->
 
@@ -1227,12 +1238,14 @@ ENDMACRO
  EQUB 0
 
 \ <----------------------------- Code deleted from the original disc version -->
-\ \  RTOK 115             \ Token 123:    "DOCKING COMPUTERS ON"
+\
+\  RTOK 115             \ Token 123:    "DOCKING COMPUTERS ON"
 \  CHAR ' '             \
 \  CHAR 'O'             \ Encoded as:   "[115] ON"
 \  CHAR 'N'
 \  EQUB 0
-\ \ <----------------------------------------------------- End of deleted code -->
+\
+\ <----------------------------------------------------- End of deleted code -->
 
 \ <-------------------------------------------------- Code added for Elite-A -->
 
@@ -1290,10 +1303,12 @@ ENDMACRO
  EQUB 0
 
 \ <----------------------------- Code deleted from the original disc version -->
-\ \  EQUB 0               \ Token 128:    ""
+\
+\  EQUB 0               \ Token 128:    ""
 \                       \
 \                       \ Encoded as:   ""
-\ \ <----------------------------------------------------- End of deleted code -->
+\
+\ <----------------------------------------------------- End of deleted code -->
 
 \ <-------------------------------------------------- Code added for Elite-A -->
 
@@ -1322,7 +1337,8 @@ ENDMACRO
  EQUB 0
 
 \ <----------------------------- Code deleted from the original disc version -->
-\ \  CONT 12              \ Token 132:    "{cr}
+\
+\  CONT 12              \ Token 132:    "{cr}
 \  CONT 8               \                {all caps}EQUIPMENT: {sentence case}"
 \  RTOK 47              \
 \  CHAR 'M'             \ Encoded as:   "{12}{8}[47]M<146>T:{6}"
@@ -1331,7 +1347,8 @@ ENDMACRO
 \  CHAR ':'
 \  CONT 6
 \  EQUB 0
-\ \ <----------------------------------------------------- End of deleted code -->
+\
+\ <----------------------------------------------------- End of deleted code -->
 
 \ <-------------------------------------------------- Code added for Elite-A -->
 
