@@ -1089,6 +1089,8 @@ ENDMACRO
 \
 \ ******************************************************************************
 
+                        \ --- Code added for Elite-A: --------------------------
+
 .ship_bushmaster
 
  EQUB 0                 \ Max. canisters on demise = 0
@@ -1100,17 +1102,7 @@ ENDMACRO
  EQUB 30                \ Explosion count          = 6, as (4 * n) + 6 = 30
  EQUB 72                \ Number of vertices       = 72 / 6 = 12
  EQUB 19                \ Number of edges          = 19
-
-                        \ --- Original Acornsoft code removed from Elite-A: ----
-
-\  EQUW 150             \ Bounty                   = 150
-
-                        \ --- And replaced by the following: -------------------
-
  EQUW 250               \ Bounty                   = 250
-
-                        \ --- End of replacement code --------------------------
-
  EQUB 36                \ Number of faces          = 36 / 4 = 9
  EQUB 20                \ Visibility distance      = 20
  EQUB 74                \ Max. energy              = 74
@@ -1118,18 +1110,8 @@ ENDMACRO
  EQUB &00               \ Edges data offset (high) = &005C
  EQUB &00               \ Faces data offset (high) = &00A8
  EQUB 2                 \ Normals are scaled by    = 2^2 = 4
-
-                        \ --- Original Acornsoft code removed from Elite-A: ----
-
-\  EQUB %00100001       \ Laser power              = 4
-\                       \ Missiles                 = 1
-
-                        \ --- And replaced by the following: -------------------
-
  EQUB %00101001         \ Laser power              = 5
                         \ Missiles                 = 1
-
-                        \ --- End of replacement code --------------------------
 
 \VERTEX    x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX    0,    0,   60,     3,     2,     1,     0,         31     \ Vertex 0
@@ -1177,6 +1159,8 @@ ENDMACRO
  FACE       42,      -85,       -7,         31    \ Face 7
  FACE        0,        0,      -96,         31    \ Face 8
 
+                        \ --- End of added code --------------------------------
+
 \ ******************************************************************************
 \
 \       Name: ship_ghavial
@@ -1186,6 +1170,8 @@ ENDMACRO
 \  Deep dive: Ship blueprints
 \
 \ ******************************************************************************
+
+                        \ --- Code added for Elite-A: --------------------------
 
 .ship_ghavial
 
@@ -1198,30 +1184,10 @@ ENDMACRO
  EQUB 34                \ Explosion count          = 7, as (4 * n) + 6 = 34
  EQUB 72                \ Number of vertices       = 72 / 6 = 12
  EQUB 22                \ Number of edges          = 22
-
-                        \ --- Original Acornsoft code removed from Elite-A: ----
-
-\  EQUW 100             \ Bounty                   = 100
-
-                        \ --- And replaced by the following: -------------------
-
  EQUW 300               \ Bounty                   = 300
-
-                        \ --- End of replacement code --------------------------
-
  EQUB 48                \ Number of faces          = 48 / 4 = 12
  EQUB 10                \ Visibility distance      = 10
-
-                        \ --- Original Acornsoft code removed from Elite-A: ----
-
-\  EQUB 114             \ Max. energy              = 114
-
-                        \ --- And replaced by the following: -------------------
-
  EQUB 123               \ Max. energy              = 123
-
-                        \ --- End of replacement code --------------------------
-
  EQUB 16                \ Max. speed               = 16
  EQUB &00               \ Edges data offset (high) = &005C
  EQUB &00               \ Faces data offset (high) = &00B4
@@ -1281,6 +1247,8 @@ ENDMACRO
  FACE      -27,      -55,      -13,         31    \ Face 10
  FACE      -28,      -56,        7,         31    \ Face 11
 
+                        \ --- End of added code --------------------------------
+
 \ ******************************************************************************
 \
 \       Name: ship_monitor
@@ -1290,6 +1258,8 @@ ENDMACRO
 \  Deep dive: Ship blueprints
 \
 \ ******************************************************************************
+
+                        \ --- Code added for Elite-A: --------------------------
 
 .ship_monitor
 
@@ -1302,30 +1272,10 @@ ENDMACRO
  EQUB 42                \ Explosion count          = 9, as (4 * n) + 6 = 42
  EQUB 102               \ Number of vertices       = 102 / 6 = 17
  EQUB 23                \ Number of edges          = 23
-
-                        \ --- Original Acornsoft code removed from Elite-A: ----
-
-\  EQUW 400             \ Bounty                   = 400
-
-                        \ --- And replaced by the following: -------------------
-
  EQUW 500               \ Bounty                   = 500
-
-                        \ --- End of replacement code --------------------------
-
  EQUB 44                \ Number of faces          = 44 / 4 = 11
  EQUB 40                \ Visibility distance      = 40
-
-                        \ --- Original Acornsoft code removed from Elite-A: ----
-
-\  EQUB 132             \ Max. energy              = 132
-
-                        \ --- And replaced by the following: -------------------
-
  EQUB 133               \ Max. energy              = 133
-
-                        \ --- End of replacement code --------------------------
-
  EQUB 16                \ Max. speed               = 16
  EQUB &00               \ Edges data offset (high) = &007A
  EQUB &00               \ Faces data offset (high) = &00D6
@@ -1389,6 +1339,8 @@ ENDMACRO
  FACE       39,      -48,      -13,         31    \ Face 8
  FACE      -39,      -48,      -13,         31    \ Face 9
  FACE        0,        0,      -64,         31    \ Face 10
+
+                        \ --- End of added code --------------------------------
 
 \ ******************************************************************************
 \

@@ -971,6 +971,8 @@ ENDMACRO
 \
 \ ******************************************************************************
 
+                        \ --- Code added for Elite-A: --------------------------
+
 .ship_chameleon
 
  EQUB 3                 \ Max. canisters on demise = 3
@@ -982,30 +984,10 @@ ENDMACRO
  EQUB 26                \ Explosion count          = 5, as (4 * n) + 6 = 26
  EQUB 108               \ Number of vertices       = 108 / 6 = 18
  EQUB 29                \ Number of edges          = 29
-
-                        \ --- Original Acornsoft code removed from Elite-A: ----
-
-\  EQUW 200             \ Bounty                   = 200
-
-                        \ --- And replaced by the following: -------------------
-
  EQUW 400               \ Bounty                   = 400
-
-                        \ --- End of replacement code --------------------------
-
  EQUB 52                \ Number of faces          = 52 / 4 = 13
  EQUB 10                \ Visibility distance      = 10
-
-                        \ --- Original Acornsoft code removed from Elite-A: ----
-
-\  EQUB 100             \ Max. energy              = 100
-
-                        \ --- And replaced by the following: -------------------
-
  EQUB 109               \ Max. energy              = 109
-
-                        \ --- End of replacement code --------------------------
-
  EQUB 29                \ Max. speed               = 29
  EQUB &00               \ Edges data offset (high) = &0080
  EQUB &00               \ Faces data offset (high) = &00F4
@@ -1078,6 +1060,8 @@ ENDMACRO
  FACE       57,      -76,      -11,         31    \ Face 10
  FACE      -57,      -76,      -11,         31    \ Face 11
  FACE        0,        0,      -96,         31    \ Face 12
+
+                        \ --- End of added code --------------------------------
 
 \ ******************************************************************************
 \
@@ -1299,6 +1283,8 @@ ENDMACRO
 \
 \ ******************************************************************************
 
+                        \ --- Code added for Elite-A: --------------------------
+
 .ship_ghavial
 
  EQUB 3                 \ Max. canisters on demise = 3
@@ -1310,46 +1296,16 @@ ENDMACRO
  EQUB 34                \ Explosion count          = 7, as (4 * n) + 6 = 34
  EQUB 72                \ Number of vertices       = 72 / 6 = 12
  EQUB 22                \ Number of edges          = 22
-
-                        \ --- Original Acornsoft code removed from Elite-A: ----
-
-\  EQUW 100             \ Bounty                   = 100
-
-                        \ --- And replaced by the following: -------------------
-
  EQUW 300               \ Bounty                   = 300
-
-                        \ --- End of replacement code --------------------------
-
  EQUB 48                \ Number of faces          = 48 / 4 = 12
  EQUB 10                \ Visibility distance      = 10
-
-                        \ --- Original Acornsoft code removed from Elite-A: ----
-
-\  EQUB 114             \ Max. energy              = 114
-
-                        \ --- And replaced by the following: -------------------
-
  EQUB 115               \ Max. energy              = 115
-
-                        \ --- End of replacement code --------------------------
-
  EQUB 16                \ Max. speed               = 16
  EQUB &00               \ Edges data offset (high) = &005C
  EQUB &00               \ Faces data offset (high) = &00B4
  EQUB 0                 \ Normals are scaled by    = 2^0 = 1
-
-                        \ --- Original Acornsoft code removed from Elite-A: ----
-
-\  EQUB %00100111       \ Laser power              = 4
-\                       \ Missiles                 = 7
-
-                        \ --- And replaced by the following: -------------------
-
  EQUB %00101111         \ Laser power              = 5
                         \ Missiles                 = 7
-
-                        \ --- End of replacement code --------------------------
 
 \VERTEX    x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX   30,    0,  100,     7,     6,     1,     0,         31     \ Vertex 0
@@ -1402,6 +1358,8 @@ ENDMACRO
  FACE        0,      -51,      -38,         31    \ Face 9
  FACE      -27,      -55,      -13,         31    \ Face 10
  FACE      -28,      -56,        7,         31    \ Face 11
+
+                        \ --- End of added code --------------------------------
 
 \ ******************************************************************************
 \
