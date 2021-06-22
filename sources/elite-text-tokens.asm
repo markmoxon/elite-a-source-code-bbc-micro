@@ -1169,7 +1169,7 @@ ENDMACRO
 \  CHAR ' '
 \  RTOK 27
 \  EQUB 0
-
+\
 \  CHAR 'M'             \ Token 118:    "MINING  LASER"
 \  TWOK 'I', 'N'        \
 \  TWOK 'I', 'N'        \ Encoded as:   "M<140><140>G [27]"

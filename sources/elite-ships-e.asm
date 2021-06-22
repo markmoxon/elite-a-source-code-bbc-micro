@@ -825,7 +825,7 @@ ENDMACRO
 \  EDGE       9,      10,    10,    11,         31  \ Edge 23
 \  EDGE       1,       4,     4,     5,         31  \ Edge 24
 \  EDGE       8,       9,     6,     7,         31  \ Edge 25
-
+\
 \ \FACE normal_x, normal_y, normal_z, visibility
 \  FACE      -27,       40,       11,        31  \ Face 0
 \  FACE       27,       40,       11,        31  \ Face 1

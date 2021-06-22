@@ -702,9 +702,13 @@ ORG &0000
 
  SKIP 4                 \ Temporary storage, used in a number of places
 
+                        \ --- Code added for Elite-A: --------------------------
+
 .finder
 
  SKIP 1                 \ AJD
+
+                        \ --- End of added code --------------------------------
 
 ORG &00D1
 
@@ -760,6 +764,882 @@ ORG &0100
 \ ******************************************************************************
 
 ORG &0300
+
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
+\ .KL
+\
+\  SKIP 1               \ The following bytes implement a key logger that
+\                       \ enables Elite to scan for concurrent key presses of
+\                       \ the primary flight keys, plus a secondary flight key
+\                       \
+\                       \ See the deep dive on "The key logger" for more details
+\                       \
+\                       \ If a key is being pressed that is not in the keyboard
+\                       \ table at KYTB, it can be stored here (as seen in
+\                       \ routine DK4, for example)
+\
+\ .KY1
+\
+\  SKIP 1               \ "?" is being pressed
+\                       \
+\                       \   * 0 = no
+\                       \
+\                       \   * Non-zero = yes
+\
+\ .KY2
+\
+\  SKIP 1               \ Space is being pressed
+\                       \
+\                       \   * 0 = no
+\                       \
+\                       \   * Non-zero = yes
+\
+\ .KY3
+\
+\  SKIP 1               \ "<" is being pressed
+\                       \
+\                       \   * 0 = no
+\                       \
+\                       \   * Non-zero = yes
+\
+\ .KY4
+\
+\  SKIP 1               \ ">" is being pressed
+\                       \
+\                       \   * 0 = no
+\                       \
+\                       \   * Non-zero = yes
+\
+\ .KY5
+\
+\  SKIP 1               \ "X" is being pressed
+\                       \
+\                       \   * 0 = no
+\                       \
+\                       \   * Non-zero = yes
+\
+\ .KY6
+\
+\  SKIP 1               \ "S" is being pressed
+\                       \
+\                       \   * 0 = no
+\                       \
+\                       \   * Non-zero = yes
+\
+\ .KY7
+\
+\  SKIP 1               \ "A" is being pressed
+\                       \
+\                       \   * 0 = no
+\                       \
+\                       \   * Non-zero = yes
+\                       \
+\                       \ This is also set when the joystick fire button has
+\                       \ been pressed
+\
+\ .KY12
+\
+\  SKIP 1               \ TAB is being pressed
+\                       \
+\                       \   * 0 = no
+\                       \
+\                       \   * Non-zero = yes
+\
+\ .KY13
+\
+\  SKIP 1               \ ESCAPE is being pressed
+\                       \
+\                       \   * 0 = no
+\                       \
+\                       \   * Non-zero = yes
+\
+\ .KY14
+\
+\  SKIP 1               \ "T" is being pressed
+\                       \
+\                       \   * 0 = no
+\                       \
+\                       \   * Non-zero = yes
+\
+\ .KY15
+\
+\  SKIP 1               \ "U" is being pressed
+\                       \
+\                       \   * 0 = no
+\                       \
+\                       \   * Non-zero = yes
+\
+\ .KY16
+\
+\  SKIP 1               \ "M" is being pressed
+\                       \
+\                       \   * 0 = no
+\                       \
+\                       \   * Non-zero = yes
+\
+\ .KY17
+\
+\  SKIP 1               \ "E" is being pressed
+\                       \
+\                       \   * 0 = no
+\                       \
+\                       \   * Non-zero = yes
+\
+\ .KY18
+\
+\  SKIP 1               \ "J" is being pressed
+\                       \
+\                       \   * 0 = no
+\                       \
+\                       \   * Non-zero = yes
+\
+\ .KY19
+\
+\  SKIP 1               \ "C" is being pressed
+\                       \
+\                       \   * 0 = no
+\                       \
+\                       \   * Non-zero = yes
+\
+\ .KY20
+\
+\  SKIP 1               \ "P" is being pressed
+\                       \
+\                       \   * 0 = no
+\                       \
+\                       \   * Non-zero = yes
+\
+\ .FRIN
+\
+\  SKIP NOSH + 1        \ Slots for the ships in the local bubble of universe
+\                       \
+\                       \ There are #NOSH + 1 slots, but the ship-spawning
+\                       \ routine at NWSHP only populates #NOSH of them, so
+\                       \ there are 13 slots but only 12 are used for ships
+\                       \ (the last slot is effectively used as a null
+\                       \ terminator when shuffling the slots down in the
+\                       \ KILLSHP routine)
+\                       \
+\                       \ See the deep dive on "The local bubble of universe"
+\                       \ for details of how Elite stores the local universe in
+\                       \ FRIN, UNIV and K%
+\
+\ .MANY
+\
+\  SKIP SST             \ The number of ships of each type in the local bubble
+\                       \ of universe
+\                       \
+\                       \ The number of ships of type X in the local bubble is
+\                       \ stored at MANY+X, so the number of Sidewinders is at
+\                       \ MANY+1, the number of Mambas is at MANY+2, and so on
+\                       \
+\                       \ See the deep dive on "Ship blueprints" for a list of
+\                       \ ship types
+\
+\ .SSPR
+\
+\  SKIP NTY + 1 - SST   \ "Space station present" flag
+\                       \
+\                       \   * Non-zero if we are inside the space station's safe
+\                       \     zone
+\                       \
+\                       \   * 0 if we aren't (in which case we can show the sun)
+\                       \
+\                       \ This flag is at MANY+SST, which is no coincidence, as
+\                       \ MANY+SST is a count of how many space stations there
+\                       \ are in our local bubble, which is the same as saying
+\                       \ "space station present"
+\
+\ .JUNK
+\
+\  SKIP 1               \ The amount of junk in the local bubble
+\                       \
+\                       \ "Junk" is defined as being one of these:
+\                       \
+\                       \   * Escape pod
+\                       \   * Alloy plate
+\                       \   * Cargo canister
+\                       \   * Asteroid
+\                       \   * Splinter
+\                       \   * Shuttle
+\                       \   * Transporter
+\                       \
+\                       \ Junk is the range of ship types from #JL to #JH - 1
+\
+\
+\ .auto
+\
+\  SKIP 1               \ Docking computer activation status
+\                       \
+\                       \   * 0 = Docking computer is off
+\                       \
+\                       \   * Non-zero = Docking computer is running
+\
+\ .ECMP
+\
+\  SKIP 1               \ Our E.C.M. status
+\                       \
+\                       \   * 0 = E.C.M. is off
+\                       \
+\                       \   * Non-zero = E.C.M. is on
+\
+\ .MJ
+\
+\  SKIP 1               \ Are we in witchspace (i.e. have we mis-jumped)?
+\                       \
+\                       \   * 0 = no, we are in normal space
+\                       \
+\                       \   * &FF = yes, we are in witchspace
+\
+\ .CABTMP
+\
+\  SKIP 1               \ Cabin temperature
+\                       \
+\                       \ The ambient cabin temperature in deep space is 30,
+\                       \ which is displayed as one notch on the dashboard bar
+\                       \
+\                       \ We get higher temperatures closer to the sun
+\                       \
+\                       \ CABTMP shares a location with MANY, but that's OK as
+\                       \ MANY+0 would contain the number of ships of type 0,
+\                       \ and as there is no ship type 0 (they start at 1), the
+\                       \ byte at MANY+0 is not used for storing a ship type
+\                       \ and can be used for the cabin temperature instead
+\
+\ .LAS2
+\
+\  SKIP 1               \ Laser power for the current laser
+\                       \
+\                       \   * Bits 0-6 contain the laser power of the current
+\                       \     space view
+\                       \
+\                       \   * Bit 7 denotes whether or not the laser pulses:
+\                       \
+\                       \     * 0 = pulsing laser
+\                       \
+\                       \     * 1 = beam laser (i.e. always on)
+\
+\ .MSAR
+\
+\  SKIP 1               \ The targeting state of our leftmost missile
+\                       \
+\                       \   * 0 = missile is not looking for a target, or it
+\                       \     already has a target lock (indicator is not
+\                       \     yellow/white)
+\                       \
+\                       \   * Non-zero = missile is currently looking for a
+\                       \     target (indicator is yellow/white)
+\
+\ .VIEW
+\
+\  SKIP 1               \ The number of the current space view
+\                       \
+\                       \   * 0 = front
+\                       \   * 1 = rear
+\                       \   * 2 = left
+\                       \   * 3 = right
+\
+\ .LASCT
+\
+\  SKIP 1               \ The laser pulse count for the current laser
+\                       \
+\                       \ This is a counter that defines the gap between the
+\                       \ pulses of a pulse laser. It is set as follows:
+\                       \
+\                       \   * 0 for a beam laser
+\                       \
+\                       \   * 10 for a pulse laser
+\                       \
+\                       \ It gets decremented every vertical sync (in the LINSCN
+\                       \ routine, which is called 50 times a second) and is set
+\                       \ to a non-zero value for pulse lasers only
+\                       \
+\                       \ The laser only fires when the value of LASCT hits
+\                       \ zero, so for pulse lasers with a value of 10, that
+\                       \ means the laser fires once every 10 vertical syncs (or
+\                       \ 5 times a second)
+\                       \
+\                       \ In comparison, beam lasers fire continuously as the
+\                       \ value of LASCT is always 0
+\
+\ .GNTMP
+\
+\  SKIP 1               \ Laser temperature (or "gun temperature")
+\                       \
+\                       \ If the laser temperature exceeds 242 then the laser
+\                       \ overheats and cannot be fired again until it has
+\                       \ cooled down
+\
+\ .HFX
+\
+\  SKIP 1               \ A flag that toggles the hyperspace colour effect
+\                       \
+\                       \   * 0 = no colour effect
+\                       \
+\                       \   * Non-zero = hyperspace colour effect enabled
+\                       \
+\                       \ When HFX is set to 1, the mode 4 screen that makes
+\                       \ up the top part of the display is temporarily switched
+\                       \ to mode 5 (the same screen mode as the dashboard),
+\                       \ which has the effect of blurring and colouring the
+\                       \ hyperspace rings in the top part of the screen. The
+\                       \ code to do this is in the LINSCN routine, which is
+\                       \ called as part of the screen mode routine at IRQ1.
+\                       \ It's in LINSCN that HFX is checked, and if it is
+\                       \ non-zero, the top part of the screen is not switched
+\                       \ to mode 4, thus leaving the top part of the screen in
+\                       \ the more colourful mode 5
+\
+\ .EV
+\
+\  SKIP 1               \ The "extra vessels" spawning counter
+\                       \
+\                       \ This counter is set to 0 on arrival in a system and
+\                       \ following an in-system jump, and is bumped up when we
+\                       \ spawn bounty hunters or pirates (i.e. "extra vessels")
+\                       \
+\                       \ It decreases by 1 each time we consider spawning more
+\                       \ "extra vessels" in part 4 of the main game loop, so
+\                       \ increasing the value of EV has the effect of delaying
+\                       \ the spawning of more vessels
+\                       \
+\                       \ In other words, this counter stops bounty hunters and
+\                       \ pirates from continually appearing, and ensures that
+\                       \ there's a delay between spawnings
+\
+\ .DLY
+\
+\  SKIP 1               \ In-flight message delay
+\                       \
+\                       \ This counter is used to keep an in-flight message up
+\                       \ for a specified time before it gets removed. The value
+\                       \ in DLY is decremented each time we start another
+\                       \ iteration of the main game loop at TT100
+\
+\ .de
+\
+\  SKIP 1               \ Equipment destruction flag
+\                       \
+\                       \   * Bit 1 denotes whether or not the in-flight message
+\                       \     about to be shown by the MESS routine is about
+\                       \     destroyed equipment:
+\                       \
+\                       \     * 0 = the message is shown normally
+\                       \
+\                       \     * 1 = the string " DESTROYED" gets added to the
+\                       \       end of the message
+\
+\ .JSTX
+\
+\  SKIP 1               \ Our current roll rate
+\                       \
+\                       \ This value is shown in the dashboard's RL indicator,
+\                       \ and determines the rate at which we are rolling
+\                       \
+\                       \ The value ranges from from 1 to 255 with 128 as the
+\                       \ centre point, so 1 means roll is decreasing at the
+\                       \ maximum rate, 128 means roll is not changing, and
+\                       \ 255 means roll is increasing at the maximum rate
+\                       \
+\                       \ This value is updated by "<" and ">" key presses, or
+\                       \ if joysticks are enabled, from the joystick. If
+\                       \ keyboard damping is enabled (which it is by default),
+\                       \ the value is slowly moved towards the centre value of
+\                       \ 128 (no roll) if there are no key presses or joystick
+\                       \ movement
+\
+\ .JSTY
+\
+\  SKIP 1               \ Our current pitch rate
+\                       \
+\                       \ This value is shown in the dashboard's DC indicator,
+\                       \ and determines the rate at which we are pitching
+\                       \
+\                       \ The value ranges from from 1 to 255 with 128 as the
+\                       \ centre point, so 1 means pitch is decreasing at the
+\                       \ maximum rate, 128 means pitch is not changing, and
+\                       \ 255 means pitch is increasing at the maximum rate
+\                       \
+\                       \ This value is updated by "S" and "X" key presses, or
+\                       \ if joysticks are enabled, from the joystick. If
+\                       \ keyboard damping is enabled (which it is by default),
+\                       \ the value is slowly moved towards the centre value of
+\                       \ 128 (no pitch) if there are no key presses or joystick
+\                       \ movement
+\ .XSAV2
+\
+\
+\  SKIP 1               \ Temporary storage, used for storing the value of the X
+\                       \ register in the TT26 routine
+\
+\
+\ .YSAV2
+\
+\
+\  SKIP 1               \ Temporary storage, used for storing the value of the Y
+\                       \ register in the TT26 routine
+\
+\
+\ .NAME
+\
+\  SKIP 8               \ The current commander name
+\                       \
+\                       \ The commander name can be up to 7 characters (the DFS
+\                       \ limit for file names), and is terminated by a carriage
+\                       \ return
+\
+\ .TP
+\
+\
+\  SKIP 1               \ The current mission status
+\                       \
+\                       \   * Bits 0-1 = Mission 1 status
+\                       \
+\                       \     * %00 = Mission not started
+\                       \     * %01 = Mission in progress, hunting for ship
+\                       \     * %11 = Constrictor killed, not debriefed yet
+\                       \     * %10 = Mission and debrief complete
+\                       \
+\                       \   * Bits 2-3 = Mission 2 status
+\                       \
+\                       \     * %00 = Mission not started
+\                       \     * %01 = Mission in progress, plans not picked up
+\                       \     * %10 = Mission in progress, plans picked up
+\                       \     * %11 = Mission complete
+\
+\
+\ .QQ0
+\
+\  SKIP 1               \ The current system's galactic x-coordinate (0-256)
+\
+\ .QQ1
+\
+\  SKIP 1               \ The current system's galactic y-coordinate (0-256)
+\
+\ .QQ21
+\
+\  SKIP 6               \ The three 16-bit seeds for the current galaxy
+\                       \
+\                       \ These seeds define system 0 in the current galaxy, so
+\                       \ they can be used as a starting point to generate all
+\                       \ 256 systems in the galaxy
+\                       \
+\                       \ Using a galactic hyperdrive rotates each byte to the
+\                       \ left (rolling each byte within itself) to get the
+\                       \ seeds for the next galaxy, so after eight galactic
+\                       \ jumps, the seeds roll around to the first galaxy again
+\                       \
+\                       \ See the deep dives on "Galaxy and system seeds" and
+\                       \ "Twisting the system seeds" for more details
+\ .CASH
+\
+\  SKIP 4               \ Our current cash pot
+\                       \
+\                       \ The cash stash is stored as a 32-bit unsigned integer,
+\                       \ with the most significant byte in CASH and the least
+\                       \ significant in CASH+3. This is big-endian, which is
+\                       \ the opposite way round to most of the numbers used in
+\                       \ Elite - to use our notation for multi-byte numbers,
+\                       \ the amount of cash is CASH(0 1 2 3)
+\
+\ .QQ14
+\
+\  SKIP 1               \ Our current fuel level (0-70)
+\                       \
+\                       \ The fuel level is stored as the number of light years
+\                       \ multiplied by 10, so QQ14 = 1 represents 0.1 light
+\                       \ years, and the maximum possible value is 70, for 7.0
+\                       \ light years
+\
+\ .COK
+\
+\  SKIP 1               \ Flags used to generate the competition code
+\                       \
+\                       \ See the deep dive on "The competition code" for
+\                       \ details of these flags and how they are used in
+\                       \ generating and decoding the competition code
+\
+\ .GCNT
+\
+\  SKIP 1               \ The number of the current galaxy (0-7)
+\                       \
+\                       \ When this is displayed in-game, 1 is added to the
+\                       \ number, so we start in galaxy 1 in-game, but it's
+\                       \ stored as galaxy 0 internally
+\                       \
+\                       \ The galaxy number increases by one every time a
+\                       \ galactic hyperdrive is used, and wraps back round to
+\                       \ the start after eight galaxies
+\
+\ .LASER
+\
+\  SKIP 4               \ The specifications of the lasers fitted to each of the
+\                       \ four space views:
+\                       \
+\                       \   * Byte #0 = front view (red key f0)
+\                       \   * Byte #1 = rear view (red key f1)
+\                       \   * Byte #2 = left view (red key f2)
+\                       \   * Byte #3 = right view (red key f3)
+\                       \
+\                       \ For each of the views:
+\                       \
+\                       \   * 0 = no laser is fitted to this view
+\                       \
+\                       \   * Non-zero = a laser is fitted to this view, with
+\                       \     the following specification:
+\                       \
+\                       \     * Bits 0-6 contain the laser's power
+\                       \
+\                       \     * Bit 7 determines whether or not the laser pulses
+\                       \       (0 = pulse or mining laser) or is always on
+\                       \       (1 = beam or military laser)
+\
+\
+\  SKIP 2               \ These bytes appear to be unused (they were originally
+\                       \ used for up/down lasers, but they were dropped)
+\
+\ .CRGO
+\
+\  SKIP 1               \ Our ship's cargo capacity
+\                       \
+\                       \   * 22 = standard cargo bay of 20 tonnes
+\                       \
+\                       \   * 37 = large cargo bay of 35 tonnes
+\                       \
+\                       \ The value is two greater than the actual capacity to
+\                       \ male the maths in tnpr slightly more efficient
+\
+\ .QQ20
+\
+\  SKIP 17              \ The contents of our cargo hold
+\                       \
+\                       \ The amount of market item X that we have in our hold
+\                       \ can be found in the X-th byte of QQ20. For example:
+\                       \
+\                       \   * QQ20 contains the amount of food (item 0)
+\                       \
+\                       \   * QQ20+7 contains the amount of computers (item 7)
+\                       \
+\                       \ See QQ23 for a list of market item numbers and their
+\                       \ storage units
+\
+\ .ECM
+\
+\  SKIP 1               \ E.C.M. system
+\                       \
+\                       \   * 0 = not fitted
+\                       \
+\                       \   * &FF = fitted
+\
+\ .BST
+\
+\  SKIP 1               \ Fuel scoops (BST stands for "barrel status")
+\                       \
+\                       \   * 0 = not fitted
+\                       \
+\                       \   * &FF = fitted
+\
+\ .BOMB
+\
+\  SKIP 1               \ Energy bomb
+\                       \
+\                       \   * 0 = not fitted
+\                       \
+\                       \   * &7F = fitted
+\
+\ .ENGY
+\
+\  SKIP 1               \ Energy unit
+\                       \
+\                       \   * 0 = not fitted
+\                       \
+\                       \   * 1 = fitted
+\
+\ .DKCMP
+\
+\  SKIP 1               \ Docking computer
+\                       \
+\                       \   * 0 = not fitted
+\                       \
+\                       \   * &FF = fitted
+\
+\ .GHYP
+\
+\  SKIP 1               \ Galactic hyperdrive
+\                       \
+\                       \   * 0 = not fitted
+\                       \
+\                       \   * &FF = fitted
+\
+\ .ESCP
+\
+\  SKIP 1               \ Escape pod
+\                       \
+\                       \   * 0 = not fitted
+\                       \
+\                       \   * &FF = fitted
+\
+\
+\  SKIP 4               \ These bytes appear to be unused
+\
+\ .NOMSL
+\
+\  SKIP 1               \ The number of missiles we have fitted (0-4)
+\
+\ .FIST
+\
+\  SKIP 1               \ Our legal status (FIST stands for "fugitive/innocent
+\                       \ status"):
+\                       \
+\                       \   * 0 = Clean
+\                       \
+\                       \   * 1-49 = Offender
+\                       \
+\                       \   * 50+ = Fugitive
+\                       \
+\                       \ You get 64 points if you kill a cop, so that's a fast
+\                       \ ticket to fugitive status
+\
+\ .AVL
+\
+\  SKIP 17              \ Market availability in the current system
+\                       \
+\                       \ The available amount of market item X is stored in
+\                       \ the X-th byte of AVL, so for example:
+\                       \
+\                       \   * AVL contains the amount of food (item 0)
+\                       \
+\                       \   * AVL+7 contains the amount of computers (item 7)
+\                       \
+\                       \ See QQ23 for a list of market item numbers and their
+\                       \ storage units, and the deep dive on "Market item
+\                       \ prices and availability" for details of the algorithm
+\                       \ used for calculating each item's availability
+\
+\ .QQ26
+\
+\  SKIP 1               \ A random value used to randomise market data
+\                       \
+\                       \ This value is set to a new random number for each
+\                       \ change of system, so we can add a random factor into
+\                       \ the calculations for market prices (for details of how
+\                       \ this is used, see the deep dive on "Market prices")
+\
+\ .TALLY
+\
+\  SKIP 2               \ Our combat rank
+\                       \
+\                       \ The combat rank is stored as the number of kills, in a
+\                       \ 16-bit number TALLY(1 0) - so the high byte is in
+\                       \ TALLY+1 and the low byte in TALLY
+\                       \
+\                       \ If the high byte in TALLY+1 is 0 then we have between
+\                       \ 0 and 255 kills, so our rank is Harmless, Mostly
+\                       \ Harmless, Poor, Average or Above Average, according to
+\                       \ the value of the low byte in TALLY:
+\                       \
+\                       \   Harmless        = %00000000 to %00000011 = 0 to 3
+\                       \   Mostly Harmless = %00000100 to %00000111 = 4 to 7
+\                       \   Poor            = %00001000 to %00001111 = 8 to 15
+\                       \   Average         = %00010000 to %00011111 = 16 to 31
+\                       \   Above Average   = %00100000 to %11111111 = 32 to 255
+\                       \
+\                       \ If the high byte in TALLY+1 is non-zero then we are
+\                       \ Competent, Dangerous, Deadly or Elite, according to
+\                       \ the high byte in TALLY+1:
+\                       \
+\                       \   Competent       = 1           = 256 to 511 kills
+\                       \   Dangerous       = 2 to 9      = 512 to 2559 kills
+\                       \   Deadly          = 10 to 24    = 2560 to 6399 kills
+\                       \   Elite           = 25 and up   = 6400 kills and up
+\                       \
+\                       \ You can see the rating calculation in STATUS
+\
+\ .SVC
+\
+\  SKIP 1               \ The save count
+\                       \
+\                       \ When a new commander is created, the save count gets
+\                       \ set to 128. This value gets halved each time the
+\                       \ commander file is saved, but it is otherwise unused.
+\                       \ It is presumably part of the security system for the
+\                       \ competition, possibly another flag to catch out
+\                       \ entries with manually altered commander files
+\
+\  SKIP 2               \ The commander file checksum
+\                       \
+\                       \ These two bytes are reserved for the commander file
+\                       \ checksum, so when the current commander block is
+\                       \ copied from here to the last saved commander block at
+\                       \ NA%, CHK and CHK2 get overwritten
+\
+\
+\ NT% = SVC + 2 - TP    \ This sets the variable NT% to the size of the current
+\                       \ commander data block, which starts at TP and ends at
+\                       \ SVC+2 (inclusive)
+\
+\
+\
+\ .MCH
+\
+\  SKIP 1               \ The text token number of the in-flight message that is
+\                       \ currently being shown, and which will be removed by
+\                       \ the me2 routine when the counter in DLY reaches zero
+\
+\ .FSH
+\
+\  SKIP 1               \ Forward shield status
+\                       \
+\                       \   * 0 = empty
+\                       \
+\                       \   * &FF = full
+\
+\ .ASH
+\
+\  SKIP 1               \ Aft shield status
+\                       \
+\                       \   * 0 = empty
+\                       \
+\                       \   * &FF = full
+\
+\ .ENERGY
+\
+\  SKIP 1               \ Energy bank status
+\                       \
+\                       \   * 0 = empty
+\                       \
+\                       \   * &FF = full
+\
+\ .COMX
+\
+\  SKIP 1               \ The x-coordinate of the compass dot
+\
+\ .COMY
+\
+\  SKIP 1               \ The y-coordinate of the compass dot
+\
+\ .QQ24
+\
+\  SKIP 1               \ Temporary storage, used to store the current market
+\                       \ item's price in routine TT151
+\
+\ .QQ25
+\
+\  SKIP 1               \ Temporary storage, used to store the current market
+\                       \ item's availability in routine TT151
+\
+\ .QQ28
+\
+\  SKIP 1               \ Temporary storage, used to store the economy byte of
+\                       \ the current system in routine var
+\
+\ .QQ29
+\
+\  SKIP 1               \ Temporary storage, used in a number of places
+\
+\ .gov
+\
+\  SKIP 1               \ The current system's government type (0-7)
+\                       \
+\                       \ See the deep dive on "Generating system data" for
+\                       \ details of the various government types
+\
+\ .tek
+\
+\  SKIP 1               \ The current system's tech level (0-14)
+\                       \
+\                       \ See the deep dive on "Generating system data" for more
+\                       \ information on tech levels
+\
+\ .SLSP
+\
+\  SKIP 2               \ The address of the bottom of the ship line heap
+\                       \
+\                       \ The ship line heap is a descending block of memory
+\                       \ that starts at WP and descends down to SLSP. It can be
+\                       \ extended downwards by the NWSHP routine when adding
+\                       \ new ships (and their associated ship line heaps), in
+\                       \ which case SLSP is lowered to provide more heap space,
+\                       \ assuming there is enough free memory to do so
+\
+\ .QQ2
+\
+\  SKIP 6               \ The three 16-bit seeds for the current system, i.e.
+\                       \ the one we are currently in
+\                       \
+\                       \ See the deep dives on "Galaxy and system seeds" and
+\                       \ "Twisting the system seeds" for more details
+\
+\ .QQ3
+\
+\  SKIP 1               \ The selected system's economy (0-7)
+\                       \
+\                       \ See the deep dive on "Generating system data" for more
+\                       \ information on economies
+\
+\ .QQ4
+\
+\  SKIP 1               \ The selected system's government (0-7)
+\                       \
+\                       \ See the deep dive on "Generating system data" for more
+\                       \ details of the various government types
+\
+\ .QQ5
+\
+\  SKIP 1               \ The selected system's tech level (0-14)
+\                       \
+\                       \ See the deep dive on "Generating system data" for more
+\                       \ information on tech levels
+\
+\ .QQ6
+\
+\  SKIP 2               \ The selected system's population in billions * 10
+\                       \ (1-71), so the maximum population is 7.1 billion
+\                       \
+\                       \ See the deep dive on "Generating system data" for more
+\                       \ details on population levels
+\
+\ .QQ7
+\
+\  SKIP 2               \ The selected system's productivity in M CR (96-62480)
+\                       \
+\                       \ See the deep dive on "Generating system data" for more
+\                       \ details about productivity levels
+\
+\ .QQ8
+\
+\  SKIP 2               \ The distance from the current system to the selected
+\                       \ system in light years * 10, stored as a 16-bit number
+\                       \
+\                       \ The distance will be 0 if the selected sysyem is the
+\                       \ current system
+\                       \
+\                       \ The galaxy chart is 102.4 light years wide and 51.2
+\                       \ light years tall (see the intra-system distance
+\                       \ calculations in routine TT111 for details), which
+\                       \ equates to 1024 x 512 in terms of QQ8
+\
+\ .QQ9
+\
+\  SKIP 1               \ The galactic x-coordinate of the crosshairs in the
+\                       \ galaxy chart (and, most of the time, the selected
+\                       \ system's galactic x-coordinate)
+\
+\ .QQ10
+\
+\  SKIP 1               \ The galactic y-coordinate of the crosshairs in the
+\                       \ galaxy chart (and, most of the time, the selected
+\                       \ system's galactic y-coordinate)
+\
+\ .NOSTM
+\
+\  SKIP 1               \ The number of stardust particles shown on screen,
+\                       \ which is 18 (#NOST) for normal space, and 3 for
+\                       \ witchspace
+\
+
+                        \ --- And replaced by the following: -------------------
 
 .KL
 
@@ -1282,12 +2162,19 @@ ORG &0300
                         \       (0 = pulse or mining laser) or is always on
                         \       (1 = beam or military laser)
 
+\
+\  SKIP 2               \ These bytes appear to be unused (they were originally
+\                       \ used for up/down lasers, but they were dropped)
+\
+
  SKIP 1                 \ This byte appears to be unused
 
 .new_type
 .cmdr_ship
 
  SKIP 1                 \ AJD
+
+                        \ --- End of replacement code --------------------------
 
 .CRGO
 
@@ -1634,6 +2521,150 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
                         \ which is 18 (#NOST) for normal space, and 3 for
                         \ witchspace
 
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
+\  SKIP 1               \ This byte appears to be unused
+\
+\ .COMC
+\
+\  SKIP 1               \ The colour of the dot on the compass
+\                       \
+\                       \   * &F0 = the object in the compass is in front of us,
+\                       \     so the dot is yellow/white
+\                       \
+\                       \   * &FF = the object in the compass is behind us, so
+\                       \     the dot is green/cyan
+\
+\ .DNOIZ
+\
+\  SKIP 1               \ Sound on/off configuration setting
+\                       \
+\                       \   * 0 = sound is on (default)
+\                       \
+\                       \   * Non-zero = sound is off
+\                       \
+\                       \ Toggled by pressing "S" when paused, see the DK4
+\                       \ routine for details
+\
+\ .DAMP
+\
+\  SKIP 1               \ Keyboard damping configuration setting
+\                       \
+\                       \   * 0 = damping is enabled (default)
+\                       \
+\                       \   * &FF = damping is disabled
+\                       \
+\                       \ Toggled by pressing CAPS LOCK when paused, see the
+\                       \ DKS3 routine for details
+\
+\ .DJD
+\
+\  SKIP 1               \ Keyboard auto-recentre configuration setting
+\                       \
+\                       \   * 0 = auto-recentre is enabled (default)
+\                       \
+\                       \   * &FF = auto-recentre is disabled
+\                       \
+\                       \ Toggled by pressing "A" when paused, see the DKS3
+\                       \ routine for details
+\
+\ .PATG
+\
+\
+\  SKIP 1               \ Configuration setting to show the author names on the
+\                       \ start-up screen and enable manual hyperspace mis-jumps
+\                       \
+\                       \   * 0 = no author names or manual mis-jumps (default)
+\                       \
+\                       \   * &FF = show author names and allow manual mis-jumps
+\                       \
+\                       \ Toggled by pressing "X" when paused, see the DKS3
+\                       \ routine for details
+\                       \
+\                       \ This needs to be turned on for manual mis-jumps to be
+\                       \ possible. To do a manual mis-jump, first toggle the
+\                       \ author display by pausing the game (COPY) and pressing
+\                       \ "X", and during the next hyperspace, hold down CTRL to
+\                       \ force a mis-jump. See routine ee5 for the "AND PATG"
+\                       \ instruction that implements this logic
+\
+\
+\ .FLH
+\
+\  SKIP 1               \ Flashing console bars configuration setting
+\                       \
+\                       \   * 0 = static bars (default)
+\                       \
+\                       \   * &FF = flashing bars
+\                       \
+\                       \ Toggled by pressing "F" when paused, see the DKS3
+\                       \ routine for details
+\
+\ .JSTGY
+\
+\  SKIP 1               \ Reverse joystick Y-channel configuration setting
+\                       \
+\                       \   * 0 = standard Y-channel (default)
+\                       \
+\                       \   * &FF = reversed Y-channel
+\                       \
+\                       \ Toggled by pressing "Y" when paused, see the DKS3
+\                       \ routine for details
+\
+\ .JSTE
+\
+\  SKIP 1               \ Reverse both joystick channels configuration setting
+\                       \
+\                       \   * 0 = standard channels (default)
+\                       \
+\                       \   * &FF = reversed channels
+\                       \
+\                       \ Toggled by pressing "J" when paused, see the DKS3
+\                       \ routine for details
+\
+\ .JSTK
+\
+\  SKIP 1               \ Keyboard or joystick configuration setting
+\                       \
+\                       \   * 0 = keyboard (default)
+\                       \
+\                       \   * &FF = joystick
+\                       \
+\                       \ Toggled by pressing "K" when paused, see the DKS3
+\                       \ routine for details
+\
+\ .BSTK
+\
+\  SKIP 1               \ Bitstik configuration setting
+\                       \
+\                       \   * 0 = keyboard or joystick (default)
+\                       \
+\                       \   * &FF = Bitstik
+\                       \
+\                       \ Toggled by pressing "B" when paused, see the DKS3
+\                       \ routine for details
+\
+\ .CATF
+\
+\  SKIP 1               \ The disc catalogue flag
+\                       \
+\                       \ Determines whether a disc catalogue is currently in
+\                       \ progress, so the TT26 print routine can format the
+\                       \ output correctly:
+\                       \
+\                       \   * 0 = disc is not currently being catalogued
+\                       \
+\                       \   * 1 = disc is currently being catalogued
+\                       \
+\                       \ Specifically, when CATF is non-zero, TT26 will omit
+\                       \ column 17 from the catalogue so that it will fit
+\                       \ on-screen (column 17 is blank column in the middle
+\                       \ of the catalogue, between the two lists of filenames,
+\                       \ so it can be dropped without affecting the layout)
+\
+
+                        \ --- And replaced by the following: -------------------
+
  SKIP 1                 \ This byte appears to be unused
 
 .COMC
@@ -1831,6 +2862,8 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
 
  SKIP 1                 \ AJD
 
+                        \ --- End of replacement code --------------------------
+
 \ ******************************************************************************
 \
 \       Name: K%
@@ -2004,6 +3037,8 @@ LOAD_A% = LOAD%
 \
 \ ******************************************************************************
 
+                        \ --- Routine added for Elite-A: -----------------------
+
 .S%
 
  JMP DOENTRY            \ AJD
@@ -2017,6 +3052,8 @@ LOAD_A% = LOAD%
  JMP BRBR
 
 BRKV = P% - 2
+
+                        \ --- End of added routine -----------------------------
 
 \ ******************************************************************************
 \
@@ -2046,8 +3083,17 @@ BRKV = P% - 2
 
 .LTLI
 
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
+\  EQUS "L.T.CODE"
+\  EQUB 13
+
+                        \ --- And replaced by the following: -------------------
+
  EQUS "L.1.D"
  EQUB 13
+
+                        \ --- End of replacement code --------------------------
 
 \ ******************************************************************************
 \
@@ -2058,12 +3104,16 @@ BRKV = P% - 2
 \
 \ ******************************************************************************
 
+                        \ --- Routine added for Elite-A: -----------------------
+
 .launch
 
  LDA #'R'
  STA LTLI
 
  EQUB &2C
+
+                        \ --- End of added routine -----------------------------
 
 \ ******************************************************************************
 \
@@ -2074,11 +3124,15 @@ BRKV = P% - 2
 \
 \ ******************************************************************************
 
+                        \ --- Routine added for Elite-A: -----------------------
+
 .escape
 
  LDA #0
  STA KL+1
  JMP INBAY
+
+                        \ --- End of added routine -----------------------------
 
 \ ******************************************************************************
 \
@@ -2089,11 +3143,15 @@ BRKV = P% - 2
 \
 \ ******************************************************************************
 
+                        \ --- Routine added for Elite-A: -----------------------
+
 .DOENTRY
 
  JSR BRKBK
  JSR RES2
  JMP BAY
+
+                        \ --- End of added routine -----------------------------
 
 \ ******************************************************************************
 \
@@ -2137,6 +3195,8 @@ BRKV = P% - 2
 \
 \ ******************************************************************************
 
+                        \ --- Routine added for Elite-A: -----------------------
+
 .write_msg3
 
  PHA                    \ Store A on the stack, so we can retrieve it later
@@ -2161,6 +3221,8 @@ BRKV = P% - 2
                         \ the stack, returning from the subroutine using a tail
                         \ call (this BNE is effectively a JMP as A is never
                         \ zero)
+
+                        \ --- End of added routine -----------------------------
 
 \ ******************************************************************************
 \
@@ -2233,6 +3295,14 @@ BRKV = P% - 2
  CLC                    \ range 220-221, as this is only called in galaxies 0
  ADC GCNT               \ and 1
 
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
+\  BNE DETOK            \ Jump to DETOK to print extended token 220-221,
+\                       \ returning from the subroutine using a tail call (this
+\                       \ BNE is effectively a JMP as A is never zero)
+
+                        \ --- End of removed code ------------------------------
+
 \ ******************************************************************************
 \
 \       Name: DETOK
@@ -2302,6 +3372,14 @@ BRKV = P% - 2
  LDA (V),Y              \ Load the character at offset Y in the token table,
                         \ which is the next character from the token table
 
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
+\  EOR #VE              \ Tokens are stored in memory having been EOR'd with
+\                       \ #VE, so we repeat the EOR to get the actual character
+\                       \ in this token
+
+                        \ --- End of removed code ------------------------------
+
  BNE DT1                \ If the result is non-zero, then this is a character
                         \ in a token rather than the delimiter (which is #VE),
                         \ so jump to DT1
@@ -2343,6 +3421,14 @@ BRKV = P% - 2
  LDA (V),Y              \ Load the character at offset Y in the token table,
                         \ which is the next character from the token we want to
                         \ print
+
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
+\  EOR #VE              \ Tokens are stored in memory having been EOR'd with
+\                       \ #VE, so we repeat the EOR to get the actual character
+\                       \ in this token
+
+                        \ --- End of removed code ------------------------------
 
  BEQ DTEX               \ If the result is zero, then this is the delimiter at
                         \ the end of the token to print (which is #VE), so jump
@@ -2448,7 +3534,11 @@ BRKV = P% - 2
                         \ If we get here then A >= 215, so this is a two-letter
                         \ token from the extended TKN2/QQ16 table
 
+                        \ --- Code added for Elite-A: --------------------------
+
 .msg_pairs
+
+                        \ --- End of added code --------------------------------
 
  SBC #215               \ Subtract 215 to get a token number in the range 0-12
                         \ (the C flag is set as we passed through the BCC above,
@@ -2665,10 +3755,14 @@ BRKV = P% - 2
 \
 \ ******************************************************************************
 
+                        \ --- Routine added for Elite-A: -----------------------
+
 .column_16
 
  LDA #&10
  EQUB &2C
+
+                        \ --- End of added routine -----------------------------
 
 \ ******************************************************************************
 \
@@ -2697,7 +3791,11 @@ BRKV = P% - 2
  LDA #6                 \ Move the text cursor to column 6
  STA XC
 
+                        \ --- Code added for Elite-A: --------------------------
+
 .set_token
+
+                        \ --- End of added code --------------------------------
 
  LDA #%11111111         \ Set all the bits in DTW2
  STA DTW2
@@ -2768,10 +3866,14 @@ BRKV = P% - 2
 \
 \ ******************************************************************************
 
+                        \ --- Routine added for Elite-A: -----------------------
+
 .clr_vdustat
 
  LDA #&01
  EQUB &2C
+
+                        \ --- End of added routine -----------------------------
 
 \ ******************************************************************************
 \
@@ -3058,9 +4160,29 @@ BRKV = P% - 2
  EQUW MT1               \ Token  1: Switch to ALL CAPS
  EQUW MT2               \ Token  2: Switch to Sentence Case
  EQUW TT27              \ Token  3: Print the selected system name
+
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
+\  EQUW TT27            \ Token  4: Print the commander's name
+
+                        \ --- And replaced by the following: -------------------
+
  EQUW MT6               \ Token  4: Switch to standard tokens, in Sentence Case
+
+                        \ --- End of replacement code --------------------------
+
  EQUW MT5               \ Token  5: Switch to extended tokens
+
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
+\  EQUW MT6             \ Token  6: Switch to standard tokens, in Sentence Case
+
+                        \ --- And replaced by the following: -------------------
+
  EQUW set_token         \ Token  6: AJD
+
+                        \ --- End of replacement code --------------------------
+
  EQUW DASC              \ Token  7: Beep
  EQUW MT8               \ Token  8: Tab to column 6
  EQUW MT9               \ Token  9: Clear screen, tab to column 1, view type = 1
@@ -3076,10 +4198,31 @@ BRKV = P% - 2
  EQUW MT19              \ Token 19: Capitalise first letter of next word only
  EQUW DASC              \ Token 20: Unused
  EQUW CLYNS             \ Token 21: Clear the bottom few lines of the space view
+
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
+\  EQUW PAUSE           \ Token 22: Display ship and wait for key press
+
+                        \ --- And replaced by the following: -------------------
+
  EQUW column_16         \ Token 22: Tab to column 16
+
+                        \ --- End of replacement code --------------------------
+
  EQUW MT23              \ Token 23: Move to row 10, white text, set lower case
+
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
+\  EQUW PAUSE2          \ Token 24: Wait for a key press
+\  EQUW BRIS            \ Token 25: Show incoming message screen, wait 2 seconds
+
+                        \ --- And replaced by the following: -------------------
+
  EQUW clr_vdustat       \ Token 24: AJD
  EQUW DASC              \ Token 25: Unused
+
+                        \ --- End of replacement code --------------------------
+
  EQUW MT26              \ Token 26: Fetch line input from keyboard (filename)
  EQUW MT27              \ Token 27: Print mission captain's name (217-219)
  EQUW MT28              \ Token 28: Print mission 1 location hint (220-221)
@@ -7526,6 +8669,91 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
 .PDESC
 
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
+\  LDA QQ8              \ If either byte in QQ18(1 0) is non-zero, meaning that
+\  ORA QQ8+1            \ the distance from the current system to the selected
+\  BNE PD1              \ is non-zero, jump to PD1 to show the standard "goat
+\                       \ soup" description
+\
+\
+\                       \ If we get here, then the current system is the same as
+\                       \ the selected system and we are docked, so now to check
+\                       \ whether there is a special override token for this
+\                       \ system
+\
+\  LDY #NRU%            \ Set Y as a loop counter as we work our way through the
+\                       \ system numbers in RUPLA, starting at NRU% (which is
+\                       \ the number of entries in RUPLA, 26) and working our
+\                       \ way down to 1
+\
+\ .PDL1
+\
+\  LDA RUPLA-1,Y        \ Fetch the Y-th byte from RUPLA-1 into A (we use
+\                       \ RUPLA-1 because Y is looping from 26 to 1
+\
+\  CMP ZZ               \ If A doesn't match the system whose description we
+\  BNE PD2              \ are printing (in ZZ), junp to PD2 to keep looping
+\                       \ through the system numbers in RUPLA
+\
+\                       \ If we get here we have found a match for this system
+\                       \ number in RUPLA
+\
+\  LDA RUGAL-1,Y        \ Fetch the Y-th byte from RUGAL-1 into A
+\
+\  AND #%01111111       \ Extract bits 0-6 of A
+\
+\  CMP GCNT             \ If the result does not equal the current galaxy
+\  BNE PD2              \ number, jump to PD2 to keep looping through the system
+\                       \ numbers in RUPLA
+\
+\  LDA RUGAL-1,Y        \ Fetch the Y-th byte from RUGAL-1 into A, once again
+\
+\  BMI PD3              \ If bit 7 is set, jump to PD3 to print the extended
+\                       \ token in A from the second table in RUTOK
+\
+\  LDA TP               \ Fetch bit 0 of TP into the C flag, and skip to PD1 if
+\  LSR A                \ it is clear (i.e. if mission 1 is not in progress) to
+\  BCC PD1              \ print the "goat soup" extended description
+\
+\                       \ If we get here then mission 1 is in progress, so we
+\                       \ print out the corresponding token from RUTOK
+\
+\  JSR MT14             \ Call MT14 to switch to justified text
+\
+\  LDA #1               \ Set A = 1 so that extended token 1 (an empty string)
+\                       \ gets printed below instead of token 176, followed by
+\                       \ the Y-th token in RUTOK
+\
+\  EQUB &2C             \ Skip the next instruction by turning it into
+\                       \ &2C &A9 &B0, or BIT &B0A9, which does nothing apart
+\                       \ from affect the flags
+\
+\ .PD3
+\
+\  LDA #176             \ Print extended token 176 ("{lower case}{justify}
+\  JSR DETOK2           \ {single cap}")
+\
+\  TYA                  \ Print the extended token in Y from the second table
+\  JSR DETOK3           \ in RUTOK
+\
+\  LDA #177             \ Set A = 177 so when we jump to PD4 in the next
+\                       \ instruction, we print token 177 (".{cr}{left align}")
+\
+\  BNE PD4              \ Jump to PD4 to print the extended token in A and
+\                       \ return from the subroutine using a tail call
+\
+\ .PD2
+\
+\  DEY                  \ Decrement the byte counter in Y
+\
+\  BNE PDL1             \ Loop back to check the next byte in RUPLA until we
+\                       \ either find a match for the system in ZZ, or we fall
+\                       \ through into the "goat soup" extended description
+\                       \ routine
+
+                        \ --- End of removed code ------------------------------
+
 .PD1
 
                         \ We now print the "goat soup" extended description
@@ -7633,13 +8861,25 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
                         \ this routine, keep looping back up to PAUSE2, until
                         \ the key is released
 
+                        \ --- Code added for Elite-A: --------------------------
+
 .l_out
+
+                        \ --- End of added code --------------------------------
 
  JSR RDKEY              \ Any pre-existing key press is now gone, so we can
                         \ start scanning the keyboard again, returning the
                         \ internal key number in X (or 0 for no key press)
 
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
+\  BEQ PAUSE2           \ Keep looping up to PAUSE2 until a key is pressed
+
+                        \ --- And replaced by the following: -------------------
+
  BEQ l_out              \ AJD
+
+                        \ --- End of replacement code --------------------------
 
  RTS                    \ Return from the subroutine
 
@@ -8131,7 +9371,16 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
  INC YC                 \ Move the text cursor down a line
 
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
+\                       \ Fall through into TT69 to set Sentence Case and print
+\                       \ a newline
+
+                        \ --- And replaced by the following: -------------------
+
                         \ Fall through into TT67 to print a newline
+
+                        \ --- End of replacement code --------------------------
 
 \ ******************************************************************************
 \
@@ -8489,6 +9738,54 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  LDA #'m'
  JSR TT26
 
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
+\  JSR TTX69            \ Print a paragraph break and set Sentence Case
+\
+\                       \ By this point, ZZ contains the current system number
+\                       \ which PDESC requires. It gets put there in the TT102
+\                       \ routine, which calls TT111 to populate ZZ before
+\                       \ calling TT25 (this routine)
+\
+\  JMP PDESC            \ Jump to PDESC to print the system's extended
+\                       \ description, returning from the subroutine using a
+\                       \ tail call
+\
+\
+\                       \ The following code doesn't appear to be called from
+\                       \ anywhere, so it's presumably a remnant of code from
+\                       \ an earlier version of the extended description code
+\
+\  LDX ZZ               \ Fetch the system number from ZZ into X
+\
+\ \LDY #LO(PTEXT)       \ These instructions are commented out in the original
+\ \STY INWK             \ source. The variable PTEXT doesn't exist, so it isn't
+\ \LDY #HI(PTEXT)-1     \ entirely obvious what this code does, though it looks
+\ \STY INWK+1           \ like it loops through a table of text tokens in PTEXT
+\ \LDY #&FF             \ until we get to the entry for the current system,
+\ \.PDT1                \ which it prints out as text tokens (so perhaps PTEXT
+\ \INY                  \ used to be a token table for the system's extended
+\ \BNE P%+4             \ descriptions before PDESC took over)
+\ \INC INWK+1
+\ \LDA (INWK),Y
+\ \BNE PDT1
+\ \DEX
+\ \BNE PDT1
+\ \.PDT2
+\ \INY
+\ \BNE P%+4
+\ \INC INWK+1
+\ \STY INWK+2
+\ \LDA (INWK),Y
+\ \BEQ TT24-1
+\ \JSR TT27
+\ \LDY INWK+2
+\ \JMP PDT2
+\
+\  RTS                  \ Return from the subroutine
+
+                        \ --- And replaced by the following: -------------------
+
  JSR TTX69              \ Print a paragraph break and set Sentence Case
 
                         \ By this point, ZZ contains the current system number
@@ -8497,6 +9794,8 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
                         \ calling TT25 (this routine)
 
  JMP PD1                \ AJD
+
+                        \ --- End of replacement code --------------------------
 
 \ ******************************************************************************
 \
@@ -9859,6 +11158,8 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 \
 \ ******************************************************************************
 
+                        \ --- Routine added for Elite-A: -----------------------
+
 .buy_invnt
 
  SBC #&50
@@ -9875,6 +11176,8 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  TAX
  LDA func_tab,X
  JMP FRCE
+
+                        \ --- End of added routine -----------------------------
 
 \ ******************************************************************************
 \
@@ -9923,10 +11226,27 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  JSR TT217              \ Scan the keyboard until a key is pressed, and return
                         \ the key's ASCII code in A (and X)
 
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
+\  LDX R                \ If R is non-zero then skip to NWDAV2, as we are
+\  BNE NWDAV2           \ already building a number
+\
+\  CMP #'y'             \ If "Y" was pressed, jump to NWDAV1 to return the
+\  BEQ NWDAV1           \ maximum number allowed (i.e. buy/sell the whole stock)
+\
+\  CMP #'n'             \ If "N" was pressed, jump to NWDAV3 to return from the
+\  BEQ NWDAV3           \ subroutine with a result of 0 (i.e. abort transaction)
+\
+\ .NWDAV2
+
+                        \ --- And replaced by the following: -------------------
+
  LDX R                  \ If R is non-zero then skip to NWDAV2, as we are
  BNE NWDAV2             \ already building a number
 
 .NWDAV2
+
+                        \ --- End of replacement code --------------------------
 
  STA Q                  \ Store the key pressed in Q
 
@@ -9937,8 +11257,18 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
                         \ with a result of 0, as the key pressed was not a
                         \ number or letter and is less than ASCII "0"
 
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
+\  CMP #10              \ If A >= 10, jump to BAY2 to display the Inventory
+\  BCS BAY2             \ screen, as the key pressed was a letter or other
+\                       \ non-digit and is greater than ASCII "9"
+
+                        \ --- And replaced by the following: -------------------
+
  CMP #10                \ If A >= 10, jump to buy_invnt to AJD
  BCS buy_invnt
+
+                        \ --- End of replacement code --------------------------
 
  STA S                  \ Store the numeric value of the key pressed in S
 
@@ -9981,6 +11311,36 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  LDA R                  \ Set A to the result we have been building in R
 
  RTS                    \ Return from the subroutine
+
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
+\ .NWDAV1
+\
+\                       \ If we get here then "Y" was pressed, so we return the
+\                       \ maximum number allowed, which is in QQ25
+\
+\  JSR TT26             \ Print the character for the key that was pressed
+\
+\  LDA QQ25             \ Set R = QQ25, so we return the maximum value allowed
+\  STA R
+\
+\
+\  RTS                  \ Return from the subroutine
+\
+\
+\ .NWDAV3
+\
+\                       \ If we get here then "N" was pressed, so we return 0
+\
+\  JSR TT26             \ Print the character for the key that was pressed
+\
+\  LDA #0               \ Set R = 0, so we return 0
+\  STA R
+\
+\
+\  RTS                  \ Return from the subroutine
+
+                        \ --- End of removed code ------------------------------
 
 \ ******************************************************************************
 \
@@ -11211,6 +12571,15 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  LDA XX21-1,Y           \ Fetch the high byte of this particular ship type's
  STA XX0+1              \ blueprint and store it in XX0+1, so XX0(1 0) now
                         \ contains the address of this ship's blueprint
+
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
+\  CPY #2*SST           \ If the ship type is a space station (SST), then jump
+\  BEQ NW6              \ to NW6, skipping the heap space steps below, as the
+\                       \ space station has its own line heap at LSO (which it
+\                       \ shares with the sun)
+
+                        \ --- End of removed code ------------------------------
 
                         \ We now want to allocate space for a heap that we can
                         \ use to store the lines we draw for our new ship (so it
@@ -12588,6 +13957,12 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
  STA MCNT               \ Reset MCNT (the main loop counter) to 0
 
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
+\ .modify
+
+                        \ --- End of removed code ------------------------------
+
  LDA #3                 \ Reset DELTA (speed) to 3
  STA DELTA
 
@@ -12613,6 +13988,12 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  STA SLSP               \ SLSP to LS% (the byte below the ship blueprints at D%)
  LDA #HI(LS%)           \ to indicate that the heap is empty
  STA SLSP+1
+
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
+\  JSR DIALS            \ Update the dashboard
+
+                        \ --- End of removed code ------------------------------
 
                         \ Finally, fall through into ZINF to reset the INWK
                         \ ship workspace
@@ -12713,6 +14094,14 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 \
 \ ******************************************************************************
 
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
+\ .DORND2
+\
+\  CLC                  \ This ensures that bit 0 of r2 is 0
+
+                        \ --- End of removed code ------------------------------
+
 .DORND
 
  LDA RAND               \ r2´ = ((r0 << 1) mod 256) + C
@@ -12778,6 +14167,72 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
  DEC MCNT               \ Decrement the main loop counter in MCNT
 
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
+\  BEQ P%+5             \ If the counter has reached zero, which it will do
+\                       \ every 256 main loops, skip the next JMP instruction
+\                       \ (or to put it another way, if the counter hasn't
+\                       \ reached zero, jump down to MLOOP, skipping all the
+\                       \ following checks)
+\
+\ .ytq
+\
+\  JMP MLOOP            \ Jump down to MLOOP to do some end-of-loop tidying and
+\                       \ restart the main loop
+\
+\                       \ We only get here once every 256 iterations of the
+\                       \ main loop. If we aren't in witchspace and don't
+\                       \ already have 3 or more asteroids in our local bubble,
+\                       \ then this section has a 13% chance of spawning
+\                       \ something benign (the other 87% of the time we jump
+\                       \ down to consider spawning cops, pirates and bounty
+\                       \ hunters)
+\                       \
+\                       \ If we are in that 13%, then 50% of the time this will
+\                       \ be a Cobra Mk III trader, and the other 50% of the
+\                       \ time it will either be an asteroid (98.5% chance) or,
+\                       \ very rarely, a cargo canister (1.5% chance)
+\
+\
+\  LDA MJ               \ If we are in witchspace following a mis-jump, skip the
+\  BNE ytq              \ following by jumping down to MLOOP (via ytq above)
+\
+\
+\  JSR DORND            \ Set A and X to random numbers
+\
+\
+\  CMP #35              \ If A >= 35 (87% chance), jump down to MLOOP to skip
+\  BCS MLOOP            \ the following
+\
+\
+\  LDA MANY+AST         \ If we already have 3 or more asteroids in the local
+\  CMP #3               \ bubble, jump down to MLOOP to skip the following
+\  BCS MLOOP
+\
+\
+\  JSR ZINF             \ Call ZINF to reset the INWK ship workspace
+\
+\  LDA #38              \ Set z_hi = 38 (far away)
+\  STA INWK+7
+\
+\  JSR DORND            \ Set A, X and C flag to random numbers
+\
+\  STA INWK             \ Set x_lo = random
+\
+\  STX INWK+3           \ Set y_lo = random
+\
+\  AND #%10000000       \ Set x_sign = bit 7 of x_lo
+\  STA INWK+2
+\
+\  TXA                  \ Set y_sign = bit 7 of y_lo
+\  AND #%10000000
+\  STA INWK+5
+\
+\  ROL INWK+1           \ Set bit 2 of x_hi to the C flag, which is random, so
+\  ROL INWK+1           \ this randomly moves us slightly off-centre
+
+                        \ --- End of removed code ------------------------------
+
                         \ Fall through into part 5 (parts 3 and 4 are not
                         \ required when we are docked)
 
@@ -12816,8 +14271,30 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  TXS                    \ location for the 6502 stack, so this instruction
                         \ effectively resets the stack
 
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
+\  LDX GNTMP            \ If the laser temperature in GNTMP is non-zero,
+\  BEQ EE20             \ decrement it (i.e. cool it down a bit)
+\  DEC GNTMP
+\
+\ .EE20
+\
+\
+\  JSR DIALS            \ Call DIALS to update the dashboard
+\
+\
+\  LDA QQ11             \ If this is a space view, skip the following two
+\  BEQ P%+7             \ instructions (i.e. jump to JSR TT17 below)
+\
+\  LDY #2               \ Wait for 2/50 of a second (0.04 seconds), to slow the
+\  JSR DELAY            \ main loop down a bit
+
+                        \ --- And replaced by the following: -------------------
+
  LDY #2                 \ Wait for 2/50 of a second (0.04 seconds), to slow the
  JSR DELAY              \ main loop down a bit
+
+                        \ --- End of replacement code --------------------------
 
  JSR TT17               \ Scan the keyboard for the cursor keys or joystick,
                         \ returning the cursor's delta values in X and Y and
@@ -12899,6 +14376,31 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
 .TT102
 
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
+\  CMP #f8              \ If red key f8 was pressed, jump to STATUS to show the
+\  BNE P%+5             \ Status Mode screen, returning from the subroutine
+\  JMP STATUS           \ using a tail call
+\
+\  CMP #f4              \ If red key f4 was pressed, jump to TT22 to show the
+\  BNE P%+5             \ Long-range Chart, returning from the subroutine using
+\  JMP TT22             \ a tail call
+\
+\  CMP #f5              \ If red key f5 was pressed, jump to TT23 to show the
+\  BNE P%+5             \ Short-range Chart, returning from the subroutine using
+\  JMP TT23             \ a tail call
+\
+\
+\  CMP #f6              \ If red key f6 was pressed, call TT111 to select the
+\  BNE TT92             \ system nearest to galactic coordinates (QQ9, QQ10)
+\  JSR TT111            \ (the location of the chart crosshairs) and set ZZ to
+\  JMP TT25             \ the system number, and then jump to TT25 to show the
+\                       \ Data on System screen (along with an extended system
+\                       \ description for the system in ZZ if we're docked),
+\                       \ returning from the subroutine using a tail call
+
+                        \ --- And replaced by the following: -------------------
+
  CMP #f8                \ If red key f8 was pressed, AJD
  BNE P%+5               \ , returning from the subroutine
  JMP info_menu          \ using a tail call
@@ -12922,7 +14424,26 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  JSR TT111
  JMP TT25
 
+                        \ --- End of replacement code --------------------------
+
 .TT92
+
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
+\  CMP #f9              \ If red key f9 was pressed, jump to TT213 to show the
+\  BNE P%+5             \ Inventory screen, returning from the subroutine
+\  JMP TT213            \ using a tail call
+\
+\  CMP #f7              \ If red key f7 was pressed, jump to TT167 to show the
+\  BNE P%+5             \ Market Price screen, returning from the subroutine
+\  JMP TT167            \ using a tail call
+\
+\
+\  CMP #f0              \ If red key f0 was pressed, jump to TT110 to launch our
+\  BNE fvw              \ ship (if docked), returning from the subroutine using
+\  JMP TT110            \ a tail call
+
+                        \ --- And replaced by the following: -------------------
 
  CMP #&77               \ AJD
  BNE not_invnt
@@ -12936,7 +14457,45 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
 .not_price
 
+                        \ --- End of replacement code --------------------------
+
 .fvw
+
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
+\  CMP #f3              \ If red key f3 was pressed, jump to EQSHP to show the
+\  BNE P%+5             \ Equip Ship screen, returning from the subroutine using
+\  JMP EQSHP            \ a tail call
+\
+\  CMP #f1              \ If red key f1 was pressed, jump to TT219 to show the
+\  BNE P%+5             \ Buy Cargo screen, returning from the subroutine using
+\  JMP TT219            \ a tail call
+\
+\
+\  CMP #&47             \ If "@" was not pressed, skip to nosave
+\  BNE nosave
+\
+\
+\  JSR SVE              \ "@" was pressed, so call SVE to show the disc access
+\                       \ menu
+\
+\  BCC P%+5             \ If the C flag was set by SVE, then we loaded a new
+\  JMP QU5              \ commander file, so jump to QU5 to restart the game
+\                       \ with the newly loaded commander
+\
+\  JMP BAY              \ Otherwise the C flag was clear, so jump to BAY to go
+\                       \ to the docking bay (i.e. show the Status Mode screen)
+\
+\ .nosave
+\
+\
+\  CMP #f2              \ If red key f2 was pressed, jump to TT208 to show the
+\  BNE LABEL_3          \ Sell Cargo screen, returning from the subroutine using
+\  JMP TT208            \ a tail call
+\
+\ .INSP
+
+                        \ --- And replaced by the following: -------------------
 
  CMP #&20               \ AJD
  BEQ jump_menu
@@ -12950,6 +14509,8 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 .jump_menu
 
  JMP info_menu
+
+                        \ --- End of replacement code --------------------------
 
 .LABEL_3
 
@@ -12997,8 +14558,17 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  LDA T1                 \ Restore the original value of A (the key that's been
                         \ pressed) from T1
 
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
+\  CMP #&36             \ If "O" was pressed, do the following three jumps,
+\  BNE ee2              \ otherwise skip to ee2 to continue
+
+                        \ --- And replaced by the following: -------------------
+
  CMP #&36               \ If "O" was pressed, do the following three jumps,
  BNE not_home           \ otherwise skip to not_home to continue AJD
+
+                        \ --- End of replacement code --------------------------
 
  JSR TT103              \ Draw small crosshairs at coordinates (QQ9, QQ10),
                         \ which will erase the crosshairs currently there
@@ -13021,6 +14591,8 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
  RTS                    \ Return from the subroutine
 
+                        \ --- Code added for Elite-A: --------------------------
+
 .not_home
 
  CMP #&21               \ AJD
@@ -13036,6 +14608,8 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  LDA cmdr_coury
  STA QQ10
  JSR TT103
+
+                        \ --- End of added code --------------------------------
 
 .T95
 
@@ -13097,7 +14671,42 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
 .BR1
 
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
+\  LDX #3               \ Set XC = 3 (set text cursor to column 3)
+\  STX XC
+\
+\
+\  JSR FX200            \ Disable the ESCAPE key and clear memory if the BREAK
+\                       \ key is pressed (*FX 200,3)
+\
+\
+\  LDX #CYL             \ Call TITLE to show a rotating Cobra Mk III (#CYL) and
+\  LDA #6               \ token 6 ("LOAD NEW {single cap}COMMANDER {all caps}
+\  JSR TITLE            \ (Y/N)?{sentence case}{cr}{cr}"), returning with the
+\                       \ internal number of the key pressed in A
+\
+\
+\  CMP #&44             \ Did we press "Y"? If not, jump to QU5, otherwise
+\  BNE QU5              \ continue on to load a new commander
+\
+\
+\  JSR DFAULT           \ Call DFAULT to reset the current commander data block
+\                       \ to the last saved commander
+\
+\  JSR SVE              \ Call SVE to load a new commander into the last saved
+\                       \ commander data block
+\
+\ .QU5
+\
+\  JSR DFAULT           \ Call DFAULT to reset the current commander data block
+\                       \ to the last saved commander
+
+                        \ --- And replaced by the following: -------------------
+
  JMP escape             \ AJD
+
+                        \ --- End of replacement code --------------------------
 
 \ ******************************************************************************
 \
@@ -13176,8 +14785,18 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  LDA #&FF               \ Set QQ12 = &FF (the docked flag) to indicate that we
  STA QQ12               \ are docked
 
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
+\  LDA #f8              \ Jump into the main loop at FRCE, setting the key
+\  JMP FRCE             \ that's "pressed" to red key f8 (so we show the Status
+\                       \ Mode screen)
+
+                        \ --- And replaced by the following: -------------------
+
  LDA #f3                \ AJD
  JMP FRCE
+
+                        \ --- End of replacement code --------------------------
 
 \ ******************************************************************************
 \
@@ -13560,8 +15179,19 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
 .BEEP
 
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
+\  LDA #32              \ Call the NOISE routine with A = 32 to make a short,
+\  BNE NOISE            \ high beep, returning from the subroutine using a tail
+\                       \ call (this BNE is effectively a JMP as A will never be
+\                       \ zero)
+
+                        \ --- And replaced by the following: -------------------
+
  LDA #32                \ Set A = 32 to denote a short, high beep, and fall
                         \ through into the NOISE routine to make the sound
+
+                        \ --- End of replacement code --------------------------
 
 \ ******************************************************************************
 \
@@ -13899,6 +15529,26 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
 .DOKEY
 
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
+\  LDA JSTK             \ If JSTK is zero, then we are configured to use the
+\  BEQ DK9              \ keyboard rather than the joystick, so jump to DK9 to
+\                       \ make sure the Bitstik is disabled as well (DK9 then
+\                       \ jumps to DK4 below)
+\
+\  LDX #1               \ Call DKS2 to fetch the value of ADC channel 1 (the
+\  JSR DKS2             \ joystick X value) into (A X), and OR A with 1. This
+\  ORA #1               \ ensures that the high byte is at least 1, and then we
+\  STA JSTX             \ store the result in JSTX
+\
+\  LDX #2               \ Call DKS2 to fetch the value of ADC channel 2 (the
+\  JSR DKS2             \ joystick Y value) into (A X), and EOR A with JSTGY.
+\  EOR JSTGY            \ JSTGY will be &FF if the game is configured to
+\  STA JSTY             \ reverse the joystick Y channel, so this EOR does
+\                       \ exactly that, and then we store the result in JSTY
+
+                        \ --- And replaced by the following: -------------------
+
  LDA JSTK               \ If JSTK is zero, then we are configured to use the
  BEQ DK4                \ keyboard rather than the joystick, so jump to DK4
 
@@ -13912,6 +15562,8 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  EOR JSTGY              \ JSTGY will be &FF if the game is configured to
  STA JSTY               \ reverse the joystick Y channel, so this EOR does
                         \ exactly that, and then we store the result in JSTY
+
+                        \ --- End of replacement code --------------------------
 
                         \ Fall through into DK4 to scan for other keys
 
@@ -13983,7 +15635,16 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
  INY                    \ Increment Y to point to the next toggle key
 
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
+\  CPY #&47             \ The last toggle key is &46 (K), so check whether we
+\                       \ have just done that one
+
+                        \ --- And replaced by the following: -------------------
+
  CPY #&48               \ AJD
+
+                        \ --- End of replacement code --------------------------
 
  BNE DKL4               \ If not, loop back to check for the next toggle key
 
@@ -14000,7 +15661,35 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  CPX #&70               \ If ESCAPE is not being pressed, skip over the next
  BNE P%+5               \ instruction
 
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
+\  JMP BR1              \ ESCAPE is being pressed, so jump to BR1 to end the
+\                       \ game
+\
+\
+\  CPX #&64             \ If "B" is not being pressed, skip to DK7
+\  BNE nobit
+\
+\
+\  LDA BSTK             \ Toggle the value of BSTK between 0 and &FF
+\  EOR #&FF
+\  STA BSTK
+\
+\  STA JSTK             \ Configure JSTK to the same value, so when the Bitstik
+\                       \ is enabled, so is the joystick
+\
+\  STA JSTE             \ Configure JSTE to the same value, so when the Bitstik
+\                       \ is enabled, the joystick is configured with reversed
+\                       \ channels
+\
+\
+\ .nobit
+
+                        \ --- And replaced by the following: -------------------
+
  JMP escape             \ AJD
+
+                        \ --- End of replacement code --------------------------
 
  CPX #&59               \ If DELETE is not being pressed, we are still paused,
  BNE FREEZE             \ so loop back up to keep listening for configuration
@@ -14023,7 +15712,26 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  LDA #&FF               \ Set A to &FF so we can store this in the keyboard
                         \ logger for keys that are being pressed
 
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
+\ .DK5
+
+                        \ --- End of removed code ------------------------------
+
  RTS                    \ Return from the subroutine
+
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
+\ .DK9
+\
+\  STA BSTK             \ DK9 is called from DOKEY using a BEQ, so we know A is
+\                       \ 0, so this disables the Bitstik and switched to
+\                       \ keyboard or joystick
+\
+\  BEQ DK4              \ Jump back to DK4 in DOKEY (this BEQ is effectively a
+\                       \ JMP as A is always zero)
+
+                        \ --- End of removed code ------------------------------
 
 \ ******************************************************************************
 \
@@ -15205,7 +16913,17 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  AND #%11110111         \ byte #31 to denote that the ship is no longer being
  STA XX1+31             \ drawn on-screen
 
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
+\  JMP DOEXP            \ Jump to DOEXP to return from the subroutine using a
+\                       \ tail call, as in the docked code DOEXP just contains
+\                       \ an RTS
+
+                        \ --- And replaced by the following: -------------------
+
  JMP TT48               \ AJD
+
+                        \ --- End of replacement code --------------------------
 
 .EE51
 
@@ -16878,7 +18596,16 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  ORA #8                 \ #31 to denote that we are drawing something on-screen
  STA XX1+31             \ for this ship
 
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
+\  JMP DOEXP            \ Jump to DOEXP to display the explosion cloud,
+\                       \ returning from the subroutine using a tail call
+
+                        \ --- And replaced by the following: -------------------
+
  JMP TT48               \ AJD
+
+                        \ --- End of replacement code --------------------------
 
 .EE31
 
@@ -18341,6 +20068,8 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 \
 \ ******************************************************************************
 
+                        \ --- Routine added for Elite-A: -----------------------
+
 .info_menu
 
  LDX #&00
@@ -18378,6 +20107,8 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  JSR dn2
  JMP BAY
 
+                        \ --- End of added routine -----------------------------
+
 \ ******************************************************************************
 \
 \       Name: ships_ag
@@ -18386,6 +20117,8 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 \    Summary: AJD
 \
 \ ******************************************************************************
+
+                        \ --- Routine added for Elite-A: -----------------------
 
 .ships_ag
 
@@ -18473,6 +20206,8 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  BEQ l_395a
  JMP BAY
 
+                        \ --- End of added routine -----------------------------
+
 \ ******************************************************************************
 \
 \       Name: controls
@@ -18481,6 +20216,8 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 \    Summary: AJD
 \
 \ ******************************************************************************
+
+                        \ --- Routine added for Elite-A: -----------------------
 
 .controls
 
@@ -18504,6 +20241,8 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  JSR write_msg3
  JMP l_restart
 
+                        \ --- End of added routine -----------------------------
+
 \ ******************************************************************************
 \
 \       Name: equip_data
@@ -18512,6 +20251,8 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 \    Summary: AJD
 \
 \ ******************************************************************************
+
+                        \ --- Routine added for Elite-A: -----------------------
 
 .equip_data
 
@@ -18539,6 +20280,8 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  JSR write_msg3
  JMP l_restart
 
+                        \ --- End of added routine -----------------------------
+
 \ ******************************************************************************
 \
 \       Name: trading
@@ -18548,6 +20291,8 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 \
 \ ******************************************************************************
 
+                        \ --- Routine added for Elite-A: -----------------------
+
 .trading
 
 .l_restart
@@ -18555,6 +20300,8 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  JSR PAUSE2
 
  JMP BAY
+
+                        \ --- End of added routine -----------------------------
 
 \ ******************************************************************************
 \
@@ -18564,6 +20311,8 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 \    Summary: AJD
 \
 \ ******************************************************************************
+
+                        \ --- Routine added for Elite-A: -----------------------
 
 .write_card
 
@@ -18658,6 +20407,8 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
  RTS
 
+                        \ --- End of added routine -----------------------------
+
 \ ******************************************************************************
 \
 \       Name: ship_load
@@ -18699,10 +20450,14 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
 .ship_posn
 
+                        \ --- Code added for Elite-A: --------------------------
+
  EQUB 19, 14, 27, 11, 20, 12, 17
  EQUB 11,  2,  2,  3, 25, 17, 11
  EQUB 20, 17, 17, 11, 22, 21, 11
  EQUB  9, 17, 29, 30, 10, 16, 15
+
+                        \ --- End of added code --------------------------------
 
 \ ******************************************************************************
 \
@@ -18728,6 +20483,8 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 \    Summary: AJD
 \
 \ ******************************************************************************
+
+                        \ --- Routine added for Elite-A: -----------------------
 
 .menu
 
@@ -18788,6 +20545,8 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 .menu_start
 
  JMP BAY
+
+                        \ --- End of added routine -----------------------------
 
 \ ******************************************************************************
 \
@@ -19109,6 +20868,8 @@ ENDMACRO
 \  Deep dive: Extended text tokens
 \
 \ ******************************************************************************
+
+                        \ --- Routine added for Elite-A: -----------------------
 
 .TKN1
 
@@ -20806,6 +22567,8 @@ ENDMACRO
                         \
                         \ Encoded as:   ""
 
+                        \ --- End of added routine -----------------------------
+
 \ ******************************************************************************
 \
 \       Name: msg_3
@@ -21546,6 +23309,8 @@ ENDMACRO
  ECHR 'R'               \                {all caps}ESC{sentence case}{tab 6}
  ECHR 'O'               \                ESCAPE CAPSULE{cr}
  ECHR 'L'               \                F{tab 6}TOGGLE COMPASS{cr}
+
+                        \ --- Code added for Elite-A: --------------------------
  ECHR 'S'               \                V{tab 6}{standard tokens, sentence
  ETWO '-', '-'          \                case} DOCKING COMPUTERS{extended
  ECHR '<'               \                tokens}ON{cr}
@@ -21576,6 +23341,9 @@ ENDMACRO
  ECHR 'I'               \                F1{2}{8}<242><238> VIEW{12}{13}F2{2}{8}
  ETWO 'S', 'E'          \                <229>FT VIEW{12}{13}F3{2}{8}RIGHT VIEW
  ECHR ' '               \                {12}"
+
+                        \ --- End of added code --------------------------------
+
  ECHR 'R'
  ECHR 'O'
  ECHR 'L'
@@ -21681,17 +23449,27 @@ ENDMACRO
  EJMP 12
  ECHR 'V'
  EJMP 8
+
+                        \ --- Code added for Elite-A: --------------------------
  EJMP 4
  TOKN 115
  EJMP 5
  ECHR ' '
+
+                        \ --- End of added code --------------------------------
+
  ETWO 'O', 'N'
  EJMP 12
  ECHR 'P'
  EJMP 8
+
+                        \ --- Code added for Elite-A: --------------------------
  EJMP 4
  TOKN 115
  EJMP 5
+
+                        \ --- End of added code --------------------------------
+
  ECHR ' '
  ECHR 'O'
  ECHR 'F'
@@ -21772,6 +23550,8 @@ ENDMACRO
  EJMP 12                \ Token 88:     "{cr}
  ECHR 'C'               \                COMBAT CONTROLS{crlf}
  ECHR 'O'               \                A{tab 6}FIRE LASER{cr}
+
+                        \ --- Code added for Elite-A: --------------------------
  ECHR 'M'               \                T{tab 6}TARGET {standard tokens,
  ECHR 'B'               \                sentence case} MISSILE{extended
  ETWO 'A', 'T'          \                tokens}{cr}
@@ -21804,6 +23584,9 @@ ENDMACRO
  EJMP 4                 \                {19}<242>D{22}N<223>-R<237>P<223>D<246>
  TOKN 106               \                T{12}WH<219>E/{19}<242>D{22}{4}[106]{5}
  EJMP 5                 \                {12}"
+
+                        \ --- End of added code --------------------------------
+
  EJMP 12
  ECHR 'M'
  EJMP 8
@@ -21811,9 +23594,14 @@ ENDMACRO
  ECHR 'I'
  ETWO 'R', 'E'
  ECHR ' '
+
+                        \ --- Code added for Elite-A: --------------------------
  EJMP 4
  TOKN 106
  EJMP 5
+
+                        \ --- End of added code --------------------------------
+
  EJMP 12
  ECHR 'U'
  EJMP 8
@@ -21822,9 +23610,14 @@ ENDMACRO
  ETWO 'A', 'R'
  ECHR 'M'
  ECHR ' '
+
+                        \ --- Code added for Elite-A: --------------------------
  EJMP 4
  TOKN 106
  EJMP 5
+
+                        \ --- End of added code --------------------------------
+
  EJMP 12
  ECHR 'E'
  EJMP 8
@@ -21865,7 +23658,12 @@ ENDMACRO
  ECHR 'H'
  ETWO 'I', 'T'
  ECHR 'E'
+
+                        \ --- Code added for Elite-A: --------------------------
  EJMP 22
+
+                        \ --- End of added code --------------------------------
+
  ECHR 'O'
  ECHR 'F'
  ECHR 'F'
@@ -21880,7 +23678,12 @@ ENDMACRO
  ECHR 'L'
  ECHR 'U'
  ECHR 'E'
+
+                        \ --- Code added for Elite-A: --------------------------
  EJMP 22
+
+                        \ --- End of added code --------------------------------
+
  ETWO 'L', 'E'
  ECHR 'G'
  ETWO 'A', 'L'
@@ -21897,7 +23700,12 @@ ENDMACRO
  ECHR 'H'
  ETWO 'I', 'T'
  ECHR 'E'
+
+                        \ --- Code added for Elite-A: --------------------------
  EJMP 22
+
+                        \ --- End of added code --------------------------------
+
  ECHR 'D'
  ECHR 'E'
  ECHR 'B'
@@ -21913,7 +23721,12 @@ ENDMACRO
  EJMP 19
  ETWO 'R', 'E'
  ECHR 'D'
+
+                        \ --- Code added for Elite-A: --------------------------
  EJMP 22
+
+                        \ --- End of added code --------------------------------
+
  ECHR 'N'
  ETWO 'O', 'N'
  ECHR '-'
@@ -21933,16 +23746,23 @@ ENDMACRO
  EJMP 19
  ETWO 'R', 'E'
  ECHR 'D'
+
+                        \ --- Code added for Elite-A: --------------------------
  EJMP 22
  EJMP 4
  TOKN 106
  EJMP 5
+
+                        \ --- End of added code --------------------------------
+
  EJMP 12
  EQUB VE
 
  EJMP 12                \ Token 89:     "{cr}
  ECHR 'N'               \                NAVIGATION CONTROLS{crlf}
  ECHR 'A'               \                H{tab 6}HYPERSPACE JUMP{cr}
+
+                        \ --- Code added for Elite-A: --------------------------
  ECHR 'V'               \                C-{single cap}H{tab 6}{standard tokens,
  ECHR 'I'               \                sentence case} GALACTIC HYPERSPACE
  ECHR 'G'               \                {extended tokens}{cr}
@@ -21974,14 +23794,22 @@ ENDMACRO
  ECHR 'M'
  ECHR 'P'
  EJMP 12
+
+                        \ --- End of added code --------------------------------
+
  ECHR 'C'
  ECHR '-'
  EJMP 19
  ECHR 'H'
  EJMP 8
+
+                        \ --- Code added for Elite-A: --------------------------
  EJMP 4
  TOKN 116
  EJMP 5
+
+                        \ --- End of added code --------------------------------
+
  EJMP 12
  ECHR 'C'
  ECHR 'U'
@@ -22355,6 +24183,8 @@ ENDMACRO
  ECHR 'G'
  EQUB VE
 
+                        \ --- Code added for Elite-A: --------------------------
+
  EJMP 4                 \ Token 95:     "{standard tokens, sentence case}MISSILE
  TOKN 106               \                {extended tokens}"
  EJMP 5                 \
@@ -22419,6 +24249,8 @@ ENDMACRO
  TOKN 118               \                MINING LASER{extended tokens}"
  EJMP 5                 \
  EQUB VE                \ Encoded as:   "{4}[118]{5}"
+
+                        \ --- End of added code --------------------------------
 
  EJMP 14                \ Token 108:    "{justify}{single cap}SELF HOMING
  EJMP 19                \                MISSILES MAY BE BOUGHT AT ANY SYSTEM.

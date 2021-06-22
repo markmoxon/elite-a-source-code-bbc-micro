@@ -375,7 +375,7 @@ ENDMACRO
                         \ --- Original Acornsoft code removed from Elite-A: ----
 
 \  JSR PROT1            \ Call PROT1 to calculate checksums into CHKSM
-
+\
 \  LDA #144             \ Call OSBYTE with A = 144, X = 255 and Y = 0 to move
 \  LDX #255             \ the screen down one line and turn screen interlace on
 \  JSR OSB
@@ -467,9 +467,9 @@ ENDMACRO
 \                       \ and auto-repeat rate to the default, when in reality
 \                       \ the OSB address in the next instruction gets modified
 \                       \ to point to OSBmod
-
+\
 \ .OSBjsr
-
+\
 \  JSR OSB              \ This JSR gets modified by code inserted into PLL1 so
 \                       \ that it points to OSBmod instead of OSB, so this
 \                       \ actually calls OSBmod to calculate some checksums
@@ -535,34 +535,34 @@ ENDMACRO
 
 \  SEI                  \ Disable interrupts while we set up our interrupt
 \                       \ handler to support the split-screen mode
-
+\
 \  LDA VIA+&44          \ Read the 6522 System VIA T1C-L timer 1 low-order
 \  STA &0001            \ counter (SHEILA &44), which increments 1000 times a
 \                       \ second so this will be pretty random, and store it in
 \                       \ &0001 among the random number seeds at &0000
-
+\
 \  LDA #%00111001       \ Set 6522 System VIA interrupt enable register IER
 \  STA VIA+&4E          \ (SHEILA &4E) bits 0 and 3-5 (i.e. disable the Timer1,
 \                       \ CB1, CB2 and CA2 interrupts from the System VIA)
-
+\
 \  LDA #%01111111       \ Set 6522 User VIA interrupt enable register IER
 \  STA VIA+&6E          \ (SHEILA &6E) bits 0-7 (i.e. disable all hardware
 \                       \ interrupts from the User VIA)
-
+\
 \  LDA IRQ1V            \ Copy the current IRQ1V vector address into VEC(1 0)
 \  STA VEC
 \  LDA IRQ1V+1
 \  STA VEC+1
-
+\
 \  LDA #LO(IRQ1)        \ Set the IRQ1V vector to IRQ1, so IRQ1 is now the
 \  STA IRQ1V            \ interrupt handler
 \  LDA #HI(IRQ1)
 \  STA IRQ1V+1
-
+\
 \  LDA #VSCAN           \ Set 6522 System VIA T1C-L timer 1 high-order counter
 \  STA VIA+&45          \ (SHEILA &45) to VSCAN (57) to start the T1 counter
 \                       \ counting down from 14622 at a rate of 1 MHz
-
+\
 \  CLI                  \ Re-enable interrupts
 
                         \ --- End of removed code ------------------------------
@@ -610,24 +610,24 @@ ENDMACRO
 \  LDA #HI(WORDS)
 \  STA P+1
 \  LDX #4
-
+\
 \  JSR MVBL             \ Call MVBL to move and decrypt 4 pages of memory from
 \                       \ WORDS to &0400-&07FF
-
+\
 \  LDX #35              \ We now want to copy the disc catalogue routine from
 \                       \ CATDcode to CATD, so set a counter in X for the 36
 \                       \ bytes to copy
-
+\
 \ .loop2
-
+\
 \  LDA CATDcode,X       \ Copy the X-th byte of CATDcode to the X-th byte of
 \  STA CATD,X           \ CATD
-
+\
 \  DEX                  \ Decrement the loop counter
-
+\
 \  BPL loop2            \ Loop back to copy the next byte until they are all
 \                       \ done
-
+\
 \  LDA &76              \ Set the drive number in the CATD routine to the
 \  STA CATBLOCK         \ contents of &76, which gets set in ELITE3
 
@@ -654,24 +654,24 @@ ENDMACRO
 \  STA P
 \  LDA #HI(LOADcode)
 \  STA P+1
-
+\
 \  LDY #0               \ We now want to move and decrypt one page of memory
 \                       \ from LOADcode to LOAD, so set Y as a byte counter
-
+\
 \ .loop3
-
+\
 \  LDA (P),Y            \ Fetch the Y-th byte of the P(1 0) memory block
-
+\
 \  EOR #&18             \ Decrypt it by EOR'ing with &18
-
+\
 \  STA (ZP),Y           \ Store the decrypted result in the Y-th byte of the
 \                       \ ZP(1 0) memory block
-
+\
 \  DEY                  \ Decrement the byte counter
-
+\
 \  BNE loop3            \ Loop back to copy the next byte until we have done a
 \                       \ whole page of 256 bytes
-
+\
 \  JMP LOAD             \ Jump to the start of the routine we just decrypted
 
                         \ --- And replaced by the following: -------------------
@@ -973,56 +973,56 @@ ORG &0B00
 \  STA BRKV             \ code's S% workspace, which contains JMP BRBR1
 \  LDA #HI(S%+11)
 \  STA BRKV+1
-
+\
 \  LDA #LO(S%+6)        \ Point BRKV to the third entry in the main docked
 \  STA WRCHV            \ code's S% workspace, which contains JMP CHPR
 \  LDA #HI(S%+6)
 \  STA WRCHV+1
-
+\
 \  SEC                  \ Set the C flag so the checksum we calculate in A
 \                       \ starts with an initial value of 18 (17 plus carry)
-
+\
 \  LDY #&00             \ Set Y = 0 to act as a byte pointer
-
+\
 \  STY ZP               \ Set the low byte of ZP(1 0) to 0, so ZP(1 0) always
 \                       \ points to the start of a page
-
+\
 \  LDX #&11             \ Set X = &11, so ZP(1 0) will point to &1100 when we
 \                       \ stick X in ZP+1 below
-
+\
 \  TXA                  \ Set A = &11 = 17, to set the intial value of the
 \                       \ checksum to 18 (17 plus carry)
-
+\
 \ .l1
-
+\
 \  STX ZP+1             \ Set the high byte of ZP(1 0) to the page number in X
-
+\
 \  ADC (ZP),Y           \ Set A = A + the Y-th byte of ZP(1 0)
-
+\
 \  DEY                  \ Decrement the byte pointer
-
+\
 \  BNE l1               \ Loop back to add the next byte until we have added the
 \                       \ whole page
-
+\
 \  INX                  \ Increment the page number in X
-
+\
 \  CPX #&54             \ Loop back to checksum the next page until we have
 \  BCC l1               \ checked up to (but not including) page &54
-
+\
 \  CMP &55FF            \ Compare the checksum with the value in &55FF, which is
 \                       \ in the docked file we just loaded, in the byte before
 \                       \ the ship hanger blueprints at XX21
-
+\
 \ IF _REMOVE_CHECKSUMS
-
+\
 \  NOP                  \ If we have disabled checksums, then ignore the result
 \  NOP                  \ of the checksum comparison
-
+\
 \ ELSE
-
+\
 \  BNE P%               \ If the checksums don't match then enter an infinite
 \                       \ loop, which hangs the computer
-
+\
 \ ENDIF
 
                         \ --- End of removed code ------------------------------
@@ -1036,7 +1036,8 @@ ORG &0B00
 
 \  EQUS "L.T.CODE"
 \  EQUB 13
-
+\
+\
 \  EQUB &44, &6F, &65   \ These bytes appear to be unused
 \  EQUB &73, &20, &79
 \  EQUB &6F, &75, &72
@@ -1922,15 +1923,15 @@ ORG LOADcode + P% - LOAD
                         \ --- Original Acornsoft code removed from Elite-A: ----
 
 \ .DIALS
-
+\
 \  INCBIN "versions/disc/binaries/P.DIALS.bin"
-
+\
 \ .SHIP_MISSILE
-
+\
 \  INCBIN "versions/disc/output/MISSILE.bin"
-
+\
 \ .WORDS
-
+\
 \  INCBIN "versions/disc/output/WORDS.bin"
 
                         \ --- And replaced by the following: -------------------
@@ -2276,7 +2277,7 @@ ORG &1100
 \ ELSE
 \  EQUD &E8030000       \ CASH = Amount of cash (100 Cr), #9-12
 \ ENDIF
-
+\
 \  EQUB 70              \ QQ14 = Fuel level, #13
 
                         \ --- And replaced by the following: -------------------
@@ -2298,7 +2299,7 @@ ENDIF
                         \ --- Original Acornsoft code removed from Elite-A: ----
 
 \  EQUB POW+(128 AND Q%)\ LASER = Front laser, #16
-
+\
 \  EQUB (POW+128) AND Q%\ LASER+1 = Rear laser, #17
 
                         \ --- And replaced by the following: -------------------
@@ -2593,15 +2594,15 @@ ORG TVT1code + P% - TVT1
                         \ --- Original Acornsoft code removed from Elite-A: ----
 
 \ .ELITE
-
+\
 \  INCBIN "versions/disc/binaries/P.ELITE.bin"
-
+\
 \ .ASOFT
-
+\
 \  INCBIN "versions/disc/binaries/P.A-SOFT.bin"
-
+\
 \ .CpASOFT
-
+\
 \  INCBIN "versions/disc/binaries/P.(C)ASFT.bin"
 
                         \ --- And replaced by the following: -------------------

@@ -764,7 +764,7 @@ ORG &0300
                         \ --- Original Acornsoft code removed from Elite-A: ----
 
 \ .KL
-
+\
 \  SKIP 1               \ The following bytes implement a key logger that
 \                       \ enables Elite to scan for concurrent key presses of
 \                       \ the primary flight keys, plus a secondary flight key
@@ -774,57 +774,57 @@ ORG &0300
 \                       \ If a key is being pressed that is not in the keyboard
 \                       \ table at KYTB, it can be stored here (as seen in
 \                       \ routine DK4, for example)
-
+\
 \ .KY1
-
+\
 \  SKIP 1               \ "?" is being pressed
 \                       \
 \                       \   * 0 = no
 \                       \
 \                       \   * Non-zero = yes
-
+\
 \ .KY2
-
+\
 \  SKIP 1               \ Space is being pressed
 \                       \
 \                       \   * 0 = no
 \                       \
 \                       \   * Non-zero = yes
-
+\
 \ .KY3
-
+\
 \  SKIP 1               \ "<" is being pressed
 \                       \
 \                       \   * 0 = no
 \                       \
 \                       \   * Non-zero = yes
-
+\
 \ .KY4
-
+\
 \  SKIP 1               \ ">" is being pressed
 \                       \
 \                       \   * 0 = no
 \                       \
 \                       \   * Non-zero = yes
-
+\
 \ .KY5
-
+\
 \  SKIP 1               \ "X" is being pressed
 \                       \
 \                       \   * 0 = no
 \                       \
 \                       \   * Non-zero = yes
-
+\
 \ .KY6
-
+\
 \  SKIP 1               \ "S" is being pressed
 \                       \
 \                       \   * 0 = no
 \                       \
 \                       \   * Non-zero = yes
-
+\
 \ .KY7
-
+\
 \  SKIP 1               \ "A" is being pressed
 \                       \
 \                       \   * 0 = no
@@ -833,81 +833,81 @@ ORG &0300
 \                       \
 \                       \ This is also set when the joystick fire button has
 \                       \ been pressed
-
+\
 \ .KY12
-
+\
 \  SKIP 1               \ TAB is being pressed
 \                       \
 \                       \   * 0 = no
 \                       \
 \                       \   * Non-zero = yes
-
+\
 \ .KY13
-
+\
 \  SKIP 1               \ ESCAPE is being pressed
 \                       \
 \                       \   * 0 = no
 \                       \
 \                       \   * Non-zero = yes
-
+\
 \ .KY14
-
+\
 \  SKIP 1               \ "T" is being pressed
 \                       \
 \                       \   * 0 = no
 \                       \
 \                       \   * Non-zero = yes
-
+\
 \ .KY15
-
+\
 \  SKIP 1               \ "U" is being pressed
 \                       \
 \                       \   * 0 = no
 \                       \
 \                       \   * Non-zero = yes
-
+\
 \ .KY16
-
+\
 \  SKIP 1               \ "M" is being pressed
 \                       \
 \                       \   * 0 = no
 \                       \
 \                       \   * Non-zero = yes
-
+\
 \ .KY17
-
+\
 \  SKIP 1               \ "E" is being pressed
 \                       \
 \                       \   * 0 = no
 \                       \
 \                       \   * Non-zero = yes
-
+\
 \ .KY18
-
+\
 \  SKIP 1               \ "J" is being pressed
 \                       \
 \                       \   * 0 = no
 \                       \
 \                       \   * Non-zero = yes
-
+\
 \ .KY19
-
+\
 \  SKIP 1               \ "C" is being pressed
 \                       \
 \                       \   * 0 = no
 \                       \
 \                       \   * Non-zero = yes
-
+\
 \ .KY20
-
+\
 \  SKIP 1               \ "P" is being pressed
 \                       \
 \                       \   * 0 = no
 \                       \
 \                       \   * Non-zero = yes
-
+\
 \ .FRIN
-
+\
 \  SKIP NOSH + 1        \ Slots for the ships in the local bubble of universe
 \                       \
 \                       \ There are #NOSH + 1 slots, but the ship-spawning
@@ -920,9 +920,9 @@ ORG &0300
 \                       \ See the deep dive on "The local bubble of universe"
 \                       \ for details of how Elite stores the local universe in
 \                       \ FRIN, UNIV and K%
-
+\
 \ .MANY
-
+\
 \  SKIP SST             \ The number of ships of each type in the local bubble
 \                       \ of universe
 \                       \
@@ -932,9 +932,9 @@ ORG &0300
 \                       \
 \                       \ See the deep dive on "Ship blueprints" for a list of
 \                       \ ship types
-
+\
 \ .SSPR
-
+\
 \  SKIP NTY + 1 - SST   \ "Space station present" flag
 \                       \
 \                       \   * Non-zero if we are inside the space station's safe
@@ -946,9 +946,9 @@ ORG &0300
 \                       \ MANY+SST is a count of how many space stations there
 \                       \ are in our local bubble, which is the same as saying
 \                       \ "space station present"
-
+\
 \ .JUNK
-
+\
 \  SKIP 1               \ The amount of junk in the local bubble
 \                       \
 \                       \ "Junk" is defined as being one of these:
@@ -962,33 +962,34 @@ ORG &0300
 \                       \   * Transporter
 \                       \
 \                       \ Junk is the range of ship types from #JL to #JH - 1
-
+\
+\
 \ .auto
-
+\
 \  SKIP 1               \ Docking computer activation status
 \                       \
 \                       \   * 0 = Docking computer is off
 \                       \
 \                       \   * Non-zero = Docking computer is running
-
+\
 \ .ECMP
-
+\
 \  SKIP 1               \ Our E.C.M. status
 \                       \
 \                       \   * 0 = E.C.M. is off
 \                       \
 \                       \   * Non-zero = E.C.M. is on
-
+\
 \ .MJ
-
+\
 \  SKIP 1               \ Are we in witchspace (i.e. have we mis-jumped)?
 \                       \
 \                       \   * 0 = no, we are in normal space
 \                       \
 \                       \   * &FF = yes, we are in witchspace
-
+\
 \ .CABTMP
-
+\
 \  SKIP 1               \ Cabin temperature
 \                       \
 \                       \ The ambient cabin temperature in deep space is 30,
@@ -1001,9 +1002,9 @@ ORG &0300
 \                       \ and as there is no ship type 0 (they start at 1), the
 \                       \ byte at MANY+0 is not used for storing a ship type
 \                       \ and can be used for the cabin temperature instead
-
+\
 \ .LAS2
-
+\
 \  SKIP 1               \ Laser power for the current laser
 \                       \
 \                       \   * Bits 0-6 contain the laser power of the current
@@ -1014,9 +1015,9 @@ ORG &0300
 \                       \     * 0 = pulsing laser
 \                       \
 \                       \     * 1 = beam laser (i.e. always on)
-
+\
 \ .MSAR
-
+\
 \  SKIP 1               \ The targeting state of our leftmost missile
 \                       \
 \                       \   * 0 = missile is not looking for a target, or it
@@ -1025,18 +1026,18 @@ ORG &0300
 \                       \
 \                       \   * Non-zero = missile is currently looking for a
 \                       \     target (indicator is yellow/white)
-
+\
 \ .VIEW
-
+\
 \  SKIP 1               \ The number of the current space view
 \                       \
 \                       \   * 0 = front
 \                       \   * 1 = rear
 \                       \   * 2 = left
 \                       \   * 3 = right
-
+\
 \ .LASCT
-
+\
 \  SKIP 1               \ The laser pulse count for the current laser
 \                       \
 \                       \ This is a counter that defines the gap between the
@@ -1057,17 +1058,17 @@ ORG &0300
 \                       \
 \                       \ In comparison, beam lasers fire continuously as the
 \                       \ value of LASCT is always 0
-
+\
 \ .GNTMP
-
+\
 \  SKIP 1               \ Laser temperature (or "gun temperature")
 \                       \
 \                       \ If the laser temperature exceeds 242 then the laser
 \                       \ overheats and cannot be fired again until it has
 \                       \ cooled down
-
+\
 \ .HFX
-
+\
 \  SKIP 1               \ A flag that toggles the hyperspace colour effect
 \                       \
 \                       \   * 0 = no colour effect
@@ -1085,9 +1086,9 @@ ORG &0300
 \                       \ non-zero, the top part of the screen is not switched
 \                       \ to mode 4, thus leaving the top part of the screen in
 \                       \ the more colourful mode 5
-
+\
 \ .EV
-
+\
 \  SKIP 1               \ The "extra vessels" spawning counter
 \                       \
 \                       \ This counter is set to 0 on arrival in a system and
@@ -1102,18 +1103,18 @@ ORG &0300
 \                       \ In other words, this counter stops bounty hunters and
 \                       \ pirates from continually appearing, and ensures that
 \                       \ there's a delay between spawnings
-
+\
 \ .DLY
-
+\
 \  SKIP 1               \ In-flight message delay
 \                       \
 \                       \ This counter is used to keep an in-flight message up
 \                       \ for a specified time before it gets removed. The value
 \                       \ in DLY is decremented each time we start another
 \                       \ iteration of the main game loop at TT100
-
+\
 \ .de
-
+\
 \  SKIP 1               \ Equipment destruction flag
 \                       \
 \                       \   * Bit 1 denotes whether or not the in-flight message
@@ -1124,9 +1125,9 @@ ORG &0300
 \                       \
 \                       \     * 1 = the string " DESTROYED" gets added to the
 \                       \       end of the message
-
+\
 \ .JSTX
-
+\
 \  SKIP 1               \ Our current roll rate
 \                       \
 \                       \ This value is shown in the dashboard's RL indicator,
@@ -1143,9 +1144,9 @@ ORG &0300
 \                       \ the value is slowly moved towards the centre value of
 \                       \ 128 (no roll) if there are no key presses or joystick
 \                       \ movement
-
+\
 \ .JSTY
-
+\
 \  SKIP 1               \ Our current pitch rate
 \                       \
 \                       \ This value is shown in the dashboard's DC indicator,
@@ -1163,25 +1164,30 @@ ORG &0300
 \                       \ 128 (no pitch) if there are no key presses or joystick
 \                       \ movement
 \ .XSAV2
-
+\
+\
 \  SKIP 1               \ Temporary storage, used for storing the value of the X
 \                       \ register in the TT26 routine
-
+\
+\
 \ .YSAV2
-
+\
+\
 \  SKIP 1               \ Temporary storage, used for storing the value of the Y
 \                       \ register in the TT26 routine
-
+\
+\
 \ .NAME
-
+\
 \  SKIP 8               \ The current commander name
 \                       \
 \                       \ The commander name can be up to 7 characters (the DFS
 \                       \ limit for file names), and is terminated by a carriage
 \                       \ return
-
+\
 \ .TP
-
+\
+\
 \  SKIP 1               \ The current mission status
 \                       \
 \                       \   * Bits 0-1 = Mission 1 status
@@ -1197,17 +1203,18 @@ ORG &0300
 \                       \     * %01 = Mission in progress, plans not picked up
 \                       \     * %10 = Mission in progress, plans picked up
 \                       \     * %11 = Mission complete
-
+\
+\
 \ .QQ0
-
+\
 \  SKIP 1               \ The current system's galactic x-coordinate (0-256)
-
+\
 \ .QQ1
-
+\
 \  SKIP 1               \ The current system's galactic y-coordinate (0-256)
-
+\
 \ .QQ21
-
+\
 \  SKIP 6               \ The three 16-bit seeds for the current galaxy
 \                       \
 \                       \ These seeds define system 0 in the current galaxy, so
@@ -1222,7 +1229,7 @@ ORG &0300
 \                       \ See the deep dives on "Galaxy and system seeds" and
 \                       \ "Twisting the system seeds" for more details
 \ .CASH
-
+\
 \  SKIP 4               \ Our current cash pot
 \                       \
 \                       \ The cash stash is stored as a 32-bit unsigned integer,
@@ -1231,26 +1238,26 @@ ORG &0300
 \                       \ the opposite way round to most of the numbers used in
 \                       \ Elite - to use our notation for multi-byte numbers,
 \                       \ the amount of cash is CASH(0 1 2 3)
-
+\
 \ .QQ14
-
+\
 \  SKIP 1               \ Our current fuel level (0-70)
 \                       \
 \                       \ The fuel level is stored as the number of light years
 \                       \ multiplied by 10, so QQ14 = 1 represents 0.1 light
 \                       \ years, and the maximum possible value is 70, for 7.0
 \                       \ light years
-
+\
 \ .COK
-
+\
 \  SKIP 1               \ Flags used to generate the competition code
 \                       \
 \                       \ See the deep dive on "The competition code" for
 \                       \ details of these flags and how they are used in
 \                       \ generating and decoding the competition code
-
+\
 \ .GCNT
-
+\
 \  SKIP 1               \ The number of the current galaxy (0-7)
 \                       \
 \                       \ When this is displayed in-game, 1 is added to the
@@ -1260,9 +1267,9 @@ ORG &0300
 \                       \ The galaxy number increases by one every time a
 \                       \ galactic hyperdrive is used, and wraps back round to
 \                       \ the start after eight galaxies
-
+\
 \ .LASER
-
+\
 \  SKIP 4               \ The specifications of the lasers fitted to each of the
 \                       \ four space views:
 \                       \
@@ -1283,12 +1290,13 @@ ORG &0300
 \                       \     * Bit 7 determines whether or not the laser pulses
 \                       \       (0 = pulse or mining laser) or is always on
 \                       \       (1 = beam or military laser)
-
+\
+\
 \  SKIP 2               \ These bytes appear to be unused (they were originally
 \                       \ used for up/down lasers, but they were dropped)
-
+\
 \ .CRGO
-
+\
 \  SKIP 1               \ Our ship's cargo capacity
 \                       \
 \                       \   * 22 = standard cargo bay of 20 tonnes
@@ -1297,9 +1305,9 @@ ORG &0300
 \                       \
 \                       \ The value is two greater than the actual capacity to
 \                       \ male the maths in tnpr slightly more efficient
-
+\
 \ .QQ20
-
+\
 \  SKIP 17              \ The contents of our cargo hold
 \                       \
 \                       \ The amount of market item X that we have in our hold
@@ -1311,71 +1319,72 @@ ORG &0300
 \                       \
 \                       \ See QQ23 for a list of market item numbers and their
 \                       \ storage units
-
+\
 \ .ECM
-
+\
 \  SKIP 1               \ E.C.M. system
 \                       \
 \                       \   * 0 = not fitted
 \                       \
 \                       \   * &FF = fitted
-
+\
 \ .BST
-
+\
 \  SKIP 1               \ Fuel scoops (BST stands for "barrel status")
 \                       \
 \                       \   * 0 = not fitted
 \                       \
 \                       \   * &FF = fitted
-
+\
 \ .BOMB
-
+\
 \  SKIP 1               \ Energy bomb
 \                       \
 \                       \   * 0 = not fitted
 \                       \
 \                       \   * &7F = fitted
-
+\
 \ .ENGY
-
+\
 \  SKIP 1               \ Energy unit
 \                       \
 \                       \   * 0 = not fitted
 \                       \
 \                       \   * 1 = fitted
-
+\
 \ .DKCMP
-
+\
 \  SKIP 1               \ Docking computer
 \                       \
 \                       \   * 0 = not fitted
 \                       \
 \                       \   * &FF = fitted
-
+\
 \ .GHYP
-
+\
 \  SKIP 1               \ Galactic hyperdrive
 \                       \
 \                       \   * 0 = not fitted
 \                       \
 \                       \   * &FF = fitted
-
+\
 \ .ESCP
-
+\
 \  SKIP 1               \ Escape pod
 \                       \
 \                       \   * 0 = not fitted
 \                       \
 \                       \   * &FF = fitted
-
+\
+\
 \  SKIP 4               \ These bytes appear to be unused
-
+\
 \ .NOMSL
-
+\
 \  SKIP 1               \ The number of missiles we have fitted (0-4)
-
+\
 \ .FIST
-
+\
 \  SKIP 1               \ Our legal status (FIST stands for "fugitive/innocent
 \                       \ status"):
 \                       \
@@ -1387,9 +1396,9 @@ ORG &0300
 \                       \
 \                       \ You get 64 points if you kill a cop, so that's a fast
 \                       \ ticket to fugitive status
-
+\
 \ .AVL
-
+\
 \  SKIP 17              \ Market availability in the current system
 \                       \
 \                       \ The available amount of market item X is stored in
@@ -1403,18 +1412,18 @@ ORG &0300
 \                       \ storage units, and the deep dive on "Market item
 \                       \ prices and availability" for details of the algorithm
 \                       \ used for calculating each item's availability
-
+\
 \ .QQ26
-
+\
 \  SKIP 1               \ A random value used to randomise market data
 \                       \
 \                       \ This value is set to a new random number for each
 \                       \ change of system, so we can add a random factor into
 \                       \ the calculations for market prices (for details of how
 \                       \ this is used, see the deep dive on "Market prices")
-
+\
 \ .TALLY
-
+\
 \  SKIP 2               \ Our combat rank
 \                       \
 \                       \ The combat rank is stored as the number of kills, in a
@@ -1442,9 +1451,9 @@ ORG &0300
 \                       \   Elite           = 25 and up   = 6400 kills and up
 \                       \
 \                       \ You can see the rating calculation in STATUS
-
+\
 \ .SVC
-
+\
 \  SKIP 1               \ The save count
 \                       \
 \                       \ When a new commander is created, the save count gets
@@ -1453,91 +1462,94 @@ ORG &0300
 \                       \ It is presumably part of the security system for the
 \                       \ competition, possibly another flag to catch out
 \                       \ entries with manually altered commander files
-
+\
 \  SKIP 2               \ The commander file checksum
 \                       \
 \                       \ These two bytes are reserved for the commander file
 \                       \ checksum, so when the current commander block is
 \                       \ copied from here to the last saved commander block at
 \                       \ NA%, CHK and CHK2 get overwritten
-
+\
+\
 \ NT% = SVC + 2 - TP    \ This sets the variable NT% to the size of the current
 \                       \ commander data block, which starts at TP and ends at
 \                       \ SVC+2 (inclusive)
-
+\
+\
+\
 \ .MCH
-
+\
 \  SKIP 1               \ The text token number of the in-flight message that is
 \                       \ currently being shown, and which will be removed by
 \                       \ the me2 routine when the counter in DLY reaches zero
-
+\
 \ .FSH
-
+\
 \  SKIP 1               \ Forward shield status
 \                       \
 \                       \   * 0 = empty
 \                       \
 \                       \   * &FF = full
-
+\
 \ .ASH
-
+\
 \  SKIP 1               \ Aft shield status
 \                       \
 \                       \   * 0 = empty
 \                       \
 \                       \   * &FF = full
-
+\
 \ .ENERGY
-
+\
 \  SKIP 1               \ Energy bank status
 \                       \
 \                       \   * 0 = empty
 \                       \
 \                       \   * &FF = full
-
+\
 \ .COMX
-
+\
 \  SKIP 1               \ The x-coordinate of the compass dot
-
+\
 \ .COMY
-
+\
 \  SKIP 1               \ The y-coordinate of the compass dot
-
+\
 \ .QQ24
-
+\
 \  SKIP 1               \ Temporary storage, used to store the current market
 \                       \ item's price in routine TT151
-
+\
 \ .QQ25
-
+\
 \  SKIP 1               \ Temporary storage, used to store the current market
 \                       \ item's availability in routine TT151
-
+\
 \ .QQ28
-
+\
 \  SKIP 1               \ Temporary storage, used to store the economy byte of
 \                       \ the current system in routine var
-
+\
 \ .QQ29
-
+\
 \  SKIP 1               \ Temporary storage, used in a number of places
-
+\
 \ .gov
-
+\
 \  SKIP 1               \ The current system's government type (0-7)
 \                       \
 \                       \ See the deep dive on "Generating system data" for
 \                       \ details of the various government types
-
+\
 \ .tek
-
+\
 \  SKIP 1               \ The current system's tech level (0-14)
 \                       \
 \                       \ See the deep dive on "Generating system data" for more
 \                       \ information on tech levels
-
+\
 \ .SLSP
-
+\
 \  SKIP 2               \ The address of the bottom of the ship line heap
 \                       \
 \                       \ The ship line heap is a descending block of memory
@@ -1546,53 +1558,53 @@ ORG &0300
 \                       \ new ships (and their associated ship line heaps), in
 \                       \ which case SLSP is lowered to provide more heap space,
 \                       \ assuming there is enough free memory to do so
-
+\
 \ .QQ2
-
+\
 \  SKIP 6               \ The three 16-bit seeds for the current system, i.e.
 \                       \ the one we are currently in
 \                       \
 \                       \ See the deep dives on "Galaxy and system seeds" and
 \                       \ "Twisting the system seeds" for more details
-
+\
 \ .QQ3
-
+\
 \  SKIP 1               \ The selected system's economy (0-7)
 \                       \
 \                       \ See the deep dive on "Generating system data" for more
 \                       \ information on economies
-
+\
 \ .QQ4
-
+\
 \  SKIP 1               \ The selected system's government (0-7)
 \                       \
 \                       \ See the deep dive on "Generating system data" for more
 \                       \ details of the various government types
-
+\
 \ .QQ5
-
+\
 \  SKIP 1               \ The selected system's tech level (0-14)
 \                       \
 \                       \ See the deep dive on "Generating system data" for more
 \                       \ information on tech levels
-
+\
 \ .QQ6
-
+\
 \  SKIP 2               \ The selected system's population in billions * 10
 \                       \ (1-71), so the maximum population is 7.1 billion
 \                       \
 \                       \ See the deep dive on "Generating system data" for more
 \                       \ details on population levels
-
+\
 \ .QQ7
-
+\
 \  SKIP 2               \ The selected system's productivity in M CR (96-62480)
 \                       \
 \                       \ See the deep dive on "Generating system data" for more
 \                       \ details about productivity levels
-
+\
 \ .QQ8
-
+\
 \  SKIP 2               \ The distance from the current system to the selected
 \                       \ system in light years * 10, stored as a 16-bit number
 \                       \
@@ -1603,24 +1615,25 @@ ORG &0300
 \                       \ light years tall (see the intra-system distance
 \                       \ calculations in routine TT111 for details), which
 \                       \ equates to 1024 x 512 in terms of QQ8
-
+\
 \ .QQ9
-
+\
 \  SKIP 1               \ The galactic x-coordinate of the crosshairs in the
 \                       \ galaxy chart (and, most of the time, the selected
 \                       \ system's galactic x-coordinate)
-
+\
 \ .QQ10
-
+\
 \  SKIP 1               \ The galactic y-coordinate of the crosshairs in the
 \                       \ galaxy chart (and, most of the time, the selected
 \                       \ system's galactic y-coordinate)
-
+\
 \ .NOSTM
-
+\
 \  SKIP 1               \ The number of stardust particles shown on screen,
 \                       \ which is 18 (#NOST) for normal space, and 3 for
 \                       \ witchspace
+\
 
                         \ --- And replaced by the following: -------------------
 
@@ -2507,9 +2520,9 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
                         \ --- Original Acornsoft code removed from Elite-A: ----
 
 \  SKIP 1               \ This byte appears to be unused
-
+\
 \ .COMC
-
+\
 \  SKIP 1               \ The colour of the dot on the compass
 \                       \
 \                       \   * &F0 = the object in the compass is in front of us,
@@ -2517,9 +2530,9 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
 \                       \
 \                       \   * &FF = the object in the compass is behind us, so
 \                       \     the dot is green/cyan
-
+\
 \ .DNOIZ
-
+\
 \  SKIP 1               \ Sound on/off configuration setting
 \                       \
 \                       \   * 0 = sound is on (default)
@@ -2528,9 +2541,9 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
 \                       \
 \                       \ Toggled by pressing "S" when paused, see the DK4
 \                       \ routine for details
-
+\
 \ .DAMP
-
+\
 \  SKIP 1               \ Keyboard damping configuration setting
 \                       \
 \                       \   * 0 = damping is enabled (default)
@@ -2539,9 +2552,9 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
 \                       \
 \                       \ Toggled by pressing CAPS LOCK when paused, see the
 \                       \ DKS3 routine for details
-
+\
 \ .DJD
-
+\
 \  SKIP 1               \ Keyboard auto-recentre configuration setting
 \                       \
 \                       \   * 0 = auto-recentre is enabled (default)
@@ -2550,9 +2563,10 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
 \                       \
 \                       \ Toggled by pressing "A" when paused, see the DKS3
 \                       \ routine for details
-
+\
 \ .PATG
-
+\
+\
 \  SKIP 1               \ Configuration setting to show the author names on the
 \                       \ start-up screen and enable manual hyperspace mis-jumps
 \                       \
@@ -2569,9 +2583,10 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
 \                       \ "X", and during the next hyperspace, hold down CTRL to
 \                       \ force a mis-jump. See routine ee5 for the "AND PATG"
 \                       \ instruction that implements this logic
-
+\
+\
 \ .FLH
-
+\
 \  SKIP 1               \ Flashing console bars configuration setting
 \                       \
 \                       \   * 0 = static bars (default)
@@ -2580,9 +2595,9 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
 \                       \
 \                       \ Toggled by pressing "F" when paused, see the DKS3
 \                       \ routine for details
-
+\
 \ .JSTGY
-
+\
 \  SKIP 1               \ Reverse joystick Y-channel configuration setting
 \                       \
 \                       \   * 0 = standard Y-channel (default)
@@ -2591,9 +2606,9 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
 \                       \
 \                       \ Toggled by pressing "Y" when paused, see the DKS3
 \                       \ routine for details
-
+\
 \ .JSTE
-
+\
 \  SKIP 1               \ Reverse both joystick channels configuration setting
 \                       \
 \                       \   * 0 = standard channels (default)
@@ -2602,9 +2617,9 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
 \                       \
 \                       \ Toggled by pressing "J" when paused, see the DKS3
 \                       \ routine for details
-
+\
 \ .JSTK
-
+\
 \  SKIP 1               \ Keyboard or joystick configuration setting
 \                       \
 \                       \   * 0 = keyboard (default)
@@ -2613,9 +2628,9 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
 \                       \
 \                       \ Toggled by pressing "K" when paused, see the DKS3
 \                       \ routine for details
-
+\
 \ .BSTK
-
+\
 \  SKIP 1               \ Bitstik configuration setting
 \                       \
 \                       \   * 0 = keyboard or joystick (default)
@@ -2624,9 +2639,9 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
 \                       \
 \                       \ Toggled by pressing "B" when paused, see the DKS3
 \                       \ routine for details
-
+\
 \ .CATF
-
+\
 \  SKIP 1               \ The disc catalogue flag
 \                       \
 \                       \ Determines whether a disc catalogue is currently in
@@ -2642,6 +2657,7 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
 \                       \ on-screen (column 17 is blank column in the middle
 \                       \ of the catalogue, between the two lists of filenames,
 \                       \ so it can be dropped without affecting the layout)
+\
 
                         \ --- And replaced by the following: -------------------
 
@@ -4562,16 +4578,19 @@ BRKV = P% - 2           \ The address of the destination address in the above
                         \ --- Original Acornsoft code removed from Elite-A: ----
 
 \  LDA INWK+31          \ Fetch the ship's exploding/killed state from byte #31
-
+\
+\
 \  AND #%00100000       \ If we are exploding then jump to MVD1 to remove it
 \  BNE MVD1             \ from the scanner permanently
-
+\
+\
 \  LDA INWK+31          \ Set bit 4 to keep the ship visible on the scanner
 \  ORA #%00010000
 \  STA INWK+31
-
+\
+\
 \ .MVD1
-
+\
 \  LDA INWK+31          \ Clear bit 4 to hide the ship on the scanner
 \  AND #%11101111
 \  STA INWK+31
@@ -6738,25 +6757,26 @@ LOAD_B% = LOAD% + P% - CODE%
 \  LDA CRGO             \ If our ship's cargo capacity is < 26 (i.e. we do not
 \  CMP #26              \ have a cargo bay extension), skip the following two
 \  BCC P%+7             \ instructions
-
+\
 \  LDA #107             \ We do have a cargo bay extension, so print recursive
 \  JSR plf2             \ token 107 ("LARGE CARGO{sentence case} BAY"), followed
 \                       \ by a newline and an indent of 6 characters
-
+\
+\
 \  LDA BST              \ If we don't have fuel scoops fitted, skip the
 \  BEQ P%+7             \ following two instructions
-
+\
 \  LDA #111             \ We do have a fuel scoops fitted, so print recursive
 \  JSR plf2             \ token 111 ("FUEL SCOOPS"), followed by a newline and
 \                       \ an indent of 6 characters
-
+\
 \  LDA ECM              \ If we don't have an E.C.M. fitted, skip the following
 \  BEQ P%+7             \ two instructions
-
+\
 \  LDA #108             \ We do have an E.C.M. fitted, so print recursive token
 \  JSR plf2             \ 108 ("E.C.M.SYSTEM"), followed by a newline and an
 \                       \ indent of 6 characters
-
+\
 \  LDA #113             \ We now cover the four pieces of equipment whose flags
 \  STA XX4              \ are stored in BOMB through BOMB+3, and whose names
 \                       \ correspond with text tokens 113 through 116:
@@ -6769,22 +6789,22 @@ LOAD_B% = LOAD% + P% - CODE%
 \                       \ We can print these out using a loop, so we set XX4 to
 \                       \ 113 as a counter (and we also set A as well, to pass
 \                       \ through to plf2)
-
+\
 \ .stqv
-
+\
 \  TAY                  \ Fetch byte BOMB+0 through BOMB+4 for values of XX4
 \  LDX BOMB-113,Y       \ from 113 through 117
-
+\
 \  BEQ P%+5             \ If it is zero then we do not own that piece of
 \                       \ equipment, so skip the next instruction
-
+\
 \  JSR plf2             \ Print the recursive token in A from 113 ("ENERGY
 \                       \ BOMB") through 116 ("GALACTIC HYPERSPACE "), followed
 \                       \ by a newline and an indent of 6 characters
-
+\
 \  INC XX4              \ Increment the counter (and A as well)
 \  LDA XX4
-
+\
 \  CMP #117             \ If A < 117, loop back up to stqv to print the next
 \  BCC stqv             \ piece of equipment
 
@@ -6877,22 +6897,22 @@ LOAD_B% = LOAD% + P% - CODE%
 
 \  LDX CNT              \ Set Y = the laser power for view X
 \  LDY LASER,X
-
+\
 \  CPY #128+POW         \ If the laser power for view X is not #POW+128 (beam
 \  BNE P%+4             \ laser), skip the next LDA instruction
-
+\
 \  LDA #104             \ This sets A = 104 if the laser in view X is a beam
 \                       \ laser (token 104 is "BEAM LASER")
-
+\
 \  CPY #Armlas          \ If the laser power for view X is not #Armlas (military
 \  BNE P%+4             \ laser), skip the next LDA instruction
-
+\
 \  LDA #117             \ This sets A = 117 if the laser in view X is a military
 \                       \ laser (token 117 is "MILITARY  LASER")
-
+\
 \  CPY #Mlas            \ If the laser power for view X is not #Mlas (mining
 \  BNE P%+4             \ laser), skip the next LDA instruction
-
+\
 \  LDA #118             \ This sets A = 118 if the laser in view X is a mining
 \                       \ laser (token 118 is "MINING  LASER")
 
@@ -6957,10 +6977,11 @@ LOAD_B% = LOAD% + P% - CODE%
                         \ --- Original Acornsoft code removed from Elite-A: ----
 
 \  JSR plf              \ Print the text token in A followed by a newline
-
+\
+\
 \  LDX #6               \ Move the text cursor to column 6
 \  STX XC
-
+\
 \  RTS                  \ Return from the subroutine
 
                         \ --- And replaced by the following: -------------------
@@ -8526,18 +8547,20 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 \  LDA #0               \ Set R = P = 0 for the low bytes in the call to the ADD
 \  STA R                \ routine below
 \  STA P
-
+\
+\
 \  LDA #8               \ Set S = 8, which is the value of the centre of the
 \  STA S                \ roll indicator
-
+\
 \  LDA ALP1             \ Fetch the roll angle alpha as a value between 0 and
 \  LSR A                \ 31, and divide by 4 to get a value of 0 to 7
 \  LSR A
-
+\
 \  ORA ALP2             \ Apply the roll sign to the value, and flip the sign,
 \  EOR #%10000000       \ so it's now in the range -7 to +7, with a positive
 \                       \ roll angle alpha giving a negative value in A
-
+\
+\
 \  JSR ADD              \ We now add A to S to give us a value in the range 1 to
 \                       \ 15, which we can pass to DIL2 to draw the vertical
 \                       \ bar on the indicator at this position. We use the ADD
@@ -8565,18 +8588,19 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
 \  LDA BETA             \ Fetch the pitch angle beta as a value between -8 and
 \                       \ +8
-
+\
 \  LDX BET1             \ Fetch the magnitude of the pitch angle beta, and if it
 \  BEQ P%+4             \ is 0 (i.e. we are not pitching), skip the next
 \                       \ instruction
-
+\
 \  SBC #1               \ The pitch angle beta is non-zero, so set A = A - 1
 \                       \ (the C flag is set by the call to DIL2 above, so we
 \                       \ don't need to do a SEC). This gives us a value of A
 \                       \ from -7 to +7 because these are magnitude-based
 \                       \ numbers with sign bits, rather than two's complement
 \                       \ numbers
-
+\
+\
 \  JSR ADD              \ We now add A to S to give us a value in the range 1 to
 \                       \ 15, which we can pass to DIL2 to draw the vertical
 \                       \ bar on the indicator at this position (see the JSR ADD
@@ -8745,7 +8769,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 \  LDA FSH              \ Draw the forward shield indicator using a range of
 \  JSR DILX             \ 0-255, and increment SC to point to the next indicator
 \                       \ (the aft shield)
-
+\
 \  LDA ASH              \ Draw the aft shield indicator using a range of 0-255,
 \  JSR DILX             \ and increment SC to point to the next indicator (the
 \                       \ fuel level)
@@ -8847,20 +8871,21 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 \  LDA MCNT             \ A will be non-zero for 8 out of every 16 main loop
 \  AND #%00001000       \ counts, when bit 4 is set, so this is what we use to
 \                       \ flash the "danger" colour
-
+\
 \  AND FLH              \ A will be zeroed if flashing colours are disabled
-
+\
+\
 \  BEQ P%+4             \ If A is zero, skip to the LDA instruction below
-
+\
 \  TXA                  \ Otherwise flashing colours are enabled and it's the
 \                       \ main loop iteration where we flash them, so set A to
 \                       \ colour 2 (yellow/white) and use the BIT trick below to
 \                       \ return from the subroutine
-
+\
 \  EQUB &2C             \ Skip the next instruction by turning it into
 \                       \ &2C &A9 &0F, or BIT &0FA9, which does nothing apart
 \                       \ from affect the flags
-
+\
 \  LDA #&0F             \ Set A to dashboard colour 1 (red)
 
                         \ --- And replaced by the following: -------------------
@@ -8942,18 +8967,18 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 \  CMP T1               \ If A >= T1 then we have passed the threshold where we
 \  BCS DL30             \ change bar colour, so jump to DL30 to set A to the
 \                       \ "high value" colour
-
+\
 \  LDA K+1              \ Set A to K+1, the "low value" colour to use
-
+\
 \  BNE DL31             \ Jump down to DL31 (this BNE is effectively a JMP as A
 \                       \ will never be zero)
-
+\
 \ .DL30
-
+\
 \  LDA K                \ Set A to K, the "high value" colour to use
-
+\
 \ .DL31
-
+\
 \  STA COL              \ Store the colour of the indicator in COL
 
                         \ --- And replaced by the following: -------------------
@@ -10171,15 +10196,15 @@ LOAD_C% = LOAD% +P% - CODE%
 \  LDA LIL2+2           \ Flip bit 6 of LIL2+2 to change the EOR (SC),Y in LIL2
 \  EOR #%01000000       \ to an ORA (SC),Y (or back again)
 \  STA LIL2+2
-
+\
 \  LDA LIL3+2           \ Flip bit 6 of LIL3+2 to change the EOR (SC),Y in LIL3
 \  EOR #%01000000       \ to an ORA (SC),Y (or back again)
 \  STA LIL3+2
-
+\
 \  LDA LIL5+2           \ Flip bit 6 of LIL2+2 to change the EOR (SC),Y in LIL5
 \  EOR #%01000000       \ to an ORA (SC),Y (or back again)
 \  STA LIL5+2
-
+\
 \  LDA LIL6+2           \ Flip bit 6 of LIL2+2 to change the EOR (SC),Y in LIL6
 \  EOR #%01000000       \ to an ORA (SC),Y (or back again)
 \  STA LIL6+2
@@ -10233,11 +10258,13 @@ LOAD_C% = LOAD% +P% - CODE%
                         \ --- Original Acornsoft code removed from Elite-A: ----
 
 \ .HFS2
-
+\
 \  STA STP              \ Store the step size in A
-
+\
+\
 \  JSR TTX66            \ Clear the screen and draw a white border
-
+\
+\
 \  JSR HFS1             \ Call HFS1 below and then fall through into the same
 \                       \ routine, so this effectively runs HFS1 twice, and as
 \                       \ HFS1 draws 8 concentric rings, this means we draw 16
@@ -12021,7 +12048,7 @@ LOAD_D% = LOAD% + P% - CODE%
 \                       \ So this is why the value in CRGO is 2 higher than the
 \                       \ actual cargo bay size, i.e. it's 22 for the standard
 \                       \ 20-tonne bay, and 37 for the large 35-tonne bay
-
+\
 \  PLA                  \ Restore A from the stack
 
                         \ --- And replaced by the following: -------------------
@@ -12054,7 +12081,7 @@ LOAD_D% = LOAD% + P% - CODE%
 \                       \ If so, this sets the C flag (no room)
 \                       \
 \                       \ Otherwise it is clear (we have room)
-
+\
 \  PLA                  \ Restore A from the stack
 
                         \ --- End of removed code ------------------------------
@@ -12628,9 +12655,9 @@ LOAD_D% = LOAD% + P% - CODE%
 \                       \ The following code doesn't appear to be called from
 \                       \ anywhere, so it's presumably a remnant of code from
 \                       \ an earlier version of the extended description code
-
+\
 \  LDX ZZ               \ Fetch the system number from ZZ into X
-
+\
 \ \LDY #LO(PTEXT)       \ These instructions are commented out in the original
 \ \STY INWK             \ source. The variable PTEXT doesn't exist, so it isn't
 \ \LDY #HI(PTEXT)-1     \ entirely obvious what this code does, though it looks
@@ -12654,7 +12681,7 @@ LOAD_D% = LOAD% + P% - CODE%
 \ \JSR TT27
 \ \LDY INWK+2
 \ \JMP PDT2
-
+\
 \  RTS                  \ Return from the subroutine
 
                         \ --- End of removed code ------------------------------
@@ -13122,10 +13149,10 @@ LOAD_D% = LOAD% + P% - CODE%
 \  LDX #0               \ Set the high bytes of K3(1 0) and K4(1 0) to 0
 \  STX K4+1
 \  STX K3+1
-
+\
 \  INX                  \ Set LSP = 1 to reset the ball line heap
 \  STX LSP
-
+\
 \  LDX #2               \ Set STP = 2, the step size for the circle
 \  STX STP
 
@@ -13694,22 +13721,22 @@ LOAD_D% = LOAD% + P% - CODE%
 
 \ \JSRTT162             \ This instruction is commented out in the original
 \                       \ source
-
+\
 \  LDA #205             \ Print recursive token 45 ("SELL")
 \  JSR TT27
-
+\
 \  LDA #206             \ Print extended token 206 ("{all caps}(Y/N)?")
 \  JSR DETOK
-
+\
 \  JSR gnum             \ Call gnum to get a number from the keyboard, which
 \                       \ will be the number of the item we want to sell,
 \                       \ returning the number entered in A and R, and setting
 \                       \ the C flag if the number is bigger than the available
 \                       \ amount of this item in QQ25
-
+\
 \  BEQ TT212            \ If no number was entered, jump to TT212 to move on to
 \                       \ the next item
-
+\
 \  BCS NWDAV4           \ If the number entered was too big, jump to NWDAV4 to
 \                       \ print an "ITEM?" error, make a beep and rejoin the
 \                       \ routine at NWDAVxx above
@@ -13745,7 +13772,7 @@ LOAD_D% = LOAD% + P% - CODE%
 
 \  LDA QQ24             \ Set Q to the item's price / 4
 \  STA Q
-
+\
 \  JSR GCASH            \ Call GCASH to calculate
 \                       \
 \                       \   (Y X) = P * Q * 4
@@ -13753,7 +13780,7 @@ LOAD_D% = LOAD% + P% - CODE%
 \                       \ which will be the total price we make from this sale
 \                       \ (as P contains the quantity we're selling and Q
 \                       \ contains the item's price / 4)
-
+\
 \  JSR MCASH            \ Add (Y X) cash to the cash pot in CASH
 
                         \ --- And replaced by the following: -------------------
@@ -13828,7 +13855,7 @@ LOAD_D% = LOAD% + P% - CODE%
 \  LDA CRGO             \ If our ship's cargo capacity is < 26 (i.e. we do not
 \  CMP #26              \ have a cargo bay extension), skip the following two
 \  BCC P%+7             \ instructions
-
+\
 \  LDA #107             \ We do have a cargo bay extension, so print recursive
 \  JSR TT27             \ token 107 ("LARGE CARGO{sentence case} BAY")
 
@@ -15299,22 +15326,22 @@ LOAD_D% = LOAD% + P% - CODE%
 \  LDX #63              \ Before loading the flight code, we need to copy the
 \                       \ two-letter token table from QQ16 to QQ16_FLIGHT, so
 \                       \ we set a counter in X for the 64 bytes in the table
-
+\
 \ .eny1
-
+\
 \  LDA QQ16,X           \ Copy the X-th byte of QQ16 to the X-th byte of
 \  STA QQ16_FLIGHT,X    \ QQ16_FLIGHT
-
+\
 \  DEX                  \ Decrement the loop counter
-
+\
 \  BPL eny1             \ Loop back to copy the next byte until we have copied
 \                       \ the whole table
-
+\
 \  JSR CATD             \ Call CATD to reload the disc catalogue
-
+\
 \  LDX #LO(RDLI)        \ Set (Y X) to point to RDLI ("R.D.CODE")
 \  LDY #HI(RDLI)
-
+\
 \  JMP OSCLI            \ Call OSCLI to run the OS command in RDLI, which *RUNs
 \                       \ the main flight code in D.CODE, returning from the
 \                       \ subroutine using a tail call
@@ -15546,7 +15573,7 @@ LOAD_D% = LOAD% + P% - CODE%
                         \ --- Original Acornsoft code removed from Elite-A: ----
 
 \ .bay
-
+\
 \  JMP BAY              \ Go to the docking bay (i.e. show the Status Mode
 \                       \ screen)
 
@@ -15587,7 +15614,8 @@ LOAD_D% = LOAD% + P% - CODE%
 \  LDA tek              \ Fetch the tech level of the current system from tek
 \  CLC                  \ and add 3 (the tech level is stored as 0-14, so A is
 \  ADC #3               \ now set to between 3 and 17)
-
+\
+\
 \  CMP #12              \ If A >= 12 then set A = 14, so A is now set to between
 \  BCC P%+4             \ 3 and 14
 \  LDA #14
@@ -15822,7 +15850,7 @@ LOAD_D% = LOAD% + P% - CODE%
 \  BEQ pres             \ to show the error "Large Cargo Bay Present", beep and
 \                       \ exit to the docking bay (i.e. show the Status Mode
 \                       \ screen)
-
+\
 \  STX CRGO             \ Otherwise we just scored ourselves a large cargo bay,
 \                       \ so update our current cargo capacity in CRGO to 37
 
@@ -15860,11 +15888,13 @@ LOAD_D% = LOAD% + P% - CODE%
 \  JSR qv               \ Print a menu listing the four views, with a "View ?"
 \                       \ prompt, and ask for a view number, which is returned
 \                       \ in X (which now contains 0-3)
-
+\
+\
 \  LDA #POW             \ Call refund with A set to the power of the new pulse
 \  JSR refund           \ laser to install the new laser and process a refund if
 \                       \ we already have a laser fitted to this view
-
+\
+\
 \  LDA #4               \ Set A to 4 as we just overwrote the original value,
 \                       \ and we still need it set correctly so we can continue
 \                       \ through the conditional statements for all the other
@@ -15887,7 +15917,8 @@ LOAD_D% = LOAD% + P% - CODE%
 \  JSR qv               \ Print a menu listing the four views, with a "View ?"
 \                       \ prompt, and ask for a view number, which is returned
 \                       \ in X (which now contains 0-3)
-
+\
+\
 \  LDA #POW+128         \ Call refund with A set to the power of the new beam
 \  JSR refund           \ laser to install the new laser and process a refund if
 \                       \ we already have a laser fitted to this view
@@ -16069,33 +16100,33 @@ LOAD_D% = LOAD% + P% - CODE%
                         \ --- Original Acornsoft code removed from Elite-A: ----
 
 \  INY                  \ Increment Y to recursive token 117 ("MILITARY  LASER")
-
+\
 \  CMP #12              \ If A is not 12 (i.e. the item we've just bought is not
 \  BNE et10             \ a military laser), skip to et10
-
+\
 \  JSR qv               \ Print a menu listing the four views, with a "View ?"
 \                       \ prompt, and ask for a view number, which is returned
 \                       \ in X (which now contains 0-3)
-
+\
 \  LDA #Armlas          \ Call refund with A set to the power of the new
 \  JSR refund           \ military laser to install the new laser and process a
 \                       \ refund if we already have a laser fitted to this view
-
+\
 \ .et10
-
+\
 \  INY                  \ Increment Y to recursive token 118 ("MINING  LASER")
-
+\
 \  CMP #13              \ If A is not 13 (i.e. the item we've just bought is not
 \  BNE et11             \ a mining laser), skip to et11
-
+\
 \  JSR qv               \ Print a menu listing the four views, with a "View ?"
 \                       \ prompt, and ask for a view number, which is returned
 \                       \ in X (which now contains 0-3)
-
+\
 \  LDA #Mlas            \ Call refund with A set to the power of the new mining
 \  JSR refund           \ laser to install the new laser and process a refund if
 \                       \ we already have a laser fitted to this view
-
+\
 \ .et11
 
                         \ --- And replaced by the following: -------------------
@@ -16364,7 +16395,7 @@ LOAD_D% = LOAD% + P% - CODE%
                         \ --- Original Acornsoft code removed from Elite-A: ----
 
 \  LDY YC               \ Update Y with the incremented counter in YC
-
+\
 \  CPY #20              \ If Y < 20 then loop back up to qv1 to print the next
 \  BCC qv1              \ view in the menu
 
@@ -16396,13 +16427,13 @@ LOAD_D% = LOAD% + P% - CODE%
 
 \  CMP #4               \ If the number entered in A < 4, then it is a valid
 \  BCC qv3              \ view number, so jump down to qv3 as we are done
-
+\
 \  JSR CLYNS            \ Otherwise we didn't get a valid view number, so clear
 \                       \ the bottom three text rows of the upper screen, and
 \                       \ move the text cursor to column 1 on row 21
-
+\
 \  JMP qv2              \ Jump back to qv2 to try again
-
+\
 \ .qv3
 
                         \ --- And replaced by the following: -------------------
@@ -16882,11 +16913,11 @@ LOAD_E% = LOAD% + P% - CODE%
 
 \  DEX                  \ If token > 6, skip the following 3 instructions
 \  BNE P%+7
-
+\
 \  LDA #%10000000       \ This token is control code 6 (switch to Sentence
 \  STA QQ17             \ Case), so set bit 7 of QQ17 to switch to Sentence Case
 \  RTS                  \ and return from the subroutine as we are done
-
+\
 \  DEX                  \ If token > 8, skip the following 2 instructions
 \  DEX
 \  BNE P%+5
@@ -17337,7 +17368,7 @@ LOAD_E% = LOAD% + P% - CODE%
 \  STA V                \ location QQ18
 \  LDA #HI(QQ18)
 \  STA V+1
-
+\
 \  LDY #0               \ Set a counter Y to point to the character offset
 \                       \ as we scan through the table
 
@@ -17895,7 +17926,7 @@ LOAD_E% = LOAD% + P% - CODE%
 \  ASL A
 \  ASL A
 \  STA T
-
+\
 \  LDA #49              \ Set SC = 49 - T
 \  SBC T                \        = 48 + 1 - (X * 8)
 \  STA SC
@@ -19409,18 +19440,21 @@ LOAD_F% = LOAD% + P% - CODE%
 \  BEQ SAL8             \ jump down to SQL8 to draw remaining the missiles, as
 \                       \ the rest of them are present and should be drawn in
 \                       \ green/cyan
-
+\
+\
 \  LDY #0               \ Draw the missile indicator at position X in black
 \  JSR MSBAR
-
+\
+\
 \  DEX                  \ Decrement the counter to point to the next missile
-
+\
 \  BNE ss               \ Loop back to ss if we still have missiles to draw
-
+\
 \  RTS                  \ Return from the subroutine
-
+\
 \ .SAL8
-
+\
+\
 \  LDY #&EE             \ Draw the missile indicator at position X in green/cyan
 \  JSR MSBAR
 
@@ -19490,7 +19524,7 @@ LOAD_F% = LOAD% + P% - CODE%
                         \ --- Original Acornsoft code removed from Elite-A: ----
 
 \ .DORND2
-
+\
 \  CLC                  \ This ensures that bit 0 of r2 is 0
 
                         \ --- End of removed code ------------------------------
@@ -19567,12 +19601,12 @@ LOAD_F% = LOAD% + P% - CODE%
 \                       \ (or to put it another way, if the counter hasn't
 \                       \ reached zero, jump down to MLOOP, skipping all the
 \                       \ following checks)
-
+\
 \ .ytq
-
+\
 \  JMP MLOOP            \ Jump down to MLOOP to do some end-of-loop tidying and
 \                       \ restart the main loop
-
+\
 \                       \ We only get here once every 256 iterations of the
 \                       \ main loop. If we aren't in witchspace and don't
 \                       \ already have 3 or more asteroids in our local bubble,
@@ -19585,37 +19619,42 @@ LOAD_F% = LOAD% + P% - CODE%
 \                       \ be a Cobra Mk III trader, and the other 50% of the
 \                       \ time it will either be an asteroid (98.5% chance) or,
 \                       \ very rarely, a cargo canister (1.5% chance)
-
+\
+\
 \  LDA MJ               \ If we are in witchspace following a mis-jump, skip the
 \  BNE ytq              \ following by jumping down to MLOOP (via ytq above)
-
+\
+\
 \  JSR DORND            \ Set A and X to random numbers
-
+\
+\
 \  CMP #35              \ If A >= 35 (87% chance), jump down to MLOOP to skip
 \  BCS MLOOP            \ the following
-
+\
+\
 \  LDA MANY+AST         \ If we already have 3 or more asteroids in the local
 \  CMP #3               \ bubble, jump down to MLOOP to skip the following
 \  BCS MLOOP
-
+\
+\
 \  JSR ZINF             \ Call ZINF to reset the INWK ship workspace
-
+\
 \  LDA #38              \ Set z_hi = 38 (far away)
 \  STA INWK+7
-
+\
 \  JSR DORND            \ Set A, X and C flag to random numbers
-
+\
 \  STA INWK             \ Set x_lo = random
-
+\
 \  STX INWK+3           \ Set y_lo = random
-
+\
 \  AND #%10000000       \ Set x_sign = bit 7 of x_lo
 \  STA INWK+2
-
+\
 \  TXA                  \ Set y_sign = bit 7 of y_lo
 \  AND #%10000000
 \  STA INWK+5
-
+\
 \  ROL INWK+1           \ Set bit 2 of x_hi to the C flag, which is random, so
 \  ROL INWK+1           \ this randomly moves us slightly off-centre
 
@@ -19664,14 +19703,16 @@ LOAD_F% = LOAD% + P% - CODE%
 \  LDX GNTMP            \ If the laser temperature in GNTMP is non-zero,
 \  BEQ EE20             \ decrement it (i.e. cool it down a bit)
 \  DEC GNTMP
-
+\
 \ .EE20
-
+\
+\
 \  JSR DIALS            \ Call DIALS to update the dashboard
-
+\
+\
 \  LDA QQ11             \ If this is a space view, skip the following two
 \  BEQ P%+7             \ instructions (i.e. jump to JSR TT17 below)
-
+\
 \  LDY #2               \ Wait for 2/50 of a second (0.04 seconds), to slow the
 \  JSR DELAY            \ main loop down a bit
 
@@ -20272,42 +20313,46 @@ ENDIF
 
 \ \JSR BELL             \ This instruction is commented out in the original
 \                       \ source. It would make a standard system beep
-
+\
+\
 \                       \ The checksum CHK is correct, so now we check whether
 \                       \ CHK2 = CHK EOR A9, and if this check fails, bit 7 of
 \                       \ the competition flags at COK gets set, to indicate
 \                       \ to Acornsoft via the competition code that there has
 \                       \ been some hacking going on with this competition entry
-
+\
 \  EOR #&A9             \ X = checksum EOR &A9
 \  TAX
-
+\
 \  LDA COK              \ Set A to the competition flags in COK
-
+\
 \  CPX CHK2             \ If X = CHK2, then skip the next instruction
 \  BEQ tZ
-
+\
 \  ORA #%10000000       \ Set bit 7 of A to indicate this commander file has
 \                       \ been tampered with
-
+\
 \ .tZ
-
+\
+\
 \ IF _STH_DISC
-
+\
 \  ORA #%00100000       \ Set bit 5 of A to denote that this is the disc version
 \                       \ with the refund bug fixed (in versions before the bug
 \                       \ was fixed, bit 2 is set)
-
+\
 \ ELIF _IB_DISC
-
+\
 \  ORA #%00000100       \ Set bit 2 of A to denote that this is the disc version
 \                       \ but before the refund bug was fixed (in versions after
 \                       \ the bug was fixed, bit 5 is set)
-
+\
 \ ENDIF
-
+\
+\
 \  STA COK              \ Store the updated competition flags in COK
-
+\
+\
 \  RTS                  \ Return from the subroutine
 
                         \ --- And replaced by the following: -------------------
@@ -20369,12 +20414,12 @@ ENDIF
 \  BEQ tiwe             \ jumps to tiwe if the value is unchanged, otherwise it
 \                       \ crashes the game with the following (as presumably
 \                       \ the game code has been tampered with)
-
+\
 \  LDA #&10             \ Modify the STA DELTA instruction in RES2 to &10 &FE,
 \  STA modify+2         \ which is a BPL P%-2 instruction, to create an infinite
 \  LDA #&FE             \ loop and hang the game
 \  STA modify+3
-
+\
 \ .tiwe
 
                         \ --- And replaced by the following: -------------------
@@ -21015,15 +21060,15 @@ ENDIF
 \  JSR GTDRV            \ Get an ASCII disc drive drive number from the keyboard
 \                       \ in A, setting the C flag if an invalid drive number
 \                       \ was entered
-
+\
 \  BCS DELT-1           \ If the C flag is set, then an invalid drive number was
 \                       \ entered, so return from the subroutine (as DELT-1
 \                       \ contains an RTS)
-
+\
 \  STA CTLI+1           \ Store the drive number in the second byte of the
 \                       \ command string at CTLI, so it overwrites the "0" in
 \                       \ ".0" with the drive number to catalogue
-
+\
 \  STA DTW7             \ Store the drive number in DTW7, so printing extended
 \                       \ token 4 will show the correct drive number (as token 4
 \                       \ contains the {drive number} jump code, which calls
@@ -21166,9 +21211,9 @@ ENDIF
 
 \  LDA INWK+4,X         \ Copy the X-th byte of INWK+4 to the X-th byte of
 \  STA DELI+5,X         \ DELI+5
-
+\
 \  DEX                  \ Decrement the loop counter
-
+\
 \  BNE DELL1            \ Loop back to DELL1 to copy the next character until we
 \                       \ have copied the whole filename
 
@@ -21315,7 +21360,7 @@ ENDIF
                         \ --- Original Acornsoft code removed from Elite-A: ----
 
 \  JSR ZEBC             \ Call ZEBC to zero-fill pages &B and &C
-
+\
 \  TSX                  \ Transfer the stack pointer to X and store it in stack,
 \  STX stack            \ so we can restore it in the MRBRK routine
 
@@ -21342,38 +21387,38 @@ ENDIF
 \                       \   3. Catalogue
 \                       \   4. Delete A File
 \                       \   5. Exit
-
+\
 \  JSR t                \ Scan the keyboard until a key is pressed, returning
 \                       \ the ASCII code in A and X
-
+\
 \  CMP #'1'             \ If A < ASCII "1", jump to SVEX to exit as the key
 \  BCC SVEX             \ press doesn't match a menu option
-
+\
 \  CMP #'4'             \ If "4" was pressed, jump to DELT to process option 4
 \  BEQ DELT             \ (delete a file)
-
+\
 \  BCS SVEX             \ If A >= ASCII "4", jump to SVEX to exit as the key
 \                       \ press is either option 5 (exit), or it doesn't match a
 \                       \ menu option (as we already checked for "4" above)
-
+\
 \  CMP #'2'             \ If A >= ASCII "2" (i.e. save or catalogue), skip to
 \  BCS SV1              \ SV1
-
+\
 \  JSR GTNMEW           \ If we get here then option 1 (load) was chosen, so
 \                       \ call GTNMEW to fetch the name of the commander file
 \                       \ to load (including drive number and directory) into
 \                       \ INWK
-
+\
 \  JSR LOD              \ Call LOD to load the commander file
-
+\
 \  JSR TRNME            \ Transfer the commander filename from INWK to NA%
-
+\
 \  SEC                  \ Set the C flag to indicate we loaded a new commander
 \  BCS SVEX+1           \ file, and return from the subroutine (as SVEX+1
 \                       \ contains an RTS)
-
+\
 \ .SV1
-
+\
 \  BNE CAT              \ We get here following the CMP #'2' above, so this
 \                       \ jumps to CAT if option 2 was not chosen - in other
 \                       \ words, if option 3 (catalogue) was chosen
@@ -21444,7 +21489,8 @@ ENDIF
                         \ --- Original Acornsoft code removed from Elite-A: ----
 
 \  LSR SVC              \ Halve the save count value in SVC
-
+\
+\
 \  LDA #3               \ Print extended token 3 ("COMPETITION NUMBER:")
 \  JSR DETOK
 
@@ -21479,32 +21525,36 @@ ENDIF
                         \ --- Original Acornsoft code removed from Elite-A: ----
 
 \  PHA                  \ Store the checksum on the stack
-
+\
 \  ORA #%10000000       \ Set K = checksum with bit 7 set
 \  STA K
-
+\
 \  EOR COK              \ Set K+2 = K EOR COK (the competition flags)
 \  STA K+2
-
+\
 \  EOR CASH+2           \ Set K+1 = K+2 EOR CASH+2 (the third cash byte)
 \  STA K+1
-
+\
 \  EOR #&5A             \ Set K+3 = K+1 EOR &5A EOR TALLY+1 (the high byte of
 \  EOR TALLY+1          \ the kill tally)
 \  STA K+3
-
+\
+\
 \  CLC                  \ Clear the C flag so the call to BPRNT does not include
 \                       \ a decimal point
-
+\
+\
 \  JSR BPRNT            \ Print the competition number stored in K to K+3. The
 \                       \ value of U might affect how this is printed, and as
 \                       \ it's a temporary variable in zero page that isn't
 \                       \ reset by ZERO, it might have any value, but as the
 \                       \ competition code is a 10-digit number, this just means
 \                       \ it may or may not have an extra space of padding
-
+\
+\
 \  JSR TT67             \ Print a newline
-
+\
+\
 \  PLA                  \ Restore the checksum from the stack
 
                         \ --- End of removed code ------------------------------
@@ -21744,13 +21794,13 @@ ENDIF
                         \ --- Original Acornsoft code removed from Elite-A: ----
 
 \ .LOR
-
+\
 \  SEC                  \ Set the C flag
-
+\
 \  RTS                  \ Return from the subroutine
-
+\
 \ .ELT2F
-
+\
 \  BRK                  \ The error that is printed if we try to load an
 \  EQUS "IIllegal "     \ invalid commander file with bit 7 of byte #0 set
 \  EQUS "ELITE II file" \ (the spelling mistake is in the original source)
@@ -22367,12 +22417,12 @@ ENDIF
 \  BEQ DK9              \ keyboard rather than the joystick, so jump to DK9 to
 \                       \ make sure the Bitstik is disabled as well (DK9 then
 \                       \ jumps to DK4 below)
-
+\
 \  LDX #1               \ Call DKS2 to fetch the value of ADC channel 1 (the
 \  JSR DKS2             \ joystick X value) into (A X), and OR A with 1. This
 \  ORA #1               \ ensures that the high byte is at least 1, and then we
 \  STA JSTX             \ store the result in JSTX
-
+\
 \  LDX #2               \ Call DKS2 to fetch the value of ADC channel 2 (the
 \  JSR DKS2             \ joystick Y value) into (A X), and EOR A with JSTGY.
 \  EOR JSTGY            \ JSTGY will be &FF if the game is configured to
@@ -22500,18 +22550,20 @@ ENDIF
 
 \  CPX #&64             \ If "B" is not being pressed, skip to DK7
 \  BNE nobit
-
+\
+\
 \  LDA BSTK             \ Toggle the value of BSTK between 0 and &FF
 \  EOR #&FF
 \  STA BSTK
-
+\
 \  STA JSTK             \ Configure JSTK to the same value, so when the Bitstik
 \                       \ is enabled, so is the joystick
-
+\
 \  STA JSTE             \ Configure JSTE to the same value, so when the Bitstik
 \                       \ is enabled, the joystick is configured with reversed
 \                       \ channels
-
+\
+\
 \ .nobit
 
                         \ --- End of removed code ------------------------------
@@ -22548,11 +22600,11 @@ ENDIF
                         \ --- Original Acornsoft code removed from Elite-A: ----
 
 \ .DK9
-
+\
 \  STA BSTK             \ DK9 is called from DOKEY using a BEQ, so we know A is
 \                       \ 0, so this disables the Bitstik and switched to
 \                       \ keyboard or joystick
-
+\
 \  BEQ DK4              \ Jump back to DK4 in DOKEY (this BEQ is effectively a
 \                       \ JMP as A is always zero)
 
@@ -27307,11 +27359,7 @@ LOAD_G% = LOAD% + P% - CODE%
  JSR DETOK
  JSR NLIN4
 
-                        \ --- Code added for Elite-A: --------------------------
-
  JSR vdu_80
-
-                        \ --- End of added code --------------------------------
 
  LDA QQ26
  EOR QQ0
@@ -27581,8 +27629,6 @@ LOAD_G% = LOAD% + P% - CODE%
  JSR DORND
  STA QQ26
 
-                        \ --- Code added for Elite-A: --------------------------
-
  LDX #&00
  STX XX4
 
@@ -27624,8 +27670,6 @@ LOAD_G% = LOAD% + P% - CODE%
  TAX
  CMP #&3F
  BCC d_31d8
-
-                        \ --- End of added code --------------------------------
 
 .stay_quit
 
@@ -29728,7 +29772,7 @@ ENDMACRO
 \  EQUB VE              \ Token 113:    ""
 \                       \
 \                       \ Encoded as:   ""
-
+\
 \  EQUB VE              \ Token 114:    ""
 \                       \
 \                       \ Encoded as:   ""
