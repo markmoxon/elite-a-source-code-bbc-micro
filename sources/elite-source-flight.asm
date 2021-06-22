@@ -2579,8 +2579,6 @@ LOAD_A% = LOAD%
 \
 \  LDA #0               \ The "cancel docking computer" key is bring pressed,
 \  STA auto             \ so turn it off by setting auto to 0
-\
-\ .MA78
 
                         \ --- And replaced by the following: -------------------
 
@@ -2595,9 +2593,9 @@ LOAD_A% = LOAD%
 
  STA auto
 
-.MA78
-
                         \ --- End of replacement code --------------------------
+
+.MA78
 
  LDA KY13               \ If ESCAPE is being pressed and we have an escape pod
  AND ESCP               \ fitted, keep going, otherwise jump to noescp to skip
@@ -2719,7 +2717,6 @@ LOAD_A% = LOAD%
 
                         \ --- Original Acornsoft code removed from Elite-A: ----
 
-\
 \  AND #%11111010       \ LASCT will be set to 0 for beam lasers, and to the
 \  STA LASCT            \ laser power AND %11111010 for pulse lasers, which
 \                       \ comes to 10 (as pulse lasers have a power of 15). See
@@ -3977,83 +3974,6 @@ LOAD_A% = LOAD%
 
 .MA33
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
-
-\  CMP #20              \ If this is the 20th iteration in this block of 32,
-\  BNE MA23             \ do the following, otherwise jump to MA23 to skip the
-\                       \ sun altitude check
-\
-\  LDA #30              \ Set CABTMP to 30, the cabin temperature in deep space
-\  STA CABTMP           \ (i.e. one notch on the dashboard bar)
-\
-\  LDA SSPR             \ If we are inside the space station safe zone, jump to
-\  BNE MA23             \ MA23 to skip the following, as we can't have both the
-\                       \ sun and space station at the same time, so we clearly
-\                       \ can't be flying near the sun
-\
-\  LDY #NI%             \ Set Y to NI%, which is the offset in K% for the sun's
-\                       \ data block, as the second block at K% is reserved for
-\                       \ the sun (or space station)
-\
-\  JSR MAS2             \ Call MAS2 to calculate the largest distance to the
-\  BNE MA23             \ sun in any of the three axes, and if it's non-zero,
-\                       \ jump to MA23 to skip the following, as we are too far
-\                       \ from the sun for scooping or temperature changes
-\
-\  JSR MAS3             \ Set A = x_hi^2 + y_hi^2 + z_hi^2, so using Pythagoras
-\                       \ we now know that A now contains the square of the
-\                       \ distance between our ship (at the origin) and the
-\                       \ heart of the sun at (x_hi, y_hi, z_hi)
-\
-\  EOR #%11111111       \ Invert A, so A is now small if we are far from the
-\                       \ sun and large if we are close to the sun, in the
-\                       \ range 0 = far away to &FF = extremely close, ouch,
-\                       \ hot, hot, hot!
-\
-\  ADC #30              \ Add the minimum cabin temperature of 30, so we get
-\                       \ one of the following:
-\                       \
-\                       \   * If the C flag is clear, A contains the cabin
-\                       \     temperature, ranging from 30 to 255, that's hotter
-\                       \     the closer we are to the sun
-\                       \
-\                       \   * If the C flag is set, the addition has rolled over
-\                       \     and the cabin temperature is over 255
-\
-\  STA CABTMP           \ Store the updated cabin temperature
-\
-\  BCS MA28             \ If the C flag is set then jump to MA28 to die, as
-\                       \ our temperature is off the scale
-\
-\  CMP #&E0             \ If the cabin temperature < 224 then jump to MA23 to
-\  BCC MA23             \ to skip fuel scooping, as we aren't close enough
-\
-\  LDA BST              \ If we don't have fuel scoops fitted, jump to BA23 to
-\  BEQ MA23             \ skip fuel scooping, as we can't scoop without fuel
-\                       \ scoops
-\
-\  LDA DELT4+1          \ We are now successfully fuel scooping, so it's time
-\  LSR A                \ to work out how much fuel we're scooping. Fetch the
-\                       \ high byte of DELT4, which contains our current speed
-\                       \ divided by 4, and halve it to get our current speed
-\                       \ divided by 8 (so it's now a value between 1 and 5, as
-\                       \ our speed is normally between 1 and 40). This gives
-\                       \ us the amount of fuel that's being scooped in A, so
-\                       \ the faster we go, the more fuel we scoop, and because
-\                       \ the fuel levels are stored as 10 * the fuel in light
-\                       \ years, that means we just scooped between 0.1 and 0.5
-\                       \ light years of free fuel
-\
-\  ADC QQ14             \ Set A = A + the current fuel level * 10 (from QQ14)
-\
-\  CMP #70              \ If A > 70 then set A = 70 (as 70 is the maximum fuel
-\  BCC P%+4             \ level, or 7.0 light years)
-\  LDA #70
-\
-\  STA QQ14             \ Store the updated fuel level in QQ14
-
-                        \ --- And replaced by the following: -------------------
-
  CMP #20                \ If this is the 20th iteration in this block of 32,
  BNE MA23               \ do the following, otherwise jump to MA23 to skip the
                         \ sun altitude check
@@ -4121,13 +4041,21 @@ LOAD_A% = LOAD%
 
  ADC QQ14               \ Set A = A + the current fuel level * 10 (from QQ14)
 
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
+\  CMP #70              \ If A > 70 then set A = 70 (as 70 is the maximum fuel
+\  BCC P%+4             \ level, or 7.0 light years)
+\  LDA #70
+
+                        \ --- And replaced by the following: -------------------
+
  CMP new_range          \ AJD
  BCC P%+5
  LDA new_range
 
- STA QQ14               \ Store the updated fuel level in QQ14
-
                         \ --- End of replacement code --------------------------
+
+ STA QQ14               \ Store the updated fuel level in QQ14
 
  LDA #160               \ Set A to token 160 ("FUEL SCOOPS ON")
 
@@ -9788,66 +9716,6 @@ LOAD_C% = LOAD% +P% - CODE%
  CPX #100               \ This is a trader, so if X >= 100 (61% chance), return
  BCS TA22               \ from the subroutine (as TA22 contains an RTS)
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
-
-\ .TN1
-\
-\  LSR A                \ Extract bit 1 of the ship's NEWB flags into the C flag
-\  BCC TN2              \ and jump to TN2 if it is clear (i.e. if this is not a
-\                       \ bounty hunter)
-\
-\  LDX FIST             \ This is a bounty hunter, so check whether our FIST
-\  CPX #40              \ rating is < 40 (where 50 is a fugitive), and jump to
-\  BCC TN2              \ TN2 if we are not 100% evil
-\
-\  LDA NEWB             \ We are a fugitive or a bad offender, and this ship is
-\  ORA #%00000100       \ a bounty hunter, so set bit 2 of the ship's NEWB flags
-\  STA NEWB             \ to make it hostile
-\
-\  LSR A                \ Shift A right twice so the next test in TN2 will check
-\  LSR A                \ bit 2
-\
-\ .TN2
-\
-\  LSR A                \ Extract bit 2 of the ship's NEWB flags into the C flag
-\  BCS TN3              \ and jump to TN3 if it is set (i.e. if this ship is
-\                       \ hostile)
-\
-\  LSR A                \ The ship is not hostile, so extract bit 4 of the
-\  LSR A                \ ship's NEWB flags into the C flag, and jump to GOPL if
-\  BCC GOPL             \ it is clear (i.e. if this ship is not docking)
-\
-\  JMP DOCKIT           \ The ship is not hostile and is docking, so jump to
-\                       \ DOCKIT to apply the docking algorithm to this ship
-\
-\ .GOPL
-\
-\  JSR SPS1             \ The ship is not hostile and it is not docking, so call
-\                       \ SPS1 to calculate the vector to the planet and store
-\                       \ it in XX15
-\
-\  JMP TA151            \ Jump to TA151 to make the ship head towards the planet
-\
-\ .TN3
-\
-\  LSR A                \ Extract bit 2 of the ship's NEWB flags into the C flag
-\  BCC TN4              \ and jump to TN4 if it is clear (i.e. if this ship is
-\                       \ not a pirate)
-\
-\  LDA SSPR             \ If we are not inside the space station safe zone, jump
-\  BEQ TN4              \ to TN4
-\
-\                       \ If we get here then this is a pirate and we are inside
-\                       \ the space station safe zone
-\
-\  LDA INWK+32          \ Set bits 0 and 7 of the AI flag in byte #32 (has AI
-\  AND #%10000001       \ enabled and has an E.C.M.)
-\  STA INWK+32
-\
-\ .TN4
-
-                        \ --- And replaced by the following: -------------------
-
 .TN1
 
  LSR A                  \ Extract bit 1 of the ship's NEWB flags into the C flag
@@ -9879,6 +9747,34 @@ LOAD_C% = LOAD% +P% - CODE%
                         \ DOCKIT to apply the docking algorithm to this ship
 
 .GOPL
+
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
+\  JSR SPS1             \ The ship is not hostile and it is not docking, so call
+\                       \ SPS1 to calculate the vector to the planet and store
+\                       \ it in XX15
+\
+\  JMP TA151            \ Jump to TA151 to make the ship head towards the planet
+\
+\ .TN3
+\
+\  LSR A                \ Extract bit 2 of the ship's NEWB flags into the C flag
+\  BCC TN4              \ and jump to TN4 if it is clear (i.e. if this ship is
+\                       \ not a pirate)
+\
+\  LDA SSPR             \ If we are not inside the space station safe zone, jump
+\  BEQ TN4              \ to TN4
+\
+\                       \ If we get here then this is a pirate and we are inside
+\                       \ the space station safe zone
+\
+\  LDA INWK+32          \ Set bits 0 and 7 of the AI flag in byte #32 (has AI
+\  AND #%10000001       \ enabled and has an E.C.M.)
+\  STA INWK+32
+\
+\ .TN4
+
+                        \ --- And replaced by the following: -------------------
 
  LDY #&00               \ AJD
 
@@ -9992,8 +9888,6 @@ LOAD_C% = LOAD% +P% - CODE%
 \
 \  JMP TN6              \ Jump to TN6 to spawn the Worm and return from
 \                       \ the subroutine using a tail call
-\
-\ .TN7
 
                         \ --- And replaced by the following: -------------------
 
@@ -10001,9 +9895,9 @@ LOAD_C% = LOAD% +P% - CODE%
 
  JMP TN6                \ Jump to TN6 to AJD
 
-.TN7
-
                         \ --- End of replacement code --------------------------
+
+.TN7
 
  JSR DORND              \ Set A and X to random numbers
 
@@ -15495,15 +15389,15 @@ LOAD_D% = LOAD% + P% - CODE%
  LDA QQ19+1             \ Set K4 = the y-coordinate of the centre
  STA K4
 
+ LDX #0                 \ Set the high bytes of K3(1 0) and K4(1 0) to 0
+ STX K4+1
+ STX K3+1
+
+ INX                    \ Set LSP = 1 to reset the ball line heap
+ STX LSP
+
                         \ --- Original Acornsoft code removed from Elite-A: ----
 
-\  LDX #0               \ Set the high bytes of K3(1 0) and K4(1 0) to 0
-\  STX K4+1
-\  STX K3+1
-\
-\  INX                  \ Set LSP = 1 to reset the ball line heap
-\  STX LSP
-\
 \  LDX #2               \ Set STP = 2, the step size for the circle
 \  STX STP
 \
@@ -15514,13 +15408,6 @@ LOAD_D% = LOAD% + P% - CODE%
 \  RTS                  \ Return from the subroutine
 
                         \ --- And replaced by the following: -------------------
-
- LDX #0                 \ Set the high bytes of K3(1 0) and K4(1 0) to 0
- STX K4+1
- STX K3+1
-
- INX                    \ Set LSP = 1 to reset the ball line heap
- STX LSP
 
  INX                    \ Set STP = 2, the step size for the circle
  STX STP
@@ -16693,20 +16580,16 @@ LOAD_D% = LOAD% + P% - CODE%
 
 .Ghy
 
+ LDX GHYP               \ Fetch GHYP, which tells us whether we own a galactic
+ BEQ zZ+1               \ hyperdrive, and if it is zero, which means we don't,
+                        \ return from the subroutine (as zZ+1 contains an RTS)
+
                         \ --- Original Acornsoft code removed from Elite-A: ----
 
-\  LDX GHYP             \ Fetch GHYP, which tells us whether we own a galactic
-\  BEQ zZ+1             \ hyperdrive, and if it is zero, which means we don't,
-\                       \ return from the subroutine (as zZ+1 contains an RTS)
-\
 \  INX                  \ We own a galactic hyperdrive, so X is &FF, so this
 \                       \ instruction sets X = 0
 
                         \ --- And replaced by the following: -------------------
-
- LDX GHYP               \ Fetch GHYP, which tells us whether we own a galactic
- BEQ zZ+1               \ hyperdrive, and if it is zero, which means we don't,
-                        \ return from the subroutine (as zZ+1 contains an RTS)
 
  INC new_hold           \ AJD
 
@@ -24556,16 +24439,14 @@ LOAD_F% = LOAD% + P% - CODE%
 \
 \
 \  JSR DORND            \ Set A and X to random numbers
-\
-\  CMP #245             \ Set the C flag if X >= 245 (4% chance)
 
                         \ --- And replaced by the following: -------------------
 
  JSR rand_posn          \ AJD
 
- CMP #245               \ Set the C flag if X >= 245 (4% chance)
-
                         \ --- End of replacement code --------------------------
+
+ CMP #245               \ Set the C flag if X >= 245 (4% chance)
 
  ROL A                  \ Set bit 0 of A to the C flag (i.e. there's a 4%
                         \ chance of this ship having E.C.M.)
@@ -25153,58 +25034,24 @@ LOAD_F% = LOAD% + P% - CODE%
  INC EV                 \ Increase the extra vessels spawning counter, to
                         \ prevent the next attempt to spawn extra vessels
 
+ AND #3                 \ Set A = random number in the range 0-3, which we
+                        \ will now use to determine the type of ship
+
                         \ --- Original Acornsoft code removed from Elite-A: ----
 
-\  AND #3               \ Set A = random number in the range 0-3, which we
-\                       \ will now use to determine the type of ship
-\
 \  ADC #CYL2            \ Add A to #CYL2 (we know the C flag is clear as we
 \                       \ passed through the BCS above), so A is now one of the
 \                       \ lone bounty hunter ships, i.e. Cobra Mk III (pirate),
 \                       \ Asp Mk II, Python (pirate) or Fer-de-lance
-\
-\  TAY                  \ Copy the new ship type to Y
-\
-\  JSR THERE            \ Call THERE to see if we are in the Constrictor's
-\                       \ system in mission 1
-\
-\  BCC NOCON            \ If the C flag is clear then we are not in the
-\                       \ Constrictor's system, so skip to NOCON
-\
-\  LDA #%11111001       \ Set the AI flag of this ship so that it has E.C.M.,
-\  STA INWK+32          \ has a very high aggression level of 28 out of 31, is
-\                       \ hostile, and has AI enabled - nasty stuff!
-\
-\  LDA TP               \ Fetch bits 0 and 1 of TP, which contain the status of
-\  AND #%00000011       \ mission 1
-\
-\  LSR A                \ Shift bit 0 into the C flag
-\
-\  BCC NOCON            \ If bit 0 is clear, skip to NOCON as mission 1 is not
-\                       \ in progress
-\
-\  ORA MANY+CON         \ Bit 0 of A now contains bit 1 of TP, so this will be
-\                       \ set if we have already completed mission 1, so this OR
-\                       \ will be non-zero if we have either completed mission
-\                       \ 1, or there is already a Constrictor in our local
-\                       \ bubble of universe (in which case MANY+CON will be
-\                       \ non-zero)
-\
-\  BEQ YESCON           \ If A = 0 then mission 1 is in progress, we haven't
-\                       \ completed it yet, and there is no Constrictor in the
-\                       \ vicinity, so jump to YESCON to spawn the Constrictor
-\
-\ .NOCON
 
                         \ --- And replaced by the following: -------------------
-
- AND #3                 \ Set A = random number in the range 0-3, which we
-                        \ will now use to determine the type of ship
 
  ADC #CYL2+1            \ Add A to #CYL2 (we know the C flag is clear as we
                         \ passed through the BCS above), so A is now one of the
                         \ lone bounty hunter ships, i.e. Cobra Mk III (pirate),
                         \ Asp Mk II, Python (pirate) or Fer-de-lance AJD
+
+                        \ --- End of replacement code --------------------------
 
  TAY                    \ Copy the new ship type to Y
 
@@ -25238,8 +25085,6 @@ LOAD_F% = LOAD% + P% - CODE%
                         \ vicinity, so jump to YESCON to spawn the Constrictor
 
 .NOCON
-
-                        \ --- End of replacement code --------------------------
 
  TYA
 
@@ -26329,11 +26174,11 @@ LOAD_F% = LOAD% + P% - CODE%
 
 .SPS1
 
+ LDX #0                 \ Copy the two high bytes of the planet's x-coordinate
+ JSR SPS3               \ into K3(2 1 0), separating out the sign bit into K3+2
+
                         \ --- Original Acornsoft code removed from Elite-A: ----
 
-\  LDX #0               \ Copy the two high bytes of the planet's x-coordinate
-\  JSR SPS3             \ into K3(2 1 0), separating out the sign bit into K3+2
-\
 \  LDX #3               \ Copy the two high bytes of the planet's y-coordinate
 \  JSR SPS3             \ into K3(5 4 3), separating out the sign bit into K3+5
 \
@@ -26341,9 +26186,6 @@ LOAD_F% = LOAD% + P% - CODE%
 \  JSR SPS3             \ into K3(8 7 6), separating out the sign bit into K3+8
 
                         \ --- And replaced by the following: -------------------
-
- LDX #0                 \ Copy the two high bytes of the planet's x-coordinate
- JSR SPS3               \ into K3(2 1 0), separating out the sign bit into K3+2
 
  JSR SPS3               \ AJD
 
@@ -27045,43 +26887,6 @@ LOAD_F% = LOAD% + P% - CODE%
  JSR NOS1               \ kill (part 1 of the explosion), and call NOS1 to set
                         \ up the sound block in XX16
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
-
-\  LDA INWK+7           \ Fetch z_hi, the distance of the ship being hit in
-\  LSR A                \ terms of the z-axis (in and out of the screen), and
-\  LSR A                \ divide by 4. If z_hi has either bit 6 or 7 set then
-\                       \ that ship is too far away to be shown on the scanner
-\                       \ (as per the SCAN routine), so we know the maximum
-\                       \ z_hi at this point is %00111111, and shifting z_hi
-\                       \ to the right twice gives us a maximum value of
-\                       \ %00001111
-\
-\  AND T                \ This reduces A to a maximum of X; X can be either
-\                       \ 7 = %0111 or 15 = %1111, so AND'ing with 15 will
-\                       \ not affect A, while AND'ing with 7 will clear bit
-\                       \ 3, reducing the maximum value in A to 7
-\
-\  ORA #%11110001       \ The SOUND statement's amplitude ranges from 0 (for no
-\                       \ sound) to -15 (full volume), so we can set bits 0 and
-\                       \ 4-7 in A, and keep bits 1-3 from the above to get
-\                       \ a value between -15 (%11110001) and -1 (%11111111),
-\                       \ with lower values of z_hi and argument X leading
-\                       \ to a more negative, or quieter number (so the closer
-\                       \ the ship, i.e. the smaller the value of X, the louder
-\                       \ the sound)
-\
-\  STA XX16+2           \ The amplitude byte of the sound block in XX16 is in
-\                       \ byte #3 (where it's the low byte of the amplitude), so
-\                       \ this sets the amplitude to the value in A
-\
-\  JSR NO3              \ Make the sound from our updated sound block in XX16
-\
-\  LDA #16              \ Set A = 16 to denote we have made a hit or kill
-\                       \ (part 2 of the explosion), and fall through into NOISE
-\                       \ to make the sound
-
-                        \ --- And replaced by the following: -------------------
-
  LDA INWK+7             \ Fetch z_hi, the distance of the ship being hit in
  LSR A                  \ terms of the z-axis (in and out of the screen), and
  LSR A                  \ divide by 4. If z_hi has either bit 6 or 7 set then
@@ -27110,6 +26915,14 @@ LOAD_F% = LOAD% + P% - CODE%
                         \ this sets the amplitude to the value in A
 
  JSR NO3                \ Make the sound from our updated sound block in XX16
+
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
+\  LDA #16              \ Set A = 16 to denote we have made a hit or kill
+\                       \ (part 2 of the explosion), and fall through into NOISE
+\                       \ to make the sound
+
+                        \ --- And replaced by the following: -------------------
 
 .n_sound10
 
@@ -27683,23 +27496,17 @@ LOAD_F% = LOAD% + P% - CODE%
  BNE auton              \ currently activated, so jump to auton in DOKEY so the
                         \ docking computer can "press" the flight keys for us
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
-
-\  LDY #1               \ Update the key logger for key 1 in the KYTB table, so
-\  JSR DKS1             \ KY1 will be &FF if "?" (slow down) is being pressed
-\
-\  INY                  \ Update the key logger for key 2 in the KYTB table, so
-\  JSR DKS1             \ KY2 will be &FF if Space (speed up) is being pressed
-\
-\  LDA VIA+&40          \ Read 6522 System VIA input register IRB (SHEILA &40)
-
-                        \ --- And replaced by the following: -------------------
-
  LDY #1                 \ Update the key logger for key 1 in the KYTB table, so
  JSR DKS1               \ KY1 will be &FF if "?" (slow down) is being pressed
 
  INY                    \ Update the key logger for key 2 in the KYTB table, so
  JSR DKS1               \ KY2 will be &FF if Space (speed up) is being pressed
+
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
+\  LDA VIA+&40          \ Read 6522 System VIA input register IRB (SHEILA &40)
+
+                        \ --- And replaced by the following: -------------------
 
  LDA #&51               \ AJD
  STA &FE60
@@ -27816,10 +27623,10 @@ LOAD_F% = LOAD% + P% - CODE%
 
 .DOKEY
 
+ JSR U%                 \ Call U% to clear the key logger
+
                         \ --- Original Acornsoft code removed from Elite-A: ----
 
-\  JSR U%               \ Call U% to clear the key logger
-\
 \  LDA JSTK             \ If JSTK is non-zero, then we are configured to use
 \  BNE DKJ1             \ the joystick rather than keyboard, so jump to DKJ1
 \                       \ to read the joystick flight controls, before jumping
@@ -27829,8 +27636,6 @@ LOAD_F% = LOAD% + P% - CODE%
 \  STA BSTK             \ Set BSTK = 0 to disable the Bitstik
 
                         \ --- And replaced by the following: -------------------
-
- JSR U%                 \ Call U% to clear the key logger
 
  LDA &2F                \ AJD
  BEQ l_open
@@ -28198,12 +28003,6 @@ LOAD_F% = LOAD% + P% - CODE%
 \                       \ key's location in the key logger to &FF
 \
 \ .DK1
-\
-\  DEY                  \ Decrement the loop counter
-\
-\  CPY #7               \ Have we just done the last key?
-\
-\  BNE DKL1             \ If not, loop back to process the next key
 
                         \ --- And replaced by the following: -------------------
 
@@ -28211,13 +28010,13 @@ LOAD_F% = LOAD% + P% - CODE%
 
  JSR DKS1               \ AJD
 
+                        \ --- End of replacement code --------------------------
+
  DEY                    \ Decrement the loop counter
 
  CPY #7                 \ Have we just done the last key?
 
  BNE DKL1               \ If not, loop back to process the next key
-
-                        \ --- End of replacement code --------------------------
 
 .DK5
 
@@ -28364,11 +28163,11 @@ LOAD_F% = LOAD% + P% - CODE%
 
  JSR DORND              \ Set A and X to random numbers
 
+ BMI DK5                \ If A < 0 (50% chance), return from the subroutine
+                        \ (as DK5 contains an RTS)
+
                         \ --- Original Acornsoft code removed from Elite-A: ----
 
-\  BMI DK5              \ If A < 0 (50% chance), return from the subroutine
-\                       \ (as DK5 contains an RTS)
-\
 \  CPX #22              \ If X >= 22 (89% chance), return from the subroutine
 \  BCS DK5              \ (as DK5 contains an RTS)
 \
@@ -28377,14 +28176,8 @@ LOAD_F% = LOAD% + P% - CODE%
 \                       \ 0-21, so this not only checks for cargo, but also for
 \                       \ E.C.M., fuel scoops, energy bomb, energy unit and
 \                       \ docking computer, all of which can be destroyed
-\
-\  LDA DLY              \ If there is already an in-flight message on-screen,
-\  BNE DK5              \ return from the subroutine (as DK5 contains an RTS)
 
                         \ --- And replaced by the following: -------------------
-
- BMI DK5                \ If A < 0 (50% chance), return from the subroutine
-                        \ (as DK5 contains an RTS)
 
  CPX #24                \ If X >= 24 (AJD chance), return from the subroutine
  BCS DK5                \ (as DK5 contains an RTS)
@@ -28392,10 +28185,10 @@ LOAD_F% = LOAD% + P% - CODE%
  LDA CRGO,X             \ If we do not have any of item CRGO+X, AJD
  BEQ DK5
 
+                        \ --- End of replacement code --------------------------
+
  LDA DLY                \ If there is already an in-flight message on-screen,
  BNE DK5                \ return from the subroutine (as DK5 contains an RTS)
-
-                        \ --- End of replacement code --------------------------
 
  LDY #3                 \ Set bit 1 of de, the equipment destruction flag, so
  STY de                 \ that when we call MESS below, " DESTROYED" is appended
@@ -34922,24 +34715,6 @@ ENDMACRO
 \
 \  BCC RTS+1            \ If the C flag is clear then the stick height in A is
 \                       \ negative, so jump down to RTS+1
-\
-\ .VLL1
-\
-\                       \ If we get here then the stick length is positive (so
-\                       \ the dot is below the ellipse and the stick is above
-\                       \ the dot, and we need to draw the stick upwards from
-\                       \ the dot)
-\
-\  DEY                  \ We want to draw the stick upwards, so decrement the
-\                       \ pixel row in Y
-\
-\  BPL VL1              \ If Y is still positive then it correctly points at the
-\                       \ line above, so jump to VL1 to skip the following
-\
-\  LDY #7               \ We just decremented Y up through the top of the
-\                       \ character block, so we need to move it to the last row
-\                       \ in the character above, so set Y to 7, the number of
-\                       \ the last row
 
                         \ --- And replaced by the following: -------------------
 
@@ -34960,6 +34735,8 @@ ENDMACRO
 
  BMI RTS+1              \ AJD
 
+                        \ --- End of replacement code --------------------------
+
 .VLL1
 
                         \ If we get here then the stick length is positive (so
@@ -34978,20 +34755,18 @@ ENDMACRO
                         \ in the character above, so set Y to 7, the number of
                         \ the last row
 
-                        \ --- End of replacement code --------------------------
-
  DEC SC+1               \ Decrement the high byte of the screen address to move
                         \ to the character block above
 
+.VL1
+
+ LDA X1                 \ Set A to the character row byte for the stick, which
+                        \ we stored in X1 above, and which has the same pixel
+                        \ pattern as the bottom-right pixel of the dot (so the
+                        \ stick comes out of the right side of the dot)
+
                         \ --- Original Acornsoft code removed from Elite-A: ----
 
-\ .VL1
-\
-\  LDA X1               \ Set A to the character row byte for the stick, which
-\                       \ we stored in X1 above, and which has the same pixel
-\                       \ pattern as the bottom-right pixel of the dot (so the
-\                       \ stick comes out of the right side of the dot)
-\
 \  EOR (SC),Y           \ Draw the stick on row Y of the character block using
 \  STA (SC),Y           \ EOR logic
 \
@@ -35050,25 +34825,8 @@ ENDMACRO
 \                       \ we stored in X1 above, and which has the same pixel
 \                       \ pattern as the bottom-right pixel of the dot (so the
 \                       \ stick comes out of the right side of the dot)
-\
-\  EOR (SC),Y           \ Draw the stick on row Y of the character block using
-\  STA (SC),Y           \ EOR logic
-\
-\  INX                  \ Increment the (negative) stick height in X
-\
-\  BNE VLL2             \ If we still have more stick to draw, jump up to VLL2
-\                       \ to draw the next pixel
-\
-\  RTS                  \ Return from the subroutine
 
                         \ --- And replaced by the following: -------------------
-
-.VL1
-
- LDA X1                 \ Set A to the character row byte for the stick, which
-                        \ we stored in X1 above, and which has the same pixel
-                        \ pattern as the bottom-right pixel of the dot (so the
-                        \ stick comes out of the right side of the dot)
 
  EOR &35                \ iff AJD
  STA &34                \ iff
@@ -35134,6 +34892,8 @@ ENDMACRO
  EOR &35                \ iff AJD
  STA &34                \ iff
 
+                        \ --- End of replacement code --------------------------
+
  EOR (SC),Y             \ Draw the stick on row Y of the character block using
  STA (SC),Y             \ EOR logic
 
@@ -35143,8 +34903,6 @@ ENDMACRO
                         \ to draw the next pixel
 
  RTS                    \ Return from the subroutine
-
-                        \ --- End of replacement code --------------------------
 
 \ ******************************************************************************
 \

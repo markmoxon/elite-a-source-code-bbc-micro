@@ -7954,34 +7954,22 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  STX R                  \ each character block of the bar, starting with a full
                         \ character's width of 4 pixels
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
-
-\  CMP T1               \ If A >= T1 then we have passed the threshold where we
-\  BCS DL30             \ change bar colour, so jump to DL30 to set A to the
-\                       \ "high value" colour
-\
-\  LDA K+1              \ Set A to K+1, the "low value" colour to use
-\
-\  BNE DL31             \ Jump down to DL31 (this BNE is effectively a JMP as A
-\                       \ will never be zero)
-\
-\ .DL30
-\
-\  LDA K                \ Set A to K, the "high value" colour to use
-\
-\ .DL31
-\
-\  STA COL              \ Store the colour of the indicator in COL
-
-                        \ --- And replaced by the following: -------------------
-
  CMP T1                 \ If A >= T1 then we have passed the threshold where we
  BCS DL30               \ change bar colour, so jump to DL30 to set A to the
                         \ "high value" colour
 
  LDA K+1                \ Set A to K+1, the "low value" colour to use
 
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
+\  BNE DL31             \ Jump down to DL31 (this BNE is effectively a JMP as A
+\                       \ will never be zero)
+
+                        \ --- And replaced by the following: -------------------
+
  EQUB &2C               \ AJD
+
+                        \ --- End of replacement code --------------------------
 
 .DL30
 
@@ -7990,8 +7978,6 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 .DL31
 
  STA COL                \ Store the colour of the indicator in COL
-
-                        \ --- End of replacement code --------------------------
 
  LDY #2                 \ We want to start drawing the indicator on the third
                         \ line in this character row, so set Y to point to that
@@ -12136,26 +12122,19 @@ LOAD_D% = LOAD% + P% - CODE%
  LDA QQ19+1             \ Set K4 = the y-coordinate of the centre
  STA K4
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
-
-\  LDX #0               \ Set the high bytes of K3(1 0) and K4(1 0) to 0
-\  STX K4+1
-\  STX K3+1
-\
-\  INX                  \ Set LSP = 1 to reset the ball line heap
-\  STX LSP
-\
-\  LDX #2               \ Set STP = 2, the step size for the circle
-\  STX STP
-
-                        \ --- And replaced by the following: -------------------
-
  LDX #0                 \ Set the high bytes of K3(1 0) and K4(1 0) to 0
  STX K4+1
  STX K3+1
 
  INX                    \ Set LSP = 1 to reset the ball line heap
  STX LSP
+
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
+\  LDX #2               \ Set STP = 2, the step size for the circle
+\  STX STP
+
+                        \ --- And replaced by the following: -------------------
 
  INX                    \ Set STP = 2, the step size for the circle
  STX STP
@@ -14313,33 +14292,6 @@ LOAD_D% = LOAD% + P% - CODE%
 
 .TT110
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
-
-\  LDX #63              \ Before loading the flight code, we need to copy the
-\                       \ two-letter token table from QQ16 to QQ16_FLIGHT, so
-\                       \ we set a counter in X for the 64 bytes in the table
-\
-\ .eny1
-\
-\  LDA QQ16,X           \ Copy the X-th byte of QQ16 to the X-th byte of
-\  STA QQ16_FLIGHT,X    \ QQ16_FLIGHT
-\
-\  DEX                  \ Decrement the loop counter
-\
-\  BPL eny1             \ Loop back to copy the next byte until we have copied
-\                       \ the whole table
-\
-\  JSR CATD             \ Call CATD to reload the disc catalogue
-\
-\  LDX #LO(RDLI)        \ Set (Y X) to point to RDLI ("R.D.CODE")
-\  LDY #HI(RDLI)
-\
-\  JMP OSCLI            \ Call OSCLI to run the OS command in RDLI, which *RUNs
-\                       \ the main flight code in D.CODE, returning from the
-\                       \ subroutine using a tail call
-
-                        \ --- And replaced by the following: -------------------
-
  LDX #63                \ Before loading the flight code, we need to copy the
                         \ two-letter token table from QQ16 to QQ16_FLIGHT, so
                         \ we set a counter in X for the 64 bytes in the table
@@ -14353,6 +14305,19 @@ LOAD_D% = LOAD% + P% - CODE%
 
  BPL eny1               \ Loop back to copy the next byte until we have copied
                         \ the whole table
+
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
+\  JSR CATD             \ Call CATD to reload the disc catalogue
+\
+\  LDX #LO(RDLI)        \ Set (Y X) to point to RDLI ("R.D.CODE")
+\  LDY #HI(RDLI)
+\
+\  JMP OSCLI            \ Call OSCLI to run the OS command in RDLI, which *RUNs
+\                       \ the main flight code in D.CODE, returning from the
+\                       \ subroutine using a tail call
+
+                        \ --- And replaced by the following: -------------------
 
  LDX #LO(RDLI)          \ Set (Y X) to point to RDLI ("R.D.CODE")
  LDY #HI(RDLI)
@@ -15118,8 +15083,6 @@ LOAD_D% = LOAD% + P% - CODE%
 \  LDA #Mlas            \ Call refund with A set to the power of the new mining
 \  JSR refund           \ laser to install the new laser and process a refund if
 \                       \ we already have a laser fitted to this view
-\
-\ .et11
 
                         \ --- And replaced by the following: -------------------
 
@@ -15157,9 +15120,9 @@ LOAD_D% = LOAD% + P% - CODE%
  STA LASER,X
  PLA
 
-.et11
-
                         \ --- End of replacement code --------------------------
+
+.et11
 
  JSR dn                 \ We are done buying equipment, so print the amount of
                         \ cash left in the cash pot, then make a short, high
@@ -15425,8 +15388,6 @@ LOAD_D% = LOAD% + P% - CODE%
 \                       \ move the text cursor to column 1 on row 21
 \
 \  JMP qv2              \ Jump back to qv2 to try again
-\
-\ .qv3
 
                         \ --- And replaced by the following: -------------------
 
@@ -15435,9 +15396,9 @@ LOAD_D% = LOAD% + P% - CODE%
  JSR CLYNS
  JMP qv2
 
-.qv3
-
                         \ --- End of replacement code --------------------------
+
+.qv3
 
  TAX                    \ We have a valid view number, so transfer it to X
 
@@ -16911,25 +16872,19 @@ LOAD_E% = LOAD% + P% - CODE%
 
 .MSBAR
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
-
-\  TXA                  \ Set T = X * 8
-\  ASL A
-\  ASL A
-\  ASL A
-\  STA T
-\
-\  LDA #49              \ Set SC = 49 - T
-\  SBC T                \        = 48 + 1 - (X * 8)
-\  STA SC
-
-                        \ --- And replaced by the following: -------------------
-
  TXA                    \ Set T = X * 8
  ASL A
  ASL A
  ASL A
  STA T
+
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
+\  LDA #49              \ Set SC = 49 - T
+\  SBC T                \        = 48 + 1 - (X * 8)
+\  STA SC
+
+                        \ --- And replaced by the following: -------------------
 
  LDA #41                \ Set SC = 41 - T
  SBC T                  \        = 40 + 1 - (X * 8) AJD
@@ -20047,16 +20002,16 @@ ENDIF
 
 .CATS
 
+ JSR GTDRV              \ Get an ASCII disc drive drive number from the keyboard
+                        \ in A, setting the C flag if an invalid drive number
+                        \ was entered
+
+ BCS DELT-1             \ If the C flag is set, then an invalid drive number was
+                        \ entered, so return from the subroutine (as DELT-1
+                        \ contains an RTS)
+
                         \ --- Original Acornsoft code removed from Elite-A: ----
 
-\  JSR GTDRV            \ Get an ASCII disc drive drive number from the keyboard
-\                       \ in A, setting the C flag if an invalid drive number
-\                       \ was entered
-\
-\  BCS DELT-1           \ If the C flag is set, then an invalid drive number was
-\                       \ entered, so return from the subroutine (as DELT-1
-\                       \ contains an RTS)
-\
 \  STA CTLI+1           \ Store the drive number in the second byte of the
 \                       \ command string at CTLI, so it overwrites the "0" in
 \                       \ ".0" with the drive number to catalogue
@@ -20067,14 +20022,6 @@ ENDIF
 \                       \ MT16 to print the character in DTW7)
 
                         \ --- And replaced by the following: -------------------
-
- JSR GTDRV              \ Get an ASCII disc drive drive number from the keyboard
-                        \ in A, setting the C flag if an invalid drive number
-                        \ was entered
-
- BCS DELT-1             \ If the C flag is set, then an invalid drive number was
-                        \ entered, so return from the subroutine (as DELT-1
-                        \ contains an RTS)
 
  STA CTLI+2             \ Store the drive number in the third byte of the
                         \ command string at CTLI, so it overwrites the "0" in
@@ -20203,23 +20150,18 @@ ENDIF
 
 \  LDA INWK+4,X         \ Copy the X-th byte of INWK+4 to the X-th byte of
 \  STA DELI+5,X         \ DELI+5
-\
-\  DEX                  \ Decrement the loop counter
-\
-\  BNE DELL1            \ Loop back to DELL1 to copy the next character until we
-\                       \ have copied the whole filename
 
                         \ --- And replaced by the following: -------------------
 
  LDA INWK+4,X           \ Copy the X-th byte of INWK+4 to the X-th byte of
  STA DELI+6,X           \ DELI+6 AJD
 
+                        \ --- End of replacement code --------------------------
+
  DEX                    \ Decrement the loop counter
 
  BNE DELL1              \ Loop back to DELL1 to copy the next character until we
                         \ have copied the whole filename
-
-                        \ --- End of replacement code --------------------------
 
  LDX #LO(DELI)          \ Set (Y X) to point to the OS command at DELI, which
  LDY #HI(DELI)          \ contains the DFS command for deleting this file
@@ -20369,54 +20311,6 @@ ENDIF
  LDA #HI(MEBRK)         \ the standard BRKV handler in BRBR while disc access
  STA BRKV+1             \ operations are happening
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
-
-\  LDA #1               \ Print extended token 1, the disc access menu, which
-\  JSR DETOK            \ presents these options:
-\                       \
-\                       \   1. Load New Commander
-\                       \   2. Save Commander {commander name}
-\                       \   3. Catalogue
-\                       \   4. Delete A File
-\                       \   5. Exit
-\
-\  JSR t                \ Scan the keyboard until a key is pressed, returning
-\                       \ the ASCII code in A and X
-\
-\  CMP #'1'             \ If A < ASCII "1", jump to SVEX to exit as the key
-\  BCC SVEX             \ press doesn't match a menu option
-\
-\  CMP #'4'             \ If "4" was pressed, jump to DELT to process option 4
-\  BEQ DELT             \ (delete a file)
-\
-\  BCS SVEX             \ If A >= ASCII "4", jump to SVEX to exit as the key
-\                       \ press is either option 5 (exit), or it doesn't match a
-\                       \ menu option (as we already checked for "4" above)
-\
-\  CMP #'2'             \ If A >= ASCII "2" (i.e. save or catalogue), skip to
-\  BCS SV1              \ SV1
-\
-\  JSR GTNMEW           \ If we get here then option 1 (load) was chosen, so
-\                       \ call GTNMEW to fetch the name of the commander file
-\                       \ to load (including drive number and directory) into
-\                       \ INWK
-\
-\  JSR LOD              \ Call LOD to load the commander file
-\
-\  JSR TRNME            \ Transfer the commander filename from INWK to NA%
-\
-\  SEC                  \ Set the C flag to indicate we loaded a new commander
-\  BCS SVEX+1           \ file, and return from the subroutine (as SVEX+1
-\                       \ contains an RTS)
-\
-\ .SV1
-\
-\  BNE CAT              \ We get here following the CMP #'2' above, so this
-\                       \ jumps to CAT if option 2 was not chosen - in other
-\                       \ words, if option 3 (catalogue) was chosen
-
-                        \ --- And replaced by the following: -------------------
-
  LDA #1                 \ Print extended token 1, the disc access menu, which
  JSR DETOK              \ presents these options:
                         \
@@ -20441,6 +20335,29 @@ ENDIF
 
  CMP #'2'               \ If A >= ASCII "2" (i.e. save or catalogue), skip to
  BCS SV1                \ SV1
+
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
+\  JSR GTNMEW           \ If we get here then option 1 (load) was chosen, so
+\                       \ call GTNMEW to fetch the name of the commander file
+\                       \ to load (including drive number and directory) into
+\                       \ INWK
+\
+\  JSR LOD              \ Call LOD to load the commander file
+\
+\  JSR TRNME            \ Transfer the commander filename from INWK to NA%
+\
+\  SEC                  \ Set the C flag to indicate we loaded a new commander
+\  BCS SVEX+1           \ file, and return from the subroutine (as SVEX+1
+\                       \ contains an RTS)
+\
+\ .SV1
+\
+\  BNE CAT              \ We get here following the CMP #'2' above, so this
+\                       \ jumps to CAT if option 2 was not chosen - in other
+\                       \ words, if option 3 (catalogue) was chosen
+
+                        \ --- And replaced by the following: -------------------
 
  LDA #0                 \ AJD
  JSR confirm
@@ -20783,23 +20700,6 @@ ENDIF
 
  BPL LOL1               \ Loop back until we have copied all NT% bytes
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
-
-\ .LOR
-\
-\  SEC                  \ Set the C flag
-\
-\  RTS                  \ Return from the subroutine
-\
-\ .ELT2F
-\
-\  BRK                  \ The error that is printed if we try to load an
-\  EQUS "IIllegal "     \ invalid commander file with bit 7 of byte #0 set
-\  EQUS "ELITE II file" \ (the spelling mistake is in the original source)
-\  BRK
-
-                        \ --- And replaced by the following: -------------------
-
 .LOR
 
  SEC                    \ Set the C flag
@@ -20807,6 +20707,15 @@ ENDIF
  RTS                    \ Return from the subroutine
 
 .ELT2F
+
+                        \ --- Original Acornsoft code removed from Elite-A: ----
+
+\  BRK                  \ The error that is printed if we try to load an
+\  EQUS "IIllegal "     \ invalid commander file with bit 7 of byte #0 set
+\  EQUS "ELITE II file" \ (the spelling mistake is in the original source)
+\  BRK
+
+                        \ --- And replaced by the following: -------------------
 
  BRK                    \ AJD
  EQUB &49
@@ -21409,22 +21318,13 @@ ENDIF
 \  BEQ DK9              \ keyboard rather than the joystick, so jump to DK9 to
 \                       \ make sure the Bitstik is disabled as well (DK9 then
 \                       \ jumps to DK4 below)
-\
-\  LDX #1               \ Call DKS2 to fetch the value of ADC channel 1 (the
-\  JSR DKS2             \ joystick X value) into (A X), and OR A with 1. This
-\  ORA #1               \ ensures that the high byte is at least 1, and then we
-\  STA JSTX             \ store the result in JSTX
-\
-\  LDX #2               \ Call DKS2 to fetch the value of ADC channel 2 (the
-\  JSR DKS2             \ joystick Y value) into (A X), and EOR A with JSTGY.
-\  EOR JSTGY            \ JSTGY will be &FF if the game is configured to
-\  STA JSTY             \ reverse the joystick Y channel, so this EOR does
-\                       \ exactly that, and then we store the result in JSTY
 
                         \ --- And replaced by the following: -------------------
 
  LDA JSTK               \ If JSTK is zero, then we are configured to use the
  BEQ DK4                \ keyboard rather than the joystick, so jump to DK4
+
+                        \ --- End of replacement code --------------------------
 
  LDX #1                 \ Call DKS2 to fetch the value of ADC channel 1 (the
  JSR DKS2               \ joystick X value) into (A X), and OR A with 1. This
@@ -21436,8 +21336,6 @@ ENDIF
  EOR JSTGY              \ JSTGY will be &FF if the game is configured to
  STA JSTY               \ reverse the joystick Y channel, so this EOR does
                         \ exactly that, and then we store the result in JSTY
-
-                        \ --- End of replacement code --------------------------
 
                         \ Fall through into DK4 to scan for other keys
 

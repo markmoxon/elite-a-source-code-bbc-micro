@@ -851,6 +851,8 @@ ENDMACRO
  \tube_wait3
  \ RTS
 
+                        \ --- End of replacement code --------------------------
+
 \ ******************************************************************************
 \
 \       Name: iff_index_code
@@ -876,6 +878,8 @@ ORG &0D7A
 \ This routine is copied to &0D7A in part 1 above.
 \
 \ ******************************************************************************
+
+                        \ --- Code added for Elite-A: --------------------------
 
 .iff_index
 
@@ -915,7 +919,7 @@ ORG &0D7A
 
  RTS \ X=0
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of added code --------------------------------
 
 COPYBLOCK iff_index, P%, iff_index_code
 
@@ -1913,21 +1917,7 @@ ORG LOADcode + P% - LOAD
 \
 \ ******************************************************************************
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
-
-\ .DIALS
-\
-\  INCBIN "versions/disc/binaries/P.DIALS.bin"
-\
-\ .SHIP_MISSILE
-\
-\  INCBIN "versions/disc/output/MISSILE.bin"
-\
-\ .WORDS
-\
-\  INCBIN "versions/disc/output/WORDS.bin"
-
-                        \ --- And replaced by the following: -------------------
+                        \ --- Code added for Elite-A: --------------------------
 
 .DIALS
 
@@ -1941,7 +1931,7 @@ ORG LOADcode + P% - LOAD
 
  INCBIN "output/WORDS.bin"
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of added code --------------------------------
 
 \ ******************************************************************************
 \
@@ -2584,21 +2574,7 @@ ORG TVT1code + P% - TVT1
 \
 \ ******************************************************************************
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
-
-\ .ELITE
-\
-\  INCBIN "versions/disc/binaries/P.ELITE.bin"
-\
-\ .ASOFT
-\
-\  INCBIN "versions/disc/binaries/P.A-SOFT.bin"
-\
-\ .CpASOFT
-\
-\  INCBIN "versions/disc/binaries/P.(C)ASFT.bin"
-
-                        \ --- And replaced by the following: -------------------
+                        \ --- Code added for Elite-A: --------------------------
 
 .ELITE
 
@@ -2611,6 +2587,8 @@ ORG TVT1code + P% - TVT1
 .CpASOFT
 
  INCBIN "binaries/P.(C)ASFT.bin"
+
+                        \ --- End of added code --------------------------------
 
 \ ******************************************************************************
 \
@@ -2635,6 +2613,8 @@ ORG &DD00
 \    Summary: AJD
 \
 \ ******************************************************************************
+
+                        \ --- Code added for Elite-A: --------------------------
 
  \ trap FILEV
 
@@ -2701,7 +2681,7 @@ ORG &DD00
  PLP
  RTS
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of added code --------------------------------
 
 \ ******************************************************************************
 \

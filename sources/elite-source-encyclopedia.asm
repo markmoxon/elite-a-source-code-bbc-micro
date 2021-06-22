@@ -8730,15 +8730,15 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  LDA #'m'
  JSR TT26
 
+ JSR TTX69              \ Print a paragraph break and set Sentence Case
+
+                        \ By this point, ZZ contains the current system number
+                        \ which PDESC requires. It gets put there in the TT102
+                        \ routine, which calls TT111 to populate ZZ before
+                        \ calling TT25 (this routine)
+
                         \ --- Original Acornsoft code removed from Elite-A: ----
 
-\  JSR TTX69            \ Print a paragraph break and set Sentence Case
-\
-\                       \ By this point, ZZ contains the current system number
-\                       \ which PDESC requires. It gets put there in the TT102
-\                       \ routine, which calls TT111 to populate ZZ before
-\                       \ calling TT25 (this routine)
-\
 \  JMP PDESC            \ Jump to PDESC to print the system's extended
 \                       \ description, returning from the subroutine using a
 \                       \ tail call
@@ -8777,13 +8777,6 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 \  RTS                  \ Return from the subroutine
 
                         \ --- And replaced by the following: -------------------
-
- JSR TTX69              \ Print a paragraph break and set Sentence Case
-
-                        \ By this point, ZZ contains the current system number
-                        \ which PDESC requires. It gets put there in the TT102
-                        \ routine, which calls TT111 to populate ZZ before
-                        \ calling TT25 (this routine)
 
  JMP PD1                \ AJD
 
@@ -10222,11 +10215,11 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  JSR TT217              \ Scan the keyboard until a key is pressed, and return
                         \ the key's ASCII code in A (and X)
 
+ LDX R                  \ If R is non-zero then skip to NWDAV2, as we are
+ BNE NWDAV2             \ already building a number
+
                         \ --- Original Acornsoft code removed from Elite-A: ----
 
-\  LDX R                \ If R is non-zero then skip to NWDAV2, as we are
-\  BNE NWDAV2           \ already building a number
-\
 \  CMP #'y'             \ If "Y" was pressed, jump to NWDAV1 to return the
 \  BEQ NWDAV1           \ maximum number allowed (i.e. buy/sell the whole stock)
 \
@@ -10236,9 +10229,6 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 \ .NWDAV2
 
                         \ --- And replaced by the following: -------------------
-
- LDX R                  \ If R is non-zero then skip to NWDAV2, as we are
- BNE NWDAV2             \ already building a number
 
 .NWDAV2
 
@@ -14531,22 +14521,13 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 \  BEQ DK9              \ keyboard rather than the joystick, so jump to DK9 to
 \                       \ make sure the Bitstik is disabled as well (DK9 then
 \                       \ jumps to DK4 below)
-\
-\  LDX #1               \ Call DKS2 to fetch the value of ADC channel 1 (the
-\  JSR DKS2             \ joystick X value) into (A X), and OR A with 1. This
-\  ORA #1               \ ensures that the high byte is at least 1, and then we
-\  STA JSTX             \ store the result in JSTX
-\
-\  LDX #2               \ Call DKS2 to fetch the value of ADC channel 2 (the
-\  JSR DKS2             \ joystick Y value) into (A X), and EOR A with JSTGY.
-\  EOR JSTGY            \ JSTGY will be &FF if the game is configured to
-\  STA JSTY             \ reverse the joystick Y channel, so this EOR does
-\                       \ exactly that, and then we store the result in JSTY
 
                         \ --- And replaced by the following: -------------------
 
  LDA JSTK               \ If JSTK is zero, then we are configured to use the
  BEQ DK4                \ keyboard rather than the joystick, so jump to DK4
+
+                        \ --- End of replacement code --------------------------
 
  LDX #1                 \ Call DKS2 to fetch the value of ADC channel 1 (the
  JSR DKS2               \ joystick X value) into (A X), and OR A with 1. This
@@ -14558,8 +14539,6 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  EOR JSTGY              \ JSTGY will be &FF if the game is configured to
  STA JSTY               \ reverse the joystick Y channel, so this EOR does
                         \ exactly that, and then we store the result in JSTY
-
-                        \ --- End of replacement code --------------------------
 
                         \ Fall through into DK4 to scan for other keys
 
