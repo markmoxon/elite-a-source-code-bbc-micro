@@ -1034,7 +1034,6 @@ ORG &0B00
 \  EQUS "L.T.CODE"
 \  EQUB 13
 \
-\
 \  EQUB &44, &6F, &65   \ These bytes appear to be unused
 \  EQUB &73, &20, &79
 \  EQUB &6F, &75, &72

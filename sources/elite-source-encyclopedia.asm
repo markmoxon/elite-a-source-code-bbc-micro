@@ -7708,7 +7708,6 @@ LOAD_C% = LOAD% +P% - CODE%
 \  BNE PD1              \ is non-zero, jump to PD1 to show the standard "goat
 \                       \ soup" description
 \
-\
 \                       \ If we get here, then the current system is the same as
 \                       \ the selected system and we are docked, so now to check
 \                       \ whether there is a special override token for this
@@ -8807,7 +8806,6 @@ LOAD_D% = LOAD% + P% - CODE%
 \  JMP PDESC            \ Jump to PDESC to print the system's extended
 \                       \ description, returning from the subroutine using a
 \                       \ tail call
-\
 \
 \                       \ The following code doesn't appear to be called from
 \                       \ anywhere, so it's presumably a remnant of code from
@@ -10290,14 +10288,10 @@ LOAD_D% = LOAD% + P% - CODE%
 \
 \  CMP #'n'             \ If "N" was pressed, jump to NWDAV3 to return from the
 \  BEQ NWDAV3           \ subroutine with a result of 0 (i.e. abort transaction)
-\
-\ .NWDAV2
 
-                        \ --- And replaced by: -------------------------------->
+                        \ --- End of removed code ------------------------------
 
 .NWDAV2
-
-                        \ --- End of replacement ------------------------------>
 
  STA Q                  \ Store the key pressed in Q
 
@@ -10375,9 +10369,7 @@ LOAD_D% = LOAD% + P% - CODE%
 \  LDA QQ25             \ Set R = QQ25, so we return the maximum value allowed
 \  STA R
 \
-\
 \  RTS                  \ Return from the subroutine
-\
 \
 \ .NWDAV3
 \
@@ -10387,7 +10379,6 @@ LOAD_D% = LOAD% + P% - CODE%
 \
 \  LDA #0               \ Set R = 0, so we return 0
 \  STA R
-\
 \
 \  RTS                  \ Return from the subroutine
 
@@ -13294,22 +13285,17 @@ LOAD_F% = LOAD% + P% - CODE%
 \                       \ time it will either be an asteroid (98.5% chance) or,
 \                       \ very rarely, a cargo canister (1.5% chance)
 \
-\
 \  LDA MJ               \ If we are in witchspace following a mis-jump, skip the
 \  BNE ytq              \ following by jumping down to MLOOP (via ytq above)
 \
-\
 \  JSR DORND            \ Set A and X to random numbers
-\
 \
 \  CMP #35              \ If A >= 35 (87% chance), jump down to MLOOP to skip
 \  BCS MLOOP            \ the following
 \
-\
 \  LDA MANY+AST         \ If we already have 3 or more asteroids in the local
 \  CMP #3               \ bubble, jump down to MLOOP to skip the following
 \  BCS MLOOP
-\
 \
 \  JSR ZINF             \ Call ZINF to reset the INWK ship workspace
 \
@@ -13380,22 +13366,15 @@ LOAD_F% = LOAD% + P% - CODE%
 \
 \ .EE20
 \
-\
 \  JSR DIALS            \ Call DIALS to update the dashboard
-\
 \
 \  LDA QQ11             \ If this is a space view, skip the following two
 \  BEQ P%+7             \ instructions (i.e. jump to JSR TT17 below)
-\
-\  LDY #2               \ Wait for 2/50 of a second (0.04 seconds), to slow the
-\  JSR DELAY            \ main loop down a bit
 
-                        \ --- And replaced by: -------------------------------->
+                        \ --- End of removed code ------------------------------
 
  LDY #2                 \ Wait for 2/50 of a second (0.04 seconds), to slow the
  JSR DELAY              \ main loop down a bit
-
-                        \ --- End of replacement ------------------------------>
 
  JSR TT17               \ Scan the keyboard for the cursor keys or joystick,
                         \ returning the cursor's delta values in X and Y and
@@ -13491,7 +13470,6 @@ LOAD_F% = LOAD% + P% - CODE%
 \  BNE P%+5             \ Short-range Chart, returning from the subroutine using
 \  JMP TT23             \ a tail call
 \
-\
 \  CMP #f6              \ If red key f6 was pressed, call TT111 to select the
 \  BNE TT92             \ system nearest to galactic coordinates (QQ9, QQ10)
 \  JSR TT111            \ (the location of the chart crosshairs) and set ZZ to
@@ -13539,7 +13517,6 @@ LOAD_F% = LOAD% + P% - CODE%
 \  BNE P%+5             \ Market Price screen, returning from the subroutine
 \  JMP TT167            \ using a tail call
 \
-\
 \  CMP #f0              \ If red key f0 was pressed, jump to TT110 to launch our
 \  BNE fvw              \ ship (if docked), returning from the subroutine using
 \  JMP TT110            \ a tail call
@@ -13572,10 +13549,8 @@ LOAD_F% = LOAD% + P% - CODE%
 \  BNE P%+5             \ Buy Cargo screen, returning from the subroutine using
 \  JMP TT219            \ a tail call
 \
-\
 \  CMP #&47             \ If "@" was not pressed, skip to nosave
 \  BNE nosave
-\
 \
 \  JSR SVE              \ "@" was pressed, so call SVE to show the disc access
 \                       \ menu
@@ -13588,7 +13563,6 @@ LOAD_F% = LOAD% + P% - CODE%
 \                       \ to the docking bay (i.e. show the Status Mode screen)
 \
 \ .nosave
-\
 \
 \  CMP #f2              \ If red key f2 was pressed, jump to TT208 to show the
 \  BNE LABEL_3          \ Sell Cargo screen, returning from the subroutine using
@@ -13767,7 +13741,6 @@ LOAD_F% = LOAD% + P% - CODE%
 \
 \ ------------------------------------------------------------------------------
 \
-\
 \ ******************************************************************************
 
 .BR1
@@ -13777,20 +13750,16 @@ LOAD_F% = LOAD% + P% - CODE%
 \  LDX #3               \ Set XC = 3 (set text cursor to column 3)
 \  STX XC
 \
-\
 \  JSR FX200            \ Disable the ESCAPE key and clear memory if the BREAK
 \                       \ key is pressed (*FX 200,3)
-\
 \
 \  LDX #CYL             \ Call TITLE to show a rotating Cobra Mk III (#CYL) and
 \  LDA #6               \ token 6 ("LOAD NEW {single cap}COMMANDER {all caps}
 \  JSR TITLE            \ (Y/N)?{sentence case}{cr}{cr}"), returning with the
 \                       \ internal number of the key pressed in A
 \
-\
 \  CMP #&44             \ Did we press "Y"? If not, jump to QU5, otherwise
 \  BNE QU5              \ continue on to load a new commander
-\
 \
 \  JSR DFAULT           \ Call DFAULT to reset the current commander data block
 \                       \ to the last saved commander
@@ -14756,10 +14725,8 @@ LOAD_F% = LOAD% + P% - CODE%
 \  JMP BR1              \ ESCAPE is being pressed, so jump to BR1 to end the
 \                       \ game
 \
-\
 \  CPX #&64             \ If "B" is not being pressed, skip to DK7
 \  BNE nobit
-\
 \
 \  LDA BSTK             \ Toggle the value of BSTK between 0 and &FF
 \  EOR #&FF
@@ -14771,7 +14738,6 @@ LOAD_F% = LOAD% + P% - CODE%
 \  STA JSTE             \ Configure JSTE to the same value, so when the Bitstik
 \                       \ is enabled, the joystick is configured with reversed
 \                       \ channels
-\
 \
 \ .nobit
 

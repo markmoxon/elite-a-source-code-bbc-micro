@@ -2353,13 +2353,11 @@ LOAD_A% = LOAD%
 \  LDA BSTK             \ If BSTK = 0 then the Bitstik is not configured, so
 \  BEQ BS2              \ jump to BS2 to skip the following
 \
-\
 \  LDX #3               \ Call OSBYTE 128 to fetch the 16-bit value from ADC
 \  LDA #128             \ channel 3 (the Bitstik rotation value), returning the
 \  JSR OSBYTE           \ value in (Y X)
 \
 \  TYA                  \ Copy Y to A, so the result is now in (A X)
-\
 \
 \  LSR A                \ Divide A by 4
 \  LSR A
@@ -2473,7 +2471,6 @@ LOAD_A% = LOAD%
 \  LDA #40              \ Call the NOISE routine with A = 40 to make a low,
 \  JSR NOISE            \ long beep to indicate the missile is now disarmed
 \
-\
 \ .MA31
 
                         \ --- And replaced by: -------------------------------->
@@ -2543,7 +2540,6 @@ LOAD_A% = LOAD%
 
 \  LDA KY12             \ If TAB is being pressed, keep going, otherwise jump
 \  BEQ MA76             \ jump down to MA76 to skip the following
-\
 \
 \  ASL BOMB             \ The "energy bomb" key is being pressed, so double
 \                       \ the value in BOMB. If we have an energy bomb fitted,
@@ -3028,7 +3024,6 @@ LOAD_A% = LOAD%
 \                       \ tonne of this cargo (A is set to 1 by this call, and
 \                       \ the C flag contains the result)
 \
-\
 \  LDY #78              \ This instruction has no effect, so presumably it used
 \                       \ to do something, but didn't get removed
 \
@@ -3047,7 +3042,6 @@ LOAD_A% = LOAD%
 \  TYA                  \ Print recursive token 48 + A as an in-flight token,
 \  ADC #208             \ which will be in the range 48 ("FOOD") to 64 ("ALIEN
 \  JSR MESS             \ ITEMS"), so this prints the scooped item's name
-\
 \
 \  ASL NEWB             \ The item has now been scooped, so set bit 7 of its
 \  SEC                  \ NEWB flags to indicate this
@@ -3364,7 +3358,6 @@ LOAD_A% = LOAD%
 \  CMP #CON             \ If the ship we hit is not a Constrictor, jump to BURN
 \  BNE BURN             \ to skip the following
 \
-\
 \  LDA LAS              \ Set A to the power of the laser we just used to hit
 \                       \ the ship (i.e. the laser in the current view)
 \
@@ -3379,12 +3372,10 @@ LOAD_A% = LOAD%
 \
 \ .BURN
 \
-\
 \  LDA INWK+35          \ Fetch the hit ship's energy from byte #35 and subtract
 \  SEC                  \ our current laser power, and if the result is greater
 \  SBC LAS              \ than zero, the other ship has survived the hit, so
 \  BCS MA14             \ jump down to MA14
-\
 \
 \  ASL INWK+31          \ Set bit 7 of the ship byte #31 to indicate that it has
 \  SEC                  \ now been killed
@@ -3683,7 +3674,6 @@ LOAD_A% = LOAD%
 \  BPL MA77             \ BOMB is now negative, so this skips to MA21 if our
 \                       \ energy bomb is not going off
 \
-\
 \  ASL BOMB             \ We set off our energy bomb, so rotate BOMB to the
 \                       \ left by one place. BOMB was rotated left once already
 \                       \ during this iteration of the main loop, back at MA24,
@@ -3692,11 +3682,9 @@ LOAD_A% = LOAD%
 \                       \ if we set off an energy bomb, it stays activated
 \                       \ (BOMB > 0) for four iterations of the main loop
 \
-\
 \  JSR WSCAN            \ Call WSCAN to wait for the vertical sync, so the whole
 \                       \ screen gets drawn and the following palette change
 \                       \ won't kick in while the screen is still refreshing
-\
 \
 \  LDA #%00110000       \ Set the palette byte at SHEILA &21 to map logical
 \  STA VIA+&21          \ colour 0 to physical colour 7 (white), but with only
@@ -6977,7 +6965,6 @@ NEXT
                         \
                         \         COMMANDER {commander name}
                         \
-                        \
                         \   Present System      : {current system name}
                         \   Hyperspace System   : {selected system name}
                         \   Condition           :
@@ -7118,7 +7105,6 @@ NEXT
 \  LDA #107             \ We do have a cargo bay extension, so print recursive
 \  JSR plf2             \ token 107 ("LARGE CARGO{sentence case} BAY"), followed
 \                       \ by a newline and an indent of 6 characters
-\
 \
 \  LDA BST              \ If we don't have fuel scoops fitted, skip the
 \  BEQ P%+7             \ following two instructions
@@ -9119,7 +9105,6 @@ NEXT
 \  JSR FRS1             \ Call FRS1 to launch the Cobra Mk III straight ahead,
 \                       \ like a missile launch, but with our ship instead
 \
-\
 \  BCS ES1              \ If the Cobra was successfully added to the local
 \                       \ bubble, jump to ES1 to skip the following instructions
 \
@@ -9127,7 +9112,6 @@ NEXT
 \  JSR FRS1             \ reason, so try launching a pirate Cobra Mk III instead
 \
 \ .ES1
-\
 \
 \  LDA #8               \ Set the Cobra's byte #27 (speed) to 8
 \  STA INWK+27
@@ -9748,35 +9732,10 @@ LOAD_C% = LOAD% +P% - CODE%
 
 .GOPL
 
-                        \ --- Original Acornsoft code removed: ---------------->
-
-\  JSR SPS1             \ The ship is not hostile and it is not docking, so call
-\                       \ SPS1 to calculate the vector to the planet and store
-\                       \ it in XX15
-\
-\  JMP TA151            \ Jump to TA151 to make the ship head towards the planet
-\
-\ .TN3
-\
-\  LSR A                \ Extract bit 2 of the ship's NEWB flags into the C flag
-\  BCC TN4              \ and jump to TN4 if it is clear (i.e. if this ship is
-\                       \ not a pirate)
-\
-\  LDA SSPR             \ If we are not inside the space station safe zone, jump
-\  BEQ TN4              \ to TN4
-\
-\                       \ If we get here then this is a pirate and we are inside
-\                       \ the space station safe zone
-\
-\  LDA INWK+32          \ Set bits 0 and 7 of the AI flag in byte #32 (has AI
-\  AND #%10000001       \ enabled and has an E.C.M.)
-\  STA INWK+32
-\
-\ .TN4
-
-                        \ --- And replaced by: -------------------------------->
-
+                        \ --- Code added for Elite-A: ------------------------->
  LDY #&00               \ AJD
+
+                        \ --- End of added code ------------------------------->
 
  JSR SPS1               \ The ship is not hostile and it is not docking, so call
                         \ SPS1 to calculate the vector to the planet and store
@@ -9801,8 +9760,6 @@ LOAD_C% = LOAD% +P% - CODE%
  STA INWK+32
 
 .TN4
-
-                        \ --- End of replacement ------------------------------>
 
  LDX #8                 \ We now want to copy the ship's x, y and z coordinates
                         \ from INWK to K3, so set up a counter for 9 bytes
@@ -15401,7 +15358,6 @@ LOAD_D% = LOAD% + P% - CODE%
 \  LDX #2               \ Set STP = 2, the step size for the circle
 \  STX STP
 \
-\
 \  JSR CIRCLE2          \ Call CIRCLE2 to draw a circle with the centre at
 \                       \ (K3(1 0), K4(1 0)) and radius K
 \
@@ -16584,19 +16540,13 @@ LOAD_D% = LOAD% + P% - CODE%
  BEQ zZ+1               \ hyperdrive, and if it is zero, which means we don't,
                         \ return from the subroutine (as zZ+1 contains an RTS)
 
-                        \ --- Original Acornsoft code removed: ---------------->
-
-\  INX                  \ We own a galactic hyperdrive, so X is &FF, so this
-\                       \ instruction sets X = 0
-
-                        \ --- And replaced by: -------------------------------->
-
+                        \ --- Code added for Elite-A: ------------------------->
  INC new_hold           \ AJD
+
+                        \ --- End of added code ------------------------------->
 
  INX                    \ We own a galactic hyperdrive, so X is &FF, so this
                         \ instruction sets X = 0
-
-                        \ --- End of replacement ------------------------------>
 
  STX GHYP               \ The galactic hyperdrive is a one-use item, so set GHYP
                         \ to 0 so we no longer have one fitted
@@ -17556,7 +17506,6 @@ LOAD_D% = LOAD% + P% - CODE%
 
 \  JSR CTRL             \ Scan the keyboard to see if CTRL is currently pressed,
 \                       \ returning a negative value in A if it is
-\
 \
 \  AND PATG             \ If the game is configured to show the author's names
 \                       \ on the start-up screen, then PATG will contain &FF,
@@ -19755,7 +19704,6 @@ LOAD_E% = LOAD% + P% - CODE%
 \  JSR SPS1             \ Otherwise we need to draw the planet on the compass,
 \                       \ so first call SPS1 to calculate the vector to the
 \                       \ planet and store it in XX15
-\
 \
 \  JMP SP2              \ Jump to SP2 to draw XX15 on the compass, returning
 \                       \ from the subroutine using a tail call
@@ -24324,10 +24272,8 @@ LOAD_F% = LOAD% + P% - CODE%
 \                       \ the rest of them are present and should be drawn in
 \                       \ green/cyan
 \
-\
 \  LDY #0               \ Draw the missile indicator at position X in black
 \  JSR MSBAR
-\
 \
 \  DEX                  \ Decrement the counter to point to the next missile
 \
@@ -24336,7 +24282,6 @@ LOAD_F% = LOAD% + P% - CODE%
 \  RTS                  \ Return from the subroutine
 \
 \ .SAL8
-\
 \
 \  LDY #&EE             \ Draw the missile indicator at position X in green/cyan
 \  JSR MSBAR
@@ -24431,12 +24376,10 @@ LOAD_F% = LOAD% + P% - CODE%
 \  AND #%10000000
 \  STA INWK+5
 \
-\
 \  LDA #25              \ Set x_hi = y_hi = z_hi = 25, a fair distance away
 \  STA INWK+1
 \  STA INWK+4
 \  STA INWK+7
-\
 \
 \  JSR DORND            \ Set A and X to random numbers
 
@@ -24549,7 +24492,6 @@ LOAD_F% = LOAD% + P% - CODE%
 \  ORA #16              \ minimum of 16 and a maximum of 31
 \  STA INWK+27
 \
-\
 \  JSR DORND            \ Set A and X to random numbers, plus the C flag
 \
 \  BMI nodo             \ If A is negative (50% chance), jump to nodo to skip
@@ -24577,7 +24519,6 @@ LOAD_F% = LOAD% + P% - CODE%
 \                       \ where A is 0 or 2 and C is 0 or 1, so this gives us a
 \                       \ ship type from the following: Cobra Mk III, Python,
 \                       \ Boa or Anaconda
-\
 \
 \  JSR NWSHP            \ Add a new ship of type A to the local bubble and fall
 \                       \ through into the main game loop again
@@ -24730,12 +24671,10 @@ LOAD_F% = LOAD% + P% - CODE%
 \  ROL INWK+1           \ Set bit 2 of x_hi to the C flag, which is random, so
 \  ROL INWK+1           \ this randomly moves us slightly off-centre
 \
-\
 \  JSR DORND            \ Set A, X and V flag to random numbers
 \
 \  BVS MTT4             \ If V flag is set (50% chance), jump up to MTT4 to
 \                       \ spawn a trader
-\
 \
 \ IF _STH_DISC
 \
@@ -24759,7 +24698,6 @@ LOAD_F% = LOAD% + P% - CODE%
 \                       \ appear in this version
 \
 \ ENDIF
-\
 \
 \  ORA #%01101111       \ Take the random number in A and set bits 0-3 and 5-6,
 \  STA INWK+29          \ so the result has a 50% chance of being positive or
@@ -25019,7 +24957,6 @@ LOAD_F% = LOAD% + P% - CODE%
 \  JSR Ze               \ Call Ze to initialise INWK to a potentially hostile
 \                       \ ship, and set A and X to random values
 \
-\
 \  CMP #100             \ If the random number in A >= 100 (61% chance), jump
 \  BCS mt1              \ to mt1 to spawn pirates, otherwise keep going to
 \                       \ spawn a lone bounty hunter or a Thargoid
@@ -25123,7 +25060,6 @@ LOAD_F% = LOAD% + P% - CODE%
 \ .mt3
 \
 \  JSR DORND            \ Set A and X to random numbers
-\
 \
 \  STA T                \ Set T to a random number
 \
@@ -26916,21 +26852,14 @@ LOAD_F% = LOAD% + P% - CODE%
 
  JSR NO3                \ Make the sound from our updated sound block in XX16
 
-                        \ --- Original Acornsoft code removed: ---------------->
-
-\  LDA #16              \ Set A = 16 to denote we have made a hit or kill
-\                       \ (part 2 of the explosion), and fall through into NOISE
-\                       \ to make the sound
-
-                        \ --- And replaced by: -------------------------------->
-
+                        \ --- Code added for Elite-A: ------------------------->
 .n_sound10
+
+                        \ --- End of added code ------------------------------->
 
  LDA #16                \ Set A = 16 to denote we have made a hit or kill
                         \ (part 2 of the explosion), and fall through into NOISE
                         \ to make the sound
-
-                        \ --- End of replacement ------------------------------>
 
 \ ******************************************************************************
 \
@@ -27502,18 +27431,13 @@ LOAD_F% = LOAD% + P% - CODE%
  INY                    \ Update the key logger for key 2 in the KYTB table, so
  JSR DKS1               \ KY2 will be &FF if Space (speed up) is being pressed
 
-                        \ --- Original Acornsoft code removed: ---------------->
-
-\  LDA VIA+&40          \ Read 6522 System VIA input register IRB (SHEILA &40)
-
-                        \ --- And replaced by: -------------------------------->
-
+                        \ --- Code added for Elite-A: ------------------------->
  LDA #&51               \ AJD
  STA &FE60
 
- LDA VIA+&40            \ Read 6522 System VIA input register IRB (SHEILA &40)
+                        \ --- End of added code ------------------------------->
 
-                        \ --- End of replacement ------------------------------>
+ LDA VIA+&40            \ Read 6522 System VIA input register IRB (SHEILA &40)
 
  TAX                    \ This instruction doesn't seem to have any effect, as
                         \ X is overwritten in a few instructions. When the
@@ -27631,7 +27555,6 @@ LOAD_F% = LOAD% + P% - CODE%
 \  BNE DKJ1             \ the joystick rather than keyboard, so jump to DKJ1
 \                       \ to read the joystick flight controls, before jumping
 \                       \ to DK4 below
-\
 \
 \  STA BSTK             \ Set BSTK = 0 to disable the Bitstik
 
@@ -27947,7 +27870,6 @@ LOAD_F% = LOAD% + P% - CODE%
 \  CPX #&64             \ If "B" is not being pressed, skip to DK7
 \  BNE nobit
 \
-\
 \  LDA BSTK             \ Toggle the value of BSTK between 0 and &FF
 \  EOR #&FF
 \  STA BSTK
@@ -27958,7 +27880,6 @@ LOAD_F% = LOAD% + P% - CODE%
 \  STA JSTE             \ Configure JSTE to the same value, so when the Bitstik
 \                       \ is enabled, the joystick is configured with reversed
 \                       \ channels
-\
 \
 \ .nobit
 
@@ -27986,7 +27907,6 @@ LOAD_F% = LOAD% + P% - CODE%
 
 \  LDA #&FF             \ Set A to &FF so we can store this in the keyboard
 \                       \ logger for keys that are being pressed
-\
 \
 \ .DKL1
 \
@@ -28202,7 +28122,6 @@ LOAD_F% = LOAD% + P% - CODE%
 \
 \  CPX #17              \ If X >= 17 then we just lost a piece of equipment, so
 \  BCS ou1              \ jump to ou1 to print the relevant message
-\
 \
 \  TXA                  \ Print recursive token 48 + A as an in-flight token,
 \  ADC #208             \ which will be in the range 48 ("FOOD") to 64 ("ALIEN
@@ -34753,7 +34672,6 @@ LOAD_H% = LOAD% + P% - CODE%
 \
 \  PLA                  \ Restore the stick height from the stack into A
 \
-\
 \  PLP                  \ Restore the flags from above, so the C flag once again
 \                       \ reflects the sign of the stick height
 \
@@ -34833,7 +34751,6 @@ LOAD_H% = LOAD% + P% - CODE%
 \                       \ the dot is above the ellipse and the stick is below
 \                       \ the dot, and we need to draw the stick downwards from
 \                       \ the dot)
-\
 \
 \  INY                  \ We want to draw the stick downwards, so we first
 \                       \ increment the row counter so that it's pointing to the

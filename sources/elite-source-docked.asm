@@ -3595,15 +3595,12 @@ BRKV = P% - 2           \ The address of the destination address in the above
 
 \  LDA INWK+31          \ Fetch the ship's exploding/killed state from byte #31
 \
-\
 \  AND #%00100000       \ If we are exploding then jump to MVD1 to remove it
 \  BNE MVD1             \ from the scanner permanently
-\
 \
 \  LDA INWK+31          \ Set bit 4 to keep the ship visible on the scanner
 \  ORA #%00010000
 \  STA INWK+31
-\
 \
 \ .MVD1
 \
@@ -5663,7 +5660,6 @@ LOAD_B% = LOAD% + P% - CODE%
                         \
                         \         COMMANDER {commander name}
                         \
-                        \
                         \   Present System      : {current system name}
                         \   Hyperspace System   : {selected system name}
                         \   Condition           :
@@ -5777,7 +5773,6 @@ LOAD_B% = LOAD% + P% - CODE%
 \  LDA #107             \ We do have a cargo bay extension, so print recursive
 \  JSR plf2             \ token 107 ("LARGE CARGO{sentence case} BAY"), followed
 \                       \ by a newline and an indent of 6 characters
-\
 \
 \  LDA BST              \ If we don't have fuel scoops fitted, skip the
 \  BEQ P%+7             \ following two instructions
@@ -5993,7 +5988,6 @@ LOAD_B% = LOAD% + P% - CODE%
                         \ --- Original Acornsoft code removed: ---------------->
 
 \  JSR plf              \ Print the text token in A followed by a newline
-\
 \
 \  LDX #6               \ Move the text cursor to column 6
 \  STX XC
@@ -7564,7 +7558,6 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 \  STA R                \ routine below
 \  STA P
 \
-\
 \  LDA #8               \ Set S = 8, which is the value of the centre of the
 \  STA S                \ roll indicator
 \
@@ -7575,7 +7568,6 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 \  ORA ALP2             \ Apply the roll sign to the value, and flip the sign,
 \  EOR #%10000000       \ so it's now in the range -7 to +7, with a positive
 \                       \ roll angle alpha giving a negative value in A
-\
 \
 \  JSR ADD              \ We now add A to S to give us a value in the range 1 to
 \                       \ 15, which we can pass to DIL2 to draw the vertical
@@ -7615,7 +7607,6 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 \                       \ from -7 to +7 because these are magnitude-based
 \                       \ numbers with sign bits, rather than two's complement
 \                       \ numbers
-\
 \
 \  JSR ADD              \ We now add A to S to give us a value in the range 1 to
 \                       \ 15, which we can pass to DIL2 to draw the vertical
@@ -7890,7 +7881,6 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 \
 \  AND FLH              \ A will be zeroed if flashing colours are disabled
 \
-\
 \  BEQ P%+4             \ If A is zero, skip to the LDA instruction below
 \
 \  TXA                  \ Otherwise flashing colours are enabled and it's the
@@ -7901,14 +7891,10 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 \  EQUB &2C             \ Skip the next instruction by turning it into
 \                       \ &2C &A9 &0F, or BIT &0FA9, which does nothing apart
 \                       \ from affect the flags
-\
-\  LDA #&0F             \ Set A to dashboard colour 1 (red)
 
-                        \ --- And replaced by: -------------------------------->
+                        \ --- End of removed code ------------------------------
 
  LDA #&0F               \ Set A to dashboard colour 1 (red)
-
-                        \ --- End of replacement ------------------------------>
 
  RTS                    \ Return from the subroutine
 
@@ -9263,9 +9249,7 @@ LOAD_C% = LOAD% +P% - CODE%
 \
 \  STA STP              \ Store the step size in A
 \
-\
 \  JSR TTX66            \ Clear the screen and draw a white border
-\
 \
 \  JSR HFS1             \ Call HFS1 below and then fall through into the same
 \                       \ routine, so this effectively runs HFS1 twice, and as
@@ -14333,15 +14317,8 @@ LOAD_D% = LOAD% + P% - CODE%
                         \ --- Original Acornsoft code removed: ---------------->
 
 \  JSR CATD             \ Call CATD to reload the disc catalogue
-\
-\  LDX #LO(RDLI)        \ Set (Y X) to point to RDLI ("R.D.CODE")
-\  LDY #HI(RDLI)
-\
-\  JMP OSCLI            \ Call OSCLI to run the OS command in RDLI, which *RUNs
-\                       \ the main flight code in D.CODE, returning from the
-\                       \ subroutine using a tail call
 
-                        \ --- And replaced by: -------------------------------->
+                        \ --- End of removed code ------------------------------
 
  LDX #LO(RDLI)          \ Set (Y X) to point to RDLI ("R.D.CODE")
  LDY #HI(RDLI)
@@ -14349,8 +14326,6 @@ LOAD_D% = LOAD% + P% - CODE%
  JMP OSCLI              \ Call OSCLI to run the OS command in RDLI, which *RUNs
                         \ the main flight code in D.CODE, returning from the
                         \ subroutine using a tail call
-
-                        \ --- End of replacement ------------------------------>
 
 \ ******************************************************************************
 \
@@ -14595,7 +14570,6 @@ LOAD_D% = LOAD% + P% - CODE%
 \  LDA tek              \ Fetch the tech level of the current system from tek
 \  CLC                  \ and add 3 (the tech level is stored as 0-14, so A is
 \  ADC #3               \ now set to between 3 and 17)
-\
 \
 \  CMP #12              \ If A >= 12 then set A = 14, so A is now set to between
 \  BCC P%+4             \ 3 and 14
@@ -14870,11 +14844,9 @@ LOAD_D% = LOAD% + P% - CODE%
 \                       \ prompt, and ask for a view number, which is returned
 \                       \ in X (which now contains 0-3)
 \
-\
 \  LDA #POW             \ Call refund with A set to the power of the new pulse
 \  JSR refund           \ laser to install the new laser and process a refund if
 \                       \ we already have a laser fitted to this view
-\
 \
 \  LDA #4               \ Set A to 4 as we just overwrote the original value,
 \                       \ and we still need it set correctly so we can continue
@@ -14898,7 +14870,6 @@ LOAD_D% = LOAD% + P% - CODE%
 \  JSR qv               \ Print a menu listing the four views, with a "View ?"
 \                       \ prompt, and ask for a view number, which is returned
 \                       \ in X (which now contains 0-3)
-\
 \
 \  LDA #POW+128         \ Call refund with A set to the power of the new beam
 \  JSR refund           \ laser to install the new laser and process a refund if
@@ -18412,10 +18383,8 @@ LOAD_F% = LOAD% + P% - CODE%
 \                       \ the rest of them are present and should be drawn in
 \                       \ green/cyan
 \
-\
 \  LDY #0               \ Draw the missile indicator at position X in black
 \  JSR MSBAR
-\
 \
 \  DEX                  \ Decrement the counter to point to the next missile
 \
@@ -18424,7 +18393,6 @@ LOAD_F% = LOAD% + P% - CODE%
 \  RTS                  \ Return from the subroutine
 \
 \ .SAL8
-\
 \
 \  LDY #&EE             \ Draw the missile indicator at position X in green/cyan
 \  JSR MSBAR
@@ -18591,22 +18559,17 @@ LOAD_F% = LOAD% + P% - CODE%
 \                       \ time it will either be an asteroid (98.5% chance) or,
 \                       \ very rarely, a cargo canister (1.5% chance)
 \
-\
 \  LDA MJ               \ If we are in witchspace following a mis-jump, skip the
 \  BNE ytq              \ following by jumping down to MLOOP (via ytq above)
 \
-\
 \  JSR DORND            \ Set A and X to random numbers
-\
 \
 \  CMP #35              \ If A >= 35 (87% chance), jump down to MLOOP to skip
 \  BCS MLOOP            \ the following
 \
-\
 \  LDA MANY+AST         \ If we already have 3 or more asteroids in the local
 \  CMP #3               \ bubble, jump down to MLOOP to skip the following
 \  BCS MLOOP
-\
 \
 \  JSR ZINF             \ Call ZINF to reset the INWK ship workspace
 \
@@ -18677,22 +18640,15 @@ LOAD_F% = LOAD% + P% - CODE%
 \
 \ .EE20
 \
-\
 \  JSR DIALS            \ Call DIALS to update the dashboard
-\
 \
 \  LDA QQ11             \ If this is a space view, skip the following two
 \  BEQ P%+7             \ instructions (i.e. jump to JSR TT17 below)
-\
-\  LDY #2               \ Wait for 2/50 of a second (0.04 seconds), to slow the
-\  JSR DELAY            \ main loop down a bit
 
-                        \ --- And replaced by: -------------------------------->
+                        \ --- End of removed code ------------------------------
 
  LDY #2                 \ Wait for 2/50 of a second (0.04 seconds), to slow the
  JSR DELAY              \ main loop down a bit
-
-                        \ --- End of replacement ------------------------------>
 
  JSR TT17               \ Scan the keyboard for the cursor keys or joystick,
                         \ returning the cursor's delta values in X and Y and
@@ -19285,7 +19241,6 @@ ENDIF
 \ \JSR BELL             \ This instruction is commented out in the original
 \                       \ source. It would make a standard system beep
 \
-\
 \                       \ The checksum CHK is correct, so now we check whether
 \                       \ CHK2 = CHK EOR A9, and if this check fails, bit 7 of
 \                       \ the competition flags at COK gets set, to indicate
@@ -19305,7 +19260,6 @@ ENDIF
 \
 \ .tZ
 \
-\
 \ IF _STH_DISC
 \
 \  ORA #%00100000       \ Set bit 5 of A to denote that this is the disc version
@@ -19320,9 +19274,7 @@ ENDIF
 \
 \ ENDIF
 \
-\
 \  STA COK              \ Store the updated competition flags in COK
-\
 \
 \  RTS                  \ Return from the subroutine
 
@@ -20085,20 +20037,14 @@ ENDIF
  JSR OSCLI              \ Call OSCLI to execute the OS command at (Y X), which
                         \ catalogues the disc
 
-                        \ --- Original Acornsoft code removed: ---------------->
-
-\  DEC CATF             \ Decrement the CATF flag back to 0, so the TT26 routine
-\                       \ reverts to standard formatting
-
-                        \ --- And replaced by: -------------------------------->
-
  DEC CATF               \ Decrement the CATF flag back to 0, so the TT26 routine
                         \ reverts to standard formatting
 
+                        \ --- Code added for Elite-A: ------------------------->
  LDA NA%+5              \ AJD
  STA NAME+5
 
-                        \ --- End of replacement ------------------------------>
+                        \ --- End of added code ------------------------------->
 
  CLC                    \ Clear the C flag
 
@@ -20423,7 +20369,6 @@ ENDIF
 
 \  LSR SVC              \ Halve the save count value in SVC
 \
-\
 \  LDA #3               \ Print extended token 3 ("COMPETITION NUMBER:")
 \  JSR DETOK
 
@@ -20472,10 +20417,8 @@ ENDIF
 \  EOR TALLY+1          \ the kill tally)
 \  STA K+3
 \
-\
 \  CLC                  \ Clear the C flag so the call to BPRNT does not include
 \                       \ a decimal point
-\
 \
 \  JSR BPRNT            \ Print the competition number stored in K to K+3. The
 \                       \ value of U might affect how this is printed, and as
@@ -20484,9 +20427,7 @@ ENDIF
 \                       \ competition code is a 10-digit number, this just means
 \                       \ it may or may not have an extra space of padding
 \
-\
 \  JSR TT67             \ Print a newline
-\
 \
 \  PLA                  \ Restore the checksum from the stack
 
@@ -21465,7 +21406,6 @@ ENDIF
 \  CPX #&64             \ If "B" is not being pressed, skip to DK7
 \  BNE nobit
 \
-\
 \  LDA BSTK             \ Toggle the value of BSTK between 0 and &FF
 \  EOR #&FF
 \  STA BSTK
@@ -21476,7 +21416,6 @@ ENDIF
 \  STA JSTE             \ Configure JSTE to the same value, so when the Bitstik
 \                       \ is enabled, the joystick is configured with reversed
 \                       \ channels
-\
 \
 \ .nobit
 
