@@ -426,15 +426,15 @@ ENDMACRO
  EQUB 16                \ Number of faces          = 16 / 4 = 4
  EQUB 8                 \ Visibility distance      = 8
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  EQUB 17              \ Max. energy              = 17
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  EQUB 8                 \ Max. energy              = 8
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  EQUB 8                 \ Max. speed               = 8
  EQUB &00               \ Edges data offset (high) = &002C
@@ -487,28 +487,28 @@ ENDMACRO
  EQUB 60                \ Number of vertices       = 60 / 6 = 10
  EQUB 15                \ Number of edges          = 15
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  EQUW 0               \ Bounty                   = 0
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  EQUW 1                 \ Bounty                   = 1
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  EQUB 28                \ Number of faces          = 28 / 4 = 7
  EQUB 12                \ Visibility distance      = 12
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  EQUB 17              \ Max. energy              = 17
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  EQUB 8                 \ Max. energy              = 8
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  EQUB 15                \ Max. speed               = 15
  EQUB &00               \ Edges data offset (high) = &0050
@@ -582,32 +582,32 @@ ENDMACRO
  EQUB 28                \ Number of faces          = 28 / 4 = 7
  EQUB 23                \ Visibility distance      = 23
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  EQUB 100             \ Max. energy              = 100
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  EQUB 91                \ Max. energy              = 91
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  EQUB 32                \ Max. speed               = 32
  EQUB &00               \ Edges data offset (high) = &006E
  EQUB &00               \ Faces data offset (high) = &00BE
  EQUB 1                 \ Normals are scaled by    = 2^1 = 2
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  EQUB %00010001       \ Laser power              = 2
 \                       \ Missiles                 = 1
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  EQUB %00101001         \ Laser power              = 5
                         \ Missiles                 = 1
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
 \VERTEX    x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX    0,    0,   72,     1,      2,    3,     4,         31    \ Vertex 0
@@ -669,18 +669,18 @@ ENDMACRO
 
 .SHIP_CONSTRICTOR
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  EQUB 3               \ Max. canisters on demise = 3
 \  EQUW 65 * 65         \ Targetable area          = 65 * 65
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  EQUB 3 + (15 << 4)     \ Max. canisters on demise = 3
                         \ Market item when scooped = 15 + 1 = 16 (Alien items)
  EQUW 99 * 99           \ Targetable area          = 99 * 99
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  EQUB &7A               \ Edges data offset (low)  = &007A
  EQUB &DA               \ Faces data offset (low)  = &00DA
@@ -693,33 +693,33 @@ ENDMACRO
  EQUB 40                \ Number of faces          = 40 / 4 = 10
  EQUB 45                \ Visibility distance      = 45
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  EQUB 252             \ Max. energy              = 252
 \  EQUB 36              \ Max. speed               = 36
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  EQUB 115               \ Max. energy              = 115
  EQUB 55                \ Max. speed               = 55
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  EQUB &00               \ Edges data offset (high) = &007A
  EQUB &00               \ Faces data offset (high) = &00DA
  EQUB 2                 \ Normals are scaled by    = 2^2 = 4
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  EQUB %00110100       \ Laser power              = 6
 \                       \ Missiles                 = 4
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  EQUB %01000111         \ Laser power              = 8
                         \ Missiles                 = 7
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
 \VERTEX    x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX   20,   -7,   80,     2,      0,    9,     9,         31    \ Vertex 0
@@ -788,7 +788,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
 .ship_iguana
 
@@ -866,7 +866,7 @@ ENDMACRO
  FACE      -23,        0,      -93,         31    \ Face 8
  FACE       23,        0,      -93,         31    \ Face 9
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -893,32 +893,32 @@ ENDMACRO
  EQUB 60                \ Number of faces          = 60 / 4 = 15
  EQUB 23                \ Visibility distance      = 23
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  EQUB 85              \ Max. energy              = 85
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  EQUB 72                \ Max. energy              = 72
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  EQUB 24                \ Max. speed               = 24
  EQUB &00               \ Edges data offset (high) = &0080
  EQUB &00               \ Faces data offset (high) = &00F4
  EQUB 2                 \ Normals are scaled by    = 2^2 = 4
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  EQUB %00010000       \ Laser power              = 2
 \                       \ Missiles                 = 0
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  EQUB %00100001         \ Laser power              = 4
                         \ Missiles                 = 1
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
 \VERTEX    x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX  -18,    0,   40,     1,      0,   12,    11,         31    \ Vertex 0
@@ -1010,28 +1010,28 @@ ENDMACRO
  EQUB 54                \ Number of vertices       = 54 / 6 = 9
  EQUB 21                \ Number of edges          = 21
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  EQUW 5               \ Bounty                   = 5
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  EQUW 15                \ Bounty                   = 15
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  EQUB 56                \ Number of faces          = 56 / 4 = 14
  EQUB 50                \ Visibility distance      = 50
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  EQUB 60              \ Max. energy              = 60
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  EQUB 56                \ Max. energy              = 56
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  EQUB 30                \ Max. speed               = 30
  EQUB &00               \ Edges data offset (high) = &004A
@@ -1111,15 +1111,15 @@ ENDMACRO
                         \ Market item when scooped = 11 + 1 = 12 (Minerals)
  EQUW 16 * 16           \ Targetable area          = 16 * 16
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  EQUB LO(SHIP_ESCAPE_POD_EDGES - SHIP_SPLINTER)    \ Edges data = escape pod
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  EQUB &5A                                            \ AJD
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  EQUB &44               \ Faces data offset (low)  = &0044
  EQUB 25                \ Max. edge count          = (25 - 1) / 4 = 6
@@ -1128,40 +1128,40 @@ ENDMACRO
  EQUB 24                \ Number of vertices       = 24 / 6 = 4
  EQUB 6                 \ Number of edges          = 6
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  EQUW 0               \ Bounty                   = 0
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  EQUW 1                 \ Bounty                   = 1
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  EQUB 16                \ Number of faces          = 16 / 4 = 4
  EQUB 8                 \ Visibility distance      = 8
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  EQUB 20              \ Max. energy              = 20
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  EQUB 16                \ Max. energy              = 16
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  EQUB 10                \ Max. speed               = 10
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  EQUB HI(SHIP_ESCAPE_POD_EDGES - SHIP_SPLINTER)    \ Edges data = escape pod
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  EQUB &FE                                            \ AJD
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  EQUB &00               \ Faces data offset (high) = &0044
  EQUB 5                 \ Normals are scaled by    = 2^5 = 32
@@ -1205,32 +1205,32 @@ ENDMACRO
  EQUB 32                \ Number of faces          = 32 / 4 = 8
  EQUB 19                \ Visibility distance      = 19
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  EQUB 30              \ Max. energy              = 30
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  EQUB 32                \ Max. energy              = 32
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  EQUB 23                \ Max. speed               = 23
  EQUB &00               \ Edges data offset (high) = &0050
  EQUB &00               \ Faces data offset (high) = &0090
  EQUB 3                 \ Normals are scaled by    = 2^3 = 8
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  EQUB %00001000       \ Laser power              = 1
 \                       \ Missiles                 = 0
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  EQUB %00011000         \ Laser power              = 3
                         \ Missiles                 = 0
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
 \VERTEX    x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX   10,  -10,   35,     2,      0,    7,     7,         31    \ Vertex 0
@@ -1297,32 +1297,32 @@ ENDMACRO
  EQUB 36                \ Number of faces          = 36 / 4 = 9
  EQUB 18                \ Visibility distance      = 18
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  EQUB 70              \ Max. energy              = 70
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  EQUB 65                \ Max. energy              = 65
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  EQUB 30                \ Max. speed               = 30
  EQUB &00               \ Edges data offset (high) = &005C
  EQUB &00               \ Faces data offset (high) = &00A0
  EQUB 3                 \ Normals are scaled by    = 2^3 = 8
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  EQUB %00010000       \ Laser power              = 2
 \                       \ Missiles                 = 0
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  EQUB %00100000         \ Laser power              = 4
                         \ Missiles                 = 0
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
 \VERTEX    x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX  -10,   -4,   47,     3,      0,    5,     4,         31    \ Vertex 0
@@ -1390,45 +1390,45 @@ ENDMACRO
  EQUB 78                \ Number of vertices       = 78 / 6 = 13
  EQUB 24                \ Number of edges          = 24
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  EQUW 0               \ Bounty                   = 0
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  EQUW 250               \ Bounty                   = 250
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  EQUB 52                \ Number of faces          = 52 / 4 = 13
  EQUB 40                \ Visibility distance      = 40
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  EQUB 250             \ Max. energy              = 250
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  EQUB 164               \ Max. energy              = 164
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  EQUB 24                \ Max. speed               = 24
  EQUB &00               \ Edges data offset (high) = &0062
  EQUB &00               \ Faces data offset (high) = &00C2
  EQUB 0                 \ Normals are scaled by    = 2^0 = 1
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  EQUB %00011100       \ Laser power              = 3
 \                       \ Missiles                 = 4
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  EQUB %00101010         \ Laser power              = 5
                         \ Missiles                 = 2
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
 \VERTEX    x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX    0,    0,   93,    15,     15,   15,    15,         31    \ Vertex 0

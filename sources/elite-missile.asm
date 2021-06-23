@@ -302,17 +302,17 @@ ENDMACRO
  FACE        0,      -32,        0,         31    \ Face 5
  FACE      -32,        0,        0,         31    \ Face 6
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  FACE        0,      160,      110,         31  \ Face 7
 \  FACE        0,       64,        4,          0  \ Face 8
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  FACE        0,       32,        0,         31    \ Face 7
  FACE        0,        0,     -176,         31    \ Face 8
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
 \ ******************************************************************************
 \
@@ -325,7 +325,7 @@ ENDMACRO
 
 .VEC
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  EQUW &0004           \ VEC = &7FFE
 \                       \
@@ -335,14 +335,14 @@ ENDMACRO
 \                       \ This default value is presumably noise included at the
 \                       \ time of compilation, as it gets overwritten
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  SKIP 2                 \ VEC = &7FFE
                         \
                         \ This gets set to the value of the original IRQ1 vector
                         \ by the loading process
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
 \ ******************************************************************************
 \

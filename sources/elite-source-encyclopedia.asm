@@ -702,13 +702,13 @@ ORG &0000
 
  SKIP 4                 \ Temporary storage, used in a number of places
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
 .finder
 
  SKIP 1                 \ AJD
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
 ORG &00D1
 
@@ -1286,12 +1286,12 @@ ORG &0300
                         \       (0 = pulse or mining laser) or is always on
                         \       (1 = beam or military laser)
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  SKIP 2               \ These bytes appear to be unused (they were originally
 \                       \ used for up/down lasers, but they were dropped)
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  SKIP 1                 \ This byte appears to be unused
 
@@ -1300,7 +1300,7 @@ ORG &0300
 
  SKIP 1                 \ AJD
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
 .CRGO
 
@@ -1383,11 +1383,11 @@ ORG &0300
                         \
                         \   * &FF = fitted
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  SKIP 4               \ These bytes appear to be unused
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
 .cmdr_cour
 
@@ -1401,7 +1401,7 @@ ORG &0300
 
  SKIP 1                 \ AJD
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
 .NOMSL
 
@@ -1792,7 +1792,7 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
                         \ of the catalogue, between the two lists of filenames,
                         \ so it can be dropped without affecting the layout)
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
 .new_pulse
 
@@ -1854,7 +1854,7 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
 
  SKIP 1                 \ AJD
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -2025,27 +2025,42 @@ LOAD_A% = LOAD%
 \       Type: Workspace
 \    Address: &11E3 to &11F0
 \   Category: Workspaces
-\    Summary: Entry points and vector addresses in the main encyclopedia code
+\    Summary: Entry points and vector addresses in the main docked code
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: --------------------------
-
 .S%
 
- JMP DOENTRY            \ AJD
+ JMP DOENTRY            \ Decrypt the main docked code and dock at the station
 
- JMP DOENTRY
+                        \ --- Original Acornsoft code removed: ---------------->
 
- JMP CHPR
+\  JMP DOBEGIN          \ Decrypt the main docked code and start a new game
 
- EQUW IRQ1
+                        \ --- And replaced by: -------------------------------->
 
- JMP BRBR
+ JMP DOENTRY            \ Decrypt the main docked code and dock at the station
 
-BRKV = P% - 2
+                        \ --- End of replacement ------------------------------>
 
-                        \ --- End of added code --------------------------------
+ JMP CHPR               \ WRCHV is set to point here by elite-loader3.asm
+
+ EQUW IRQ1              \ IRQ1V is set to point here by elite-loader3.asm
+
+                        \ --- Original Acornsoft code removed: ---------------->
+
+\  JMP BRBR1            \ BRKV is set to point here by elite-loader3.asm
+
+                        \ --- And replaced by: -------------------------------->
+
+ JMP BRBR               \ AJD
+
+                        \ --- End of replacement ------------------------------>
+
+BRKV = P% - 2           \ The address of the destination address in the above
+                        \ JMP BRBR1 instruction. This ensures that any code that
+                        \ updates BRKV will update this instruction instead of
+                        \ the actual vector
 
 \ ******************************************************************************
 \
@@ -2075,17 +2090,17 @@ BRKV = P% - 2
 
 .LTLI
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  EQUS "L.T.CODE"
 \  EQUB 13
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  EQUS "L.1.D"
  EQUB 13
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
 \ ******************************************************************************
 \
@@ -2096,7 +2111,7 @@ BRKV = P% - 2
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
 .launch
 
@@ -2105,7 +2120,7 @@ BRKV = P% - 2
 
  EQUB &2C
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -2116,7 +2131,7 @@ BRKV = P% - 2
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
 .escape
 
@@ -2124,7 +2139,7 @@ BRKV = P% - 2
  STA KL+1
  JMP INBAY
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -2135,7 +2150,7 @@ BRKV = P% - 2
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
 .DOENTRY
 
@@ -2143,7 +2158,7 @@ BRKV = P% - 2
  JSR RES2
  JMP BAY
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -2187,7 +2202,7 @@ BRKV = P% - 2
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
 .write_msg3
 
@@ -2214,7 +2229,7 @@ BRKV = P% - 2
                         \ call (this BNE is effectively a JMP as A is never
                         \ zero)
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -2287,7 +2302,7 @@ BRKV = P% - 2
  CLC                    \ range 220-221, as this is only called in galaxies 0
  ADC GCNT               \ and 1
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  BNE DETOK            \ Jump to DETOK to print extended token 220-221,
 \                       \ returning from the subroutine using a tail call (this
@@ -2364,7 +2379,7 @@ BRKV = P% - 2
  LDA (V),Y              \ Load the character at offset Y in the token table,
                         \ which is the next character from the token table
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  EOR #VE              \ Tokens are stored in memory having been EOR'd with
 \                       \ #VE, so we repeat the EOR to get the actual character
@@ -2414,7 +2429,7 @@ BRKV = P% - 2
                         \ which is the next character from the token we want to
                         \ print
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  EOR #VE              \ Tokens are stored in memory having been EOR'd with
 \                       \ #VE, so we repeat the EOR to get the actual character
@@ -2526,11 +2541,11 @@ BRKV = P% - 2
                         \ If we get here then A >= 215, so this is a two-letter
                         \ token from the extended TKN2/QQ16 table
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
 .msg_pairs
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
  SBC #215               \ Subtract 215 to get a token number in the range 0-12
                         \ (the C flag is set as we passed through the BCC above,
@@ -2747,14 +2762,14 @@ BRKV = P% - 2
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
 .column_16
 
  LDA #&10
  EQUB &2C
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -2783,11 +2798,11 @@ BRKV = P% - 2
  LDA #6                 \ Move the text cursor to column 6
  STA XC
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
 .set_token
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
  LDA #%11111111         \ Set all the bits in DTW2
  STA DTW2
@@ -2858,14 +2873,14 @@ BRKV = P% - 2
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
 .clr_vdustat
 
  LDA #&01
  EQUB &2C
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -3153,27 +3168,27 @@ BRKV = P% - 2
  EQUW MT2               \ Token  2: Switch to Sentence Case
  EQUW TT27              \ Token  3: Print the selected system name
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  EQUW TT27            \ Token  4: Print the commander's name
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  EQUW MT6               \ Token  4: Switch to standard tokens, in Sentence Case
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  EQUW MT5               \ Token  5: Switch to extended tokens
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  EQUW MT6             \ Token  6: Switch to standard tokens, in Sentence Case
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  EQUW set_token         \ Token  6: AJD
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  EQUW DASC              \ Token  7: Beep
  EQUW MT8               \ Token  8: Tab to column 6
@@ -3191,29 +3206,29 @@ BRKV = P% - 2
  EQUW DASC              \ Token 20: Unused
  EQUW CLYNS             \ Token 21: Clear the bottom few lines of the space view
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  EQUW PAUSE           \ Token 22: Display ship and wait for key press
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  EQUW column_16         \ Token 22: Tab to column 16
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  EQUW MT23              \ Token 23: Move to row 10, white text, set lower case
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  EQUW PAUSE2          \ Token 24: Wait for a key press
 \  EQUW BRIS            \ Token 25: Show incoming message screen, wait 2 seconds
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  EQUW clr_vdustat       \ Token 24: AJD
  EQUW DASC              \ Token 25: Unused
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  EQUW MT26              \ Token 26: Fetch line input from keyboard (filename)
  EQUW MT27              \ Token 27: Print mission captain's name (217-219)
@@ -3872,7 +3887,7 @@ PRINT "Code size is ", ~(P% - CODE%)
 PRINT "Execute at ", ~LOAD%
 PRINT "Reload at ", ~LOAD_A%
 
-PRINT "S.ELTA ", ~CODE%, " ", ~P%, " ", ~LOAD%, " ", ~LOAD_A%
+PRINT "S.F.ELTA ", ~CODE%, " ", ~P%, " ", ~LOAD%, " ", ~LOAD_A%
 \SAVE "output/F.ELTA.bin", CODE%, P%, LOAD%
 
 \ ******************************************************************************
@@ -7026,6 +7041,31 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
 \ ******************************************************************************
 \
+\ Save output/ELTB.bin
+\
+\ ******************************************************************************
+
+PRINT "ELITE B"
+PRINT "Assembled at ", ~CODE_B%
+PRINT "Ends at ", ~P%
+PRINT "Code size is ", ~(P% - CODE_B%)
+PRINT "Execute at ", ~LOAD%
+PRINT "Reload at ", ~LOAD_B%
+
+PRINT "S.F.ELTB ", ~CODE_B%, " ", ~P%, " ", ~LOAD%, " ", ~LOAD_B%
+\SAVE "output/F.ELTB.bin", CODE_B%, P%, LOAD%
+
+\ ******************************************************************************
+\
+\ ELITE C FILE
+\
+\ ******************************************************************************
+
+CODE_C% = P%
+LOAD_C% = LOAD% +P% - CODE%
+
+\ ******************************************************************************
+\
 \       Name: SQUA
 \       Type: Subroutine
 \   Category: Maths (Arithmetic)
@@ -7661,7 +7701,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
 .PDESC
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  LDA QQ8              \ If either byte in QQ18(1 0) is non-zero, meaning that
 \  ORA QQ8+1            \ the distance from the current system to the selected
@@ -7853,25 +7893,25 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
                         \ this routine, keep looping back up to PAUSE2, until
                         \ the key is released
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
 .l_out
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
  JSR RDKEY              \ Any pre-existing key press is now gone, so we can
                         \ start scanning the keyboard again, returning the
                         \ internal key number in X (or 0 for no key press)
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  BEQ PAUSE2           \ Keep looping up to PAUSE2 until a key is pressed
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  BEQ l_out              \ AJD
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  RTS                    \ Return from the subroutine
 
@@ -8199,6 +8239,31 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
 \ ******************************************************************************
 \
+\ Save output/ELTC.bin
+\
+\ ******************************************************************************
+
+PRINT "ELITE C"
+PRINT "Assembled at ", ~CODE_C%
+PRINT "Ends at ", ~P%
+PRINT "Code size is ", ~(P% - CODE_C%)
+PRINT "Execute at ", ~LOAD%
+PRINT "Reload at ", ~LOAD_C%
+
+PRINT "S.F.ELTC ", ~CODE_C%, " ", ~P%, " ", ~LOAD%, " ", ~LOAD_C%
+\SAVE "output/F.ELTC.bin", CODE_C%, P%, LOAD%
+
+\ ******************************************************************************
+\
+\ ELITE D FILE
+\
+\ ******************************************************************************
+
+CODE_D% = P%
+LOAD_D% = LOAD% + P% - CODE%
+
+\ ******************************************************************************
+\
 \       Name: TT20
 \       Type: Subroutine
 \   Category: Universe
@@ -8363,16 +8428,16 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
  INC YC                 \ Move the text cursor down a line
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \                       \ Fall through into TT69 to set Sentence Case and print
 \                       \ a newline
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
                         \ Fall through into TT67 to print a newline
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
 \ ******************************************************************************
 \
@@ -8737,7 +8802,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
                         \ routine, which calls TT111 to populate ZZ before
                         \ calling TT25 (this routine)
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  JMP PDESC            \ Jump to PDESC to print the system's extended
 \                       \ description, returning from the subroutine using a
@@ -8776,11 +8841,11 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 \
 \  RTS                  \ Return from the subroutine
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  JMP PD1                \ AJD
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
 \ ******************************************************************************
 \
@@ -10130,13 +10195,13 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
 .func_tab
 
  EQUB f0, f1, f2, f3, f4, f5, f6, f7, f8, f9
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -10147,7 +10212,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
 .buy_invnt
 
@@ -10166,7 +10231,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  LDA func_tab,X
  JMP FRCE
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -10218,7 +10283,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  LDX R                  \ If R is non-zero then skip to NWDAV2, as we are
  BNE NWDAV2             \ already building a number
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  CMP #'y'             \ If "Y" was pressed, jump to NWDAV1 to return the
 \  BEQ NWDAV1           \ maximum number allowed (i.e. buy/sell the whole stock)
@@ -10228,11 +10293,11 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 \
 \ .NWDAV2
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
 .NWDAV2
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  STA Q                  \ Store the key pressed in Q
 
@@ -10243,18 +10308,18 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
                         \ with a result of 0, as the key pressed was not a
                         \ number or letter and is less than ASCII "0"
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  CMP #10              \ If A >= 10, jump to BAY2 to display the Inventory
 \  BCS BAY2             \ screen, as the key pressed was a letter or other
 \                       \ non-digit and is greater than ASCII "9"
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  CMP #10                \ If A >= 10, jump to buy_invnt to AJD
  BCS buy_invnt
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  STA S                  \ Store the numeric value of the key pressed in S
 
@@ -10298,7 +10363,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
  RTS                    \ Return from the subroutine
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \ .NWDAV1
 \
@@ -10377,6 +10442,31 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
                         \ the start of the top row of the three bottom rows
 
                         \ Return from the subroutine using a tail call
+
+\ ******************************************************************************
+\
+\ Save output/ELTD.bin
+\
+\ ******************************************************************************
+
+PRINT "ELITE D"
+PRINT "Assembled at ", ~CODE_D%
+PRINT "Ends at ", ~P%
+PRINT "Code size is ", ~(P% - CODE_D%)
+PRINT "Execute at ", ~LOAD%
+PRINT "Reload at ", ~LOAD_D%
+
+PRINT "S.F.ELTD ", ~CODE_D%, " ", ~P%, " ", ~LOAD%, " ", ~LOAD_D%
+\SAVE "output/F.ELTD.bin", CODE_D%, P%, LOAD%
+
+\ ******************************************************************************
+\
+\ ELITE E FILE
+\
+\ ******************************************************************************
+
+CODE_E% = P%
+LOAD_E% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
 \
@@ -11558,7 +11648,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  STA XX0+1              \ blueprint and store it in XX0+1, so XX0(1 0) now
                         \ contains the address of this ship's blueprint
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  CPY #2*SST           \ If the ship type is a space station (SST), then jump
 \  BEQ NW6              \ to NW6, skipping the heap space steps below, as the
@@ -12846,6 +12936,31 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
 \ ******************************************************************************
 \
+\ Save output/ELTE.bin
+\
+\ ******************************************************************************
+
+PRINT "ELITE E"
+PRINT "Assembled at ", ~CODE_E%
+PRINT "Ends at ", ~P%
+PRINT "Code size is ", ~(P% - CODE_E%)
+PRINT "Execute at ", ~LOAD%
+PRINT "Reload at ", ~LOAD_E%
+
+PRINT "S.F.ELTE ", ~CODE_E%, " ", ~P%, " ", ~LOAD%, " ", ~LOAD_E%
+\SAVE "output/F.ELTE.bin", CODE_E%, P%, LOAD%
+
+\ ******************************************************************************
+\
+\ ELITE F FILE
+\
+\ ******************************************************************************
+
+CODE_F% = P%
+LOAD_F% = LOAD% + P% - CODE%
+
+\ ******************************************************************************
+\
 \       Name: SFX
 \       Type: Variable
 \   Category: Sound
@@ -12943,7 +13058,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
  STA MCNT               \ Reset MCNT (the main loop counter) to 0
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \ .modify
 
@@ -12975,7 +13090,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  LDA #HI(LS%)           \ to indicate that the heap is empty
  STA SLSP+1
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  JSR DIALS            \ Update the dashboard
 
@@ -13080,7 +13195,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 \
 \ ******************************************************************************
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \ .DORND2
 \
@@ -13153,7 +13268,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
  DEC MCNT               \ Decrement the main loop counter in MCNT
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  BEQ P%+5             \ If the counter has reached zero, which it will do
 \                       \ every 256 main loops, skip the next JMP instruction
@@ -13257,7 +13372,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  TXS                    \ location for the 6502 stack, so this instruction
                         \ effectively resets the stack
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  LDX GNTMP            \ If the laser temperature in GNTMP is non-zero,
 \  BEQ EE20             \ decrement it (i.e. cool it down a bit)
@@ -13275,12 +13390,12 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 \  LDY #2               \ Wait for 2/50 of a second (0.04 seconds), to slow the
 \  JSR DELAY            \ main loop down a bit
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  LDY #2                 \ Wait for 2/50 of a second (0.04 seconds), to slow the
  JSR DELAY              \ main loop down a bit
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  JSR TT17               \ Scan the keyboard for the cursor keys or joystick,
                         \ returning the cursor's delta values in X and Y and
@@ -13362,7 +13477,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
 .TT102
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  CMP #f8              \ If red key f8 was pressed, jump to STATUS to show the
 \  BNE P%+5             \ Status Mode screen, returning from the subroutine
@@ -13385,7 +13500,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 \                       \ description for the system in ZZ if we're docked),
 \                       \ returning from the subroutine using a tail call
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  CMP #f8                \ If red key f8 was pressed, AJD
  BNE P%+5               \ , returning from the subroutine
@@ -13410,11 +13525,11 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  JSR TT111
  JMP TT25
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
 .TT92
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  CMP #f9              \ If red key f9 was pressed, jump to TT213 to show the
 \  BNE P%+5             \ Inventory screen, returning from the subroutine
@@ -13429,7 +13544,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 \  BNE fvw              \ ship (if docked), returning from the subroutine using
 \  JMP TT110            \ a tail call
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  CMP #&77               \ AJD
  BNE not_invnt
@@ -13443,11 +13558,11 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
 .not_price
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
 .fvw
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  CMP #f3              \ If red key f3 was pressed, jump to EQSHP to show the
 \  BNE P%+5             \ Equip Ship screen, returning from the subroutine using
@@ -13481,7 +13596,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 \
 \ .INSP
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  CMP #&20               \ AJD
  BEQ jump_menu
@@ -13496,7 +13611,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
  JMP info_menu
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
 .LABEL_3
 
@@ -13544,17 +13659,17 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  LDA T1                 \ Restore the original value of A (the key that's been
                         \ pressed) from T1
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  CMP #&36             \ If "O" was pressed, do the following three jumps,
 \  BNE ee2              \ otherwise skip to ee2 to continue
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  CMP #&36               \ If "O" was pressed, do the following three jumps,
  BNE not_home           \ otherwise skip to not_home to continue AJD
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  JSR TT103              \ Draw small crosshairs at coordinates (QQ9, QQ10),
                         \ which will erase the crosshairs currently there
@@ -13577,7 +13692,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
  RTS                    \ Return from the subroutine
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
 .not_home
 
@@ -13595,7 +13710,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  STA QQ10
  JSR TT103
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
 .T95
 
@@ -13635,7 +13750,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 \
 \ This counter starts at zero, and is decremented whenever the BRKV handler at
 \ BRBR prints an error message. It is incremented every time an error message
-\ is printer out as part of the TITLE routine.
+\ is printed out as part of the TITLE routine.
 \
 \ ******************************************************************************
 
@@ -13657,7 +13772,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
 .BR1
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  LDX #3               \ Set XC = 3 (set text cursor to column 3)
 \  STX XC
@@ -13688,11 +13803,11 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 \  JSR DFAULT           \ Call DFAULT to reset the current commander data block
 \                       \ to the last saved commander
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  JMP escape             \ AJD
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
 \ ******************************************************************************
 \
@@ -13771,18 +13886,18 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  LDA #&FF               \ Set QQ12 = &FF (the docked flag) to indicate that we
  STA QQ12               \ are docked
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  LDA #f8              \ Jump into the main loop at FRCE, setting the key
 \  JMP FRCE             \ that's "pressed" to red key f8 (so we show the Status
 \                       \ Mode screen)
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  LDA #f3                \ AJD
  JMP FRCE
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
 \ ******************************************************************************
 \
@@ -14165,19 +14280,19 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
 .BEEP
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  LDA #32              \ Call the NOISE routine with A = 32 to make a short,
 \  BNE NOISE            \ high beep, returning from the subroutine using a tail
 \                       \ call (this BNE is effectively a JMP as A will never be
 \                       \ zero)
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  LDA #32                \ Set A = 32 to denote a short, high beep, and fall
                         \ through into the NOISE routine to make the sound
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
 \ ******************************************************************************
 \
@@ -14515,19 +14630,19 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
 .DOKEY
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  LDA JSTK             \ If JSTK is zero, then we are configured to use the
 \  BEQ DK9              \ keyboard rather than the joystick, so jump to DK9 to
 \                       \ make sure the Bitstik is disabled as well (DK9 then
 \                       \ jumps to DK4 below)
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  LDA JSTK               \ If JSTK is zero, then we are configured to use the
  BEQ DK4                \ keyboard rather than the joystick, so jump to DK4
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  LDX #1                 \ Call DKS2 to fetch the value of ADC channel 1 (the
  JSR DKS2               \ joystick X value) into (A X), and OR A with 1. This
@@ -14610,16 +14725,16 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
  INY                    \ Increment Y to point to the next toggle key
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  CPY #&47             \ The last toggle key is &46 (K), so check whether we
 \                       \ have just done that one
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  CPY #&48               \ AJD
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  BNE DKL4               \ If not, loop back to check for the next toggle key
 
@@ -14636,7 +14751,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  CPX #&70               \ If ESCAPE is not being pressed, skip over the next
  BNE P%+5               \ instruction
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  JMP BR1              \ ESCAPE is being pressed, so jump to BR1 to end the
 \                       \ game
@@ -14660,11 +14775,11 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 \
 \ .nobit
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  JMP escape             \ AJD
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  CPX #&59               \ If DELETE is not being pressed, we are still paused,
  BNE FREEZE             \ so loop back up to keep listening for configuration
@@ -14687,7 +14802,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  LDA #&FF               \ Set A to &FF so we can store this in the keyboard
                         \ logger for keys that are being pressed
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \ .DK5
 
@@ -14695,7 +14810,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
  RTS                    \ Return from the subroutine
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \ .DK9
 \
@@ -15267,6 +15382,31 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
 \ ******************************************************************************
 \
+\ Save output/ELTF.bin
+\
+\ ******************************************************************************
+
+PRINT "ELITE F"
+PRINT "Assembled at ", ~CODE_F%
+PRINT "Ends at ", ~P%
+PRINT "Code size is ", ~(P% - CODE_F%)
+PRINT "Execute at ", ~LOAD%
+PRINT "Reload at ", ~LOAD_F%
+
+PRINT "S.F.ELTF ", ~CODE_F%, " ", ~P%, " ", ~LOAD%, " ", ~LOAD_F%
+\SAVE "output/F.ELTF.bin", CODE_F%, P%, LOAD%
+
+\ ******************************************************************************
+\
+\ ELITE G FILE
+\
+\ ******************************************************************************
+
+CODE_G% = P%
+LOAD_G% = LOAD% + P% - CODE%
+
+\ ******************************************************************************
+\
 \       Name: SHPPT
 \       Type: Subroutine
 \   Category: Drawing ships
@@ -15618,7 +15758,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 \
 \ ------------------------------------------------------------------------------
 \
-\ Calculate following dot products:
+\ Calculate the following dot products:
 \
 \   XX12(1 0) = XX15(5 0) . XX16(5 0)
 \   XX12(3 2) = XX15(5 0) . XX16(11 6)
@@ -15888,17 +16028,17 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  AND #%11110111         \ byte #31 to denote that the ship is no longer being
  STA XX1+31             \ drawn on-screen
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  JMP DOEXP            \ Jump to DOEXP to return from the subroutine using a
 \                       \ tail call, as in the docked code DOEXP just contains
 \                       \ an RTS
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  JMP TT48               \ AJD
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
 .EE51
 
@@ -17571,16 +17711,16 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  ORA #8                 \ #31 to denote that we are drawing something on-screen
  STA XX1+31             \ for this ship
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  JMP DOEXP            \ Jump to DOEXP to display the explosion cloud,
 \                       \ returning from the subroutine using a tail call
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  JMP TT48               \ AJD
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
 .EE31
 
@@ -19036,6 +19176,31 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
 \ ******************************************************************************
 \
+\ Save output/ELTG.bin
+\
+\ ******************************************************************************
+
+PRINT "ELITE G"
+PRINT "Assembled at ", ~CODE_G%
+PRINT "Ends at ", ~P%
+PRINT "Code size is ", ~(P% - CODE_G%)
+PRINT "Execute at ", ~LOAD%
+PRINT "Reload at ", ~LOAD_G%
+
+PRINT "S.F.ELTG ", ~CODE_G%, " ", ~P%, " ", ~LOAD%, " ", ~LOAD_G%
+\SAVE "output/F.ELTG.bin", CODE_G%, P%, LOAD%
+
+\ ******************************************************************************
+\
+\ ELITE H FILE
+\
+\ ******************************************************************************
+
+CODE_H% = P%
+LOAD_H% = LOAD% + P% - CODE%
+
+\ ******************************************************************************
+\
 \       Name: info_menu
 \       Type: Subroutine
 \   Category: Encyclopedia
@@ -19043,7 +19208,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
 .info_menu
 
@@ -19082,7 +19247,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  JSR dn2
  JMP BAY
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -19093,7 +19258,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
 .ships_ag
 
@@ -19181,7 +19346,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  BEQ l_395a
  JMP BAY
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -19192,7 +19357,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
 .controls
 
@@ -19216,7 +19381,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  JSR write_msg3
  JMP l_restart
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -19227,7 +19392,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
 .equip_data
 
@@ -19255,7 +19420,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  JSR write_msg3
  JMP l_restart
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -19266,7 +19431,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
 .trading
 
@@ -19276,7 +19441,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
  JMP BAY
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -19287,7 +19452,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
 .write_card
 
@@ -19382,7 +19547,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
  RTS
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -19393,14 +19558,14 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
 .ship_load
 
  EQUS "L.S.0"
  EQUB 13
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -19411,7 +19576,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
 .ship_file
 
@@ -19420,7 +19585,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  EQUB 'G', 'I', 'M', 'A', 'O', 'F', 'E'
  EQUB 'L', 'L', 'C', 'C', 'P', 'A', 'H'
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -19431,7 +19596,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
 .ship_posn
 
@@ -19440,7 +19605,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  EQUB 20, 17, 17, 11, 22, 21, 11
  EQUB  9, 17, 29, 30, 10, 16, 15
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -19451,7 +19616,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
 .ship_dist
 
@@ -19460,7 +19625,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  EQUB &01, &02, &01, &02, &01, &01, &02
  EQUB &01, &01, &03, &01, &01, &01, &01
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -19471,7 +19636,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
 .menu
 
@@ -19533,7 +19698,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
  JMP BAY
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -19544,13 +19709,13 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
 .menu_title
 
  EQUB &01, &02, &03, &05, &04
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -19561,13 +19726,13 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
 .menu_titlex
 
  EQUB &05, &0C, &0C, &0C, &0B
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -19578,13 +19743,13 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
 .menu_offset
 
  EQUB &02, &07, &15, &5B, &5F
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -19595,13 +19760,13 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
 .menu_entry
 
  EQUB &04, &0E, &0E, &04, &0D
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -19612,13 +19777,13 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
 .menu_query
 
  EQUB &06, &43, &43, &05, &04
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -19876,7 +20041,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
 .TKN1
 
@@ -21574,7 +21739,7 @@ ENDMACRO
                         \
                         \ Encoded as:   ""
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -21585,7 +21750,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
 .msg_3
 
@@ -25477,7 +25642,7 @@ ENDMACRO
  ETOK 177
  EQUB VE
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -25550,7 +25715,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
 .ship_centre
 
@@ -25559,7 +25724,7 @@ ENDMACRO
  EQUB &0D, &0D, &0D, &0C, &0D, &0C, &0D
  EQUB &0C, &0B, &0C, &0C, &0A, &0D, &0E
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -25570,7 +25735,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
 .card_pattern
 
@@ -25600,7 +25765,7 @@ ENDMACRO
  EQUB  1, 20, &2D       \ space
  EQUB  1, 21, &00
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -25611,7 +25776,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
 .card_addr
 
@@ -25622,7 +25787,7 @@ ENDMACRO
  EQUW shuttle, sidewinder, thargoid, thargon
  EQUW transporter, viper, worm
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -25633,7 +25798,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
 .adder
 
@@ -25659,7 +25824,7 @@ ENDMACRO
  EQUS "AM 18 ", &EA, " ", &C2
  EQUB 0, 0
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -25670,7 +25835,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
 .anaconda
 
@@ -25696,7 +25861,7 @@ ENDMACRO
  EQUS &C9, "32.24", &0C, &F4, "g", &EF, &DE, &F4, "s"
  EQUB 0, 0
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -25707,7 +25872,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
 .asp_2
 
@@ -25733,7 +25898,7 @@ ENDMACRO
  EQUS &BC, " Whip", &F9, "sh", &0C, &01, "HK", &02, " ", &B2, &B5
  EQUB 0, 0
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -25744,7 +25909,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
 .boa
 
@@ -25770,7 +25935,7 @@ ENDMACRO
  EQUS &C8, &0C, &B6, &B7, " ", &C2, &F4, "s"
  EQUB 0, 0
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -25781,7 +25946,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
 .bushmaster
 
@@ -25803,7 +25968,7 @@ ENDMACRO
  EQUS &BC, " Whip", &F9, "sh", &0C, &01, "HT", &02, " ", &B2, &B5
  EQUB 0, 0
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -25814,7 +25979,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
 .chameleon
 
@@ -25840,7 +26005,7 @@ ENDMACRO
  EQUS &BC, " ", &DE, &F0, "g", &F4, &0C, "Pul", &DA, &B5
  EQUB 0, 0
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -25851,7 +26016,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
 .cobra_1
 
@@ -25877,7 +26042,7 @@ ENDMACRO
  EQUS &D0, &B5
  EQUB 0, 0
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -25888,7 +26053,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
 .cobra_3
 
@@ -25914,7 +26079,7 @@ ENDMACRO
  EQUS &BA, &B7, "fa", &DE, &0C, "Irrik", &FF, " Thru", &CD
  EQUB 0, 0
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -25925,7 +26090,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
 .coriolis
 
@@ -25937,7 +26102,7 @@ ENDMACRO
  EQUS "2000", &C3, "s"
  EQUB 0, 0
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -25948,7 +26113,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
 .dodecagon
 
@@ -25960,7 +26125,7 @@ ENDMACRO
  EQUS "2700", &C3, "s"
  EQUB 0, 0
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -25971,7 +26136,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
 .escape_pod
 
@@ -25985,7 +26150,7 @@ ENDMACRO
  EQUS "1-2"
  EQUB 0, 0
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -25996,7 +26161,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
 .fer_de_lance
 
@@ -26022,7 +26187,7 @@ ENDMACRO
  EQUS "T", &DB, "r", &DF, "ix ", &F0, "t", &F4, "sun", &0C, &01, "LT", &02, " ", &CE
  EQUB 0, 0
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -26033,7 +26198,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
 .gecko
 
@@ -26059,7 +26224,7 @@ ENDMACRO
  EQUS "B", &F2, "am", &B2, &B7, " ", &01, "XL", &02
  EQUB 0, 0
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -26070,7 +26235,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
 .ghavial
 
@@ -26096,7 +26261,7 @@ ENDMACRO
  EQUS "Sp", &E4, "d", &F4, " & Prime ", &01, "TT1", &02
  EQUB 0, 0
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -26107,7 +26272,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
 .iguana
 
@@ -26133,7 +26298,7 @@ ENDMACRO
  EQUS &C7, " Sup", &F4, " ", &C2, &0C, &01, "VC", &02, "9"
  EQUB 0, 0
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -26144,7 +26309,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
 .krait
 
@@ -26168,7 +26333,7 @@ ENDMACRO
  EQUS &C7, " Sp", &F0, &CE, " ZX14"
  EQUB 0, 0
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -26179,7 +26344,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
 .mamba
 
@@ -26203,7 +26368,7 @@ ENDMACRO
  EQUS &B6, &B7, " ", &01, "HV", &02, " ", &C2
  EQUB 0, 0
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -26214,7 +26379,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
 .monitor
 
@@ -26240,7 +26405,7 @@ ENDMACRO
  EQUS &C9, "29.01", &0C, &B7, " ", &CA, &F4, "s"
  EQUB 0, 0
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -26251,7 +26416,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
 .moray
 
@@ -26277,7 +26442,7 @@ ENDMACRO
  EQUS "Turbul", &F6, " ", &FE, &EE, "k", &0C, &F2, "-ch", &EE, "g", &F4, " 1287"
  EQUB 0, 0
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -26288,7 +26453,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
 .ophidian
 
@@ -26314,7 +26479,7 @@ ENDMACRO
  EQUS &BC, " ", &DE, &F0, "g", &F4, &0C, "Pul", &DA, &B5
  EQUB 0, 0
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -26325,7 +26490,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
 .python
 
@@ -26351,7 +26516,7 @@ ENDMACRO
  EQUS &C8, &0C, "Exl", &DF, " 76NN Model"
  EQUB 0, 0
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -26362,7 +26527,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
 .shuttle
 
@@ -26382,7 +26547,7 @@ ENDMACRO
  EQUS &C9, "20.20", &0C, &DE, &EE, &EF, "t ", &B5
  EQUB 0, 0
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -26393,7 +26558,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
 .sidewinder
 
@@ -26415,7 +26580,7 @@ ENDMACRO
  EQUS &C7, " Sp", &F0, &CE, " ", &01, "MV", &02
  EQUB 0, 0
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -26426,7 +26591,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
 .thargoid
 
@@ -26448,7 +26613,7 @@ ENDMACRO
  EQUS &9E, " ", &C4
  EQUB 0, 0
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -26459,7 +26624,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
 .thargon
 
@@ -26479,7 +26644,7 @@ ENDMACRO
  EQUS &9E, " ", &C4
  EQUB 0, 0
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -26490,7 +26655,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
 .transporter
 
@@ -26506,7 +26671,7 @@ ENDMACRO
  EQUS "10", &BE
  EQUB 0, 0
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -26517,7 +26682,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
 .viper
 
@@ -26539,7 +26704,7 @@ ENDMACRO
  EQUS &C7, " Sup", &F4, " ", &C2, &0C, &01, "VC", &02, "10"
  EQUB 0, 0
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -26550,7 +26715,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
 .worm
 
@@ -26572,7 +26737,7 @@ ENDMACRO
  EQUS &B6, &B7, " ", &01, "HV", &02, " ", &C2
  EQUB 0, 0
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \

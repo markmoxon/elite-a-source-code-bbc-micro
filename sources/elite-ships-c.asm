@@ -426,15 +426,15 @@ ENDMACRO
  EQUB 16                \ Number of faces          = 16 / 4 = 4
  EQUB 8                 \ Visibility distance      = 8
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  EQUB 17              \ Max. energy              = 17
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  EQUB 8                 \ Max. energy              = 8
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  EQUB 8                 \ Max. speed               = 8
  EQUB &00               \ Edges data offset (high) = &002C
@@ -487,28 +487,28 @@ ENDMACRO
  EQUB 60                \ Number of vertices       = 60 / 6 = 10
  EQUB 15                \ Number of edges          = 15
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  EQUW 0               \ Bounty                   = 0
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  EQUW 1                 \ Bounty                   = 1
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  EQUB 28                \ Number of faces          = 28 / 4 = 7
  EQUB 12                \ Visibility distance      = 12
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  EQUB 17              \ Max. energy              = 17
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  EQUB 8                 \ Max. energy              = 8
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  EQUB 15                \ Max. speed               = 15
  EQUB &00               \ Edges data offset (high) = &0050
@@ -582,32 +582,32 @@ ENDMACRO
  EQUB 40                \ Number of faces          = 40 / 4 = 10
  EQUB 55                \ Visibility distance      = 55
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  EQUB 240             \ Max. energy              = 240
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  EQUB 253               \ Max. energy              = 253
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  EQUB 39                \ Max. speed               = 39
  EQUB &00               \ Edges data offset (high) = &008C
  EQUB &00               \ Faces data offset (high) = &00F4
  EQUB 2                 \ Normals are scaled by    = 2^2 = 4
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  EQUB %00010110       \ Laser power              = 2
 \                       \ Missiles                 = 6
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  EQUB %00111000         \ Laser power              = 7
                         \ Missiles                 = 0
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
 \VERTEX    x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX   32,  -48,   48,     0,      4,    8,     8,         31    \ Vertex 0
@@ -702,32 +702,32 @@ ENDMACRO
  EQUB 28                \ Number of faces          = 28 / 4 = 7
  EQUB 20                \ Visibility distance      = 20
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  EQUB 20              \ Max. energy              = 20
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  EQUB 33                \ Max. energy              = 33
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  EQUB 30                \ Max. speed               = 30
  EQUB HI(SHIP_CANISTER_EDGES - SHIP_THARGON)         \ Edges data = canister
  EQUB &00               \ Faces data offset (high) = &0050
  EQUB 2                 \ Normals are scaled by    = 2^2 = 4
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  EQUB %00010000       \ Laser power              = 2
 \                       \ Missiles                 = 0
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  EQUB %00100000         \ Laser power              = 4
                         \ Missiles                 = 0
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
 \VERTEX    x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX   -9,    0,   40,     1,      0,    5,     5,         31    \ Vertex 0
@@ -738,11 +738,11 @@ ENDMACRO
  VERTEX    9,    0,   -8,     5,      1,    6,     6,         31    \ Vertex 5
  VERTEX    9,  -10,  -15,     2,      1,    6,     6,         31    \ Vertex 6
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
 .SHIP_THARGON_VERTICES
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
  VERTEX    9,   -6,  -26,     3,      2,    6,     6,         31    \ Vertex 7
  VERTEX    9,    6,  -26,     4,      3,    6,     6,         31    \ Vertex 8
@@ -782,32 +782,32 @@ ENDMACRO
  EQUB 28                \ Number of faces          = 28 / 4 = 7
  EQUB 23                \ Visibility distance      = 23
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  EQUB 100             \ Max. energy              = 100
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  EQUB 91                \ Max. energy              = 91
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  EQUB 32                \ Max. speed               = 32
  EQUB &00               \ Edges data offset (high) = &006E
  EQUB &00               \ Faces data offset (high) = &00BE
  EQUB 1                 \ Normals are scaled by    = 2^1 = 2
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  EQUB %00010001       \ Laser power              = 2
 \                       \ Missiles                 = 1
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  EQUB %00101001         \ Laser power              = 5
                         \ Missiles                 = 1
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
 \VERTEX    x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX    0,    0,   72,     1,      2,    3,     4,         31    \ Vertex 0
@@ -867,7 +867,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
 .ship_rattler
 
@@ -951,7 +951,7 @@ ENDMACRO
  FACE       26,      -92,        6,         31    \ Face 11
  FACE        0,        0,      -96,         31    \ Face 12
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -963,7 +963,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
 .ship_chameleon
 
@@ -1053,7 +1053,7 @@ ENDMACRO
  FACE      -57,      -76,      -11,         31    \ Face 11
  FACE        0,        0,      -96,         31    \ Face 12
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -1077,106 +1077,106 @@ ENDMACRO
  EQUB 66                \ Number of vertices       = 66 / 6 = 11
  EQUB 26                \ Number of edges          = 26
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  EQUW 0               \ Bounty                   = 0
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  EQUW 300               \ Bounty                   = 300
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  EQUB 52                \ Number of faces          = 52 / 4 = 13
  EQUB 40                \ Visibility distance      = 40
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  EQUB 250             \ Max. energy              = 250
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  EQUB 125               \ Max. energy              = 125
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  EQUB 20                \ Max. speed               = 20
  EQUB &00               \ Edges data offset (high) = &0056
  EQUB &00               \ Faces data offset (high) = &00BE
  EQUB 0                 \ Normals are scaled by    = 2^0 = 1
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  EQUB %00011011       \ Laser power              = 3
 \                       \ Missiles                 = 3
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  EQUB %00101100         \ Laser power              = 5
                         \ Missiles                 = 4
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
 \VERTEX    x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX    0,    0,  224,     0,      1,    2,     3,         31    \ Vertex 0
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  VERTEX    0,   48,   48,     0,      1,    4,     5,         31  \ Vertex 1
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  VERTEX    0,   48,   48,     0,      1,    4,     5,         30    \ Vertex 1
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  VERTEX   96,    0,  -16,    15,     15,   15,    15,         31    \ Vertex 2
  VERTEX  -96,    0,  -16,    15,     15,   15,    15,         31    \ Vertex 3
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  VERTEX    0,   48,  -32,     4,      5,    8,     9,         31  \ Vertex 4
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  VERTEX    0,   48,  -32,     4,      5,    8,     9,         30    \ Vertex 4
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  VERTEX    0,   24, -112,     9,      8,   12,    12,         31    \ Vertex 5
  VERTEX  -48,    0, -112,     8,     11,   12,    12,         31    \ Vertex 6
  VERTEX   48,    0, -112,     9,     10,   12,    12,         31    \ Vertex 7
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  VERTEX    0,  -48,   48,     2,      3,    6,     7,         31  \ Vertex 8
 \  VERTEX    0,  -48,  -32,     6,      7,   10,    11,         31  \ Vertex 9
 \  VERTEX    0,  -24, -112,    10,     11,   12,    12,         31  \ Vertex 10
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  VERTEX    0,  -48,   48,     2,      3,    6,     7,         30    \ Vertex 8
  VERTEX    0,  -48,  -32,     6,      7,   10,    11,         30    \ Vertex 9
  VERTEX    0,  -24, -112,    10,     11,   12,    12,         30    \ Vertex 10
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
 \EDGE vertex1, vertex2, face1, face2, visibility
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  EDGE       0,       8,     2,     3,         31  \ Edge 0
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  EDGE       0,       8,     2,     3,         30    \ Edge 0
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  EDGE       0,       3,     0,     2,         31    \ Edge 1
  EDGE       0,       2,     1,     3,         31    \ Edge 2
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  EDGE       0,       1,     0,     1,         31  \ Edge 3
 \  EDGE       2,       4,     9,     5,         31  \ Edge 4
@@ -1192,7 +1192,7 @@ ENDMACRO
 \  EDGE       2,       5,     9,     9,          7  \ Edge 14
 \  EDGE       2,      10,    10,    10,          7  \ Edge 15
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  EDGE       0,       1,     0,     1,         30    \ Edge 3
  EDGE       2,       4,     9,     5,         29    \ Edge 4
@@ -1208,14 +1208,14 @@ ENDMACRO
  EDGE       2,       5,     9,     9,          5    \ Edge 14
  EDGE       2,      10,    10,    10,          5    \ Edge 15
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  EDGE       2,       7,     9,    10,         31    \ Edge 16
  EDGE       3,       6,     8,    11,         31    \ Edge 17
  EDGE       5,       6,     8,    12,         31    \ Edge 18
  EDGE       5,       7,     9,    12,         31    \ Edge 19
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  EDGE       7,      10,    12,    10,         31  \ Edge 20
 \  EDGE       6,      10,    11,    12,         31  \ Edge 21
@@ -1239,7 +1239,7 @@ ENDMACRO
 \  FACE      -25,      -37,      -11,        31  \ Face 11
 \  FACE        0,        0,     -112,        31  \ Face 12
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  EDGE       7,      10,    12,    10,         29    \ Edge 20
  EDGE       6,      10,    11,    12,         29    \ Edge 21
@@ -1263,7 +1263,7 @@ ENDMACRO
  FACE      -25,      -37,      -11,         30    \ Face 11
  FACE        0,        0,     -112,         30    \ Face 12
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
 \ ******************************************************************************
 \
@@ -1294,20 +1294,20 @@ ENDMACRO
  EQUB &00               \ Edges data offset (high) = &00F2
  EQUB &01               \ Faces data offset (high) = &01AA
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  EQUB 2               \ Normals are scaled by    = 2^2 = 4
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  EQUB 1                 \ Normals are scaled by    = 2^1 = 2
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  EQUB %00000000         \ Laser power              = 0
                         \ Missiles                 = 0
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \ \VERTEX    x,    y,    z, face1, face2, face3, face4, visibility
 \  VERTEX    0,   10,  -26,     6,      0,    7,     7,         31  \ Vertex 0
@@ -1348,7 +1348,7 @@ ENDMACRO
 \  VERTEX    9,    3,  -26,     0,      0,    0,     0,          5  \ Vertex 35
 \  VERTEX   -8,    3,  -26,     0,      0,    0,     0,          5  \ Vertex 36
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
 \VERTEX    x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX    0,   19,  -51,     6,     0,     7,     7,         31     \ Vertex 0
@@ -1389,7 +1389,7 @@ ENDMACRO
  VERTEX   17,    6,  -51,     0,     0,     0,     0,          4     \ Vertex 35
  VERTEX  -17,    6,  -51,     0,     0,     0,     0,          4     \ Vertex 36
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
 \EDGE vertex1, vertex2, face1, face2, visibility
  EDGE       0,       1,     7,     0,         31    \ Edge 0
@@ -1400,44 +1400,44 @@ ENDMACRO
  EDGE       5,       6,     5,     0,         31    \ Edge 5
  EDGE       0,       6,     6,     0,         31    \ Edge 6
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  EDGE       0,       7,     7,     6,         16  \ Edge 7
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  EDGE       0,       7,     7,     6,         15    \ Edge 7
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  EDGE       1,       8,     7,     1,         31    \ Edge 8
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  EDGE       2,       9,     2,     1,         11  \ Edge 9
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  EDGE       2,       9,     2,     1,         10    \ Edge 9
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  EDGE       3,       9,     3,     2,         31    \ Edge 10
  EDGE       4,      10,     4,     3,         31    \ Edge 11
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  EDGE       5,      10,     5,     4,         11  \ Edge 12
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  EDGE       5,      10,     5,     4,         10    \ Edge 12
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  EDGE       6,      11,     6,     5,         31    \ Edge 13
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  EDGE       7,       8,     8,     7,         17  \ Edge 14
 \  EDGE       8,       9,     9,     1,         17  \ Edge 15
@@ -1446,7 +1446,7 @@ ENDMACRO
 \  EDGE       7,      15,    12,    11,         19  \ Edge 18
 \  EDGE       7,      12,    12,     8,         19  \ Edge 19
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  EDGE       7,       8,     8,     7,         16    \ Edge 14
  EDGE       8,       9,     9,     1,         16    \ Edge 15
@@ -1455,7 +1455,7 @@ ENDMACRO
  EDGE       7,      15,    12,    11,         18    \ Edge 18
  EDGE       7,      12,    12,     8,         18    \ Edge 19
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  EDGE       8,      12,     9,     8,         16    \ Edge 20
  EDGE       9,      13,     9,     3,         31    \ Edge 21
@@ -1466,7 +1466,7 @@ ENDMACRO
  EDGE      14,      15,    13,    10,         31    \ Edge 26
  EDGE      12,      15,    13,    12,         31    \ Edge 27
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  EDGE      16,      17,     7,     7,          7  \ Edge 28
 \  EDGE      18,      19,     7,     7,          7  \ Edge 29
@@ -1487,7 +1487,7 @@ ENDMACRO
 \  EDGE      35,      36,     0,     0,          5  \ Edge 44
 \  EDGE      36,      33,     0,     0,          5  \ Edge 45
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  EDGE      16,      17,     7,     7,          6    \ Edge 28
  EDGE      18,      19,     7,     7,          6    \ Edge 29
@@ -1508,7 +1508,7 @@ ENDMACRO
  EDGE      35,      36,     0,     0,          4    \ Edge 44
  EDGE      36,      33,     0,     0,          4    \ Edge 45
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
 \FACE normal_x, normal_y, normal_z, visibility
  FACE        0,        0,     -103,         31    \ Face 0
@@ -1520,28 +1520,28 @@ ENDMACRO
  FACE        8,       32,        3,         31    \ Face 6
  FACE       -8,       32,        3,         31    \ Face 7
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  FACE       -8,       34,       11,         19  \ Face 8
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  FACE       -8,       34,       11,         18    \ Face 8
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  FACE      -75,       32,       79,         31    \ Face 9
  FACE       75,       32,       79,         31    \ Face 10
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  FACE        8,       34,       11,         19  \ Face 11
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  FACE        8,       34,       11,         18    \ Face 11
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  FACE        0,       38,       17,         31    \ Face 12
  FACE        0,        0,      121,         31    \ Face 13

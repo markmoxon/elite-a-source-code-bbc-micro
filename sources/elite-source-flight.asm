@@ -692,13 +692,13 @@ ORG &0000
 
  SKIP 4                 \ Temporary storage, used in a number of places
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
 .finder
 
  SKIP 1                 \ AJD
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
 ORG &00D1
 
@@ -1276,12 +1276,12 @@ ORG &0300
                         \       (0 = pulse or mining laser) or is always on
                         \       (1 = beam or military laser)
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  SKIP 2               \ These bytes appear to be unused (they were originally
 \                       \ used for up/down lasers, but they were dropped)
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  SKIP 1                 \ This byte appears to be unused
 
@@ -1290,7 +1290,7 @@ ORG &0300
 
  SKIP 1                 \ AJD
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
 .CRGO
 
@@ -1373,11 +1373,11 @@ ORG &0300
                         \
                         \   * &FF = fitted
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  SKIP 4               \ These bytes appear to be unused
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
 .cmdr_cour
 
@@ -1391,7 +1391,7 @@ ORG &0300
 
  SKIP 1                 \ AJD
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
 .NOMSL
 
@@ -1782,7 +1782,7 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
                         \ of the catalogue, between the two lists of filenames,
                         \ so it can be dropped without affecting the layout)
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
 .new_pulse
 
@@ -1844,7 +1844,7 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
 
  SKIP 1                 \ AJD
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -2021,19 +2021,19 @@ LOAD_A% = LOAD%
 
 .S%
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  JMP scramble         \ Decrypt the main flight code and join the main loop
 \
 \  JMP scramble         \ Decrypt the main flight code and start a new game
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  JMP RSHIPS             \ AJD
 
  JMP RSHIPS
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  JMP TT26               \ WRCHV is set to point here by elite-loader3.asm
 
@@ -2069,17 +2069,17 @@ LOAD_A% = LOAD%
 
 .LTLI
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  EQUS "L.T.CODE"
 \  EQUB 13
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  EQUS "L.1.D"
  EQUB 13
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
 \ ******************************************************************************
 \
@@ -2118,18 +2118,18 @@ LOAD_A% = LOAD%
                         \ and fall through into the entry code for the game
                         \ to restart from the title screen
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  JSR CATD             \ Call CATD to reload the disc catalogue
 \
 \  BNE INBAY            \ Jump to INBAY to load the docked code (this BNE is
 \                       \ effectively a JMP)
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  BMI INBAY              \ AJD
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
 \ ******************************************************************************
 \
@@ -2192,13 +2192,13 @@ LOAD_A% = LOAD%
 \
 \ ******************************************************************************
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  LDX JSTX             \ Set X to the current rate of roll in JSTX, and
 \  JSR cntr             \ apply keyboard damping twice (if enabled) so the roll
 \  JSR cntr             \ rate in X creeps towards the centre by 2
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  LDX JSTX               \ AJD
  CPX new_max
@@ -2216,7 +2216,7 @@ LOAD_A% = LOAD%
  JSR cntr
  JSR cntr
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
                         \ The roll rate in JSTX increases if we press ">" (and
                         \ the RL indicator on the dashboard goes to the right).
@@ -2273,13 +2273,13 @@ LOAD_A% = LOAD%
  ORA ALP2               \ Store A in ALPHA, but with the sign set to ALP2 (so
  STA ALPHA              \ ALPHA has a different sign to the actual roll rate)
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  LDX JSTY             \ Set X to the current rate of pitch in JSTY, and
 \  JSR cntr             \ apply keyboard damping so the pitch rate in X creeps
 \                       \ towards the centre by 1
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  LDX JSTY               \ AJD
  CPX new_max
@@ -2296,7 +2296,7 @@ LOAD_A% = LOAD%
 
  JSR cntr
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  TXA                    \ Set A and Y to the pitch rate but with the sign bit
  EOR #%10000000         \ flipped
@@ -2348,7 +2348,7 @@ LOAD_A% = LOAD%
  ORA BET2               \ Store A in BETA, but with the sign set to BET2 (so
  STA BETA               \ BETA has the same sign as the actual pitch rate)
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  LDA BSTK             \ If BSTK = 0 then the Bitstik is not configured, so
 \  BEQ BS2              \ jump to BS2 to skip the following
@@ -2412,7 +2412,7 @@ LOAD_A% = LOAD%
 \
 \ ******************************************************************************
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \ .BS2
 
@@ -2421,7 +2421,7 @@ LOAD_A% = LOAD%
  LDA KY2                \ If Space is being pressed, keep going, otherwise jump
  BEQ MA17               \ down to MA17 to skip the following
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  LDA DELTA            \ The "go faster" key is being pressed, so first we
 \  CMP #40              \ fetch the current speed from DELTA into A, and if
@@ -2431,13 +2431,13 @@ LOAD_A% = LOAD%
 \  INC DELTA            \ We can go a bit faster, so increment the speed in
 \                       \ location DELTA
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  LDA &7D                \ AJD
  CMP new_speed
  BCC speed_up
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
 .MA17
 
@@ -2449,11 +2449,11 @@ LOAD_A% = LOAD%
 
  BNE MA4                \ If the speed is still greater than zero, jump to MA4
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
 .speed_up
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
  INC DELTA              \ Otherwise we just braked a little too hard, so bump
                         \ the speed back up to the minimum value of 1
@@ -2468,7 +2468,7 @@ LOAD_A% = LOAD%
  JSR ABORT              \ ABORT to disarm the missile and update the missile
                         \ indicators on the dashboard to green/cyan (Y = &EE)
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  LDA #40              \ Call the NOISE routine with A = 40 to make a low,
 \  JSR NOISE            \ long beep to indicate the missile is now disarmed
@@ -2476,12 +2476,12 @@ LOAD_A% = LOAD%
 \
 \ .MA31
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  JSR WA1                \ Call the WA1 routine to make a low, long beep to
                         \ indicate the missile is now disarmed
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  LDA #0                 \ Set MSAR to 0 to indicate that no missiles are
  STA MSAR               \ currently armed
@@ -2507,7 +2507,7 @@ LOAD_A% = LOAD%
                         \ value &FF, as we just loaded it from MSTG and checked
                         \ that it was negative)
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  LDY #&E0             \ Change the leftmost missile indicator to yellow/white
 \  JSR MSBAR            \ on the missile bar (this call changes the leftmost
@@ -2516,13 +2516,13 @@ LOAD_A% = LOAD%
 \                       \ right to left, so X is the number of the leftmost
 \                       \ indicator)
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  LDY #&E0               \ AJD
  DEX
  JSR MSBAR
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
 .MA25
 
@@ -2539,7 +2539,7 @@ LOAD_A% = LOAD%
 
 .MA24
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  LDA KY12             \ If TAB is being pressed, keep going, otherwise jump
 \  BEQ MA76             \ jump down to MA76 to skip the following
@@ -2554,7 +2554,7 @@ LOAD_A% = LOAD%
 \                       \ MAL1 routine below - this just registers the fact that
 \                       \ we've set the bomb ticking
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  LDA KY12               \ AJD
  AND BOMB
@@ -2568,11 +2568,11 @@ LOAD_A% = LOAD%
  JSR TT111
  JSR hyper_snap
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
 .MA76
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  LDA KY20             \ If "P" is being pressed, keep going, otherwise skip
 \  BEQ MA78             \ the next two instructions
@@ -2580,7 +2580,7 @@ LOAD_A% = LOAD%
 \  LDA #0               \ The "cancel docking computer" key is bring pressed,
 \  STA auto             \ so turn it off by setting auto to 0
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  LDA KY19               \ AJD
  AND DKCMP
@@ -2593,7 +2593,7 @@ LOAD_A% = LOAD%
 
  STA auto
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
 .MA78
 
@@ -2634,7 +2634,7 @@ LOAD_A% = LOAD%
 
 .MA64
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  LDA KY19             \ If "C" is being pressed, and we have a docking
 \  AND DKCMP            \ computer fitted, keep going, otherwise jump down to
@@ -2682,19 +2682,19 @@ LOAD_A% = LOAD%
 
  PHA                    \ Store the current view's laser power on the stack
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  AND #%01111111       \ Set LAS and LAS2 to bits 0-6 of the laser power
 \  STA LAS
 \  STA LAS2
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  AND #%01111111         \ Set LAS and LAS2 to bits 0-6 of the laser power
  STA LAS2
  STA LAS
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  LDA #0                 \ Call the NOISE routine with A = 0 to make the sound
  JSR NOISE              \ of our laser firing
@@ -2715,18 +2715,18 @@ LOAD_A% = LOAD%
 
 .ma1
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  AND #%11111010       \ LASCT will be set to 0 for beam lasers, and to the
 \  STA LASCT            \ laser power AND %11111010 for pulse lasers, which
 \                       \ comes to 10 (as pulse lasers have a power of 15). See
 \                       \ MA23 below for more on laser pulsing and LASCT
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  STA LASCT              \ AJD
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
 \ ******************************************************************************
 \
@@ -2818,14 +2818,14 @@ LOAD_A% = LOAD%
  LDA XX21-1,Y           \ Fetch the high byte of this particular ship type's
  STA XX0+1              \ blueprint and store it in XX0+1
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
                         \ We now go straight to part 6, omitting part 5 from the
                         \ original disc version, as part 5 implements the energy
                         \ bomb, and Elite-A replaces the energy bomb with the
                         \ Hyperspace Unit
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -2996,24 +2996,24 @@ LOAD_A% = LOAD%
 
 .oily
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  JSR DORND            \ Set A and X to random numbers and reduce A to a
 \  AND #7               \ random number in the range 0-7
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  JSR DORND              \ Set A and X to random numbers and reduce A to a
  AND #15                \ random number in the range 0-15 AJD
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
 .slvy2
 
                         \ By the time we get here, we are scooping, and A
                         \ contains the type of item we are scooping (a random
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \                       \ number 0-7 if we are scooping a cargo canister, 3 if
 \                       \ we are scooping an escape pod, or 16 if we are
@@ -3053,12 +3053,12 @@ LOAD_A% = LOAD%
 \  SEC                  \ NEWB flags to indicate this
 \  ROR NEWB
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
                         \ AJD
 
  TAX                    \ AJD
- JSR tnpr_FLIGHT
+ JSR tnpr
 
  BCS MA58               \ AJD
  INC QQ20,X
@@ -3068,7 +3068,7 @@ LOAD_A% = LOAD%
 
  JSR top_6a             \ AJD
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
 .MA65
 
@@ -3118,11 +3118,11 @@ LOAD_A% = LOAD%
  CMP #214               \ docking, as the angle of approach is greater than 26
  BCC MA62               \ degrees
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
  LDY #&25               \ AJD
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
  JSR SPS1               \ Call SPS1 to calculate the vector to the planet and
                         \ store it in XX15
@@ -3157,7 +3157,7 @@ LOAD_A% = LOAD%
 
                         \ If we arrive here, docking has just failed
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  LDA DELTA            \ If the ship's speed is < 5, jump to MA67 to register
 \  CMP #5               \ some damage, but not a huge amount
@@ -3166,13 +3166,13 @@ LOAD_A% = LOAD%
 \  JMP DEATH            \ Otherwise we have just crashed into the station, so
 \                       \ process our death
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  LDA &7D                \ AJD
  CMP #5
  BCS n_crunch
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
 \ ******************************************************************************
 \
@@ -3196,7 +3196,7 @@ LOAD_A% = LOAD%
 \
 \ ******************************************************************************
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \ .MA59
 \
@@ -3247,7 +3247,7 @@ LOAD_A% = LOAD%
 \  ROR A                \ this is quite a big dent, and colliding with higher
 \                       \ energy ships will cause more damage
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  LDA auto               \ AJD
  AND #&04
@@ -3264,7 +3264,7 @@ LOAD_A% = LOAD%
 
  LDA #&80
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
 .MA63
 
@@ -3355,7 +3355,7 @@ LOAD_A% = LOAD%
  JSR EXNO               \ the crosshairs, so call EXNO to make the sound of
                         \ us making a laser strike on another ship
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  LDA TYPE             \ Did we just hit the space station? If so, jump to
 \  CMP #SST             \ MA14+2 to make the station hostile, skipping the
@@ -3415,7 +3415,7 @@ LOAD_A% = LOAD%
 \  LDY #OIL             \ Randomly spawn some cargo canisters
 \  JSR SPIN
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  LDA &44                \ AJD
 
@@ -3459,7 +3459,7 @@ LOAD_A% = LOAD%
  LDY #OIL               \ Randomly spawn some cargo canisters
  JSR SPIN
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  JSR EXNO2              \ Call EXNO2 to process the fact that we have killed a
                         \ ship (so increase the kill tally, make an explosion
@@ -3467,18 +3467,18 @@ LOAD_A% = LOAD%
 
 .MA14
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  STA INWK+35          \ Store the hit ship's updated energy in ship byte #35
 \
 \  LDA TYPE             \ Call ANGRY to make this ship hostile, now that we
 \  JSR ANGRY            \ have hit it
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  JSR anger_8c           \ AJD
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
 \ ******************************************************************************
 \
@@ -3528,7 +3528,7 @@ LOAD_A% = LOAD%
  BEQ MAC1               \ ship is no longer exploding, so jump to MAC1 to skip
                         \ the following
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  LDA NEWB             \ Extract bit 6 of the ship's NEWB flags, so A = 64 if
 \  AND #%01000000       \ bit 6 is set, or 0 if it is clear. Bit 6 is set if
@@ -3540,7 +3540,7 @@ LOAD_A% = LOAD%
 \                       \ a fugitive if we just shot the sheriff, but won't
 \                       \ affect our status if the enemy wasn't a copper
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  BIT &6A                \ AJD
  BVS n_badboy
@@ -3564,26 +3564,26 @@ LOAD_A% = LOAD%
 
 .n_goodboy
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  LDA DLY                \ If we already have an in-flight message on-screen (in
  ORA MJ                 \ which case DLY > 0), or we are in witchspace (in
  BNE KS1S               \ which case MJ > 0), jump to KS1S to skip showing an
                         \ on-screen bounty for this kill
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  LDY #10              \ Fetch byte #10 of the ship's blueprint, which is the
 \  LDA (XX0),Y          \ low byte of the bounty awarded when this ship is
 \  BEQ KS1S             \ killed (in Cr * 10), and if it's zero jump to KS1S as
 \                       \ there is no on-screen bounty to display
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  LDY #10                \ AJD
  LDA (XX0),Y
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  TAX                    \ Put the low byte of the bounty into X
 
@@ -3602,7 +3602,7 @@ LOAD_A% = LOAD%
                         \ ship from its slot and shuffles all the other ships
                         \ down to close up the gap)
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
 .n_hit
 
@@ -3628,7 +3628,7 @@ LOAD_A% = LOAD%
  \ C clear if dead
  RTS
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
 .MAC1
 
@@ -3677,7 +3677,7 @@ LOAD_A% = LOAD%
 
 .MA18
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  LDA BOMB             \ If we set off our energy bomb (see MA24 above), then
 \  BPL MA77             \ BOMB is now negative, so this skips to MA21 if our
@@ -4041,19 +4041,19 @@ LOAD_A% = LOAD%
 
  ADC QQ14               \ Set A = A + the current fuel level * 10 (from QQ14)
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  CMP #70              \ If A > 70 then set A = 70 (as 70 is the maximum fuel
 \  BCC P%+4             \ level, or 7.0 light years)
 \  LDA #70
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  CMP new_range          \ AJD
  BCC P%+5
  LDA new_range
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  STA QQ14               \ Store the updated fuel level in QQ14
 
@@ -4234,7 +4234,7 @@ PRINT "Code size is ", ~(P% - CODE%)
 PRINT "Execute at ", ~LOAD%
 PRINT "Reload at ", ~LOAD_A%
 
-PRINT "S.ELTA ", ~CODE%, " ", ~P%, " ", ~LOAD%, " ", ~LOAD_A%
+PRINT "S.D.ELTA ", ~CODE%, " ", ~P%, " ", ~LOAD%, " ", ~LOAD_A%
 \SAVE "output/D.ELTA.bin", CODE%, P%, LOAD%
 
 \ ******************************************************************************
@@ -5660,13 +5660,13 @@ NEXT
  AND #%00000111
  TAX
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  LDA ZZ               \ If distance in ZZ >= 144, then this point is a very
 \  CMP #144             \ long way away, so jump to PX3 to fetch a 1-pixel point
 \  BCS PX3              \ from TWOS and EOR it into SC+Y
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  LDA ZZ                 \ AJD
  CMP #144
@@ -5676,7 +5676,7 @@ NEXT
 
 .thick_dot
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  LDA TWOS2,X            \ Otherwise fetch a 2-pixel dash from TWOS2 and EOR it
  EOR (SC),Y             \ into SC+Y
@@ -6645,7 +6645,7 @@ NEXT
  DEY                    \ Decrement the loop counter to point to the next
                         \ stardust particle
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  BEQ ST3              \ If we have just done the last particle, skip the next
 \                       \ instruction to return from the subroutine
@@ -6657,7 +6657,7 @@ NEXT
 \
 \  RTS                  \ Return from the subroutine
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  BEQ MA9                \ If we have just done the last particle, return from
                         \ the subroutine (as MA9 contains an RTS)
@@ -6665,7 +6665,7 @@ NEXT
  JMP STL6               \ We have more stardust to process, so jump back up to
                         \ STL6 for the next particle
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
 .KILL6
 
@@ -7109,7 +7109,7 @@ NEXT
                         \
                         \ followed by a newline and an indent of 6 characters
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  LDA CRGO             \ If our ship's cargo capacity is < 26 (i.e. we do not
 \  CMP #26              \ have a cargo bay extension), skip the following two
@@ -7165,7 +7165,7 @@ NEXT
 \  CMP #117             \ If A < 117, loop back up to stqv to print the next
 \  BCC stqv             \ piece of equipment
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
 .sell_equip
 
@@ -7207,7 +7207,7 @@ NEXT
  CMP #&75
  BCC stqv
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  LDX #0                 \ Now to print our ship's lasers, so set a counter in X
                         \ to count through the four views (0 = front, 1 = rear,
@@ -7221,24 +7221,24 @@ NEXT
  BEQ st1                \ have a laser fitted to that view, jump to st1 to move
                         \ on to the next one
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  TXA                  \ Print recursive token 96 + X, which will print from 96
 \  CLC                  \ ("FRONT") through to 99 ("RIGHT"), followed by a space
 \  ADC #96
 \  JSR spc
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  TXA                    \ AJD
  ORA #&60
  JSR spc
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  LDA #103               \ Set A to token 103 ("PULSE LASER")
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  LDX CNT              \ Set Y = the laser power for view X
 \  LDY LASER,X
@@ -7261,7 +7261,7 @@ NEXT
 \  LDA #118             \ This sets A = 118 if the laser in view X is a mining
 \                       \ laser (token 118 is "MINING  LASER")
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  LDX &93                \ AJD
  LDY LASER,X
@@ -7283,7 +7283,7 @@ NEXT
 
 .l_1ba9
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  JSR plf2               \ Print the text token in A (which contains our legal
                         \ status) followed by a newline and an indent of 6
@@ -7321,21 +7321,21 @@ NEXT
 
  JSR plf                \ Print the text token in A followed by a newline
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  LDX #6               \ Move the text cursor to column 6
 \  STX XC
 \
 \  RTS                  \ Return from the subroutine
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  LDX #8                 \ Move the text cursor to column 8
  STX XC
 
  RTS                    \ Return from the subroutine
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
 \ ******************************************************************************
 \
@@ -7702,11 +7702,11 @@ NEXT
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
  CLC
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
 .pr2
 
@@ -9110,7 +9110,7 @@ NEXT
 
  JSR RES2               \ Reset a number of flight variables and workspaces
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  LDX #CYL             \ Set the current ship type to a Cobra Mk III, so we
 \  STX TYPE             \ can show our ship disappear into the distance when we
@@ -9139,7 +9139,7 @@ NEXT
 \  STA INWK+32          \ has no AI, and we can use this value as a counter to
 \                       \ do the following loop 97 times
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  LDX #ESC               \ AJD
  STX &8C
@@ -9152,19 +9152,19 @@ NEXT
  LSR A
  STA &66
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
 .ESL1
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  JSR MVEIT            \ Call MVEIT to move the Cobra in space
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  JSR MVEIT              \ Call MVEIT to move the escape pod in space AJD
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  JSR LL9                \ Call LL9 to draw the Cobra on-screen
 
@@ -9179,18 +9179,18 @@ NEXT
  LDA #0                 \ Set A = 0 so we can use it to zero the contents of
                         \ the cargo hold
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  LDX #16              \ We lose all our cargo when using our escape pod, so
 \                       \ up a counter in X so we can zero the 17 cargo slots
 \                       \ in QQ20
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  STA QQ20+&10           \ AJD
  LDX #&0C               \ LDX #&10 save gold/plat/gems
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
 .ESL2
 
@@ -9208,13 +9208,13 @@ NEXT
  STA ESCP               \ The escape pod is a one-use item, so set ESCP to 0 so
                         \ we no longer have one fitted
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  LDA #70              \ Our replacement ship is delivered with a full tank of
 \  STA QQ14             \ fuel, so set the current fuel level in QQ14 to 70, or
 \                       \ 7.0 light years
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  INC new_hold           \ AJD
  LDA new_range
@@ -9223,7 +9223,7 @@ NEXT
  JSR TT111
  JSR jmp
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  JMP GOIN               \ Go to the docking bay (i.e. show the ship hanger
                         \ screen) and return from the subroutine with a tail
@@ -9242,7 +9242,7 @@ PRINT "Code size is ", ~(P% - CODE_B%)
 PRINT "Execute at ", ~LOAD%
 PRINT "Reload at ", ~LOAD_B%
 
-PRINT "S.ELTB ", ~CODE_B%, " ", ~P%, " ", ~LOAD%, " ", ~LOAD_B%
+PRINT "S.D.ELTB ", ~CODE_B%, " ", ~P%, " ", ~LOAD%, " ", ~LOAD_B%
 \SAVE "output/D.ELTB.bin", CODE_B%, P%, LOAD%
 
 \ ******************************************************************************
@@ -9305,18 +9305,18 @@ LOAD_C% = LOAD% +P% - CODE%
 
  JSR EXNO3              \ Make the sound of the missile exploding
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  LDA #250             \ Call OOPS to damage the ship by 250, which is a pretty
 \  JMP OOPS             \ big hit, and return from the subroutine using a tail
 \                       \ call
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  LDA #250               \ Call n_oops to AJD
  JMP n_oops
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
 .TA18
 
@@ -9374,7 +9374,7 @@ LOAD_C% = LOAD% +P% - CODE%
  BEQ TA35               \ space station), jump to TA35 to destroy this missile,
                         \ as the space station ain't kidding around
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
  LDY #&23               \ missile damage AJD
  SEC
@@ -9382,7 +9382,7 @@ LOAD_C% = LOAD% +P% - CODE%
  SBC #&40
  BCS n_misshit
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
  LDY #31                \ Fetch byte #31 (the exploding flag) of the target ship
  LDA (V),Y              \ into A
@@ -9394,12 +9394,12 @@ LOAD_C% = LOAD% +P% - CODE%
  BNE TA35               \ If the target ship is already exploding, jump to TA35
                         \ to destroy this missile
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  ORA #%10000000       \ Otherwise set bit 7 of the target's byte #31 to mark
 \  STA (V),Y            \ the ship as having been killed, so it explodes
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  ORA #%10000000         \ Otherwise set bit 7 of the target's byte #31 to mark
 
@@ -9407,7 +9407,7 @@ LOAD_C% = LOAD% +P% - CODE%
 
  STA (V),Y              \ the ship as having been killed, so it explodes
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
 .TA35
 
@@ -9418,19 +9418,19 @@ LOAD_C% = LOAD% +P% - CODE%
  BNE TA87               \ If A is non-zero then the missile is not near our
                         \ ship, so jump to TA87 to skip damaging our ship
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  LDA #80              \ Otherwise the missile just got destroyed near us, so
 \  JSR OOPS             \ call OOPS to damage the ship by 80, which is nowhere
 \                       \ near as bad as the 250 damage from a missile slamming
 \                       \ straight into us, but it's still pretty nasty
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  LDA #80                \ AJD
  JSR n_oops
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
 .TA87
 
@@ -9537,7 +9537,7 @@ LOAD_C% = LOAD% +P% - CODE%
  CPX #SST               \ If this is not the space station, jump down to TA13
  BNE TA13
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  LDA NEWB             \ This is the space station, so check whether bit 2 of
 \  AND #%00000100       \ the ship's NEWB flags is set, and if it is (i.e. the
@@ -9568,7 +9568,7 @@ LOAD_C% = LOAD% +P% - CODE%
 \
 \ .TN5
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  LDA NEWB               \ This is the space station, so check whether bit 2 of
  AND #%00000100         \ the ship's NEWB flags is set, and if it is (i.e. the
@@ -9602,7 +9602,7 @@ LOAD_C% = LOAD% +P% - CODE%
 
 .TN5
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
                         \ We only call the tactics routine for the space station
                         \ when it is hostile, so if we get here then this is the
@@ -9614,19 +9614,19 @@ LOAD_C% = LOAD% +P% - CODE%
  CMP #240               \ If A < 240 (93.8% chance), return from the subroutine
  BCC TA1                \ (as TA1 contains an RTS)
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  LDA MANY+COPS        \ Check how many cops there are in the vicinity already,
 \  CMP #4               \ and if there are 4 or more, return from the subroutine
 \  BCS TA22             \ (as TA22 contains an RTS)
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  LDA MANY+COPS          \ Check how many cops there are in the vicinity already,
  CMP #7                 \ and if there are 7 or more, return from the subroutine
  BCS TA22               \ (as TA22 contains an RTS)
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  LDX #COPS              \ Set X to the ship type for a cop
 
@@ -9748,7 +9748,7 @@ LOAD_C% = LOAD% +P% - CODE%
 
 .GOPL
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  JSR SPS1             \ The ship is not hostile and it is not docking, so call
 \                       \ SPS1 to calculate the vector to the planet and store
@@ -9774,7 +9774,7 @@ LOAD_C% = LOAD% +P% - CODE%
 \
 \ .TN4
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  LDY #&00               \ AJD
 
@@ -9802,7 +9802,7 @@ LOAD_C% = LOAD% +P% - CODE%
 
 .TN4
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  LDX #8                 \ We now want to copy the ship's x, y and z coordinates
                         \ from INWK to K3, so set up a counter for 9 bytes
@@ -9882,20 +9882,20 @@ LOAD_C% = LOAD% +P% - CODE%
  CMP #200               \ If A < 200 (78% chance), jump down to TN7 to skip the
  BCC TN7                \ following
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  LDX #WRM             \ Set X to the ship type for a Worm
 \
 \  JMP TN6              \ Jump to TN6 to spawn the Worm and return from
 \                       \ the subroutine using a tail call
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  LDX #15                \ AJD
 
  JMP TN6                \ Jump to TN6 to AJD
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
 .TN7
 
@@ -9979,15 +9979,15 @@ LOAD_C% = LOAD% +P% - CODE%
 
  JSR DORND              \ Set A and X to random numbers
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  AND #31              \ Restrict A to a random number in the range 0-31
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  AND #15                \ Restrict A to a random number in the range 0-15
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  CMP T                  \ If A >= T, which is quite likely, though less likely
  BCS TA3                \ with higher numbers of missiles, jump to TA3
@@ -10098,18 +10098,18 @@ LOAD_C% = LOAD% +P% - CODE%
                         \ the laser power and number of missiles) to get the
                         \ amount of damage we should take
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  JSR OOPS             \ Call OOPS to take some damage, which could do anything
 \                       \ from reducing the shields and energy, all the way to
 \                       \ losing cargo or dying (if the latter, we don't come
 \                       \ back from this subroutine)
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  JSR n_oops             \ AJD
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  DEC INWK+28            \ Halve the attacking ship's acceleration in byte #28
 
@@ -10688,11 +10688,11 @@ LOAD_C% = LOAD% +P% - CODE%
                         \ code that gets skipped if K3+10 is non-zero, but as
                         \ to what this means... that's not yet clear
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
 .top_6a
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
  ASL NEWB               \ Set bit 7 of the ship's NEWB flags to indicate that
  SEC                    \ the ship has now docked, which only has meaning if
@@ -11336,7 +11336,7 @@ LOAD_C% = LOAD% +P% - CODE%
 
  JSR ANGRY              \ Call ANGRY to make the target ship hostile
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  LDY #0               \ We have just launched a missile, so we need to remove
 \  JSR ABORT            \ missile lock and hide the leftmost indicator on the
@@ -11346,13 +11346,13 @@ LOAD_C% = LOAD% +P% - CODE%
 
  DEC NOMSL              \ Reduce the number of missiles we have by 1
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  LDA #48              \ Call the NOISE routine with A = 48 to make the sound
 \  JMP NOISE            \ of a missile launch, returning from the subroutine
 \                       \ using a tail call
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  JSR msblob             \ AJD redraw missiles
  STY MSAR
@@ -11360,7 +11360,7 @@ LOAD_C% = LOAD% +P% - CODE%
 
  JMP n_sound30          \ AJD
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
 \ ******************************************************************************
 \
@@ -11371,13 +11371,13 @@ LOAD_C% = LOAD% +P% - CODE%
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
 .anger_8c
 
  LDA TYPE
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -11800,16 +11800,16 @@ LOAD_C% = LOAD% +P% - CODE%
 
 .LAUN
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  LDA #48              \ Call the NOISE routine with A = 48 to make the sound
 \  JSR NOISE            \ of the ship launching from the station
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  JSR n_sound30          \ AJD
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  LDA #8                 \ Set the step size for the launch tunnel rings to 8, so
                         \ there are fewer sections in the rings and they are
@@ -12255,14 +12255,14 @@ LOAD_C% = LOAD% +P% - CODE%
 
 .MU5
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  STA K                \ Set K(3 2 1 0) to (A A A A)
 \  STA K+1
 \  STA K+2
 \  STA K+3
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  STA K                  \ Set K(3 2 1 0) to (A A A A), starting with the lowest
                         \ byte
@@ -12273,7 +12273,7 @@ LOAD_C% = LOAD% +P% - CODE%
  STA K+2
  STA K+3
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  CLC                    \ Clear the C flag
 
@@ -12907,7 +12907,7 @@ LOAD_C% = LOAD% +P% - CODE%
 
 {
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  LDX Q
 \  BEQ MU1
@@ -13785,19 +13785,19 @@ LOAD_C% = LOAD% +P% - CODE%
                         \ The result of our division is now in R, so we just
                         \ need to shift it back by the scale factor in Y
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  LDA #0               \ Set K(3 2 1) = 0 to hold the result (we populate K
 \  STA K+1              \ next)
 \  STA K+2
 \  STA K+3
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  LDA #0                 \ AJD
  JSR n_store
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  TYA                    \ If Y is positive, jump to DV12
  BPL DV12
@@ -14307,7 +14307,7 @@ PRINT "Code size is ", ~(P% - CODE_C%)
 PRINT "Execute at ", ~LOAD%
 PRINT "Reload at ", ~LOAD_C%
 
-PRINT "S.ELTC ", ~CODE_C%, " ", ~P%, " ", ~LOAD%, " ", ~LOAD_C%
+PRINT "S.D.ELTC ", ~CODE_C%, " ", ~P%, " ", ~LOAD%, " ", ~LOAD_C%
 \SAVE "output/D.ELTC.bin", CODE_C%, P%, LOAD%
 
 \ ******************************************************************************
@@ -14321,16 +14321,16 @@ LOAD_D% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
 \
-\       Name: tnpr_FLIGHT
+\       Name: tnpr
 \       Type: Subroutine
 \   Category: Market
 \    Summary: AJD
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
-.tnpr_FLIGHT
+.tnpr
 
  CPX #&10
  BEQ n_aliens
@@ -14361,7 +14361,7 @@ LOAD_D% = LOAD% + P% - CODE%
  ADC #&00
  RTS
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -14543,16 +14543,16 @@ LOAD_D% = LOAD% + P% - CODE%
 
 .TT69
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  LDA #%10000000       \ Set bit 7 of QQ17 to switch to Sentence Case
 \  STA QQ17
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  JSR vdu_80             \ AJD
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
                         \ Fall through into TT67 to print a newline
 
@@ -14736,17 +14736,17 @@ LOAD_D% = LOAD% + P% - CODE%
  INX                    \ is stored in the range 0-14 but the displayed range
                         \ should be 1-15
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  CLC                  \ Call pr2 to print the technology level as a 3-digit
 \  JSR pr2              \ number without a decimal point (by clearing the C
 \                       \ flag)
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  JSR pr2-1              \ AJD
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  JSR TTX69              \ Print a paragraph break and set Sentence Case
 
@@ -14872,16 +14872,16 @@ LOAD_D% = LOAD% + P% - CODE%
 
  JSR TT162              \ Print a space
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  LDA #0               \ Set QQ17 = 0 to switch to ALL CAPS
 \  STA QQ17
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  JSR vdu_00             \ AJD
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  LDA #'M'               \ Print "M"
  JSR TT27
@@ -15396,7 +15396,7 @@ LOAD_D% = LOAD% + P% - CODE%
  INX                    \ Set LSP = 1 to reset the ball line heap
  STX LSP
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  LDX #2               \ Set STP = 2, the step size for the circle
 \  STX STP
@@ -15407,7 +15407,7 @@ LOAD_D% = LOAD% + P% - CODE%
 \
 \  RTS                  \ Return from the subroutine
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  INX                    \ Set STP = 2, the step size for the circle
  STX STP
@@ -15416,7 +15416,7 @@ LOAD_D% = LOAD% + P% - CODE%
                         \ (K3(1 0), K4(1 0)) and radius K, returning from the
                         \ subroutine using a tail call
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
 \ ******************************************************************************
 \
@@ -15483,17 +15483,17 @@ LOAD_D% = LOAD% + P% - CODE%
  PLA                    \ Restore the amount of item in the hold into X
  TAX
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  CLC                  \ Print the 8-bit number in X to 3 digits, without a
 \  JSR pr2              \ decimal point
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  JSR pr2-1              \ Print the 8-bit number in X to 3 digits, without a
                         \ decimal point
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  JSR TT152              \ Print the unit ("t", "kg" or "g") for the market item
                         \ whose byte #1 from the market prices table is in
@@ -15538,7 +15538,7 @@ LOAD_D% = LOAD% + P% - CODE%
  JSR fwl                \ Call fwl to print the fuel and cash levels on two
                         \ separate lines
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  LDA CRGO             \ If our ship's cargo capacity is < 26 (i.e. we do not
 \  CMP #26              \ have a cargo bay extension), skip the following two
@@ -15547,7 +15547,7 @@ LOAD_D% = LOAD% + P% - CODE%
 \  LDA #107             \ We do have a cargo bay extension, so print recursive
 \  JSR TT27             \ token 107 ("LARGE CARGO{sentence case} BAY")
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  LDA #&0E               \ AJD
  JSR TT68
@@ -15556,7 +15556,7 @@ LOAD_D% = LOAD% + P% - CODE%
  JSR pr2-1
  JSR TT160
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  JMP TT210              \ Jump to TT210 to print the contents of our cargo bay
                         \ and return from the subroutine using a tail call
@@ -15590,7 +15590,7 @@ LOAD_D% = LOAD% + P% - CODE%
  EOR #&FF
  PHA
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  JSR WSCAN            \ Call WSCAN to wait for the vertical sync, so the whole
 \                       \ screen gets drawn and we can move the crosshairs with
@@ -15866,11 +15866,11 @@ LOAD_D% = LOAD% + P% - CODE%
  SEC                    \ (s1_hi, s0_hi) and (QQ0, QQ1)
  SBC QQ0
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
  STA &3A                \ AJD
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
  BCS TT184              \ If a borrow didn't occur, i.e. s1_hi >= QQ0, then the
                         \ result is positive, so jump to TT184 and skip the
@@ -15890,11 +15890,11 @@ LOAD_D% = LOAD% + P% - CODE%
  SEC                    \ (s1_hi, s0_hi) and (QQ0, QQ1)
  SBC QQ1
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
  STA &E0                \ AJD
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
  BCS TT186              \ If a borrow didn't occur, i.e. s0_hi >= QQ1, then the
                         \ result is positive, so jump to TT186 and skip the
@@ -15915,7 +15915,7 @@ LOAD_D% = LOAD% + P% - CODE%
                         \ and set up the various variables we need to draw the
                         \ system's filled circle on the chart
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  LDA QQ15+3           \ Set A = s1_hi - QQ0, the horizontal distance between
 \  SEC                  \ this system and the current system, where |A| < 20.
@@ -15926,11 +15926,11 @@ LOAD_D% = LOAD% + P% - CODE%
 \                       \ of the chart's centre, or positive if it's to the
 \                       \ right)
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  LDA &3A                \ AJD
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  ASL A                  \ Set XX12 = 104 + x-delta * 4
  ASL A                  \
@@ -15944,7 +15944,7 @@ LOAD_D% = LOAD% + P% - CODE%
  STA XC
  INC XC
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  LDA QQ15+1           \ Set A = s0_hi - QQ1, the vertical distance between
 \  SEC                  \ this system and the current system, where |A| < 38.
@@ -15954,11 +15954,11 @@ LOAD_D% = LOAD% + P% - CODE%
 \                       \ sign of A, so it can be negative if it's above the
 \                       \ chart's centre, or positive if it's below)
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  LDA &E0                \ AJD
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  ASL A                  \ Set K4 = 90 + y-delta * 2
  ADC #90                \
@@ -16010,16 +16010,16 @@ LOAD_D% = LOAD% + P% - CODE%
  STA INWK,Y             \ occupied so we don't try to print another system's
                         \ label on this row
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  LDA #%10000000       \ Set bit 7 of QQ17 to switch to Sentence Case
 \  STA QQ17
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  JSR vdu_80             \ AJD
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  JSR cpl                \ Call cpl to print out the system name for the seeds
                         \ in QQ15 (which now contains the seeds for the current
@@ -16432,21 +16432,21 @@ LOAD_D% = LOAD% + P% - CODE%
  BMI Ghy                \ If it is, then the galactic hyperdrive has been
                         \ activated, so jump to Ghy to process it
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  LDA QQ11             \ If the current view is 0 (i.e. the space view) then
 \  BNE P%+5             \ jump to TTX110, which calls TT111 to set the current
 \  JMP TTX110           \ system to the nearest system to (QQ9, QQ10), and jumps
 \                       \ back into this routine at TTX111 below
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  LDA QQ11               \ AJD
  BNE P%+8
  JSR TT111
  JMP TTX111
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  JSR hm                 \ This is a chart view, so call hm to redraw the chart
                         \ crosshairs
@@ -16466,16 +16466,16 @@ LOAD_D% = LOAD% + P% - CODE%
  LDA #23
  STA YC
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  LDA #0               \ Set QQ17 = 0 to switch to ALL CAPS
 \  STA QQ17
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  JSR vdu_00             \ AJD
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  LDA #189               \ Print recursive token 29 ("HYPERSPACE ")
  JSR TT27
@@ -16530,21 +16530,21 @@ LOAD_D% = LOAD% + P% - CODE%
                         \ to 5, so setting QQ22 to 15 here makes the first tick
                         \ of the hyperspace counter longer than subsequent ticks
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  TAX                  \ Print the 8-bit number in X (i.e. 15) at text location
 \  JMP ee3              \ (0, 1), padded to 5 digits, so it appears in the top
 \                       \ left corner of the screen, and return from the
 \                       \ subroutine using a tail call
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  TAX                    \ Print the 8-bit number in X (i.e. 15) at text location
  BNE ee3                \ (0, 1), padded to 5 digits, so it appears in the top
                         \ left corner of the screen, and return from the
                         \ subroutine using a tail call AJD
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
 \ ******************************************************************************
 \
@@ -16584,19 +16584,19 @@ LOAD_D% = LOAD% + P% - CODE%
  BEQ zZ+1               \ hyperdrive, and if it is zero, which means we don't,
                         \ return from the subroutine (as zZ+1 contains an RTS)
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  INX                  \ We own a galactic hyperdrive, so X is &FF, so this
 \                       \ instruction sets X = 0
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  INC new_hold           \ AJD
 
  INX                    \ We own a galactic hyperdrive, so X is &FF, so this
                         \ instruction sets X = 0
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  STX GHYP               \ The galactic hyperdrive is a one-use item, so set GHYP
                         \ to 0 so we no longer have one fitted
@@ -16604,12 +16604,12 @@ LOAD_D% = LOAD% + P% - CODE%
  STX FIST               \ Changing galaxy also clears our criminal record, so
                         \ set our legal status in FIST to 0 ("clean")
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
  STX cmdr_cour          \ AJD
  STX cmdr_cour+1
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
  JSR wW                 \ Call wW to start the hyperspace countdown
 
@@ -17126,16 +17126,16 @@ LOAD_D% = LOAD% + P% - CODE%
 
 .TT168
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  LDX #%10000000       \ Set bit 7 of QQ17 to switch to Sentence Case, with the
 \  STX QQ17             \ next letter in capitals
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  JSR vdu_80             \ AJD
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  JSR TT151              \ Call TT151 to print the item name, market price and
                         \ availability of the current item, and set QQ24 to the
@@ -17251,7 +17251,7 @@ LOAD_D% = LOAD% + P% - CODE%
 
 .hyp1
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  JSR TT111            \ Select the system closest to galactic coordinates
 \                       \ (QQ9, QQ10)
@@ -17452,7 +17452,7 @@ LOAD_D% = LOAD% + P% - CODE%
 \
 \ ******************************************************************************
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \ .ptg
 \
@@ -17500,11 +17500,11 @@ LOAD_D% = LOAD% + P% - CODE%
  STA QQ1                \ vicinity of our original destination, but above or
                         \ below it in the galactic chart
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
 .RTS111
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
  RTS                    \ Return from the subroutine
 
@@ -17534,11 +17534,11 @@ LOAD_D% = LOAD% + P% - CODE%
 
  STA QQ14               \ Store the updated fuel amount in QQ14
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
 .hyper_snap
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
  LDA QQ11               \ If the current view is not a space view, jump to ee5
  BNE ee5                \ to skip the following
@@ -17552,7 +17552,7 @@ LOAD_D% = LOAD% + P% - CODE%
 
 .ee5
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  JSR CTRL             \ Scan the keyboard to see if CTRL is currently pressed,
 \                       \ returning a negative value in A if it is
@@ -17583,7 +17583,7 @@ LOAD_D% = LOAD% + P% - CODE%
 \  JSR hyp1+3           \ Jump straight to the system at (QQ9, QQ10) without
 \                       \ first calculating which system is closest
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  JSR DORND              \ Set A and X to random numbers
 
@@ -17592,7 +17592,7 @@ LOAD_D% = LOAD% + P% - CODE%
 
  JSR hyp1               \ AJD
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  JSR RES2               \ Reset a number of flight variables and workspaces
 
@@ -17602,19 +17602,19 @@ LOAD_D% = LOAD% + P% - CODE%
 
  JSR LSHIPS             \ Call LSHIPS to load a new ship blueprints file
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  LDA QQ11             \ If the current view in QQ11 is not a space view (0) or
 \  AND #%00111111       \ one of the charts (64 or 128), return from the
 \  BNE TT113            \ subroutine (as TT113 contains an RTS)
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  LDA QQ11               \ If the current view in QQ11 is not a space view (0) or
  AND #%00111111         \ one of the charts (64 or 128), return from the
  BNE RTS111             \ subroutine (as RTS111 contains an RTS)
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  JSR TTX66              \ Otherwise clear the screen and draw a white border
 
@@ -17763,7 +17763,7 @@ LOAD_D% = LOAD% + P% - CODE%
  ADC CASH+2             \
  STA CASH+2             \   CASH+2 = CASH+2 + Y
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  LDA CASH+1           \ Then the third most significant bytes (which are 0):
 \  ADC #0               \
@@ -17773,7 +17773,7 @@ LOAD_D% = LOAD% + P% - CODE%
 \  ADC #0               \
 \  STA CASH             \   CASH = CASH + 0
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  BCC TT113              \ AJD
  INC CASH+1
@@ -17782,7 +17782,7 @@ LOAD_D% = LOAD% + P% - CODE%
 
 .n_addmny
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  CLC                    \ Clear the C flag, so if the above was done following
                         \ a failed LCASH call, the C flag correctly indicates
@@ -17818,11 +17818,11 @@ LOAD_D% = LOAD% + P% - CODE%
  ASL P
  ROL A
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
 .price_xy
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
  TAY                    \ Set (Y X) = (A P)
  LDX P
@@ -17876,7 +17876,7 @@ PRINT "Code size is ", ~(P% - CODE_D%)
 PRINT "Execute at ", ~LOAD%
 PRINT "Reload at ", ~LOAD_D%
 
-PRINT "S.ELTD ", ~CODE_D%, " ", ~P%, " ", ~LOAD%, " ", ~LOAD_D%
+PRINT "S.D.ELTD ", ~CODE_D%, " ", ~P%, " ", ~LOAD%, " ", ~LOAD_D%
 \SAVE "output/D.ELTD.bin", CODE_D%, P%, LOAD%
 
 \ ******************************************************************************
@@ -18075,7 +18075,7 @@ LOAD_E% = LOAD% + P% - CODE%
 
 .tal
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  CLC                  \ We don't want to print the galaxy number with a
 \                       \ decimal point, so clear the C flag for pr2 to take as
@@ -18089,18 +18089,18 @@ LOAD_E% = LOAD% + P% - CODE%
                         \ are 0-7 internally, but we want to display them as
                         \ galaxy 1 through 8
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  JMP pr2              \ Jump to pr2, which prints the number in X to a width
 \                       \ of 3 figures, left-padding with spaces to a width of
 \                       \ 3, and once done, return from the subroutine (as pr2
 \                       \ ends with an RTS)
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  JMP pr2-1              \ AJD
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
 \ ******************************************************************************
 \
@@ -18298,7 +18298,7 @@ LOAD_E% = LOAD% + P% - CODE%
  DEX                    \ If token = 5, this is control code 5 (fuel, newline,
  BEQ fwl                \ cash, newline), so jump to fwl
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  DEX                  \ If token > 6, skip the following 3 instructions
 \  BNE P%+7
@@ -18311,7 +18311,7 @@ LOAD_E% = LOAD% + P% - CODE%
 \  DEX
 \  BNE P%+5
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  DEX                    \ AJD
  BNE l_33b9
@@ -18325,13 +18325,13 @@ LOAD_E% = LOAD% + P% - CODE%
 
  LDX #&00
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  STX QQ17               \ This token is control code 8 (switch to ALL CAPS), so
  RTS                    \ set QQ17 to 0 to switch to ALL CAPS and return from
                         \ the subroutine as we are done
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
 .l_33b9
 
@@ -18339,7 +18339,7 @@ LOAD_E% = LOAD% + P% - CODE%
  DEX
  BEQ vdu_00
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
  DEX                    \ If token = 9, this is control code 9 (tab to column
  BEQ crlf               \ 21 and print a colon), so jump to crlf
@@ -18754,7 +18754,7 @@ LOAD_E% = LOAD% + P% - CODE%
 
  TAX                    \ Copy the token number into X
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  LDA #LO(QQ18)        \ Set V, V+1 to point to the recursive token table at
 \  STA V                \ location QQ18
@@ -18764,14 +18764,14 @@ LOAD_E% = LOAD% + P% - CODE%
 \  LDY #0               \ Set a counter Y to point to the character offset
 \                       \ as we scan through the table
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  LDY #LO(QQ18)          \ Set V, V+1 to point to the recursive token table at
  STY V                  \ location QQ18, and because QQ18 starts on a page
  LDA #HI(QQ18)          \ boundary, the lower byte of the address is 0, so this
  STA V+1                \ also sets Y = 0
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  TXA                    \ Copy the token number back into A, so both A and X
                         \ now contain the token number we want to print
@@ -19295,14 +19295,14 @@ LOAD_E% = LOAD% + P% - CODE%
 
 .SOLAR
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  LSR FIST             \ Halve our legal status in FIST, making us less bad,
 \                       \ and moving bit 0 into the C flag (so every time we
 \                       \ arrive in a new system, our legal status improves a
 \                       \ bit)
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  LDA QQ8                \ AJD
  LDY #3
@@ -19323,7 +19323,7 @@ LOAD_E% = LOAD% + P% - CODE%
  EOR #&FF
  STA FIST
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  JSR ZINF               \ Call ZINF to reset the INWK ship workspace, which
                         \ doesn't affect the C flag
@@ -19747,7 +19747,7 @@ LOAD_E% = LOAD% + P% - CODE%
  JSR DOT                \ Call DOT to redraw (i.e. remove) the current compass
                         \ dot
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  LDA SSPR             \ If we are inside the space station safe zone, jump to
 \  BNE SP1              \ SP1 to draw the space station on the compass
@@ -19760,7 +19760,7 @@ LOAD_E% = LOAD% + P% - CODE%
 \  JMP SP2              \ Jump to SP2 to draw XX15 on the compass, returning
 \                       \ from the subroutine using a tail call
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  LDY #&25               \ AJD
  LDA SSPR
@@ -19773,7 +19773,7 @@ LOAD_E% = LOAD% + P% - CODE%
 
                         \ Fall through into SP2 to draw XX15 on the compass
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
 \ ******************************************************************************
 \
@@ -20031,7 +20031,7 @@ LOAD_E% = LOAD% + P% - CODE%
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
 .n_oops
 
@@ -20039,7 +20039,7 @@ LOAD_E% = LOAD% + P% - CODE%
  SBC new_shields
  BCC n_shok
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -20087,11 +20087,11 @@ LOAD_E% = LOAD% + P% - CODE%
 
  STA FSH                \ Store the new value of the forward shield in FSH
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
 .n_shok
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
  RTS                    \ Return from the subroutine
 
@@ -20187,7 +20187,7 @@ LOAD_E% = LOAD% + P% - CODE%
 
 .SPS3
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  LDA K%+1,X           \ Copy x_hi into K3+X
 \  STA K3,X
@@ -20195,7 +20195,7 @@ LOAD_E% = LOAD% + P% - CODE%
 \  LDA K%+2,X           \ Set A = Y = x_sign
 \  TAY
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  LDA K%+1,Y             \ Copy x_hi into K3+X
  STA K3,X
@@ -20203,18 +20203,18 @@ LOAD_E% = LOAD% + P% - CODE%
  LDA K%+2,Y             \ Set A = x_sign and store it on the stack
  PHA
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  AND #%01111111         \ Set K3+1 = |x_sign|
  STA K3+1,X
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  TYA                  \ Set K3+2 = the sign of x_sign
 \  AND #%10000000
 \  STA K3+2,X
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  PLA                    \ Set K3+2 = the sign of x_sign
  AND #%10000000
@@ -20227,7 +20227,7 @@ LOAD_E% = LOAD% + P% - CODE%
  INX
  INX
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  RTS                    \ Return from the subroutine
 
@@ -20278,7 +20278,7 @@ LOAD_E% = LOAD% + P% - CODE%
 
  JSR SPBLB              \ Light up the space station bulb on the dashboard
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  LDX #%10000001       \ Set the AI flag in byte #32 to %10000001 (hostile,
 \  STX INWK+32          \ no AI, has an E.C.M.)
@@ -20289,7 +20289,7 @@ LOAD_E% = LOAD% + P% - CODE%
 \  STX NEWB             \ Set NEWB to %00000000, though this gets overridden by
 \                       \ the default flags from E% in NWSHP below
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  LDX #&81               \ AJD
  STX &66
@@ -20298,7 +20298,7 @@ LOAD_E% = LOAD% + P% - CODE%
  INX
  STX &64
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
 \STX INWK+31            \ This instruction is commented out in the original
                         \ source. It would set the exploding state and missile
@@ -20308,12 +20308,12 @@ LOAD_E% = LOAD% + P% - CODE%
                         \ indicate we should show the space station rather than
                         \ the sun
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  DEX                  \ Set roll counter to 255 (maximum roll with no
 \  STX INWK+29          \ damping)
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  STX &67                \ AJD
  LDA FIST
@@ -20324,22 +20324,22 @@ LOAD_E% = LOAD% + P% - CODE%
 
  STX &6A
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  LDX #10                \ Call NwS1 to flip the sign of nosev_x_hi (byte #10)
  JSR NwS1
 
  JSR NwS1               \ And again to flip the sign of nosev_y_hi (byte #12)
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
  STX &68                \ AJD
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
  JSR NwS1               \ And again to flip the sign of nosev_z_hi (byte #14)
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  LDA #LO(LSO)         \ Set bytes #33 and #34 to point to LSO for the ship
 \  STA INWK+33          \ line heap for the space station
@@ -20727,18 +20727,18 @@ LOAD_E% = LOAD% + P% - CODE%
 
  STX MSTG               \ Store the target of our missile lock in MSTG
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  LDX NOMSL            \ Call MSBAR to update the leftmost indicator in the
 \  JSR MSBAR            \ dashboard's missile bar, which returns with Y = 0
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  LDX NOMSL              \ AJD
  DEX
  JSR MSBAR
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  STY MSAR               \ Set MSAR = 0 to indicate that the leftmost missile
                         \ is no longer seeking a target lock
@@ -20844,7 +20844,7 @@ LOAD_E% = LOAD% + P% - CODE%
 
  STA SC                 \ Store the low byte of the screen address in SC
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  STX P+1              \ Set P(2 1) = (Y X)
 \  STY P+2
@@ -20853,7 +20853,7 @@ LOAD_E% = LOAD% + P% - CODE%
 \                       \ &7D as the bulbs are both in the character row from
 \                       \ &7D00 to &7DFF
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  LDA #&7D               \ Set A to the high byte of the screen address, which is
                         \ &7D as the bulbs are both in the character row from
@@ -20862,7 +20862,7 @@ LOAD_E% = LOAD% + P% - CODE%
  STX P+1                \ Set P(2 1) = (Y X)
  STY P+2
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  JMP RREN               \ Call RREN to print the character definition pointed to
                         \ by P(2 1) at the screen address pointed to by (A SC),
@@ -20963,7 +20963,7 @@ LOAD_E% = LOAD% + P% - CODE%
 
 .MSBAR
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  TXA                  \ Set T = X * 8
 \  ASL A
@@ -20975,7 +20975,7 @@ LOAD_E% = LOAD% + P% - CODE%
 \  SBC T                \        = 48 + 1 - (X * 8)
 \  STA SC
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  CPX #4
  BCC n_mok
@@ -20993,7 +20993,7 @@ LOAD_E% = LOAD% + P% - CODE%
  SBC T                  \        = 40 + 1 - (X * 8) AJD
  STA SC
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
                         \ So the low byte of SC(1 0) contains the row address
                         \ for the rightmost missile indicator, made up as
@@ -21869,7 +21869,7 @@ LOAD_E% = LOAD% + P% - CODE%
                         \ of the screen (so we don't need to draw its bottom
                         \ half)
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  TXA                  \ Negate X using two's complement, so X = ~X + 1
 \  EOR #%11111111       \
@@ -21878,14 +21878,14 @@ LOAD_E% = LOAD% + P% - CODE%
 \  TAX                  \ centre, and the centre is off the bottom of the
 \                       \ screen, past 191. So we negate it to make it positive
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  TXA                    \ AJD
  EOR #&FF
  TAX
  INX
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
 .PLF17
 
@@ -22808,7 +22808,7 @@ LOAD_E% = LOAD% + P% - CODE%
  LDA YY+1               \ And then subtracting the high bytes
  SBC #0
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  BNE ED3              \ If the high byte subtraction is non-zero, then skip
 \                       \ to ED3
@@ -22821,11 +22821,11 @@ LOAD_E% = LOAD% + P% - CODE%
 \
 \ .ED3
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  BEQ P%+8               \ AJD
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  BPL ED1                \ If the addition is positive then the calculation has
                         \ underflowed, so jump to ED1 to return a failure
@@ -23933,7 +23933,7 @@ PRINT "Code size is ", ~(P% - CODE_E%)
 PRINT "Execute at ", ~LOAD%
 PRINT "Reload at ", ~LOAD_E%
 
-PRINT "S.ELTE ", ~CODE_E%, " ", ~P%, " ", ~LOAD%, " ", ~LOAD_E%
+PRINT "S.D.ELTE ", ~CODE_E%, " ", ~P%, " ", ~LOAD%, " ", ~LOAD_E%
 \SAVE "versions/disc/output/D.ELTE.bin", CODE_E%, P%, LOAD%
 
 \ ******************************************************************************
@@ -24010,7 +24010,7 @@ LOAD_F% = LOAD% + P% - CODE%
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
 .rand_posn
 
@@ -24034,7 +24034,7 @@ LOAD_F% = LOAD% + P% - CODE%
  STA INWK+7
  JMP DORND
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -24304,20 +24304,20 @@ LOAD_F% = LOAD% + P% - CODE%
 
 .msblob
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  LDX #4               \ Set up a loop counter in X to count through all four
 \                       \ missile indicators
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  LDX #3                 \ AJD
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
 .ss
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  CPX NOMSL            \ If the counter is equal to the number of missiles,
 \  BEQ SAL8             \ jump down to SQL8 to draw remaining the missiles, as
@@ -24341,7 +24341,7 @@ LOAD_F% = LOAD% + P% - CODE%
 \  LDY #&EE             \ Draw the missile indicator at position X in green/cyan
 \  JSR MSBAR
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  LDY #0                 \ AJD
  CPX NOMSL
@@ -24353,19 +24353,19 @@ LOAD_F% = LOAD% + P% - CODE%
 
  JSR MSBAR
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  DEX                    \ Decrement the counter to point to the next missile
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  BNE SAL8             \ Loop back to SAL8 if we still have missiles to draw
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  BPL ss                 \ AJD
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  RTS                    \ Return from the subroutine
 
@@ -24416,7 +24416,7 @@ LOAD_F% = LOAD% + P% - CODE%
 
 .Ze
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  JSR ZINF             \ Call ZINF to reset the INWK ship workspace
 \
@@ -24440,11 +24440,11 @@ LOAD_F% = LOAD% + P% - CODE%
 \
 \  JSR DORND            \ Set A and X to random numbers
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  JSR rand_posn          \ AJD
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  CMP #245               \ Set the C flag if X >= 245 (4% chance)
 
@@ -24543,7 +24543,7 @@ LOAD_F% = LOAD% + P% - CODE%
                         \ C flag was set), giving the ship either no missiles or
                         \ one missile
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  AND #15              \ Set the ship speed to our random number, set to a
 \  ORA #16              \ minimum of 16 and a maximum of 31
@@ -24582,7 +24582,7 @@ LOAD_F% = LOAD% + P% - CODE%
 \  JSR NWSHP            \ Add a new ship of type A to the local bubble and fall
 \                       \ through into the main game loop again
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  AND #15                \ AJD
  STA INWK+27
@@ -24609,7 +24609,7 @@ LOAD_F% = LOAD% + P% - CODE%
 
  JMP hordes
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
 \ ******************************************************************************
 \
@@ -24690,24 +24690,24 @@ LOAD_F% = LOAD% + P% - CODE%
 
  JSR DORND              \ Set A and X to random numbers
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  CMP #35              \ If A >= 35 (87% chance), jump down to MTT1 to skip
 \  BCS MTT1             \ the spawning of an asteroid or cargo canister and
 \                       \ potentially spawn something else
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  CMP #&33               \ trader fraction AJD
  BCS MTT1
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  LDA JUNK               \ If we already have 3 or more bits of junk in the local
  CMP #3                 \ bubble, jump down to MTT1 to skip the following and
  BCS MTT1               \ potentially spawn something else
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  JSR ZINF             \ Call ZINF to reset the INWK ship workspace
 \
@@ -24796,7 +24796,7 @@ LOAD_F% = LOAD% + P% - CODE%
 \
 \  JSR DORND            \ Set A and X to random numbers
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  JSR rand_posn          \ AJD
  BVS MTT4
@@ -24834,7 +24834,7 @@ LOAD_F% = LOAD% + P% - CODE%
 
  JSR DORND              \ Set A and X to random numbers
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  CMP #10                \ If random A >= 10 (96% of the time), set the C flag
 
@@ -24845,15 +24845,15 @@ LOAD_F% = LOAD% + P% - CODE%
                         \ us spawning either a boulder (#OIL + 1) or an asteroid
                         \ (#OIL + 2)
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  JSR NWSHP            \ Add our new asteroid or canister to the universe
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  BNE horde_plain        \ AJD
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
 \ ******************************************************************************
 \
@@ -24904,7 +24904,7 @@ LOAD_F% = LOAD% + P% - CODE%
  JSR Ze                 \ Call Ze to initialise INWK to a potentially hostile
                         \ ship, and set A and X to random values
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  CMP T                \ If the random value in A >= our badness level, which
 \  BCS P%+7             \ will be the case unless we have been really, really
@@ -24916,7 +24916,7 @@ LOAD_F% = LOAD% + P% - CODE%
 \  LDA #COPS            \ Add a new police ship to the local bubble
 \  JSR NWSHP
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  CMP T                  \ If the random value in A >= our badness level, which
  BCS l_4050             \ will be the case unless we have been really, really
@@ -24934,7 +24934,7 @@ LOAD_F% = LOAD% + P% - CODE%
 
 .l_4050
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  LDA MANY+COPS          \ If we now have at least one cop in the local bubble,
  BNE MLOOPS             \ jump down to MLOOPS, otherwise fall through into the
@@ -25014,7 +25014,7 @@ LOAD_F% = LOAD% + P% - CODE%
                         \ Now to spawn a lone bounty hunter, a Thargoid or a
                         \ group of pirates
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  JSR Ze               \ Call Ze to initialise INWK to a potentially hostile
 \                       \ ship, and set A and X to random values
@@ -25024,12 +25024,12 @@ LOAD_F% = LOAD% + P% - CODE%
 \  BCS mt1              \ to mt1 to spawn pirates, otherwise keep going to
 \                       \ spawn a lone bounty hunter or a Thargoid
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  CPX #&64               \ AJD
  BCS mt1
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  INC EV                 \ Increase the extra vessels spawning counter, to
                         \ prevent the next attempt to spawn extra vessels
@@ -25037,21 +25037,21 @@ LOAD_F% = LOAD% + P% - CODE%
  AND #3                 \ Set A = random number in the range 0-3, which we
                         \ will now use to determine the type of ship
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  ADC #CYL2            \ Add A to #CYL2 (we know the C flag is clear as we
 \                       \ passed through the BCS above), so A is now one of the
 \                       \ lone bounty hunter ships, i.e. Cobra Mk III (pirate),
 \                       \ Asp Mk II, Python (pirate) or Fer-de-lance
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  ADC #CYL2+1            \ Add A to #CYL2 (we know the C flag is clear as we
                         \ passed through the BCS above), so A is now one of the
                         \ lone bounty hunter ships, i.e. Cobra Mk III (pirate),
                         \ Asp Mk II, Python (pirate) or Fer-de-lance AJD
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  TAY                    \ Copy the new ship type to Y
 
@@ -25109,7 +25109,7 @@ LOAD_F% = LOAD% + P% - CODE%
 
 .mt1
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  AND #3               \ It's time to spawn a group of pirates, so set A to a
 \                       \ random number in the range 0-3, which will be the
@@ -25136,7 +25136,7 @@ LOAD_F% = LOAD% + P% - CODE%
 \  AND #7               \ Reduce A to a random number in the range 0-7, though
 \                       \ with a bigger chance of a smaller number in this range
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  LDA #&11
  LDX #&07
@@ -25173,7 +25173,7 @@ LOAD_F% = LOAD% + P% - CODE%
 
  AND #&FF
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  STA CPIR               \ Set CPIR to this random number in the range 0-7
 
@@ -25181,14 +25181,14 @@ LOAD_F% = LOAD% + P% - CODE%
 
  LDA CPIR               \ Set A to the ship type in CPIR
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  ADC #PACK            \ #PACK is set to #SH3, the ship type for a Sidewinder,
 \                       \ so this sets our new ship type to one of the pack
 \                       \ hunters, namely a Sidewinder, Mamba, Krait, Adder,
 \                       \ Gecko, Cobra Mk I, Worm or Cobra Mk III (pirate)
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  CLC                    \ AJD
 
@@ -25199,11 +25199,11 @@ LOAD_F% = LOAD% + P% - CODE%
  INC &47
  INC &4A
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  JSR NWSHP              \ Try adding a new ship of type A to the local bubble
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  BCS P%+7             \ If the ship was successfully added, skip the following
 \                       \ two instructions
@@ -25219,7 +25219,7 @@ LOAD_F% = LOAD% + P% - CODE%
 \                       \ CPIR is 0, in which case give up and move on to the
 \                       \ next pirate to spawn
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  CMP #&18               \ AJD
  BCS l_40d7
@@ -25228,7 +25228,7 @@ LOAD_F% = LOAD% + P% - CODE%
 
 .l_40d7
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  DEC XX13               \ Decrement the pirate counter
 
@@ -25279,7 +25279,7 @@ LOAD_F% = LOAD% + P% - CODE%
 
  JSR DIALS              \ Call DIALS to update the dashboard
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  LDA QQ11             \ If this is a space view, skip the following five
 \  BEQ P%+13            \ instructions (i.e. jump to JSR TT17 below)
@@ -25291,7 +25291,7 @@ LOAD_F% = LOAD% + P% - CODE%
 \  LDY #2               \ Wait for 2/50 of a second (0.04 seconds), to slow the
 \  JSR DELAY            \ main loop down a bit
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  LDA QQ11               \ If this is a space view, skip the following two
  BEQ l_40f8             \ instructions (i.e. jump to JSR TT17 below)
@@ -25301,7 +25301,7 @@ LOAD_F% = LOAD% + P% - CODE%
 
 .l_40f8
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  JSR TT17               \ Scan the keyboard for the cursor keys or joystick,
                         \ returning the cursor's delta values in X and Y and
@@ -25339,21 +25339,21 @@ LOAD_F% = LOAD% + P% - CODE%
 
 .FRCE
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
  PHA                    \ AJD
  LDA &2F
  BNE l_locked
  PLA
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
  JSR TT102              \ Call TT102 to process the key pressed in A
 
  JMP TT100              \ Otherwise jump to TT100 to restart the main loop from
                         \ the start
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
 .l_locked
 
@@ -25361,7 +25361,7 @@ LOAD_F% = LOAD% + P% - CODE%
  JSR TT107
  JMP TT100
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -25456,7 +25456,7 @@ LOAD_F% = LOAD% + P% - CODE%
  CMP #&32               \ If "D" was pressed, jump to T95 to print the distance
  BEQ T95                \ to a system (if we are in one of the chart screens)
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
  CMP #&43               \ If "F" was not pressed, jump down to HME1, otherwise
  BNE HME1               \ keep going to process searching for systems
@@ -25468,11 +25468,11 @@ LOAD_F% = LOAD% + P% - CODE%
 
 .HME1
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
  STA T1                 \ Store A (the key that's been pressed) in T1
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  LDA QQ11             \ If the current view is a chart (QQ11 = 64 or 128),
 \  AND #%11000000       \ keep going, otherwise jump down to TT107 to skip the
@@ -25482,28 +25482,28 @@ LOAD_F% = LOAD% + P% - CODE%
 \  BNE TT107            \ then we are already counting down, so jump to TT107
 \                       \ to skip the following
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  LDA QQ11               \ If the current view is a chart (QQ11 = 64 or 128),
  AND #%11000000         \ keep going, otherwise jump down to TT107 to skip the
  BEQ TT107              \ following AJD
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  LDA T1                 \ Restore the original value of A (the key that's been
                         \ pressed) from T1
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  CMP #&36             \ If "O" was pressed, do the following three jumps,
 \  BNE ee2              \ otherwise skip to ee2 to continue
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  CMP #&36               \ If "O" was pressed, do the following three jumps,
  BNE not_home           \ otherwise skip to not_home to continue AJD
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  JSR TT103              \ Draw small crosshairs at coordinates (QQ9, QQ10),
                         \ which will erase the crosshairs currently there
@@ -25512,20 +25512,20 @@ LOAD_F% = LOAD% + P% - CODE%
                         \ will move the location in (QQ9, QQ10) to the current
                         \ home system
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  JSR TT103            \ Draw small crosshairs at coordinates (QQ9, QQ10),
 \                       \ which will draw the crosshairs at our current home
 \                       \ system
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  JMP TT103              \ Draw small crosshairs at coordinates (QQ9, QQ10),
                         \ which will draw the crosshairs at our current home
                         \ system, and return from the subroutine using a tail
                         \ call
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
 .ee2
 
@@ -25579,7 +25579,7 @@ LOAD_F% = LOAD% + P% - CODE%
                         \ to do a hyperspace jump, returning from the subroutine
                         \ using a tail call
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
 .BAD
 
@@ -25589,13 +25589,13 @@ LOAD_F% = LOAD% + P% - CODE%
  ASL A
  ADC QQ20+&0A
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
 .t95
 
  RTS                    \ Return from the subroutine
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
 .not_home
 
@@ -25613,7 +25613,7 @@ LOAD_F% = LOAD% + P% - CODE%
  STA QQ10
  JSR TT103
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
 .T95
 
@@ -25632,16 +25632,16 @@ LOAD_F% = LOAD% + P% - CODE%
 
  JSR cpl                \ Print control code 3 (the selected system name)
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  LDA #%10000000       \ Set bit 7 of QQ17 to switch to Sentence Case, with the
 \  STA QQ17             \ next letter in capitals
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  JSR vdu_80             \ AJD
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  LDA #1                 \ Move the text cursor to column 1 and down one line
  STA XC                 \ (in other words, to the start of the next line)
@@ -25933,12 +25933,12 @@ LOAD_F% = LOAD% + P% - CODE%
 
 .LSHIPS
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
  LDA #0                 \ AJD
  STA finder
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
  JSR THERE              \ Call THERE to see if we are in the Constrictor's
                         \ system in mission 1
@@ -25960,7 +25960,7 @@ LOAD_F% = LOAD% + P% - CODE%
  CPX #10                \ 0 of A, otherwise shift a 1
  ROL A
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \                       \ By this point, A is:
 \                       \
@@ -25976,11 +25976,11 @@ LOAD_F% = LOAD% + P% - CODE%
 \                       \ appropriate ship blueprints file (where 0 is file
 \                       \ D.MOA and 15 is file D.MOP)
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  ADC GCNT               \ 16+7 -> 23 files ! AJD
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  TAX                    \ Store A in X so we can retrieve it after the mission 2
                         \ progress check
@@ -26009,7 +26009,7 @@ LOAD_F% = LOAD% + P% - CODE%
  CLC                    \ Convert A from 0-15 to 'A' to 'P'
  ADC #'A'
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  STA SHIPI+6          \ Store the letter of the ship blueprints file we want
 \                       \ in the sixth byte of the command string at SHIPI, so
@@ -26018,11 +26018,11 @@ LOAD_F% = LOAD% + P% - CODE%
 \
 \  JSR CATD             \ Call CATD to reload the disc catalogue
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  STA SHIPI+4            \ AJD
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  LDX #LO(SHIPI)         \ Set (Y X) to point to the OS command at SHIPI, which
  LDY #HI(SHIPI)         \ loads the relevant ship blueprints file
@@ -26042,17 +26042,17 @@ LOAD_F% = LOAD% + P% - CODE%
 
 .SHIPI
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  EQUS "L.D.MO0"
 \  EQUB 13
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  EQUS "L.S.0"
  EQUB 13
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
 \ ******************************************************************************
 \
@@ -26177,7 +26177,7 @@ LOAD_F% = LOAD% + P% - CODE%
  LDX #0                 \ Copy the two high bytes of the planet's x-coordinate
  JSR SPS3               \ into K3(2 1 0), separating out the sign bit into K3+2
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  LDX #3               \ Copy the two high bytes of the planet's y-coordinate
 \  JSR SPS3             \ into K3(5 4 3), separating out the sign bit into K3+5
@@ -26185,13 +26185,13 @@ LOAD_F% = LOAD% + P% - CODE%
 \  LDX #6               \ Copy the two high bytes of the planet's z-coordinate
 \  JSR SPS3             \ into K3(8 7 6), separating out the sign bit into K3+8
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  JSR SPS3               \ AJD
 
  JSR SPS3               \ AJD
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
                         \ Fall through into TAS2 to build XX15 from K3
 
@@ -26358,65 +26358,65 @@ LOAD_F% = LOAD% + P% - CODE%
 
  JSR SQUA               \ Set (A P) = A * A = y^2
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  STA T                \ Set (T P) = (A P) = y^2
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  TAY                    \ AJD
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  LDA P                  \ Set (R Q) = (R Q) + (T P) = x^2 + y^2
  ADC Q                  \
  STA Q                  \ First, doing the low bytes, Q = Q + P
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  LDA T                \ And then the high bytes, R = R + T
 \  ADC R
 \  STA R
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  TYA                    \ AJD
  ADC R
  STA R
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  LDA XX15+2             \ Fetch the z-coordinate into A
 
  JSR SQUA               \ Set (A P) = A * A = z^2
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  STA T                \ Set (T P) = (A P) = z^2
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  TAY                    \ AJD
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  LDA P                  \ Set (R Q) = (R Q) + (T P) = x^2 + y^2 + z^2
  ADC Q                  \
  STA Q                  \ First, doing the low bytes, Q = Q + P
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  LDA T                \ And then the high bytes, R = R + T
 \  ADC R
 \  STA R
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  TYA                    \ AJD
  ADC R
  STA R
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  JSR LL5                \ We now have the following:
                         \
@@ -26548,11 +26548,11 @@ LOAD_F% = LOAD% + P% - CODE%
                         \ escape pods and cargo canisters, so to check whether
                         \ we can jump, we first grab the slot contents into A
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
  ORA JUNK               \ no jump if any ship AJD
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
  ORA SSPR               \ If there is a space station nearby, then SSPR will
                         \ be non-zero, so OR'ing with SSPR will produce a
@@ -26733,7 +26733,7 @@ LOAD_F% = LOAD% + P% - CODE%
 
 .EXNO3
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  LDA #16              \ Call the NOISE routine with A = 16 to make the first
 \  JSR NOISE            \ death sound
@@ -26743,7 +26743,7 @@ LOAD_F% = LOAD% + P% - CODE%
 \                       \ tail call (this BNE is effectively a JMP as A will
 \                       \ never be zero)
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  JSR n_sound10          \ AJD
 
@@ -26752,7 +26752,7 @@ LOAD_F% = LOAD% + P% - CODE%
                         \ tail call (this BNE is effectively a JMP as A will
                         \ never be zero)
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
 \ ******************************************************************************
 \
@@ -26801,11 +26801,11 @@ LOAD_F% = LOAD% + P% - CODE%
  LDA #120               \ Print recursive token 120 ("INCOMING MISSILE") as an
  JSR MESS               \ in-flight message
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
 .n_sound30
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
  LDA #48                \ Call the NOISE routine with A = 48 to make the sound
  BNE NOISE              \ of the missile being launched and return from the
@@ -26916,13 +26916,13 @@ LOAD_F% = LOAD% + P% - CODE%
 
  JSR NO3                \ Make the sound from our updated sound block in XX16
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  LDA #16              \ Set A = 16 to denote we have made a hit or kill
 \                       \ (part 2 of the explosion), and fall through into NOISE
 \                       \ to make the sound
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
 .n_sound10
 
@@ -26930,7 +26930,7 @@ LOAD_F% = LOAD% + P% - CODE%
                         \ (part 2 of the explosion), and fall through into NOISE
                         \ to make the sound
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
 \ ******************************************************************************
 \
@@ -26970,29 +26970,29 @@ LOAD_F% = LOAD% + P% - CODE%
 
 .NO3
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  LDX DNOIZ            \ Set X to the DNOIZ configuration setting
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  LDY DNOIZ              \ Set Y to the DNOIZ configuration setting
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  BNE KYTB               \ If DNOIZ is non-zero, then sound is disabled, so
                         \ return from the subroutine (as KYTB contains an RTS)
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  LDX #LO(XX16)        \ Otherwise set (Y X) to point to the sound block in
 \  LDY #HI(XX16)        \ XX16
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  LDX #LO(XX16)          \ AJD
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  LDA #7                 \ Call OSWORD 7 to makes the sound, as described in the
  JMP OSWORD             \ documentation for variable SFX, and return from the
@@ -27092,7 +27092,7 @@ LOAD_F% = LOAD% + P% - CODE%
  RTS                    \ Return from the subroutine (used as an entry point and
                         \ a fall-through from above)
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \                       \ These are the primary flight controls (pitch, roll,
 \                       \ speed and lasers):
@@ -27116,7 +27116,7 @@ LOAD_F% = LOAD% + P% - CODE%
 \  EQUB &45             \ J         KYTB+14     In-system jump
 \  EQUB &52             \ C         KYTB+15     Docking computer
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
                         \ These are the primary flight controls (pitch, roll,
                         \ speed and lasers):
@@ -27140,7 +27140,7 @@ LOAD_F% = LOAD% + P% - CODE%
  EQUB &45               \ J         KYTB+14     In-system jump
  EQUB &63               \ AJD
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  EQUB &37               \ P         KYTB+16     Cancel docking computer
 
@@ -27153,14 +27153,14 @@ LOAD_F% = LOAD% + P% - CODE%
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
 .b_table
 
  EQUB &61, &31, &80, &80, &80, &80, &51
  EQUB &64, &34, &32, &62, &52, &54, &58, &38, &68
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -27171,7 +27171,7 @@ LOAD_F% = LOAD% + P% - CODE%
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
 .b_13
 
@@ -27191,7 +27191,7 @@ LOAD_F% = LOAD% + P% - CODE%
 
  RTS
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -27221,12 +27221,12 @@ LOAD_F% = LOAD% + P% - CODE%
 
 .DKS1
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
  LDA BSTK               \ AJD
  BMI b_14
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
  LDX KYTB,Y             \ Get the internal key number from the Y-th byte of the
                         \ KYTB table above
@@ -27234,28 +27234,28 @@ LOAD_F% = LOAD% + P% - CODE%
  JSR DKS4               \ Call DKS4, which will set A and X to a negative value
                         \ if the key is being pressed
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  BPL DKS2-1           \ The key is not being pressed, so return from the
 \                       \ subroutine (as DKS2-1 contains an RTS)
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  BPL b_quit             \ The key is not being pressed, so return from the
                         \ subroutine (as b_quit contains an RTS)
 
 .b_pressed
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  LDA #&FF               \ Store &FF in the Y-th byte of the key logger at KL
  STA KL,Y
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
 .b_quit
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
  RTS                    \ Return from the subroutine
 
@@ -27502,18 +27502,18 @@ LOAD_F% = LOAD% + P% - CODE%
  INY                    \ Update the key logger for key 2 in the KYTB table, so
  JSR DKS1               \ KY2 will be &FF if Space (speed up) is being pressed
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  LDA VIA+&40          \ Read 6522 System VIA input register IRB (SHEILA &40)
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  LDA #&51               \ AJD
  STA &FE60
 
  LDA VIA+&40            \ Read 6522 System VIA input register IRB (SHEILA &40)
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  TAX                    \ This instruction doesn't seem to have any effect, as
                         \ X is overwritten in a few instructions. When the
@@ -27625,7 +27625,7 @@ LOAD_F% = LOAD% + P% - CODE%
 
  JSR U%                 \ Call U% to clear the key logger
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  LDA JSTK             \ If JSTK is non-zero, then we are configured to use
 \  BNE DKJ1             \ the joystick rather than keyboard, so jump to DKJ1
@@ -27635,7 +27635,7 @@ LOAD_F% = LOAD% + P% - CODE%
 \
 \  STA BSTK             \ Set BSTK = 0 to disable the Bitstik
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  LDA &2F                \ AJD
  BEQ l_open
@@ -27648,7 +27648,7 @@ LOAD_F% = LOAD% + P% - CODE%
                         \ to read the joystick flight controls, before jumping
                         \ to DK4 below
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  LDY #7                 \ We're going to work our way through the primary flight
                         \ control keys (pitch, roll, speed and laser), so set a
@@ -27913,16 +27913,16 @@ LOAD_F% = LOAD% + P% - CODE%
 
  INY                    \ Increment Y to point to the next toggle key
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  CPY #&47             \ The last toggle key is &46 (K), so check whether we
 \                       \ have just done that one
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  CPY #&48               \ AJD
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  BNE DKL4               \ If not, loop back to check for the next toggle key
 
@@ -27942,7 +27942,7 @@ LOAD_F% = LOAD% + P% - CODE%
  JMP DEATH2             \ ESCAPE is being pressed, so jump to DEATH2 to end
                         \ the game
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  CPX #&64             \ If "B" is not being pressed, skip to DK7
 \  BNE nobit
@@ -27982,7 +27982,7 @@ LOAD_F% = LOAD% + P% - CODE%
                         \ to KL+16. So set a decreasing counter in Y for the
                         \ index, starting at 16, so we can loop through them
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  LDA #&FF             \ Set A to &FF so we can store this in the keyboard
 \                       \ logger for keys that are being pressed
@@ -28004,13 +28004,13 @@ LOAD_F% = LOAD% + P% - CODE%
 \
 \ .DK1
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
 .DKL1
 
  JSR DKS1               \ AJD
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  DEY                    \ Decrement the loop counter
 
@@ -28067,13 +28067,13 @@ LOAD_F% = LOAD% + P% - CODE%
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
 .cargo_mtok
 
  ADC #&D0
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -28095,16 +28095,16 @@ LOAD_F% = LOAD% + P% - CODE%
 
 .MESS
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  LDX #0               \ Set QQ17 = 0 to switch to ALL CAPS
 \  STX QQ17
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  JSR vdu_00             \ AJD
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  LDY #9                 \ Move the text cursor to column 9, row 22, at the
  STY XC                 \ bottom middle of the screen, and set Y = 22
@@ -28166,7 +28166,7 @@ LOAD_F% = LOAD% + P% - CODE%
  BMI DK5                \ If A < 0 (50% chance), return from the subroutine
                         \ (as DK5 contains an RTS)
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  CPX #22              \ If X >= 22 (89% chance), return from the subroutine
 \  BCS DK5              \ (as DK5 contains an RTS)
@@ -28177,7 +28177,7 @@ LOAD_F% = LOAD% + P% - CODE%
 \                       \ E.C.M., fuel scoops, energy bomb, energy unit and
 \                       \ docking computer, all of which can be destroyed
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  CPX #24                \ If X >= 24 (AJD chance), return from the subroutine
  BCS DK5                \ (as DK5 contains an RTS)
@@ -28185,7 +28185,7 @@ LOAD_F% = LOAD% + P% - CODE%
  LDA CRGO,X             \ If we do not have any of item CRGO+X, AJD
  BEQ DK5
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  LDA DLY                \ If there is already an in-flight message on-screen,
  BNE DK5                \ return from the subroutine (as DK5 contains an RTS)
@@ -28194,7 +28194,7 @@ LOAD_F% = LOAD% + P% - CODE%
  STY de                 \ that when we call MESS below, " DESTROYED" is appended
                         \ to the in-flight message
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  STA QQ20,X           \ A is 0 (as we didn't branch with the BNE above), so
 \                       \ this sets QQ20+X to 0, which destroys any cargo or
@@ -28211,7 +28211,7 @@ LOAD_F% = LOAD% + P% - CODE%
 \                       \ set bit 1 of the de flag above), and returns from the
 \                       \ subroutine using a tail call
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  STA CRGO,X             \ AJD
  DEX
@@ -28227,11 +28227,11 @@ LOAD_F% = LOAD% + P% - CODE%
  BNE equip_mtok
  LDA #&6F-&6B-1
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
 .ou1
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  BEQ ou2              \ If X = 17, jump to ou2 to print "E.C.M.SYSTEM
 \                       \ DESTROYED" and return from the subroutine using a tail
@@ -28249,7 +28249,7 @@ LOAD_F% = LOAD% + P% - CODE%
 \                       \     = 113 - 19 + X
 \                       \     = 113 to 115
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  ADC #&6B-&5D           \ AJD
 
@@ -28258,7 +28258,7 @@ LOAD_F% = LOAD% + P% - CODE%
  ADC #&5D
  INC new_hold
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  BNE MESS               \ Print recursive token A ("ENERGY BOMB", "ENERGY UNIT"
                         \ or "DOCKING COMPUTERS") as an in-flight message,
@@ -28785,6 +28785,31 @@ ENDMACRO
 
 \ ******************************************************************************
 \
+\ Save output/ELTF.bin
+\
+\ ******************************************************************************
+
+PRINT "ELITE F"
+PRINT "Assembled at ", ~CODE_F%
+PRINT "Ends at ", ~P%
+PRINT "Code size is ", ~(P% - CODE_F%)
+PRINT "Execute at ", ~LOAD%
+PRINT "Reload at ", ~LOAD_F%
+
+PRINT "S.D.ELTF ", ~CODE_F%, " ", ~P%, " ", ~LOAD%, " ", ~LOAD_F%
+\SAVE "output/D.ELTF.bin", CODE_F%, P%, LOAD%
+
+\ ******************************************************************************
+\
+\ ELITE G FILE
+\
+\ ******************************************************************************
+
+CODE_G% = P%
+LOAD_G% = LOAD% + P% - CODE%
+
+\ ******************************************************************************
+\
 \       Name: SHPPT
 \       Type: Subroutine
 \   Category: Drawing ships
@@ -29142,7 +29167,7 @@ ENDMACRO
 \
 \ ------------------------------------------------------------------------------
 \
-\ Calculate following dot products:
+\ Calculate the following dot products:
 \
 \   XX12(1 0) = XX15(5 0) . XX16(5 0)
 \   XX12(3 2) = XX15(5 0) . XX16(11 6)
@@ -32557,6 +32582,31 @@ ENDMACRO
 
 \ ******************************************************************************
 \
+\ Save output/ELTG.bin
+\
+\ ******************************************************************************
+
+PRINT "ELITE G"
+PRINT "Assembled at ", ~CODE_G%
+PRINT "Ends at ", ~P%
+PRINT "Code size is ", ~(P% - CODE_G%)
+PRINT "Execute at ", ~LOAD%
+PRINT "Reload at ", ~LOAD_G%
+
+PRINT "S.D.ELTG ", ~CODE_G%, " ", ~P%, " ", ~LOAD%, " ", ~LOAD_G%
+\SAVE "output/D.ELTG.bin", CODE_G%, P%, LOAD%
+
+\ ******************************************************************************
+\
+\ ELITE H FILE
+\
+\ ******************************************************************************
+
+CODE_H% = P%
+LOAD_H% = LOAD% + P% - CODE%
+
+\ ******************************************************************************
+\
 \       Name: MVEIT (Part 1 of 9)
 \       Type: Subroutine
 \   Category: Moving
@@ -34146,16 +34196,16 @@ ENDMACRO
 
 .TTX66
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  LDA #%10000000       \ Set bit 7 of QQ17 to switch to Sentence Case
 \  STA QQ17
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  JSR vdu_80             \ AJD
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  JSR FLFLLS             \ Call FLFLLS to reset the LSO block
 
@@ -34414,13 +34464,13 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
 .iff_xor
 
  EQUB &00, &00, &0F \, &FF, &F0 overlap
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -34431,13 +34481,13 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: --------------------------
+                        \ --- Code added for Elite-A: ------------------------->
 
 .iff_base
 
  EQUB &FF, &F0, &FF, &F0, &FF
 
-                        \ --- End of added code --------------------------------
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -34472,7 +34522,7 @@ ENDMACRO
                         \ scanner, so return from the subroutine (as SC5
                         \ contains an RTS)
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  LDX #&FF             \ Set X to the default scanner colour of green/cyan
 \                       \ (a 4-pixel mode 5 byte in colour 3)
@@ -34497,7 +34547,7 @@ ENDMACRO
 \  STX COL              \ Store X, the colour of this ship on the scanner, in
 \                       \ COL
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  JSR iff_index          \ AJD
  LDA iff_base,X
@@ -34505,7 +34555,7 @@ ENDMACRO
  LDA iff_xor,X
  STA &37
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  LDA INWK+1             \ If any of x_hi, y_hi and z_hi have a 1 in bit 6 or 7,
  ORA INWK+4             \ then the ship is too far away to be shown on the
@@ -34668,7 +34718,7 @@ ENDMACRO
                         \
                         \ and we can get on with drawing the dot and stick
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  PHP                  \ Store the flags (specifically the C flag) from the
 \                       \ above subtraction
@@ -34694,7 +34744,7 @@ ENDMACRO
                         \ We can use there as the starting point for drawing the
                         \ stick, if there is one
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  LDA CTWOS+1,X        \ Load the same mode 5 1-pixel byte that we just used
 \  AND COL              \ for the top-right pixel, and mask it with the same
@@ -34716,7 +34766,7 @@ ENDMACRO
 \  BCC RTS+1            \ If the C flag is clear then the stick height in A is
 \                       \ negative, so jump down to RTS+1
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  LDA TWOS+&11,X         \ AJD
  TAX
@@ -34735,7 +34785,7 @@ ENDMACRO
 
  BMI RTS+1              \ AJD
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
 .VLL1
 
@@ -34765,7 +34815,7 @@ ENDMACRO
                         \ pattern as the bottom-right pixel of the dot (so the
                         \ stick comes out of the right side of the dot)
 
-                        \ --- Original Acornsoft code removed from Elite-A: ----
+                        \ --- Original Acornsoft code removed: ---------------->
 
 \  EOR (SC),Y           \ Draw the stick on row Y of the character block using
 \  STA (SC),Y           \ EOR logic
@@ -34826,7 +34876,7 @@ ENDMACRO
 \                       \ pattern as the bottom-right pixel of the dot (so the
 \                       \ stick comes out of the right side of the dot)
 
-                        \ --- And replaced by the following: -------------------
+                        \ --- And replaced by: -------------------------------->
 
  EOR &35                \ iff AJD
  STA &34                \ iff
@@ -34892,7 +34942,7 @@ ENDMACRO
  EOR &35                \ iff AJD
  STA &34                \ iff
 
-                        \ --- End of replacement code --------------------------
+                        \ --- End of replacement ------------------------------>
 
  EOR (SC),Y             \ Draw the stick on row Y of the character block using
  STA (SC),Y             \ EOR logic

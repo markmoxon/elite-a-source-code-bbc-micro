@@ -2260,7 +2260,7 @@ ENDIF
  STA dockedp
  LDA #&FF
 
- JSR scramble           \ Decrypt the newly loaded code
+ JSR SCRAM
 
  JSR RES2               \ Reset a number of flight variables and workspaces
 
@@ -2402,16 +2402,17 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: scramble
+\       Name: SCRAM
 \       Type: Subroutine
 \   Category: Loader
-\    Summary: AJD
+\    Summary: Decrypt the main docked code, reset the flight variables and start
+\             the game
 \
 \ ******************************************************************************
 
-.scramble
+.SCRAM
 
- STA save_lock
+ STA save_lock          \ AJD
 
 \ ******************************************************************************
 \
@@ -15612,7 +15613,7 @@ LOAD_F% = LOAD% + P% - CODE%
 \
 \ This counter starts at zero, and is decremented whenever the BRKV handler at
 \ BRBR prints an error message. It is incremented every time an error message
-\ is printer out as part of the TITLE routine.
+\ is printed out as part of the TITLE routine.
 \
 \ ******************************************************************************
 
@@ -18645,7 +18646,7 @@ LOAD_G% = LOAD% + P% - CODE%
 \
 \ ------------------------------------------------------------------------------
 \
-\ Calculate following dot products:
+\ Calculate the following dot products:
 \
 \   XX12(1 0) = XX15(5 0) . XX16(5 0)
 \   XX12(3 2) = XX15(5 0) . XX16(11 6)
