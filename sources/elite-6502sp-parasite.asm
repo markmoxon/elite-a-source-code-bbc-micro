@@ -45492,7 +45492,7 @@ LOAD_M% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
 \
-\       Name: Main game loop (Part 1 of 6)
+\       Name: Main game loop for flight (Part 1 of 6)
 \       Type: Subroutine
 \   Category: Main loop
 \    Summary: Spawn a trader (a Cobra Mk III, Python, Boa or Anaconda)
@@ -45562,7 +45562,7 @@ LOAD_M% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
 \
-\       Name: Main game loop (Part 2 of 6)
+\       Name: Main game loop for flight (Part 2 of 6)
 \       Type: Subroutine
 \   Category: Main loop
 \    Summary: AJD
@@ -45631,7 +45631,7 @@ LOAD_M% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
 \
-\       Name: Main game loop (Part 3 of 6)
+\       Name: Main game loop for flight (Part 3 of 6)
 \       Type: Subroutine
 \   Category: Main loop
 \    Summary: Potentially spawn a cop, particularly if we've been bad
@@ -45700,7 +45700,7 @@ LOAD_M% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
 \
-\       Name: Main game loop (Part 4 of 6)
+\       Name: Main game loop for flight (Part 4 of 6)
 \       Type: Subroutine
 \   Category: Main loop
 \    Summary: Potentially spawn a lone bounty hunter, a Thargoid, or up to four
@@ -45909,7 +45909,7 @@ LOAD_M% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
 \
-\       Name: Main game loop (Part 5 of 6)
+\       Name: Main game loop for flight (Part 5 of 6)
 \       Type: Subroutine
 \   Category: Main loop
 \    Summary: AJD
@@ -45944,7 +45944,7 @@ LOAD_M% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
 \
-\       Name: Main game loop (Part 6 of 6)
+\       Name: Main game loop for flight (Part 6 of 6)
 \       Type: Subroutine
 \   Category: Main loop
 \    Summary: AJD
