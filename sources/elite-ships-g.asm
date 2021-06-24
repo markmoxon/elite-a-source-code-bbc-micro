@@ -428,7 +428,7 @@ ENDMACRO
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  EQUB 17              \ Max. energy              = 17
+\ EQUB 17               \ Max. energy              = 17
 
                         \ --- And replaced by: -------------------------------->
 
@@ -489,7 +489,7 @@ ENDMACRO
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  EQUW 0               \ Bounty                   = 0
+\ EQUW 0                \ Bounty                   = 0
 
                         \ --- And replaced by: -------------------------------->
 
@@ -502,7 +502,7 @@ ENDMACRO
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  EQUB 17              \ Max. energy              = 17
+\ EQUB 17               \ Max. energy              = 17
 
                         \ --- And replaced by: -------------------------------->
 
@@ -584,7 +584,7 @@ ENDMACRO
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  EQUB 100             \ Max. energy              = 100
+\ EQUB 100              \ Max. energy              = 100
 
                         \ --- And replaced by: -------------------------------->
 
@@ -599,7 +599,7 @@ ENDMACRO
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  EQUB %00010001       \ Laser power              = 2
+\ EQUB %00010001        \ Laser power              = 2
 \                       \ Missiles                 = 1
 
                         \ --- And replaced by: -------------------------------->
@@ -671,8 +671,8 @@ ENDMACRO
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  EQUB 3               \ Max. canisters on demise = 3
-\  EQUW 65 * 65         \ Targetable area          = 65 * 65
+\ EQUB 3                \ Max. canisters on demise = 3
+\ EQUW 65 * 65          \ Targetable area          = 65 * 65
 
                         \ --- And replaced by: -------------------------------->
 
@@ -695,8 +695,8 @@ ENDMACRO
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  EQUB 252             \ Max. energy              = 252
-\  EQUB 36              \ Max. speed               = 36
+\ EQUB 252              \ Max. energy              = 252
+\ EQUB 36               \ Max. speed               = 36
 
                         \ --- And replaced by: -------------------------------->
 
@@ -711,7 +711,7 @@ ENDMACRO
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  EQUB %00110100       \ Laser power              = 6
+\ EQUB %00110100        \ Laser power              = 6
 \                       \ Missiles                 = 4
 
                         \ --- And replaced by: -------------------------------->
@@ -895,7 +895,7 @@ ENDMACRO
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  EQUB 85              \ Max. energy              = 85
+\ EQUB 85               \ Max. energy              = 85
 
                         \ --- And replaced by: -------------------------------->
 
@@ -910,7 +910,7 @@ ENDMACRO
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  EQUB %00010000       \ Laser power              = 2
+\ EQUB %00010000        \ Laser power              = 2
 \                       \ Missiles                 = 0
 
                         \ --- And replaced by: -------------------------------->
@@ -1012,7 +1012,7 @@ ENDMACRO
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  EQUW 5               \ Bounty                   = 5
+\ EQUW 5                \ Bounty                   = 5
 
                         \ --- And replaced by: -------------------------------->
 
@@ -1025,7 +1025,7 @@ ENDMACRO
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  EQUB 60              \ Max. energy              = 60
+\ EQUB 60               \ Max. energy              = 60
 
                         \ --- And replaced by: -------------------------------->
 
@@ -1113,7 +1113,7 @@ ENDMACRO
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  EQUB LO(SHIP_ESCAPE_POD_EDGES - SHIP_SPLINTER)    \ Edges data = escape pod
+\ EQUB LO(SHIP_ESCAPE_POD_EDGES - SHIP_SPLINTER)     \ Edges data = escape pod
 
                         \ --- And replaced by: -------------------------------->
 
@@ -1130,7 +1130,7 @@ ENDMACRO
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  EQUW 0               \ Bounty                   = 0
+\ EQUW 0                \ Bounty                   = 0
 
                         \ --- And replaced by: -------------------------------->
 
@@ -1143,7 +1143,7 @@ ENDMACRO
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  EQUB 20              \ Max. energy              = 20
+\ EQUB 20               \ Max. energy              = 20
 
                         \ --- And replaced by: -------------------------------->
 
@@ -1155,7 +1155,7 @@ ENDMACRO
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  EQUB HI(SHIP_ESCAPE_POD_EDGES - SHIP_SPLINTER)    \ Edges data = escape pod
+\ EQUB HI(SHIP_ESCAPE_POD_EDGES - SHIP_SPLINTER)     \ Edges data = escape pod
 
                         \ --- And replaced by: -------------------------------->
 
@@ -1207,7 +1207,7 @@ ENDMACRO
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  EQUB 30              \ Max. energy              = 30
+\ EQUB 30               \ Max. energy              = 30
 
                         \ --- And replaced by: -------------------------------->
 
@@ -1222,7 +1222,7 @@ ENDMACRO
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  EQUB %00001000       \ Laser power              = 1
+\ EQUB %00001000        \ Laser power              = 1
 \                       \ Missiles                 = 0
 
                         \ --- And replaced by: -------------------------------->
@@ -1299,7 +1299,7 @@ ENDMACRO
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  EQUB 70              \ Max. energy              = 70
+\ EQUB 70               \ Max. energy              = 70
 
                         \ --- And replaced by: -------------------------------->
 
@@ -1314,7 +1314,7 @@ ENDMACRO
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  EQUB %00010000       \ Laser power              = 2
+\ EQUB %00010000        \ Laser power              = 2
 \                       \ Missiles                 = 0
 
                         \ --- And replaced by: -------------------------------->
@@ -1392,7 +1392,7 @@ ENDMACRO
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  EQUW 0               \ Bounty                   = 0
+\ EQUW 0                \ Bounty                   = 0
 
                         \ --- And replaced by: -------------------------------->
 
@@ -1405,7 +1405,7 @@ ENDMACRO
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  EQUB 250             \ Max. energy              = 250
+\ EQUB 250              \ Max. energy              = 250
 
                         \ --- And replaced by: -------------------------------->
 
@@ -1420,7 +1420,7 @@ ENDMACRO
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  EQUB %00011100       \ Laser power              = 3
+\ EQUB %00011100        \ Laser power              = 3
 \                       \ Missiles                 = 4
 
                         \ --- And replaced by: -------------------------------->

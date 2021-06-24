@@ -1284,7 +1284,7 @@ ORG &0300
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  SKIP 2               \ These bytes appear to be unused (they were originally
+\ SKIP 2                \ These bytes appear to be unused (they were originally
 \                       \ used for up/down lasers, but they were dropped)
 
                         \ --- And replaced by: -------------------------------->
@@ -1381,7 +1381,7 @@ ORG &0300
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  SKIP 4               \ These bytes appear to be unused
+\ SKIP 4                \ These bytes appear to be unused
 
                         \ --- And replaced by: -------------------------------->
 
@@ -2037,7 +2037,7 @@ LOAD_A% = LOAD%
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  JMP BRBR1            \ BRKV is set to point here by elite-loader3.asm
+\ JMP BRBR1             \ BRKV is set to point here by elite-loader3.asm
 
                         \ --- And replaced by: -------------------------------->
 
@@ -2063,10 +2063,10 @@ BRKV = P% - 2           \ The address of the destination address in the above
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  LDX #0               \ This code is never run, and seems to have no effect
-\  LDY #0
-\  JSR &8888
-\  JMP SCRAM
+\ LDX #0                \ This code is never run, and seems to have no effect
+\ LDY #0
+\ JSR &8888
+\ JMP SCRAM
 
                         \ --- And replaced by: -------------------------------->
 
@@ -2096,7 +2096,7 @@ BRKV = P% - 2           \ The address of the destination address in the above
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  JSR scramble         \ Decrypt the main docked code between &1300 and &5FFF
+\ JSR scramble          \ Decrypt the main docked code between &1300 and &5FFF
 
                         \ --- And replaced by: -------------------------------->
 
@@ -2123,7 +2123,7 @@ BRKV = P% - 2           \ The address of the destination address in the above
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  JSR scramble         \ Decrypt the newly loaded code
+\ JSR scramble          \ Decrypt the newly loaded code
 
                         \ --- And replaced by: -------------------------------->
 
@@ -2299,11 +2299,11 @@ BRKV = P% - 2           \ The address of the destination address in the above
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  JSR scramble         \ Decrypt the main docked code between &1300 and &5FFF
+\ JSR scramble          \ Decrypt the main docked code between &1300 and &5FFF
 \
-\  JSR RES2             \ Reset a number of flight variables and workspaces
+\ JSR RES2              \ Reset a number of flight variables and workspaces
 \
-\  JMP TT170            \ Jump to TT170 to start the game
+\ JMP TT170             \ Jump to TT170 to start the game
 
                         \ --- And replaced by: -------------------------------->
 
@@ -2452,11 +2452,11 @@ BRKV = P% - 2           \ The address of the destination address in the above
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  BNE DETOK            \ Jump to DETOK to print extended token 220-221,
+\ BNE DETOK             \ Jump to DETOK to print extended token 220-221,
 \                       \ returning from the subroutine using a tail call (this
 \                       \ BNE is effectively a JMP as A is never zero)
 
-                        \ --- End of removed code ------------------------------
+                        \ --- End of removed code ----------------------------->
 
 \ ******************************************************************************
 \
@@ -2529,11 +2529,11 @@ BRKV = P% - 2           \ The address of the destination address in the above
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  EOR #VE              \ Tokens are stored in memory having been EOR'd with
+\ EOR #VE               \ Tokens are stored in memory having been EOR'd with
 \                       \ #VE, so we repeat the EOR to get the actual character
 \                       \ in this token
 
-                        \ --- End of removed code ------------------------------
+                        \ --- End of removed code ----------------------------->
 
  BNE DT1                \ If the result is non-zero, then this is a character
                         \ in a token rather than the delimiter (which is #VE),
@@ -2579,11 +2579,11 @@ BRKV = P% - 2           \ The address of the destination address in the above
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  EOR #VE              \ Tokens are stored in memory having been EOR'd with
+\ EOR #VE               \ Tokens are stored in memory having been EOR'd with
 \                       \ #VE, so we repeat the EOR to get the actual character
 \                       \ in this token
 
-                        \ --- End of removed code ------------------------------
+                        \ --- End of removed code ----------------------------->
 
  BEQ DTEX               \ If the result is zero, then this is the delimiter at
                         \ the end of the token to print (which is #VE), so jump
@@ -3593,22 +3593,22 @@ BRKV = P% - 2           \ The address of the destination address in the above
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  LDA INWK+31          \ Fetch the ship's exploding/killed state from byte #31
+\ LDA INWK+31           \ Fetch the ship's exploding/killed state from byte #31
 \
-\  AND #%00100000       \ If we are exploding then jump to MVD1 to remove it
-\  BNE MVD1             \ from the scanner permanently
+\ AND #%00100000        \ If we are exploding then jump to MVD1 to remove it
+\ BNE MVD1              \ from the scanner permanently
 \
-\  LDA INWK+31          \ Set bit 4 to keep the ship visible on the scanner
-\  ORA #%00010000
-\  STA INWK+31
+\ LDA INWK+31           \ Set bit 4 to keep the ship visible on the scanner
+\ ORA #%00010000
+\ STA INWK+31
 \
-\ .MVD1
+\.MVD1
 \
-\  LDA INWK+31          \ Clear bit 4 to hide the ship on the scanner
-\  AND #%11101111
-\  STA INWK+31
+\ LDA INWK+31           \ Clear bit 4 to hide the ship on the scanner
+\ AND #%11101111
+\ STA INWK+31
 
-                        \ --- End of removed code ------------------------------
+                        \ --- End of removed code ----------------------------->
 
  RTS                    \ Return from the subroutine
 
@@ -5557,20 +5557,20 @@ LOAD_B% = LOAD% + P% - CODE%
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  EQUW 1               \ 0  Fuel, calculated in EQSHP  140.0 Cr (full tank)
-\  EQUW 300             \ 1  Missile                     30.0 Cr
-\  EQUW 4000            \ 2  Large Cargo Bay            400.0 Cr
-\  EQUW 6000            \ 3  E.C.M. System              600.0 Cr
-\  EQUW 4000            \ 4  Extra Pulse Lasers         400.0 Cr
-\  EQUW 10000           \ 5  Extra Beam Lasers         1000.0 Cr
-\  EQUW 5250            \ 6  Fuel Scoops                525.0 Cr
-\  EQUW 10000           \ 7  Escape Pod                1000.0 Cr
-\  EQUW 9000            \ 8  Energy Bomb                900.0 Cr
-\  EQUW 15000           \ 9  Energy Unit               1500.0 Cr
-\  EQUW 10000           \ 10 Docking Computer          1000.0 Cr
-\  EQUW 50000           \ 11 Galactic Hyperspace       5000.0 Cr
-\  EQUW 60000           \ 12 Extra Military Lasers     6000.0 Cr
-\  EQUW 8000            \ 13 Extra Mining Lasers        800.0 Cr
+\ EQUW 1                \ 0  Fuel, calculated in EQSHP  140.0 Cr (full tank)
+\ EQUW 300              \ 1  Missile                     30.0 Cr
+\ EQUW 4000             \ 2  Large Cargo Bay            400.0 Cr
+\ EQUW 6000             \ 3  E.C.M. System              600.0 Cr
+\ EQUW 4000             \ 4  Extra Pulse Lasers         400.0 Cr
+\ EQUW 10000            \ 5  Extra Beam Lasers         1000.0 Cr
+\ EQUW 5250             \ 6  Fuel Scoops                525.0 Cr
+\ EQUW 10000            \ 7  Escape Pod                1000.0 Cr
+\ EQUW 9000             \ 8  Energy Bomb                900.0 Cr
+\ EQUW 15000            \ 9  Energy Unit               1500.0 Cr
+\ EQUW 10000            \ 10 Docking Computer          1000.0 Cr
+\ EQUW 50000            \ 11 Galactic Hyperspace       5000.0 Cr
+\ EQUW 60000            \ 12 Extra Military Lasers     6000.0 Cr
+\ EQUW 8000             \ 13 Extra Mining Lasers        800.0 Cr
 
                         \ --- And replaced by: -------------------------------->
 
@@ -5766,30 +5766,30 @@ LOAD_B% = LOAD% + P% - CODE%
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  LDA CRGO             \ If our ship's cargo capacity is < 26 (i.e. we do not
-\  CMP #26              \ have a cargo bay extension), skip the following two
-\  BCC P%+7             \ instructions
+\ LDA CRGO              \ If our ship's cargo capacity is < 26 (i.e. we do not
+\ CMP #26               \ have a cargo bay extension), skip the following two
+\ BCC P%+7              \ instructions
 \
-\  LDA #107             \ We do have a cargo bay extension, so print recursive
-\  JSR plf2             \ token 107 ("LARGE CARGO{sentence case} BAY"), followed
+\ LDA #107              \ We do have a cargo bay extension, so print recursive
+\ JSR plf2              \ token 107 ("LARGE CARGO{sentence case} BAY"), followed
 \                       \ by a newline and an indent of 6 characters
 \
-\  LDA BST              \ If we don't have fuel scoops fitted, skip the
-\  BEQ P%+7             \ following two instructions
+\ LDA BST               \ If we don't have fuel scoops fitted, skip the
+\ BEQ P%+7              \ following two instructions
 \
-\  LDA #111             \ We do have a fuel scoops fitted, so print recursive
-\  JSR plf2             \ token 111 ("FUEL SCOOPS"), followed by a newline and
+\ LDA #111              \ We do have a fuel scoops fitted, so print recursive
+\ JSR plf2              \ token 111 ("FUEL SCOOPS"), followed by a newline and
 \                       \ an indent of 6 characters
 \
-\  LDA ECM              \ If we don't have an E.C.M. fitted, skip the following
-\  BEQ P%+7             \ two instructions
+\ LDA ECM               \ If we don't have an E.C.M. fitted, skip the following
+\ BEQ P%+7              \ two instructions
 \
-\  LDA #108             \ We do have an E.C.M. fitted, so print recursive token
-\  JSR plf2             \ 108 ("E.C.M.SYSTEM"), followed by a newline and an
+\ LDA #108              \ We do have an E.C.M. fitted, so print recursive token
+\ JSR plf2              \ 108 ("E.C.M.SYSTEM"), followed by a newline and an
 \                       \ indent of 6 characters
 \
-\  LDA #113             \ We now cover the four pieces of equipment whose flags
-\  STA XX4              \ are stored in BOMB through BOMB+3, and whose names
+\ LDA #113              \ We now cover the four pieces of equipment whose flags
+\ STA XX4               \ are stored in BOMB through BOMB+3, and whose names
 \                       \ correspond with text tokens 113 through 116:
 \                       \
 \                       \   BOMB+0 = BOMB  = token 113 = Energy bomb
@@ -5801,23 +5801,23 @@ LOAD_B% = LOAD% + P% - CODE%
 \                       \ 113 as a counter (and we also set A as well, to pass
 \                       \ through to plf2)
 \
-\ .stqv
+\.stqv
 \
-\  TAY                  \ Fetch byte BOMB+0 through BOMB+4 for values of XX4
-\  LDX BOMB-113,Y       \ from 113 through 117
+\ TAY                   \ Fetch byte BOMB+0 through BOMB+4 for values of XX4
+\ LDX BOMB-113,Y        \ from 113 through 117
 \
-\  BEQ P%+5             \ If it is zero then we do not own that piece of
+\ BEQ P%+5              \ If it is zero then we do not own that piece of
 \                       \ equipment, so skip the next instruction
 \
-\  JSR plf2             \ Print the recursive token in A from 113 ("ENERGY
+\ JSR plf2              \ Print the recursive token in A from 113 ("ENERGY
 \                       \ BOMB") through 116 ("GALACTIC HYPERSPACE "), followed
 \                       \ by a newline and an indent of 6 characters
 \
-\  INC XX4              \ Increment the counter (and A as well)
-\  LDA XX4
+\ INC XX4               \ Increment the counter (and A as well)
+\ LDA XX4
 \
-\  CMP #117             \ If A < 117, loop back up to stqv to print the next
-\  BCC stqv             \ piece of equipment
+\ CMP #117              \ If A < 117, loop back up to stqv to print the next
+\ BCC stqv              \ piece of equipment
 
                         \ --- And replaced by: -------------------------------->
 
@@ -5889,10 +5889,10 @@ LOAD_B% = LOAD% + P% - CODE%
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  TXA                  \ Print recursive token 96 + X, which will print from 96
-\  CLC                  \ ("FRONT") through to 99 ("RIGHT"), followed by a space
-\  ADC #96
-\  JSR spc
+\ TXA                   \ Print recursive token 96 + X, which will print from 96
+\ CLC                   \ ("FRONT") through to 99 ("RIGHT"), followed by a space
+\ ADC #96
+\ JSR spc
 
                         \ --- And replaced by: -------------------------------->
 
@@ -5906,25 +5906,25 @@ LOAD_B% = LOAD% + P% - CODE%
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  LDX CNT              \ Set Y = the laser power for view X
-\  LDY LASER,X
+\ LDX CNT               \ Set Y = the laser power for view X
+\ LDY LASER,X
 \
-\  CPY #128+POW         \ If the laser power for view X is not #POW+128 (beam
-\  BNE P%+4             \ laser), skip the next LDA instruction
+\ CPY #128+POW          \ If the laser power for view X is not #POW+128 (beam
+\ BNE P%+4              \ laser), skip the next LDA instruction
 \
-\  LDA #104             \ This sets A = 104 if the laser in view X is a beam
+\ LDA #104              \ This sets A = 104 if the laser in view X is a beam
 \                       \ laser (token 104 is "BEAM LASER")
 \
-\  CPY #Armlas          \ If the laser power for view X is not #Armlas (military
-\  BNE P%+4             \ laser), skip the next LDA instruction
+\ CPY #Armlas           \ If the laser power for view X is not #Armlas (military
+\ BNE P%+4              \ laser), skip the next LDA instruction
 \
-\  LDA #117             \ This sets A = 117 if the laser in view X is a military
+\ LDA #117              \ This sets A = 117 if the laser in view X is a military
 \                       \ laser (token 117 is "MILITARY  LASER")
 \
-\  CPY #Mlas            \ If the laser power for view X is not #Mlas (mining
-\  BNE P%+4             \ laser), skip the next LDA instruction
+\ CPY #Mlas             \ If the laser power for view X is not #Mlas (mining
+\ BNE P%+4              \ laser), skip the next LDA instruction
 \
-\  LDA #118             \ This sets A = 118 if the laser in view X is a mining
+\ LDA #118              \ This sets A = 118 if the laser in view X is a mining
 \                       \ laser (token 118 is "MINING  LASER")
 
                         \ --- And replaced by: -------------------------------->
@@ -5987,12 +5987,12 @@ LOAD_B% = LOAD% + P% - CODE%
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  JSR plf              \ Print the text token in A followed by a newline
+\ JSR plf               \ Print the text token in A followed by a newline
 \
-\  LDX #6               \ Move the text cursor to column 6
-\  STX XC
+\ LDX #6                \ Move the text cursor to column 6
+\ STX XC
 \
-\  RTS                  \ Return from the subroutine
+\ RTS                   \ Return from the subroutine
 
                         \ --- And replaced by: -------------------------------->
 
@@ -7554,22 +7554,22 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  LDA #0               \ Set R = P = 0 for the low bytes in the call to the ADD
-\  STA R                \ routine below
-\  STA P
+\ LDA #0                \ Set R = P = 0 for the low bytes in the call to the ADD
+\ STA R                 \ routine below
+\ STA P
 \
-\  LDA #8               \ Set S = 8, which is the value of the centre of the
-\  STA S                \ roll indicator
+\ LDA #8                \ Set S = 8, which is the value of the centre of the
+\ STA S                 \ roll indicator
 \
-\  LDA ALP1             \ Fetch the roll angle alpha as a value between 0 and
-\  LSR A                \ 31, and divide by 4 to get a value of 0 to 7
-\  LSR A
+\ LDA ALP1              \ Fetch the roll angle alpha as a value between 0 and
+\ LSR A                 \ 31, and divide by 4 to get a value of 0 to 7
+\ LSR A
 \
-\  ORA ALP2             \ Apply the roll sign to the value, and flip the sign,
-\  EOR #%10000000       \ so it's now in the range -7 to +7, with a positive
+\ ORA ALP2              \ Apply the roll sign to the value, and flip the sign,
+\ EOR #%10000000        \ so it's now in the range -7 to +7, with a positive
 \                       \ roll angle alpha giving a negative value in A
 \
-\  JSR ADD              \ We now add A to S to give us a value in the range 1 to
+\ JSR ADD               \ We now add A to S to give us a value in the range 1 to
 \                       \ 15, which we can pass to DIL2 to draw the vertical
 \                       \ bar on the indicator at this position. We use the ADD
 \                       \ routine like this:
@@ -7594,21 +7594,21 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  LDA BETA             \ Fetch the pitch angle beta as a value between -8 and
+\ LDA BETA              \ Fetch the pitch angle beta as a value between -8 and
 \                       \ +8
 \
-\  LDX BET1             \ Fetch the magnitude of the pitch angle beta, and if it
-\  BEQ P%+4             \ is 0 (i.e. we are not pitching), skip the next
+\ LDX BET1              \ Fetch the magnitude of the pitch angle beta, and if it
+\ BEQ P%+4              \ is 0 (i.e. we are not pitching), skip the next
 \                       \ instruction
 \
-\  SBC #1               \ The pitch angle beta is non-zero, so set A = A - 1
+\ SBC #1                \ The pitch angle beta is non-zero, so set A = A - 1
 \                       \ (the C flag is set by the call to DIL2 above, so we
 \                       \ don't need to do a SEC). This gives us a value of A
 \                       \ from -7 to +7 because these are magnitude-based
 \                       \ numbers with sign bits, rather than two's complement
 \                       \ numbers
 \
-\  JSR ADD              \ We now add A to S to give us a value in the range 1 to
+\ JSR ADD               \ We now add A to S to give us a value in the range 1 to
 \                       \ 15, which we can pass to DIL2 to draw the vertical
 \                       \ bar on the indicator at this position (see the JSR ADD
 \                       \ above for more on this)
@@ -7683,9 +7683,9 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  LDA ENERGY           \ Set A = Q = ENERGY / 4, so they are both now in the
-\  LSR A                \ range 0-63 (so that's a maximum of 16 in each of the
-\  LSR A                \ banks, and a maximum of 15 in the top bank)
+\ LDA ENERGY            \ Set A = Q = ENERGY / 4, so they are both now in the
+\ LSR A                 \ range 0-63 (so that's a maximum of 16 in each of the
+\ LSR A                 \ banks, and a maximum of 15 in the top bank)
 
                         \ --- And replaced by: -------------------------------->
 
@@ -7773,12 +7773,12 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  LDA FSH              \ Draw the forward shield indicator using a range of
-\  JSR DILX             \ 0-255, and increment SC to point to the next indicator
+\ LDA FSH               \ Draw the forward shield indicator using a range of
+\ JSR DILX              \ 0-255, and increment SC to point to the next indicator
 \                       \ (the aft shield)
 \
-\  LDA ASH              \ Draw the aft shield indicator using a range of 0-255,
-\  JSR DILX             \ and increment SC to point to the next indicator (the
+\ LDA ASH               \ Draw the aft shield indicator using a range of 0-255,
+\ JSR DILX              \ and increment SC to point to the next indicator (the
 \                       \ fuel level)
 
                         \ --- And replaced by: -------------------------------->
@@ -7875,24 +7875,24 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  LDA MCNT             \ A will be non-zero for 8 out of every 16 main loop
-\  AND #%00001000       \ counts, when bit 4 is set, so this is what we use to
+\ LDA MCNT              \ A will be non-zero for 8 out of every 16 main loop
+\ AND #%00001000        \ counts, when bit 4 is set, so this is what we use to
 \                       \ flash the "danger" colour
 \
-\  AND FLH              \ A will be zeroed if flashing colours are disabled
+\ AND FLH               \ A will be zeroed if flashing colours are disabled
 \
-\  BEQ P%+4             \ If A is zero, skip to the LDA instruction below
+\ BEQ P%+4              \ If A is zero, skip to the LDA instruction below
 \
-\  TXA                  \ Otherwise flashing colours are enabled and it's the
+\ TXA                   \ Otherwise flashing colours are enabled and it's the
 \                       \ main loop iteration where we flash them, so set A to
 \                       \ colour 2 (yellow/white) and use the BIT trick below to
 \                       \ return from the subroutine
 \
-\  EQUB &2C             \ Skip the next instruction by turning it into
+\ EQUB &2C              \ Skip the next instruction by turning it into
 \                       \ &2C &A9 &0F, or BIT &0FA9, which does nothing apart
 \                       \ from affect the flags
 
-                        \ --- End of removed code ------------------------------
+                        \ --- End of removed code ----------------------------->
 
  LDA #&0F               \ Set A to dashboard colour 1 (red)
 
@@ -7972,7 +7972,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  BNE DL31             \ Jump down to DL31 (this BNE is effectively a JMP as A
+\ BNE DL31              \ Jump down to DL31 (this BNE is effectively a JMP as A
 \                       \ will never be zero)
 
                         \ --- And replaced by: -------------------------------->
@@ -9181,21 +9181,21 @@ LOAD_C% = LOAD% +P% - CODE%
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  LDA LIL2+2           \ Flip bit 6 of LIL2+2 to change the EOR (SC),Y in LIL2
-\  EOR #%01000000       \ to an ORA (SC),Y (or back again)
-\  STA LIL2+2
+\ LDA LIL2+2            \ Flip bit 6 of LIL2+2 to change the EOR (SC),Y in LIL2
+\ EOR #%01000000        \ to an ORA (SC),Y (or back again)
+\ STA LIL2+2
 \
-\  LDA LIL3+2           \ Flip bit 6 of LIL3+2 to change the EOR (SC),Y in LIL3
-\  EOR #%01000000       \ to an ORA (SC),Y (or back again)
-\  STA LIL3+2
+\ LDA LIL3+2            \ Flip bit 6 of LIL3+2 to change the EOR (SC),Y in LIL3
+\ EOR #%01000000        \ to an ORA (SC),Y (or back again)
+\ STA LIL3+2
 \
-\  LDA LIL5+2           \ Flip bit 6 of LIL2+2 to change the EOR (SC),Y in LIL5
-\  EOR #%01000000       \ to an ORA (SC),Y (or back again)
-\  STA LIL5+2
+\ LDA LIL5+2            \ Flip bit 6 of LIL2+2 to change the EOR (SC),Y in LIL5
+\ EOR #%01000000        \ to an ORA (SC),Y (or back again)
+\ STA LIL5+2
 \
-\  LDA LIL6+2           \ Flip bit 6 of LIL2+2 to change the EOR (SC),Y in LIL6
-\  EOR #%01000000       \ to an ORA (SC),Y (or back again)
-\  STA LIL6+2
+\ LDA LIL6+2            \ Flip bit 6 of LIL2+2 to change the EOR (SC),Y in LIL6
+\ EOR #%01000000        \ to an ORA (SC),Y (or back again)
+\ STA LIL6+2
 
                         \ --- And replaced by: -------------------------------->
 
@@ -9245,18 +9245,18 @@ LOAD_C% = LOAD% +P% - CODE%
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\ .HFS2
+\.HFS2
 \
-\  STA STP              \ Store the step size in A
+\ STA STP               \ Store the step size in A
 \
-\  JSR TTX66            \ Clear the screen and draw a white border
+\ JSR TTX66             \ Clear the screen and draw a white border
 \
-\  JSR HFS1             \ Call HFS1 below and then fall through into the same
+\ JSR HFS1              \ Call HFS1 below and then fall through into the same
 \                       \ routine, so this effectively runs HFS1 twice, and as
 \                       \ HFS1 draws 8 concentric rings, this means we draw 16
 \                       \ of them in all
 
-                        \ --- End of removed code ------------------------------
+                        \ --- End of removed code ----------------------------->
 
 .HFS1
 
@@ -10973,9 +10973,9 @@ LOAD_D% = LOAD% + P% - CODE%
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  PHA                  \ Store A on the stack
+\ PHA                   \ Store A on the stack
 
-                        \ --- End of removed code ------------------------------
+                        \ --- End of removed code ----------------------------->
 
  LDX #12                \ If QQ29 > 12 then jump to kg below, as this cargo
  CPX QQ29               \ type is gold, platinum, gem-stones or alien items,
@@ -11016,7 +11016,7 @@ LOAD_D% = LOAD% + P% - CODE%
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  CMP CRGO             \ If A < CRGO then the C flag will be clear (we have
+\ CMP CRGO              \ If A < CRGO then the C flag will be clear (we have
 \                       \ room in the hold)
 \                       \
 \                       \ If A >= CRGO then the C flag will be set (we do not
@@ -11035,7 +11035,7 @@ LOAD_D% = LOAD% + P% - CODE%
 \                       \ actual cargo bay size, i.e. it's 22 for the standard
 \                       \ 20-tonne bay, and 37 for the large 35-tonne bay
 \
-\  PLA                  \ Restore A from the stack
+\ PLA                   \ Restore A from the stack
 
                         \ --- And replaced by: -------------------------------->
 
@@ -11060,7 +11060,7 @@ LOAD_D% = LOAD% + P% - CODE%
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  CMP #200             \ Is the result greater than 200 (the limit on
+\ CMP #200              \ Is the result greater than 200 (the limit on
 \                       \ individual stocks of gold, platinum, gem-stones and
 \                       \ alien items)?
 \                       \
@@ -11068,9 +11068,9 @@ LOAD_D% = LOAD% + P% - CODE%
 \                       \
 \                       \ Otherwise it is clear (we have room)
 \
-\  PLA                  \ Restore A from the stack
+\ PLA                   \ Restore A from the stack
 
-                        \ --- End of removed code ------------------------------
+                        \ --- End of removed code ----------------------------->
 
  RTS                    \ Return from the subroutine
 
@@ -11642,35 +11642,35 @@ LOAD_D% = LOAD% + P% - CODE%
 \                       \ anywhere, so it's presumably a remnant of code from
 \                       \ an earlier version of the extended description code
 \
-\  LDX ZZ               \ Fetch the system number from ZZ into X
+\ LDX ZZ                \ Fetch the system number from ZZ into X
 \
-\ \LDY #LO(PTEXT)       \ These instructions are commented out in the original
-\ \STY INWK             \ source. The variable PTEXT doesn't exist, so it isn't
-\ \LDY #HI(PTEXT)-1     \ entirely obvious what this code does, though it looks
-\ \STY INWK+1           \ like it loops through a table of text tokens in PTEXT
-\ \LDY #&FF             \ until we get to the entry for the current system,
-\ \.PDT1                \ which it prints out as text tokens (so perhaps PTEXT
-\ \INY                  \ used to be a token table for the system's extended
-\ \BNE P%+4             \ descriptions before PDESC took over)
-\ \INC INWK+1
-\ \LDA (INWK),Y
-\ \BNE PDT1
-\ \DEX
-\ \BNE PDT1
-\ \.PDT2
-\ \INY
-\ \BNE P%+4
-\ \INC INWK+1
-\ \STY INWK+2
-\ \LDA (INWK),Y
-\ \BEQ TT24-1
-\ \JSR TT27
-\ \LDY INWK+2
-\ \JMP PDT2
+\\LDY #LO(PTEXT)        \ These instructions are commented out in the original
+\\STY INWK              \ source. The variable PTEXT doesn't exist, so it isn't
+\\LDY #HI(PTEXT)-1      \ entirely obvious what this code does, though it looks
+\\STY INWK+1            \ like it loops through a table of text tokens in PTEXT
+\\LDY #&FF              \ until we get to the entry for the current system,
+\\.PDT1                 \ which it prints out as text tokens (so perhaps PTEXT
+\\INY                   \ used to be a token table for the system's extended
+\\BNE P%+4              \ descriptions before PDESC took over)
+\\INC INWK+1
+\\LDA (INWK),Y
+\\BNE PDT1
+\\DEX
+\\BNE PDT1
+\\.PDT2
+\\INY
+\\BNE P%+4
+\\INC INWK+1
+\\STY INWK+2
+\\LDA (INWK),Y
+\\BEQ TT24-1
+\\JSR TT27
+\\LDY INWK+2
+\\JMP PDT2
 \
-\  RTS                  \ Return from the subroutine
+\ RTS                   \ Return from the subroutine
 
-                        \ --- End of removed code ------------------------------
+                        \ --- End of removed code ----------------------------->
 
 \ ******************************************************************************
 \
@@ -12139,8 +12139,8 @@ LOAD_D% = LOAD% + P% - CODE%
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  LDX #2               \ Set STP = 2, the step size for the circle
-\  STX STP
+\ LDX #2                \ Set STP = 2, the step size for the circle
+\ STX STP
 
                         \ --- And replaced by: -------------------------------->
 
@@ -12190,8 +12190,8 @@ LOAD_D% = LOAD% + P% - CODE%
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  LDA #%10000000       \ Set bit 7 of QQ17 to switch to Sentence Case, with the
-\  STA QQ17             \ next letter in capitals
+\ LDA #%10000000        \ Set bit 7 of QQ17 to switch to Sentence Case, with the
+\ STA QQ17              \ next letter in capitals
 
                         \ --- And replaced by: -------------------------------->
 
@@ -12263,12 +12263,12 @@ LOAD_D% = LOAD% + P% - CODE%
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  LDX #0               \ These instructions have no effect, as they are
-\  STX R                \ repeated at the start of gnum, which we call next.
-\  LDX #12              \ Perhaps they were left behind when code was moved from
-\  STX T1               \ here into gnum, and weren't deleted?
+\ LDX #0                \ These instructions have no effect, as they are
+\ STX R                 \ repeated at the start of gnum, which we call next.
+\ LDX #12               \ Perhaps they were left behind when code was moved from
+\ STX T1                \ here into gnum, and weren't deleted?
 
-                        \ --- End of removed code ------------------------------
+                        \ --- End of removed code ----------------------------->
 
  JSR gnum               \ Call gnum to get a number from the keyboard, which
                         \ will be the quantity of this item we want to purchase,
@@ -12698,25 +12698,25 @@ LOAD_D% = LOAD% + P% - CODE%
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\ \JSRTT162             \ This instruction is commented out in the original
+\\JSRTT162              \ This instruction is commented out in the original
 \                       \ source
 \
-\  LDA #205             \ Print recursive token 45 ("SELL")
-\  JSR TT27
+\ LDA #205              \ Print recursive token 45 ("SELL")
+\ JSR TT27
 \
-\  LDA #206             \ Print extended token 206 ("{all caps}(Y/N)?")
-\  JSR DETOK
+\ LDA #206              \ Print extended token 206 ("{all caps}(Y/N)?")
+\ JSR DETOK
 \
-\  JSR gnum             \ Call gnum to get a number from the keyboard, which
+\ JSR gnum              \ Call gnum to get a number from the keyboard, which
 \                       \ will be the number of the item we want to sell,
 \                       \ returning the number entered in A and R, and setting
 \                       \ the C flag if the number is bigger than the available
 \                       \ amount of this item in QQ25
 \
-\  BEQ TT212            \ If no number was entered, jump to TT212 to move on to
+\ BEQ TT212             \ If no number was entered, jump to TT212 to move on to
 \                       \ the next item
 \
-\  BCS NWDAV4           \ If the number entered was too big, jump to NWDAV4 to
+\ BCS NWDAV4            \ If the number entered was too big, jump to NWDAV4 to
 \                       \ print an "ITEM?" error, make a beep and rejoin the
 \                       \ routine at NWDAVxx above
 
@@ -12749,10 +12749,10 @@ LOAD_D% = LOAD% + P% - CODE%
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  LDA QQ24             \ Set Q to the item's price / 4
-\  STA Q
+\ LDA QQ24              \ Set Q to the item's price / 4
+\ STA Q
 \
-\  JSR GCASH            \ Call GCASH to calculate
+\ JSR GCASH             \ Call GCASH to calculate
 \                       \
 \                       \   (Y X) = P * Q * 4
 \                       \
@@ -12760,7 +12760,7 @@ LOAD_D% = LOAD% + P% - CODE%
 \                       \ (as P contains the quantity we're selling and Q
 \                       \ contains the item's price / 4)
 \
-\  JSR MCASH            \ Add (Y X) cash to the cash pot in CASH
+\ JSR MCASH             \ Add (Y X) cash to the cash pot in CASH
 
                         \ --- And replaced by: -------------------------------->
 
@@ -12831,12 +12831,12 @@ LOAD_D% = LOAD% + P% - CODE%
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  LDA CRGO             \ If our ship's cargo capacity is < 26 (i.e. we do not
-\  CMP #26              \ have a cargo bay extension), skip the following two
-\  BCC P%+7             \ instructions
+\ LDA CRGO              \ If our ship's cargo capacity is < 26 (i.e. we do not
+\ CMP #26               \ have a cargo bay extension), skip the following two
+\ BCC P%+7              \ instructions
 \
-\  LDA #107             \ We do have a cargo bay extension, so print recursive
-\  JSR TT27             \ token 107 ("LARGE CARGO{sentence case} BAY")
+\ LDA #107              \ We do have a cargo bay extension, so print recursive
+\ JSR TT27              \ token 107 ("LARGE CARGO{sentence case} BAY")
 
                         \ --- And replaced by: -------------------------------->
 
@@ -13205,9 +13205,9 @@ LOAD_D% = LOAD% + P% - CODE%
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  LDA QQ15+3           \ Set A = s1_hi - QQ0, the horizontal distance between
-\  SEC                  \ this system and the current system, where |A| < 20.
-\  SBC QQ0              \ Let's call this the x-delta, as it's the horizontal
+\ LDA QQ15+3            \ Set A = s1_hi - QQ0, the horizontal distance between
+\ SEC                   \ this system and the current system, where |A| < 20.
+\ SBC QQ0               \ Let's call this the x-delta, as it's the horizontal
 \                       \ difference between the current system at the centre of
 \                       \ the chart, and this system (and this time we keep the
 \                       \ sign of A, so it can be negative if it's to the left
@@ -13234,9 +13234,9 @@ LOAD_D% = LOAD% + P% - CODE%
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  LDA QQ15+1           \ Set A = s0_hi - QQ1, the vertical distance between
-\  SEC                  \ this system and the current system, where |A| < 38.
-\  SBC QQ1              \ Let's call this the y-delta, as it's the vertical
+\ LDA QQ15+1            \ Set A = s0_hi - QQ1, the vertical distance between
+\ SEC                   \ this system and the current system, where |A| < 38.
+\ SBC QQ1               \ Let's call this the y-delta, as it's the vertical
 \                       \ difference between the current system at the centre of
 \                       \ the chart, and this system (and this time we keep the
 \                       \ sign of A, so it can be negative if it's above the
@@ -13300,8 +13300,8 @@ LOAD_D% = LOAD% + P% - CODE%
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  LDA #%10000000       \ Set bit 7 of QQ17 to switch to Sentence Case
-\  STA QQ17
+\ LDA #%10000000        \ Set bit 7 of QQ17 to switch to Sentence Case
+\ STA QQ17
 
                         \ --- And replaced by: -------------------------------->
 
@@ -14095,8 +14095,8 @@ LOAD_D% = LOAD% + P% - CODE%
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  LDX #%10000000       \ Set bit 7 of QQ17 to switch to Sentence Case, with the
-\  STX QQ17             \ next letter in capitals
+\ LDX #%10000000        \ Set bit 7 of QQ17 to switch to Sentence Case, with the
+\ STX QQ17              \ next letter in capitals
 
                         \ --- And replaced by: -------------------------------->
 
@@ -14316,9 +14316,9 @@ LOAD_D% = LOAD% + P% - CODE%
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  JSR CATD             \ Call CATD to reload the disc catalogue
+\ JSR CATD              \ Call CATD to reload the disc catalogue
 
-                        \ --- End of removed code ------------------------------
+                        \ --- End of removed code ----------------------------->
 
  LDX #LO(RDLI)          \ Set (Y X) to point to RDLI ("R.D.CODE")
  LDY #HI(RDLI)
@@ -14498,8 +14498,8 @@ LOAD_D% = LOAD% + P% - CODE%
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  EQUS "R.D.CODE"
-\  EQUB 13
+\ EQUS "R.D.CODE"
+\ EQUB 13
 
                         \ --- And replaced by: -------------------------------->
 
@@ -14528,12 +14528,12 @@ LOAD_D% = LOAD% + P% - CODE%
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\ .bay
+\.bay
 \
-\  JMP BAY              \ Go to the docking bay (i.e. show the Status Mode
+\ JMP BAY               \ Go to the docking bay (i.e. show the Status Mode
 \                       \ screen)
 
-                        \ --- End of removed code ------------------------------
+                        \ --- End of removed code ----------------------------->
 
 .EQSHP
 
@@ -14554,8 +14554,8 @@ LOAD_D% = LOAD% + P% - CODE%
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  LDA #%10000000       \ Set bit 7 of QQ17 to switch to Sentence Case, with the
-\  STA QQ17             \ next letter in capitals
+\ LDA #%10000000        \ Set bit 7 of QQ17 to switch to Sentence Case, with the
+\ STA QQ17              \ next letter in capitals
 
                         \ --- And replaced by: -------------------------------->
 
@@ -14567,13 +14567,13 @@ LOAD_D% = LOAD% + P% - CODE%
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  LDA tek              \ Fetch the tech level of the current system from tek
-\  CLC                  \ and add 3 (the tech level is stored as 0-14, so A is
-\  ADC #3               \ now set to between 3 and 17)
+\ LDA tek               \ Fetch the tech level of the current system from tek
+\ CLC                   \ and add 3 (the tech level is stored as 0-14, so A is
+\ ADC #3                \ now set to between 3 and 17)
 \
-\  CMP #12              \ If A >= 12 then set A = 14, so A is now set to between
-\  BCC P%+4             \ 3 and 14
-\  LDA #14
+\ CMP #12               \ If A >= 12 then set A = 14, so A is now set to between
+\ BCC P%+4              \ 3 and 14
+\ LDA #14
 
                         \ --- And replaced by: -------------------------------->
 
@@ -14608,9 +14608,9 @@ LOAD_D% = LOAD% + P% - CODE%
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  LDA #70              \ Set A = 70 - QQ14, where QQ14 contains the current
-\  SEC                  \ level in light years * 10, so this leaves the amount
-\  SBC QQ14             \ of fuel we need to fill 'er up (in light years * 10)
+\ LDA #70               \ Set A = 70 - QQ14, where QQ14 contains the current
+\ SEC                   \ level in light years * 10, so this leaves the amount
+\ SBC QQ14              \ of fuel we need to fill 'er up (in light years * 10)
 
                         \ --- And replaced by: -------------------------------->
 
@@ -14710,9 +14710,9 @@ LOAD_D% = LOAD% + P% - CODE%
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  PHA                  \ While preserving the value in A, call eq to subtract
-\  JSR eq               \ the price of the item we want to buy (which is in A)
-\  PLA                  \ from our cash pot, but only if we have enough cash in
+\ PHA                   \ While preserving the value in A, call eq to subtract
+\ JSR eq                \ the price of the item we want to buy (which is in A)
+\ PLA                   \ from our cash pot, but only if we have enough cash in
 \                       \ the pot. If we don't have enough cash, exit to the
 \                       \ docking bay (i.e. show the Status Mode screen)
 
@@ -14747,8 +14747,8 @@ LOAD_D% = LOAD% + P% - CODE%
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  LDX #70              \ And set the current fuel level * 10 in QQ14 to 70, or
-\  STX QQ14             \ 7.0 light years (a full tank)
+\ LDX #70               \ And set the current fuel level * 10 in QQ14 to 70, or
+\ STX QQ14              \ 7.0 light years (a full tank)
 
                         \ --- And replaced by: -------------------------------->
 
@@ -14772,8 +14772,8 @@ LOAD_D% = LOAD% + P% - CODE%
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  CPX #5               \ If buying this missile would give us 5 missiles, this
-\  BCS pres             \ is more than the maximum of 4 missiles that we can
+\ CPX #5                \ If buying this missile would give us 5 missiles, this
+\ BCS pres              \ is more than the maximum of 4 missiles that we can
 \                       \ fit, so jump to pres to show the error "All Present",
 \                       \ beep and exit to the docking bay (i.e. show the Status
 \                       \ Mode screen)
@@ -14800,13 +14800,13 @@ LOAD_D% = LOAD% + P% - CODE%
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  LDX #37              \ If our current cargo capacity in CRGO is 37, then we
-\  CPX CRGO             \ already have a large cargo bay fitted, so jump to pres
-\  BEQ pres             \ to show the error "Large Cargo Bay Present", beep and
+\ LDX #37               \ If our current cargo capacity in CRGO is 37, then we
+\ CPX CRGO              \ already have a large cargo bay fitted, so jump to pres
+\ BEQ pres              \ to show the error "Large Cargo Bay Present", beep and
 \                       \ exit to the docking bay (i.e. show the Status Mode
 \                       \ screen)
 \
-\  STX CRGO             \ Otherwise we just scored ourselves a large cargo bay,
+\ STX CRGO              \ Otherwise we just scored ourselves a large cargo bay,
 \                       \ so update our current cargo capacity in CRGO to 37
 
                         \ --- And replaced by: -------------------------------->
@@ -14840,15 +14840,15 @@ LOAD_D% = LOAD% + P% - CODE%
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  JSR qv               \ Print a menu listing the four views, with a "View ?"
+\ JSR qv                \ Print a menu listing the four views, with a "View ?"
 \                       \ prompt, and ask for a view number, which is returned
 \                       \ in X (which now contains 0-3)
 \
-\  LDA #POW             \ Call refund with A set to the power of the new pulse
-\  JSR refund           \ laser to install the new laser and process a refund if
+\ LDA #POW              \ Call refund with A set to the power of the new pulse
+\ JSR refund            \ laser to install the new laser and process a refund if
 \                       \ we already have a laser fitted to this view
 \
-\  LDA #4               \ Set A to 4 as we just overwrote the original value,
+\ LDA #4                \ Set A to 4 as we just overwrote the original value,
 \                       \ and we still need it set correctly so we can continue
 \                       \ through the conditional statements for all the other
 \                       \ equipment
@@ -14867,12 +14867,12 @@ LOAD_D% = LOAD% + P% - CODE%
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  JSR qv               \ Print a menu listing the four views, with a "View ?"
+\ JSR qv                \ Print a menu listing the four views, with a "View ?"
 \                       \ prompt, and ask for a view number, which is returned
 \                       \ in X (which now contains 0-3)
 \
-\  LDA #POW+128         \ Call refund with A set to the power of the new beam
-\  JSR refund           \ laser to install the new laser and process a refund if
+\ LDA #POW+128          \ Call refund with A set to the power of the new beam
+\ JSR refund            \ laser to install the new laser and process a refund if
 \                       \ we already have a laser fitted to this view
 
                         \ --- And replaced by: -------------------------------->
@@ -14968,8 +14968,8 @@ LOAD_D% = LOAD% + P% - CODE%
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  LDX #&7F             \ Otherwise we just bought an energy bomb, so set BOMB
-\  STX BOMB             \ to &7F
+\ LDX #&7F              \ Otherwise we just bought an energy bomb, so set BOMB
+\ STX BOMB              \ to &7F
 
                         \ --- And replaced by: -------------------------------->
 
@@ -14991,7 +14991,7 @@ LOAD_D% = LOAD% + P% - CODE%
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  INC ENGY             \ Otherwise we just picked up an energy unit, so set
+\ INC ENGY              \ Otherwise we just picked up an energy unit, so set
 \                       \ ENGY to 1 (as ENGY was 0 before the INC instruction)
 
                         \ --- And replaced by: -------------------------------->
@@ -15028,8 +15028,8 @@ LOAD_D% = LOAD% + P% - CODE%
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  LDX GHYP             \ If we already have a galactic hyperdrive fitted (i.e.
-\  BNE pres             \ GHYP is non-zero), jump to pres to show the error
+\ LDX GHYP              \ If we already have a galactic hyperdrive fitted (i.e.
+\ BNE pres              \ GHYP is non-zero), jump to pres to show the error
 \                       \ "Galactic Hyperspace Present", beep and exit to the
 \                       \ docking bay (i.e. show the Status Mode screen)
 
@@ -15051,32 +15051,32 @@ LOAD_D% = LOAD% + P% - CODE%
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  INY                  \ Increment Y to recursive token 117 ("MILITARY  LASER")
+\ INY                   \ Increment Y to recursive token 117 ("MILITARY  LASER")
 \
-\  CMP #12              \ If A is not 12 (i.e. the item we've just bought is not
-\  BNE et10             \ a military laser), skip to et10
+\ CMP #12               \ If A is not 12 (i.e. the item we've just bought is not
+\ BNE et10              \ a military laser), skip to et10
 \
-\  JSR qv               \ Print a menu listing the four views, with a "View ?"
+\ JSR qv                \ Print a menu listing the four views, with a "View ?"
 \                       \ prompt, and ask for a view number, which is returned
 \                       \ in X (which now contains 0-3)
 \
-\  LDA #Armlas          \ Call refund with A set to the power of the new
-\  JSR refund           \ military laser to install the new laser and process a
+\ LDA #Armlas           \ Call refund with A set to the power of the new
+\ JSR refund            \ military laser to install the new laser and process a
 \                       \ refund if we already have a laser fitted to this view
 \
-\ .et10
+\.et10
 \
-\  INY                  \ Increment Y to recursive token 118 ("MINING  LASER")
+\ INY                   \ Increment Y to recursive token 118 ("MINING  LASER")
 \
-\  CMP #13              \ If A is not 13 (i.e. the item we've just bought is not
-\  BNE et11             \ a mining laser), skip to et11
+\ CMP #13               \ If A is not 13 (i.e. the item we've just bought is not
+\ BNE et11              \ a mining laser), skip to et11
 \
-\  JSR qv               \ Print a menu listing the four views, with a "View ?"
+\ JSR qv                \ Print a menu listing the four views, with a "View ?"
 \                       \ prompt, and ask for a view number, which is returned
 \                       \ in X (which now contains 0-3)
 \
-\  LDA #Mlas            \ Call refund with A set to the power of the new mining
-\  JSR refund           \ laser to install the new laser and process a refund if
+\ LDA #Mlas             \ Call refund with A set to the power of the new mining
+\ JSR refund            \ laser to install the new laser and process a refund if
 \                       \ we already have a laser fitted to this view
 
                         \ --- And replaced by: -------------------------------->
@@ -15200,8 +15200,8 @@ LOAD_D% = LOAD% + P% - CODE%
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  LDA #197             \ Otherwise we don't have enough cash to but this piece
-\  JSR prq              \ of equipment, so print recursive token 37 ("CASH")
+\ LDA #197              \ Otherwise we don't have enough cash to but this piece
+\ JSR prq               \ of equipment, so print recursive token 37 ("CASH")
 \                       \ followed by a question mark
 
                         \ --- And replaced by: -------------------------------->
@@ -15252,8 +15252,8 @@ LOAD_D% = LOAD% + P% - CODE%
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  ASL A                \ Set Y = A * 2, so it can act as an index into the
-\  TAY                  \ PRXS table, which has two bytes per entry
+\ ASL A                 \ Set Y = A * 2, so it can act as an index into the
+\ TAY                   \ PRXS table, which has two bytes per entry
 
                         \ --- And replaced by: -------------------------------->
 
@@ -15323,7 +15323,7 @@ LOAD_D% = LOAD% + P% - CODE%
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  TYA                  \ Transfer the counter value from Y to A
+\ TYA                   \ Transfer the counter value from Y to A
 
                         \ --- And replaced by: -------------------------------->
 
@@ -15344,10 +15344,10 @@ LOAD_D% = LOAD% + P% - CODE%
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  LDY YC               \ Update Y with the incremented counter in YC
+\ LDY YC                \ Update Y with the incremented counter in YC
 \
-\  CPY #20              \ If Y < 20 then loop back up to qv1 to print the next
-\  BCC qv1              \ view in the menu
+\ CPY #20               \ If Y < 20 then loop back up to qv1 to print the next
+\ BCC qv1               \ view in the menu
 
                         \ --- And replaced by: -------------------------------->
 
@@ -15375,14 +15375,14 @@ LOAD_D% = LOAD% + P% - CODE%
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  CMP #4               \ If the number entered in A < 4, then it is a valid
-\  BCC qv3              \ view number, so jump down to qv3 as we are done
+\ CMP #4                \ If the number entered in A < 4, then it is a valid
+\ BCC qv3               \ view number, so jump down to qv3 as we are done
 \
-\  JSR CLYNS            \ Otherwise we didn't get a valid view number, so clear
+\ JSR CLYNS             \ Otherwise we didn't get a valid view number, so clear
 \                       \ the bottom three text rows of the upper screen, and
 \                       \ move the text cursor to column 1 on row 21
 \
-\  JMP qv2              \ Jump back to qv2 to try again
+\ JMP qv2               \ Jump back to qv2 to try again
 
                         \ --- And replaced by: -------------------------------->
 
@@ -15859,16 +15859,16 @@ LOAD_E% = LOAD% + P% - CODE%
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  DEX                  \ If token > 6, skip the following 3 instructions
-\  BNE P%+7
+\ DEX                   \ If token > 6, skip the following 3 instructions
+\ BNE P%+7
 \
-\  LDA #%10000000       \ This token is control code 6 (switch to Sentence
-\  STA QQ17             \ Case), so set bit 7 of QQ17 to switch to Sentence Case
-\  RTS                  \ and return from the subroutine as we are done
+\ LDA #%10000000        \ This token is control code 6 (switch to Sentence
+\ STA QQ17              \ Case), so set bit 7 of QQ17 to switch to Sentence Case
+\ RTS                   \ and return from the subroutine as we are done
 \
-\  DEX                  \ If token > 8, skip the following 2 instructions
-\  DEX
-\  BNE P%+5
+\ DEX                   \ If token > 8, skip the following 2 instructions
+\ DEX
+\ BNE P%+5
 
                         \ --- And replaced by: -------------------------------->
 
@@ -16312,12 +16312,12 @@ LOAD_E% = LOAD% + P% - CODE%
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  LDA #LO(QQ18)        \ Set V, V+1 to point to the recursive token table at
-\  STA V                \ location QQ18
-\  LDA #HI(QQ18)
-\  STA V+1
+\ LDA #LO(QQ18)         \ Set V, V+1 to point to the recursive token table at
+\ STA V                 \ location QQ18
+\ LDA #HI(QQ18)
+\ STA V+1
 \
-\  LDY #0               \ Set a counter Y to point to the character offset
+\ LDY #0                \ Set a counter Y to point to the character offset
 \                       \ as we scan through the table
 
                         \ --- And replaced by: -------------------------------->
@@ -16875,9 +16875,9 @@ LOAD_E% = LOAD% + P% - CODE%
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  LDA #49              \ Set SC = 49 - T
-\  SBC T                \        = 48 + 1 - (X * 8)
-\  STA SC
+\ LDA #49               \ Set SC = 49 - T
+\ SBC T                 \        = 48 + 1 - (X * 8)
+\ STA SC
 
                         \ --- And replaced by: -------------------------------->
 
@@ -18365,7 +18365,7 @@ LOAD_F% = LOAD% + P% - CODE%
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  LDX #4               \ Set up a loop counter in X to count through all four
+\ LDX #4                \ Set up a loop counter in X to count through all four
 \                       \ missile indicators
 
                         \ --- And replaced by: -------------------------------->
@@ -18378,24 +18378,24 @@ LOAD_F% = LOAD% + P% - CODE%
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  CPX NOMSL            \ If the counter is equal to the number of missiles,
-\  BEQ SAL8             \ jump down to SQL8 to draw remaining the missiles, as
+\ CPX NOMSL             \ If the counter is equal to the number of missiles,
+\ BEQ SAL8              \ jump down to SQL8 to draw remaining the missiles, as
 \                       \ the rest of them are present and should be drawn in
 \                       \ green/cyan
 \
-\  LDY #0               \ Draw the missile indicator at position X in black
-\  JSR MSBAR
+\ LDY #0                \ Draw the missile indicator at position X in black
+\ JSR MSBAR
 \
-\  DEX                  \ Decrement the counter to point to the next missile
+\ DEX                   \ Decrement the counter to point to the next missile
 \
-\  BNE ss               \ Loop back to ss if we still have missiles to draw
+\ BNE ss                \ Loop back to ss if we still have missiles to draw
 \
-\  RTS                  \ Return from the subroutine
+\ RTS                   \ Return from the subroutine
 \
-\ .SAL8
+\.SAL8
 \
-\  LDY #&EE             \ Draw the missile indicator at position X in green/cyan
-\  JSR MSBAR
+\ LDY #&EE              \ Draw the missile indicator at position X in green/cyan
+\ JSR MSBAR
 
                         \ --- And replaced by: -------------------------------->
 
@@ -18415,7 +18415,7 @@ LOAD_F% = LOAD% + P% - CODE%
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  BNE SAL8             \ Loop back to SAL8 if we still have missiles to draw
+\ BNE SAL8              \ Loop back to SAL8 if we still have missiles to draw
 
                         \ --- And replaced by: -------------------------------->
 
@@ -18462,11 +18462,11 @@ LOAD_F% = LOAD% + P% - CODE%
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\ .DORND2
+\.DORND2
 \
-\  CLC                  \ This ensures that bit 0 of r2 is 0
+\ CLC                   \ This ensures that bit 0 of r2 is 0
 
-                        \ --- End of removed code ------------------------------
+                        \ --- End of removed code ----------------------------->
 
 .DORND
 
@@ -18535,15 +18535,15 @@ LOAD_F% = LOAD% + P% - CODE%
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  BEQ P%+5             \ If the counter has reached zero, which it will do
+\ BEQ P%+5              \ If the counter has reached zero, which it will do
 \                       \ every 256 main loops, skip the next JMP instruction
 \                       \ (or to put it another way, if the counter hasn't
 \                       \ reached zero, jump down to MLOOP, skipping all the
 \                       \ following checks)
 \
-\ .ytq
+\.ytq
 \
-\  JMP MLOOP            \ Jump down to MLOOP to do some end-of-loop tidying and
+\ JMP MLOOP             \ Jump down to MLOOP to do some end-of-loop tidying and
 \                       \ restart the main loop
 \
 \                       \ We only get here once every 256 iterations of the
@@ -18559,40 +18559,40 @@ LOAD_F% = LOAD% + P% - CODE%
 \                       \ time it will either be an asteroid (98.5% chance) or,
 \                       \ very rarely, a cargo canister (1.5% chance)
 \
-\  LDA MJ               \ If we are in witchspace following a mis-jump, skip the
-\  BNE ytq              \ following by jumping down to MLOOP (via ytq above)
+\ LDA MJ                \ If we are in witchspace following a mis-jump, skip the
+\ BNE ytq               \ following by jumping down to MLOOP (via ytq above)
 \
-\  JSR DORND            \ Set A and X to random numbers
+\ JSR DORND             \ Set A and X to random numbers
 \
-\  CMP #35              \ If A >= 35 (87% chance), jump down to MLOOP to skip
-\  BCS MLOOP            \ the following
+\ CMP #35               \ If A >= 35 (87% chance), jump down to MLOOP to skip
+\ BCS MLOOP             \ the following
 \
-\  LDA MANY+AST         \ If we already have 3 or more asteroids in the local
-\  CMP #3               \ bubble, jump down to MLOOP to skip the following
-\  BCS MLOOP
+\ LDA MANY+AST          \ If we already have 3 or more asteroids in the local
+\ CMP #3                \ bubble, jump down to MLOOP to skip the following
+\ BCS MLOOP
 \
-\  JSR ZINF             \ Call ZINF to reset the INWK ship workspace
+\ JSR ZINF              \ Call ZINF to reset the INWK ship workspace
 \
-\  LDA #38              \ Set z_hi = 38 (far away)
-\  STA INWK+7
+\ LDA #38               \ Set z_hi = 38 (far away)
+\ STA INWK+7
 \
-\  JSR DORND            \ Set A, X and C flag to random numbers
+\ JSR DORND             \ Set A, X and C flag to random numbers
 \
-\  STA INWK             \ Set x_lo = random
+\ STA INWK              \ Set x_lo = random
 \
-\  STX INWK+3           \ Set y_lo = random
+\ STX INWK+3            \ Set y_lo = random
 \
-\  AND #%10000000       \ Set x_sign = bit 7 of x_lo
-\  STA INWK+2
+\ AND #%10000000        \ Set x_sign = bit 7 of x_lo
+\ STA INWK+2
 \
-\  TXA                  \ Set y_sign = bit 7 of y_lo
-\  AND #%10000000
-\  STA INWK+5
+\ TXA                   \ Set y_sign = bit 7 of y_lo
+\ AND #%10000000
+\ STA INWK+5
 \
-\  ROL INWK+1           \ Set bit 2 of x_hi to the C flag, which is random, so
-\  ROL INWK+1           \ this randomly moves us slightly off-centre
+\ ROL INWK+1            \ Set bit 2 of x_hi to the C flag, which is random, so
+\ ROL INWK+1            \ this randomly moves us slightly off-centre
 
-                        \ --- End of removed code ------------------------------
+                        \ --- End of removed code ----------------------------->
 
                         \ Fall through into part 5 (parts 3 and 4 are not
                         \ required when we are docked)
@@ -18634,18 +18634,18 @@ LOAD_F% = LOAD% + P% - CODE%
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  LDX GNTMP            \ If the laser temperature in GNTMP is non-zero,
-\  BEQ EE20             \ decrement it (i.e. cool it down a bit)
-\  DEC GNTMP
+\ LDX GNTMP             \ If the laser temperature in GNTMP is non-zero,
+\ BEQ EE20              \ decrement it (i.e. cool it down a bit)
+\ DEC GNTMP
 \
-\ .EE20
+\.EE20
 \
-\  JSR DIALS            \ Call DIALS to update the dashboard
+\ JSR DIALS             \ Call DIALS to update the dashboard
 \
-\  LDA QQ11             \ If this is a space view, skip the following two
-\  BEQ P%+7             \ instructions (i.e. jump to JSR TT17 below)
+\ LDA QQ11              \ If this is a space view, skip the following two
+\ BEQ P%+7              \ instructions (i.e. jump to JSR TT17 below)
 
-                        \ --- End of removed code ------------------------------
+                        \ --- End of removed code ----------------------------->
 
  LDY #2                 \ Wait for 2/50 of a second (0.04 seconds), to slow the
  JSR DELAY              \ main loop down a bit
@@ -18765,9 +18765,9 @@ LOAD_F% = LOAD% + P% - CODE%
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  CMP #f0              \ If red key f0 was pressed, jump to TT110 to launch our
-\  BNE fvw              \ ship (if docked), returning from the subroutine using
-\  JMP TT110            \ a tail call
+\ CMP #f0               \ If red key f0 was pressed, jump to TT110 to launch our
+\ BNE fvw               \ ship (if docked), returning from the subroutine using
+\ JMP TT110             \ a tail call
 
                         \ --- And replaced by: -------------------------------->
 
@@ -18864,8 +18864,8 @@ LOAD_F% = LOAD% + P% - CODE%
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  CMP #&36             \ If "O" was pressed, do the following three jumps,
-\  BNE ee2              \ otherwise skip to ee2 to continue
+\ CMP #&36              \ If "O" was pressed, do the following three jumps,
+\ BNE ee2               \ otherwise skip to ee2 to continue
 
                         \ --- And replaced by: -------------------------------->
 
@@ -18934,8 +18934,8 @@ LOAD_F% = LOAD% + P% - CODE%
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  LDA #%10000000       \ Set bit 7 of QQ17 to switch to Sentence Case, with the
-\  STA QQ17             \ next letter in capitals
+\ LDA #%10000000        \ Set bit 7 of QQ17 to switch to Sentence Case, with the
+\ STA QQ17              \ next letter in capitals
 
                         \ --- And replaced by: -------------------------------->
 
@@ -19238,7 +19238,7 @@ ENDIF
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\ \JSR BELL             \ This instruction is commented out in the original
+\\JSR BELL              \ This instruction is commented out in the original
 \                       \ source. It would make a standard system beep
 \
 \                       \ The checksum CHK is correct, so now we check whether
@@ -19247,36 +19247,36 @@ ENDIF
 \                       \ to Acornsoft via the competition code that there has
 \                       \ been some hacking going on with this competition entry
 \
-\  EOR #&A9             \ X = checksum EOR &A9
-\  TAX
+\ EOR #&A9              \ X = checksum EOR &A9
+\ TAX
 \
-\  LDA COK              \ Set A to the competition flags in COK
+\ LDA COK               \ Set A to the competition flags in COK
 \
-\  CPX CHK2             \ If X = CHK2, then skip the next instruction
-\  BEQ tZ
+\ CPX CHK2              \ If X = CHK2, then skip the next instruction
+\ BEQ tZ
 \
-\  ORA #%10000000       \ Set bit 7 of A to indicate this commander file has
+\ ORA #%10000000        \ Set bit 7 of A to indicate this commander file has
 \                       \ been tampered with
 \
-\ .tZ
+\.tZ
 \
-\ IF _STH_DISC
+\IF _STH_DISC
 \
-\  ORA #%00100000       \ Set bit 5 of A to denote that this is the disc version
+\ ORA #%00100000        \ Set bit 5 of A to denote that this is the disc version
 \                       \ with the refund bug fixed (in versions before the bug
 \                       \ was fixed, bit 2 is set)
 \
-\ ELIF _IB_DISC
+\ELIF _IB_DISC
 \
-\  ORA #%00000100       \ Set bit 2 of A to denote that this is the disc version
+\ ORA #%00000100        \ Set bit 2 of A to denote that this is the disc version
 \                       \ but before the refund bug was fixed (in versions after
 \                       \ the bug was fixed, bit 5 is set)
 \
-\ ENDIF
+\ENDIF
 \
-\  STA COK              \ Store the updated competition flags in COK
+\ STA COK               \ Store the updated competition flags in COK
 \
-\  RTS                  \ Return from the subroutine
+\ RTS                   \ Return from the subroutine
 
                         \ --- And replaced by: -------------------------------->
 
@@ -19332,18 +19332,18 @@ ENDIF
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  LDA &9F              \ As part of the copy protection, location &9F is set to
-\  CMP #219             \ 219 in the OSBmod routine in elite-loader3.asm. This
-\  BEQ tiwe             \ jumps to tiwe if the value is unchanged, otherwise it
+\ LDA &9F               \ As part of the copy protection, location &9F is set to
+\ CMP #219              \ 219 in the OSBmod routine in elite-loader3.asm. This
+\ BEQ tiwe              \ jumps to tiwe if the value is unchanged, otherwise it
 \                       \ crashes the game with the following (as presumably
 \                       \ the game code has been tampered with)
 \
-\  LDA #&10             \ Modify the STA DELTA instruction in RES2 to &10 &FE,
-\  STA modify+2         \ which is a BPL P%-2 instruction, to create an infinite
-\  LDA #&FE             \ loop and hang the game
-\  STA modify+3
+\ LDA #&10              \ Modify the STA DELTA instruction in RES2 to &10 &FE,
+\ STA modify+2          \ which is a BPL P%-2 instruction, to create an infinite
+\ LDA #&FE              \ loop and hang the game
+\ STA modify+3
 \
-\ .tiwe
+\.tiwe
 
                         \ --- And replaced by: -------------------------------->
 
@@ -19361,8 +19361,8 @@ ENDIF
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  INX                  \ Set QQ17 to 128 (so bit 7 is set) to switch to
-\  STX QQ17             \ Sentence Case, with the next letter printing in upper
+\ INX                   \ Set QQ17 to 128 (so bit 7 is set) to switch to
+\ STX QQ17              \ Sentence Case, with the next letter printing in upper
 \                       \ case
 
                         \ --- And replaced by: -------------------------------->
@@ -19549,7 +19549,7 @@ ENDIF
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  CLC                  \ Clear the C flag so we can do addition without the
+\ CLC                   \ Clear the C flag so we can do addition without the
 \                       \ C flag affecting the result
 
                         \ --- And replaced by: -------------------------------->
@@ -19922,8 +19922,8 @@ ENDIF
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  EQUS ".0"            \ The "0" part of the string is overwritten with the
-\  EQUB 13              \ actual drive number by the CATS routine
+\ EQUS ".0"             \ The "0" part of the string is overwritten with the
+\ EQUB 13               \ actual drive number by the CATS routine
 
                         \ --- And replaced by: -------------------------------->
 
@@ -19945,8 +19945,8 @@ ENDIF
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  EQUS "DE.:0.E.1234567"
-\  EQUB 13
+\ EQUS "DE.:0.E.1234567"
+\ EQUB 13
 
                         \ --- And replaced by: -------------------------------->
 
@@ -19988,11 +19988,11 @@ ENDIF
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  STA CTLI+1           \ Store the drive number in the second byte of the
+\ STA CTLI+1            \ Store the drive number in the second byte of the
 \                       \ command string at CTLI, so it overwrites the "0" in
 \                       \ ".0" with the drive number to catalogue
 \
-\  STA DTW7             \ Store the drive number in DTW7, so printing extended
+\ STA DTW7              \ Store the drive number in DTW7, so printing extended
 \                       \ token 4 will show the correct drive number (as token 4
 \                       \ contains the {drive number} jump code, which calls
 \                       \ MT16 to print the character in DTW7)
@@ -20016,8 +20016,8 @@ ENDIF
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  LDA #1               \ Set the CATF flag to 1, so that the TT26 routine will
-\  STA CATF             \ print out the disc catalogue correctly
+\ LDA #1                \ Set the CATF flag to 1, so that the TT26 routine will
+\ STA CATF              \ print out the disc catalogue correctly
 
                         \ --- And replaced by: -------------------------------->
 
@@ -20084,8 +20084,8 @@ ENDIF
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  LDA CTLI+1           \ The call to CATS above put the drive number into
-\  STA DELI+4           \ CTLI+1, so copy the drive number into DELI+4 so that
+\ LDA CTLI+1            \ The call to CATS above put the drive number into
+\ STA DELI+4            \ CTLI+1, so copy the drive number into DELI+4 so that
 \                       \ the drive number in the "DE.:0.E.1234567" string
 \                       \ gets updated (i.e. the number after the colon)
 
@@ -20119,8 +20119,8 @@ ENDIF
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  LDA INWK+4,X         \ Copy the X-th byte of INWK+4 to the X-th byte of
-\  STA DELI+5,X         \ DELI+5
+\ LDA INWK+4,X          \ Copy the X-th byte of INWK+4 to the X-th byte of
+\ STA DELI+5,X          \ DELI+5
 
                         \ --- And replaced by: -------------------------------->
 
@@ -20176,8 +20176,8 @@ ENDIF
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  LDX stack            \ Set the stack pointer to the value that we stored in
-\  TXS                  \ location stack, so that's back to the value it had
+\ LDX stack             \ Set the stack pointer to the value that we stored in
+\ TXS                   \ location stack, so that's back to the value it had
 \                       \ before we set BRKV to point to MEBRK in the SVE
 \                       \ routine
 
@@ -20264,10 +20264,10 @@ ENDIF
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  JSR ZEBC             \ Call ZEBC to zero-fill pages &B and &C
+\ JSR ZEBC              \ Call ZEBC to zero-fill pages &B and &C
 \
-\  TSX                  \ Transfer the stack pointer to X and store it in stack,
-\  STX stack            \ so we can restore it in the MRBRK routine
+\ TSX                   \ Transfer the stack pointer to X and store it in stack,
+\ STX stack             \ so we can restore it in the MRBRK routine
 
                         \ --- And replaced by: -------------------------------->
 
@@ -20309,22 +20309,22 @@ ENDIF
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  JSR GTNMEW           \ If we get here then option 1 (load) was chosen, so
+\ JSR GTNMEW            \ If we get here then option 1 (load) was chosen, so
 \                       \ call GTNMEW to fetch the name of the commander file
 \                       \ to load (including drive number and directory) into
 \                       \ INWK
 \
-\  JSR LOD              \ Call LOD to load the commander file
+\ JSR LOD               \ Call LOD to load the commander file
 \
-\  JSR TRNME            \ Transfer the commander filename from INWK to NA%
+\ JSR TRNME             \ Transfer the commander filename from INWK to NA%
 \
-\  SEC                  \ Set the C flag to indicate we loaded a new commander
-\  BCS SVEX+1           \ file, and return from the subroutine (as SVEX+1
+\ SEC                   \ Set the C flag to indicate we loaded a new commander
+\ BCS SVEX+1            \ file, and return from the subroutine (as SVEX+1
 \                       \ contains an RTS)
 \
-\ .SV1
+\.SV1
 \
-\  BNE CAT              \ We get here following the CMP #'2' above, so this
+\ BNE CAT               \ We get here following the CMP #'2' above, so this
 \                       \ jumps to CAT if option 2 was not chosen - in other
 \                       \ words, if option 3 (catalogue) was chosen
 
@@ -20368,12 +20368,12 @@ ENDIF
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  LSR SVC              \ Halve the save count value in SVC
+\ LSR SVC               \ Halve the save count value in SVC
 \
-\  LDA #3               \ Print extended token 3 ("COMPETITION NUMBER:")
-\  JSR DETOK
+\ LDA #3                \ Print extended token 3 ("COMPETITION NUMBER:")
+\ JSR DETOK
 
-                        \ --- End of removed code ------------------------------
+                        \ --- End of removed code ----------------------------->
 
  LDX #NT%               \ We now want to copy the current commander data block
                         \ from location TP to the last saved commander block at
@@ -20403,36 +20403,36 @@ ENDIF
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  PHA                  \ Store the checksum on the stack
+\ PHA                   \ Store the checksum on the stack
 \
-\  ORA #%10000000       \ Set K = checksum with bit 7 set
-\  STA K
+\ ORA #%10000000        \ Set K = checksum with bit 7 set
+\ STA K
 \
-\  EOR COK              \ Set K+2 = K EOR COK (the competition flags)
-\  STA K+2
+\ EOR COK               \ Set K+2 = K EOR COK (the competition flags)
+\ STA K+2
 \
-\  EOR CASH+2           \ Set K+1 = K+2 EOR CASH+2 (the third cash byte)
-\  STA K+1
+\ EOR CASH+2            \ Set K+1 = K+2 EOR CASH+2 (the third cash byte)
+\ STA K+1
 \
-\  EOR #&5A             \ Set K+3 = K+1 EOR &5A EOR TALLY+1 (the high byte of
-\  EOR TALLY+1          \ the kill tally)
-\  STA K+3
+\ EOR #&5A              \ Set K+3 = K+1 EOR &5A EOR TALLY+1 (the high byte of
+\ EOR TALLY+1           \ the kill tally)
+\ STA K+3
 \
-\  CLC                  \ Clear the C flag so the call to BPRNT does not include
+\ CLC                   \ Clear the C flag so the call to BPRNT does not include
 \                       \ a decimal point
 \
-\  JSR BPRNT            \ Print the competition number stored in K to K+3. The
+\ JSR BPRNT             \ Print the competition number stored in K to K+3. The
 \                       \ value of U might affect how this is printed, and as
 \                       \ it's a temporary variable in zero page that isn't
 \                       \ reset by ZERO, it might have any value, but as the
 \                       \ competition code is a 10-digit number, this just means
 \                       \ it may or may not have an extra space of padding
 \
-\  JSR TT67             \ Print a newline
+\ JSR TT67              \ Print a newline
 \
-\  PLA                  \ Restore the checksum from the stack
+\ PLA                   \ Restore the checksum from the stack
 
-                        \ --- End of removed code ------------------------------
+                        \ --- End of removed code ----------------------------->
 
  STA &0B00+NT%          \ Store the checksum in the last byte of the save file
                         \ at &0B00 (the equivalent of CHK in the last saved
@@ -20676,10 +20676,10 @@ ENDIF
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  BRK                  \ The error that is printed if we try to load an
-\  EQUS "IIllegal "     \ invalid commander file with bit 7 of byte #0 set
-\  EQUS "ELITE II file" \ (the spelling mistake is in the original source)
-\  BRK
+\ BRK                   \ The error that is printed if we try to load an
+\ EQUS "IIllegal "      \ invalid commander file with bit 7 of byte #0 set
+\ EQUS "ELITE II file"  \ (the spelling mistake is in the original source)
+\ BRK
 
                         \ --- And replaced by: -------------------------------->
 
@@ -20929,8 +20929,8 @@ ENDIF
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  LDA #32              \ Call the NOISE routine with A = 32 to make a short,
-\  BNE NOISE            \ high beep, returning from the subroutine using a tail
+\ LDA #32               \ Call the NOISE routine with A = 32 to make a short,
+\ BNE NOISE             \ high beep, returning from the subroutine using a tail
 \                       \ call (this BNE is effectively a JMP as A will never be
 \                       \ zero)
 
@@ -21280,8 +21280,8 @@ ENDIF
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  LDA JSTK             \ If JSTK is zero, then we are configured to use the
-\  BEQ DK9              \ keyboard rather than the joystick, so jump to DK9 to
+\ LDA JSTK              \ If JSTK is zero, then we are configured to use the
+\ BEQ DK9               \ keyboard rather than the joystick, so jump to DK9 to
 \                       \ make sure the Bitstik is disabled as well (DK9 then
 \                       \ jumps to DK4 below)
 
@@ -21375,7 +21375,7 @@ ENDIF
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  CPY #&47             \ The last toggle key is &46 (K), so check whether we
+\ CPY #&47              \ The last toggle key is &46 (K), so check whether we
 \                       \ have just done that one
 
                         \ --- And replaced by: -------------------------------->
@@ -21404,23 +21404,23 @@ ENDIF
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  CPX #&64             \ If "B" is not being pressed, skip to DK7
-\  BNE nobit
+\ CPX #&64              \ If "B" is not being pressed, skip to DK7
+\ BNE nobit
 \
-\  LDA BSTK             \ Toggle the value of BSTK between 0 and &FF
-\  EOR #&FF
-\  STA BSTK
+\ LDA BSTK              \ Toggle the value of BSTK between 0 and &FF
+\ EOR #&FF
+\ STA BSTK
 \
-\  STA JSTK             \ Configure JSTK to the same value, so when the Bitstik
+\ STA JSTK              \ Configure JSTK to the same value, so when the Bitstik
 \                       \ is enabled, so is the joystick
 \
-\  STA JSTE             \ Configure JSTE to the same value, so when the Bitstik
+\ STA JSTE              \ Configure JSTE to the same value, so when the Bitstik
 \                       \ is enabled, the joystick is configured with reversed
 \                       \ channels
 \
-\ .nobit
+\.nobit
 
-                        \ --- End of removed code ------------------------------
+                        \ --- End of removed code ----------------------------->
 
  CPX #&59               \ If DELETE is not being pressed, we are still paused,
  BNE FREEZE             \ so loop back up to keep listening for configuration
@@ -21445,24 +21445,24 @@ ENDIF
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\ .DK5
+\.DK5
 
-                        \ --- End of removed code ------------------------------
+                        \ --- End of removed code ----------------------------->
 
  RTS                    \ Return from the subroutine
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\ .DK9
+\.DK9
 \
-\  STA BSTK             \ DK9 is called from DOKEY using a BEQ, so we know A is
+\ STA BSTK              \ DK9 is called from DOKEY using a BEQ, so we know A is
 \                       \ 0, so this disables the Bitstik and switched to
 \                       \ keyboard or joystick
 \
-\  BEQ DK4              \ Jump back to DK4 in DOKEY (this BEQ is effectively a
+\ BEQ DK4               \ Jump back to DK4 in DOKEY (this BEQ is effectively a
 \                       \ JMP as A is always zero)
 
-                        \ --- End of removed code ------------------------------
+                        \ --- End of removed code ----------------------------->
 
 \ ******************************************************************************
 \
@@ -22796,7 +22796,7 @@ LOAD_G% = LOAD% + P% - CODE%
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  JMP DOEXP            \ Jump to DOEXP to return from the subroutine using a
+\ JMP DOEXP             \ Jump to DOEXP to return from the subroutine using a
 \                       \ tail call, as in the docked code DOEXP just contains
 \                       \ an RTS
 
@@ -24479,7 +24479,7 @@ LOAD_G% = LOAD% + P% - CODE%
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  JMP DOEXP            \ Jump to DOEXP to display the explosion cloud,
+\ JMP DOEXP             \ Jump to DOEXP to display the explosion cloud,
 \                       \ returning from the subroutine using a tail call
 
                         \ --- And replaced by: -------------------------------->
@@ -27147,21 +27147,21 @@ ENDMACRO
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  ECHR 'C'             \ Token 3:      "COMPETITION NUMBER:"
-\  ECHR 'O'             \
-\  ECHR 'M'             \ Encoded as:   "COMPE<251><251><223> <225>MB<244>:"
-\  ECHR 'P'
-\  ECHR 'E'
-\  ETWO 'T', 'I'
-\  ETWO 'T', 'I'
-\  ETWO 'O', 'N'
-\  ECHR ' '
-\  ETWO 'N', 'U'
-\  ECHR 'M'
-\  ECHR 'B'
-\  ETWO 'E', 'R'
-\  ECHR ':'
-\  EQUB VE
+\ ECHR 'C'              \ Token 3:      "COMPETITION NUMBER:"
+\ ECHR 'O'              \
+\ ECHR 'M'              \ Encoded as:   "COMPE<251><251><223> <225>MB<244>:"
+\ ECHR 'P'
+\ ECHR 'E'
+\ ETWO 'T', 'I'
+\ ETWO 'T', 'I'
+\ ETWO 'O', 'N'
+\ ECHR ' '
+\ ETWO 'N', 'U'
+\ ECHR 'M'
+\ ECHR 'B'
+\ ETWO 'E', 'R'
+\ ECHR ':'
+\ EQUB VE
 
                         \ --- And replaced by: -------------------------------->
 
@@ -28611,7 +28611,7 @@ ENDMACRO
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  EQUB VE              \ Token 111:    ""
+\ EQUB VE               \ Token 111:    ""
 \                       \
 \                       \ Encoded as:   ""
 
@@ -28639,11 +28639,11 @@ ENDMACRO
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  EQUB VE              \ Token 113:    ""
+\ EQUB VE               \ Token 113:    ""
 \                       \
 \                       \ Encoded as:   ""
 \
-\  EQUB VE              \ Token 114:    ""
+\ EQUB VE               \ Token 114:    ""
 \                       \
 \                       \ Encoded as:   ""
 
@@ -29542,35 +29542,35 @@ ENDMACRO
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  ECHR 'A'             \ Encoded as:   "{25}{9}{29}{14}{2}GOOD DAY [154]
-\  ECHR 'L'             \                 {4}[204]I{13} AM {19}AG<246>T {19}B
-\  ECHR ' '             \                <249>KE OF {19}NAVAL {19}<240>TEL<229>
-\  EJMP 19              \                G<246><233>[204]AS [179] K<227>W, [147]
-\  ETWO 'I', 'N'        \                {19}NAVY HA<250> <247><246> KEEP[195]
-\  ECHR 'T'             \                [147]{19}<226><238>GOIDS OFF [179]R ASS
-\  ECHR 'E'             \                 <217>T <240> DEEP SPA<233> F<253>
-\  ECHR 'L'             \                 <239>NY YE<238>S <227>W. {19}WELL
-\  ETWO 'L', 'E'        \                 [147]S<219>UA<251><223> HAS CH<255>G
-\  ECHR 'G'             \                <252>[204]<217>R BOYS <238>E <242>ADY F
-\  ETWO 'E', 'N'        \                <253>[208]PUSH RIGHT[201][147]HOME
-\  ETWO 'C', 'E'        \                 SYSTEM OF <226>O<218> MO<226><244>S
-\  ETOK 204             \                [204]{24}{9}{29}I{13} HA<250> OBTA
-\  ECHR 'A'             \                <240>[196][147]DEF<246><233> P<249>NS F
-\  ECHR 'S'             \                <253> <226>EIR {19}HI<250> {19}W<253>LD
-\  ECHR ' '             \                S[204][147]<247><221><229>S K<227>W WE
-\  ETOK 179             \                [39]<250> GOT <235>ME<226>[195]BUT
-\  ECHR ' '             \                 <227>T WH<245>[204]IF {19}I T<248>NSM
-\  ECHR 'K'             \                <219> [147]P<249>NS[201]<217>R BA<218>
-\  ETWO 'N', 'O'        \                 <223> {19}<234><242><248> <226>EY[39]L
-\  ECHR 'W'             \                L <240>T<244><233>PT [147]TR<255>SMISSI
-\  ECHR ','             \                <223>. {19}I NE<252>[208][207][201]
-\  ECHR ' '             \                <239>KE [147]RUN[204][179][39]<242> E
-\  ETOK 147             \                <229>CT<252>[204][147]P<249>NS A<242>
-\  EJMP 19              \                 UNIPUL<218> COD[196]WI<226><240> [148]
-\  ECHR 'N'             \                TR<255>SMISSI<223>[204]{8}[179] W<220>L
-\  ECHR 'A'             \                 <247> PAID[204]    {19}GOOD LUCK [154]
-\  ECHR 'V'             \                [212]{24}"
-\  ECHR 'Y'
+\ ECHR 'A'              \ Encoded as:   "{25}{9}{29}{14}{2}GOOD DAY [154]
+\ ECHR 'L'              \                 {4}[204]I{13} AM {19}AG<246>T {19}B
+\ ECHR ' '              \                <249>KE OF {19}NAVAL {19}<240>TEL<229>
+\ EJMP 19               \                G<246><233>[204]AS [179] K<227>W, [147]
+\ ETWO 'I', 'N'         \                {19}NAVY HA<250> <247><246> KEEP[195]
+\ ECHR 'T'              \                [147]{19}<226><238>GOIDS OFF [179]R ASS
+\ ECHR 'E'              \                 <217>T <240> DEEP SPA<233> F<253>
+\ ECHR 'L'              \                 <239>NY YE<238>S <227>W. {19}WELL
+\ ETWO 'L', 'E'         \                 [147]S<219>UA<251><223> HAS CH<255>G
+\ ECHR 'G'              \                <252>[204]<217>R BOYS <238>E <242>ADY F
+\ ETWO 'E', 'N'         \                <253>[208]PUSH RIGHT[201][147]HOME
+\ ETWO 'C', 'E'         \                 SYSTEM OF <226>O<218> MO<226><244>S
+\ ETOK 204              \                [204]{24}{9}{29}I{13} HA<250> OBTA
+\ ECHR 'A'              \                <240>[196][147]DEF<246><233> P<249>NS F
+\ ECHR 'S'              \                <253> <226>EIR {19}HI<250> {19}W<253>LD
+\ ECHR ' '              \                S[204][147]<247><221><229>S K<227>W WE
+\ ETOK 179              \                [39]<250> GOT <235>ME<226>[195]BUT
+\ ECHR ' '              \                 <227>T WH<245>[204]IF {19}I T<248>NSM
+\ ECHR 'K'              \                <219> [147]P<249>NS[201]<217>R BA<218>
+\ ETWO 'N', 'O'         \                 <223> {19}<234><242><248> <226>EY[39]L
+\ ECHR 'W'              \                L <240>T<244><233>PT [147]TR<255>SMISSI
+\ ECHR ','              \                <223>. {19}I NE<252>[208][207][201]
+\ ECHR ' '              \                <239>KE [147]RUN[204][179][39]<242> E
+\ ETOK 147              \                <229>CT<252>[204][147]P<249>NS A<242>
+\ EJMP 19               \                 UNIPUL<218> COD[196]WI<226><240> [148]
+\ ECHR 'N'              \                TR<255>SMISSI<223>[204]{8}[179] W<220>L
+\ ECHR 'A'              \                 <247> PAID[204]    {19}GOOD LUCK [154]
+\ ECHR 'V'              \                [212]{24}"
+\ ECHR 'Y'
 
                         \ --- And replaced by: -------------------------------->
 
@@ -29717,8 +29717,8 @@ ENDMACRO
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  ECHR 'U'
-\  ECHR 'S'
+\ ECHR 'U'
+\ ECHR 'S'
 
                         \ --- And replaced by: -------------------------------->
 
@@ -29745,8 +29745,8 @@ ENDMACRO
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  ECHR 'S'
-\  ECHR 'T'
+\ ECHR 'S'
+\ ECHR 'T'
 
                         \ --- And replaced by: -------------------------------->
 
@@ -30039,14 +30039,14 @@ ENDMACRO
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  ECHR ' '             \                [196]US WELL[178]WE SH<228>L <242>MEMB
-\  ETWO 'S', 'E'        \                <244>[204]WE DID <227>T EXPECT [147]
-\  ECHR 'R'             \                {19}<226><238>GOIDS[201]F<240>D <217>T
-\  ECHR 'V'             \                 AB<217>T [179][204]F<253> [147]MOM
-\  ETOK 196             \                <246>T P<229>A<218> AC<233>PT [148]{19}
-\  ECHR 'U'             \                NAVY {6}[114]{5} AS PAYM<246>T[212]
-\  ECHR 'S'             \                {24}"
-\  ECHR ' '
+\ ECHR ' '              \                [196]US WELL[178]WE SH<228>L <242>MEMB
+\ ETWO 'S', 'E'         \                <244>[204]WE DID <227>T EXPECT [147]
+\ ECHR 'R'              \                {19}<226><238>GOIDS[201]F<240>D <217>T
+\ ECHR 'V'              \                 AB<217>T [179][204]F<253> [147]MOM
+\ ETOK 196              \                <246>T P<229>A<218> AC<233>PT [148]{19}
+\ ECHR 'U'              \                NAVY {6}[114]{5} AS PAYM<246>T[212]
+\ ECHR 'S'              \                {24}"
+\ ECHR ' '
 
                         \ --- And replaced by: -------------------------------->
 
@@ -30086,8 +30086,8 @@ ENDMACRO
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  ECHR 'D'
-\  ECHR 'I'
+\ ECHR 'D'
+\ ECHR 'I'
 
                         \ --- And replaced by: -------------------------------->
 
@@ -30127,8 +30127,8 @@ ENDMACRO
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  ECHR 'A'
-\  ECHR 'B'
+\ ECHR 'A'
+\ ECHR 'B'
 
                         \ --- And replaced by: -------------------------------->
 
@@ -30203,11 +30203,11 @@ ENDMACRO
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  ECHR 'B'             \ Token 227:    "BISON"
-\  ECHR 'I'             \
-\  ECHR 'S'             \ Encoded as:   "BIS<223>"
-\  ETWO 'O', 'N'
-\  EQUB VE
+\ ECHR 'B'              \ Token 227:    "BISON"
+\ ECHR 'I'              \
+\ ECHR 'S'              \ Encoded as:   "BIS<223>"
+\ ETWO 'O', 'N'
+\ EQUB VE
 
                         \ --- And replaced by: -------------------------------->
 
@@ -30634,7 +30634,7 @@ ENDMACRO
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  ETWO 'L', 'O'        \                <242>[208]WHI<229> BACK. LOOK[196]B
+\ ETWO 'L', 'O'         \                <242>[208]WHI<229> BACK. LOOK[196]B
 
                         \ --- And replaced by: -------------------------------->
 
@@ -30669,8 +30669,8 @@ ENDMACRO
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  ECHR 'L'
-\  ECHR 'O'
+\ ECHR 'L'
+\ ECHR 'O'
 
                         \ --- And replaced by: -------------------------------->
 
@@ -30811,8 +30811,8 @@ ENDMACRO
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  ECHR 'W'             \                 A<236><238>. MY <249>S<244>S DIDN[39]T
-\  ETWO 'E', 'N'        \                 EV<246> SC<248>TCH [147][24?]"
+\ ECHR 'W'              \                 A<236><238>. MY <249>S<244>S DIDN[39]T
+\ ETWO 'E', 'N'         \                 EV<246> SC<248>TCH [147][24?]"
 
                         \ --- And replaced by: -------------------------------->
 
@@ -30847,8 +30847,8 @@ ENDMACRO
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  ECHR 'D'
-\  ECHR 'I'
+\ ECHR 'D'
+\ ECHR 'I'
 
                         \ --- And replaced by: -------------------------------->
 
@@ -31027,9 +31027,9 @@ ENDMACRO
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  EJMP 1               \ Token 9:      "{all caps}COMING SOON: ELITE II"
-\  ECHR 'C'             \
-\  ECHR 'O'             \ Encoded as:   "{1}COM[195]<235><223>: EL<219>E II"
+\ EJMP 1                \ Token 9:      "{all caps}COMING SOON: ELITE II"
+\ ECHR 'C'              \
+\ ECHR 'O'              \ Encoded as:   "{1}COM[195]<235><223>: EL<219>E II"
 
                         \ --- And replaced by: -------------------------------->
 
@@ -31165,16 +31165,16 @@ ENDMACRO
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  ETOK 147             \ Token 25:     "THE INHABITANTS OF [86-90] ARE SO
-\  ETOK 193             \                AMAZINGLY PRIMITIVE THAT THEY STILL
-\  ECHR 'S'             \                THINK {single cap}A*****R IS A PRETTY
-\  ECHR ' '             \                NEAT GAME"
-\  ECHR 'O'             \
-\  ECHR 'F'             \ Encoded as:   "[147][193]S OF [18?] A<242> <235> A
-\  ECHR ' '             \                <239>Z<240>GLY PRIMI<251><250> <226>
-\  ERND 18              \                <245> <226>EY <222><220>L <226><240>K
-\  ECHR ' '             \                 {19}A*****R[202]A P<242>TTY NE<245>
-\  ECHR 'A'             \                 GAME"
+\ ETOK 147              \ Token 25:     "THE INHABITANTS OF [86-90] ARE SO
+\ ETOK 193              \                AMAZINGLY PRIMITIVE THAT THEY STILL
+\ ECHR 'S'              \                THINK {single cap}A*****R IS A PRETTY
+\ ECHR ' '              \                NEAT GAME"
+\ ECHR 'O'              \
+\ ECHR 'F'              \ Encoded as:   "[147][193]S OF [18?] A<242> <235> A
+\ ECHR ' '              \                <239>Z<240>GLY PRIMI<251><250> <226>
+\ ERND 18               \                <245> <226>EY <222><220>L <226><240>K
+\ ECHR ' '              \                 {19}A*****R[202]A P<242>TTY NE<245>
+\ ECHR 'A'              \                 GAME"
 
                         \ --- And replaced by: -------------------------------->
 
@@ -31230,31 +31230,31 @@ ENDMACRO
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  ECHR 'A'
-\  ECHR '*'
-\  ECHR '*'
-\  ECHR '*'
-\  ECHR '*'
-\  ECHR '*'
-\  ECHR 'R'
-\  ETOK 202
-\  ECHR 'A'
-\  ECHR ' '
-\  ECHR 'P'
-\  ETWO 'R', 'E'
-\  ECHR 'T'
-\  ECHR 'T'
-\  ECHR 'Y'
-\  ECHR ' '
-\  ECHR 'N'
-\  ECHR 'E'
-\  ETWO 'A', 'T'
-\  ECHR ' '
-\  ECHR 'G'
-\  ECHR 'A'
-\  ECHR 'M'
-\  ECHR 'E'
-\  EQUB VE
+\ ECHR 'A'
+\ ECHR '*'
+\ ECHR '*'
+\ ECHR '*'
+\ ECHR '*'
+\ ECHR '*'
+\ ECHR 'R'
+\ ETOK 202
+\ ECHR 'A'
+\ ECHR ' '
+\ ECHR 'P'
+\ ETWO 'R', 'E'
+\ ECHR 'T'
+\ ECHR 'T'
+\ ECHR 'Y'
+\ ECHR ' '
+\ ECHR 'N'
+\ ECHR 'E'
+\ ETWO 'A', 'T'
+\ ECHR ' '
+\ ECHR 'G'
+\ ECHR 'A'
+\ ECHR 'M'
+\ ECHR 'E'
+\ EQUB VE
 
                         \ --- And replaced by: -------------------------------->
 
@@ -31345,6 +31345,53 @@ ENDMACRO
  EQUB 120               \ Token 36: a random extended token between 120 and 124
  EQUB 125               \ Token 37: a random extended token between 125 and 129
 
+\ ******************************************************************************
+\
+\       Name: Unused block 2
+\       Type: Variable
+\   Category: Utility routines
+\    Summary: These bytes appear to be unused
+\
+\ ******************************************************************************
+
+                        \ --- Original Acornsoft code removed: ---------------->
+
+\IF _STH_DISC
+\
+\ EQUB &45, &4E         \ These bytes appear to be unused
+\ EQUB &44, &2D
+\ EQUB &45, &4E
+\ EQUB &44, &2D
+\ EQUB &45, &4E
+\ EQUB &44, &52
+\ EQUB &50, &53
+\ EQUB &00, &8E
+\ EQUB &11, &D8
+\ EQUB &00, &00
+\ EQUB &06, &56
+\ EQUB &52, &49
+\ EQUB &45, &E6
+\
+\ELIF _IB_DISC
+\
+\ EQUB &45, &4E         \ These bytes appear to be unused
+\ EQUB &44, &2D
+\ EQUB &45, &4E
+\ EQUB &44, &2D
+\ EQUB &45, &4E
+\ EQUB &44, &8E
+\ EQUB &13, &1C
+\ EQUB &00, &00
+\ EQUB &73, &56
+\ EQUB &52, &49
+\ EQUB &53, &00
+\ EQUB &8E, &13
+\ EQUB &34, &B3
+\
+\ENDIF
+
+                        \ --- And replaced by: -------------------------------->
+
  EQUB &56, &05          \ These bytes appear to be unused
  EQUB &EA, &32
  EQUB &00, &00
@@ -31353,6 +31400,8 @@ ENDMACRO
  EQUB &36, &43
  EQUB &35, &56
  EQUB &57
+
+                        \ --- End of replacement ------------------------------>
 
 \ ******************************************************************************
 \
@@ -31665,7 +31714,7 @@ ENDMACRO
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  EQUB 17              \ Max. energy              = 17
+\ EQUB 17               \ Max. energy              = 17
 
                         \ --- And replaced by: -------------------------------->
 
@@ -31982,7 +32031,7 @@ ENDMACRO
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  EQUB 150             \ Max. energy              = 150
+\ EQUB 150              \ Max. energy              = 150
 
                         \ --- And replaced by: -------------------------------->
 
@@ -32109,7 +32158,7 @@ ENDMACRO
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  EQUB 250             \ Max. energy              = 250
+\ EQUB 250              \ Max. energy              = 250
 
                         \ --- And replaced by: -------------------------------->
 
@@ -32207,7 +32256,7 @@ ENDMACRO
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  EQUB 100             \ Max. energy              = 100
+\ EQUB 100              \ Max. energy              = 100
 
                         \ --- And replaced by: -------------------------------->
 
@@ -32296,8 +32345,8 @@ ENDMACRO
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  EQUB 20              \ Visibility distance      = 20
-\  EQUB 80              \ Max. energy              = 80
+\ EQUB 20               \ Visibility distance      = 20
+\ EQUB 80               \ Max. energy              = 80
 
                         \ --- And replaced by: -------------------------------->
 
@@ -32312,7 +32361,7 @@ ENDMACRO
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  EQUB 2               \ Normals are scaled by    = 2^2 = 4
+\ EQUB 2                \ Normals are scaled by    = 2^2 = 4
 
                         \ --- And replaced by: -------------------------------->
 
@@ -32332,8 +32381,8 @@ ENDMACRO
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  VERTEX   90,    0,   87,     1,     0,     1,     1,         28   \ Vertex 5
-\  VERTEX  -90,    0,   87,     3,     2,     3,     3,         28   \ Vertex 6
+\ VERTEX   90,    0,   87,     1,     0,     1,     1,         28    \ Vertex 5
+\ VERTEX  -90,    0,   87,     3,     2,     3,     3,         28    \ Vertex 6
 
                         \ --- And replaced by: -------------------------------->
 
@@ -32365,9 +32414,9 @@ ENDMACRO
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  EDGE       3,       5,     1,     0,         28  \ Edge 8
-\  EDGE       4,       6,     3,     2,         28  \ Edge 9
-\  EDGE       1,       2,     5,     4,          5  \ Edge 10
+\ EDGE       3,       5,     1,     0,         28   \ Edge 8
+\ EDGE       4,       6,     3,     2,         28   \ Edge 9
+\ EDGE       1,       2,     5,     4,          5   \ Edge 10
 
                         \ --- And replaced by: -------------------------------->
 
@@ -32390,13 +32439,13 @@ ENDMACRO
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\ \FACE normal_x, normal_y, normal_z, visibility
-\  FACE        7,       48,        6,         31  \ Face 0
-\  FACE        7,      -48,        6,         31  \ Face 1
-\  FACE       -7,      -48,        6,         31  \ Face 2
-\  FACE       -7,       48,        6,         31  \ Face 3
-\  FACE       77,        0,     -154,         31  \ Face 4
-\  FACE      -77,        0,     -154,         31  \ Face 5
+\\FACE normal_x, normal_y, normal_z, visibility
+\ FACE        7,       48,        6,         31   \ Face 0
+\ FACE        7,      -48,        6,         31   \ Face 1
+\ FACE       -7,      -48,        6,         31   \ Face 2
+\ FACE       -7,       48,        6,         31   \ Face 3
+\ FACE       77,        0,     -154,         31   \ Face 4
+\ FACE      -77,        0,     -154,         31   \ Face 5
 
                         \ --- And replaced by: -------------------------------->
 
@@ -32438,8 +32487,8 @@ ENDMACRO
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  EQUB 200             \ Max. energy              = 200
-\  EQUB 55              \ Max. speed               = 55
+\ EQUB 200              \ Max. energy              = 200
+\ EQUB 55               \ Max. speed               = 55
 
                         \ --- And replaced by: -------------------------------->
 

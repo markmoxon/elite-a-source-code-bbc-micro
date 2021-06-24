@@ -304,8 +304,8 @@ ENDMACRO
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  FACE        0,      160,      110,         31  \ Face 7
-\  FACE        0,       64,        4,          0  \ Face 8
+\ FACE        0,      160,      110,         31   \ Face 7
+\ FACE        0,       64,        4,          0   \ Face 8
 
                         \ --- And replaced by: -------------------------------->
 
@@ -327,7 +327,7 @@ ENDMACRO
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  EQUW &0004           \ VEC = &7FFE
+\ EQUW &0004            \ VEC = &7FFE
 \                       \
 \                       \ This gets set to the value of the original IRQ1 vector
 \                       \ by the loading process

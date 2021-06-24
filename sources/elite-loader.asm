@@ -374,11 +374,11 @@ ENDMACRO
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  JSR PROT1            \ Call PROT1 to calculate checksums into CHKSM
+\ JSR PROT1             \ Call PROT1 to calculate checksums into CHKSM
 \
-\  LDA #144             \ Call OSBYTE with A = 144, X = 255 and Y = 0 to move
-\  LDX #255             \ the screen down one line and turn screen interlace on
-\  JSR OSB
+\ LDA #144              \ Call OSBYTE with A = 144, X = 255 and Y = 0 to move
+\ LDX #255              \ the screen down one line and turn screen interlace on
+\ JSR OSB
 
                         \ --- And replaced by: -------------------------------->
 
@@ -414,9 +414,9 @@ ENDMACRO
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  LDA #16              \ Call OSBYTE with A = 16 and X = 3 to set the ADC to
-\  LDX #3               \ sample 3 channels from the joystick/Bitstik
-\  JSR OSBYTE
+\ LDA #16               \ Call OSBYTE with A = 16 and X = 3 to set the ADC to
+\ LDX #3                \ sample 3 channels from the joystick/Bitstik
+\ JSR OSBYTE
 
                         \ --- And replaced by: -------------------------------->
 
@@ -440,9 +440,9 @@ ENDMACRO
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  LDA #200             \ Call OSBYTE with A = 200, X = 0 and Y = 0 to enable
-\  LDX #0               \ the ESCAPE key and disable memory clearing if the
-\  JSR OSB              \ BREAK key is pressed
+\ LDA #200              \ Call OSBYTE with A = 200, X = 0 and Y = 0 to enable
+\ LDX #0                \ the ESCAPE key and disable memory clearing if the
+\ JSR OSB               \ BREAK key is pressed
 
                         \ --- And replaced by: -------------------------------->
 
@@ -462,19 +462,19 @@ ENDMACRO
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  LDA #12              \ Set A = 12 and  X = 0 to pretend that this is an to
-\  LDX #0               \ innocent call to OSBYTE to reset the keyboard delay
+\ LDA #12               \ Set A = 12 and  X = 0 to pretend that this is an to
+\ LDX #0                \ innocent call to OSBYTE to reset the keyboard delay
 \                       \ and auto-repeat rate to the default, when in reality
 \                       \ the OSB address in the next instruction gets modified
 \                       \ to point to OSBmod
 \
-\ .OSBjsr
+\.OSBjsr
 \
-\  JSR OSB              \ This JSR gets modified by code inserted into PLL1 so
+\ JSR OSB               \ This JSR gets modified by code inserted into PLL1 so
 \                       \ that it points to OSBmod instead of OSB, so this
 \                       \ actually calls OSBmod to calculate some checksums
 
-                        \ --- End of removed code ------------------------------
+                        \ --- End of removed code ----------------------------->
 
  LDA #13                \ Call OSBYTE with A = 13, X = 2 and Y = 0 to disable
  LDX #2                 \ the "character entering buffer" event
@@ -533,39 +533,39 @@ ENDMACRO
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  SEI                  \ Disable interrupts while we set up our interrupt
+\ SEI                   \ Disable interrupts while we set up our interrupt
 \                       \ handler to support the split-screen mode
 \
-\  LDA VIA+&44          \ Read the 6522 System VIA T1C-L timer 1 low-order
-\  STA &0001            \ counter (SHEILA &44), which increments 1000 times a
+\ LDA VIA+&44           \ Read the 6522 System VIA T1C-L timer 1 low-order
+\ STA &0001             \ counter (SHEILA &44), which increments 1000 times a
 \                       \ second so this will be pretty random, and store it in
 \                       \ &0001 among the random number seeds at &0000
 \
-\  LDA #%00111001       \ Set 6522 System VIA interrupt enable register IER
-\  STA VIA+&4E          \ (SHEILA &4E) bits 0 and 3-5 (i.e. disable the Timer1,
+\ LDA #%00111001        \ Set 6522 System VIA interrupt enable register IER
+\ STA VIA+&4E           \ (SHEILA &4E) bits 0 and 3-5 (i.e. disable the Timer1,
 \                       \ CB1, CB2 and CA2 interrupts from the System VIA)
 \
-\  LDA #%01111111       \ Set 6522 User VIA interrupt enable register IER
-\  STA VIA+&6E          \ (SHEILA &6E) bits 0-7 (i.e. disable all hardware
+\ LDA #%01111111        \ Set 6522 User VIA interrupt enable register IER
+\ STA VIA+&6E           \ (SHEILA &6E) bits 0-7 (i.e. disable all hardware
 \                       \ interrupts from the User VIA)
 \
-\  LDA IRQ1V            \ Copy the current IRQ1V vector address into VEC(1 0)
-\  STA VEC
-\  LDA IRQ1V+1
-\  STA VEC+1
+\ LDA IRQ1V             \ Copy the current IRQ1V vector address into VEC(1 0)
+\ STA VEC
+\ LDA IRQ1V+1
+\ STA VEC+1
 \
-\  LDA #LO(IRQ1)        \ Set the IRQ1V vector to IRQ1, so IRQ1 is now the
-\  STA IRQ1V            \ interrupt handler
-\  LDA #HI(IRQ1)
-\  STA IRQ1V+1
+\ LDA #LO(IRQ1)         \ Set the IRQ1V vector to IRQ1, so IRQ1 is now the
+\ STA IRQ1V             \ interrupt handler
+\ LDA #HI(IRQ1)
+\ STA IRQ1V+1
 \
-\  LDA #VSCAN           \ Set 6522 System VIA T1C-L timer 1 high-order counter
-\  STA VIA+&45          \ (SHEILA &45) to VSCAN (57) to start the T1 counter
+\ LDA #VSCAN            \ Set 6522 System VIA T1C-L timer 1 high-order counter
+\ STA VIA+&45           \ (SHEILA &45) to VSCAN (57) to start the T1 counter
 \                       \ counting down from 14622 at a rate of 1 MHz
 \
-\  CLI                  \ Re-enable interrupts
+\ CLI                   \ Re-enable interrupts
 
-                        \ --- End of removed code ------------------------------
+                        \ --- End of removed code ----------------------------->
 
  LDA #&00               \ Set the following:
  STA ZP                 \
@@ -601,37 +601,37 @@ ENDMACRO
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  LDA #&00             \ Set the following:
-\  STA ZP               \
-\  LDA #&04             \   ZP(1 0) = &0400
-\  STA ZP+1             \   P(1 0) = WORDS
-\  LDA #LO(WORDS)       \   X = 4
-\  STA P
-\  LDA #HI(WORDS)
-\  STA P+1
-\  LDX #4
+\ LDA #&00              \ Set the following:
+\ STA ZP                \
+\ LDA #&04              \   ZP(1 0) = &0400
+\ STA ZP+1              \   P(1 0) = WORDS
+\ LDA #LO(WORDS)        \   X = 4
+\ STA P
+\ LDA #HI(WORDS)
+\ STA P+1
+\ LDX #4
 \
-\  JSR MVBL             \ Call MVBL to move and decrypt 4 pages of memory from
+\ JSR MVBL              \ Call MVBL to move and decrypt 4 pages of memory from
 \                       \ WORDS to &0400-&07FF
 \
-\  LDX #35              \ We now want to copy the disc catalogue routine from
+\ LDX #35               \ We now want to copy the disc catalogue routine from
 \                       \ CATDcode to CATD, so set a counter in X for the 36
 \                       \ bytes to copy
 \
-\ .loop2
+\.loop2
 \
-\  LDA CATDcode,X       \ Copy the X-th byte of CATDcode to the X-th byte of
-\  STA CATD,X           \ CATD
+\ LDA CATDcode,X        \ Copy the X-th byte of CATDcode to the X-th byte of
+\ STA CATD,X            \ CATD
 \
-\  DEX                  \ Decrement the loop counter
+\ DEX                   \ Decrement the loop counter
 \
-\  BPL loop2            \ Loop back to copy the next byte until they are all
+\ BPL loop2             \ Loop back to copy the next byte until they are all
 \                       \ done
 \
-\  LDA &76              \ Set the drive number in the CATD routine to the
-\  STA CATBLOCK         \ contents of &76, which gets set in ELITE3
+\ LDA &76               \ Set the drive number in the CATD routine to the
+\ STA CATBLOCK          \ contents of &76, which gets set in ELITE3
 
-                        \ --- End of removed code ------------------------------
+                        \ --- End of removed code ----------------------------->
 
  FNE 0                  \ Set up sound envelopes 0-3 using the FNE macro
  FNE 1
@@ -646,33 +646,33 @@ ENDMACRO
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  LDA #LO(LOAD)        \ Set the following:
-\  STA ZP               \
-\  LDA #HI(LOAD)        \   ZP(1 0) = LOAD
-\  STA ZP+1             \   P(1 0) = LOADcode
-\  LDA #LO(LOADcode)
-\  STA P
-\  LDA #HI(LOADcode)
-\  STA P+1
+\ LDA #LO(LOAD)         \ Set the following:
+\ STA ZP                \
+\ LDA #HI(LOAD)         \   ZP(1 0) = LOAD
+\ STA ZP+1              \   P(1 0) = LOADcode
+\ LDA #LO(LOADcode)
+\ STA P
+\ LDA #HI(LOADcode)
+\ STA P+1
 \
-\  LDY #0               \ We now want to move and decrypt one page of memory
+\ LDY #0                \ We now want to move and decrypt one page of memory
 \                       \ from LOADcode to LOAD, so set Y as a byte counter
 \
-\ .loop3
+\.loop3
 \
-\  LDA (P),Y            \ Fetch the Y-th byte of the P(1 0) memory block
+\ LDA (P),Y             \ Fetch the Y-th byte of the P(1 0) memory block
 \
-\  EOR #&18             \ Decrypt it by EOR'ing with &18
+\ EOR #&18              \ Decrypt it by EOR'ing with &18
 \
-\  STA (ZP),Y           \ Store the decrypted result in the Y-th byte of the
+\ STA (ZP),Y            \ Store the decrypted result in the Y-th byte of the
 \                       \ ZP(1 0) memory block
 \
-\  DEY                  \ Decrement the byte counter
+\ DEY                   \ Decrement the byte counter
 \
-\  BNE loop3            \ Loop back to copy the next byte until we have done a
+\ BNE loop3             \ Loop back to copy the next byte until we have done a
 \                       \ whole page of 256 bytes
 \
-\  JMP LOAD             \ Jump to the start of the routine we just decrypted
+\ JMP LOAD              \ Jump to the start of the routine we just decrypted
 
                         \ --- And replaced by: -------------------------------->
 
@@ -966,63 +966,63 @@ ORG &0B00
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  LDA #LO(S%+11)       \ Point BRKV to the fifth entry in the main docked
-\  STA BRKV             \ code's S% workspace, which contains JMP BRBR1
-\  LDA #HI(S%+11)
-\  STA BRKV+1
+\ LDA #LO(S%+11)        \ Point BRKV to the fifth entry in the main docked
+\ STA BRKV              \ code's S% workspace, which contains JMP BRBR1
+\ LDA #HI(S%+11)
+\ STA BRKV+1
 \
-\  LDA #LO(S%+6)        \ Point BRKV to the third entry in the main docked
-\  STA WRCHV            \ code's S% workspace, which contains JMP CHPR
-\  LDA #HI(S%+6)
-\  STA WRCHV+1
+\ LDA #LO(S%+6)         \ Point BRKV to the third entry in the main docked
+\ STA WRCHV             \ code's S% workspace, which contains JMP CHPR
+\ LDA #HI(S%+6)
+\ STA WRCHV+1
 \
-\  SEC                  \ Set the C flag so the checksum we calculate in A
+\ SEC                   \ Set the C flag so the checksum we calculate in A
 \                       \ starts with an initial value of 18 (17 plus carry)
 \
-\  LDY #&00             \ Set Y = 0 to act as a byte pointer
+\ LDY #&00              \ Set Y = 0 to act as a byte pointer
 \
-\  STY ZP               \ Set the low byte of ZP(1 0) to 0, so ZP(1 0) always
+\ STY ZP                \ Set the low byte of ZP(1 0) to 0, so ZP(1 0) always
 \                       \ points to the start of a page
 \
-\  LDX #&11             \ Set X = &11, so ZP(1 0) will point to &1100 when we
+\ LDX #&11              \ Set X = &11, so ZP(1 0) will point to &1100 when we
 \                       \ stick X in ZP+1 below
 \
-\  TXA                  \ Set A = &11 = 17, to set the intial value of the
+\ TXA                   \ Set A = &11 = 17, to set the intial value of the
 \                       \ checksum to 18 (17 plus carry)
 \
-\ .l1
+\.l1
 \
-\  STX ZP+1             \ Set the high byte of ZP(1 0) to the page number in X
+\ STX ZP+1              \ Set the high byte of ZP(1 0) to the page number in X
 \
-\  ADC (ZP),Y           \ Set A = A + the Y-th byte of ZP(1 0)
+\ ADC (ZP),Y            \ Set A = A + the Y-th byte of ZP(1 0)
 \
-\  DEY                  \ Decrement the byte pointer
+\ DEY                   \ Decrement the byte pointer
 \
-\  BNE l1               \ Loop back to add the next byte until we have added the
+\ BNE l1                \ Loop back to add the next byte until we have added the
 \                       \ whole page
 \
-\  INX                  \ Increment the page number in X
+\ INX                   \ Increment the page number in X
 \
-\  CPX #&54             \ Loop back to checksum the next page until we have
-\  BCC l1               \ checked up to (but not including) page &54
+\ CPX #&54              \ Loop back to checksum the next page until we have
+\ BCC l1                \ checked up to (but not including) page &54
 \
-\  CMP &55FF            \ Compare the checksum with the value in &55FF, which is
+\ CMP &55FF             \ Compare the checksum with the value in &55FF, which is
 \                       \ in the docked file we just loaded, in the byte before
 \                       \ the ship hanger blueprints at XX21
 \
-\ IF _REMOVE_CHECKSUMS
+\IF _REMOVE_CHECKSUMS
 \
-\  NOP                  \ If we have disabled checksums, then ignore the result
-\  NOP                  \ of the checksum comparison
+\ NOP                   \ If we have disabled checksums, then ignore the result
+\ NOP                   \ of the checksum comparison
 \
-\ ELSE
+\ELSE
 \
-\  BNE P%               \ If the checksums don't match then enter an infinite
+\ BNE P%                \ If the checksums don't match then enter an infinite
 \                       \ loop, which hangs the computer
 \
-\ ENDIF
+\ENDIF
 
-                        \ --- End of removed code ------------------------------
+                        \ --- End of removed code ----------------------------->
 
  JMP S%+3               \ Jump to the second entry in the main docked code's S%
                         \ workspace to start a new game
@@ -1031,21 +1031,21 @@ ORG &0B00
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  EQUS "L.T.CODE"
-\  EQUB 13
+\ EQUS "L.T.CODE"
+\ EQUB 13
 \
-\  EQUB &44, &6F, &65   \ These bytes appear to be unused
-\  EQUB &73, &20, &79
-\  EQUB &6F, &75, &72
-\  EQUB &20, &6D, &6F
-\  EQUB &74, &68, &65
-\  EQUB &72, &20, &6B
-\  EQUB &6E, &6F, &77
-\  EQUB &20, &79, &6F
-\  EQUB &75, &20, &64
-\  EQUB &6F, &20, &74
-\  EQUB &68, &69, &73
-\  EQUB &3F
+\ EQUB &44, &6F, &65    \ These bytes appear to be unused
+\ EQUB &73, &20, &79
+\ EQUB &6F, &75, &72
+\ EQUB &20, &6D, &6F
+\ EQUB &74, &68, &65
+\ EQUB &72, &20, &6B
+\ EQUB &6E, &6F, &77
+\ EQUB &20, &79, &6F
+\ EQUB &75, &20, &64
+\ EQUB &6F, &20, &74
+\ EQUB &68, &69, &73
+\ EQUB &3F
 
                         \ --- And replaced by: -------------------------------->
 
@@ -1090,12 +1090,12 @@ ORG LOADcode + P% - LOAD
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  LDA #LO(OSBmod)      \ As part of the copy protection, the JSR OSB
-\  STA OSBjsr+1         \ instruction at OSBjsr gets modified to point to OSBmod
+\ LDA #LO(OSBmod)       \ As part of the copy protection, the JSR OSB
+\ STA OSBjsr+1          \ instruction at OSBjsr gets modified to point to OSBmod
 \                       \ instead of OSB, and this is where we modify the low
 \                       \ byte of the destination address
 
-                        \ --- End of removed code ------------------------------
+                        \ --- End of removed code ----------------------------->
 
  JSR DORND              \ Set A and X to random numbers, say A = r2
 
@@ -1270,12 +1270,12 @@ ORG LOADcode + P% - LOAD
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  LDA #HI(OSBmod)      \ As part of the copy protection, the JSR OSB
-\  STA OSBjsr+2         \ instruction at OSBjsr gets modified to point to OSBmod
+\ LDA #HI(OSBmod)       \ As part of the copy protection, the JSR OSB
+\ STA OSBjsr+2          \ instruction at OSBjsr gets modified to point to OSBmod
 \                       \ instead of OSB, and this is where we modify the high
 \                       \ byte of the destination address
 
-                        \ --- End of removed code ------------------------------
+                        \ --- End of removed code ----------------------------->
 
  JSR DORND              \ Set A and X to random numbers, say A = r6
 
@@ -1670,10 +1670,10 @@ ORG LOADcode + P% - LOAD
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  JMP P%               \ This would hang the computer, but we never get here as
+\ JMP P%                \ This would hang the computer, but we never get here as
 \                       \ the checksum code has been disabled
 
-                        \ --- End of removed code ------------------------------
+                        \ --- End of removed code ----------------------------->
 
 \ ******************************************************************************
 \
@@ -1805,9 +1805,9 @@ ORG LOADcode + P% - LOAD
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  EOR #&A5             \ Decrypt it by EOR'ing with &A5
+\ EOR #&A5              \ Decrypt it by EOR'ing with &A5
 
-                        \ --- End of removed code ------------------------------
+                        \ --- End of removed code ----------------------------->
 
  STA (ZP),Y             \ Store the decrypted result in the Y-th byte of the
                         \ ZP(1 0) memory block
@@ -1869,8 +1869,8 @@ ORG LOADcode + P% - LOAD
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  EQUS "*DIR E"
-\  EQUB 13
+\ EQUS "*DIR E"
+\ EQUB 13
 
                         \ --- And replaced by: -------------------------------->
 
@@ -2213,8 +2213,8 @@ ORG &1100
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  EQUS "JAMESON"       \ The current commander name, which defaults to JAMESON
-\  EQUB 13              \
+\ EQUS "JAMESON"        \ The current commander name, which defaults to JAMESON
+\ EQUB 13               \
 \                       \ The commander name can be up to 7 characters (the DFS
 \                       \ limit for file names), and is terminated by a carriage
 \                       \ return
@@ -2254,13 +2254,13 @@ ORG &1100
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\ IF Q%
-\  EQUD &00CA9A3B       \ CASH = Amount of cash (100,000,000 Cr), #9-12
-\ ELSE
-\  EQUD &E8030000       \ CASH = Amount of cash (100 Cr), #9-12
-\ ENDIF
+\IF Q%
+\ EQUD &00CA9A3B        \ CASH = Amount of cash (100,000,000 Cr), #9-12
+\ELSE
+\ EQUD &E8030000        \ CASH = Amount of cash (100 Cr), #9-12
+\ENDIF
 \
-\  EQUB 70              \ QQ14 = Fuel level, #13
+\ EQUB 70               \ QQ14 = Fuel level, #13
 
                         \ --- And replaced by: -------------------------------->
 
@@ -2280,9 +2280,9 @@ ENDIF
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  EQUB POW+(128 AND Q%)\ LASER = Front laser, #16
+\ EQUB POW+(128 AND Q%) \ LASER = Front laser, #16
 \
-\  EQUB (POW+128) AND Q%\ LASER+1 = Rear laser, #17
+\ EQUB (POW+128) AND Q% \ LASER+1 = Rear laser, #17
 
                         \ --- And replaced by: -------------------------------->
 
@@ -2302,7 +2302,7 @@ ENDIF
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  EQUB 22+(15 AND Q%)  \ CRGO = Cargo capacity, #22
+\ EQUB 22+(15 AND Q%)   \ CRGO = Cargo capacity, #22
 
                         \ --- And replaced by: -------------------------------->
 
@@ -2346,7 +2346,7 @@ ENDIF
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  EQUB 3+(Q% AND 1)    \ NOMSL = Number of missiles, #51
+\ EQUB 3+(Q% AND 1)     \ NOMSL = Number of missiles, #51
 
                         \ --- And replaced by: -------------------------------->
 
@@ -2358,7 +2358,7 @@ ENDIF
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  EQUB 16              \ AVL+0  = Market availability of Food, #53
+\ EQUB 16               \ AVL+0  = Market availability of Food, #53
 
                         \ --- And replaced by: -------------------------------->
 
@@ -2390,7 +2390,7 @@ ENDIF
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  EQUB 128             \ SVC = Save count, #73
+\ EQUB 128              \ SVC = Save count, #73
 
                         \ --- And replaced by: -------------------------------->
 
@@ -2421,7 +2421,7 @@ ENDIF
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  EQUB &03 EOR &A9     \ The checksum value for the default commander, EOR'd
+\ EQUB &03 EOR &A9      \ The checksum value for the default commander, EOR'd
 \                       \ with &A9 to make it harder to tamper with the checksum
 \                       \ byte, #74
 
@@ -2456,7 +2456,7 @@ ENDIF
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  EQUB &03             \ The checksum value for the default commander, #75
+\ EQUB &03              \ The checksum value for the default commander, #75
 
                         \ --- And replaced by: -------------------------------->
 
@@ -2519,18 +2519,18 @@ ENDIF
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\  EQUB &64, &5F, &61   \ These bytes appear to be unused
-\  EQUB &74, &74, &72
-\  EQUB &69, &62, &75
-\  EQUB &74, &65, &73
-\  EQUB &00, &C4, &24
-\  EQUB &6A, &43, &67
-\  EQUB &65, &74, &72
-\  EQUB &64, &69, &73
-\  EQUB &63, &00, &B6
-\  EQUB &3C, &C6
+\ EQUB &64, &5F, &61    \ These bytes appear to be unused
+\ EQUB &74, &74, &72
+\ EQUB &69, &62, &75
+\ EQUB &74, &65, &73
+\ EQUB &00, &C4, &24
+\ EQUB &6A, &43, &67
+\ EQUB &65, &74, &72
+\ EQUB &64, &69, &73
+\ EQUB &63, &00, &B6
+\ EQUB &3C, &C6
 
-                        \ --- End of removed code ------------------------------
+                        \ --- End of removed code ----------------------------->
 
 COPYBLOCK TVT1, P%, TVT1code
 
