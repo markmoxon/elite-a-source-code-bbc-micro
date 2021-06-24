@@ -16,6 +16,8 @@ See the [introduction](#introduction) for more information.
 
   * [A note on licences, copyright etc.](#user-content-a-note-on-licences-copyright-etc)
 
+* [Browsing the source in an IDE](#browsing-the-source-in-an-ide)
+
 * [Building Elite-A from the source](#building-elite-a-from-the-source)
 
   * [Requirements](#requirements)
@@ -74,6 +76,34 @@ The reason for this is that my commentary is intertwined with the original Elite
 Under GitHub's rules, you have the right to read and fork this repository... but that's it. No other use is permitted, I'm afraid.
 
 My hope is that the educational and non-profit intentions of this repository will enable it to stay hosted and available, but the original copyright holders do have the right to ask for it to be taken down, in which case I will comply without hesitation. I do hope, though, that along with the various other disassemblies and commentaries of this source, it will remain viable.
+
+## Browsing the source in an IDE
+
+If you want to browse the source in an IDE, you might find the following useful.
+
+* The most interesting files are in the [sources](sources) folder:
+
+  * The main game's source code is in the [elite-source-flight.asm](sources/elite-source-flight.asm), [elite-source-docked.asm](sources/elite-source-docked.asm) and [elite-source-encyclopedia.asm](sources/elite-source-encyclopedia.asm) files (for when we're in-flight, docked or viewing the encyclopedia) - this is the motherlode and probably contains all the stuff you're interested in.
+
+  * The 6502 Second Processor version's source code is in the [elite-6502sp-parasite.asm](sources/elite-6502sp-parasite.asm) file (for the parasite, i.e. the Second Processor) and [elite-6502sp-io-processor.asm](sources/elite-6502sp-io-processor.asm) (for the I/O processor, i.e. the BBC Micro).
+
+  * The game's loader is in the [elite-loader.asm](sources/elite-loader.asm) file - this is mainly concerned with setup and checking for Tube and BBC Master hardware.
+
+* The source files for Elite-A are unique amongst the annotated versions in this project, in that they contain inline diffs. Angus created Elite-A by taking the original disc version of Elite and modifying the code to include all his new features. The annotated source files in this repository contain both the original disc code and all of Angus's modifications, so you can look through the source to see exactly what Angus changed in order to create Elite-A. Any code that he removed from the disc version is commented out in the source files, so when they are assembled they produce the Elite-A binaries, while still containing details of Angus's modifications. You can find all the diffs by searching the sources for `-->`. (Note that this feature does not apply to the two 6502 Second Processor version source files, which just contain the Elite-A code.)
+
+* It's probably worth skimming through the [notes on terminology and notations](https://www.bbcelite.com/about_site/terminology_used_in_this_commentary.html) on the accompanying website, as this explains a number of terms used in the commentary, without which it might be a bit tricky to follow at times (in particular, you should understand the terminology I use for multi-byte numbers).
+
+* The accompanying website contains [a number of "deep dive" articles](https://www.bbcelite.com/deep_dives/), each of which goes into an aspect of the game in detail. Routines that are explained further in these articles are tagged with the label `Deep dive:` and the relevant article name.
+
+* There are loads of routines and variables in Elite - literally hundreds. You can find them in the source files by searching for the following: `Type: Subroutine`, `Type: Variable`, `Type: Workspace` and `Type: Macro`.
+
+* If you know the name of a routine, you can find it by searching for `Name: <name>`, as in `Name: SCAN` (for the 3D scanner routine) or `Name: LL9` (for the ship-drawing routine).
+
+* The entry point for the [main game code](sources/elite-source-docked.asm) is routine `TT170`, which you can find by searching for `Name: TT170`. If you want to follow the program flow all the way from the title screen around the main game loop, then you can find a number of [deep dives on program flow](https://www.bbcelite.com/deep_dives/) on the accompanying website.
+
+* The source code is designed to be read at an 80-column width and with a monospaced font, just like in the good old days.
+
+I hope you enjoy exploring the inner-workings of Elite-A as much as I have.
 
 ## Building Elite-A from the source
 
@@ -163,6 +193,31 @@ b1447e60  16778  b1447e60  16778   Yes   1.E.bin
 3d638042   1956  3d638042   1956   Yes   2.H.bin
 1f1783e7  43141  1f1783e7  43141   Yes   2.T.bin
 171ccea5   5363  171ccea5   5363   Yes   ELITE.bin
+4f2febe4    256  4f2febe4    256   Yes   MISSILE.bin
+678c1c7f   2560  678c1c7f   2560   Yes   S.A.bin
+cae56eda   2560  cae56eda   2560   Yes   S.B.bin
+7b56fbb5   2560  7b56fbb5   2560   Yes   S.C.bin
+55e86dde   2560  55e86dde   2560   Yes   S.D.bin
+be2665dd   2560  be2665dd   2560   Yes   S.E.bin
+c0917c15   2560  c0917c15   2560   Yes   S.F.bin
+80f4145e   2560  80f4145e   2560   Yes   S.G.bin
+0d9fe4e8   2560  0d9fe4e8   2560   Yes   S.H.bin
+31ea0782   2560  31ea0782   2560   Yes   S.I.bin
+f444274e   2560  f444274e   2560   Yes   S.J.bin
+b9672969   2560  b9672969   2560   Yes   S.K.bin
+05f74f36   2560  05f74f36   2560   Yes   S.L.bin
+39856010   2560  39856010   2560   Yes   S.M.bin
+132980ad   2560  132980ad   2560   Yes   S.N.bin
+26525e5c   2560  26525e5c   2560   Yes   S.O.bin
+76097753   2560  76097753   2560   Yes   S.P.bin
+6bd215b4   2560  6bd215b4   2560   Yes   S.Q.bin
+bcd49589   2560  bcd49589   2560   Yes   S.R.bin
+8b44b8b6   2560  8b44b8b6   2560   Yes   S.S.bin
+155e6a6b   2560  155e6a6b   2560   Yes   S.T.bin
+fab17499   2560  fab17499   2560   Yes   S.U.bin
+8504604f   2560  8504604f   2560   Yes   S.V.bin
+40f96e61   2560  40f96e61   2560   Yes   S.W.bin
+b7b3c692   1024  b7b3c692   1024   Yes   WORDS.bin
 ```
 
 All the compiled binaries match the extracts, so we know we are producing the same final game as the release version.
