@@ -34080,17 +34080,7 @@ ENDMACRO
  ECHR ' '               \                WHILE BACK. LOOKED BOUND FOR AREXE"
  ERND 23                \
  ECHR ' '               \ Encoded as:   "A [23?] <224>OK[195][207] <229>FT HE
-
-                        \ --- Original Acornsoft code removed: ---------------->
-
-\ ETWO 'L', 'O'         \                <242>[208]WHI<229> BACK. LOOK[196]B
-
-                        \ --- And replaced by: -------------------------------->
-
  ETWO 'L', 'O'          \                <242>[208]WHI<229> BACK. <224>OK[196]B
-
-                        \ --- End of replacement ------------------------------>
-
  ECHR 'O'               \                <217>ND F<253> <238>E<230>"
  ECHR 'K'
  ETOK 195
@@ -34257,19 +34247,8 @@ ENDMACRO
  ECHR ' '               \                LASERS DIDN'T EVEN SCRATCH THE [91-95]"
  ETOK 207               \
  ECHR ' '               \ Encoded as:   "[24?] [207] W<246>T F<253> ME <245>
-
-                        \ --- Original Acornsoft code removed: ---------------->
-
-\ ECHR 'W'              \                 A<236><238>. MY <249>S<244>S DIDN[39]T
-\ ETWO 'E', 'N'         \                 EV<246> SC<248>TCH [147][24?]"
-
-                        \ --- And replaced by: -------------------------------->
-
  ECHR 'W'               \                 A<236><238>. MY <249>S<244>S <241>DN
  ETWO 'E', 'N'          \                 [39]TEV<246> SC<248>TCH [147][24?]"
-
-                        \ --- End of replacement ------------------------------>
-
  ECHR 'T'
  ECHR ' '
  ECHR 'F'
@@ -34474,20 +34453,9 @@ ENDMACRO
  ETWO 'R', 'A'
  EQUB VE
 
-                        \ --- Original Acornsoft code removed: ---------------->
-
-\ EJMP 1                \ Token 9:      "{all caps}COMING SOON: ELITE II"
-\ ECHR 'C'              \
-\ ECHR 'O'              \ Encoded as:   "{1}COM[195]<235><223>: EL<219>E II"
-
-                        \ --- And replaced by: -------------------------------->
-
  EJMP 1                 \ Token 9:      "{all caps}COMING SOON: ELITE III"
  ECHR 'C'               \
  ECHR 'O'               \ Encoded as:   "{1}COM[195]<235><223>: EL<219>E III"
-
-                        \ --- End of replacement ------------------------------>
-
  ECHR 'M'
  ETOK 195
  ETWO 'S', 'O'
@@ -34612,21 +34580,6 @@ ENDMACRO
  ECHR 'E'
  EQUB VE
 
-                        \ --- Original Acornsoft code removed: ---------------->
-
-\ ETOK 147              \ Token 25:     "THE INHABITANTS OF [86-90] ARE SO
-\ ETOK 193              \                AMAZINGLY PRIMITIVE THAT THEY STILL
-\ ECHR 'S'              \                THINK {single cap}A*****R IS A PRETTY
-\ ECHR ' '              \                NEAT GAME"
-\ ECHR 'O'              \
-\ ECHR 'F'              \ Encoded as:   "[147][193]S OF [18?] A<242> <235> A
-\ ECHR ' '              \                <239>Z<240>GLY PRIMI<251><250> <226>
-\ ERND 18               \                <245> <226>EY <222><220>L <226><240>K
-\ ECHR ' '              \                 {19}A*****R[202]A P<242>TTY NE<245>
-\ ECHR 'A'              \                 GAME"
-
-                        \ --- And replaced by: -------------------------------->
-
  ETOK 147               \ Token 25:     "THE INHABITANTS OF [86-90] ARE SO
  ETOK 193               \                AMAZINGLY PRIMITIVE THAT THEY STILL
  ECHR 'S'               \                THINK {single cap}ELITE IS A PRETTY
@@ -34637,9 +34590,6 @@ ENDMACRO
  ERND 18                \                <245> <226>EY <222><220>L <226><240>K
  ECHR ' '               \                 {19}EL<219>E[202]A P<242>TTY NE<245>
  ECHR 'A'               \                 GAME"
-
-                        \ --- End of replacement ------------------------------>
-
  ETWO 'R', 'E'
  ECHR ' '
  ETWO 'S', 'O'

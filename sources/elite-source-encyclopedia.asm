@@ -8427,16 +8427,7 @@ LOAD_D% = LOAD% + P% - CODE%
 
  INC YC                 \ Move the text cursor down a line
 
-                        \ --- Original Acornsoft code removed: ---------------->
-
-\                       \ Fall through into TT69 to set Sentence Case and print
-\                       \ a newline
-
-                        \ --- And replaced by: -------------------------------->
-
                         \ Fall through into TT67 to print a newline
-
-                        \ --- End of replacement ------------------------------>
 
 \ ******************************************************************************
 \

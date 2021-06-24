@@ -2873,14 +2873,10 @@ LOAD_A% = LOAD%
  LDA XX21-1,Y           \ Fetch the high byte of this particular ship type's
  STA XX0+1              \ blueprint and store it in XX0+1
 
-                        \ --- Code added for Elite-A: ------------------------->
-
                         \ We now go straight to part 6, omitting part 5 from the
                         \ original disc version, as part 5 implements the energy
                         \ bomb, and Elite-A replaces the energy bomb with the
                         \ Hyperspace Unit
-
-                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -9304,15 +9300,7 @@ NEXT
 
 .ESL1
 
-                        \ --- Original Acornsoft code removed: ---------------->
-
-\ JSR MVEIT             \ Call MVEIT to move the Cobra in space
-
-                        \ --- And replaced by: -------------------------------->
-
  JSR MVEIT              \ Call MVEIT to move the escape pod in space AJD
-
-                        \ --- End of replacement ------------------------------>
 
  JSR LL9                \ Call LL9 to draw the Cobra on-screen
 
