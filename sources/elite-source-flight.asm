@@ -9733,6 +9733,7 @@ LOAD_C% = LOAD% +P% - CODE%
 .GOPL
 
                         \ --- Code added for Elite-A: ------------------------->
+
  LDY #&00               \ AJD
 
                         \ --- End of added code ------------------------------->
@@ -16541,6 +16542,7 @@ LOAD_D% = LOAD% + P% - CODE%
                         \ return from the subroutine (as zZ+1 contains an RTS)
 
                         \ --- Code added for Elite-A: ------------------------->
+
  INC new_hold           \ AJD
 
                         \ --- End of added code ------------------------------->
@@ -26853,6 +26855,7 @@ LOAD_F% = LOAD% + P% - CODE%
  JSR NO3                \ Make the sound from our updated sound block in XX16
 
                         \ --- Code added for Elite-A: ------------------------->
+
 .n_sound10
 
                         \ --- End of added code ------------------------------->
@@ -27432,6 +27435,7 @@ LOAD_F% = LOAD% + P% - CODE%
  JSR DKS1               \ KY2 will be &FF if Space (speed up) is being pressed
 
                         \ --- Code added for Elite-A: ------------------------->
+
  LDA #&51               \ AJD
  STA &FE60
 

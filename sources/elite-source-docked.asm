@@ -20041,6 +20041,7 @@ ENDIF
                         \ reverts to standard formatting
 
                         \ --- Code added for Elite-A: ------------------------->
+
  LDA NA%+5              \ AJD
  STA NAME+5
 
@@ -31053,6 +31054,7 @@ ENDMACRO
  ECHR 'I'
 
                         \ --- Code added for Elite-A: ------------------------->
+
  ECHR 'I'
 
                         \ --- End of added code ------------------------------->
