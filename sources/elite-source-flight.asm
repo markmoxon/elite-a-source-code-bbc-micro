@@ -2083,6 +2083,65 @@ LOAD_A% = LOAD%
 
 \ ******************************************************************************
 \
+\       Name: scramble
+\       Type: Subroutine
+\   Category: Loader
+\    Summary: Decrypt the main flight code between &1300 and &55FF and jump into
+\             the main game loop
+\
+\ ******************************************************************************
+
+                        \ --- Original Acornsoft section removed: ------------->
+\
+\.scramble
+\
+\ LDY #0                \ We're going to work our way through a large number of
+\                       \ encrypted bytes, so we set Y to 0 to be the index of
+\                       \ the current byte within its page in memory
+\
+\ STY SC                \ Set the low byte of SC(1 0) to 0
+\
+\ LDX #&13              \ Set X to &13 to be the page number of the current
+\                       \ byte, so we start the decryption with the first byte
+\                       \ of page &13
+\
+\.scrl
+\
+\ STX SCH               \ Set the high byte of SC(1 0) to X, so SC(1 0) now
+\                       \ points to the first byte of page X
+\
+\ TYA                   \ Set A to Y, so A now contains the index of the current
+\                       \ byte within its page
+\
+\ EOR (SC),Y            \ EOR the current byte with its index within the page
+\
+\ EOR #&33              \ EOR the current byte with &33
+\
+\ STA (SC),Y            \ Update the current byte
+\
+\                       \ The current byte is in page X at offset Y, and SC(1 0)
+\                       \ points to the first byte of page X, so we just did
+\                       \  this:
+\                       \
+\                       \   (X Y) = (X Y) EOR Y EOR &33
+\
+\ DEY                   \ Decrement the index in Y to point to the next byte
+\
+\ BNE scrl              \ Loop back to scrl to decrypt the next byte until we
+\                       \ have done the whole page
+\
+\ INX                   \ Increment X to point to the next page in memory
+\
+\ CPX #&56              \ Loop back to scrl to decrypt the next page until we
+\ BNE scrl              \ reach the start of page &56
+\
+\ JMP RSHIPS            \ Call RSHIPS to launch from the station, load a new set
+\                       \ of ship blueprints and jump into the main game loop
+\
+                        \ --- End of removed section -------------------------->
+
+\ ******************************************************************************
+\
 \       Name: DOENTRY
 \       Type: Subroutine
 \   Category: Loader
@@ -2822,6 +2881,51 @@ LOAD_A% = LOAD%
                         \ Hyperspace Unit
 
                         \ --- End of added code ------------------------------->
+
+\ ******************************************************************************
+\
+\       Name: Main flight loop (Part 5 of 16)
+\       Type: Subroutine
+\   Category: Main loop
+\    Summary: For each nearby ship: If an energy bomb has been set off,
+\             potentially kill this ship
+\  Deep dive: Program flow of the main game loop
+\
+\ ------------------------------------------------------------------------------
+\
+\ The main flight loop covers most of the flight-specific aspects of Elite. This
+\ section covers the following:
+\
+\   * Continue looping through all the ships in the local bubble, and for each
+\     one:
+\
+\     * If an energy bomb has been set off and this ship can be killed, kill it
+\       and increase the kill tally
+\
+\ ******************************************************************************
+
+                        \ --- Original Acornsoft section removed: ------------->
+\
+\ LDA BOMB              \ If we set off our energy bomb (see MA24 above), then
+\ BPL MA21              \ BOMB is now negative, so this skips to MA21 if our
+\                       \ energy bomb is not going off
+\
+\ CPY #2*SST            \ If the ship in Y is the space station, jump to BA21
+\ BEQ MA21              \ as energy bombs are useless against space stations
+\
+\ LDA INWK+31           \ If the ship we are checking has bit 5 set in its ship
+\ AND #%00100000        \ byte #31, then it is already exploding, so jump to
+\ BNE MA21              \ BA21 as ships can't explode more than once
+\
+\ ASL INWK+31           \ The energy bomb is killing this ship, so set bit 7 of
+\ SEC                   \ the ship byte #31 to indicate that it has now been
+\ ROR INWK+31           \ killed
+\
+\ JSR EXNO2             \ Call EXNO2 to process the fact that we have killed a
+\                       \ ship (so increase the kill tally, make an explosion
+\                       \ sound and possibly display "RIGHT ON COMMANDER!")
+\
+                        \ --- End of removed section -------------------------->
 
 \ ******************************************************************************
 \
@@ -5074,6 +5178,26 @@ NEXT
 
 \ ******************************************************************************
 \
+\       Name: FLKB
+\       Type: Subroutine
+\   Category: Keyboard
+\    Summary: Flush the keyboard buffer
+\
+\ ******************************************************************************
+
+                        \ --- Original Acornsoft section removed: ------------->
+\
+\.FLKB
+\
+\ LDA #15               \ Call OSBYTE with A = 15 and Y <> 0 to flush the input
+\ TAX                   \ buffers (i.e. flush the operating system's keyboard
+\ JMP OSBYTE            \ buffer) and return from the subroutine using a tail
+\                       \ call
+\
+                        \ --- End of removed section -------------------------->
+
+\ ******************************************************************************
+\
 \       Name: NLIN3
 \       Type: Subroutine
 \   Category: Drawing lines
@@ -5482,6 +5606,46 @@ NEXT
  EQUB %00000111
  EQUB %00000011
  EQUB %00000001
+
+\ ******************************************************************************
+\
+\       Name: PX3
+\       Type: Subroutine
+\   Category: Drawing pixels
+\    Summary: Plot a single pixel at (X, Y) within a character block
+\
+\ ------------------------------------------------------------------------------
+\
+\ This routine is called from PIXEL to set 1 pixel within a character block for
+\ a distant point (i.e. where the distance ZZ >= &90). See the PIXEL routine for
+\ details, as this routine is effectively part of PIXEL.
+\
+\ Arguments:
+\
+\   X                   The x-coordinate of the pixel within the character block
+\
+\   Y                   The y-coordinate of the pixel within the character block
+\
+\   SC(1 0)             The screen address of the character block
+\
+\   T1                  The value of Y to restore on exit, so Y is preserved by
+\                       the call to PIXEL
+\
+\ ******************************************************************************
+
+                        \ --- Original Acornsoft section removed: ------------->
+\
+\.PX3
+\
+\ LDA TWOS,X            \ Fetch a 1-pixel byte from TWOS and EOR it into SC+Y
+\ EOR (SC),Y
+\ STA (SC),Y
+\
+\ LDY T1                \ Restore Y from T1, so Y is preserved by the routine
+\
+\ RTS                   \ Return from the subroutine
+\
+                        \ --- End of removed section -------------------------->
 
 \ ******************************************************************************
 \
@@ -11329,13 +11493,13 @@ LOAD_C% = LOAD% +P% - CODE%
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: ------------------------->
+                        \ --- Whole section added for Elite-A: ---------------->
 
 .anger_8c
 
  LDA TYPE
 
-                        \ --- End of added code ------------------------------->
+                        \ --- End of added section ---------------------------->
 
 \ ******************************************************************************
 \
@@ -13007,6 +13171,34 @@ LOAD_C% = LOAD% +P% - CODE%
 
 \ ******************************************************************************
 \
+\       Name: MUT3
+\       Type: Subroutine
+\   Category: Maths (Arithmetic)
+\    Summary: Unused routine that does the same as MUT2
+\
+\ ------------------------------------------------------------------------------
+\
+\ This routine is never actually called, but it is identical to MUT2, as the
+\ extra instructions have no effect.
+\
+\ ******************************************************************************
+
+                        \ --- Original Acornsoft section removed: ------------->
+\
+\.MUT3
+\
+\ LDX ALP1              \ Set P = ALP1, though this gets overwritten by the
+\ STX P                 \ following, so this has no effect
+\
+\                       \ Fall through into MUT2 to do the following:
+\                       \
+\                       \   (S R) = XX(1 0)
+\                       \   (A P) = Q * A
+\
+                        \ --- End of removed section -------------------------->
+
+\ ******************************************************************************
+\
 \       Name: MUT1
 \       Type: Subroutine
 \   Category: Maths (Arithmetic)
@@ -14254,6 +14446,32 @@ LOAD_C% = LOAD% +P% - CODE%
 
 \ ******************************************************************************
 \
+\       Name: Unused block
+\       Type: Variable
+\   Category: Utility routines
+\    Summary: These bytes appear to be unused (the same block appears in both
+\             the flight and docked code)
+\
+\ ******************************************************************************
+
+                        \ --- Original Acornsoft section removed: ------------->
+\
+\ EQUB &8C, &E7
+\ EQUB &8D, &ED
+\ EQUB &8A, &E6
+\ EQUB &C1, &C8
+\ EQUB &C8, &8B
+\ EQUB &E0, &8A
+\ EQUB &E6, &D6
+\ EQUB &C5, &C6
+\ EQUB &C1, &CA
+\ EQUB &95, &9D
+\ EQUB &9C, &97
+\
+                        \ --- End of removed section -------------------------->
+
+\ ******************************************************************************
+\
 \ Save output/ELTC.bin
 \
 \ ******************************************************************************
@@ -14279,6 +14497,56 @@ LOAD_D% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
 \
+\       Name: tnpr1
+\       Type: Subroutine
+\   Category: Market
+\    Summary: Work out if we have space for one tonne of cargo
+\
+\ ------------------------------------------------------------------------------
+\
+\ Given a market item, work out whether there is room in the cargo hold for one
+\ tonne of this item.
+\
+\ For standard tonne canisters, the limit is given by the type of cargo hold we
+\ have, with a standard cargo hold having a capacity of 20t and an extended
+\ cargo bay being 35t.
+\
+\ For items measured in kg (gold, platinum), g (gem-stones) and alien items,
+\ the individual limit on each of these is 200 units.
+\
+\ Arguments:
+\
+\   A                   The type of market item (see QQ23 for a list of market
+\                       item numbers)
+\
+\ Returns:
+\
+\   A                   A = 1
+\
+\   C flag              Returns the result:
+\
+\                         * Set if there is no room for this item
+\
+\                         * Clear if there is room for this item
+\
+\ ******************************************************************************
+
+                        \ --- Original Acornsoft section removed: ------------->
+\
+\.tnpr1
+\
+\ STA QQ29              \ Store the type of market item in QQ29
+\
+\ LDA #1                \ Set the number of units of this market item to 1
+\
+\                       \ Fall through into tnpr to work out whether there is
+\                       \ room in the cargo hold for A tonnes of the item of
+\                       \ type QQ29
+\
+                        \ --- End of removed section -------------------------->
+
+\ ******************************************************************************
+\
 \       Name: tnpr
 \       Type: Subroutine
 \   Category: Market
@@ -14286,7 +14554,7 @@ LOAD_D% = LOAD% + P% - CODE%
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: ------------------------->
+                        \ --- Whole section added for Elite-A: ---------------->
 
 .tnpr
 
@@ -14319,7 +14587,7 @@ LOAD_D% = LOAD% + P% - CODE%
  ADC #&00
  RTS
 
-                        \ --- End of added code ------------------------------->
+                        \ --- End of added section ---------------------------->
 
 \ ******************************************************************************
 \
@@ -16776,6 +17044,30 @@ LOAD_D% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
 \
+\       Name: TTX110
+\       Type: Subroutine
+\   Category: Flight
+\    Summary: Set the current system to the nearest system and return to hyp
+\
+\ ******************************************************************************
+
+                        \ --- Original Acornsoft section removed: ------------->
+\
+\.TTX110
+\
+\                       \ This routine is only called from the hyp routine, and
+\                       \ it jumps back into hyp at label TTX111
+\
+\ JSR TT111             \ Call TT111 to set the current system to the nearest
+\                       \ system to (QQ9, QQ10), and put the seeds of the
+\                       \ nearest system into QQ15 to QQ15+5
+\
+\ JMP TTX111            \ Return to TTX111 in the hyp routine
+\
+                        \ --- End of removed section -------------------------->
+
+\ ******************************************************************************
+\
 \       Name: TT151
 \       Type: Subroutine
 \   Category: Market
@@ -17742,6 +18034,29 @@ LOAD_D% = LOAD% + P% - CODE%
 .TT113
 
  RTS                    \ Return from the subroutine
+
+\ ******************************************************************************
+\
+\       Name: GCASH
+\       Type: Subroutine
+\   Category: Maths (Arithmetic)
+\    Summary: Calculate (Y X) = P * Q * 4
+\
+\ ------------------------------------------------------------------------------
+\
+\ Calculate the following multiplication of unsigned 8-bit numbers:
+\
+\   (Y X) = P * Q * 4
+\
+\ ******************************************************************************
+
+                        \ --- Original Acornsoft section removed: ------------->
+\
+\.GCASH
+\
+\ JSR MULTU             \ Call MULTU to calculate (A P) = P * Q
+\
+                        \ --- End of removed section -------------------------->
 
 \ ******************************************************************************
 \
@@ -19727,6 +20042,128 @@ LOAD_E% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
 \
+\       Name: SPS2
+\       Type: Subroutine
+\   Category: Maths (Arithmetic)
+\    Summary: Calculate (Y X) = A / 10
+\
+\ ------------------------------------------------------------------------------
+\
+\ Calculate the following, where A is a signed 8-bit integer and the result is a
+\ signed 16-bit integer:
+\
+\   (Y X) = A / 10
+\
+\ Returns:
+\
+\   C flag              The C flag is cleared
+\
+\ ******************************************************************************
+
+                        \ --- Original Acornsoft section moved elsewhere: ----->
+\
+\.SPS2
+\
+\ ASL A                 \ Set X = |A| * 2, and set the C flag to the sign bit of
+\ TAX                   \ A
+\
+\ LDA #0                \ Set Y to have the sign bit from A in bit 7, with the
+\ ROR A                 \ rest of its bits zeroed, so Y now contains the sign of
+\ TAY                   \ the original argument
+\
+\ LDA #20               \ Set Q = 20
+\ STA Q
+\
+\ TXA                   \ Copy X into A, so A now contains the argument A * 2
+\
+\ JSR DVID4             \ Calculate the following:
+\                       \
+\                       \   P = A / Q
+\                       \     = |argument A| * 2 / 20
+\                       \     = |argument A| / 10
+\
+\ LDX P                 \ Set X to the result
+\
+\ TYA                   \ If the sign of the original argument A is negative,
+\ BMI LL163             \ jump to LL163 to flip the sign of the result
+\
+\ LDY #0                \ Set the high byte of the result to 0, as the result is
+\                       \ positive
+\
+\ RTS                   \ Return from the subroutine
+\
+\.LL163
+\
+\ LDY #&FF              \ The result is negative, so set the high byte to &FF
+\
+\ TXA                   \ Flip the low byte and add 1 to get the negated low
+\ EOR #&FF              \ byte, using two's complement
+\ TAX
+\ INX
+\
+\ RTS                   \ Return from the subroutine
+\
+                        \ --- End of moved section ---------------------------->
+
+\ ******************************************************************************
+\
+\       Name: SPS4
+\       Type: Subroutine
+\   Category: Maths (Geometry)
+\    Summary: Calculate the vector to the space station
+\
+\ ------------------------------------------------------------------------------
+\
+\ Calculate the vector between our ship and the space station and store it in
+\ XX15.
+\
+\ ******************************************************************************
+
+                        \ --- Original Acornsoft section removed: ------------->
+\
+\.SPS4
+\
+\ LDX #8                \ First we need to copy the space station's coordinates
+\                       \ into K3, so set a counter to copy the first 9 bytes
+\                       \ (the 3-byte x, y and z coordinates) from the station's
+\                       \ data block at K% + NI% into K3
+\
+\.SPL1
+\
+\ LDA K%+NI%,X          \ Copy the X-th byte from the station's data block at
+\ STA K3,X              \ K% + NI% to the X-th byte of K3
+\
+\ DEX                   \ Decrement the loop counter
+\
+\ BPL SPL1              \ Loop back to SPL1 until we have copied all 9 bytes
+\
+\ JMP TAS2              \ Call TAS2 to build XX15 from K3, returning from the
+\                       \ subroutine using a tail call
+\
+                        \ --- End of removed section -------------------------->
+
+\ ******************************************************************************
+\
+\       Name: SP1
+\       Type: Subroutine
+\   Category: Dashboard
+\    Summary: Draw the space station on the compass
+\
+\ ******************************************************************************
+
+                        \ --- Original Acornsoft section removed: ------------->
+\
+\.SP1
+\
+\ JSR SPS4              \ Call SPS4 to calculate the vector to the space station
+\                       \ and store it in XX15
+\
+\                       \ Fall through into SP2 to draw XX15 on the compass
+\
+                        \ --- End of removed section -------------------------->
+
+\ ******************************************************************************
+\
 \       Name: SP2
 \       Type: Subroutine
 \   Category: Dashboard
@@ -19981,7 +20418,7 @@ LOAD_E% = LOAD% + P% - CODE%
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: ------------------------->
+                        \ --- Whole section added for Elite-A: ---------------->
 
 .n_oops
 
@@ -19989,7 +20426,7 @@ LOAD_E% = LOAD% + P% - CODE%
  SBC new_shields
  BCC n_shok
 
-                        \ --- End of added code ------------------------------->
+                        \ --- End of added section ---------------------------->
 
 \ ******************************************************************************
 \
@@ -23960,7 +24397,7 @@ LOAD_F% = LOAD% + P% - CODE%
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: ------------------------->
+                        \ --- Whole section added for Elite-A: ---------------->
 
 .rand_posn
 
@@ -23984,7 +24421,7 @@ LOAD_F% = LOAD% + P% - CODE%
  STA INWK+7
  JMP DORND
 
-                        \ --- End of added code ------------------------------->
+                        \ --- End of added section ---------------------------->
 
 \ ******************************************************************************
 \
@@ -25590,6 +26027,51 @@ LOAD_F% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
 \
+\       Name: BAD
+\       Type: Subroutine
+\   Category: Status
+\    Summary: Calculate how bad we have been
+\
+\ ------------------------------------------------------------------------------
+\
+\ Work out how bad we are from the amount of contraband in our hold. The
+\ formula is:
+\
+\   (slaves + narcotics) * 2 + firearms
+\
+\ so slaves and narcotics are twice as illegal as firearms. The value in FIST
+\ (our legal status) is set to at least this value whenever we launch from a
+\ space station, and a FIST of 50 or more gives us fugitive status, so leaving a
+\ station carrying 25 tonnes of slaves/narcotics, or 50 tonnes of firearms
+\ across multiple trips, is enough to make us a fugitive.
+\
+\ Returns:
+\
+\   A                   A value that determines how bad we are from the amount
+\                       of contraband in our hold
+\
+\ ******************************************************************************
+
+                        \ --- Original Acornsoft section removed: ------------->
+\
+\.BAD
+\
+\ LDA QQ20+3            \ Set A to the number of tonnes of slaves in the hold
+\
+\ CLC                   \ Clear the C flag so we can do addition without the
+\                       \ C flag affecting the result
+\
+\ ADC QQ20+6            \ Add the number of tonnes of narcotics in the hold
+\
+\ ASL A                 \ Double the result and add the number of tonnes of
+\ ADC QQ20+10           \ firearms in the hold
+\
+\ RTS                   \ Return from the subroutine
+\
+                        \ --- End of removed section -------------------------->
+
+\ ******************************************************************************
+\
 \       Name: FAROF
 \       Type: Subroutine
 \   Category: Maths (Geometry)
@@ -27085,14 +27567,14 @@ LOAD_F% = LOAD% + P% - CODE%
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: ------------------------->
+                        \ --- Whole section added for Elite-A: ---------------->
 
 .b_table
 
  EQUB &61, &31, &80, &80, &80, &80, &51
  EQUB &64, &34, &32, &62, &52, &54, &58, &38, &68
 
-                        \ --- End of added code ------------------------------->
+                        \ --- End of added section ---------------------------->
 
 \ ******************************************************************************
 \
@@ -27103,7 +27585,7 @@ LOAD_F% = LOAD% + P% - CODE%
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: ------------------------->
+                        \ --- Whole section added for Elite-A: ---------------->
 
 .b_13
 
@@ -27123,7 +27605,7 @@ LOAD_F% = LOAD% + P% - CODE%
 
  RTS
 
-                        \ --- End of added code ------------------------------->
+                        \ --- End of added section ---------------------------->
 
 \ ******************************************************************************
 \
@@ -27984,6 +28466,45 @@ LOAD_F% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
 \
+\       Name: ou2
+\       Type: Subroutine
+\   Category: Text
+\    Summary: Display "E.C.M.SYSTEM DESTROYED" as an in-flight message
+\
+\ ******************************************************************************
+
+                        \ --- Original Acornsoft section removed: ------------->
+\
+\.ou2
+\
+\ LDA #108              \ Set A to recursive token 108 ("E.C.M.SYSTEM")
+\
+\ EQUB &2C              \ Fall through into ou3 to print the new message, but
+\                       \ skip the first instruction by turning it into
+\                       \ &2C &A9 &6F, or BIT &6FA9, which does nothing apart
+\                       \ from affect the flags
+\
+                        \ --- End of removed section -------------------------->
+
+\ ******************************************************************************
+\
+\       Name: ou3
+\       Type: Subroutine
+\   Category: Text
+\    Summary: Display "FUEL SCOOPS DESTROYED" as an in-flight message
+\
+\ ******************************************************************************
+
+                        \ --- Original Acornsoft section removed: ------------->
+\
+\.ou3
+\
+\ LDA #111              \ Set A to recursive token 111 ("FUEL SCOOPS")
+\
+                        \ --- End of removed section -------------------------->
+
+\ ******************************************************************************
+\
 \       Name: cargo_mtok
 \       Type: Subroutine
 \   Category: Text
@@ -27991,13 +28512,13 @@ LOAD_F% = LOAD% + P% - CODE%
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: ------------------------->
+                        \ --- Whole section added for Elite-A: ---------------->
 
 .cargo_mtok
 
  ADC #&D0
 
-                        \ --- End of added code ------------------------------->
+                        \ --- End of added section ---------------------------->
 
 \ ******************************************************************************
 \
@@ -34387,13 +34908,13 @@ LOAD_H% = LOAD% + P% - CODE%
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: ------------------------->
+                        \ --- Whole section added for Elite-A: ---------------->
 
 .iff_xor
 
  EQUB &00, &00, &0F \, &FF, &F0 overlap
 
-                        \ --- End of added code ------------------------------->
+                        \ --- End of added section ---------------------------->
 
 \ ******************************************************************************
 \
@@ -34404,13 +34925,13 @@ LOAD_H% = LOAD% + P% - CODE%
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: ------------------------->
+                        \ --- Whole section added for Elite-A: ---------------->
 
 .iff_base
 
  EQUB &FF, &F0, &FF, &F0, &FF
 
-                        \ --- End of added code ------------------------------->
+                        \ --- End of added section ---------------------------->
 
 \ ******************************************************************************
 \

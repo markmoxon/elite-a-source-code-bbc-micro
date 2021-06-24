@@ -2111,6 +2111,65 @@ BRKV = P% - 2           \ The address of the destination address in the above
 
 \ ******************************************************************************
 \
+\       Name: scramble
+\       Type: Subroutine
+\   Category: Loader
+\    Summary: Decrypt the main docked code between &1300 and &5FFF and
+\             the main game loop
+\
+\ ******************************************************************************
+
+                        \ --- Original Acornsoft section removed: ------------->
+\
+\.scramble
+\
+\ LDY #0                \ We're going to work our way through a large number of
+\                       \ encrypted bytes, so we set Y to 0 to be the index of
+\                       \ the current byte within its page in memory
+\
+\ STY SC                \ Set the low byte of SC(1 0) to 0
+\
+\ LDX #&13              \ Set X to &13 to be the page number of the current
+\                       \ byte, so we start the decryption with the first byte
+\                       \ of page &13
+\
+\.scrl
+\
+\ STX SCH               \ Set the high byte of SC(1 0) to X, so SC(1 0) now
+\                       \ points to the first byte of page X
+\
+\ TYA                   \ Set A to Y, so A now contains the index of the current
+\                       \ byte within its page
+\
+\ EOR (SC),Y            \ EOR the current byte with its index within the page
+\
+\ EOR #&33              \ EOR the current byte with &33
+\
+\ STA (SC),Y            \ Update the current byte
+\
+\                       \ The current byte is in page X at offset Y, and SC(1 0)
+\                       \ points to the first byte of page X, so we just did
+\                       \  this:
+\                       \
+\                       \   (X Y) = (X Y) EOR Y EOR &33
+\
+\ DEY                   \ Decrement the index in Y to point to the next byte
+\
+\ BNE scrl              \ Loop back to scrl to decrypt the next byte until we
+\                       \ have done the whole page
+\
+\ INX                   \ Increment X to point to the next page in memory
+\
+\ CPX #&60              \ Loop back to scrl to decrypt the next page until we
+\ BNE scrl              \ reach the start of page &60
+\
+\ JMP BRKBK             \ Call BRKBK to set BRKV to point to the BRBR routine
+\                       \ and return from the subroutine using a tail call
+\
+                        \ --- End of removed section -------------------------->
+
+\ ******************************************************************************
+\
 \       Name: DOENTRY
 \       Type: Subroutine
 \   Category: Flight
@@ -2457,6 +2516,60 @@ BRKV = P% - 2           \ The address of the destination address in the above
 \                       \ BNE is effectively a JMP as A is never zero)
 
                         \ --- End of removed code ----------------------------->
+
+\ ******************************************************************************
+\
+\       Name: DETOK3
+\       Type: Subroutine
+\   Category: Text
+\    Summary: Print an extended recursive token from the RUTOK token table
+\  Deep dive: Extended system descriptions
+\             Extended text tokens
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   A                   The recursive token to be printed, in the range 0-255
+\
+\ Returns:
+\
+\   A                   A is preserved
+\
+\   Y                   Y is preserved
+\
+\   V(1 0)              V(1 0) is preserved
+\
+\ ******************************************************************************
+
+                        \ --- Original Acornsoft section moved elsewhere: ----->
+\
+\.DETOK3
+\
+\ PHA                   \ Store A on the stack, so we can retrieve it later
+\
+\ TAX                   \ Copy the token number from A into X
+\
+\ TYA                   \ Store Y on the stack
+\ PHA
+\
+\ LDA V                 \ Store V(1 0) on the stack
+\ PHA
+\ LDA V+1
+\ PHA
+\
+\ LDA #LO(RUTOK)        \ Set V to the low byte of RUTOK
+\ STA V
+\
+\ LDA #HI(RUTOK)        \ Set A to the high byte of RUTOK
+\
+\ BNE DTEN              \ Call DTEN to print token number X from the RUTOK
+\                       \ table and restore the values of A, Y and V(1 0) from
+\                       \ the stack, returning from the subroutine using a tail
+\                       \ call (this BNE is effectively a JMP as A is never
+\                       \ zero)
+\
+                        \ --- End of moved section ---------------------------->
 
 \ ******************************************************************************
 \
@@ -3614,6 +3727,281 @@ BRKV = P% - 2           \ The address of the destination address in the above
 
 \ ******************************************************************************
 \
+\       Name: MVT1
+\       Type: Subroutine
+\   Category: Moving
+\    Summary: Calculate (x_sign x_hi x_lo) = (x_sign x_hi x_lo) + (A R)
+\
+\ ------------------------------------------------------------------------------
+\
+\ Add the signed delta (A R) to a ship's coordinate, along the axis given in X.
+\ Mathematically speaking, this routine translates the ship along a single axis
+\ by a signed delta. Taking the example of X = 0, the x-axis, it does the
+\ following:
+\
+\   (x_sign x_hi x_lo) = (x_sign x_hi x_lo) + (A R)
+\
+\ (In practice, MVT1 is only ever called directly with A = 0 or 128, otherwise
+\ it is always called via MVT-2, which clears A apart from the sign bit. The
+\ routine is written to cope with a non-zero delta_hi, so it supports a full
+\ 16-bit delta, but it appears that delta_hi is only ever used to hold the
+\ sign of the delta.)
+\
+\ The comments below assume we are adding delta to the x-axis, though the axis
+\ is determined by the value of X.
+\
+\ Arguments:
+\
+\   (A R)               The signed delta, so A = delta_hi and R = delta_lo
+\
+\   X                   Determines which coordinate axis of INWK to change:
+\
+\                         * X = 0 adds the delta to (x_lo, x_hi, x_sign)
+\
+\                         * X = 3 adds the delta to (y_lo, y_hi, y_sign)
+\
+\                         * X = 6 adds the delta to (z_lo, z_hi, z_sign)
+\
+\ Other entry points:
+\
+\   MVT1-2              Clear bits 0-6 of A before entering MVT1
+\
+\ ******************************************************************************
+
+                        \ --- Original Acornsoft section removed: ------------->
+\
+\ AND #%10000000        \ Clear bits 0-6 of A
+\
+\.MVT1
+\
+\ ASL A                 \ Set the C flag to the sign bit of the delta, leaving
+\                       \ delta_hi << 1 in A
+\
+\ STA S                 \ Set S = delta_hi << 1
+\                       \
+\                       \ This also clears bit 0 of S
+\
+\ LDA #0                \ Set T = just the sign bit of delta (in bit 7)
+\ ROR A
+\ STA T
+\
+\ LSR S                 \ Set S = delta_hi >> 1
+\                       \       = |delta_hi|
+\                       \
+\                       \ This also clear the C flag, as we know that bit 0 of
+\                       \ S was clear before the LSR
+\
+\ EOR INWK+2,X          \ If T EOR x_sign has bit 7 set, then x_sign and delta
+\ BMI MV10              \ have different signs, so jump to MV10
+\
+\                       \ At this point, we know x_sign and delta have the same
+\                       \ sign, that sign is in T, and S contains |delta_hi|,
+\                       \ so now we want to do:
+\                       \
+\                       \   (x_sign x_hi x_lo) = (x_sign x_hi x_lo) + (S R)
+\                       \
+\                       \ and then set the sign of the result to the same sign
+\                       \ as x_sign and delta
+\
+\ LDA R                 \ First we add the low bytes, so:
+\ ADC INWK,X            \
+\ STA INWK,X            \   x_lo = x_lo + R
+\
+\ LDA S                 \ Then we add the high bytes:
+\ ADC INWK+1,X          \
+\ STA INWK+1,X          \   x_hi = x_hi + S
+\
+\ LDA INWK+2,X          \ And finally we add any carry into x_sign, and if the
+\ ADC #0                \ sign of x_sign and delta in T is negative, make sure
+\ ORA T                 \ the result is negative (by OR'ing with T)
+\ STA INWK+2,X
+\
+\ RTS                   \ Return from the subroutine
+\
+\.MV10
+\
+\                       \ If we get here, we know x_sign and delta have
+\                       \ different signs, with delta's sign in T, and
+\                       \ |delta_hi| in S, so now we want to do:
+\                       \
+\                       \   (x_sign x_hi x_lo) = (x_sign x_hi x_lo) - (S R)
+\                       \
+\                       \ and then set the sign of the result according to
+\                       \ the signs of x_sign and delta
+\
+\ LDA INWK,X            \ First we subtract the low bytes, so:
+\ SEC                   \
+\ SBC R                 \   x_lo = x_lo - R
+\ STA INWK,X
+\
+\ LDA INWK+1,X          \ Then we subtract the high bytes:
+\ SBC S                 \
+\ STA INWK+1,X          \   x_hi = x_hi - S
+\
+\ LDA INWK+2,X          \ And finally we subtract any borrow from bits 0-6 of
+\ AND #%01111111        \ x_sign, and give the result the opposite sign bit to T
+\ SBC #0                \ (i.e. give it the sign of the original x_sign)
+\ ORA #%10000000
+\ EOR T
+\ STA INWK+2,X
+\
+\ BCS MV11              \ If the C flag is set by the above SBC, then our sum
+\                       \ above didn't underflow and is correct - to put it
+\                       \ another way, (x_sign x_hi x_lo) >= (S R) so the result
+\                       \ should indeed have the same sign as x_sign, so jump to
+\                       \ MV11 to return from the subroutine
+\
+\                       \ Otherwise our subtraction underflowed because
+\                       \ (x_sign x_hi x_lo) < (S R), so we now need to flip the
+\                       \ subtraction around by using two's complement to this:
+\                       \
+\                       \   (S R) - (x_sign x_hi x_lo)
+\                       \
+\                       \ and then we need to give the result the same sign as
+\                       \ (S R), the delta, as that's the dominant figure in the
+\                       \ sum
+\
+\ LDA #1                \ First we subtract the low bytes, so:
+\ SBC INWK,X            \
+\ STA INWK,X            \   x_lo = 1 - x_lo
+\
+\ LDA #0                \ Then we subtract the high bytes:
+\ SBC INWK+1,X          \
+\ STA INWK+1,X          \   x_hi = 0 - x_hi
+\
+\ LDA #0                \ And then we subtract the sign bytes:
+\ SBC INWK+2,X          \
+\                       \   x_sign = 0 - x_sign
+\
+\ AND #%01111111        \ Finally, we set the sign bit to the sign in T, the
+\ ORA T                 \ sign of the original delta, as the delta is the
+\ STA INWK+2,X          \ dominant figure in the sum
+\
+\.MV11
+\
+\ RTS                   \ Return from the subroutine
+\
+                        \ --- End of removed section -------------------------->
+
+\ ******************************************************************************
+\
+\       Name: MVT3
+\       Type: Subroutine
+\   Category: Moving
+\    Summary: Calculate K(3 2 1) = (x_sign x_hi x_lo) + K(3 2 1)
+\
+\ ------------------------------------------------------------------------------
+\
+\ Add an INWK position coordinate - i.e. x, y or z - to K(3 2 1), like this:
+\
+\   K(3 2 1) = (x_sign x_hi x_lo) + K(3 2 1)
+\
+\ The INWK coordinate to add to K(3 2 1) is specified by X.
+\
+\ Arguments:
+\
+\   X                   The coordinate to add to K(3 2 1), as follows:
+\
+\                         * If X = 0, add (x_sign x_hi x_lo)
+\
+\                         * If X = 3, add (y_sign y_hi y_lo)
+\
+\                         * If X = 6, add (z_sign z_hi z_lo)
+\
+\ Returns:
+\
+\   A                   Contains a copy of the high byte of the result, K+3
+\
+\   X                   X is preserved
+\
+\ ******************************************************************************
+
+                        \ --- Original Acornsoft section removed: ------------->
+\
+\.MVT3
+\
+\ LDA K+3               \ Set S = K+3
+\ STA S
+\
+\ AND #%10000000        \ Set T = sign bit of K(3 2 1)
+\ STA T
+\
+\ EOR INWK+2,X          \ If x_sign has a different sign to K(3 2 1), jump to
+\ BMI MV13              \ MV13 to process the addition as a subtraction
+\
+\ LDA K+1               \ Set K(3 2 1) = K(3 2 1) + (x_sign x_hi x_lo)
+\ CLC                   \ starting with the low bytes
+\ ADC INWK,X
+\ STA K+1
+\
+\ LDA K+2               \ Then the middle bytes
+\ ADC INWK+1,X
+\ STA K+2
+\
+\ LDA K+3               \ And finally the high bytes
+\ ADC INWK+2,X
+\
+\ AND #%01111111        \ Setting the sign bit of K+3 to T, the original sign
+\ ORA T                 \ of K(3 2 1)
+\ STA K+3
+\
+\ RTS                   \ Return from the subroutine
+\
+\.MV13
+\
+\ LDA S                 \ Set S = |K+3| (i.e. K+3 with the sign bit cleared)
+\ AND #%01111111
+\ STA S
+\
+\ LDA INWK,X            \ Set K(3 2 1) = (x_sign x_hi x_lo) - K(3 2 1)
+\ SEC                   \ starting with the low bytes
+\ SBC K+1
+\ STA K+1
+\
+\ LDA INWK+1,X          \ Then the middle bytes
+\ SBC K+2
+\ STA K+2
+\
+\ LDA INWK+2,X          \ And finally the high bytes, doing A = |x_sign| - |K+3|
+\ AND #%01111111        \ and setting the C flag for testing below
+\ SBC S
+\
+\ ORA #%10000000        \ Set the sign bit of K+3 to the opposite sign of T,
+\ EOR T                 \ i.e. the opposite sign to the original K(3 2 1)
+\ STA K+3
+\
+\ BCS MV14              \ If the C flag is set, i.e. |x_sign| >= |K+3|, then
+\                       \ the sign of K(3 2 1). In this case, we want the
+\                       \ result to have the same sign as the largest argument,
+\                       \ which is (x_sign x_hi x_lo), which we know has the
+\                       \ opposite sign to K(3 2 1), and that's what we just set
+\                       \ the sign of K(3 2 1) to... so we can jump to MV14 to
+\                       \ return from the subroutine
+\
+\ LDA #1                \ We need to swap the sign of the result in K(3 2 1),
+\ SBC K+1               \ which we do by calculating 0 - K(3 2 1), which we can
+\ STA K+1               \ do with 1 - C - K(3 2 1), as we know the C flag is
+\                       \ clear. We start with the low bytes
+\
+\ LDA #0                \ Then the middle bytes
+\ SBC K+2
+\ STA K+2
+\
+\ LDA #0                \ And finally the high bytes
+\ SBC K+3
+\
+\ AND #%01111111        \ Set the sign bit of K+3 to the same sign as T,
+\ ORA T                 \ i.e. the same sign as the original K(3 2 1), as
+\ STA K+3               \ that's the largest argument
+\
+\.MV14
+\
+\ RTS                   \ Return from the subroutine
+\
+                        \ --- End of removed section -------------------------->
+
+\ ******************************************************************************
+\
 \       Name: MVS4
 \       Type: Subroutine
 \   Category: Moving
@@ -3926,6 +4314,116 @@ BRKV = P% - 2           \ The address of the destination address in the above
  STA INWK+1,X
 
  RTS                    \ Return from the subroutine
+
+\ ******************************************************************************
+\
+\       Name: MVT6
+\       Type: Subroutine
+\   Category: Moving
+\    Summary: Calculate (A P+2 P+1) = (x_sign x_hi x_lo) + (A P+2 P+1)
+\
+\ ------------------------------------------------------------------------------
+\
+\ Do the following calculation, for the coordinate given by X (so this is what
+\ it does for the x-coordinate):
+\
+\   (A P+2 P+1) = (x_sign x_hi x_lo) + (A P+2 P+1)
+\
+\ A is a sign bit and is not included in the calculation, but bits 0-6 of A are
+\ preserved. Bit 7 is set to the sign of the result.
+\
+\ Arguments:
+\
+\   A                   The sign of P(2 1) in bit 7
+\
+\   P(2 1)              The 16-bit value we want to add the coordinate to
+\
+\   X                   The coordinate to add, as follows:
+\
+\                         * If X = 0, add to (x_sign x_hi x_lo)
+\
+\                         * If X = 3, add to (y_sign y_hi y_lo)
+\
+\                         * If X = 6, add to (z_sign z_hi z_lo)
+\
+\ Returns:
+\
+\   A                   The sign of the result (in bit 7)
+\
+\ ******************************************************************************
+
+                        \ --- Original Acornsoft section removed: ------------->
+\
+\.MVT6
+\
+\ TAY                   \ Store argument A into Y, for later use
+\
+\ EOR INWK+2,X          \ Set A = A EOR x_sign
+\
+\ BMI MV50              \ If the sign is negative, i.e. A and x_sign have
+\                       \ different signs, jump to MV50
+\
+\                       \ The signs are the same, so we can add the two
+\                       \ arguments and keep the sign to get the result
+\
+\ LDA P+1               \ First we add the low bytes:
+\ CLC                   \
+\ ADC INWK,X            \   P+1 = P+1 + x_lo
+\ STA P+1
+\
+\ LDA P+2               \ And then the high bytes:
+\ ADC INWK+1,X          \
+\ STA P+2               \   P+2 = P+2 + x_hi
+\
+\ TYA                   \ Restore the original A argument that we stored earlier
+\                       \ so that we keep the original sign
+\
+\ RTS                   \ Return from the subroutine
+\
+\.MV50
+\
+\ LDA INWK,X            \ First we subtract the low bytes:
+\ SEC                   \
+\ SBC P+1               \   P+1 = x_lo - P+1
+\ STA P+1
+\
+\ LDA INWK+1,X          \ And then the high bytes:
+\ SBC P+2               \
+\ STA P+2               \   P+2 = x_hi - P+2
+\
+\ BCC MV51              \ If the last subtraction underflowed, then the C flag
+\                       \ will be clear and x_hi < P+2, so jump to MV51 to
+\                       \ negate the result
+\
+\ TYA                   \ Restore the original A argument that we stored earlier
+\ EOR #%10000000        \ but flip bit 7, which flips the sign. We do this
+\                       \ because x_hi >= P+2 so we want the result to have the
+\                       \ same sign as x_hi (as it's the dominant side in this
+\                       \ calculation). The sign of x_hi is x_sign, and x_sign
+\                       \ has the opposite sign to A, so we flip the sign in A
+\                       \ to return the correct result
+\
+\ RTS                   \ Return from the subroutine
+\
+\.MV51
+\
+\ LDA #1                \ Our subtraction underflowed, so we negate the result
+\ SBC P+1               \ using two's complement, first with the low byte:
+\ STA P+1               \
+\                       \   P+1 = 1 - P+1
+\
+\ LDA #0                \ And then the high byte:
+\ SBC P+2               \
+\ STA P+2               \   P+2 = 0 - P+2
+\
+\ TYA                   \ Restore the original A argument that we stored earlier
+\                       \ as this is the correct sign for the result. This is
+\                       \ because x_hi < P+2, so we want to return the same sign
+\                       \ as P+2, the dominant side
+\
+\ RTS                   \ Return from the subroutine
+\
+                        \ --- End of removed section -------------------------->
 
 \ ******************************************************************************
 \
@@ -5248,6 +5746,123 @@ LOAD_B% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
 \
+\       Name: PIX1
+\       Type: Subroutine
+\   Category: Maths (Arithmetic)
+\    Summary: Calculate (YY+1 SYL+Y) = (A P) + (S R) and draw stardust particle
+\
+\ ------------------------------------------------------------------------------
+\
+\ Calculate the following:
+\
+\   (YY+1 SYL+Y) = (A P) + (S R)
+\
+\ and draw a stardust particle at (X1,Y1) with distance ZZ.
+\
+\ Arguments:
+\
+\   (A P)               A is the angle ALPHA or BETA, P is always 0
+\
+\   (S R)               YY(1 0) or YY(1 0) + Q * A
+\
+\   Y                   Stardust particle number
+\
+\   X1                  The x-coordinate offset
+\
+\   Y1                  The y-coordinate offset
+\
+\   ZZ                  The distance of the point (further away = smaller point)
+\
+\ ******************************************************************************
+
+                        \ --- Original Acornsoft section removed: ------------->
+\
+\.PIX1
+\
+\ JSR ADD               \ Set (A X) = (A P) + (S R)
+\
+\ STA YY+1              \ Set YY+1 to A, the high byte of the result
+\
+\ TXA                   \ Set SYL+Y to X, the low byte of the result
+\ STA SYL,Y
+\
+\                       \ Fall through into PIX1 to draw the stardust particle
+\                       \ at (X1,Y1)
+\
+                        \ --- End of removed section -------------------------->
+
+\ ******************************************************************************
+\
+\       Name: PIXEL2
+\       Type: Subroutine
+\   Category: Drawing pixels
+\    Summary: Draw a stardust particle relative to the screen centre
+\
+\ ------------------------------------------------------------------------------
+\
+\ Draw a point (X1, Y1) from the middle of the screen with a size determined by
+\ a distance value. Used to draw stardust particles.
+\
+\ Arguments:
+\
+\   X1                  The x-coordinate offset
+\
+\   Y1                  The y-coordinate offset (positive means up the screen
+\                       from the centre, negative means down the screen)
+\
+\   ZZ                  The distance of the point (further away = smaller point)
+\
+\ ******************************************************************************
+
+                        \ --- Original Acornsoft section removed: ------------->
+\
+\.PIXEL2
+\
+\ LDA X1                \ Fetch the x-coordinate offset into A
+\
+\ BPL PX1               \ If the x-coordinate offset is positive, jump to PX1
+\                       \ to skip the following negation
+\
+\ EOR #%01111111        \ The x-coordinate offset is negative, so flip all the
+\ CLC                   \ bits apart from the sign bit and add 1, to negate
+\ ADC #1                \ it to a positive number, i.e. A is now |X1|
+\
+\.PX1
+\
+\ EOR #%10000000        \ Set X = -|A|
+\ TAX                   \       = -|X1|
+\
+\ LDA Y1                \ Fetch the y-coordinate offset into A and clear the
+\ AND #%01111111        \ sign bit, so A = |Y1|
+\
+\ CMP #96               \ If |Y1| >= 96 then it's off the screen (as 96 is half
+\ BCS PX4               \ the screen height), so return from the subroutine (as
+\                       \ PX4 contains an RTS)
+\
+\ LDA Y1                \ Fetch the y-coordinate offset into A
+\
+\ BPL PX2               \ If the y-coordinate offset is positive, jump to PX2
+\                       \ to skip the following negation
+\
+\ EOR #%01111111        \ The y-coordinate offset is negative, so flip all the
+\ ADC #1                \ bits apart from the sign bit and subtract 1, to negate
+\                       \ it to a positive number, i.e. A is now |Y1|
+\
+\.PX2
+\
+\ STA T                 \ Set A = 97 - A
+\ LDA #97               \       = 97 - |Y1|
+\ SBC T                 \
+\                       \ so if Y is positive we display the point up from the
+\                       \ centre, while a negative Y means down from the centre
+\
+\                       \ Fall through into PIXEL to draw the stardust at the
+\                       \ screen coordinates in (X, A)
+\
+                        \ --- End of removed section -------------------------->
+
+\ ******************************************************************************
+\
 \       Name: PIXEL
 \       Type: Subroutine
 \   Category: Drawing pixels
@@ -5538,6 +6153,67 @@ LOAD_B% = LOAD% + P% - CODE%
  STA CNT
 
  RTS                    \ Return from the subroutine
+
+\ ******************************************************************************
+\
+\       Name: FLIP
+\       Type: Subroutine
+\   Category: Stardust
+\    Summary: Reflect the stardust particles in the screen diagonal
+\
+\ ------------------------------------------------------------------------------
+\
+\ Swap the x- and y-coordinates of all the stardust particles and draw the new
+\ set of particles. Called by LOOK1 when we switch views.
+\
+\ This is a quick way of making the stardust field in the new view feel
+\ different without having to generate a whole new field. If you look carefully
+\ at the stardust field when you switch views, you can just about see that the
+\ new field is a reflection of the previous field in the screen diagonal, i.e.
+\ in the line from bottom left to top right. This is the line where x = y when
+\ the origin is in the middle of the screen, and positive x and y are right and
+\ up, which is the coordinate system we use for stardust).
+\
+\ ******************************************************************************
+
+                        \ --- Original Acornsoft section removed: ------------->
+\
+\.FLIP
+\
+\\LDA MJ                \ These instructions are commented out in the original
+\\BNE FLIP-1            \ source. They would have the effect of not swapping the
+\                       \ stardust if we had mis-jumped into witchspace
+\
+\ LDY NOSTM             \ Set Y to the current number of stardust particles, so
+\                       \ we can use it as a counter through all the stardust
+\
+\.FLL1
+\
+\ LDX SY,Y              \ Copy the Y-th particle's y-coordinate from SY+Y into X
+\
+\ LDA SX,Y              \ Copy the Y-th particle's x-coordinate from SX+Y into
+\ STA Y1                \ both Y1 and the particle's y-coordinate
+\ STA SY,Y
+\
+\ TXA                   \ Copy the Y-th particle's original y-coordinate into
+\ STA X1                \ both X1 and the particle's x-coordinate, so the x- and
+\ STA SX,Y              \ y-coordinates are now swapped and (X1, Y1) contains
+\                       \ the particle's new coordinates
+\
+\ LDA SZ,Y              \ Fetch the Y-th particle's distance from SZ+Y into ZZ
+\ STA ZZ
+\
+\ JSR PIXEL2            \ Draw a stardust particle at (X1,Y1) with distance ZZ
+\
+\ DEY                   \ Decrement the counter to point to the next particle of
+\                       \ stardust
+\
+\ BNE FLL1              \ Loop back to FLL1 until we have moved all the stardust
+\                       \ particles
+\
+\ RTS                   \ Return from the subroutine
+\
+                        \ --- End of removed section -------------------------->
 
 \ ******************************************************************************
 \
@@ -9220,6 +9896,74 @@ LOAD_C% = LOAD% +P% - CODE%
 
 \ ******************************************************************************
 \
+\       Name: LL164
+\       Type: Subroutine
+\   Category: Drawing circles
+\    Summary: Make the hyperspace sound and draw the hyperspace tunnel
+\
+\ ------------------------------------------------------------------------------
+\
+\ See the IRQ1 routine for details on the multi-coloured effect that's used.
+\
+\ ******************************************************************************
+
+                        \ --- Original Acornsoft section removed: ------------->
+\
+\.LL164
+\
+\ LDA #56               \ Call the NOISE routine with A = 56 to make the sound
+\ JSR NOISE             \ of the hyperspace drive being engaged
+\
+\ LDA #1                \ Set HFX to 1, which switches the screen mode to a full
+\ STA HFX               \ mode 5 screen, therefore making the hyperspace rings
+\                       \ multi-coloured and all zig-zaggy (see the IRQ1 routine
+\                       \ for details)
+\
+\ LDA #4                \ Set the step size for the hyperspace rings to 4, so
+\                       \ there are more sections in the rings and they are
+\                       \ quite round (compared to the step size of 8 used in
+\                       \ the much more polygonal launch rings)
+\
+\ JSR HFS2              \ Call HFS2 to draw the hyperspace tunnel rings
+\
+\ DEC HFX               \ Set HFX back to 0, so we switch back to the normal
+\                       \ split-screen mode
+\
+\ RTS                   \ Return from the subroutine
+\
+                        \ --- End of removed section -------------------------->
+
+\ ******************************************************************************
+\
+\       Name: LAUN
+\       Type: Subroutine
+\   Category: Drawing circles
+\    Summary: Make the launch sound and draw the launch tunnel
+\
+\ ------------------------------------------------------------------------------
+\
+\ This is shown when launching from or docking with the space station.
+\
+\ ******************************************************************************
+
+                        \ --- Original Acornsoft section removed: ------------->
+\
+\.LAUN
+\
+\ LDA #48               \ Call the NOISE routine with A = 48 to make the sound
+\ JSR NOISE             \ of the ship launching from the station
+\
+\ LDA #8                \ Set the step size for the launch tunnel rings to 8, so
+\                       \ there are fewer sections in the rings and they are
+\                       \ quite polygonal (compared to the step size of 4 used
+\                       \ in the much rounder hyperspace rings)
+\
+\                       \ Fall through into HFS2 to draw the launch tunnel rings
+\
+                        \ --- End of removed section -------------------------->
+
+\ ******************************************************************************
+\
 \       Name: HFS1
 \       Type: Subroutine
 \   Category: Drawing circles
@@ -9321,6 +10065,104 @@ LOAD_C% = LOAD% +P% - CODE%
 
 \ ******************************************************************************
 \
+\       Name: Unused block
+\       Type: Variable
+\   Category: Utility routines
+\    Summary: These bytes appear to be unused (the same block appears in both
+\             the flight and docked code)
+\
+\ ******************************************************************************
+
+                        \ --- Original Acornsoft section removed: ------------->
+\
+\ EQUB &8C, &E7
+\ EQUB &8D, &ED
+\ EQUB &8A, &E6
+\ EQUB &C1, &C8
+\ EQUB &C8, &8B
+\ EQUB &E0, &8A
+\ EQUB &E6, &D6
+\ EQUB &C5, &C6
+\ EQUB &C1, &CA
+\ EQUB &95, &9D
+\ EQUB &9C, &97
+\
+                        \ --- End of removed section -------------------------->
+
+\ ******************************************************************************
+\
+\       Name: MU5
+\       Type: Subroutine
+\   Category: Maths (Arithmetic)
+\    Summary: Set K(3 2 1 0) = (A A A A) and clear the C flGag
+\
+\ ------------------------------------------------------------------------------
+\
+\ In practice this is only called via a BEQ following an AND instruction, in
+\ which case A = 0, so this routine effectively does this:
+\
+\   K(3 2 1 0) = 0
+\
+\ Other entry points:
+\
+\   n_store             Sets K(3 2 1) = (A A A) and clears the C flag
+\
+\ ******************************************************************************
+
+                        \ --- Original Acornsoft section removed: ------------->
+\
+\.MU5
+\
+\ STA K                 \ Set K(3 2 1 0) to (A A A A)
+\ STA K+1
+\ STA K+2
+\ STA K+3
+\
+\ CLC                   \ Clear the C flag
+\
+\ RTS                   \ Return from the subroutine
+\
+                        \ --- End of removed section -------------------------->
+
+\ ******************************************************************************
+\
+\       Name: MLS2
+\       Type: Subroutine
+\   Category: Maths (Arithmetic)
+\    Summary: Calculate (S R) = XX(1 0) and (A P) = A * ALP1
+\
+\ ------------------------------------------------------------------------------
+\
+\ Calculate the following:
+\
+\   (S R) = XX(1 0)
+\
+\   (A P) = A * ALP1
+\
+\ where ALP1 is the magnitude of the current roll angle alpha, in the range
+\ 0-31.
+\
+\ ******************************************************************************
+
+                        \ --- Original Acornsoft section removed: ------------->
+\
+\.MLS2
+\
+\ LDX XX                \ Set (S R) = XX(1 0), starting with the low bytes
+\ STX R
+\
+\ LDX XX+1              \ And then doing the high bytes
+\ STX S
+\
+\ LDX ALP1              \ This repeats the first two instructions of MLS1, which
+\ STX P                 \ is presumably unintentional (though it has no effect)
+\
+\                       \ Fall through into MLS1 to calculate (A P) = A * ALP1
+\
+                        \ --- End of removed section -------------------------->
+
+\ ******************************************************************************
+\
 \       Name: SQUA
 \       Type: Subroutine
 \   Category: Maths (Arithmetic)
@@ -9384,6 +10226,67 @@ LOAD_C% = LOAD% +P% - CODE%
  TXA
 
  RTS                    \ Return from the subroutine
+
+\ ******************************************************************************
+\
+\       Name: MLU1
+\       Type: Subroutine
+\   Category: Maths (Arithmetic)
+\    Summary: Calculate Y1 = y_hi and (A P) = |y_hi| * Q for Y-th stardust
+\
+\ ------------------------------------------------------------------------------
+\
+\ Do the following assignment, and multiply the Y-th stardust particle's
+\ y-coordinate with an unsigned number Q:
+\
+\   Y1 = y_hi
+\
+\   (A P) = |y_hi| * Q
+\
+\ ******************************************************************************
+
+                        \ --- Original Acornsoft section removed: ------------->
+\
+\.MLU1
+\
+\ LDA SY,Y              \ Set Y1 the Y-th byte of SY
+\ STA Y1
+\
+\                       \ Fall through into MLU2 to calculate:
+\                       \
+\                       \   (A P) = |A| * Q
+\
+                        \ --- End of removed section -------------------------->
+
+\ ******************************************************************************
+\
+\       Name: MLU2
+\       Type: Subroutine
+\   Category: Maths (Arithmetic)
+\    Summary: Calculate (A P) = |A| * Q
+\
+\ ------------------------------------------------------------------------------
+\
+\ Do the following multiplication of a sign-magnitude 8-bit number P with an
+\ unsigned number Q:
+\
+\   (A P) = |A| * Q
+\
+\ ******************************************************************************
+
+                        \ --- Original Acornsoft section removed: ------------->
+\
+\.MLU2
+\
+\ AND #%01111111        \ Clear the sign bit in P, so P = |A|
+\ STA P
+\
+\                       \ Fall through into MULTU to calculate:
+\                       \
+\                       \   (A P) = P * Q
+\                       \         = |A| * Q
+\
+                        \ --- End of removed section -------------------------->
 
 \ ******************************************************************************
 \
@@ -9473,6 +10376,33 @@ LOAD_C% = LOAD% +P% - CODE%
                         \ all the way
 
  RTS                    \ Return from the subroutine
+
+\ ******************************************************************************
+\
+\       Name: MU6
+\       Type: Subroutine
+\   Category: Maths (Arithmetic)
+\    Summary: Set P(1 0) = (A A)
+\
+\ ------------------------------------------------------------------------------
+\
+\ In practice this is only called via a BEQ following an AND instruction, in
+\ which case A = 0, so this routine effectively does this:
+\
+\   P(1 0) = 0
+\
+\ ******************************************************************************
+
+                        \ --- Original Acornsoft section removed: ------------->
+\
+\.MU6
+\
+\ STA P+1               \ Set P(1 0) = (A A)
+\ STA P
+\
+\ RTS                   \ Return from the subroutine
+\
+                        \ --- End of removed section -------------------------->
 
 \ ******************************************************************************
 \
@@ -9589,6 +10519,230 @@ LOAD_C% = LOAD% +P% - CODE%
 
 \ ******************************************************************************
 \
+\       Name: Unused duplicate of MULTU
+\       Type: Subroutine
+\   Category: Maths (Arithmetic)
+\    Summary: Unused duplicate of the MULTU routine
+\
+\ ------------------------------------------------------------------------------
+\
+\ This is a duplicate of the MULTU routine, but with no entry label, so it can't
+\ be called by name. It is unused, and could have been culled to save a few
+\ bytes (24 to be precise), but it's still here.
+\
+\ In the disc version it has the label MULTU6, but here in the cassette version
+\ it's unnamed, unloved and unvisited, through no fault of its own.
+\
+\ ******************************************************************************
+
+                        \ --- Original Acornsoft section removed: ------------->
+\
+\{
+\ LDX Q
+\ BEQ MU1
+\ DEX
+\ STX T
+\ LDA #0
+\ LDX #8
+\ LSR P
+\
+\.MUL6
+\
+\ BCC P%+4
+\ ADC T
+\ ROR A
+\ ROR P
+\ DEX
+\ BNE MUL6
+\ RTS
+\}
+\
+                        \ --- End of removed section -------------------------->
+
+\ ******************************************************************************
+\
+\       Name: MLTU2
+\       Type: Subroutine
+\   Category: Maths (Arithmetic)
+\    Summary: Calculate (A P+1 P) = (A ~P) * Q
+\  Deep dive: Shift-and-add multiplication
+\
+\ ------------------------------------------------------------------------------
+\
+\ Do the following multiplication of an unsigned 16-bit number and an unsigned
+\ 8-bit number:
+\
+\   (A P+1 P) = (A ~P) * Q
+\
+\ where ~P means P EOR %11111111 (i.e. P with all its bits flipped). In other
+\ words, if you wanted to calculate &1234 * &56, you would:
+\
+\   * Set A to &12
+\   * Set P to &34 EOR %11111111 = &CB
+\   * Set Q to &56
+\
+\ before calling MLTU2.
+\
+\ This routine is like a mash-up of MU11 and FMLTU. It uses part of FMLTU's
+\ inverted argument trick to work out whether or not to do an addition, and like
+\ MU11 it sets up a counter in X to extract bits from (P+1 P). But this time we
+\ extract 16 bits from (P+1 P), so the result is a 24-bit number. The core of
+\ the algorithm is still the shift-and-add approach explained in MULT1, just
+\ with more bits.
+\
+\ Returns:
+\
+\   Q                   Q is preserved
+\
+\ Other entry points:
+\
+\   MLTU2-2             Set Q to X, so this calculates (A P+1 P) = (A ~P) * X
+\
+\ ******************************************************************************
+
+                        \ --- Original Acornsoft section removed: ------------->
+\
+\ STX Q                 \ Store X in Q
+\
+\.MLTU2
+\
+\ EOR #%11111111        \ Flip the bits in A and rotate right, storing the
+\ LSR A                 \ result in P+1, so we now calculate (P+1 P) * Q
+\ STA P+1
+\
+\ LDA #0                \ Set A = 0 so we can start building the answer in A
+\
+\ LDX #16               \ Set up a counter in X to count the 16 bits in (P+1 P)
+\
+\ ROR P                 \ Set P = P >> 1 with bit 7 = bit 0 of A
+\                       \ and C flag = bit 0 of P
+\
+\.MUL7
+\
+\ BCS MU21              \ If C (i.e. the next bit from P) is set, do not do the
+\                       \ addition for this bit of P, and instead skip to MU21
+\                       \ to just do the shifts
+\
+\ ADC Q                 \ Do the addition for this bit of P:
+\                       \
+\                       \   A = A + Q + C
+\                       \     = A + Q
+\
+\ ROR A                 \ Rotate (A P+1 P) to the right, so we capture the next
+\ ROR P+1               \ digit of the result in P+1, and extract the next digit
+\ ROR P                 \ of (P+1 P) in the C flag
+\
+\ DEX                   \ Decrement the loop counter
+\
+\ BNE MUL7              \ Loop back for the next bit until P has been rotated
+\                       \ all the way
+\
+\ RTS                   \ Return from the subroutine
+\
+\.MU21
+\
+\ LSR A                 \ Shift (A P+1 P) to the right, so we capture the next
+\ ROR P+1               \ digit of the result in P+1, and extract the next digit
+\ ROR P                 \ of (P+1 P) in the C flag
+\
+\ DEX                   \ Decrement the loop counter
+\
+\ BNE MUL7              \ Loop back for the next bit until P has been rotated
+\                       \ all the way
+\
+\ RTS                   \ Return from the subroutine
+\
+                        \ --- End of removed section -------------------------->
+
+\ ******************************************************************************
+\
+\       Name: MUT3
+\       Type: Subroutine
+\   Category: Maths (Arithmetic)
+\    Summary: Unused routine that does the same as MUT2
+\
+\ ------------------------------------------------------------------------------
+\
+\ This routine is never actually called, but it is identical to MUT2, as the
+\ extra instructions have no effect.
+\
+\ ******************************************************************************
+
+                        \ --- Original Acornsoft section removed: ------------->
+\
+\.MUT3
+\
+\ LDX ALP1              \ Set P = ALP1, though this gets overwritten by the
+\ STX P                 \ following, so this has no effect
+\
+\                       \ Fall through into MUT2 to do the following:
+\                       \
+\                       \   (S R) = XX(1 0)
+\                       \   (A P) = Q * A
+\
+                        \ --- End of removed section -------------------------->
+
+\ ******************************************************************************
+\
+\       Name: MUT2
+\       Type: Subroutine
+\   Category: Maths (Arithmetic)
+\    Summary: Calculate (S R) = XX(1 0) and (A P) = Q * A
+\
+\ ------------------------------------------------------------------------------
+\
+\ Do the following assignment, and multiplication of two signed 8-bit numbers:
+\
+\   (S R) = XX(1 0)
+\   (A P) = Q * A
+\
+\ ******************************************************************************
+
+                        \ --- Original Acornsoft section removed: ------------->
+\
+\.MUT2
+\
+\ LDX XX+1              \ Set S = XX+1
+\ STX S
+\
+\                       \ Fall through into MUT1 to do the following:
+\                       \
+\                       \   R = XX
+\                       \   (A P) = Q * A
+\
+                        \ --- End of removed section -------------------------->
+
+\ ******************************************************************************
+\
+\       Name: MUT1
+\       Type: Subroutine
+\   Category: Maths (Arithmetic)
+\    Summary: Calculate R = XX and (A P) = Q * A
+\
+\ ------------------------------------------------------------------------------
+\
+\ Do the following assignment, and multiplication of two signed 8-bit numbers:
+\
+\   R = XX
+\   (A P) = Q * A
+\
+\ ******************************************************************************
+
+                        \ --- Original Acornsoft section removed: ------------->
+\
+\.MUT1
+\
+\ LDX XX                \ Set R = XX
+\ STX R
+\
+\                       \ Fall through into MULT1 to do the following:
+\                       \
+\                       \   (A P) = Q * A
+\
+                        \ --- End of removed section -------------------------->
+
+\ ******************************************************************************
+\
 \       Name: MULT1
 \       Type: Subroutine
 \   Category: Maths (Arithmetic)
@@ -9701,6 +10855,78 @@ LOAD_C% = LOAD% +P% - CODE%
  STA R
 
  RTS                    \ Return from the subroutine
+
+\ ******************************************************************************
+\
+\       Name: TAS3
+\       Type: Subroutine
+\   Category: Maths (Geometry)
+\    Summary: Calculate the dot product of XX15 and an orientation vector
+\
+\ ------------------------------------------------------------------------------
+\
+\ Calculate the dot product of the vector in XX15 and one of the orientation
+\ vectors, as determined by the value of Y. If vect is the orientation vector,
+\ we calculate this:
+\
+\   (A X) = vect . XX15
+\         = vect_x * XX15 + vect_y * XX15+1 + vect_z * XX15+2
+\
+\ Arguments:
+\
+\   Y                   The orientation vector:
+\
+\                         * If Y = 10, calculate nosev . XX15
+\
+\                         * If Y = 16, calculate roofv . XX15
+\
+\                         * If Y = 22, calculate sidev . XX15
+\
+\ Returns:
+\
+\   (A X)               The result of the dot product
+\
+\ Other entry points:
+\
+\   TAS3-2              Calculate nosev . XX15
+\
+\ ******************************************************************************
+
+                        \ --- Original Acornsoft section removed: ------------->
+\
+\.TAS3
+\
+\ LDX INWK,Y            \ Set Q = the Y-th byte of INWK, i.e. vect_x
+\ STX Q
+\
+\ LDA XX15              \ Set A = XX15
+\
+\ JSR MULT12            \ Set (S R) = Q * A
+\                       \           = vect_x * XX15
+\
+\ LDX INWK+2,Y          \ Set Q = the Y+2-th byte of INWK, i.e. vect_y
+\ STX Q
+\
+\ LDA XX15+1            \ Set A = XX15+1
+\
+\ JSR MAD               \ Set (A X) = Q * A + (S R)
+\                       \           = vect_y * XX15+1 + vect_x * XX15
+\
+\ STA S                 \ Set (S R) = (A X)
+\ STX R
+\
+\ LDX INWK+4,Y          \ Set Q = the Y+2-th byte of INWK, i.e. vect_z
+\ STX Q
+\
+\ LDA XX15+2            \ Set A = XX15+2
+\
+\                       \ Fall through into MAD to set:
+\                       \
+\                       \   (A X) = Q * A + (S R)
+\                       \           = vect_z * XX15+2 + vect_y * XX15+1 +
+\                       \             vect_x * XX15
+\
+                        \ --- End of removed section -------------------------->
 
 \ ******************************************************************************
 \
@@ -9923,6 +11149,98 @@ LOAD_C% = LOAD% +P% - CODE%
 
 \ ******************************************************************************
 \
+\       Name: DV42
+\       Type: Subroutine
+\   Category: Maths (Arithmetic)
+\    Summary: Calculate (P R) = 256 * DELTA / z_hi
+\
+\ ------------------------------------------------------------------------------
+\
+\ Calculate the following division and remainder:
+\
+\   P = DELTA / (the Y-th stardust particle's z_hi coordinate)
+\
+\   R = remainder as a fraction of A, where 1.0 = 255
+\
+\ Another way of saying the above is this:
+\
+\   (P R) = 256 * DELTA / z_hi
+\
+\ DELTA is a value between 1 and 40, and the minimum z_hi is 16 (dust particles
+\ are removed at lower values than this), so this means P is between 0 and 2
+\ (as 40 / 16 = 2.5, so the maximum result is P = 2 and R = 128.
+\
+\ This uses the same shift-and-subtract algorithm as TIS2, but this time we
+\ keep the remainder.
+\
+\ Arguments:
+\
+\   Y                   The number of the stardust particle to process
+\
+\ Returns:
+\
+\   C flag              The C flag is cleared
+\
+\ ******************************************************************************
+
+                        \ --- Original Acornsoft section removed: ------------->
+\
+\.DV42
+\
+\ LDA SZ,Y              \ Fetch the Y-th dust particle's z_hi coordinate into A
+\
+\                       \ Fall through into DV41 to do:
+\                       \
+\                       \   (P R) = 256 * DELTA / A
+\                       \         = 256 * DELTA / Y-th stardust particle's z_hi
+\
+                        \ --- End of removed section -------------------------->
+
+\ ******************************************************************************
+\
+\       Name: DV41
+\       Type: Subroutine
+\   Category: Maths (Arithmetic)
+\    Summary: Calculate (P R) = 256 * DELTA / A
+\
+\ ------------------------------------------------------------------------------
+\
+\ Calculate the following division and remainder:
+\
+\   P = DELTA / A
+\
+\   R = remainder as a fraction of A, where 1.0 = 255
+\
+\ Another way of saying the above is this:
+\
+\   (P R) = 256 * DELTA / A
+\
+\ This uses the same shift-and-subtract algorithm as TIS2, but this time we
+\ keep the remainder.
+\
+\ Returns:
+\
+\   C flag              The C flag is cleared
+\
+\ ******************************************************************************
+
+                        \ --- Original Acornsoft section removed: ------------->
+\
+\.DV41
+\
+\ STA Q                 \ Store A in Q
+\
+\ LDA DELTA             \ Fetch the speed from DELTA into A
+\
+\                       \ Fall through into DVID4 to do:
+\                       \
+\                       \   (P R) = 256 * A / Q
+\                       \         = 256 * DELTA / A
+\
+                        \ --- End of removed section -------------------------->
+
+\ ******************************************************************************
+\
 \       Name: DVID4
 \       Type: Subroutine
 \   Category: Maths (Arithmetic)
@@ -9989,6 +11307,440 @@ LOAD_C% = LOAD% +P% - CODE%
                         \ in R, where 1.0 = 255. LL28+4 always returns with the
                         \ C flag cleared, and we return from the subroutine
                         \ using a tail call
+
+\ ******************************************************************************
+\
+\       Name: DVID3B2
+\       Type: Subroutine
+\   Category: Maths (Arithmetic)
+\    Summary: Calculate K(3 2 1 0) = (A P+1 P) / (z_sign z_hi z_lo)
+\  Deep dive: Shift-and-subtract division
+\
+\ ------------------------------------------------------------------------------
+\
+\ Calculate the following:
+\
+\   K(3 2 1 0) = (A P+1 P) / (z_sign z_hi z_lo)
+\
+\ The actual division here is done as an 8-bit calculation using LL31, but this
+\ routine shifts both the numerator (the top part of the division) and the
+\ denominator (the bottom part of the division) around to get the multi-byte
+\ result we want.
+\
+\ Specifically, it shifts both of them to the left as far as possible, keeping a
+\ tally of how many shifts get done in each one - and specifically, the
+\ difference in the number of shifts between the top and bottom (as shifting
+\ both of them once in the same direction won't change the result). It then
+\ divides the two highest bytes with the simple 8-bit routine in LL31, and
+\ shifts the result by the difference in the number of shifts, which acts as a
+\ scale factor to get the correct result.
+\
+\ Returns:
+\
+\   K(3 2 1 0)          The result of the division
+\
+\   X                   X is preserved
+\
+\ ******************************************************************************
+
+                        \ --- Original Acornsoft section removed: ------------->
+\
+\.DVID3B2
+\
+\ STA P+2               \ Set P+2 = A
+\
+\ LDA INWK+6            \ Set Q = z_lo
+\ STA Q
+\
+\ LDA INWK+7            \ Set R = z_hi
+\ STA R
+\
+\ LDA INWK+8            \ Set S = z_sign
+\ STA S
+\
+\.DVID3B
+\
+\                       \ Given the above assignments, we now want to calculate
+\                       \ the following to get the result we want:
+\                       \
+\                       \   K(3 2 1 0) = P(2 1 0) / (S R Q)
+\
+\ LDA P                 \ Make sure P(2 1 0) is at least 1
+\ ORA #1
+\ STA P
+\
+\ LDA P+2               \ Set T to the sign of P+2 * S (i.e. the sign of the
+\ EOR S                 \ result) and store it in T
+\ AND #%10000000
+\ STA T
+\
+\ LDY #0                \ Set Y = 0 to store the scale factor
+\
+\ LDA P+2               \ Clear the sign bit of P+2, so the division can be done
+\ AND #%01111111        \ with positive numbers and we'll set the correct sign
+\                       \ below, once all the maths is done
+\                       \
+\                       \ This also leaves A = P+2, which we use below
+\
+\.DVL9
+\
+\                       \ We now shift (A P+1 P) left until A >= 64, counting
+\                       \ the number of shifts in Y. This makes the top part of
+\                       \ the division as large as possible, thus retaining as
+\                       \ much accuracy as we can.  When we come to return the
+\                       \ final result, we shift the result by the number of
+\                       \ places in Y, and in the correct direction
+\
+\ CMP #64               \ If A >= 64, jump down to DV14
+\ BCS DV14
+\
+\ ASL P                 \ Shift (A P+1 P) to the left
+\ ROL P+1
+\ ROL A
+\
+\ INY                   \ Increment the scale factor in Y
+\
+\ BNE DVL9              \ Loop up to DVL9 (this BNE is effectively a JMP, as Y
+\                       \ will never be zero)
+\
+\.DV14
+\
+\                       \ If we get here, A >= 64 and contains the highest byte
+\                       \ of the numerator, scaled up by the number of left
+\                       \ shifts in Y
+\
+\ STA P+2               \ Store A in P+2, so we now have the scaled value of
+\                       \ the numerator in P(2 1 0)
+\
+\ LDA S                 \ Set A = |S|
+\ AND #%01111111
+\
+\ BMI DV9               \ If bit 7 of A is set, jump down to DV9 to skip the
+\                       \ left-shifting of the denominator (though this branch
+\                       \ instruction has no effect as bit 7 of the above AND
+\                       \ can never be set, which is why this instruction was
+\                       \ removed from later versions)
+\
+\.DVL6
+\
+\                       \ We now shift (S R Q) left until bit 7 of S is set,
+\                       \ reducing Y by the number of shifts. This makes the
+\                       \ bottom part of the division as large as possible, thus
+\                       \ retaining as much accuracy as we can. When we come to
+\                       \ return the final result, we shift the result by the
+\                       \ total number of places in Y, and in the correct
+\                       \ direction, to give us the correct result
+\                       \
+\                       \ We set A to |S| above, so the following actually
+\                       \ shifts (A R Q)
+\
+\ DEY                   \ Decrement the scale factor in Y
+\
+\ ASL Q                 \ Shift (A R Q) to the left
+\ ROL R
+\ ROL A
+\
+\ BPL DVL6              \ Loop up to DVL6 to do another shift, until bit 7 of A
+\                       \ is set and we can't shift left any further
+\
+\.DV9
+\
+\                       \ We have now shifted both the numerator and denominator
+\                       \ left as far as they will go, keeping a tally of the
+\                       \ overall scale factor of the various shifts in Y. We
+\                       \ can now divide just the two highest bytes to get our
+\                       \ result
+\
+\ STA Q                 \ Set Q = A, the highest byte of the denominator
+\
+\ LDA #254              \ Set R to have bits 1-7 set, so we can pass this to
+\ STA R                 \ LL31 to act as the bit counter in the division
+\
+\ LDA P+2               \ Set A to the highest byte of the numerator
+\
+\ JSR LL31              \ Call LL31 to calculate:
+\                       \
+\                       \   R = 256 * A / Q
+\                       \     = 256 * numerator / denominator
+\
+\                       \ The result of our division is now in R, so we just
+\                       \ need to shift it back by the scale factor in Y
+\
+\ LDA #0                \ Set K(3 2 1) = 0 to hold the result (we populate K
+\ STA K+1               \ next)
+\ STA K+2
+\ STA K+3
+\
+\ TYA                   \ If Y is positive, jump to DV12
+\ BPL DV12
+\
+\                       \ If we get here then Y is negative, so we need to shift
+\                       \ the result R to the left by Y places, and then set the
+\                       \ correct sign for the result
+\
+\ LDA R                 \ Set A = R
+\
+\.DVL8
+\
+\ ASL A                 \ Shift (K+3 K+2 K+1 A) left
+\ ROL K+1
+\ ROL K+2
+\ ROL K+3
+\
+\ INY                   \ Increment the scale factor in Y
+\
+\ BNE DVL8              \ Loop back to DVL8 until we have shifted left by Y
+\                       \ places
+\
+\ STA K                 \ Store A in K so the result is now in K(3 2 1 0)
+\
+\ LDA K+3               \ Set K+3 to the sign in T, which we set above to the
+\ ORA T                 \ correct sign for the result
+\ STA K+3
+\
+\ RTS                   \ Return from the subroutine
+\
+\.DV13
+\
+\                       \ If we get here then Y is zero, so we don't need to
+\                       \ shift the result R, we just need to set the correct
+\                       \ sign for the result
+\
+\ LDA R                 \ Store R in K so the result is now in K(3 2 1 0)
+\ STA K
+\
+\ LDA T                 \ Set K+3 to the sign in T, which we set above to the
+\ STA K+3               \ correct sign for the result
+\
+\ RTS                   \ Return from the subroutine
+\
+\.DV12
+\
+\ BEQ DV13              \ We jumped here having set A to the scale factor in Y,
+\                       \ so this jumps up to DV13 if Y = 0
+\
+\                       \ If we get here then Y is positive and non-zero, so we
+\                       \ need to shift the result R to the right by Y places
+\                       \ and then set the correct sign for the result. We also
+\                       \ know that K(3 2 1) will stay 0, as we are shifting the
+\                       \ lowest byte to the right, so no set bits will make
+\                       \ their way into the top three bytes
+\
+\ LDA R                 \ Set A = R
+\
+\.DVL10
+\
+\ LSR A                 \ Shift A right
+\
+\ DEY                   \ Decrement the scale factor in Y
+\
+\ BNE DVL10             \ Loop back to DVL10 until we have shifted right by Y
+\                       \ places
+\
+\ STA K                 \ Store the shifted A in K so the result is now in
+\                       \ K(3 2 1 0)
+\
+\ LDA T                 \ Set K+3 to the sign in T, which we set above to the
+\ STA K+3               \ correct sign for the result
+\
+\ RTS                   \ Return from the subroutine
+\
+                        \ --- End of removed section -------------------------->
+
+\ ******************************************************************************
+\
+\       Name: cntr
+\       Type: Subroutine
+\   Category: Dashboard
+\    Summary: Apply damping to the pitch or roll dashboard indicator
+\
+\ ------------------------------------------------------------------------------
+\
+\ Apply damping to the value in X, where X ranges from 1 to 255 with 128 as the
+\ centre point (so X represents a position on a centre-based dashboard slider,
+\ such as pitch or roll). If the value is in the left-hand side of the slider
+\ (1-127) then it bumps the value up by 1 so it moves towards the centre, and
+\ if it's in the right-hand side, it reduces it by 1, also moving it towards the
+\ centre.
+\
+\ ******************************************************************************
+
+                        \ --- Original Acornsoft section removed: ------------->
+\
+\.cntr
+\
+\ LDA DAMP              \ If DAMP is non-zero, then keyboard damping is not
+\ BNE RE1               \ enabled, so jump to RE1 to return from the subroutine
+\
+\ TXA                   \ If X < 128, then it's in the left-hand side of the
+\ BPL BUMP              \ dashboard slider, so jump to BUMP to bump it up by 1,
+\                       \ to move it closer to the centre
+\
+\ DEX                   \ Otherwise X >= 128, so it's in the right-hand side
+\ BMI RE1               \ of the dashboard slider, so decrement X by 1, and if
+\                       \ it's still >= 128, jump to RE1 to return from the
+\                       \ subroutine, otherwise fall through to BUMP to undo
+\                       \ the bump and then return
+\
+\.BUMP
+\
+\ INX                   \ Bump X up by 1, and if it hasn't overshot the end of
+\ BNE RE1               \ the dashboard slider, jump to RE1 to return from the
+\                       \ subroutine, otherwise fall through to REDU to drop
+\                       \ it down by 1 again
+\
+\.REDU
+\
+\ DEX                   \ Reduce X by 1, and if we have reached 0 jump up to
+\ BEQ BUMP              \ BUMP to add 1, because we need the value to be in the
+\                       \ range 1 to 255
+\
+\.RE1
+\
+\ RTS                   \ Return from the subroutine
+\
+                        \ --- End of removed section -------------------------->
+
+\ ******************************************************************************
+\
+\       Name: BUMP2
+\       Type: Subroutine
+\   Category: Dashboard
+\    Summary: Bump up the value of the pitch or roll dashboard indicator
+\
+\ ------------------------------------------------------------------------------
+\
+\ Increase ("bump up") X by A, where X is either the current rate of pitch or
+\ the current rate of roll.
+\
+\ The rate of pitch or roll ranges from 1 to 255 with 128 as the centre point.
+\ This is the amount by which the pitch or roll is currently changing, so 1
+\ means it is decreasing at the maximum rate, 128 means it is not changing,
+\ and 255 means it is increasing at the maximum rate. These values correspond
+\ to the line on the DC or RL indicators on the dashboard, with 1 meaning full
+\ left, 128 meaning the middle, and 255 meaning full right.
+\
+\ If bumping up X would push it past 255, then X is set to 255.
+\
+\ If keyboard auto-recentre is configured and the result is less than 128, we
+\ bump X up to the mid-point, 128. This is the equivalent of having a roll or
+\ pitch in the left half of the indicator, when increasing the roll or pitch
+\ should jump us straight to the mid-point.
+\
+\ Other entry points:
+\
+\   RE2+2               Restore A from T and return from the subroutine
+\
+\ ******************************************************************************
+
+                        \ --- Original Acornsoft section removed: ------------->
+\
+\.BUMP2
+\
+\ STA T                 \ Store argument A in T so we can restore it later
+\
+\ TXA                   \ Copy argument X into A
+\
+\ CLC                   \ Clear the C flag so we can do addition without the
+\                       \ C flag affecting the result
+\
+\ ADC T                 \ Set X = A = argument X + argument A
+\ TAX
+\
+\ BCC RE2               \ If the C flag is clear, then we didn't overflow, so
+\                       \ jump to RE2 to auto-recentre and return the result
+\
+\ LDX #255              \ We have an overflow, so set X to the maximum possible
+\                       \ value of 255
+\
+\.RE2
+\
+\ BPL RE3+2             \ If X has bit 7 clear (i.e. the result < 128), then
+\                       \ jump to RE3+2 in routine REDU2 to do an auto-recentre,
+\                       \ if configured, because the result is on the left side
+\                       \ of the centre point of 128
+\
+\                       \ Jumps to RE2+2 end up here
+\
+\ LDA T                 \ Restore the original argument A from T into A
+\
+\ RTS                   \ Return from the subroutine
+\
+                        \ --- End of removed section -------------------------->
+
+\ ******************************************************************************
+\
+\       Name: REDU2
+\       Type: Subroutine
+\   Category: Dashboard
+\    Summary: Reduce the value of the pitch or roll dashboard indicator
+\
+\ ------------------------------------------------------------------------------
+\
+\ Reduce X by A, where X is either the current rate of pitch or the current
+\ rate of roll.
+\
+\ The rate of pitch or roll ranges from 1 to 255 with 128 as the centre point.
+\ This is the amount by which the pitch or roll is currently changing, so 1
+\ means it is decreasing at the maximum rate, 128 means it is not changing,
+\ and 255 means it is increasing at the maximum rate. These values correspond
+\ to the line on the DC or RL indicators on the dashboard, with 1 meaning full
+\ left, 128 meaning the middle, and 255 meaning full right.
+\
+\ If reducing X would bring it below 1, then X is set to 1.
+\
+\ If keyboard auto-recentre is configured and the result is greater than 128, we
+\ reduce X down to the mid-point, 128. This is the equivalent of having a roll
+\ or pitch in the right half of the indicator, when decreasing the roll or pitch
+\ should jump us straight to the mid-point.
+\
+\ Other entry points:
+\
+\   RE3+2               Auto-recentre the value in X, if keyboard auto-recentre
+\                       is configured
+\
+\ ******************************************************************************
+
+                        \ --- Original Acornsoft section removed: ------------->
+\
+\.REDU2
+\
+\ STA T                 \ Store argument A in T so we can restore it later
+\
+\ TXA                   \ Copy argument X into A
+\
+\ SEC                   \ Set the C flag so we can do subtraction without the
+\                       \ C flag affecting the result
+\
+\ SBC T                 \ Set X = A = argument X - argument A
+\ TAX
+\
+\ BCS RE3               \ If the C flag is set, then we didn't underflow, so
+\                       \ jump to RE3 to auto-recentre and return the result
+\
+\ LDX #1                \ We have an underflow, so set X to the minimum possible
+\                       \ value, 1
+\
+\.RE3
+\
+\ BPL RE2+2             \ If X has bit 7 clear (i.e. the result < 128), then
+\                       \ jump to RE2+2 above to return the result as is,
+\                       \ because the result is on the left side of the centre
+\                       \ point of 128, so we don't need to auto-centre
+\
+\                       \ Jumps to RE3+2 end up here
+\
+\                       \ If we get here, then we need to apply auto-recentre,
+\                       \ if it is configured
+\
+\ LDA DJD               \ If keyboard auto-recentre is disabled, then
+\ BNE RE2+2             \ jump to RE2+2 to restore A and return
+\
+\ LDX #128              \ If keyboard auto-recentre is enabled, set X to 128
+\ BMI RE2+2             \ (the middle of our range) and jump to RE2+2 to
+\                       \ restore A and return
+\
+                        \ --- End of removed section -------------------------->
 
 \ ******************************************************************************
 \
@@ -10582,6 +12334,50 @@ LOAD_C% = LOAD% +P% - CODE%
 
 \ ******************************************************************************
 \
+\       Name: SIGHT
+\       Type: Subroutine
+\   Category: Flight
+\    Summary: Draw the laser crosshairs
+\
+\ ******************************************************************************
+
+                        \ --- Original Acornsoft section removed: ------------->
+\
+\.SIGHT
+\
+\ LDY VIEW              \ Fetch the laser power for our new view
+\ LDA LASER,Y
+\
+\ BEQ BOL1-1            \ If it is zero (i.e. there is no laser fitted to this
+\                       \ view), jump to BOL1-1 to return from the subroutine
+\                       \ (as BOL1-1 contains &60, which is the opcode for an
+\                       \ RTS)
+\
+\ LDA #128              \ Set QQ19 to the x-coordinate of the centre of the
+\ STA QQ19              \ screen
+\
+\ LDA #Y-24             \ Set QQ19+1 to the y-coordinate of the centre of the
+\ STA QQ19+1            \ screen, minus 24 (because TT15 will add 24 to the
+\                       \ coordinate when it draws the crosshairs)
+\
+\ LDA #20               \ Set QQ19+2 to size 20 for the crosshairs size
+\ STA QQ19+2
+\
+\ JSR TT15              \ Call TT15 to draw crosshairs of size 20 just to the
+\                       \ left of the middle of the screen
+\
+\ LDA #10               \ Set QQ19+2 to size 10 for the crosshairs size
+\ STA QQ19+2
+\
+\ JMP TT15              \ Call TT15 to draw crosshairs of size 10 at the same
+\                       \ location, which will remove the centre part from the
+\                       \ laser crosshairs, leaving a gap in the middle, and
+\                       \ return from the subroutine using a tail call
+\
+                        \ --- End of removed section -------------------------->
+
+\ ******************************************************************************
+\
 \       Name: TT66
 \       Type: Subroutine
 \   Category: Utility routines
@@ -10873,6 +12669,148 @@ LOAD_C% = LOAD% +P% - CODE%
 .SC5
 
  RTS                    \ Return from the subroutine
+
+\ ******************************************************************************
+\
+\       Name: CPIX4
+\       Type: Subroutine
+\   Category: Drawing pixels
+\    Summary: Draw a double-height dot on the dashboard
+\
+\ ------------------------------------------------------------------------------
+\
+\ Draw a double-height mode 5 dot (2 pixels high, 2 pixels wide).
+\
+\ Arguments:
+\
+\   X1                  The screen pixel x-coordinate of the bottom-left corner
+\                       of the dot
+\
+\   Y1                  The screen pixel y-coordinate of the bottom-left corner
+\                       of the dot
+\
+\   COL                 The colour of the dot as a mode 5 character row byte
+\
+\ ******************************************************************************
+
+                        \ --- Original Acornsoft section removed: ------------->
+\
+\.CPIX4
+\
+\ JSR CPIX2             \ Call CPIX2 to draw a single-height dash at (X1, Y1)
+\
+\ DEC Y1                \ Decrement Y1
+\
+\                       \ Fall through into CPIX2 to draw a second single-height
+\                       \ dash on the pixel row above the first one, to create a
+\                       \ double-height dot
+\
+                        \ --- End of removed section -------------------------->
+
+\ ******************************************************************************
+\
+\       Name: CPIX2
+\       Type: Subroutine
+\   Category: Drawing pixels
+\    Summary: Draw a single-height dot on the dashboard
+\  Deep dive: Drawing colour pixels in mode 5
+\
+\ ------------------------------------------------------------------------------
+\
+\ Draw a single-height mode 5 dash (1 pixel high, 2 pixels wide).
+\
+\ Arguments:
+\
+\   X1                  The screen pixel x-coordinate of the dash
+\
+\   Y1                  The screen pixel y-coordinate of the dash
+\
+\   COL                 The colour of the dash as a mode 5 character row byte
+\
+\ ******************************************************************************
+
+                        \ --- Original Acornsoft section removed: ------------->
+\
+\.CPIX2
+\
+\ LDA Y1                \ Fetch the y-coordinate into A
+\
+\ TAY                   \ Store the y-coordinate in Y
+\
+\ LSR A                 \ Set A = A / 8, so A now contains the character row we
+\ LSR A                 \ need to draw in (as each character row contains 8
+\ LSR A                 \ pixel rows)
+\
+\ ORA #&60              \ Each character row in Elite's screen mode takes up one
+\                       \ page in memory (256 bytes), so we now OR with &60 to
+\                       \ get the page containing the dash (see the comments in
+\                       \ routine TT26 for more discussion about calculating
+\                       \ screen memory addresses)
+\
+\ STA SCH               \ Store the screen page in the high byte of SC(1 0)
+\
+\ LDA X1                \ Each character block contains 8 pixel rows, so to get
+\ AND #%11111000        \ the address of the first byte in the character block
+\                       \ that we need to draw into, as an offset from the start
+\                       \ of the row, we clear bits 0-2
+\
+\ STA SC                \ Store the address of the character block in the low
+\                       \ byte of SC(1 0), so now SC(1 0) points to the
+\                       \ character block we need to draw into
+\
+\ TYA                   \ Set Y to just bits 0-2 of the y-coordinate, which will
+\ AND #%00000111        \ be the number of the pixel row we need to draw into
+\ TAY                   \ within the character block
+\
+\ LDA X1                \ Copy bits 0-1 of X1 to bits 1-2 of X, and clear the C
+\ AND #%00000110        \ flag in the process (using the LSR). X will now be
+\ LSR A                 \ a value between 0 and 3, and will be the pixel number
+\ TAX                   \ in the character row for the left pixel in the dash.
+\                       \ This is because each character row is one byte that
+\                       \ contains 4 pixels, but covers 8 screen coordinates, so
+\                       \ this effectively does the division by 2 that we need
+\
+\ LDA CTWOS,X           \ Fetch a mode 5 1-pixel byte with the pixel position
+\ AND COL               \ at X, and AND with the colour byte so that pixel takes
+\                       \ on the colour we want to draw (i.e. A is acting as a
+\                       \ mask on the colour byte)
+\
+\ EOR (SC),Y            \ Draw the pixel on-screen using EOR logic, so we can
+\ STA (SC),Y            \ remove it later without ruining the background that's
+\                       \ already on-screen
+\
+\ LDA CTWOS+1,X         \ Fetch a mode 5 1-pixel byte with the pixel position
+\                       \ at X+1, so we can draw the right pixel of the dash
+\
+\ BPL CP1               \ The CTWOS table has an extra row at the end of it that
+\                       \ repeats the first value, %10001000, so if we have not
+\                       \ fetched that value, then the right pixel of the dash
+\                       \ is in the same character block as the left pixel, so
+\                       \ jump to CP1 to draw it
+\
+\ LDA SC                \ Otherwise the left pixel we drew was at the last
+\ ADC #8                \ position of four in this character block, so we add
+\ STA SC                \ 8 to the screen address to move onto the next block
+\                       \ along (as there are 8 bytes in a character block).
+\                       \ The C flag was cleared above, so this ADC is correct
+\
+\ LDA CTWOS+1,X         \ Refetch the mode 5 1-pixel byte, as we just overwrote
+\                       \ A (the byte will still be the fifth byte from the
+\                       \ table, which is correct as we want to draw the
+\                       \ leftmost pixel in the next character along as the
+\                       \ dash's right pixel)
+\
+\.CP1
+\
+\ AND COL               \ Apply the colour mask to the pixel byte, as above
+\
+\ EOR (SC),Y            \ Draw the dash's right pixel according to the mask in
+\ STA (SC),Y            \ A, with the colour in COL, using EOR logic, just as
+\                       \ above
+\
+\ RTS                   \ Return from the subroutine
+\
+                        \ --- End of removed section -------------------------->
 
 \ ******************************************************************************
 \
@@ -12372,7 +14310,7 @@ LOAD_D% = LOAD% + P% - CODE%
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: ------------------------->
+                        \ --- Whole section added for Elite-A: ---------------->
 
 .sell_yn
 
@@ -12381,7 +14319,7 @@ LOAD_D% = LOAD% + P% - CODE%
  LDA #&CE
  JSR DETOK
 
-                        \ --- End of added code ------------------------------->
+                        \ --- End of added section ---------------------------->
 
 \ ******************************************************************************
 \
@@ -12528,7 +14466,7 @@ LOAD_D% = LOAD% + P% - CODE%
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: ------------------------->
+                        \ --- Whole section added for Elite-A: ---------------->
 
 .sell_jump
 
@@ -12548,7 +14486,7 @@ LOAD_D% = LOAD% + P% - CODE%
 
  JMP BAY
 
-                        \ --- End of added code ------------------------------->
+                        \ --- End of added section ---------------------------->
 
 \ ******************************************************************************
 \
@@ -12852,6 +14790,59 @@ LOAD_D% = LOAD% + P% - CODE%
 
  JMP TT210              \ Jump to TT210 to print the contents of our cargo bay
                         \ and return from the subroutine using a tail call
+
+\ ******************************************************************************
+\
+\       Name: TT214
+\       Type: Subroutine
+\   Category: Inventory
+\    Summary: Ask a question with a "Y/N?" prompt and return the response
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   A                   The text token to print before the "Y/N?" prompt
+\
+\ Returns:
+\
+\   C flag              Set if the response was "yes", clear otherwise
+\
+\ ******************************************************************************
+
+                        \ --- Original Acornsoft section removed: ------------->
+\
+\.TT214
+\
+\.TT221
+\
+\ JSR TT27              \ Print the text token in A
+\
+\ LDA #206              \ Print extended token 206 ("{all caps}(Y/N)?")
+\ JSR DETOK
+\
+\ JSR TT217             \ Scan the keyboard until a key is pressed, and return
+\                       \ the key's ASCII code in A and X
+\
+\ ORA #%00100000        \ Set bit 5 in the value of the key pressed, which
+\                       \ converts it to lower case
+\
+\ CMP #'y'              \ If "y" was pressed, jump to TT218
+\ BEQ TT218
+\
+\ LDA #'n'              \ Otherwise jump to TT26 to print "n" and return from
+\ JMP TT26              \ the subroutine using a tail call (so all other
+\                       \ responses apart from "y" indicate a no)
+\
+\.TT218
+\
+\ JSR TT26              \ Print the character in A, i.e. print "y"
+\
+\ SEC                   \ Set the C flag to indicate a "yes" response
+\
+\ RTS
+\
+                        \ --- End of removed section -------------------------->
 
 \ ******************************************************************************
 \
@@ -13681,6 +15672,277 @@ LOAD_D% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
 \
+\       Name: hyp
+\       Type: Subroutine
+\   Category: Flight
+\    Summary: Start the hyperspace process
+\
+\ ------------------------------------------------------------------------------
+\
+\ Called when "H" or CTRL-H is pressed during flight. Checks the following:
+\
+\   * We are in space
+\
+\   * We are not already in a hyperspace countdown
+\
+\ If CTRL is being held down, we jump to Ghy to engage the galactic hyperdrive,
+\ otherwise we check that:
+\
+\   * The selected system is not the current system
+\
+\   * We have enough fuel to make the jump
+\
+\ and if all the pre-jump checks are passed, we print the destination on-screen
+\ and start the countdown.
+\
+\ Other entry points:
+\
+\   TTX111              Used to rejoin this routine from the call to TTX110
+\
+\ ******************************************************************************
+
+                        \ --- Original Acornsoft section removed: ------------->
+\
+\.hyp
+\
+\ LDA QQ22+1            \ Fetch QQ22+1, which contains the number that's shown
+\                       \ on-screen during hyperspace countdown
+\
+\ ORA QQ12              \ If we are docked (QQ12 = &FF) or there is already a
+\ BNE zZ+1              \ countdown in progress, then return from the subroutine
+\                       \ using a tail call (as zZ+1 contains an RTS), as we
+\                       \ can't hyperspace when docked, or there is already a
+\                       \ countdown in progress
+\
+\ JSR CTRL              \ Scan the keyboard to see if CTRL is currently pressed
+\
+\ BMI Ghy               \ If it is, then the galactic hyperdrive has been
+\                       \ activated, so jump to Ghy to process it
+\
+\ LDA QQ11              \ If the current view is 0 (i.e. the space view) then
+\ BEQ TTX110            \ jump to TTX110, which calls TT111 to set the current
+\                       \ system to the nearest system to (QQ9, QQ10), and jumps
+\                       \ back into this routine at TTX111 below
+\
+\ AND #%11000000        \ If neither bits 6 or 7 of the view number are set - so
+\ BEQ zZ+1              \ this is neither the Short-range or Long-range Chart -
+\                       \ then return from the subroutine (as zZ+1 contains an
+\                       \ RTS)
+\
+\ JSR hm                \ This is a chart view, so call hm to redraw the chart
+\                       \ crosshairs
+\
+\.TTX111
+\
+\                       \ If we get here then the current view is either the
+\                       \ space view or a chart
+\
+\ LDA QQ8               \ If both bytes of the distance to the selected system
+\ ORA QQ8+1             \ in QQ8 are zero, return from the subroutine (as zZ+1
+\ BEQ zZ+1              \ contains an RTS), as the selected system is the
+\                       \ current system
+\
+\ LDA #7                \ Move the text cursor to column 7, row 22 (in the
+\ STA XC                \ middle of the bottom text row)
+\ LDA #22
+\ STA YC
+\
+\ LDA #0                \ Set QQ17 = 0 to switch to ALL CAPS
+\ STA QQ17
+\
+\ LDA #189              \ Print recursive token 29 ("HYPERSPACE ")
+\ JSR TT27
+\
+\ LDA QQ8+1             \ If the high byte of the distance to the selected
+\ BNE TT147             \ system in QQ8 is > 0, then it is definitely too far to
+\                       \ jump (as our maximum range is 7.0 light years, or a
+\                       \ value of 70 in QQ8(1 0)), so jump to TT147 to print
+\                       \ "RANGE?" and return from the subroutine using a tail
+\                       \ call
+\
+\ LDA QQ14              \ Fetch our current fuel level from Q114 into A
+\
+\ CMP QQ8               \ If our fuel reserves are less than the distance to the
+\ BCC TT147             \ selected system, then we don't have enough fuel for
+\                       \ this jump, so jump to TT147 to print "RANGE?" and
+\                       \ return from the subroutine using a tail call
+\
+\ LDA #'-'              \ Print a hyphen
+\ JSR TT27
+\
+\ JSR cpl               \ Call cpl to print the name of the selected system
+\
+\                       \ Fall through into wW to start the hyperspace countdown
+\
+                        \ --- End of removed section -------------------------->
+
+\ ******************************************************************************
+\
+\       Name: wW
+\       Type: Subroutine
+\   Category: Flight
+\    Summary: Start a hyperspace countdown
+\
+\ ------------------------------------------------------------------------------
+\
+\ Start the hyperspace countdown (for both inter-system hyperspace and the
+\ galactic hyperdrive).
+\
+\ ******************************************************************************
+
+                        \ --- Original Acornsoft section removed: ------------->
+\
+\.wW
+\
+\ LDA #15               \ The hyperspace countdown starts from 15, so set A to
+\                       \ to 15 so we can set the two hyperspace counters
+\
+\ STA QQ22+1            \ Set the number in QQ22+1 to 15, which is the number
+\                       \ that's shown on-screen during the hyperspace countdown
+\
+\ STA QQ22              \ Set the number in QQ22 to 15, which is the internal
+\                       \ counter that counts down by 1 each iteration of the
+\                       \ main game loop, and each time it reaches zero, the
+\                       \ on-screen counter gets decremented, and QQ22 gets set
+\                       \ to 5, so setting QQ22 to 15 here makes the first tick
+\                       \ of the hyperspace counter longer than subsequent ticks
+\
+\ TAX                   \ Print the 8-bit number in X (i.e. 15) at text location
+\ JMP ee3               \ (0, 1), padded to 5 digits, so it appears in the top
+\                       \ left corner of the screen, and return from the
+\                       \ subroutine using a tail call
+\
+                        \ --- End of removed section -------------------------->
+
+\ ******************************************************************************
+\
+\       Name: TTX110
+\       Type: Subroutine
+\   Category: Flight
+\    Summary: Set the current system to the nearest system and return to hyp
+\
+\ ******************************************************************************
+
+                        \ --- Original Acornsoft section removed: ------------->
+\
+\.TTX110
+\
+\                       \ This routine is only called from the hyp routine, and
+\                       \ it jumps back into hyp at label TTX111
+\
+\ JSR TT111             \ Call TT111 to set the current system to the nearest
+\                       \ system to (QQ9, QQ10), and put the seeds of the
+\                       \ nearest system into QQ15 to QQ15+5
+\
+\ JMP TTX111            \ Return to TTX111 in the hyp routine
+\
+                        \ --- End of removed section -------------------------->
+
+\ ******************************************************************************
+\
+\       Name: Ghy
+\       Type: Subroutine
+\   Category: Flight
+\    Summary: Perform a galactic hyperspace jump
+\  Deep dive: Twisting the system seeds
+\             Galaxy and system seeds
+\
+\ ------------------------------------------------------------------------------
+\
+\ Engage the galactic hyperdrive. Called from the hyp routine above if CTRL-H is
+\ being pressed.
+\
+\ This routine also updates the galaxy seeds to point to the next galaxy. Using
+\ a galactic hyperdrive rotates each seed byte to the left, rolling each byte
+\ left within itself like this:
+\
+\   01234567 -> 12345670
+\
+\ to get the seeds for the next galaxy. So after 8 galactic jumps, the seeds
+\ roll round to those of the first galaxy again.
+\
+\ We always arrive in a new galaxy at galactic coordinates (96, 96), and then
+\ find the nearest system and set that as our location.
+\
+\ Other entry points:
+\
+\   zZ+1                Contains an RTS
+\
+\ ******************************************************************************
+
+                        \ --- Original Acornsoft section removed: ------------->
+\
+\.Ghy
+\
+\ LDX GHYP              \ Fetch GHYP, which tells us whether we own a galactic
+\ BEQ hy5               \ hyperdrive, and if it is zero, which means we don't,
+\                       \ return from the subroutine (as hy5 contains an RTS)
+\
+\ INX                   \ We own a galactic hyperdrive, so X is &FF, so this
+\                       \ instruction sets X = 0
+\
+\ STX GHYP              \ The galactic hyperdrive is a one-use item, so set GHYP
+\                       \ to 0 so we no longer have one fitted
+\
+\ STX FIST              \ Changing galaxy also clears our criminal record, so
+\                       \ set our legal status in FIST to 0 ("clean")
+\
+\ JSR wW                \ Call wW to start the hyperspace countdown
+\
+\ LDX #5                \ To move galaxy, we rotate the galaxy's seeds left, so
+\                       \ set a counter in X for the 6 seed bytes
+\
+\ INC GCNT              \ Increment the current galaxy number in GCNT
+\
+\ LDA GCNT              \ Set GCNT = GCNT mod 8, so we jump from galaxy 7 back
+\ AND #7                \ to galaxy 0 (shown in-game as going from galaxy 8 back
+\ STA GCNT              \ to the starting point in galaxy 1)
+\
+\.G1
+\
+\ LDA QQ21,X            \ Load the X-th seed byte into A
+\
+\ ASL A                 \ Set the C flag to bit 7 of the seed
+\
+\ ROL QQ21,X            \ Rotate the seed in memory, which will add bit 7 back
+\                       \ in as bit 0, so this rolls the seed around on itself
+\
+\ DEX                   \ Decrement the counter
+\
+\ BPL G1                \ Loop back for the next seed byte, until we have
+\                       \ rotated them all
+\
+\\JSR DORND             \ This instruction is commented out in the original
+\                       \ source, and would set A and X to random numbers, so
+\                       \ perhaps the original plan was to arrive in each new
+\                       \ galaxy in a random place?
+\
+\.zZ
+\
+\ LDA #&60              \ Set (QQ9, QQ10) to (96, 96), which is where we always
+\ STA QQ9               \ arrive in a new galaxy (the selected system will be
+\ STA QQ10              \ set to the nearest actual system later on)
+\
+\ JSR TT110             \ Call TT110 to show the front space view
+\
+\ JSR TT111             \ Call TT111 to set the current system to the nearest
+\                       \ system to (QQ9, QQ10), and put the seeds of the
+\                       \ nearest system into QQ15 to QQ15+5
+\
+\ LDX #0                \ Set the distance to the selected system in QQ8(1 0)
+\ STX QQ8               \ to 0
+\ STX QQ8+1
+\
+\ LDA #116              \ Print recursive token 116 (GALACTIC HYPERSPACE ")
+\ JSR MESS              \ as an in-flight message
+\
+\                       \ Fall through into jmp to set the system to the
+\                       \ current system and return from the subroutine there
+\
+                        \ --- End of removed section -------------------------->
+
+\ ******************************************************************************
+\
 \       Name: jmp
 \       Type: Subroutine
 \   Category: Universe
@@ -13766,6 +16028,28 @@ LOAD_D% = LOAD% + P% - CODE%
 
  JMP TT11               \ Call TT11 to print (Y X) to 5 digits and return from
                         \ the subroutine using a tail call
+
+\ ******************************************************************************
+\
+\       Name: TT147
+\       Type: Subroutine
+\   Category: Text
+\    Summary: Print an error when a system is out of hyperspace range
+\
+\ ------------------------------------------------------------------------------
+\
+\ Print "RANGE?" for when the hyperspace distance is too far
+\
+\ ******************************************************************************
+
+                        \ --- Original Acornsoft section removed: ------------->
+\
+\.TT147
+\
+\ LDA #202              \ Load A with token 42 ("RANGE") and fall through into
+\                       \ prq to print it, followed by a question mark
+\
+                        \ --- End of removed section -------------------------->
 
 \ ******************************************************************************
 \
@@ -14272,14 +16556,14 @@ LOAD_D% = LOAD% + P% - CODE%
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: ------------------------->
+                        \ --- Whole section added for Elite-A: ---------------->
 
 .encyclopedia
 
  LDA #'E'
  STA RDLI+4
 
-                        \ --- End of added code ------------------------------->
+                        \ --- End of added section ---------------------------->
 
 \ ******************************************************************************
 \
@@ -15435,6 +17719,129 @@ LOAD_D% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
 \
+\       Name: refund
+\       Type: Subroutine
+\   Category: Equipment
+\    Summary: Install a new laser, processing a refund if applicable
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   A                   The power of the new laser to be fitted
+\
+\   X                   The view number for fitting the new laser
+\
+\ Returns:
+\
+\   A                   A is preserved
+\
+\   X                   X is preserved
+\
+\ ******************************************************************************
+
+                        \ --- Original Acornsoft section removed: ------------->
+\
+\IF _STH_DISC
+\
+\ NOP                   \ In the first version of disc Elite, there was a nasty
+\ NOP                   \ bug where buying a laser that you already owned
+\ NOP                   \ affected your credit balance, so if you were clever,
+\ NOP                   \ you could keep doing this to get as many credits as
+\ NOP                   \ you liked. This was quickly fixed by replacing the
+\ NOP                   \ incorrect code with NOPs, which is what we have here
+\ NOP
+\ NOP
+\ NOP
+\
+\.refund
+\
+\ STA T1                \ Store A in T1 so we can retrieve it later
+\
+\ LDA LASER,X           \ If there is no laser in view X (i.e. the laser power
+\ BEQ ref3              \ is zero), jump to ref3 to skip the refund code
+\
+\ELIF _IB_DISC
+\
+\                       \ In the first version of disc Elite, there was a nasty
+\                       \ bug where buying a laser that you already owned
+\                       \ affected your credit balance. This was quickly fixed
+\                       \ by replacing the incorrect code with NOPs, but the
+\                       \ version on Ian Bell's website contains this bug, and
+\                       \ this is the section responsible for the problem
+\
+\.ref2
+\
+\ LDY #187              \ Print out the error: "LASER PRESENT" and refund the
+\ JMP pres              \ value of the laser, returning from the subroutine
+\                       \ using a tail call. This is the cause of the refund
+\                       \ bug, as pres is called with the laser power in A
+\                       \ rather than the item number, so the prx routine
+\                       \ fetches a refund price from a location well outside
+\                       \ the prxs table. This means that depending on which
+\                       \ type of laser you are attempting to buy, your credit
+\                       \ level will go up or down, when it shouldn't change at
+\                       \ all
+\
+\.refund
+\
+\ STA T1                \ Store A in T1 so we can retrieve it later
+\
+\ LDA LASER,X           \ If there is no laser in view X (i.e. the laser power
+\ BEQ ref3              \ is zero), jump to ref3 to skip the refund code
+\
+\ CMP T1                \ If we are trying to replace a laser with one of the
+\ BEQ ref2              \ same type, jump up ref2 above
+\
+\ENDIF
+\
+\ LDY #4                \ If the current laser has power #POW (pulse laser),
+\ CMP #POW              \ jump to ref1 with Y = 4 (the item number of a pulse
+\ BEQ ref1              \ laser in the table at PRXS)
+\
+\ LDY #5                \ If the current laser has power #POW+128 (beam laser),
+\ CMP #POW+128          \ jump to ref1 with Y = 5 (the item number of a beam
+\ BEQ ref1              \ laser in the table at PRXS)
+\
+\ LDY #12               \ If the current laser has power #Armlas (military
+\ CMP #Armlas           \ laser), jump to ref1 with Y = 12 (the item number of a
+\ BEQ ref1              \ military laser in the table at PRXS)
+\
+\ LDY #13               \ Otherwise this is a mining laser, so fall through into
+\                       \ ref1 with Y = 13 (the item number of a mining laser in
+\                       \ the table at PRXS)
+\
+\.ref1
+\
+\                       \ We now want to refund the laser of type Y that we are
+\                       \ exchanging for the new laser
+\
+\ STX ZZ                \ Store the view number in ZZnso we can retrieve it
+\                       \ later
+\
+\ TYA                   \ Copy the laser type to be refunded from Y to A
+\
+\ JSR prx               \ Call prx to set (Y X) to the price of equipment item
+\                       \ number A
+\
+\ JSR MCASH             \ Call MCASH to add (Y X) to the cash pot
+\
+\ LDX ZZ                \ Retrieve the view number from ZZ
+\
+\.ref3
+\
+\                       \ Finally, we install the new laser
+\
+\ LDA T1                \ Retrieve the new laser's power from T1 into A
+\
+\ STA LASER,X           \ Set the laser view to the new laser's power
+\
+\ RTS                   \ Return from the subroutine
+\
+                        \ --- End of removed section -------------------------->
+
+\ ******************************************************************************
+\
 \ Save output/ELTD.bin
 \
 \ ******************************************************************************
@@ -16426,6 +18833,32 @@ LOAD_E% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
 \
+\       Name: DOEXP
+\       Type: Subroutine
+\   Category: Drawing ships
+\    Summary: Draw an exploding ship
+\  Deep dive: Drawing explosion clouds
+\
+\ ******************************************************************************
+
+                        \ --- Original Acornsoft section removed: ------------->
+\
+\.EX2
+\
+\ LDA INWK+31           \ Set bits 5 and 7 of the ship's byte #31 to denote that
+\ ORA #%10100000        \ the ship is exploding and has been killed
+\ STA INWK+31
+\
+\ RTS                   \ Return from the subroutine
+\
+\.DOEXP
+\
+\ RTS                   \ Return from the subroutine
+\
+                        \ --- End of removed section -------------------------->
+
+\ ******************************************************************************
+\
 \       Name: WPSHPS
 \       Type: Subroutine
 \   Category: Dashboard
@@ -16539,6 +18972,177 @@ LOAD_E% = LOAD% + P% - CODE%
                         \ is empty
 
  RTS                    \ Return from the subroutine
+
+\ ******************************************************************************
+\
+\       Name: DET1
+\       Type: Subroutine
+\   Category: Screen mode
+\    Summary: Show or hide the dashboard (for when we die)
+\
+\ ------------------------------------------------------------------------------
+\
+\ Set the screen to show the number of text rows given in X. This is used when
+\ we are killed, as reducing the number of rows from the usual 31 to 24 has the
+\ effect of hiding the dashboard, leaving a monochrome image of ship debris and
+\ explosion clouds. Increasing the rows back up to 31 makes the dashboard
+\ reappear, as the dashboard's screen memory doesn't get touched by this
+\ process.
+\
+\ Returns:
+\
+\   A                   A is set to 6
+\
+\ ******************************************************************************
+
+                        \ --- Original Acornsoft section removed: ------------->
+\
+\.DET1
+\
+\ LDA #6                \ Set A to 6 so we can update 6845 register R6 below
+\
+\ SEI                   \ Disable interrupts so we can update the 6845
+\
+\ STA VIA+&00           \ Set 6845 register R6 to the value in X. Register R6
+\ STX VIA+&01           \ is the "vertical displayed" register, which sets the
+\                       \ number of rows shown on the screen
+\
+\ CLI                   \ Re-enable interrupts
+\
+\ RTS                   \ Return from the subroutine
+\
+                        \ --- End of removed section -------------------------->
+
+\ ******************************************************************************
+\
+\       Name: SHD
+\       Type: Subroutine
+\   Category: Flight
+\    Summary: Charge a shield and drain some energy from the energy banks
+\
+\ ------------------------------------------------------------------------------
+\
+\ Charge up a shield, and if it needs charging, drain some energy from the
+\ energy banks.
+\
+\ Arguments:
+\
+\   X                   The value of the shield to recharge
+\
+\ ******************************************************************************
+
+                        \ --- Original Acornsoft section removed: ------------->
+\
+\ DEX                   \ Increment the shield value so that it doesn't go past
+\                       \ a maximum of 255
+\
+\ RTS                   \ Return from the subroutine
+\
+\.SHD
+\
+\ INX                   \ Increment the shield value
+\
+\ BEQ SHD-2             \ If the shield value is 0 then this means it was 255
+\                       \ before, which is the maximum value, so jump to SHD-2
+\                       \ to bring it back down to 258 and return
+\
+\                       \ Otherwise fall through into DENGY to drain our energy
+\                       \ to pay for all this shield charging
+\
+                        \ --- End of removed section -------------------------->
+
+\ ******************************************************************************
+\
+\       Name: DENGY
+\       Type: Subroutine
+\   Category: Flight
+\    Summary: Drain some energy from the energy banks
+\
+\ ------------------------------------------------------------------------------
+\
+\ Returns:
+\
+\   Z flag              Set if we have no energy left, clear otherwise
+\
+\ ******************************************************************************
+
+                        \ --- Original Acornsoft section removed: ------------->
+\
+\.DENGY
+\
+\ DEC ENERGY            \ Decrement the energy banks in ENERGY
+\
+\ PHP                   \ Save the flags on the stack
+\
+\ BNE P%+5              \ If the energy levels are not yet zero, skip the
+\                       \ following instruction
+\
+\ INC ENERGY            \ The minimum allowed energy level is 1, and we just
+\                       \ reached 0, so increment ENERGY back to 1
+\
+\ PLP                   \ Restore the flags from the stack, so we return with
+\                       \ the Z flag from the DEC instruction above
+\
+\ RTS                   \ Return from the subroutine
+\
+                        \ --- End of removed section -------------------------->
+
+\ ******************************************************************************
+\
+\       Name: SPS3
+\       Type: Subroutine
+\   Category: Maths (Geometry)
+\    Summary: Copy a space coordinate from the K% block into K3
+\
+\ ------------------------------------------------------------------------------
+\
+\ Copy one of the planet's coordinates into the corresponding location in the
+\ temporary variable K3. The high byte and absolute value of the sign byte are
+\ copied into the first two K3 bytes, and the sign of the sign byte is copied
+\ into the highest K3 byte.
+\
+\ The comments below are written for the x-coordinate into K3(2 1 0).
+\
+\ Arguments:
+\
+\   X                   Determines where to copy the coordinate to:
+\
+\                         * X = 0 copies the coordinate into K3(2 1 0)
+\
+\                         * X = 3 copies the coordinate into K3(5 4 3)
+\
+\                         * X = 6 copies the coordinate into K3(8 7 6)
+\
+\   Y                   Determines which coordinate to copy:
+\
+\                         * Y = 0 copies (x_sign, x_hi)
+\
+\                         * Y = 3 copies (y_sign, y_hi)
+\
+\                         * Y = 6 copies (z_sign, z_hi)
+\
+\ ******************************************************************************
+
+                        \ --- Original Acornsoft section removed: ------------->
+\
+\.SPS3
+\
+\ LDA K%+1,X            \ Copy x_hi into K3+X
+\ STA K3,X
+\
+\ LDA K%+2,X            \ Set A = Y = x_sign
+\ TAY
+\
+\ AND #%01111111        \ Set K3+1 = |x_sign|
+\ STA K3+1,X
+\
+\ TYA                   \ Set K3+2 = the sign of x_sign
+\ AND #%10000000
+\ STA K3+2,X
+\
+\ RTS                   \ Return from the subroutine
+\
+                        \ --- End of removed section -------------------------->
 
 \ ******************************************************************************
 \
@@ -16828,6 +19432,216 @@ LOAD_E% = LOAD% + P% - CODE%
                         \ C flag to indicate success
 
  RTS                    \ Return from the subroutine
+
+\ ******************************************************************************
+\
+\       Name: NwS1
+\       Type: Subroutine
+\   Category: Universe
+\    Summary: Flip the sign and double an INWK byte
+\
+\ ------------------------------------------------------------------------------
+\
+\ Flip the sign of the INWK byte at offset X, and increment X by 2. This is
+\ used by the space station creation routine at NWSPS.
+\
+\ Arguments:
+\
+\   X                   The offset of the INWK byte to be flipped
+\
+\ Returns:
+\
+\   X                   X is incremented by 2
+\
+\ ******************************************************************************
+
+                        \ --- Original Acornsoft section removed: ------------->
+\
+\.NwS1
+\
+\ LDA INWK,X            \ Load the X-th byte of INWK into A and flip bit 7,
+\ EOR #%10000000        \ storing the result back in the X-th byte of INWK
+\ STA INWK,X
+\
+\ INX                   \ Add 2 to X
+\ INX
+\
+\ RTS                   \ Return from the subroutine
+\
+                        \ --- End of removed section -------------------------->
+
+\ ******************************************************************************
+\
+\       Name: ABORT
+\       Type: Subroutine
+\   Category: Dashboard
+\    Summary: Disarm missiles and update the dashboard indicators
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   Y                   The new status of the leftmost missile indicator
+\
+\ ******************************************************************************
+
+                        \ --- Original Acornsoft section removed: ------------->
+\
+\.ABORT
+\
+\ LDX #&FF              \ Set X to &FF, which is the value of MSTG when we have
+\                       \ no target lock for our missile
+\
+\                       \ Fall through into ABORT2 to set the missile lock to
+\                       \ the value in X, which effectively disarms the missile
+\
+                        \ --- End of removed section -------------------------->
+
+\ ******************************************************************************
+\
+\       Name: ABORT2
+\       Type: Subroutine
+\   Category: Dashboard
+\    Summary: Set/unset the lock target for a missile and update the dashboard
+\
+\ ------------------------------------------------------------------------------
+\
+\ Set the lock target for the leftmost missile and update the dashboard.
+\
+\ Arguments:
+\
+\   X                   The slot number of the ship to lock our missile onto, or
+\                       &FF to remove missile lock
+\
+\   Y                   The new colour of the missile indicator:
+\
+\                         * &00 = black (no missile)
+\
+\                         * &0E = red (armed and locked)
+\
+\                         * &E0 = yellow/white (armed)
+\
+\                         * &EE = green/cyan (disarmed)
+\
+\ ******************************************************************************
+
+                        \ --- Original Acornsoft section removed: ------------->
+\
+\.ABORT2
+\
+\ STX MSTG              \ Store the target of our missile lock in MSTG
+\
+\ LDX NOMSL             \ Call MSBAR to update the leftmost indicator in the
+\ JSR MSBAR             \ dashboard's missile bar, which returns with Y = 0
+\
+\ STY MSAR              \ Set MSAR = 0 to indicate that the leftmost missile
+\                       \ is no longer seeking a target lock
+\
+\ RTS                   \ Return from the subroutine
+\
+                        \ --- End of removed section -------------------------->
+
+\ ******************************************************************************
+\
+\       Name: SPBLB
+\       Type: Subroutine
+\   Category: Dashboard
+\    Summary: Draw (or erase) the space station indicator ("S") on the dashboard
+\
+\ ------------------------------------------------------------------------------
+\
+\ Other entry points:
+\
+\   BULB-2              Set the Y screen address
+\
+\ ******************************************************************************
+
+                        \ --- Original Acornsoft section removed: ------------->
+\
+\.SPBLB
+\
+\ LDA #24*8             \ The space station bulb is in character block number 24
+\                       \ with each character taking 8 bytes, so this sets the
+\                       \ low byte of the screen address of the character block
+\                       \ we want to draw to
+\
+\ LDX #LO(SPBT)         \ Set (Y X) to point to the character definition in SPBT
+\ LDY #HI(SPBT)
+\
+\                       \ Fall through into BULB to draw the space station bulb
+\
+                        \ --- End of removed section -------------------------->
+
+\ ******************************************************************************
+\
+\       Name: BULB
+\       Type: Subroutine
+\   Category: Dashboard
+\    Summary: Draw an indicator bulb on the dashboard
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   A                   The y-coordinate of the bulb as a low-byte screen
+\                       address offset within screen page &7D (as both bulbs
+\                       are on this character row in the dashboard)
+\
+\   (Y X)               The address of the character definition of the bulb to
+\                       be drawn (i.e. ECBT for the E.C.M. bulb, or SPBT for the
+\                       space station bulb)
+\
+\ ******************************************************************************
+
+                        \ --- Original Acornsoft section removed: ------------->
+\
+\.BULB
+\
+\ STA SC                \ Store the low byte of the screen address in SC
+\
+\ STX P+1               \ Set P(2 1) = (Y X)
+\ STY P+2
+\
+\ LDA #&7D              \ Set A to the high byte of the screen address, which is
+\                       \ &7D as the bulbs are both in the character row from
+\                       \ &7D00 to &7DFF
+\
+\ JMP RREN              \ Call RREN to print the character definition pointed to
+\                       \ by P(2 1) at the screen address pointed to by (A SC),
+\                       \ returning from the subroutine using a tail call
+\
+                        \ --- End of removed section -------------------------->
+
+\ ******************************************************************************
+\
+\       Name: SPBT
+\       Type: Variable
+\   Category: Dashboard
+\    Summary: The bitmap definition for the space station indicator bulb
+\
+\ ------------------------------------------------------------------------------
+\
+\ The bitmap definition for the space station indicator's "S" bulb that gets
+\ displayed on the dashboard.
+\
+\ Each pixel is in mode 5 colour 2 (%10), which is yellow/white.
+\
+\ ******************************************************************************
+
+                        \ --- Original Acornsoft section removed: ------------->
+\
+\.SPBT
+\
+\ EQUB %11100000        \ x x x .
+\ EQUB %11100000        \ x x x .
+\ EQUB %10000000        \ x . . .
+\ EQUB %11100000        \ x x x .
+\ EQUB %11100000        \ x x x .
+\ EQUB %00100000        \ . . x .
+\ EQUB %11100000        \ x x x .
+\ EQUB %11100000        \ x x x .
+\
+                        \ --- End of removed section -------------------------->
 
 \ ******************************************************************************
 \
@@ -17471,6 +20285,60 @@ LOAD_E% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
 \
+\       Name: CIRCLE
+\       Type: Subroutine
+\   Category: Drawing circles
+\    Summary: Draw a circle for the planet
+\  Deep dive: Drawing circles
+\
+\ ------------------------------------------------------------------------------
+\
+\ Draw a circle with the centre at (K3, K4) and radius K. Used to draw the
+\ planet's main outline.
+\
+\ Arguments:
+\
+\   K                   The planet's radius
+\
+\   K3(1 0)             Pixel x-coordinate of the centre of the planet
+\
+\   K4(1 0)             Pixel y-coordinate of the centre of the planet
+\
+\ ******************************************************************************
+
+                        \ --- Original Acornsoft section removed: ------------->
+\
+\.CIRCLE
+\
+\ LDA #0                \ Set LSX2 = 0
+\ STA LSX2
+\
+\ LDX K                 \ Set X = K = radius
+\
+\ LDA #8                \ Set A = 8
+\
+\ CPX #8                \ If the radius < 8, skip to PL89
+\ BCC PL89
+\
+\ LSR A                 \ Halve A so A = 4
+\
+\ CPX #60               \ If the radius < 60, skip to PL89
+\ BCC PL89
+\
+\ LSR A                 \ Halve A so A = 2
+\
+\.PL89
+\
+\ STA STP               \ Set STP = A. STP is the step size for the circle, so
+\                       \ the above sets a smaller step size for bigger circles
+\
+\                       \ Fall through into CIRCLE2 to draw the circle with the
+\                       \ correct step size
+\
+                        \ --- End of removed section -------------------------->
+
+\ ******************************************************************************
+\
 \       Name: CIRCLE2
 \       Type: Subroutine
 \   Category: Drawing circles
@@ -17605,6 +20473,95 @@ LOAD_E% = LOAD% + P% - CODE%
  CLC                    \ Clear the C flag to indicate success
 
  RTS                    \ Return from the subroutine
+
+\ ******************************************************************************
+\
+\       Name: WP1
+\       Type: Subroutine
+\   Category: Drawing planets
+\    Summary: Reset the ball line heap
+\
+\ ******************************************************************************
+
+                        \ --- Original Acornsoft section removed: ------------->
+\
+\.WP1
+\
+\ LDA #1                \ Set LSP = 1 to reset the ball line heap pointer
+\ STA LSP
+\
+\ LDA #&FF              \ Set LSX2 = &FF to indicate the ball line heap is empty
+\ STA LSX2
+\
+\ RTS                   \ Return from the subroutine
+\
+                        \ --- End of removed section -------------------------->
+
+\ ******************************************************************************
+\
+\       Name: WPLS
+\       Type: Subroutine
+\   Category: Drawing suns
+\    Summary: Remove the sun from the screen
+\  Deep dive: Drawing the sun
+\
+\ ------------------------------------------------------------------------------
+\
+\ We do this by redrawing it using the lines stored in the sun line heap when
+\ the sun was originally drawn by the SUN routine.
+\
+\ Arguments:
+\
+\   SUNX(1 0)           The x-coordinate of the vertical centre axis of the sun
+\
+\ Other entry points:
+\
+\   WPLS-1              Contains an RTS
+\
+\ ******************************************************************************
+
+                        \ --- Original Acornsoft section removed: ------------->
+\
+\.WPLS
+\
+\ LDA LSX               \ If LSX < 0, the sun line heap is empty, so return from
+\ BMI PL44              \ the subroutine (as PL44 contains a CLC and RTS)
+\
+\ LDA SUNX              \ Set YY(1 0) = SUNX(1 0), the x-coordinate of the
+\ STA YY                \ vertical centre axis of the sun that's currently on
+\ LDA SUNX+1            \ screen
+\ STA YY+1
+\
+\ LDY #2*Y-1            \ #Y is the y-coordinate of the centre of the space
+\                       \ view, so this sets Y as a counter for the number of
+\                       \ lines in the space view (i.e. 191), which is also the
+\                       \ number of lines in the LSO block
+\
+\.WPL2
+\
+\ LDA LSO,Y             \ Fetch the Y-th point from the sun line heap, which
+\                       \ gives us the half-width of the sun's line on this line
+\                       \ of the screen
+\
+\ BEQ P%+5              \ If A = 0, skip the following call to HLOIN2 as there
+\                       \ is no sun line on this line of the screen
+\
+\ JSR HLOIN2            \ Call HLOIN2 to draw a horizontal line on pixel line Y,
+\                       \ with centre point YY(1 0) and half-width A, and remove
+\                       \ the line from the sun line heap once done
+\
+\ DEY                   \ Decrement the loop counter
+\
+\ BNE WPL2              \ Loop back for the next line in the line heap until
+\                       \ we have gone through the entire heap
+\
+\ DEY                   \ This sets Y to &FF, as we end the loop with Y = 0
+\
+\ STY LSX               \ Set LSX to &FF to indicate the sun line heap is empty
+\
+\ RTS                   \ Return from the subroutine
+\
+                        \ --- End of removed section -------------------------->
 
 \ ******************************************************************************
 \
@@ -18448,6 +21405,68 @@ LOAD_F% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
 \
+\       Name: Ze
+\       Type: Subroutine
+\   Category: Universe
+\    Summary: Initialise the INWK workspace to a hostile ship
+\
+\ ------------------------------------------------------------------------------
+\
+\ Specifically, this routine does the following:
+\
+\   * Reset the INWK ship workspace
+\
+\   * Set the ship to a fair distance away in all axes, in front of us but
+\     randomly up or down, left or right
+\
+\   * Give the ship a 4% chance of having E.C.M.
+\
+\   * Set the ship to hostile, with AI enabled
+\
+\ This routine also sets A, X, T1 and the C flag to random values.
+\
+\ ******************************************************************************
+
+                        \ --- Original Acornsoft section removed: ------------->
+\
+\.Ze
+\
+\ JSR ZINF              \ Call ZINF to reset the INWK ship workspace
+\
+\ JSR DORND             \ Set A and X to random numbers
+\
+\ STA T1                \ Store A in T1
+\
+\ AND #%10000000        \ Extract the sign of A and store in x_sign
+\ STA INWK+2
+\
+\ TXA                   \ Extract the sign of X and store in y_sign
+\ AND #%10000000
+\ STA INWK+5
+\
+\ LDA #25               \ Set x_hi = y_hi = z_hi = 25, a fair distance away
+\ STA INWK+1
+\ STA INWK+4
+\ STA INWK+7
+\
+\ TXA                   \ Set the C flag if X >= 245 (4% chance)
+\ CMP #245
+\
+\ ROL A                 \ Set bit 0 of A to the C flag (i.e. there's a 4%
+\                       \ chance of this ship having E.C.M.)
+\
+\ ORA #%11000000        \ Set bits 6 and 7 of A, so the ship is hostile (bit 6
+\                       \ and has AI (bit 7)
+\
+\ STA INWK+32           \ Store A in the AI flag of this ship
+\
+\                       \ Fall through into DORND2 to set A, X and the C flag
+\                       \ randomly
+\
+                        \ --- End of removed section -------------------------->
+
+\ ******************************************************************************
+\
 \       Name: DORND
 \       Type: Subroutine
 \   Category: Utility routines
@@ -18949,6 +21968,51 @@ LOAD_F% = LOAD% + P% - CODE%
 
  JMP TT146              \ Print the distance to the selected system and return
                         \ from the subroutine using a tail call
+
+\ ******************************************************************************
+\
+\       Name: BAD
+\       Type: Subroutine
+\   Category: Status
+\    Summary: Calculate how bad we have been
+\
+\ ------------------------------------------------------------------------------
+\
+\ Work out how bad we are from the amount of contraband in our hold. The
+\ formula is:
+\
+\   (slaves + narcotics) * 2 + firearms
+\
+\ so slaves and narcotics are twice as illegal as firearms. The value in FIST
+\ (our legal status) is set to at least this value whenever we launch from a
+\ space station, and a FIST of 50 or more gives us fugitive status, so leaving a
+\ station carrying 25 tonnes of slaves/narcotics, or 50 tonnes of firearms
+\ across multiple trips, is enough to make us a fugitive.
+\
+\ Returns:
+\
+\   A                   A value that determines how bad we are from the amount
+\                       of contraband in our hold
+\
+\ ******************************************************************************
+
+                        \ --- Original Acornsoft section removed: ------------->
+\
+\.BAD
+\
+\ LDA QQ20+3            \ Set A to the number of tonnes of slaves in the hold
+\
+\ CLC                   \ Clear the C flag so we can do addition without the
+\                       \ C flag affecting the result
+\
+\ ADC QQ20+6            \ Add the number of tonnes of narcotics in the hold
+\
+\ ASL A                 \ Double the result and add the number of tonnes of
+\ ADC QQ20+10           \ firearms in the hold
+\
+\ RTS                   \ Return from the subroutine
+\
+                        \ --- End of removed section -------------------------->
 
 \ ******************************************************************************
 \
@@ -20145,6 +23209,24 @@ ENDIF
 
 \ ******************************************************************************
 \
+\       Name: stack
+\       Type: Variable
+\   Category: Save and load
+\    Summary: Temporary storage for the stack pointer when switching the BRKV
+\             handler between BRBR and MEBRK
+
+\ ******************************************************************************
+
+                        \ --- Original Acornsoft section removed: ------------->
+\
+\.stack
+\
+\ EQUB 0
+\
+                        \ --- End of removed section -------------------------->
+
+\ ******************************************************************************
+\
 \       Name: MEBRK
 \       Type: Subroutine
 \   Category: Save and load
@@ -20475,7 +23557,7 @@ ENDIF
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: ------------------------->
+                        \ --- Whole section added for Elite-A: ---------------->
 
 .confirm
 
@@ -20496,7 +23578,7 @@ ENDIF
 
  RTS
 
-                        \ --- End of added code ------------------------------->
+                        \ --- End of added section ---------------------------->
 
 \ ******************************************************************************
 \
@@ -20728,6 +23810,168 @@ ENDIF
 
 \ ******************************************************************************
 \
+\       Name: Unused routine
+\       Type: Subroutine
+\   Category: Utility routines
+\    Summary: This code appears to be unused
+\
+\ ******************************************************************************
+
+                        \ --- Original Acornsoft section removed: ------------->
+\
+\ JSR GTNME             \ This code appears to be unused, but it would fetch the
+\ RTS                   \ the name of a commander file to save or load
+\
+                        \ --- End of removed section -------------------------->
+
+\ ******************************************************************************
+\
+\       Name: SPS1
+\       Type: Subroutine
+\   Category: Maths (Geometry)
+\    Summary: Calculate the vector to the planet and store it in XX15
+\
+\ ------------------------------------------------------------------------------
+\
+\ Other entry points:
+\
+\   SPS1+1              A BRK instruction
+\
+\ ******************************************************************************
+
+                        \ --- Original Acornsoft section removed: ------------->
+\
+\.SPS1
+\
+\ LDX #0                \ Copy the two high bytes of the planet's x-coordinate
+\ JSR SPS3              \ into K3(2 1 0), separating out the sign bit into K3+2
+\
+\ LDX #3                \ Copy the two high bytes of the planet's y-coordinate
+\ JSR SPS3              \ into K3(5 4 3), separating out the sign bit into K3+5
+\
+\ LDX #6                \ Copy the two high bytes of the planet's z-coordinate
+\ JSR SPS3              \ into K3(8 7 6), separating out the sign bit into K3+8
+\
+\                       \ Fall through into TAS2 to build XX15 from K3
+\
+                        \ --- End of removed section -------------------------->
+
+\ ******************************************************************************
+\
+\       Name: TAS2
+\       Type: Subroutine
+\   Category: Maths (Geometry)
+\    Summary: Normalise the three-coordinate vector in K3
+\
+\ ------------------------------------------------------------------------------
+\
+\ Normalise the vector in K3, which has 16-bit values and separate sign bits,
+\ and store the normalised version in XX15 as a signed 8-bit vector.
+\
+\ A normalised vector (also known as a unit vector) has length 1, so this
+\ routine takes an existing vector in K3 and scales it so the length of the
+\ new vector is 1. This is used in two places: when drawing the compass, and
+\ when applying AI tactics to ships.
+\
+\ We do this in two stages. This stage shifts the 16-bit vector coordinates in
+\ K3 to the left as far as they will go without losing any bits off the end, so
+\ we can then take the high bytes and use them as the most accurate 8-bit vector
+\ to normalise. Then the next stage (in routine NORM) does the normalisation.
+\
+\ Arguments:
+\
+\   K3(2 1 0)           The 16-bit x-coordinate as (x_sign x_hi x_lo), where
+\                       x_sign is just bit 7
+\
+\   K3(5 4 3)           The 16-bit y-coordinate as (y_sign y_hi y_lo), where
+\                       y_sign is just bit 7
+\
+\   K3(8 7 6)           The 16-bit z-coordinate as (z_sign z_hi z_lo), where
+\                       z_sign is just bit 7
+\
+\ Returns:
+\
+\   XX15                The normalised vector, with:
+\
+\                         * The x-coordinate in XX15
+\
+\                         * The y-coordinate in XX15+1
+\
+\                         * The z-coordinate in XX15+2
+\
+\ Other entry points:
+\
+\   TA2                 Calculate the length of the vector in XX15 (ignoring the
+\                       low coordinates), returning it in Q
+\
+\ ******************************************************************************
+
+                        \ --- Original Acornsoft section removed: ------------->
+\
+\.TAS2
+\
+\ LDA K3                \ OR the three low bytes and 1 to get a byte that has
+\ ORA K3+3              \ a 1 wherever any of the three low bytes has a 1
+\ ORA K3+6              \ (as well as always having bit 0 set), and store in
+\ ORA #1                \ K3+9
+\ STA K3+9
+\
+\ LDA K3+1              \ OR the three high bytes to get a byte in A that has a
+\ ORA K3+4              \ 1 wherever any of the three high bytes has a 1
+\ ORA K3+7
+\
+\                       \ (A K3+9) now has a 1 wherever any of the 16-bit
+\                       \ values in K3 has a 1
+\.TAL2
+\
+\ ASL K3+9              \ Shift (A K3+9) to the left, so bit 7 of the high byte
+\ ROL A                 \ goes into the C flag
+\
+\ BCS TA2               \ If the left shift pushed a 1 out of the end, then we
+\                       \ know that at least one of the coordinates has a 1 in
+\                       \ this position, so jump to TA2 as we can't shift the
+\                       \ values in K3 any further to the left
+\
+\ ASL K3                \ Shift K3(1 0), the x-coordinate, to the left
+\ ROL K3+1
+\
+\ ASL K3+3              \ Shift K3(4 3), the y-coordinate, to the left
+\ ROL K3+4
+\
+\ ASL K3+6              \ Shift K3(6 7), the z-coordinate, to the left
+\ ROL K3+7
+\
+\ BCC TAL2              \ Jump back to TAL2 to do another shift left (this BCC
+\                       \ is effectively a JMP as we know bit 7 of K3+7 is not a
+\                       \ 1, as otherwise bit 7 of A would have been a 1 and we
+\                       \ would have taken the BCS above)
+\
+\.TA2
+\
+\ LDA K3+1              \ Fetch the high byte of the x-coordinate from our left-
+\ LSR A                 \ shifted K3, shift it right to clear bit 7, stick the
+\ ORA K3+2              \ sign bit in there from the x_sign part of K3, and
+\ STA XX15              \ store the resulting signed 8-bit x-coordinate in XX15
+\
+\ LDA K3+4              \ Fetch the high byte of the y-coordinate from our left-
+\ LSR A                 \ shifted K3, shift it right to clear bit 7, stick the
+\ ORA K3+5              \ sign bit in there from the y_sign part of K3, and
+\ STA XX15+1            \ store the resulting signed 8-bit y-coordinate in
+\                       \ XX15+1
+\
+\ LDA K3+7              \ Fetch the high byte of the z-coordinate from our left-
+\ LSR A                 \ shifted K3, shift it right to clear bit 7, stick the
+\ ORA K3+8              \ sign bit in there from the z_sign part of K3, and
+\ STA XX15+2            \ store the resulting signed 8-bit  z-coordinate in
+\                       \ XX15+2
+\
+\                       \ Now we have a signed 8-bit version of the vector K3 in
+\                       \ XX15, so fall through into NORM to normalise it
+\
+                        \ --- End of removed section -------------------------->
+
+\ ******************************************************************************
+\
 \       Name: NORM
 \       Type: Subroutine
 \   Category: Maths (Geometry)
@@ -20918,6 +24162,38 @@ ENDIF
 
 \ ******************************************************************************
 \
+\       Name: EXNO3
+\       Type: Subroutine
+\   Category: Sound
+\    Summary: Make an explosion sound
+\
+\ ------------------------------------------------------------------------------
+\
+\ Make the sound of death in the cold, hard vacuum of space. Apparently, in
+\ Elite space, everyone can hear you scream.
+\
+\ This routine also makes the sound of a destroyed cargo canister if we don't
+\ get scooping right, the sound of us colliding with another ship, and the sound
+\ of us being hit with depleted shields. It is not a good sound to hear.
+\
+\ ******************************************************************************
+
+                        \ --- Original Acornsoft section removed: ------------->
+\
+\.EXNO3
+\
+\ LDA #16               \ Call the NOISE routine with A = 16 to make the first
+\ JSR NOISE             \ death sound
+\
+\ LDA #24               \ Call the NOISE routine with A = 24 to make the second
+\ BNE NOISE             \ death sound and return from the subroutine using a
+\                       \ tail call (this BNE is effectively a JMP as A will
+\                       \ never be zero)
+\
+                        \ --- End of removed section -------------------------->
+
+\ ******************************************************************************
+\
 \       Name: BEEP
 \       Type: Subroutine
 \   Category: Sound
@@ -20940,6 +24216,122 @@ ENDIF
                         \ through into the NOISE routine to make the sound
 
                         \ --- End of replacement ------------------------------>
+
+\ ******************************************************************************
+\
+\       Name: EXNO2
+\       Type: Subroutine
+\   Category: Sound
+\    Summary: Process us making a kill
+\  Deep dive: Combat rank
+\
+\ ------------------------------------------------------------------------------
+\
+\ We have killed a ship, so increase the kill tally, displaying an iconic
+\ message of encouragement if the kill total is a multiple of 256, and then
+\ make a nearby explosion sound.
+\
+\ Other entry points:
+\
+\   EXNO-2              Set X = 7 and fall through into EXNO to make the sound
+\                       of a ship exploding
+\
+\ ******************************************************************************
+
+                        \ --- Original Acornsoft section removed: ------------->
+\
+\.EXNO2
+\
+\ INC TALLY             \ Increment the low byte of the kill count in TALLY
+\
+\ BNE EXNO-2            \ If there is no carry, jump to the LDX #7 below (at
+\                       \ EXNO-2)
+\
+\ INC TALLY+1           \ Increment the high byte of the kill count in TALLY
+\
+\ LDA #101              \ The kill total is a multiple of 256, so it's time
+\ JSR MESS              \ for a pat on the back, so print recursive token 101
+\                       \ ("RIGHT ON COMMANDER!") as an in-flight message
+\
+\ LDX #7                \ Set X = 7 and fall through into EXNO to make the
+\                       \ sound of a ship exploding
+\
+                        \ --- End of removed section -------------------------->
+
+\ ******************************************************************************
+\
+\       Name: EXNO
+\       Type: Subroutine
+\   Category: Sound
+\    Summary: Make the sound of a laser strike or ship explosion
+\
+\ ------------------------------------------------------------------------------
+\
+\ Make the two-part explosion sound of us making a laser strike, or of another
+\ ship exploding.
+\
+\ The volume of the first explosion is affected by the distance of the ship
+\ being hit, with more distant ships being quieter. The value in X also affects
+\ the volume of the first explosion, with a higher X giving a quieter sound
+\ (so X can be used to differentiate a laser strike from an explosion).
+\
+\ Arguments:
+\
+\   X                   The larger the value of X, the fainter the explosion.
+\                       Allowed values are:
+\
+\                         * 7  = explosion is louder (i.e. the ship has just
+\                                exploded)
+\
+\                         * 15 = explosion is quieter (i.e. this is just a laser
+\                                strike)
+\
+\ ******************************************************************************
+
+                        \ --- Original Acornsoft section removed: ------------->
+\
+\.EXNO
+\
+\ STX T                 \ Store the distance in T
+\
+\ LDA #24               \ Set A = 24 to denote the sound of us making a hit or
+\ JSR NOS1              \ kill (part 1 of the explosion), and call NOS1 to set
+\                       \ up the sound block in XX16
+\
+\ LDA INWK+7            \ Fetch z_hi, the distance of the ship being hit in
+\ LSR A                 \ terms of the z-axis (in and out of the screen), and
+\ LSR A                 \ divide by 4. If z_hi has either bit 6 or 7 set then
+\                       \ that ship is too far away to be shown on the scanner
+\                       \ (as per the SCAN routine), so we know the maximum
+\                       \ z_hi at this point is %00111111, and shifting z_hi
+\                       \ to the right twice gives us a maximum value of
+\                       \ %00001111
+\
+\ AND T                 \ This reduces A to a maximum of X; X can be either
+\                       \ 7 = %0111 or 15 = %1111, so AND'ing with 15 will
+\                       \ not affect A, while AND'ing with 7 will clear bit
+\                       \ 3, reducing the maximum value in A to 7
+\
+\ ORA #%11110001        \ The SOUND statement's amplitude ranges from 0 (for no
+\                       \ sound) to -15 (full volume), so we can set bits 0 and
+\                       \ 4-7 in A, and keep bits 1-3 from the above to get
+\                       \ a value between -15 (%11110001) and -1 (%11111111),
+\                       \ with lower values of z_hi and argument X leading
+\                       \ to a more negative, or quieter number (so the closer
+\                       \ the ship, i.e. the smaller the value of X, the louder
+\                       \ the sound)
+\
+\ STA XX16+2            \ The amplitude byte of the sound block in XX16 is in
+\                       \ byte #3 (where it's the low byte of the amplitude), so
+\                       \ this sets the amplitude to the value in A
+\
+\ JSR NO3               \ Make the sound from our updated sound block in XX16
+\
+\ LDA #16               \ Set A = 16 to denote we have made a hit or kill
+\                       \ (part 2 of the explosion), and fall through into NOISE
+\                       \ to make the sound
+\
+                        \ --- End of removed section -------------------------->
 
 \ ******************************************************************************
 \
@@ -21266,6 +24658,63 @@ ENDIF
 .Dk3
 
  RTS                    \ Return from the subroutine
+
+\ ******************************************************************************
+\
+\       Name: DKJ1
+\       Type: Subroutine
+\   Category: Keyboard
+\    Summary: Read joystick and flight controls
+\
+\ ------------------------------------------------------------------------------
+\
+\ Specifically, scan the keyboard for the speed up and slow down keys, and read
+\ the joystick's fire button and X and Y axes, storing the results in the key
+\ logger and the joystick position variables.
+\
+\ This routine is only called if joysticks are enabled (JSTK = non-zero).
+\
+\ ******************************************************************************
+
+                        \ --- Original Acornsoft section removed: ------------->
+\
+\.DKJ1
+\
+\ LDA VIA+&40           \ Read 6522 System VIA input register IRB (SHEILA &40)
+\
+\ TAX                   \ This instruction doesn't seem to have any effect, as
+\                       \ X is overwritten in a few instructions. When the
+\                       \ joystick is checked in a similar way in the TITLE
+\                       \ subroutine for the "Press Fire Or Space,Commander."
+\                       \ stage of the start-up screen, there's another
+\                       \ unnecessary TAX instruction present, but there it's
+\                       \ commented out
+\
+\ AND #%00010000        \ Bit 4 of IRB (PB4) is clear if joystick 1's fire
+\                       \ button is pressed, otherwise it is set, so AND'ing
+\                       \ the value of IRB with %10000 extracts this bit
+\
+\ EOR #%00010000        \ Flip bit 4 so that it's set if the fire button has
+\ STA KY7               \ been pressed, and store the result in the keyboard
+\                       \ logger at location KY7, which is also where the A key
+\                       \ (fire lasers) key is logged
+\
+\ LDX #1                \ Call DKS2 to fetch the value of ADC channel 1 (the
+\ JSR DKS2              \ joystick X value) into (A X), and OR A with 1. This
+\ ORA #1                \ ensures that the high byte is at least 1, and then we
+\ STA JSTX              \ store the result in JSTX
+\
+\ LDX #2                \ Call DKS2 to fetch the value of ADC channel 2 (the
+\ JSR DKS2              \ joystick Y value) into (A X), and EOR A with JSTGY.
+\ EOR JSTGY             \ JSTGY will be &FF if the game is configured to
+\ STA JSTY              \ reverse the joystick Y channel, so this EOR does
+\                       \ exactly that, and then we store the result in JSTY
+\
+\ JMP DK4               \ We are done scanning the joystick flight controls,
+\                       \ so jump to DK4 to scan for other keys, using a tail
+\                       \ call so we can return from the subroutine there
+\
+                        \ --- End of removed section -------------------------->
 
 \ ******************************************************************************
 \
@@ -25949,7 +29398,7 @@ LOAD_G% = LOAD% + P% - CODE%
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: ------------------------->
+                        \ --- Whole section added for Elite-A: ---------------->
 
 .n_buyship
 
@@ -26060,7 +29509,7 @@ LOAD_G% = LOAD% + P% - CODE%
 
  JMP BAY
 
-                        \ --- End of added code ------------------------------->
+                        \ --- End of added section ---------------------------->
 
 \ ******************************************************************************
 \
@@ -26071,7 +29520,7 @@ LOAD_G% = LOAD% + P% - CODE%
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: ------------------------->
+                        \ --- Whole section added for Elite-A: ---------------->
 
 .n_load
 
@@ -26113,7 +29562,7 @@ LOAD_G% = LOAD% + P% - CODE%
  BPL count_lasers
  RTS
 
-                        \ --- End of added code ------------------------------->
+                        \ --- End of added section ---------------------------->
 
 \ ******************************************************************************
 \
@@ -26124,13 +29573,13 @@ LOAD_G% = LOAD% + P% - CODE%
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: ------------------------->
+                        \ --- Whole section added for Elite-A: ---------------->
 
 .count_offs
 
  EQUB &00, &01, &02, &03, &06, &18, &19, &1A, &1B, &1C, &1D, &1E
 
-                        \ --- End of added code ------------------------------->
+                        \ --- End of added section ---------------------------->
 
 \ ******************************************************************************
 \
@@ -26141,7 +29590,7 @@ LOAD_G% = LOAD% + P% - CODE%
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: ------------------------->
+                        \ --- Whole section added for Elite-A: ---------------->
 
 .n_name
 
@@ -26161,7 +29610,7 @@ LOAD_G% = LOAD% + P% - CODE%
  BNE n_lprint
  RTS
 
-                        \ --- End of added code ------------------------------->
+                        \ --- End of added section ---------------------------->
 
 \ ******************************************************************************
 \
@@ -26172,7 +29621,7 @@ LOAD_G% = LOAD% + P% - CODE%
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: ------------------------->
+                        \ --- Whole section added for Elite-A: ---------------->
 
 .n_price
 
@@ -26189,7 +29638,7 @@ LOAD_G% = LOAD% + P% - CODE%
  BPL n_lprice
  RTS
 
-                        \ --- End of added code ------------------------------->
+                        \ --- End of added section ---------------------------->
 
 \ ******************************************************************************
 \
@@ -26200,7 +29649,7 @@ LOAD_G% = LOAD% + P% - CODE%
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: ------------------------->
+                        \ --- Whole section added for Elite-A: ---------------->
 
 .cour_buy
 
@@ -26407,7 +29856,7 @@ LOAD_G% = LOAD% + P% - CODE%
  STA INWK
  JMP cour_loop
 
-                        \ --- End of added code ------------------------------->
+                        \ --- End of added section ---------------------------->
 
 \ ******************************************************************************
 \
@@ -26418,7 +29867,7 @@ LOAD_G% = LOAD% + P% - CODE%
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: ------------------------->
+                        \ --- Whole section added for Elite-A: ---------------->
 
 .cour_dock
 
@@ -26464,7 +29913,7 @@ LOAD_G% = LOAD% + P% - CODE%
 
  RTS
 
-                        \ --- End of added code ------------------------------->
+                        \ --- End of added section ---------------------------->
 
 \ ******************************************************************************
 \
@@ -26475,7 +29924,7 @@ LOAD_G% = LOAD% + P% - CODE%
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: ------------------------->
+                        \ --- Whole section added for Elite-A: ---------------->
 
 .stay_here
 
@@ -26533,7 +29982,7 @@ LOAD_G% = LOAD% + P% - CODE%
 
  JMP BAY
 
-                        \ --- End of added code ------------------------------->
+                        \ --- End of added section ---------------------------->
 
 \ ******************************************************************************
 \
@@ -26544,7 +29993,7 @@ LOAD_G% = LOAD% + P% - CODE%
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: ------------------------->
+                        \ --- Whole section added for Elite-A: ---------------->
 
 .new_offsets
 
@@ -26557,7 +30006,7 @@ LOAD_G% = LOAD% + P% - CODE%
  \ Shields, Energy, Speed, Hold, Range, Costs
  \ Manouvre-h, Manoevre-l \, Spare, Spare
 
-                        \ --- End of added code ------------------------------->
+                        \ --- End of added section ---------------------------->
 
 \ ******************************************************************************
 \
@@ -26568,7 +30017,7 @@ LOAD_G% = LOAD% + P% - CODE%
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: ------------------------->
+                        \ --- Whole section added for Elite-A: ---------------->
 
 .new_ships
 
@@ -26672,7 +30121,7 @@ ELIF _RELEASED
 
 ENDIF
 
-                        \ --- End of added code ------------------------------->
+                        \ --- End of added section ---------------------------->
 
 \ ******************************************************************************
 \
@@ -26683,7 +30132,7 @@ ENDIF
 \
 \ ******************************************************************************
 
-                        \ --- Code added for Elite-A: ------------------------->
+                        \ --- Whole section added for Elite-A: ---------------->
 
 .new_details
 
@@ -26775,7 +30224,7 @@ ELIF _RELEASED
 
 ENDIF
 
-                        \ --- End of added code ------------------------------->
+                        \ --- End of added section ---------------------------->
 
 \ ******************************************************************************
 \
