@@ -1404,7 +1404,10 @@ ORG LOADcode + P% - LOAD
 \
 \ ------------------------------------------------------------------------------
 \
-\ Set A and X to random numbers. The C and V flags are also set randomly.
+\ Set A and X to random numbers (though note that X is set to the random number
+\ that was returned in A the last time DORND was called).
+\
+\ The C and V flags are also set randomly.
 \
 \ This is a simplified version of the DORND routine in the main game code. It
 \ swaps the two calculations around and omits the ROL A instruction, but is
@@ -2333,7 +2336,7 @@ ENDIF
 
  EQUB Q%                \ BST = Fuel scoops ("barrel status"), #41
 
- EQUB Q% AND 127        \ BOMB = Energy bomb, #42
+ EQUB Q% AND 127        \ BOMB = Hyperspace unit, #42
 
  EQUB Q% AND 1          \ ENGY = Energy/shield level, #43
 

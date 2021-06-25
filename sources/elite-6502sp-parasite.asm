@@ -1330,11 +1330,15 @@ ORG &0300
 
 .BOMB
 
- SKIP 1                 \ Energy bomb
+ SKIP 1                 \ Hyperspace unit
                         \
                         \   * 0 = not fitted
                         \
                         \   * &7F = fitted
+                        \
+                        \ Elite-A replaces the energy bomb with the hyperspace
+                        \ unit, reusing the BOMB variable to determine whether
+                        \ one is fitted
 
 .ENGY
 
@@ -2122,7 +2126,7 @@ ENDIF
 
  EQUB Q%                \ BST = Fuel scoops ("barrel status"), #41
 
- EQUB Q% AND 127        \ BOMB = Energy bomb, #42
+ EQUB Q% AND 127        \ BOMB = Hyperspace unit, #42
 
  EQUB Q% AND 1          \ ENGY = Energy/shield level, #43
 
@@ -5835,25 +5839,6 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
  INC DTW5               \ Increment the buffer size in DTW5
 
-\LDA #' '               \ This instruction is commented out in the original
-                        \ source, as it has no effect because A already contains
-                        \ ASCII " ". This is because the last character that is
-                        \ tested in the above loop is at position SC, which we
-                        \ know contains a space, so we know A contains a space
-                        \ character when the loop finishes
-
-                        \ We've now shifted the line to the right by 1 from
-                        \ position SC onwards, so SC and SC+1 both contain
-                        \ spaces, and Y is now SC-1 as we did a DEY just before
-                        \ the end of the loop - in other words, we have inserted
-                        \ a space at position SC, and Y points to the character
-                        \ before the newly inserted space
-
-                        \ We now want to move the pointer Y left to find the
-                        \ next space in the line buffer, before looping back to
-                        \ check whether we are done, and if not, insert another
-                        \ space
-
 .DAL3
 
  CMP BUF,Y              \ If the character at position Y is not a space, jump to
@@ -5881,9 +5866,8 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  JSR CHPR
 
  LDA DTW5               \ Subtract #LL from the end-of-buffer pointer in DTW5
-\CLC                    \
- SBC #LL                \ The CLC instruction is commented out in the original
- STA DTW5               \ source. It isn't needed as CHPR clears the C flag
+ SBC #LL                \
+ STA DTW5               \ The subtraction works as CHPR clears the C flag
 
  TAX                    \ Copy the new value of DTW5 into X
 
@@ -6239,11 +6223,9 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
  LDA DELTA              \ Fetch our ship's speed into A, in the range 0-40
 
-\LSR A                  \ Draw the speed indicator using a range of 0-31, and
- JSR DIL-1              \ increment SC to point to the next indicator (the roll
-                        \ indicator). The LSR is commented out as it isn't
-                        \ required with a call to DIL-1, so perhaps this was
-                        \ originally a call to DIL that got optimised
+ JSR DIL-1              \ Draw the speed indicator using a range of 0-31, and
+                        \ increment SC to point to the next indicator (the roll
+                        \ indicator)
 
 \ ******************************************************************************
 \
@@ -6651,7 +6633,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  JSR tube_write
  INC SC+1
 
-.DL9                    \ This label is not used but is in the original source
+.DL9
 
  RTS                    \ Return from the subroutine
 
@@ -12487,15 +12469,15 @@ LOAD_D% = LOAD% + P% - CODE%
 
 .et7
 
- INY                    \ Increment Y to recursive token 113 ("ENERGY BOMB")
+ INY                    \ Increment Y to recursive token 113 ("HYPERSPACE UNIT")
 
  CMP #8                 \ If A is not 8 (i.e. the item we've just bought is not
- BNE et8                \ an energy bomb), skip to et8
+ BNE et8                \ a hyperspace unit), skip to et8
 
- LDX BOMB               \ If we already have an energy bomb fitted (i.e. BOMB
- BNE pres               \ is non-zero), jump to pres to show the error "Energy
-                        \ Bomb Present", beep and exit to the docking bay (i.e.
-                        \ show the Status Mode screen)
+ LDX BOMB               \ If we already have a hyperspace unit fitted (i.e. BOMB
+ BNE pres               \ is non-zero), jump to pres to show the error
+                        \ "Hyperspace Unit Present", beep and exit to the docking
+                        \ bay (i.e. show the Status Mode screen)
 
  DEC BOMB               \ AJD
 
@@ -13109,7 +13091,7 @@ LOAD_E% = LOAD% + P% - CODE%
  LDA #195               \ Print recursive token 35 ("LIGHT YEARS") followed by
  JSR plf                \ a newline
 
-.PCASH                  \ This label is not used but is in the original source
+.PCASH
 
  LDA #119               \ Print recursive token 119 ("CASH:" then control code
  BNE TT27               \ 0, which prints cash levels, then " CR" and newline)
@@ -14986,10 +14968,6 @@ LOAD_E% = LOAD% + P% - CODE%
  CPY #16                \ If Y >= 16 set the C flag, so A = A - 1
  SBC #0
 
-\CPY #&20               \ These instructions are commented out in the original
-\SBC #0                 \ source, but they would make the joystick move the
-                        \ cursor faster by increasing the range of Y by -1 to +1
-
  CPY #64                \ If Y >= 64 set the C flag, so A = A - 1
  SBC #0
 
@@ -14998,10 +14976,6 @@ LOAD_E% = LOAD% + P% - CODE%
 
  CPY #224               \ If Y >= 224 set the C flag, so A = A + 1
  ADC #0
-
-\CPY #&F0               \ These instructions are commented out in the original
-\ADC #0                 \ source, but they would make the joystick move the
-                        \ cursor faster by increasing the range of Y by -1 to +1
 
  TAY                    \ Copy the value of A into Y
 
@@ -15582,7 +15556,10 @@ LOAD_F% = LOAD% + P% - CODE%
 \
 \ ------------------------------------------------------------------------------
 \
-\ Set A and X to random numbers. The C and V flags are also set randomly.
+\ Set A and X to random numbers (though note that X is set to the random number
+\ that was returned in A the last time DORND was called).
+\
+\ The C and V flags are also set randomly.
 \
 \ ******************************************************************************
 
@@ -18880,9 +18857,6 @@ LOAD_G% = LOAD% + P% - CODE%
  LDY #2                 \ vertices used as origins for explosion clouds), and
  STA (XX19),Y           \ store it in byte #2 of the ship line heap
 
-\LDA XX1+32             \ These instructions are commented out in the original
-\AND #&7F               \ source
-
                         \ The following loop sets bytes 3-6 of the of the ship
                         \ line heap to random numbers
 
@@ -18939,10 +18913,6 @@ LOAD_G% = LOAD% + P% - CODE%
  JMP LL155              \ Jump to LL155 to draw the ship, which removes it from
                         \ the screen, returning from the subroutine using a
                         \ tail call
-
-\LL24                   \ This label is commented out in the original source,
-                        \ and was presumably used to label the RTS which is
-                        \ actually called by LL10-1 above, not LL24
 
  RTS                    \ Return from the subroutine
 
@@ -21539,8 +21509,6 @@ LOAD_G% = LOAD% + P% - CODE%
  CPY XX20               \ If the heap counter is less than the size of the heap,
  BCC LL27               \ loop back to LL27 to draw the next line from the heap
 
-\LL82                   \ This label is commented out in the original source
-
  RTS                    \ Return from the subroutine
 
 \ ******************************************************************************
@@ -21700,9 +21668,6 @@ LOAD_G% = LOAD% + P% - CODE%
 
 .LL135
 
-\BNE LL139              \ This instruction is commented out in the original
-                        \ source
-
  LDA XX15+2             \ Set (S R) = (y1_hi y1_lo) - 192
  SEC                    \
  SBC #Y*2               \ starting with the low bytes
@@ -21778,8 +21743,6 @@ LOAD_G% = LOAD% + P% - CODE%
 
  LDA XX15               \ Set R = x1_lo
  STA R
-
-\.LL120                 \ This label is commented out in the original source
 
  JSR LL129              \ Call LL129 to do the following:
                         \
@@ -21988,10 +21951,9 @@ LOAD_G% = LOAD% + P% - CODE%
 
  TXA                    \ Otherwise negate (Y X) using two's complement by first
  EOR #%11111111         \ setting the low byte to ~X + 1
-\CLC                    \
- ADC #1                 \ The CLC instruction is commented out in the original
- TAX                    \ source. It would have no effect as we know the C flag
-                        \ is clear from when we passed through the BCS above
+ ADC #1                 \
+ TAX                    \ The addition works as we know the C flag is clear from
+                        \ when we passed through the BCS above
 
  TYA                    \ Then set the high byte to ~Y + C
  EOR #%11111111
@@ -34418,7 +34380,7 @@ LOAD_J% = LOAD% + P% - CODE%
 \
 \   * Space and "?" to speed up and slow down
 \   * "U", "T" and "M" to disarm, arm and fire missiles
-\   * TAB to fire an energy bomb
+\   * TAB to activate the hyperspace unit
 \   * ESCAPE to launch an escape pod
 \   * "J" to initiate an in-system jump
 \   * "E" to deploy E.C.M. anti-missile countermeasures
@@ -34705,8 +34667,7 @@ LOAD_J% = LOAD% + P% - CODE%
 
  LDA TYPE               \ If the ship type is negative then this indicates a
  BMI MA21               \ planet or sun, so jump down to MA21, as the next bit
-                        \ sets up a pointer to the ship blueprint, and then
-                        \ checks for energy bomb damage, and neither of these
+                        \ sets up a pointer to the ship blueprint, which doesn't
                         \ apply to planets and suns
 
  ASL A                  \ Set Y = ship type * 2
@@ -34723,7 +34684,7 @@ LOAD_J% = LOAD% + P% - CODE%
                         \ We now go straight to part 6, omitting part 5 from the
                         \ original disc version, as part 5 implements the energy
                         \ bomb, and Elite-A replaces the energy bomb with the
-                        \ Hyperspace Unit
+                        \ hyperspace unit
 
 \ ******************************************************************************
 \
@@ -35218,8 +35179,8 @@ LOAD_J% = LOAD% + P% - CODE%
                         \ ship that's no longer around
 
  LDA INWK+31            \ If bit 7 of the ship's byte #31 is clear, then the
- BPL MAC1               \ ship hasn't been killed by energy bomb, collision or
-                        \ laser fire, so jump to MAC1 to skip the following
+ BPL MAC1               \ ship hasn't been killed by collision or laser fire,
+                        \ so jump to MAC1 to skip the following
 
  AND #%00100000         \ If bit 5 of the ship's byte #31 is clear then the
  BEQ MAC1               \ ship is no longer exploding, so jump to MAC1 to skip
@@ -35326,7 +35287,7 @@ LOAD_J% = LOAD% + P% - CODE%
 \       Name: Main flight loop (Part 13 of 16)
 \       Type: Subroutine
 \   Category: Main loop
-\    Summary: Show energy bomb effect, charge shields and energy banks
+\    Summary: Charge shields and energy banks
 \  Deep dive: Program flow of the main game loop
 \             Scheduling tasks with the main loop counter
 \
@@ -35334,8 +35295,6 @@ LOAD_J% = LOAD% + P% - CODE%
 \
 \ The main flight loop covers most of the flight-specific aspects of Elite. This
 \ section covers the following:
-\
-\   * Show energy bomb effect (if applicable)
 \
 \   * Charge shields and energy banks (every 7 iterations of the main loop)
 \
@@ -35981,10 +35940,6 @@ LOAD_J% = LOAD% + P% - CODE%
 
 .FLIP
 
-\LDA MJ                 \ These instructions are commented out in the original
-\BNE FLIP-1             \ source. They would have the effect of not swapping the
-                        \ stardust if we had mis-jumped into witchspace
-
  LDY NOSTM              \ Set Y to the current number of stardust particles, so
                         \ we can use it as a counter through all the stardust
 
@@ -36290,9 +36245,6 @@ LOAD_J% = LOAD% + P% - CODE%
  LDA YY                 \ Set (S R) = YY(1 0) = y
  STA R
  LDA YY+1
-\JSR MAD                \ These instructions are commented out in the original
-\STA S                  \ source
-\STX R
  STA S
 
  LDA #0                 \ Set P = 0
@@ -36635,11 +36587,6 @@ LOAD_J% = LOAD% + P% - CODE%
  STA R
  LDA YY+1
  STA S
-
-\EOR #128               \ These instructions are commented out in the original
-\JSR MAD                \ source
-\STA S
-\STX R
 
  LDA #0                 \ Set P = 0
  STA P
@@ -38267,9 +38214,6 @@ LOAD_K% = LOAD% + P% - CODE%
                         \ the station, so check how close we are
 
  LDA K                  \ Fetch the distance to the station into A
-
-\BEQ PH10               \ This instruction is commented out in the original
-                        \ source
 
  CMP #157               \ If A < 157, jump to PH2 to turn away from the station,
  BCC PH2                \ as we are too close
@@ -41112,8 +41056,7 @@ LOAD_K% = LOAD% + P% - CODE%
 
  STA T                  \ Set A = 128 - A
  LDA #128               \
-\SEC                    \ The SEC instruction is commented out in the original
- SBC T                  \ source, and isn't required as we did a SEC before
+ SBC T                  \ The subtraction will work because we did a SEC before
                         \ calling AR3
 
  RTS                    \ Return from the subroutine
@@ -41512,11 +41455,6 @@ LOAD_L% = LOAD% + P% - CODE%
 
  BPL G1                 \ Loop back for the next seed byte, until we have
                         \ rotated them all
-
-\JSR DORND              \ This instruction is commented out in the original
-                        \ source, and would set A and X to random numbers, so
-                        \ perhaps the original plan was to arrive in each new
-                        \ galaxy in a random place?
 
 .zZ
 
@@ -43090,10 +43028,6 @@ NEXT
  INX
  STX &64
 
-\STX INWK+31            \ This instruction is commented out in the original
-                        \ source. It would set the exploding state and missile
-                        \ count to 0
-
  STX FRIN+1             \ Set the sun/space station slot at FRIN+1 to 0, to
                         \ indicate we should show the space station rather than
                         \ the sun
@@ -43307,11 +43241,10 @@ NEXT
                         \ because INWK is in zero page, so INWK+34 = 0
 
  LDA INWK+33            \ Calculate INWK+33 - INF, again using 16-bit
-\SEC                    \ arithmetic, and put the result in (A Y), so the high
- SBC INF                \ byte is in A and the low byte in Y. The SEC
- TAY                    \ instruction is commented out in the original source;
- LDA INWK+34            \ as the previous subtraction will never underflow, it
- SBC INF+1              \ is superfluous
+ SBC INF                \ arithmetic, and put the result in (A Y), so the high
+ TAY                    \ byte is in A and the low byte in Y. The subtraction
+ LDA INWK+34            \ works because the previous subtraction will never
+ SBC INF+1              \ underflow, so we know the C flag is set
 
  BCC NW3+1              \ If we have an underflow from the subtraction, then
                         \ INF > INWK+33 and we definitely don't have enough
@@ -44796,10 +44729,6 @@ NEXT
 
  LDA K+3                \ Fetch the sign of the result from K+3 (which we know
                         \ has zeroes in bits 0-6, so this just fetches the sign)
-
-\CLC                    \ This instruction is commented out in the original
-                        \ source. It would have no effect as we know the C flag
-                        \ is already clear, as we skipped past the BCS above
 
  BPL PL6                \ If the sign bit is clear and the result is positive,
                         \ then the result is already correct, so return from
@@ -47607,8 +47536,8 @@ LOAD_M% = LOAD% + P% - CODE%
  ADC #&5D
  INC new_hold
 
- BNE MESS               \ Print recursive token A ("ENERGY BOMB", "ENERGY UNIT"
-                        \ or "DOCKING COMPUTERS") as an in-flight message,
+ BNE MESS               \ Print recursive token A ("HYPERSPACE UNIT", "ENERGY
+                        \ UNIT" or "DOCKING COMPUTERS") as an in-flight message,
                         \ followed by " DESTROYED", and return from the
                         \ subroutine using a tail call
 

@@ -1346,12 +1346,16 @@ ORG &0300
 
 .BOMB
 
- SKIP 1                 \ Energy bomb
+ SKIP 1                 \ Hyperspace unit
                         \
                         \   * 0 = not fitted
                         \
                         \   * &7F = fitted
 
+                        \
+                        \ Elite-A replaces the energy bomb with the hyperspace
+                        \ unit, reusing the BOMB variable to determine whether
+                        \ one is fitted
 .ENGY
 
  SKIP 1                 \ Energy unit
@@ -6377,25 +6381,6 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
  INC DTW5               \ Increment the buffer size in DTW5
 
-\LDA #' '               \ This instruction is commented out in the original
-                        \ source, as it has no effect because A already contains
-                        \ ASCII " ". This is because the last character that is
-                        \ tested in the above loop is at position SC, which we
-                        \ know contains a space, so we know A contains a space
-                        \ character when the loop finishes
-
-                        \ We've now shifted the line to the right by 1 from
-                        \ position SC onwards, so SC and SC+1 both contain
-                        \ spaces, and Y is now SC-1 as we did a DEY just before
-                        \ the end of the loop - in other words, we have inserted
-                        \ a space at position SC, and Y points to the character
-                        \ before the newly inserted space
-
-                        \ We now want to move the pointer Y left to find the
-                        \ next space in the line buffer, before looping back to
-                        \ check whether we are done, and if not, insert another
-                        \ space
-
 .DAL3
 
  CMP BUF,Y              \ If the character at position Y is not a space, jump to
@@ -6423,9 +6408,8 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  JSR CHPR
 
  LDA DTW5               \ Subtract #LL from the end-of-buffer pointer in DTW5
-\CLC                    \
- SBC #LL                \ The CLC instruction is commented out in the original
- STA DTW5               \ source. It isn't needed as CHPR clears the C flag
+ SBC #LL                \
+ STA DTW5               \ The subtraction works as CHPR clears the C flag
 
  TAX                    \ Copy the new value of DTW5 into X
 
@@ -8805,30 +8789,6 @@ LOAD_D% = LOAD% + P% - CODE%
 \
 \ LDX ZZ                \ Fetch the system number from ZZ into X
 \
-\\LDY #LO(PTEXT)        \ These instructions are commented out in the original
-\\STY INWK              \ source. The variable PTEXT doesn't exist, so it isn't
-\\LDY #HI(PTEXT)-1      \ entirely obvious what this code does, though it looks
-\\STY INWK+1            \ like it loops through a table of text tokens in PTEXT
-\\LDY #&FF              \ until we get to the entry for the current system,
-\\.PDT1                 \ which it prints out as text tokens (so perhaps PTEXT
-\\INY                   \ used to be a token table for the system's extended
-\\BNE P%+4              \ descriptions before PDESC took over)
-\\INC INWK+1
-\\LDA (INWK),Y
-\\BNE PDT1
-\\DEX
-\\BNE PDT1
-\\.PDT2
-\\INY
-\\BNE P%+4
-\\INC INWK+1
-\\STY INWK+2
-\\LDA (INWK),Y
-\\BEQ TT24-1
-\\JSR TT27
-\\LDY INWK+2
-\\JMP PDT2
-\
 \ RTS                   \ Return from the subroutine
 
                         \ --- And replaced by: -------------------------------->
@@ -10687,7 +10647,7 @@ LOAD_E% = LOAD% + P% - CODE%
  LDA #195               \ Print recursive token 35 ("LIGHT YEARS") followed by
  JSR plf                \ a newline
 
-.PCASH                  \ This label is not used but is in the original source
+.PCASH
 
  LDA #119               \ Print recursive token 119 ("CASH:" then control code
  BNE TT27               \ 0, which prints cash levels, then " CR" and newline)
@@ -11711,11 +11671,10 @@ LOAD_E% = LOAD% + P% - CODE%
                         \ because INWK is in zero page, so INWK+34 = 0
 
  LDA INWK+33            \ Calculate INWK+33 - INF, again using 16-bit
-\SEC                    \ arithmetic, and put the result in (A Y), so the high
- SBC INF                \ byte is in A and the low byte in Y. The SEC
- TAY                    \ instruction is commented out in the original source;
- LDA INWK+34            \ as the previous subtraction will never underflow, it
- SBC INF+1              \ is superfluous
+ SBC INF                \ arithmetic, and put the result in (A Y), so the high
+ TAY                    \ byte is in A and the low byte in Y. The subtraction
+ LDA INWK+34            \ works because the previous subtraction will never
+ SBC INF+1              \ underflow, so we know the C flag is set
 
  BCC NW3+1              \ If we have an underflow from the subtraction, then
                         \ INF > INWK+33 and we definitely don't have enough
@@ -12815,10 +12774,6 @@ LOAD_E% = LOAD% + P% - CODE%
  CPY #16                \ If Y >= 16 set the C flag, so A = A - 1
  SBC #0
 
-\CPY #&20               \ These instructions are commented out in the original
-\SBC #0                 \ source, but they would make the joystick move the
-                        \ cursor faster by increasing the range of Y by -1 to +1
-
  CPY #64                \ If Y >= 64 set the C flag, so A = A - 1
  SBC #0
 
@@ -12827,10 +12782,6 @@ LOAD_E% = LOAD% + P% - CODE%
 
  CPY #224               \ If Y >= 224 set the C flag, so A = A + 1
  ADC #0
-
-\CPY #&F0               \ These instructions are commented out in the original
-\ADC #0                 \ source, but they would make the joystick move the
-                        \ cursor faster by increasing the range of Y by -1 to +1
 
  TAY                    \ Copy the value of A into Y
 
@@ -13174,7 +13125,10 @@ LOAD_F% = LOAD% + P% - CODE%
 \
 \ ------------------------------------------------------------------------------
 \
-\ Set A and X to random numbers. The C and V flags are also set randomly.
+\ Set A and X to random numbers (though note that X is set to the random number
+\ that was returned in A the last time DORND was called).
+\
+\ The C and V flags are also set randomly.
 \
 \ ******************************************************************************
 
@@ -15944,9 +15898,6 @@ LOAD_G% = LOAD% + P% - CODE%
  LDY #2                 \ vertices used as origins for explosion clouds), and
  STA (XX19),Y           \ store it in byte #2 of the ship line heap
 
-\LDA XX1+32             \ These instructions are commented out in the original
-\AND #&7F               \ source
-
                         \ The following loop sets bytes 3-6 of the of the ship
                         \ line heap to random numbers
 
@@ -16011,10 +15962,6 @@ LOAD_G% = LOAD% + P% - CODE%
  JMP LL155              \ Jump to LL155 to draw the ship, which removes it from
                         \ the screen, returning from the subroutine using a
                         \ tail call
-
-\LL24                   \ This label is commented out in the original source,
-                        \ and was presumably used to label the RTS which is
-                        \ actually called by LL10-1 above, not LL24
 
  RTS                    \ Return from the subroutine
 
@@ -18619,8 +18566,6 @@ LOAD_G% = LOAD% + P% - CODE%
  CPY XX20               \ If the heap counter is less than the size of the heap,
  BCC LL27               \ loop back to LL27 to draw the next line from the heap
 
-\LL82                   \ This label is commented out in the original source
-
  RTS                    \ Return from the subroutine
 
 \ ******************************************************************************
@@ -18780,9 +18725,6 @@ LOAD_G% = LOAD% + P% - CODE%
 
 .LL135
 
-\BNE LL139              \ This instruction is commented out in the original
-                        \ source
-
  LDA XX15+2             \ Set (S R) = (y1_hi y1_lo) - 192
  SEC                    \
  SBC #Y*2               \ starting with the low bytes
@@ -18858,8 +18800,6 @@ LOAD_G% = LOAD% + P% - CODE%
 
  LDA XX15               \ Set R = x1_lo
  STA R
-
-\.LL120                 \ This label is commented out in the original source
 
  JSR LL129              \ Call LL129 to do the following:
                         \
@@ -19068,10 +19008,9 @@ LOAD_G% = LOAD% + P% - CODE%
 
  TXA                    \ Otherwise negate (Y X) using two's complement by first
  EOR #%11111111         \ setting the low byte to ~X + 1
-\CLC                    \
- ADC #1                 \ The CLC instruction is commented out in the original
- TAX                    \ source. It would have no effect as we know the C flag
-                        \ is clear from when we passed through the BCS above
+ ADC #1                 \
+ TAX                    \ The addition works as we know the C flag is clear from
+                        \ when we passed through the BCS above
 
  TYA                    \ Then set the high byte to ~Y + C
  EOR #%11111111

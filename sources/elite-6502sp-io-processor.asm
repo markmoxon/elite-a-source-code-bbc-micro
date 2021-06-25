@@ -2048,7 +2048,7 @@ ORG CODE%
 
 .DL6
 
-.DL9                    \ This label is not used but is in the original source
+.DL9
 
  RTS                    \ Return from the subroutine
 
@@ -2918,7 +2918,7 @@ ORG CODE%
 
                         \ These are the secondary flight controls:
 
- EQUB &60               \ TAB       KYTB+8      Energy bomb
+ EQUB &60               \ TAB       KYTB+8      Activate hyperspace unit
  EQUB &70               \ ESCAPE    KYTB+9      Launch escape pod
  EQUB &23               \ T         KYTB+10     Arm missile
  EQUB &35               \ U         KYTB+11     Unarm missile
