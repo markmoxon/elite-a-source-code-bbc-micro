@@ -69,8 +69,8 @@ ORG CODE%
  EQUW 0
  EQUW 0
  EQUW SHIP_PYTHON       \        11 = Python
- EQUW ship_chameleon    \        12 = Chameleon
- EQUW ship_ghavial      \        13 = Ghavial
+ EQUW SHIP_CHAMELEON    \        12 = Chameleon
+ EQUW SHIP_GHAVIAL      \        13 = Ghavial
  EQUW 0
  EQUW 0
  EQUW SHIP_VIPER        \ COPS = 16 = Viper
@@ -79,7 +79,7 @@ ORG CODE%
  EQUW 0
  EQUW 0
  EQUW 0
- EQUW ship_chameleon    \        22 = Chameleon
+ EQUW SHIP_CHAMELEON    \        22 = Chameleon
  EQUW SHIP_PYTHON       \        23 = Python
  EQUW 0
  EQUW 0
@@ -964,7 +964,7 @@ ENDMACRO
 
 \ ******************************************************************************
 \
-\       Name: ship_chameleon
+\       Name: SHIP_CHAMELEON
 \       Type: Variable
 \   Category: Drawing ships
 \    Summary: Ship blueprint for a Chameleon
@@ -974,7 +974,7 @@ ENDMACRO
 
                         \ --- Whole section added for Elite-A: ---------------->
 
-.ship_chameleon
+.SHIP_CHAMELEON
 
  EQUB 3                 \ Max. canisters on demise = 3
  EQUW 4000              \ Targetable area          = 63.24 * 63.24
@@ -1276,7 +1276,7 @@ ENDMACRO
 
 \ ******************************************************************************
 \
-\       Name: ship_ghavial
+\       Name: SHIP_GHAVIAL
 \       Type: Variable
 \   Category: Drawing ships
 \    Summary: Ship blueprint for a Ghavial
@@ -1286,7 +1286,7 @@ ENDMACRO
 
                         \ --- Whole section added for Elite-A: ---------------->
 
-.ship_ghavial
+.SHIP_GHAVIAL
 
  EQUB 3                 \ Max. canisters on demise = 3
  EQUW 9728              \ Targetable area          = 98.63 * 98.63

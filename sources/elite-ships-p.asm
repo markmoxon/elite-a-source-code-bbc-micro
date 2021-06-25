@@ -69,8 +69,8 @@ ORG CODE%
  EQUW 0
  EQUW SHIP_TRANSPORTER  \        10 = Transporter
  EQUW 0
- EQUW ship_chameleon    \        12 = Chameleon
- EQUW ship_ophidian     \        13 = Ophidian
+ EQUW SHIP_CHAMELEON    \        12 = Chameleon
+ EQUW SHIP_OPHIDIAN     \        13 = Ophidian
  EQUW 0
  EQUW 0
  EQUW SHIP_VIPER        \ COPS = 16 = Viper
@@ -78,14 +78,14 @@ ORG CODE%
  EQUW 0
  EQUW 0
  EQUW 0
- EQUW ship_ophidian     \        21 = Ophidian
- EQUW ship_chameleon    \        22 = Chameleon
+ EQUW SHIP_OPHIDIAN     \        21 = Ophidian
+ EQUW SHIP_CHAMELEON    \        22 = Chameleon
  EQUW SHIP_MORAY        \        23 = Moray
  EQUW 0
  EQUW 0
  EQUW 0
  EQUW SHIP_MORAY        \        27 = Moray
- EQUW ship_chameleon    \        28 = Chameleon
+ EQUW SHIP_CHAMELEON    \        28 = Chameleon
  EQUW 0
  EQUW 0
  EQUW 0
@@ -953,7 +953,7 @@ ENDMACRO
 
 \ ******************************************************************************
 \
-\       Name: ship_chameleon
+\       Name: SHIP_CHAMELEON
 \       Type: Variable
 \   Category: Drawing ships
 \    Summary: Ship blueprint for a Chameleon
@@ -963,7 +963,7 @@ ENDMACRO
 
                         \ --- Whole section added for Elite-A: ---------------->
 
-.ship_chameleon
+.SHIP_CHAMELEON
 
  EQUB 3                 \ Max. canisters on demise = 3
  EQUW 4000              \ Targetable area          = 63.24 * 63.24
@@ -1171,7 +1171,7 @@ ENDMACRO
 
 \ ******************************************************************************
 \
-\       Name: ship_ophidian
+\       Name: SHIP_OPHIDIAN
 \       Type: Variable
 \   Category: Drawing ships
 \    Summary: Ship blueprint for an Ophidian
@@ -1181,7 +1181,7 @@ ENDMACRO
 
                         \ --- Whole section added for Elite-A: ---------------->
 
-.ship_ophidian
+.SHIP_OPHIDIAN
 
  EQUB 2                 \ Max. canisters on demise = 2
  EQUW 3720              \ Targetable area          = 60.99 * 60.99

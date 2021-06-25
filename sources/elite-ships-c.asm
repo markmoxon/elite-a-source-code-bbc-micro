@@ -69,8 +69,8 @@ ORG CODE%
  EQUW 0
  EQUW SHIP_TRANSPORTER  \        10 = Transporter
  EQUW SHIP_PYTHON       \        11 = Python
- EQUW ship_rattler      \        12 = Rattler
- EQUW ship_chameleon    \        13 = Chameleon
+ EQUW SHIP_RATTLER      \        12 = Rattler
+ EQUW SHIP_CHAMELEON    \        13 = Chameleon
  EQUW 0
  EQUW 0
  EQUW SHIP_VIPER        \ COPS = 16 = Viper
@@ -79,13 +79,13 @@ ORG CODE%
  EQUW 0
  EQUW 0
  EQUW 0
- EQUW ship_rattler      \        22 = Rattler
- EQUW ship_chameleon    \        23 = Chameleon
+ EQUW SHIP_RATTLER      \        22 = Rattler
+ EQUW SHIP_CHAMELEON    \        23 = Chameleon
  EQUW SHIP_PYTHON       \        24 = Python
  EQUW 0
  EQUW 0
  EQUW SHIP_PYTHON       \        27 = Python
- EQUW ship_rattler      \        28 = Rattler
+ EQUW SHIP_RATTLER      \        28 = Rattler
  EQUW SHIP_THARGOID     \ THG  = 29 = Thargoid
  EQUW SHIP_THARGON      \ TGL  = 30 = Thargon
  EQUW 0
@@ -860,7 +860,7 @@ ENDMACRO
 
 \ ******************************************************************************
 \
-\       Name: ship_rattler
+\       Name: SHIP_RATTLER
 \       Type: Variable
 \   Category: Drawing ships
 \    Summary: Ship blueprint for a Rattler
@@ -870,7 +870,7 @@ ENDMACRO
 
                         \ --- Whole section added for Elite-A: ---------------->
 
-.ship_rattler
+.SHIP_RATTLER
 
  EQUB 2                 \ Max. canisters on demise = 2
  EQUW 6000              \ Targetable area          = 77.46 * 77.46
@@ -956,7 +956,7 @@ ENDMACRO
 
 \ ******************************************************************************
 \
-\       Name: ship_chameleon
+\       Name: SHIP_CHAMELEON
 \       Type: Variable
 \   Category: Drawing ships
 \    Summary: Ship blueprint for a Chameleon
@@ -966,7 +966,7 @@ ENDMACRO
 
                         \ --- Whole section added for Elite-A: ---------------->
 
-.ship_chameleon
+.SHIP_CHAMELEON
 
  EQUB 3                 \ Max. canisters on demise = 3
  EQUW 4000              \ Targetable area          = 63.24 * 63.24

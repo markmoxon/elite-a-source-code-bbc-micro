@@ -70,20 +70,20 @@ ORG CODE%
  EQUW 0
  EQUW SHIP_COBRA_MK_3   \ CYL  = 11 = Cobra Mk III
  EQUW SHIP_PYTHON       \        12 = Python
- EQUW ship_iguana       \        13 = Iguana
+ EQUW SHIP_IGUANA       \        13 = Iguana
  EQUW 0
  EQUW 0
  EQUW SHIP_VIPER        \ COPS = 16 = Viper
  EQUW SHIP_GECKO        \        17 = Gecko
  EQUW 0
  EQUW 0
- EQUW ship_bushmaster   \        20 = Bushmaster
+ EQUW SHIP_BUSHMASTER   \        20 = Bushmaster
  EQUW SHIP_COBRA_MK_3   \        21 = Cobra Mk III
  EQUW SHIP_PYTHON       \        22 = Python
- EQUW ship_iguana       \        23 = Iguana
+ EQUW SHIP_IGUANA       \        23 = Iguana
  EQUW SHIP_MORAY        \        24 = Moray
  EQUW SHIP_COBRA_MK_3   \        25 = Cobra Mk III
- EQUW ship_bushmaster   \        26 = Bushmaster
+ EQUW SHIP_BUSHMASTER   \        26 = Bushmaster
  EQUW SHIP_GECKO        \        27 = Gecko
  EQUW SHIP_PYTHON       \        28 = Python
  EQUW 0
@@ -983,7 +983,7 @@ ENDMACRO
 
 \ ******************************************************************************
 \
-\       Name: ship_bushmaster
+\       Name: SHIP_BUSHMASTER
 \       Type: Variable
 \   Category: Drawing ships
 \    Summary: Ship blueprint for a Bushmaster
@@ -993,7 +993,7 @@ ENDMACRO
 
                         \ --- Whole section added for Elite-A: ---------------->
 
-.ship_bushmaster
+.SHIP_BUSHMASTER
 
  EQUB 0                 \ Max. canisters on demise = 0
  EQUW 4250              \ Targetable area          = 65.19 * 65.19
@@ -1275,7 +1275,7 @@ ENDMACRO
 
 \ ******************************************************************************
 \
-\       Name: ship_iguana
+\       Name: SHIP_IGUANA
 \       Type: Variable
 \   Category: Drawing ships
 \    Summary: Ship blueprint for an Iguana
@@ -1285,7 +1285,7 @@ ENDMACRO
 
                         \ --- Whole section added for Elite-A: ---------------->
 
-.ship_iguana
+.SHIP_IGUANA
 
  EQUB 1                 \ Max. canisters on demise = 1
  EQUW 3500              \ Targetable area          = 59.16 * 59.16

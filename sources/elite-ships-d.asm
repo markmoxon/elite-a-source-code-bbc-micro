@@ -71,19 +71,19 @@ ORG CODE%
  EQUW SHIP_BOA          \        11 = Boa
  EQUW 0
  EQUW 0
- EQUW ship_dragon       \        14 = Dragon
+ EQUW SHIP_DRAGON       \        14 = Dragon
  EQUW SHIP_SIDEWINDER   \        15 = Sidewinder
  EQUW SHIP_VIPER        \ COPS = 16 = Viper
  EQUW SHIP_SIDEWINDER   \        17 = Sidewinder
  EQUW SHIP_SIDEWINDER   \        18 = Sidewinder
  EQUW SHIP_GECKO        \        19 = Gecko
- EQUW ship_bushmaster   \        20 = Bushmaster
+ EQUW SHIP_BUSHMASTER   \        20 = Bushmaster
  EQUW 0
  EQUW 0
  EQUW 0
  EQUW 0
  EQUW 0
- EQUW ship_bushmaster   \        26 = Bushmaster
+ EQUW SHIP_BUSHMASTER   \        26 = Bushmaster
  EQUW SHIP_GECKO        \        27 = Gecko
  EQUW SHIP_SIDEWINDER   \        28 = Sidewinder
  EQUW SHIP_THARGOID     \ THG  = 29 = Thargoid
@@ -1090,7 +1090,7 @@ ENDMACRO
 
 \ ******************************************************************************
 \
-\       Name: ship_dragon
+\       Name: SHIP_DRAGON
 \       Type: Variable
 \   Category: Drawing ships
 \    Summary: Ship blueprint for a Dragon
@@ -1100,7 +1100,7 @@ ENDMACRO
 
                         \ --- Whole section added for Elite-A: ---------------->
 
-.ship_dragon
+.SHIP_DRAGON
 
  EQUB 0                 \ Max. canisters on demise = 0
  EQUW 26192             \ Targetable area          = 161.83 * 161.83
@@ -1176,7 +1176,7 @@ ENDMACRO
 
 \ ******************************************************************************
 \
-\       Name: ship_bushmaster
+\       Name: SHIP_BUSHMASTER
 \       Type: Variable
 \   Category: Drawing ships
 \    Summary: Ship blueprint for a Bushmaster
@@ -1186,7 +1186,7 @@ ENDMACRO
 
                         \ --- Whole section added for Elite-A: ---------------->
 
-.ship_bushmaster
+.SHIP_BUSHMASTER
 
  EQUB 0                 \ Max. canisters on demise = 0
  EQUW 4250              \ Targetable area          = 65.19 * 65.19

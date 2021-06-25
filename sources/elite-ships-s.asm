@@ -68,8 +68,8 @@ ORG CODE%
  EQUW 0
  EQUW 0
  EQUW 0
- EQUW ship_ghavial      \        11 = Ghavial
- EQUW ship_monitor      \        12 = Monitor
+ EQUW SHIP_GHAVIAL      \        11 = Ghavial
+ EQUW SHIP_MONITOR      \        12 = Monitor
  EQUW 0
  EQUW 0
  EQUW 0
@@ -77,13 +77,13 @@ ORG CODE%
  EQUW SHIP_SIDEWINDER   \ SH3  = 17 = Sidewinder
  EQUW SHIP_GECKO        \        18 = Gecko
  EQUW SHIP_MAMBA        \        19 = Mamba
- EQUW ship_bushmaster   \        29 = Bushmaster
+ EQUW SHIP_BUSHMASTER   \        29 = Bushmaster
  EQUW 0
  EQUW 0
  EQUW 0
- EQUW ship_monitor      \        24 = Monitor
+ EQUW SHIP_MONITOR      \        24 = Monitor
  EQUW 0
- EQUW ship_bushmaster   \        26 = Bushmaster
+ EQUW SHIP_BUSHMASTER   \        26 = Bushmaster
  EQUW SHIP_GECKO        \        27 = Gecko
  EQUW SHIP_SIDEWINDER   \        28 = Sidewinder
  EQUW 0
@@ -1082,7 +1082,7 @@ ENDMACRO
 
 \ ******************************************************************************
 \
-\       Name: ship_bushmaster
+\       Name: SHIP_BUSHMASTER
 \       Type: Variable
 \   Category: Drawing ships
 \    Summary: Ship blueprint for a Bushmaster
@@ -1092,7 +1092,7 @@ ENDMACRO
 
                         \ --- Whole section added for Elite-A: ---------------->
 
-.ship_bushmaster
+.SHIP_BUSHMASTER
 
  EQUB 0                 \ Max. canisters on demise = 0
  EQUW 4250              \ Targetable area          = 65.19 * 65.19
@@ -1164,7 +1164,7 @@ ENDMACRO
 
 \ ******************************************************************************
 \
-\       Name: ship_ghavial
+\       Name: SHIP_GHAVIAL
 \       Type: Variable
 \   Category: Drawing ships
 \    Summary: Ship blueprint for a Ghavial
@@ -1174,7 +1174,7 @@ ENDMACRO
 
                         \ --- Whole section added for Elite-A: ---------------->
 
-.ship_ghavial
+.SHIP_GHAVIAL
 
  EQUB 3                 \ Max. canisters on demise = 3
  EQUW 9728              \ Targetable area          = 98.63 * 98.63
@@ -1252,7 +1252,7 @@ ENDMACRO
 
 \ ******************************************************************************
 \
-\       Name: ship_monitor
+\       Name: SHIP_MONITOR
 \       Type: Variable
 \   Category: Drawing ships
 \    Summary: Ship blueprint for a Monitor
@@ -1262,7 +1262,7 @@ ENDMACRO
 
                         \ --- Whole section added for Elite-A: ---------------->
 
-.ship_monitor
+.SHIP_MONITOR
 
  EQUB 4                 \ Max. canisters on demise = 4
  EQUW 13824             \ Targetable area          = 117.57 * 117.57

@@ -66,24 +66,24 @@ ORG CODE%
  EQUW 0
  EQUW 0
  EQUW 0
- EQUW ship_shuttle_2    \         9 = Shuttle 2
+ EQUW SHIP_SHUTTLE_MK_2 \         9 = Shuttle Mk II
  EQUW 0
  EQUW SHIP_COBRA_MK_3   \ CYL  = 11 = Cobra Mk III
  EQUW 0
- EQUW ship_iguana       \        13 = Iguana
+ EQUW SHIP_IGUANA       \        13 = Iguana
  EQUW 0
  EQUW 0
  EQUW SHIP_VIPER        \ COPS = 16 = Viper
  EQUW SHIP_KRAIT        \        17 = Krait
  EQUW 0
  EQUW 0
- EQUW ship_iguana       \        20 = Iguana
+ EQUW SHIP_IGUANA       \        20 = Iguana
  EQUW SHIP_COBRA_MK_3   \        21 = Cobra Mk III
  EQUW 0
  EQUW 0
  EQUW SHIP_ASP_MK_2     \        24 = Asp Mk II
  EQUW SHIP_COBRA_MK_3   \        25 = Cobra Mk III
- EQUW ship_iguana       \        26 = Iguana
+ EQUW SHIP_IGUANA       \        26 = Iguana
  EQUW SHIP_ASP_MK_2     \        27 = Asp Mk II
  EQUW SHIP_KRAIT        \        28 = Krait
  EQUW 0
@@ -111,7 +111,7 @@ ORG CODE%
  EQUB 0
  EQUB 0
  EQUB 0
- EQUB %00100001         \ Shuttle 2                             Trader, innocent
+ EQUB %00100001         \ Shuttle Mk II                         Trader, innocent
  EQUB 0
  EQUB %10100000         \ Cobra Mk III                      Innocent, escape pod
  EQUB 0
@@ -682,17 +682,17 @@ ENDMACRO
 
 \ ******************************************************************************
 \
-\       Name: ship_shuttle_2
+\       Name: SHIP_SHUTTLE_MK_2
 \       Type: Variable
 \   Category: Drawing ships
-\    Summary: Ship blueprint for a Shuttle 2 AJD
+\    Summary: Ship blueprint for a Shuttle Mk II
 \  Deep dive: Ship blueprints
 \
 \ ******************************************************************************
 
                         \ --- Whole section added for Elite-A: ---------------->
 
-.ship_shuttle_2
+.SHIP_SHUTTLE_MK_2
 
  EQUB 15                \ Max. canisters on demise = 15
  EQUW 50 * 50           \ Targetable area          = 50 * 50
@@ -782,7 +782,7 @@ ENDMACRO
 
 \ ******************************************************************************
 \
-\       Name: ship_iguana
+\       Name: SHIP_IGUANA
 \       Type: Variable
 \   Category: Drawing ships
 \    Summary: Ship blueprint for an Iguana
@@ -792,7 +792,7 @@ ENDMACRO
 
                         \ --- Whole section added for Elite-A: ---------------->
 
-.ship_iguana
+.SHIP_IGUANA
 
  EQUB 1                 \ Max. canisters on demise = 1
  EQUW 3500              \ Targetable area          = 59.16 * 59.16

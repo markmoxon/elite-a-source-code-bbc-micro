@@ -68,8 +68,8 @@ ORG CODE%
  EQUW 0
  EQUW 0
  EQUW 0
- EQUW ship_ghavial      \        11 = Ghavial
- EQUW ship_ophidian     \        12 = Ophidian
+ EQUW SHIP_GHAVIAL      \        11 = Ghavial
+ EQUW SHIP_OPHIDIAN     \        12 = Ophidian
  EQUW SHIP_COBRA_MK_1   \        13 = Cobra Mk I
  EQUW SHIP_ANACONDA     \ ANA  = 14 = Anaconda
  EQUW SHIP_WORM         \        15 = Worm
@@ -78,7 +78,7 @@ ORG CODE%
  EQUW SHIP_COBRA_MK_1   \        18 = Cobra Mk I
  EQUW 0
  EQUW 0
- EQUW ship_ophidian     \        21 = Ophidian
+ EQUW SHIP_OPHIDIAN     \        21 = Ophidian
  EQUW SHIP_WORM         \        22 = Worm
  EQUW 0
  EQUW SHIP_ASP_MK_2     \        24 = Asp Mk II
@@ -1188,7 +1188,7 @@ ENDMACRO
 
 \ ******************************************************************************
 \
-\       Name: ship_ghavial
+\       Name: SHIP_GHAVIAL
 \       Type: Variable
 \   Category: Drawing ships
 \    Summary: Ship blueprint for a Ghavial
@@ -1198,7 +1198,7 @@ ENDMACRO
 
                         \ --- Whole section added for Elite-A: ---------------->
 
-.ship_ghavial
+.SHIP_GHAVIAL
 
  EQUB 3                 \ Max. canisters on demise = 3
  EQUW 9728              \ Targetable area          = 98.63 * 98.63
@@ -1276,7 +1276,7 @@ ENDMACRO
 
 \ ******************************************************************************
 \
-\       Name: ship_ophidian
+\       Name: SHIP_OPHIDIAN
 \       Type: Variable
 \   Category: Drawing ships
 \    Summary: Ship blueprint for an Ophidian
@@ -1286,7 +1286,7 @@ ENDMACRO
 
                         \ --- Whole section added for Elite-A: ---------------->
 
-.ship_ophidian
+.SHIP_OPHIDIAN
 
  EQUB 2                 \ Max. canisters on demise = 2
  EQUW 3720              \ Targetable area          = 60.99 * 60.99

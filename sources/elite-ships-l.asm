@@ -69,8 +69,8 @@ ORG CODE%
  EQUW SHIP_SHUTTLE      \ SHU  =  9 = Shuttle
  EQUW 0
  EQUW SHIP_BOA          \        11 = Boa
- EQUW ship_ophidian     \        12 = Ophidian
- EQUW ship_chameleon    \        13 = Chameleon
+ EQUW SHIP_OPHIDIAN     \        12 = Ophidian
+ EQUW SHIP_CHAMELEON    \        13 = Chameleon
  EQUW 0
  EQUW 0
  EQUW SHIP_VIPER        \ COPS = 16 = Viper
@@ -78,8 +78,8 @@ ORG CODE%
  EQUW SHIP_KRAIT        \        18 = Krait
  EQUW 0
  EQUW 0
- EQUW ship_ophidian     \        21 = Ophidian
- EQUW ship_chameleon    \        22 = Chameleon
+ EQUW SHIP_OPHIDIAN     \        21 = Ophidian
+ EQUW SHIP_CHAMELEON    \        22 = Chameleon
  EQUW 0
  EQUW 0
  EQUW 0
@@ -931,7 +931,7 @@ ENDMACRO
 
 \ ******************************************************************************
 \
-\       Name: ship_ophidian
+\       Name: SHIP_OPHIDIAN
 \       Type: Variable
 \   Category: Drawing ships
 \    Summary: Ship blueprint for an Ophidian
@@ -941,7 +941,7 @@ ENDMACRO
 
                         \ --- Whole section added for Elite-A: ---------------->
 
-.ship_ophidian
+.SHIP_OPHIDIAN
 
  EQUB 2                 \ Max. canisters on demise = 2
  EQUW 3720              \ Targetable area          = 60.99 * 60.99
@@ -1153,7 +1153,7 @@ ENDMACRO
 
 \ ******************************************************************************
 \
-\       Name: ship_chameleon
+\       Name: SHIP_CHAMELEON
 \       Type: Variable
 \   Category: Drawing ships
 \    Summary: Ship blueprint for a Chameleon
@@ -1163,7 +1163,7 @@ ENDMACRO
 
                         \ --- Whole section added for Elite-A: ---------------->
 
-.ship_chameleon
+.SHIP_CHAMELEON
 
  EQUB 3                 \ Max. canisters on demise = 3
  EQUW 4000              \ Targetable area          = 63.24 * 63.24

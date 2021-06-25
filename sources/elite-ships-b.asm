@@ -66,10 +66,10 @@ ORG CODE%
  EQUW 0
  EQUW 0
  EQUW 0
- EQUW ship_shuttle_2    \         9 = Shuttle 2
+ EQUW SHIP_SHUTTLE_MK_2 \         9 = Shuttle Mk II
  EQUW 0
- EQUW ship_ghavial      \        11 = Ghavial
- EQUW ship_monitor      \        12 = Monitor
+ EQUW SHIP_GHAVIAL      \        11 = Ghavial
+ EQUW SHIP_MONITOR      \        12 = Monitor
  EQUW SHIP_COBRA_MK_1   \        13 = Cobra Mk I
  EQUW 0
  EQUW 0
@@ -77,15 +77,15 @@ ORG CODE%
  EQUW SHIP_COBRA_MK_1   \        17 = Cobra Mk I
  EQUW 0
  EQUW 0
- EQUW ship_iguana       \        20 = Iguana
+ EQUW SHIP_IGUANA       \        20 = Iguana
  EQUW SHIP_COBRA_MK_3   \        21 = Cobra Mk III
  EQUW 0
  EQUW 0
- EQUW ship_monitor      \        24 = Monitor
+ EQUW SHIP_MONITOR      \        24 = Monitor
  EQUW SHIP_COBRA_MK_3   \        25 = Cobra Mk III
- EQUW ship_iguana       \        26 = Iguana
+ EQUW SHIP_IGUANA       \        26 = Iguana
  EQUW SHIP_COBRA_MK_1   \        27 = Cobra Mk I
- EQUW ship_ghavial      \        28 = Ghavial
+ EQUW SHIP_GHAVIAL      \        28 = Ghavial
  EQUW 0
  EQUW 0
  EQUW 0
@@ -111,7 +111,7 @@ ORG CODE%
  EQUB 0
  EQUB 0
  EQUB 0
- EQUB %00100001         \ Shuttle 2                             Trader, innocent
+ EQUB %00100001         \ Shuttle Mk II                         Trader, innocent
  EQUB 0
  EQUB %10100000         \ Ghavial                           Innocent, escape pod
  EQUB %10100001         \ Monitor                   Trader, innocent, escape pod
@@ -769,7 +769,7 @@ ENDMACRO
 
 \ ******************************************************************************
 \
-\       Name: ship_ghavial
+\       Name: SHIP_GHAVIAL
 \       Type: Variable
 \   Category: Drawing ships
 \    Summary: Ship blueprint for a Ghavial
@@ -779,7 +779,7 @@ ENDMACRO
 
                         \ --- Whole section added for Elite-A: ---------------->
 
-.ship_ghavial
+.SHIP_GHAVIAL
 
  EQUB 3                 \ Max. canisters on demise = 3
  EQUW 9728              \ Targetable area          = 98.63 * 98.63
@@ -857,7 +857,7 @@ ENDMACRO
 
 \ ******************************************************************************
 \
-\       Name: ship_monitor
+\       Name: SHIP_MONITOR
 \       Type: Variable
 \   Category: Drawing ships
 \    Summary: Ship blueprint for a Monitor
@@ -867,7 +867,7 @@ ENDMACRO
 
                         \ --- Whole section added for Elite-A: ---------------->
 
-.ship_monitor
+.SHIP_MONITOR
 
  EQUB 4                 \ Max. canisters on demise = 4
  EQUW 13824             \ Targetable area          = 117.57 * 117.57
@@ -1097,17 +1097,17 @@ ENDMACRO
 
 \ ******************************************************************************
 \
-\       Name: ship_shuttle_2
+\       Name: SHIP_SHUTTLE_MK_2
 \       Type: Variable
 \   Category: Drawing ships
-\    Summary: Ship blueprint for a Shuttle 2 AJD
+\    Summary: Ship blueprint for a Shuttle Mk II
 \  Deep dive: Ship blueprints
 \
 \ ******************************************************************************
 
                         \ --- Whole section added for Elite-A: ---------------->
 
-.ship_shuttle_2
+.SHIP_SHUTTLE_MK_2
 
  EQUB 15                \ Max. canisters on demise = 15
  EQUW 50 * 50           \ Targetable area          = 50 * 50
@@ -1197,7 +1197,7 @@ ENDMACRO
 
 \ ******************************************************************************
 \
-\       Name: ship_iguana
+\       Name: SHIP_IGUANA
 \       Type: Variable
 \   Category: Drawing ships
 \    Summary: Ship blueprint for an Iguana
@@ -1207,7 +1207,7 @@ ENDMACRO
 
                         \ --- Whole section added for Elite-A: ---------------->
 
-.ship_iguana
+.SHIP_IGUANA
 
  EQUB 1                 \ Max. canisters on demise = 1
  EQUW 3500              \ Targetable area          = 59.16 * 59.16

@@ -69,7 +69,7 @@ ORG CODE%
  EQUW 0
  EQUW 0
  EQUW SHIP_COBRA_MK_3   \ CYL  = 11 = Cobra Mk III
- EQUW ship_rattler      \        12 = Rattler
+ EQUW SHIP_RATTLER      \        12 = Rattler
  EQUW SHIP_PYTHON       \        13 = Python
  EQUW 0
  EQUW 0
@@ -79,13 +79,13 @@ ORG CODE%
  EQUW 0
  EQUW 0
  EQUW SHIP_COBRA_MK_3   \        21 = Cobra Mk III
- EQUW ship_rattler      \        22 = Rattler
+ EQUW SHIP_RATTLER      \        22 = Rattler
  EQUW SHIP_PYTHON       \        23 = Python
  EQUW SHIP_ASP_MK_2     \        24 = Asp Mk II
  EQUW SHIP_COBRA_MK_3   \        25 = Cobra Mk III
  EQUW 0
  EQUW SHIP_GECKO        \        27 = Gecko
- EQUW ship_rattler      \        28 = Rattler
+ EQUW SHIP_RATTLER      \        28 = Rattler
  EQUW 0
  EQUW 0
  EQUW 0
@@ -819,7 +819,7 @@ ENDMACRO
 
 \ ******************************************************************************
 \
-\       Name: ship_rattler
+\       Name: SHIP_RATTLER
 \       Type: Variable
 \   Category: Drawing ships
 \    Summary: Ship blueprint for a Rattler
@@ -829,7 +829,7 @@ ENDMACRO
 
                         \ --- Whole section added for Elite-A: ---------------->
 
-.ship_rattler
+.SHIP_RATTLER
 
  EQUB 2                 \ Max. canisters on demise = 2
  EQUW 6000              \ Targetable area          = 77.46 * 77.46

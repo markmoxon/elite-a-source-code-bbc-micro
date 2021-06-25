@@ -69,7 +69,7 @@ ORG CODE%
  EQUW 0
  EQUW 0
  EQUW SHIP_PYTHON       \        11 = Python
- EQUW ship_ophidian     \        12 = Ophidian
+ EQUW SHIP_OPHIDIAN     \        12 = Ophidian
  EQUW SHIP_BOA          \        13 = Boa
  EQUW 0
  EQUW 0
@@ -77,15 +77,15 @@ ORG CODE%
  EQUW SHIP_MAMBA        \        17 = Mamba
  EQUW 0
  EQUW 0
- EQUW ship_bushmaster   \        20 = Bushmaster
- EQUW ship_ophidian     \        21 = Ophidian
+ EQUW SHIP_BUSHMASTER   \        20 = Bushmaster
+ EQUW SHIP_OPHIDIAN     \        21 = Ophidian
  EQUW SHIP_PYTHON       \        22 = Python
- EQUW ship_iguana       \        23 = Iguana
+ EQUW SHIP_IGUANA       \        23 = Iguana
  EQUW 0
  EQUW 0
- EQUW ship_bushmaster   \        26 = Bushmaster
+ EQUW SHIP_BUSHMASTER   \        26 = Bushmaster
  EQUW SHIP_PYTHON       \        27 = Python
- EQUW ship_ophidian     \        28 = Ophidian
+ EQUW SHIP_OPHIDIAN     \        28 = Ophidian
  EQUW 0
  EQUW 0
  EQUW 0
@@ -672,7 +672,7 @@ ENDMACRO
 
 \ ******************************************************************************
 \
-\       Name: ship_ophidian
+\       Name: SHIP_OPHIDIAN
 \       Type: Variable
 \   Category: Drawing ships
 \    Summary: Ship blueprint for an Ophidian
@@ -682,7 +682,7 @@ ENDMACRO
 
                         \ --- Whole section added for Elite-A: ---------------->
 
-.ship_ophidian
+.SHIP_OPHIDIAN
 
  EQUB 2                 \ Max. canisters on demise = 2
  EQUW 3720              \ Targetable area          = 60.99 * 60.99
@@ -1104,7 +1104,7 @@ ENDMACRO
 
 \ ******************************************************************************
 \
-\       Name: ship_bushmaster
+\       Name: SHIP_BUSHMASTER
 \       Type: Variable
 \   Category: Drawing ships
 \    Summary: Ship blueprint for a Bushmaster
@@ -1114,7 +1114,7 @@ ENDMACRO
 
                         \ --- Whole section added for Elite-A: ---------------->
 
-.ship_bushmaster
+.SHIP_BUSHMASTER
 
  EQUB 0                 \ Max. canisters on demise = 0
  EQUW 4250              \ Targetable area          = 65.19 * 65.19
@@ -1186,7 +1186,7 @@ ENDMACRO
 
 \ ******************************************************************************
 \
-\       Name: ship_iguana
+\       Name: SHIP_IGUANA
 \       Type: Variable
 \   Category: Drawing ships
 \    Summary: Ship blueprint for an Iguana
@@ -1196,7 +1196,7 @@ ENDMACRO
 
                         \ --- Whole section added for Elite-A: ---------------->
 
-.ship_iguana
+.SHIP_IGUANA
 
  EQUB 1                 \ Max. canisters on demise = 1
  EQUW 3500              \ Targetable area          = 59.16 * 59.16

@@ -69,7 +69,7 @@ ORG CODE%
  EQUW 0
  EQUW 0
  EQUW SHIP_BOA          \        11 = Boa
- EQUW ship_ophidian     \        12 = Ophidian
+ EQUW SHIP_OPHIDIAN     \        12 = Ophidian
  EQUW 0
  EQUW 0
  EQUW 0
@@ -77,13 +77,13 @@ ORG CODE%
  EQUW SHIP_SIDEWINDER   \ SH3  = 17 = Sidewinder
  EQUW SHIP_GECKO        \        18 = Gecko
  EQUW 0
- EQUW ship_bushmaster   \        20 = Bushmaster
- EQUW ship_ophidian     \        21 = Ophidian
+ EQUW SHIP_BUSHMASTER   \        20 = Bushmaster
+ EQUW SHIP_OPHIDIAN     \        21 = Ophidian
  EQUW 0
  EQUW 0
  EQUW 0
  EQUW 0
- EQUW ship_bushmaster   \        26 = Bushmaster
+ EQUW SHIP_BUSHMASTER   \        26 = Bushmaster
  EQUW SHIP_GECKO        \        27 = Gecko
  EQUW SHIP_SIDEWINDER   \        28 = Sidewinder
  EQUW 0
@@ -800,7 +800,7 @@ ENDMACRO
 
 \ ******************************************************************************
 \
-\       Name: ship_bushmaster
+\       Name: SHIP_BUSHMASTER
 \       Type: Variable
 \   Category: Drawing ships
 \    Summary: Ship blueprint for a Bushmaster
@@ -810,7 +810,7 @@ ENDMACRO
 
                         \ --- Whole section added for Elite-A: ---------------->
 
-.ship_bushmaster
+.SHIP_BUSHMASTER
 
  EQUB 0                 \ Max. canisters on demise = 0
  EQUW 4250              \ Targetable area          = 65.19 * 65.19
@@ -1174,7 +1174,7 @@ ENDMACRO
 
 \ ******************************************************************************
 \
-\       Name: ship_ophidian
+\       Name: SHIP_OPHIDIAN
 \       Type: Variable
 \   Category: Drawing ships
 \    Summary: Ship blueprint for an Ophidian
@@ -1184,7 +1184,7 @@ ENDMACRO
 
                         \ --- Whole section added for Elite-A: ---------------->
 
-.ship_ophidian
+.SHIP_OPHIDIAN
 
  EQUB 2                 \ Max. canisters on demise = 2
  EQUW 3720              \ Targetable area          = 60.99 * 60.99

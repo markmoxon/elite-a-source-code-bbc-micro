@@ -70,20 +70,20 @@ ORG CODE%
  EQUW 0
  EQUW SHIP_BOA          \        11 = Boa
  EQUW SHIP_ADDER        \        12 = Adder
- EQUW ship_iguana       \        13 = Iguana
+ EQUW SHIP_IGUANA       \        13 = Iguana
  EQUW 0
  EQUW 0
  EQUW SHIP_VIPER        \ COPS = 16 = Viper
  EQUW SHIP_GECKO        \        17 = Gecko
  EQUW 0
  EQUW SHIP_ADDER        \        19 = Adder
- EQUW ship_iguana       \        20 = Iguana
+ EQUW SHIP_IGUANA       \        20 = Iguana
  EQUW 0
  EQUW SHIP_WORM         \        22 = Worm
  EQUW 0
  EQUW 0
  EQUW 0
- EQUW ship_iguana       \        26 = Iguana
+ EQUW SHIP_IGUANA       \        26 = Iguana
  EQUW SHIP_ADDER        \        27 = Adder
  EQUW SHIP_GECKO        \        28 = Gecko
  EQUW 0
@@ -781,7 +781,7 @@ ENDMACRO
 
 \ ******************************************************************************
 \
-\       Name: ship_iguana
+\       Name: SHIP_IGUANA
 \       Type: Variable
 \   Category: Drawing ships
 \    Summary: Ship blueprint for an Iguana
@@ -791,7 +791,7 @@ ENDMACRO
 
                         \ --- Whole section added for Elite-A: ---------------->
 
-.ship_iguana
+.SHIP_IGUANA
 
  EQUB 1                 \ Max. canisters on demise = 1
  EQUW 3500              \ Targetable area          = 59.16 * 59.16

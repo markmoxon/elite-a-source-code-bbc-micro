@@ -71,7 +71,7 @@ ORG CODE%
  EQUW 0
  EQUW 0
  EQUW SHIP_FER_DE_LANCE \        13 = Fer-de-lance
- EQUW ship_dragon       \        14 = Dragon
+ EQUW SHIP_DRAGON       \        14 = Dragon
  EQUW SHIP_SIDEWINDER   \        15 = Sidewinder
  EQUW SHIP_VIPER        \ COPS = 16 = Viper
  EQUW SHIP_SIDEWINDER   \        17 = Sidewinder
@@ -670,7 +670,7 @@ ENDMACRO
 
 \ ******************************************************************************
 \
-\       Name: ship_dragon
+\       Name: SHIP_DRAGON
 \       Type: Variable
 \   Category: Drawing ships
 \    Summary: Ship blueprint for a Dragon
@@ -680,7 +680,7 @@ ENDMACRO
 
                         \ --- Whole section added for Elite-A: ---------------->
 
-.ship_dragon
+.SHIP_DRAGON
 
  EQUB 0                 \ Max. canisters on demise = 0
  EQUW 26192             \ Targetable area          = 161.83 * 161.83

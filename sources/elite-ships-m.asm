@@ -69,7 +69,7 @@ ORG CODE%
  EQUW 0
  EQUW 0
  EQUW 0
- EQUW ship_ophidian     \        12 = Ophidian
+ EQUW SHIP_OPHIDIAN     \        12 = Ophidian
  EQUW SHIP_FER_DE_LANCE \        13 = Fer-de-lance
  EQUW 0
  EQUW 0
@@ -77,13 +77,13 @@ ORG CODE%
  EQUW SHIP_MAMBA        \        17 = Mamba
  EQUW SHIP_COBRA_MK_1   \        18 = Cobra Mk I
  EQUW 0
- EQUW ship_bushmaster   \        20 = Bushmaster
- EQUW ship_ophidian     \        21 = Ophidian
- EQUW ship_chameleon    \        22 = Chameleon
+ EQUW SHIP_BUSHMASTER   \        20 = Bushmaster
+ EQUW SHIP_OPHIDIAN     \        21 = Ophidian
+ EQUW SHIP_CHAMELEON    \        22 = Chameleon
  EQUW 0
  EQUW SHIP_FER_DE_LANCE \        24 = Fer-de-lance
  EQUW SHIP_FER_DE_LANCE \        25 = Fer-de-lance
- EQUW ship_bushmaster   \        26 = Bushmaster
+ EQUW SHIP_BUSHMASTER   \        26 = Bushmaster
  EQUW SHIP_COBRA_MK_1   \        27 = Cobra Mk I
  EQUW SHIP_MAMBA        \        28 = Mamba
  EQUW 0
@@ -997,7 +997,7 @@ ENDMACRO
 
 \ ******************************************************************************
 \
-\       Name: ship_ophidian
+\       Name: SHIP_OPHIDIAN
 \       Type: Variable
 \   Category: Drawing ships
 \    Summary: Ship blueprint for an Ophidian
@@ -1007,7 +1007,7 @@ ENDMACRO
 
                         \ --- Whole section added for Elite-A: ---------------->
 
-.ship_ophidian
+.SHIP_OPHIDIAN
 
  EQUB 2                 \ Max. canisters on demise = 2
  EQUW 3720              \ Targetable area          = 60.99 * 60.99
@@ -1101,7 +1101,7 @@ ENDMACRO
 
 \ ******************************************************************************
 \
-\       Name: ship_chameleon
+\       Name: SHIP_CHAMELEON
 \       Type: Variable
 \   Category: Drawing ships
 \    Summary: Ship blueprint for a Chameleon
@@ -1111,7 +1111,7 @@ ENDMACRO
 
                         \ --- Whole section added for Elite-A: ---------------->
 
-.ship_chameleon
+.SHIP_CHAMELEON
 
  EQUB 3                 \ Max. canisters on demise = 3
  EQUW 4000              \ Targetable area          = 63.24 * 63.24
@@ -1203,7 +1203,7 @@ ENDMACRO
 
 \ ******************************************************************************
 \
-\       Name: ship_bushmaster
+\       Name: SHIP_BUSHMASTER
 \       Type: Variable
 \   Category: Drawing ships
 \    Summary: Ship blueprint for a Bushmaster
@@ -1213,7 +1213,7 @@ ENDMACRO
 
                         \ --- Whole section added for Elite-A: ---------------->
 
-.ship_bushmaster
+.SHIP_BUSHMASTER
 
  EQUB 0                 \ Max. canisters on demise = 0
  EQUW 4250              \ Targetable area          = 65.19 * 65.19

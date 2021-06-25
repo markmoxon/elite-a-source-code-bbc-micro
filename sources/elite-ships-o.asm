@@ -66,7 +66,7 @@ ORG CODE%
  EQUW SHIP_BOULDER      \         6 = Boulder
  EQUW SHIP_ASTEROID     \ AST  =  7 = Asteroid
  EQUW SHIP_SPLINTER     \ SPL  =  8 = Splinter
- EQUW ship_shuttle_2    \         9 = Shuttle 2
+ EQUW SHIP_SHUTTLE_MK_2 \         9 = Shuttle Mk II
  EQUW 0
  EQUW SHIP_PYTHON       \        11 = Python
  EQUW SHIP_MORAY        \        12 = Moray
@@ -111,7 +111,7 @@ ORG CODE%
  EQUB %00000000         \ Boulder
  EQUB %00000000         \ Asteroid
  EQUB %00000000         \ Splinter
- EQUB %00100001         \ Shuttle 2                             Trader, innocent
+ EQUB %00100001         \ Shuttle Mk II                         Trader, innocent
  EQUB 0
  EQUB %10100000         \ Python                            Innocent, escape pod
  EQUB %10100001         \ Moray                     Trader, innocent, escape pod
@@ -760,17 +760,17 @@ ENDMACRO
 
 \ ******************************************************************************
 \
-\       Name: ship_shuttle_2
+\       Name: SHIP_SHUTTLE_MK_2
 \       Type: Variable
 \   Category: Drawing ships
-\    Summary: Ship blueprint for a Shuttle 2 AJD
+\    Summary: Ship blueprint for a Shuttle Mk II
 \  Deep dive: Ship blueprints
 \
 \ ******************************************************************************
 
                         \ --- Whole section added for Elite-A: ---------------->
 
-.ship_shuttle_2
+.SHIP_SHUTTLE_MK_2
 
  EQUB 15                \ Max. canisters on demise = 15
  EQUW 50 * 50           \ Targetable area          = 50 * 50

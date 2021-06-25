@@ -68,7 +68,7 @@ ORG CODE%
  EQUW 0
  EQUW 0
  EQUW 0
- EQUW ship_monitor      \        11 = Monitor
+ EQUW SHIP_MONITOR      \        11 = Monitor
  EQUW SHIP_ADDER        \        12 = Adder
  EQUW SHIP_COBRA_MK_1   \        13 = Cobra Mk I
  EQUW 0
@@ -78,14 +78,14 @@ ORG CODE%
  EQUW SHIP_GECKO        \        18 = Gecko
  EQUW SHIP_ADDER        \        19 = Adder
  EQUW 0
- EQUW ship_ophidian     \        21 = Ophidian
+ EQUW SHIP_OPHIDIAN     \        21 = Ophidian
  EQUW SHIP_MORAY        \        22 = Moray
  EQUW 0
- EQUW ship_monitor      \        24 = Monitor
+ EQUW SHIP_MONITOR      \        24 = Monitor
  EQUW 0
  EQUW 0
  EQUW SHIP_ADDER        \        27 = Adder
- EQUW ship_monitor      \        28 = Monitor
+ EQUW SHIP_MONITOR      \        28 = Monitor
  EQUW 0
  EQUW 0
  EQUW 0
@@ -780,7 +780,7 @@ ENDMACRO
 
 \ ******************************************************************************
 \
-\       Name: ship_monitor
+\       Name: SHIP_MONITOR
 \       Type: Variable
 \   Category: Drawing ships
 \    Summary: Ship blueprint for a Monitor
@@ -790,7 +790,7 @@ ENDMACRO
 
                         \ --- Whole section added for Elite-A: ---------------->
 
-.ship_monitor
+.SHIP_MONITOR
 
  EQUB 4                 \ Max. canisters on demise = 4
  EQUW 13824             \ Targetable area          = 117.57 * 117.57
@@ -1070,7 +1070,7 @@ ENDMACRO
 
 \ ******************************************************************************
 \
-\       Name: ship_ophidian
+\       Name: SHIP_OPHIDIAN
 \       Type: Variable
 \   Category: Drawing ships
 \    Summary: Ship blueprint for an Ophidian
@@ -1080,7 +1080,7 @@ ENDMACRO
 
                         \ --- Whole section added for Elite-A: ---------------->
 
-.ship_ophidian
+.SHIP_OPHIDIAN
 
  EQUB 2                 \ Max. canisters on demise = 2
  EQUW 3720              \ Targetable area          = 60.99 * 60.99

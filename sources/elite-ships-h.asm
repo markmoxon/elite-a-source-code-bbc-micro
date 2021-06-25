@@ -68,8 +68,8 @@ ORG CODE%
  EQUW 0
  EQUW 0
  EQUW 0
- EQUW ship_ghavial      \        11 = Ghavial
- EQUW ship_rattler      \        12 = Rattler
+ EQUW SHIP_GHAVIAL      \        11 = Ghavial
+ EQUW SHIP_RATTLER      \        12 = Rattler
  EQUW SHIP_COBRA_MK_1   \        13 = Cobra Mk I
  EQUW SHIP_ANACONDA     \ ANA  = 14 = Anaconda
  EQUW SHIP_WORM         \        15 = Worm
@@ -80,12 +80,12 @@ ORG CODE%
  EQUW 0
  EQUW 0
  EQUW SHIP_WORM         \        22 = Worm
- EQUW ship_rattler      \        23 = Rattler
+ EQUW SHIP_RATTLER      \        23 = Rattler
  EQUW 0
  EQUW 0
  EQUW 0
  EQUW SHIP_COBRA_MK_1   \        27 = Cobra Mk I
- EQUW ship_rattler      \        28 = Rattler
+ EQUW SHIP_RATTLER      \        28 = Rattler
  EQUW 0
  EQUW 0
  EQUW 0
@@ -971,7 +971,7 @@ ENDMACRO
 
 \ ******************************************************************************
 \
-\       Name: ship_rattler
+\       Name: SHIP_RATTLER
 \       Type: Variable
 \   Category: Drawing ships
 \    Summary: Ship blueprint for a Rattler
@@ -981,7 +981,7 @@ ENDMACRO
 
                         \ --- Whole section added for Elite-A: ---------------->
 
-.ship_rattler
+.SHIP_RATTLER
 
  EQUB 2                 \ Max. canisters on demise = 2
  EQUW 6000              \ Targetable area          = 77.46 * 77.46
@@ -1187,7 +1187,7 @@ ENDMACRO
 
 \ ******************************************************************************
 \
-\       Name: ship_ghavial
+\       Name: SHIP_GHAVIAL
 \       Type: Variable
 \   Category: Drawing ships
 \    Summary: Ship blueprint for a Ghavial
@@ -1197,7 +1197,7 @@ ENDMACRO
 
                         \ --- Whole section added for Elite-A: ---------------->
 
-.ship_ghavial
+.SHIP_GHAVIAL
 
  EQUB 3                 \ Max. canisters on demise = 3
  EQUW 9728              \ Targetable area          = 98.63 * 98.63

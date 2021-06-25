@@ -51784,7 +51784,7 @@ ENDMACRO
 
 \ ******************************************************************************
 \
-\       Name: ship_dragon
+\       Name: SHIP_DRAGON
 \       Type: Variable
 \   Category: Drawing ships
 \    Summary: Ship blueprint for a Dragon
@@ -51792,7 +51792,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-.ship_dragon
+.SHIP_DRAGON
 
  EQUB 0                 \ Max. canisters on demise = 0
  EQUW 26192             \ Targetable area          = 161.83 * 161.83
@@ -51866,7 +51866,7 @@ ENDMACRO
 
 \ ******************************************************************************
 \
-\       Name: ship_monitor
+\       Name: SHIP_MONITOR
 \       Type: Variable
 \   Category: Drawing ships
 \    Summary: Ship blueprint for a Monitor
@@ -51874,7 +51874,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-.ship_monitor
+.SHIP_MONITOR
 
  EQUB 4                 \ Max. canisters on demise = 4
  EQUW 13824             \ Targetable area          = 117.57 * 117.57
@@ -51955,7 +51955,7 @@ ENDMACRO
 
 \ ******************************************************************************
 \
-\       Name: ship_ophidian
+\       Name: SHIP_OPHIDIAN
 \       Type: Variable
 \   Category: Drawing ships
 \    Summary: Ship blueprint for an Ophidian
@@ -51963,7 +51963,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-.ship_ophidian
+.SHIP_OPHIDIAN
 
  EQUB 2                 \ Max. canisters on demise = 2
  EQUW 3720              \ Targetable area          = 60.99 * 60.99
@@ -52055,7 +52055,7 @@ ENDMACRO
 
 \ ******************************************************************************
 \
-\       Name: ship_ghavial
+\       Name: SHIP_GHAVIAL
 \       Type: Variable
 \   Category: Drawing ships
 \    Summary: Ship blueprint for a Ghavial
@@ -52063,7 +52063,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-.ship_ghavial
+.SHIP_GHAVIAL
 
  EQUB 3                 \ Max. canisters on demise = 3
  EQUW 9728              \ Targetable area          = 98.63 * 98.63
@@ -52139,7 +52139,7 @@ ENDMACRO
 
 \ ******************************************************************************
 \
-\       Name: ship_bushmaster
+\       Name: SHIP_BUSHMASTER
 \       Type: Variable
 \   Category: Drawing ships
 \    Summary: Ship blueprint for a Bushmaster
@@ -52147,7 +52147,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-.ship_bushmaster
+.SHIP_BUSHMASTER
 
  EQUB 0                 \ Max. canisters on demise = 0
  EQUW 4250              \ Targetable area          = 65.19 * 65.19
@@ -52217,7 +52217,7 @@ ENDMACRO
 
 \ ******************************************************************************
 \
-\       Name: ship_rattler
+\       Name: SHIP_RATTLER
 \       Type: Variable
 \   Category: Drawing ships
 \    Summary: Ship blueprint for a Rattler
@@ -52225,7 +52225,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-.ship_rattler
+.SHIP_RATTLER
 
  EQUB 2                 \ Max. canisters on demise = 2
  EQUW 6000              \ Targetable area          = 77.46 * 77.46
@@ -52309,7 +52309,7 @@ ENDMACRO
 
 \ ******************************************************************************
 \
-\       Name: ship_iguana
+\       Name: SHIP_IGUANA
 \       Type: Variable
 \   Category: Drawing ships
 \    Summary: Ship blueprint for an Iguana
@@ -52317,7 +52317,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-.ship_iguana
+.SHIP_IGUANA
 
  EQUB 1                 \ Max. canisters on demise = 1
  EQUW 3500              \ Targetable area          = 59.16 * 59.16
@@ -52395,15 +52395,15 @@ ENDMACRO
 
 \ ******************************************************************************
 \
-\       Name: ship_shuttle_2
+\       Name: SHIP_SHUTTLE_MK_2
 \       Type: Variable
 \   Category: Drawing ships
-\    Summary: Ship blueprint for a Shuttle 2 AJD
+\    Summary: Ship blueprint for a Shuttle Mk II
 \  Deep dive: Ship blueprints
 \
 \ ******************************************************************************
 
-.ship_shuttle_2
+.SHIP_SHUTTLE_MK_2
 
  EQUB 15                \ Max. canisters on demise = 15
  EQUW 50 * 50           \ Targetable area          = 50 * 50
@@ -52491,7 +52491,7 @@ ENDMACRO
 
 \ ******************************************************************************
 \
-\       Name: ship_chameleon
+\       Name: SHIP_CHAMELEON
 \       Type: Variable
 \   Category: Drawing ships
 \    Summary: Ship blueprint for a Chameleon
@@ -52499,7 +52499,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-.ship_chameleon
+.SHIP_CHAMELEON
 
  EQUB 3                 \ Max. canisters on demise = 3
  EQUW 4000              \ Targetable area          = 63.24 * 63.24
@@ -52605,9 +52605,9 @@ ENDMACRO
  EQUW SHIP_VIPER, SHIP_SIDEWINDER, SHIP_MAMBA, SHIP_KRAIT
  EQUW SHIP_ADDER, SHIP_GECKO, SHIP_COBRA_MK_1, SHIP_ASP_MK_2
  EQUW SHIP_FER_DE_LANCE, SHIP_MORAY, SHIP_THARGOID, SHIP_THARGON
- EQUW SHIP_CONSTRICTOR, ship_dragon, ship_monitor, ship_ophidian
- EQUW ship_ghavial, ship_bushmaster, ship_rattler, ship_iguana
- EQUW ship_shuttle_2, ship_chameleon
+ EQUW SHIP_CONSTRICTOR, SHIP_DRAGON, SHIP_MONITOR, SHIP_OPHIDIAN
+ EQUW SHIP_GHAVIAL, SHIP_BUSHMASTER, SHIP_RATTLER, SHIP_IGUANA
+ EQUW SHIP_SHUTTLE_MK_2, SHIP_CHAMELEON
 
  EQUW 0
 

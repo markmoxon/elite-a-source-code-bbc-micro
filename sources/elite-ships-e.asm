@@ -69,21 +69,21 @@ ORG CODE%
  EQUW 0
  EQUW 0
  EQUW SHIP_PYTHON       \        11 = Python
- EQUW ship_rattler      \        12 = Rattler
- EQUW ship_iguana       \        13 = Iguana
+ EQUW SHIP_RATTLER      \        12 = Rattler
+ EQUW SHIP_IGUANA       \        13 = Iguana
  EQUW 0
  EQUW 0
  EQUW SHIP_VIPER        \ COPS = 16 = Viper
  EQUW SHIP_GECKO        \        17 = Gecko
  EQUW 0
  EQUW SHIP_ADDER        \        19 = Adder
- EQUW ship_iguana       \        20 = Iguana
+ EQUW SHIP_IGUANA       \        20 = Iguana
  EQUW 0
  EQUW SHIP_PYTHON       \        22 = Python
- EQUW ship_rattler      \        23 = Rattler
+ EQUW SHIP_RATTLER      \        23 = Rattler
  EQUW 0
  EQUW 0
- EQUW ship_iguana       \        26 = Iguana
+ EQUW SHIP_IGUANA       \        26 = Iguana
  EQUW SHIP_PYTHON       \        27 = Python
  EQUW SHIP_GECKO        \        28 = Gecko
  EQUW 0
@@ -966,7 +966,7 @@ ENDMACRO
 
 \ ******************************************************************************
 \
-\       Name: ship_rattler
+\       Name: SHIP_RATTLER
 \       Type: Variable
 \   Category: Drawing ships
 \    Summary: Ship blueprint for a Rattler
@@ -976,7 +976,7 @@ ENDMACRO
 
                         \ --- Whole section added for Elite-A: ---------------->
 
-.ship_rattler
+.SHIP_RATTLER
 
  EQUB 2                 \ Max. canisters on demise = 2
  EQUW 6000              \ Targetable area          = 77.46 * 77.46
@@ -1062,7 +1062,7 @@ ENDMACRO
 
 \ ******************************************************************************
 \
-\       Name: ship_iguana
+\       Name: SHIP_IGUANA
 \       Type: Variable
 \   Category: Drawing ships
 \    Summary: Ship blueprint for an Iguana
@@ -1072,7 +1072,7 @@ ENDMACRO
 
                         \ --- Whole section added for Elite-A: ---------------->
 
-.ship_iguana
+.SHIP_IGUANA
 
  EQUB 1                 \ Max. canisters on demise = 1
  EQUW 3500              \ Targetable area          = 59.16 * 59.16
