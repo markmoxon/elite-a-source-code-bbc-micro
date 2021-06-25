@@ -2475,12 +2475,12 @@ ENDIF
  LDA V+1
  PHA
 
- LDA #LO(msg_3)         \ Set V to the low byte of RUTOK
+ LDA #LO(msg_3)         \ Set V to the low byte of msg_3
  STA V
 
- LDA #HI(msg_3)         \ Set A to the high byte of RUTOK
+ LDA #HI(msg_3)         \ Set A to the high byte of msg_3
 
- BNE DTEN               \ Call DTEN to print token number X from the RUTOK
+ BNE DTEN               \ Call DTEN to print token number X from the msg_3
                         \ table and restore the values of A, Y and V(1 0) from
                         \ the stack, returning from the subroutine using a tail
                         \ call (this BNE is effectively a JMP as A is never
