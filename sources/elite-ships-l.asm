@@ -8,7 +8,8 @@
 \ Acornsoft 1984, and the extra code in Elite-A is copyright Angus Duggan
 \
 \ The code on this site is identical to Angus Duggan's source discs (it's just
-\ been reformatted and variable names changed to be more readable)
+\ been reformatted, and the label names have been changed to be consistent with
+\ the sources for the original BBC Micro disc version on which it is based)
 \
 \ The commentary is copyright Mark Moxon, and any misunderstandings or mistakes
 \ in the documentation are entirely my fault

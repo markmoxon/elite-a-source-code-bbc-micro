@@ -59,7 +59,7 @@ My hope is that this repository and the [accompanying website](https://www.bbcel
 
 Elite-A was written by Angus Duggan, and is an extended version of the BBC Micro disc version of Elite; the extra code is copyright Angus Duggan. The original Elite was written by Ian Bell and David Braben and is copyright &copy; Acornsoft 1984.
 
-The code on this site is identical to Angus Duggan's source discs (it's just been reformatted to be more readable).
+The code on this site is identical to Angus Duggan's source discs (it's just been reformatted, and the label names have been changed to be consistent with the sources for the original BBC Micro disc version on which it is based).
 
 The commentary is copyright &copy; Mark Moxon. Any misunderstandings or mistakes in the documentation are entirely my fault.
 
