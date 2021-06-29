@@ -1289,20 +1289,22 @@ ORG &0300
 .new_type
 .cmdr_ship
 
- SKIP 1                 \ AJD
+ SKIP 1                 \ The type of our current ship
 
                         \ --- End of replacement ------------------------------>
 
 .CRGO
 
- SKIP 1                 \ Our ship's cargo capacity
+ SKIP 1                 \ I.F.F. system
                         \
-                        \   * 22 = standard cargo bay of 20 tonnes
+                        \   * 0 = not fitted
                         \
-                        \   * 37 = large cargo bay of 35 tonnes
+                        \   * &FF = fitted
                         \
-                        \ The value is two greater than the actual capacity to
-                        \ male the maths in tnpr slightly more efficient
+                        \ Elite-A doesn't sell the large cargo bay as you can
+                        \ buy different ships with different capacities, so we
+                        \ reuse the CRGO variable to determine whether an I.F.F.
+                        \ is fitted
 
 .QQ20
 
@@ -1760,14 +1762,16 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
 
 .BSTK
 
- SKIP 1                 \ Bitstik configuration setting
+ SKIP 1                 \ Delta 14b joystick configuration setting
                         \
-                        \   * 0 = keyboard or joystick (default)
+                        \   * Positive (0-127) = keyboard
                         \
-                        \   * &FF = Bitstik
+                        \   * Negative (127-255) = Delta 14b joystick
                         \
-                        \ Toggled by pressing "B" when paused, see the DKS3
-                        \ routine for details
+                        \ Elite-A doesn't support the Bitstik, but instead it
+                        \ supports the multi-button Volmace Delta 14b joystick,
+                        \ reusing the BSTK variable to determine whether it is
+                        \ configured
 
 .CATF
 
@@ -1807,7 +1811,7 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
 
 .new_mounts
 
- SKIP 1                 \ AJD
+ SKIP 1                 \ The number of laser mounts in our current ship
 
 .new_missiles
 
@@ -1823,7 +1827,7 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
 
 .new_speed
 
- SKIP 1                 \ AJD
+ SKIP 1                 \ Our current ship's maximum speed
 
 .new_hold
 
@@ -1831,7 +1835,12 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
 
 .new_range
 
- SKIP 1                 \ AJD
+ SKIP 1                 \ Our current ship's hyperspace range (i.e. the size of
+                        \ the fuel tank)
+                        \
+                        \ The range is stored as the number of light years
+                        \ multiplied by 10, so QQ14 = 1 represents 0.1 light
+                        \ years, while 70 represents 7.0 light years
 
 .new_costs
 
@@ -1839,11 +1848,11 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
 
 .new_max
 
- SKIP 1                 \ AJD
+ SKIP 1                 \ Our current ship's maximum pitch/roll rate
 
 .new_min
 
- SKIP 1                 \ AJD
+ SKIP 1                 \ Our current ship's minimum pitch/roll rate
 
 .new_space
 
@@ -2191,7 +2200,8 @@ LOAD_A% = LOAD%
 
                         \ --- And replaced by: -------------------------------->
 
- BMI INBAY              \ AJD
+ BMI INBAY              \ Jump to INBAY to load the docked code (this BMI is
+                        \ effectively a JMP)
 
                         \ --- End of replacement ------------------------------>
 
@@ -2264,21 +2274,28 @@ LOAD_A% = LOAD%
 
                         \ --- And replaced by: -------------------------------->
 
- LDX JSTX               \ AJD
- CPX new_max
- BCC n_highx
- LDX new_max
+ LDX JSTX               \ Set X to the current rate of roll in JSTX
+
+ CPX new_max            \ If X < new_max (where new_max is our current ship's
+ BCC n_highx            \ maximum roll rate), then jump to n_highx to skip the
+                        \ following instruction
+
+ LDX new_max            \ X is at least new_max, so set X to new_max so it is
+                        \ never higher than our current ship's maximum roll rate
 
 .n_highx
 
- CPX new_min
- BCS n_lowx
- LDX new_min
+ CPX new_min            \ If X >= new_min (where new_min is our current ship's
+ BCS n_lowx             \ minimum roll rate), then jump to n_lowx to skip the
+                        \ following instruction
+
+ LDX new_min            \ X is less than new_min, so set X to new_min so it is
+                        \ never lower than our current ship's minimum roll rate
 
 .n_lowx
 
- JSR cntr
- JSR cntr
+ JSR cntr               \ Apply keyboard damping twice (if enabled) so the roll
+ JSR cntr               \ rate in X creeps towards the centre by 2
 
                         \ --- End of replacement ------------------------------>
 
@@ -2345,20 +2362,29 @@ LOAD_A% = LOAD%
 
                         \ --- And replaced by: -------------------------------->
 
- LDX JSTY               \ AJD
- CPX new_max
- BCC n_highy
- LDX new_max
+ LDX JSTY               \ Set X to the current rate of pitch in JSTY
+
+ CPX new_max            \ If X < new_max (where new_max is our current ship's
+ BCC n_highy            \ maximum pitch rate), then jump to n_highy to skip the
+                        \ following instruction
+
+ LDX new_max            \ X is at least new_max, so set X to new_max so it is
+                        \ never higher than our current ship's maximum pitch
+                        \ rate
 
 .n_highy
 
- CPX new_min
- BCS n_lowy
- LDX new_min
+ CPX new_min            \ If X >= new_min (where new_min is our current ship's
+ BCS n_lowy             \ minimum pitch rate), then jump to n_lowy to skip the
+                        \ following instruction
+
+ LDX new_min            \ X is less than new_min, so set X to new_min so it is
+                        \ never lower than our current ship's minimum pitch rate
 
 .n_lowy
 
- JSR cntr
+ JSR cntr               \ Apply keyboard damping so the pitch rate in X creeps
+                        \ towards the centre by 1
 
                         \ --- End of replacement ------------------------------>
 
@@ -2495,9 +2521,11 @@ LOAD_A% = LOAD%
 
                         \ --- And replaced by: -------------------------------->
 
- LDA &7D                \ AJD
- CMP new_speed
- BCC speed_up
+ LDA DELTA              \ The "go faster" key is being pressed, so first we
+ CMP new_speed          \ fetch the current speed from DELTA into A, and if
+ BCC speed_up           \ A < new_speed (the maximum speed of our current ship),
+                        \ then we can go a bit faster, so jump to speed_up to
+                        \ accelerate
 
                         \ --- End of replacement ------------------------------>
 
@@ -2579,9 +2607,12 @@ LOAD_A% = LOAD%
 
                         \ --- And replaced by: -------------------------------->
 
- LDY #&E0               \ AJD
- DEX
- JSR MSBAR
+ LDY #&E0               \ Change the leftmost missile indicator to yellow/white
+ DEX                    \ on the missile bar (this call changes the leftmost
+ JSR MSBAR              \ indicator because we set X to the number of missiles
+                        \ in NOMSL above, and the indicators are numbered from
+                        \ right to left, starting at 0, so X - 1 is the number
+                        \ of the leftmost indicator)
 
                         \ --- End of replacement ------------------------------>
 
@@ -3143,7 +3174,7 @@ LOAD_A% = LOAD%
 \ STA QQ20,Y            \ of type Y in the cargo hold, as we just successfully
 \                       \ scooped one canister of type Y
 \
-\ TYA                   \ Print recursive token 48 + A as an in-flight token,
+\ TYA                   \ Print recursive token 48 + Y as an in-flight token,
 \ ADC #208              \ which will be in the range 48 ("FOOD") to 64 ("ALIEN
 \ JSR MESS              \ ITEMS"), so this prints the scooped item's name
 \
@@ -3153,18 +3184,33 @@ LOAD_A% = LOAD%
 
                         \ --- And replaced by: -------------------------------->
 
-                        \ AJD
+                        \ number 0-15 if we are scooping a cargo canister, 3 if
+                        \ we are scooping an escape pod, or 16 if we are
+                        \ scooping a Thargon). These numbers correspond to the
+                        \ relevant market items (see QQ23 for a list), so a
+                        \ cargo canister can contain anything from food to
+                        \ gem-stones, while escape pods contain slaves, and
+                        \ Thargons become alien items when scooped
 
- TAX                    \ AJD
- JSR tnpr
+ TAX                    \ Copy the type of cargo we are scooping into X
 
- BCS MA58               \ AJD
- INC QQ20,X
- TXA
- ADC #&D0
- JSR MESS
+ JSR tnpr               \ Call tnpr to work out whether we have room in the
+                        \ hold for the scooped item (the C flag contains the
+                        \ result)
 
- JSR top_6a             \ AJD
+ BCS MA58               \ If the C flag is set then we have no room in the hold
+                        \ for the scooped item, so jump down to MA58 to skip all
+                        \ the docking and scooping checks
+
+ INC QQ20,X             \ Scooping was successful, so increment the number of
+                        \ items of type X that we have in the hold
+
+ TXA                    \ Print recursive token 48 + X as an in-flight token,
+ ADC #208               \ which will be in the range 48 ("FOOD") to 64 ("ALIEN
+ JSR MESS               \ ITEMS"), so this prints the scooped item's name
+
+ JSR top_6a             \ The item has now been scooped, so call top_6a to set
+                        \ bit 7 of its NEWB flags to indicate this
 
                         \ --- End of replacement ------------------------------>
 
@@ -7305,10 +7351,12 @@ NEXT
 
 .sell_equip
 
- LDA CRGO               \ AJD
- BEQ l_1ce7             \ IFF if flag not set
- LDA #&6B
- JSR plf2
+ LDA CRGO               \ If we don't have an I.F.F. system fitted (i.e. CRGO is
+ BEQ l_1ce7             \ zero), skip the following three instructions
+
+ LDA #107               \ We do have an I.F.F. system fitted, so print recursive
+ JSR plf2               \ token 107 ("I.F.F.SYSTEM"), followed by a newline and an
+                        \ indent of 6 characters
 
 .l_1ce7
 
@@ -9273,22 +9321,28 @@ NEXT
 
                         \ --- And replaced by: -------------------------------->
 
- LDX #ESC               \ AJD
- STX &8C
- JSR FRS1
+ LDX #ESC               \ Set the current ship type to an escape pod, so we can
+ STX TYPE               \ show it disappearing into the distance when we eject
+                        \ in our pod
 
- LDA #&10               \ AJD
- STA &61
- LDA #&C2
- STA &64
- LSR A
- STA &66
+ JSR FRS1               \ Call FRS1 to launch the escape pod straight ahead,
+                        \ like a missile launch, but with our ship instead
+
+ LDA #16                \ Set the escape pod's byte #27 (speed) to 8
+ STA INWK+27
+
+ LDA #194               \ Set the escape pod's byte #30 (pitch counter) to 194,
+ STA INWK+30            \ so it pitches as we pull away
+
+ LSR A                  \ Set the escape pod's byte #32 (AI flag) to %01100001,
+ STA INWK+32            \ so it has no AI, and we can use this value as a
+                        \ counter to do the following loop 97 times
 
                         \ --- End of replacement ------------------------------>
 
 .ESL1
 
- JSR MVEIT              \ Call MVEIT to move the escape pod in space AJD
+ JSR MVEIT              \ Call MVEIT to move the escape pod in space
 
  JSR LL9                \ Call LL9 to draw the Cobra on-screen
 
@@ -9311,8 +9365,13 @@ NEXT
 
                         \ --- And replaced by: -------------------------------->
 
- STA QQ20+&10           \ AJD
- LDX #&0C               \ LDX #&10 save gold/plat/gems
+ STA QQ20+16            \ We lose any alien items when using our escape pod, so
+                        \ set QQ20+16 to 0 (which is where they are stored)
+
+ LDX #12                \ We lose all our cargo canisters when using our escape
+                        \ pod (i.e. all the cargo except gold, platinum and gem
+                        \ stones), so up a counter in X so we can zero cargo
+                        \ slots 0-12 in QQ20
 
                         \ --- End of replacement ------------------------------>
 
@@ -9341,8 +9400,12 @@ NEXT
                         \ --- And replaced by: -------------------------------->
 
  INC new_hold           \ AJD
- LDA new_range
- STA QQ14
+
+ LDA new_range          \ Our replacement ship is delivered with a full tank of
+ STA QQ14               \ so fetch our current ship's hyperspace range from
+                        \ new_range and set the current fuel level in QQ14 to
+                        \ this value
+
  JSR ping
  JSR TT111
  JSR jmp
@@ -10471,7 +10534,8 @@ LOAD_C% = LOAD% +P% - CODE%
 \
 \ Other entry points:
 \
-\   top_6a              AJD
+\   top_6a              Set bit 7 of the ship's NEWB flags to indicate that it
+\                       has docked or been scooped
 \
 \ ******************************************************************************
 
@@ -11453,7 +11517,9 @@ LOAD_C% = LOAD% +P% - CODE%
  STY MSAR
  STX &45
 
- JMP n_sound30          \ AJD
+ JMP n_sound30          \ Call n_sound30 to make the sound of a missile being
+                        \ launched and return from the subroutine using a tail
+                        \ call
 
                         \ --- End of replacement ------------------------------>
 
@@ -11902,7 +11968,8 @@ LOAD_C% = LOAD% +P% - CODE%
 
                         \ --- And replaced by: -------------------------------->
 
- JSR n_sound30          \ AJD
+ JSR n_sound30          \ Call n_sound30 to make the sound of a missile being
+                        \ launched
 
                         \ --- End of replacement ------------------------------>
 
@@ -12344,7 +12411,7 @@ LOAD_C% = LOAD% +P% - CODE%
 \
 \ Other entry points:
 \
-\   n_store             Sets K(3 2 1) = (A A A) and clears the C flag
+\   n_store             Set K(3 2 1) = (A A A) and clear the C flag
 \
 \ ******************************************************************************
 
@@ -13917,8 +13984,8 @@ LOAD_C% = LOAD% +P% - CODE%
 
                         \ --- And replaced by: -------------------------------->
 
- LDA #0                 \ AJD
- JSR n_store
+ LDA #0                 \ Call n_store to set K(3 2 1) = 0 to hold the result
+ JSR n_store            \ (we populate K next)
 
                         \ --- End of replacement ------------------------------>
 
@@ -14748,7 +14815,7 @@ LOAD_D% = LOAD% + P% - CODE%
 
                         \ --- And replaced by: -------------------------------->
 
- JSR vdu_80             \ AJD
+ JSR vdu_80             \ Call vdu_80 to switch to Sentence Case
 
                         \ --- End of replacement ------------------------------>
 
@@ -15077,7 +15144,7 @@ LOAD_D% = LOAD% + P% - CODE%
 
                         \ --- And replaced by: -------------------------------->
 
- JSR vdu_00             \ AJD
+ JSR vdu_00             \ Call vdu_00 to switch to ALL CAPS
 
                         \ --- End of replacement ------------------------------>
 
@@ -16214,7 +16281,7 @@ LOAD_D% = LOAD% + P% - CODE%
 
                         \ --- And replaced by: -------------------------------->
 
- JSR vdu_80             \ AJD
+ JSR vdu_80             \ Call vdu_80 to switch to Sentence Case
 
                         \ --- End of replacement ------------------------------>
 
@@ -16670,7 +16737,7 @@ LOAD_D% = LOAD% + P% - CODE%
 
                         \ --- And replaced by: -------------------------------->
 
- JSR vdu_00             \ AJD
+ JSR vdu_00             \ Call vdu_00 to switch to ALL CAPS
 
                         \ --- End of replacement ------------------------------>
 
@@ -17099,7 +17166,7 @@ LOAD_D% = LOAD% + P% - CODE%
                         \ "g"), padded to a width of two characters
 
  JSR var                \ Call var to set QQ19+3 = economy * |economic_factor|
-                        \ (and set the availability of Alien Items to 0)
+                        \ (and set the availability of alien items to 0)
 
  LDA QQ19+1             \ Fetch the byte #1 that we stored above and jump to
  BMI TT155              \ TT155 if it is negative (i.e. if the economic_factor
@@ -17344,7 +17411,8 @@ LOAD_D% = LOAD% + P% - CODE%
 
                         \ --- And replaced by: -------------------------------->
 
- JSR vdu_80             \ AJD
+ JSR vdu_80             \ Call vdu_80 to switch to Sentence Case, with the next
+                        \ letter in capitals
 
                         \ --- End of replacement ------------------------------>
 
@@ -17374,7 +17442,7 @@ LOAD_D% = LOAD% + P% - CODE%
 \ ------------------------------------------------------------------------------
 \
 \ Set QQ19+3 = economy * |economic_factor|, given byte #1 of the market prices
-\ table for an item. Also sets the availability of Alien Items to 0.
+\ table for an item. Also sets the availability of alien items to 0.
 \
 \ This routine forms part of the calculations for market item prices (TT151)
 \ and availability (GVL).
@@ -17400,7 +17468,7 @@ LOAD_D% = LOAD% + P% - CODE%
 
  CLC                    \ Clear the C flag so we can do additions below
 
- LDA #0                 \ Set AVL+16 (availability of Alien Items) to 0,
+ LDA #0                 \ Set AVL+16 (availability of alien items) to 0,
  STA AVL+16             \ setting A to 0 in the process
 
 .TT153
@@ -17550,7 +17618,7 @@ LOAD_D% = LOAD% + P% - CODE%
                         \ QQ19+1
 
  JSR var                \ Call var to set QQ19+3 = economy * |economic_factor|
-                        \ (and set the availability of Alien Items to 0)
+                        \ (and set the availability of alien items to 0)
 
  LDA QQ23+3,X           \ Fetch byte #3 from the market prices table (mask) and
  AND QQ26               \ AND with the random number for this system visit
@@ -18487,9 +18555,9 @@ LOAD_E% = LOAD% + P% - CODE%
 \
 \ Other entry points:
 \
-\   vdu_80              AJD
+\   vdu_80              Switch standard tokens to Sentence Case
 \
-\   vdu_00              AJD
+\   vdu_00              Switch standard tokens to ALL CAPS
 \
 \ ******************************************************************************
 
@@ -18541,17 +18609,22 @@ LOAD_E% = LOAD% + P% - CODE%
 
                         \ --- And replaced by: -------------------------------->
 
- DEX                    \ AJD
+ DEX                    \ If token > 6, skip the following 3 instructions
  BNE l_33b9
 
 .vdu_80
 
- LDX #&80
- EQUB &2C
+ LDX #%10000000         \ Set bit 7 of X, so when we set QQ17 below, we switch
+                        \ standard tokens to Sentence Case
+
+ EQUB &2C               \ Skip the next instruction by turning it into
+                        \ &2C &A2 &00, or BIT &00A2, which does nothing apart
+                        \ from affect the flags
 
 .vdu_00
 
- LDX #&00
+ LDX #0                 \ Clear bit 7 of X, so when we set QQ17 below, we switch
+                        \ standard tokens to ALL CAPS
 
                         \ --- End of replacement ------------------------------>
 
@@ -18563,9 +18636,9 @@ LOAD_E% = LOAD% + P% - CODE%
 
 .l_33b9
 
- DEX                    \ AJD
- DEX
- BEQ vdu_00
+ DEX                    \ If token = 8, this is control code 8 (switch to ALL
+ DEX                    \ CAPS), so jump up to vdu_00 to set QQ17 to 0 to switch
+ BEQ vdu_00             \ to ALL CAPS and return from the subroutine
 
                         \ --- End of added code ------------------------------->
 
@@ -19989,14 +20062,24 @@ LOAD_E% = LOAD% + P% - CODE%
 
                         \ --- And replaced by: -------------------------------->
 
- LDY #&25               \ AJD
- LDA SSPR
- BNE l_station
- LDY finder
+ LDY #NI%               \ Set Y = NI%, so SPS1 will calculate the vector to the
+                        \ second slot in the local bubble, i.e. the space
+                        \ station or the sun
+
+ LDA SSPR               \ If we are inside the space station safe zone, jump to
+ BNE l_station          \ l_station to skip the following instruction and ensure
+                        \ we draw the space station on the compass
+
+ LDY finder             \ We are not inside the space station safe zone, so
+                        \ set the value of Y to finder, which determines whether
+                        \ the compass is configured to show the sun or the
+                        \ planet
 
 .l_station
 
- JSR SPS1
+ JSR SPS1               \ We now draw the planet or sun/station on the compass,
+                        \ so first call SPS1 to calculate the vector to the
+                        \ planet/sun/station and store it in XX15
 
                         \ Fall through into SP2 to draw XX15 on the compass
 
@@ -20507,12 +20590,13 @@ LOAD_E% = LOAD% + P% - CODE%
 \
 \ ------------------------------------------------------------------------------
 \
-\ Copy one of the planet's coordinates into the corresponding location in the
-\ temporary variable K3. The high byte and absolute value of the sign byte are
-\ copied into the first two K3 bytes, and the sign of the sign byte is copied
-\ into the highest K3 byte.
+\ Copy one of the space coordinates of the planet, sun or space station into the
+\ corresponding location in the temporary variable K3. The high byte and
+\ absolute value of the sign byte are copied into the first two K3 bytes, and
+\ the sign of the sign byte is copied into the highest K3 byte.
 \
-\ The comments below are written for the x-coordinate into K3(2 1 0).
+\ The comments below are written for copying the planet's x-coordinate into
+\ K3(2 1 0).
 \
 \ Arguments:
 \
@@ -20526,11 +20610,23 @@ LOAD_E% = LOAD% + P% - CODE%
 \
 \   Y                   Determines which coordinate to copy:
 \
-\                         * Y = 0 copies (x_sign, x_hi)
+\                         * Y = 0 copies (x_sign, x_hi) of planet
 \
-\                         * Y = 3 copies (y_sign, y_hi)
+\                         * Y = 3 copies (y_sign, y_hi) of planet
 \
-\                         * Y = 6 copies (z_sign, z_hi)
+\                         * Y = 6 copies (z_sign, z_hi) of planet
+\
+\                         * Y = NI% + 0 copies (x_sign, x_hi) of sun/station
+\
+\                         * Y = NI% + 3 copies (y_sign, y_hi) of sun/station
+\
+\                         * Y = NI% + 6 copies (z_sign, z_hi) of sun/station
+\
+\ Returns:
+\
+\   X                   X is incremented by 3 to point to the next coordinate
+\
+\   Y                   Y is incremented by 3 to point to the next coordinate
 \
 \ ******************************************************************************
 
@@ -20569,11 +20665,12 @@ LOAD_E% = LOAD% + P% - CODE%
  AND #%10000000
  STA K3+2,X
 
- INY                    \ AJD, update header above and all calls to SPS3
+ INY                    \ Increment the value of Y by 3 so the next call to SPS3
+ INY                    \ will copy the next coordinate (i.e. x then y then z)
  INY
- INY
- INX
- INX
+
+ INX                    \ Increment the value of X by 3 so the next call to SPS3
+ INX                    \ will store the coordinate in the next 24-bit K3 number
  INX
 
                         \ --- End of replacement ------------------------------>
@@ -21078,9 +21175,12 @@ LOAD_E% = LOAD% + P% - CODE%
 
                         \ --- And replaced by: -------------------------------->
 
- LDX NOMSL              \ AJD
- DEX
- JSR MSBAR
+ LDX NOMSL              \ Call MSBAR to update the leftmost indicator in the
+ DEX                    \ dashboard's missile bar, by calling with X = NOMSL - 1
+ JSR MSBAR              \ (as the missile indicators are numbered 0-3 in Elite-A
+                        \ rather than the 1-4 in the disc version)
+                        \
+                        \ MSBAR returns with Y = 0
 
                         \ --- End of replacement ------------------------------>
 
@@ -21284,8 +21384,8 @@ LOAD_E% = LOAD% + P% - CODE%
 \ Arguments:
 \
 \   X                   The number of the missile indicator to update (counting
-\                       from right to left, so indicator NOMSL is the leftmost
-\                       indicator)
+\                       from right to left and starting at 0 rather than 1, so
+\                       indicator NOMSL - 1 is the leftmost indicator)
 \
 \   Y                   The colour of the missile indicator:
 \
@@ -21321,7 +21421,7 @@ LOAD_E% = LOAD% + P% - CODE%
 
                         \ --- And replaced by: -------------------------------->
 
- CPX #4
+ CPX #4                 \ AJD
  BCC n_mok
  LDX #3
 
@@ -21334,8 +21434,13 @@ LOAD_E% = LOAD% + P% - CODE%
  STA T
 
  LDA #41                \ Set SC = 41 - T
- SBC T                  \        = 40 + 1 - (X * 8) AJD
- STA SC
+ SBC T                  \        = 40 + 1 - (X * 8)
+ STA SC                 \
+                        \ This is the same calculation as in the disc version's
+                        \ MSBAR routine, but because the missile number in the
+                        \ Elite-A version is in the range 0-3 rather than 1-3,
+                        \ we subtract from 41 instead of 49 to get the screen
+                        \ address
 
                         \ --- End of replacement ------------------------------>
 
@@ -24643,7 +24748,9 @@ LOAD_F% = LOAD% + P% - CODE%
 
                         \ --- And replaced by: -------------------------------->
 
- LDX #3                 \ AJD
+ LDX #3                 \ Set up a loop counter in X to count through all four
+                        \ missile indicators (in Elite-A the missile indicators
+                        \ are numbered 0-3 rather than 1-4)
 
                         \ --- End of replacement ------------------------------>
 
@@ -24672,15 +24779,15 @@ LOAD_F% = LOAD% + P% - CODE%
 
                         \ --- And replaced by: -------------------------------->
 
- LDY #0                 \ AJD
- CPX NOMSL
+ LDY #0                 \ If X >= NOMSL, then jump down to miss_miss with Y = 0
+ CPX NOMSL              \ to draw the missile indicator at position X in black
  BCS miss_miss
 
- LDY #&EE               \ AJD
+ LDY #&EE               \ Set the colour of the missile indicator to green/cyan
 
 .miss_miss
 
- JSR MSBAR
+ JSR MSBAR              \ Draw the missile indicator at position X in colour Y
 
                         \ --- End of replacement ------------------------------>
 
@@ -24692,7 +24799,7 @@ LOAD_F% = LOAD% + P% - CODE%
 
                         \ --- And replaced by: -------------------------------->
 
- BPL ss                 \ AJD
+ BPL ss                 \ Loop back to ss if we still have missiles to draw
 
                         \ --- End of replacement ------------------------------>
 
@@ -25962,7 +26069,8 @@ LOAD_F% = LOAD% + P% - CODE%
 
                         \ --- And replaced by: -------------------------------->
 
- JSR vdu_80             \ AJD
+ JSR vdu_80             \ Call vdu_80 to switch to Sentence Case, with the next
+                        \ letter in capitals
 
                         \ --- End of replacement ------------------------------>
 
@@ -26530,9 +26638,18 @@ LOAD_F% = LOAD% + P% - CODE%
 \       Name: SPS1
 \       Type: Subroutine
 \   Category: Maths (Geometry)
-\    Summary: Calculate the vector to the planet and store it in XX15
+\    Summary: Calculate the vector to the planet, sun or station and store it in
+\             XX15
 \
 \ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   Y                   Determines the object whose vector we are calculating:
+\
+\                         * 0 = calculate the vector to the planet
+\
+\                         * NI% = calculate the vector to the sun/space station
 \
 \ Other entry points:
 \
@@ -26542,11 +26659,11 @@ LOAD_F% = LOAD% + P% - CODE%
 
 .SPS1
 
- LDX #0                 \ Copy the two high bytes of the planet's x-coordinate
- JSR SPS3               \ into K3(2 1 0), separating out the sign bit into K3+2
-
                         \ --- Original Acornsoft code removed: ---------------->
 
+\ LDX #0                \ Copy the two high bytes of the planet's x-coordinate
+\ JSR SPS3              \ into K3(2 1 0), separating out the sign bit into K3+2
+\
 \ LDX #3                \ Copy the two high bytes of the planet's y-coordinate
 \ JSR SPS3              \ into K3(5 4 3), separating out the sign bit into K3+5
 \
@@ -26555,9 +26672,17 @@ LOAD_F% = LOAD% + P% - CODE%
 
                         \ --- And replaced by: -------------------------------->
 
- JSR SPS3               \ AJD
+ LDX #0                 \ Copy the two high bytes of the planet/sun/station's
+ JSR SPS3               \ x-coordinate into K3(2 1 0), separating out the sign
+                        \ bit into K3+2
 
- JSR SPS3               \ AJD
+ JSR SPS3               \ Copy the two high bytes of the planet/sun/station's
+                        \ y-coordinate into K3(5 4 3), separating out the sign
+                        \ bit into K3+5
+
+ JSR SPS3               \ Copy the two high bytes of the planet/sun/station's
+                        \ z-coordinate into K3(8 7 6), separating out the sign
+                        \ bit into K3+8
 
                         \ --- End of replacement ------------------------------>
 
@@ -26729,26 +26854,24 @@ LOAD_F% = LOAD% + P% - CODE%
                         \ --- Original Acornsoft code removed: ---------------->
 
 \ STA T                 \ Set (T P) = (A P) = y^2
-
-                        \ --- And replaced by: -------------------------------->
-
- TAY                    \ AJD
-
-                        \ --- End of replacement ------------------------------>
-
- LDA P                  \ Set (R Q) = (R Q) + (T P) = x^2 + y^2
- ADC Q                  \
- STA Q                  \ First, doing the low bytes, Q = Q + P
-
-                        \ --- Original Acornsoft code removed: ---------------->
-
+\
+\ LDA P                 \ Set (R Q) = (R Q) + (T P) = x^2 + y^2
+\ ADC Q                 \
+\ STA Q                 \ First, doing the low bytes, Q = Q + P
+\
 \ LDA T                 \ And then the high bytes, R = R + T
 \ ADC R
 \ STA R
 
                         \ --- And replaced by: -------------------------------->
 
- TYA                    \ AJD
+ TAY                    \ Set (Y P) = (A P) = y^2
+
+ LDA P                  \ Set (R Q) = (R Q) + (Y P) = x^2 + y^2
+ ADC Q                  \
+ STA Q                  \ First, doing the low bytes, Q = Q + P
+
+ TYA                    \ And then the high bytes, R = R + Y
  ADC R
  STA R
 
@@ -26761,26 +26884,24 @@ LOAD_F% = LOAD% + P% - CODE%
                         \ --- Original Acornsoft code removed: ---------------->
 
 \ STA T                 \ Set (T P) = (A P) = z^2
-
-                        \ --- And replaced by: -------------------------------->
-
- TAY                    \ AJD
-
-                        \ --- End of replacement ------------------------------>
-
- LDA P                  \ Set (R Q) = (R Q) + (T P) = x^2 + y^2 + z^2
- ADC Q                  \
- STA Q                  \ First, doing the low bytes, Q = Q + P
-
-                        \ --- Original Acornsoft code removed: ---------------->
-
+\
+\ LDA P                 \ Set (R Q) = (R Q) + (T P) = x^2 + y^2 + z^2
+\ ADC Q                 \
+\ STA Q                 \ First, doing the low bytes, Q = Q + P
+\
 \ LDA T                 \ And then the high bytes, R = R + T
 \ ADC R
 \ STA R
 
                         \ --- And replaced by: -------------------------------->
 
- TYA                    \ AJD
+ TAY                    \ Set (Y P) = (A P) = z^2
+
+ LDA P                  \ Set (R Q) = (R Q) + (Y P) = x^2 + y^2 + z^2
+ ADC Q                  \
+ STA Q                  \ First, doing the low bytes, Q = Q + P
+
+ TYA                    \ And then the high bytes, R = R + Y
  ADC R
  STA R
 
@@ -27113,7 +27234,7 @@ LOAD_F% = LOAD% + P% - CODE%
 
                         \ --- And replaced by: -------------------------------->
 
- JSR n_sound10          \ AJD
+ JSR n_sound10          \ Call n_sound10 make the first death sound
 
  LDA #24                \ Call the NOISE routine with A = 24 to make the
  BNE NOISE              \ death sound and return from the subroutine using a
@@ -27244,6 +27365,11 @@ LOAD_F% = LOAD% + P% - CODE%
 \
 \                         * 15 = explosion is quieter (i.e. this is just a laser
 \                                strike)
+\
+\ Other entry points:
+\
+\   n_sound10           Make the first part of the death sound, or the second
+\                       part of the explosion sound
 \
 \ ******************************************************************************
 
@@ -27516,7 +27642,7 @@ LOAD_F% = LOAD% + P% - CODE%
 \       Name: b_14
 \       Type: Subroutine
 \   Category: Keyboard
-\    Summary: Check Voltmace Delta 14 joystick buttons AJD
+\    Summary: Check Delta 14b joystick buttons AJD
 \
 \ ******************************************************************************
 
@@ -27562,9 +27688,10 @@ LOAD_F% = LOAD% + P% - CODE%
 \   Y                   The offset into the KYTB table above of the key that we
 \                       want to scan on the keyboard
 \
-\ Other tnery points:
+\ Other entry points:
 \
-\   b_pressed           AJD
+\   b_pressed           Store &FF in the Y-th byte of the key logger at KL, to
+\                       indicate that key is being pressed
 \
 \ ******************************************************************************
 
@@ -27572,8 +27699,9 @@ LOAD_F% = LOAD% + P% - CODE%
 
                         \ --- Code added for Elite-A: ------------------------->
 
- LDA BSTK               \ AJD
- BMI b_14
+ LDA BSTK               \ If BTSK is negative, then the Delta 14b joystick is
+ BMI b_14               \ configured, so jump to b_14 to check the Delta 14b
+                        \ joystick buttons
 
                         \ --- End of added code ------------------------------->
 
@@ -27769,6 +27897,7 @@ LOAD_F% = LOAD% + P% - CODE%
 \   * Y toggles reverse joystick Y channel (&44)
 \   * J toggles reverse both joystick channels (&45)
 \   * K toggles keyboard and joystick (&46)
+\   * @ toggles keyboard and Delta 14B joystick (&47)
 \
 \ The numbers in brackets are the internal key numbers (see p.142 of the
 \ Advanced User Guide for a list of internal key numbers). We pass the key that
@@ -28259,7 +28388,8 @@ LOAD_F% = LOAD% + P% - CODE%
 
                         \ --- And replaced by: -------------------------------->
 
- CPY #&48               \ AJD
+ CPY #&48               \ The last toggle key is &47 (@), so check whether we
+                        \ have just done that one
 
                         \ --- End of replacement ------------------------------>
 
@@ -28344,7 +28474,8 @@ LOAD_F% = LOAD% + P% - CODE%
 
 .DKL1
 
- JSR DKS1               \ AJD
+ JSR DKS1               \ Call DKS1 to see if the KYTB key at offset Y is being
+                        \ pressed, and set the key logger accordingly
 
                         \ --- End of replacement ------------------------------>
 
@@ -28438,7 +28569,18 @@ LOAD_F% = LOAD% + P% - CODE%
 \       Name: cargo_mtok
 \       Type: Subroutine
 \   Category: Text
-\    Summary: AJD
+\    Summary: Print the name of a specific cargo item
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   A                   The number of the cargo item whose name we want to print
+\                       (where 0 = food, 1 = textiles, and so on up to 16 for
+\                       alien items)
+\
+\                       See QQ23 for a list of market item numbers and their
+\                       storage units
 \
 \ ******************************************************************************
 
@@ -28446,7 +28588,10 @@ LOAD_F% = LOAD% + P% - CODE%
 
 .cargo_mtok
 
- ADC #&D0
+ ADC #208               \ Add 208 to the value in A, so when we fall through
+                        \ into MESS, we print recursive token 48 + A as an
+                        \ in-flight token, which will be in the range 48
+                        \ ("FOOD") to 64 ("ALIEN ITEMS")
 
                         \ --- End of added section ---------------------------->
 
@@ -28477,7 +28622,7 @@ LOAD_F% = LOAD% + P% - CODE%
 
                         \ --- And replaced by: -------------------------------->
 
- JSR vdu_00             \ AJD
+ JSR vdu_00             \ Call vdu_00 to switch to ALL CAPS
 
                         \ --- End of replacement ------------------------------>
 
@@ -28543,7 +28688,7 @@ LOAD_F% = LOAD% + P% - CODE%
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\ CPX #22               \ If X >= 22 (89% chance), return from the subroutine
+\ CPX #22               \ If X >= 22 (91% chance), return from the subroutine
 \ BCS DK5               \ (as DK5 contains an RTS)
 \
 \ LDA QQ20,X            \ If we do not have any of item QQ20+X, return from the
@@ -28554,11 +28699,15 @@ LOAD_F% = LOAD% + P% - CODE%
 
                         \ --- And replaced by: -------------------------------->
 
- CPX #24                \ If X >= 24 (AJD chance), return from the subroutine
+ CPX #24                \ If X >= 24 (90% chance), return from the subroutine
  BCS DK5                \ (as DK5 contains an RTS)
 
- LDA CRGO,X             \ If we do not have any of item CRGO+X, AJD
- BEQ DK5
+ LDA CRGO,X             \ If we do not have any of item CRGO+X, return from the
+ BEQ DK5                \ subroutine (as DK5 contains an RTS). X is in the range
+                        \ 0-23, so this not only checks for cargo, but also for
+                        \ the I.F.F., E.C.M., fuel scoops, hyperspace unit,
+                        \ energy unit, docking computer and galactic hyperdrive,
+                        \ all of which can be destroyed
 
                         \ --- End of replacement ------------------------------>
 
@@ -28587,19 +28736,44 @@ LOAD_F% = LOAD% + P% - CODE%
 
                         \ --- And replaced by: -------------------------------->
 
- STA CRGO,X             \ AJD
- DEX
- BMI ou1
+ STA CRGO,X             \ A is 0 (as we didn't branch with the BNE above), so
+                        \ this sets CRGO+X to 0, which destroys any cargo or
+                        \ equipment we have of that type
 
- CPX #17                \ If X = 17 then AJD
- BEQ ou1
+ DEX                    \ Decrement X, so X is now in the range -1 to 22, and a
+                        \ value of 0 means we just lost some food, 1 means we
+                        \ lost some textiles, and so on
 
- TXA                    \ AJD
- BCC cargo_mtok
+ BMI ou1                \ If X is now negative, then we just lost the I.F.F.
+                        \ system (as X was 0 before being decremented), so jump
+                        \ to ou1 to print the relevant message, which will be
+                        \ "I.F.F.SYSTEM DESTROYED" as A = 0 and the C flag is
+                        \ clear (as we passed through the BCS above)
 
- CMP #&12
- BNE equip_mtok
- LDA #&6F-&6B-1
+ CPX #17                \ If X = 17 then we just lost the E.C.M., so jump to ou1
+ BEQ ou1                \ to print the relevant message, which will be
+                        \ "E.C.M.SYSTEM DESTROYED" as A = 0 and the C flag is
+                        \ set from the CPX
+
+                        \ If we get here then X is in the range 0-16 or 18-22
+
+ TXA                    \ Copy the value of X into A
+
+ BCC cargo_mtok         \ If X < 17 then we just lost some cargo (as opposed to
+                        \ equipment), so jump to cargo_mtok to print the name of
+                        \ the cargo whose number is in A, plus " DESTROYED", and
+                        \ return from the subroutine using a tail call
+
+                        \ If we get here then X (and A) are in the range 18-22
+
+ CMP #18                \ If A is not 18, jump down to equip_mtok with A in the
+ BNE equip_mtok         \ range 19-22 and the C flag set from the CMP, to print
+                        \ token 113 ("HYPERSPACE UNIT") through 116 ("GALACTIC
+                        \ HYPERSPACE")
+
+ LDA #111-107-1         \ Otherwise A is 18, so we have lost the fuel scoops, so
+                        \ set A to 111-107-1 = 3 and the C flag set from the CMP
+                        \ to print token 111 ("FUEL SCOOPS")
 
                         \ --- End of replacement ------------------------------>
 
@@ -28630,15 +28804,25 @@ LOAD_F% = LOAD% + P% - CODE%
 
                         \ --- And replaced by: -------------------------------->
 
- ADC #&6B-&5D           \ AJD
+ ADC #107-93            \ We can reach here with three values of A and the C
+                        \ flag, and then add 93 below to print the following
+                        \ tokens:
+                        \
+                        \   A = 0, C flag clear = token 107 ("I.F.F.SYSTEM")
+                        \   A = 0, C flag set   = token 108 ("E.C.M.SYSTEM")
+                        \   A = 3, C flag set   = token 111 ("FUEL SCOOPS")
 
 .equip_mtok
 
- ADC #&5D
- INC new_hold
+ ADC #93                \ We can either reach here from above, or jump straight
+                        \ here with A = 19-22 and the C flag set, in which case
+                        \ adding 93 will give us token 113 ("HYPERSPACE UNIT")
+                        \ through 116 ("GALACTIC HYPERSPACE ")
 
- BNE MESS               \ Print recursive token A ("HYPERSPACE UNIT", "ENERGY
-                        \ UNIT" or "DOCKING COMPUTERS") as an in-flight message,
+ INC new_hold           \ We just lost a piece of equipment, so increment the
+                        \ amount of free space in the hold
+
+BNE MESS                \ Print recursive token A as an in-flight message,
                         \ followed by " DESTROYED", and return from the
                         \ subroutine using a tail call
 
@@ -28767,7 +28951,7 @@ ENDMACRO
 
  ITEM 45,  -1, 'g', 250, %00001111   \ 15 = Gem-Stones
 
- ITEM 53,  15, 't', 192, %00000111   \ 16 = Alien Items
+ ITEM 53,  15, 't', 192, %00000111   \ 16 = Alien items
 
 \ ******************************************************************************
 \
@@ -34567,7 +34751,7 @@ LOAD_H% = LOAD% + P% - CODE%
 
                         \ --- And replaced by: -------------------------------->
 
- JSR vdu_80             \ AJD
+ JSR vdu_80             \ Call vdu_80 to switch to Sentence Case
 
                         \ --- End of replacement ------------------------------>
 

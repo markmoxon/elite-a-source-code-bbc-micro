@@ -2948,7 +2948,7 @@ ORG CODE%
 \       Name: b_14
 \       Type: Subroutine
 \   Category: Keyboard
-\    Summary: Check Voltmace Delta 14 joystick buttons AJD
+\    Summary: Check Delta 14b joystick buttons AJD
 \
 \ ******************************************************************************
 

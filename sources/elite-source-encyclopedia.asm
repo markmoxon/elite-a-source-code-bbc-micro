@@ -1299,20 +1299,22 @@ ORG &0300
 .new_type
 .cmdr_ship
 
- SKIP 1                 \ AJD
+ SKIP 1                 \ The type of our current ship
 
                         \ --- End of replacement ------------------------------>
 
 .CRGO
 
- SKIP 1                 \ Our ship's cargo capacity
+ SKIP 1                 \ I.F.F. system
                         \
-                        \   * 22 = standard cargo bay of 20 tonnes
+                        \   * 0 = not fitted
                         \
-                        \   * 37 = large cargo bay of 35 tonnes
+                        \   * &FF = fitted
                         \
-                        \ The value is two greater than the actual capacity to
-                        \ male the maths in tnpr slightly more efficient
+                        \ Elite-A doesn't sell the large cargo bay as you can
+                        \ buy different ships with different capacities, so we
+                        \ reuse the CRGO variable to determine whether an I.F.F.
+                        \ is fitted
 
 .QQ20
 
@@ -1770,14 +1772,16 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
 
 .BSTK
 
- SKIP 1                 \ Bitstik configuration setting
+ SKIP 1                 \ Delta 14b joystick configuration setting
                         \
-                        \   * 0 = keyboard or joystick (default)
+                        \   * Positive (0-127) = keyboard
                         \
-                        \   * &FF = Bitstik
+                        \   * Negative (127-255) = Delta 14b joystick
                         \
-                        \ Toggled by pressing "B" when paused, see the DKS3
-                        \ routine for details
+                        \ Elite-A doesn't support the Bitstik, but instead it
+                        \ supports the multi-button Volmace Delta 14b joystick,
+                        \ reusing the BSTK variable to determine whether it is
+                        \ configured
 
 .CATF
 
@@ -1817,7 +1821,7 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
 
 .new_mounts
 
- SKIP 1                 \ AJD
+ SKIP 1                 \ The number of laser mounts in our current ship
 
 .new_missiles
 
@@ -1833,7 +1837,7 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
 
 .new_speed
 
- SKIP 1                 \ AJD
+ SKIP 1                 \ Our current ship's maximum speed
 
 .new_hold
 
@@ -1841,7 +1845,12 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
 
 .new_range
 
- SKIP 1                 \ AJD
+ SKIP 1                 \ Our current ship's hyperspace range (i.e. the size of
+                        \ the fuel tank)
+                        \
+                        \ The range is stored as the number of light years
+                        \ multiplied by 10, so QQ14 = 1 represents 0.1 light
+                        \ years, while 70 represents 7.0 light years
 
 .new_costs
 
@@ -1849,11 +1858,11 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
 
 .new_max
 
- SKIP 1                 \ AJD
+ SKIP 1                 \ Our current ship's maximum pitch/roll rate
 
 .new_min
 
- SKIP 1                 \ AJD
+ SKIP 1                 \ Our current ship's minimum pitch/roll rate
 
 .new_space
 
@@ -2794,7 +2803,7 @@ BRKV = P% - 2           \ The address of the destination address in the above
 \
 \ Other entry points:
 \
-\   set_token           AJD
+\   set_token           Start a new word when printing extended tokens
 \
 \ ******************************************************************************
 
@@ -2882,9 +2891,11 @@ BRKV = P% - 2           \ The address of the destination address in the above
 
 .clr_vdustat
 
- LDA #&01
- EQUB &2C
+ LDA #%00000001         
 
+ EQUB &2C               \ Skip the next instruction by turning it into
+                        \ &2C &A9 &80, or BIT &80A9, which does nothing apart
+                        \ from affect the flags
                         \ --- End of added section ---------------------------->
 
 \ ******************************************************************************
@@ -3191,7 +3202,7 @@ BRKV = P% - 2           \ The address of the destination address in the above
 
                         \ --- And replaced by: -------------------------------->
 
- EQUW set_token         \ Token  6: AJD
+ EQUW set_token         \ Token  6: Start a new word
 
                         \ --- End of replacement ------------------------------>
 
@@ -13784,7 +13795,8 @@ LOAD_F% = LOAD% + P% - CODE%
 \       Name: BAY
 \       Type: Subroutine
 \   Category: Status
-\    Summary: Go to the docking bay (i.e. show the Status Mode screen)
+\    Summary: Go to the docking bay (i.e. show the Encyclopedia Galactica menu
+\             screen)
 \
 \ ------------------------------------------------------------------------------
 \
@@ -13809,8 +13821,9 @@ LOAD_F% = LOAD% + P% - CODE%
 
                         \ --- And replaced by: -------------------------------->
 
- LDA #f3                \ AJD
- JMP FRCE
+ LDA #f3                \ Jump into the main loop at FRCE, setting the key
+ JMP FRCE               \ that's "pressed" to red key f3 (so we show the
+                        \ Encyclopedia Galactica menu screen)
 
                         \ --- End of replacement ------------------------------>
 
@@ -14482,6 +14495,7 @@ LOAD_F% = LOAD% + P% - CODE%
 \   * Y toggles reverse joystick Y channel (&44)
 \   * J toggles reverse both joystick channels (&45)
 \   * K toggles keyboard and joystick (&46)
+\   * @ toggles keyboard and Delta 14B joystick (&47)
 \
 \ The numbers in brackets are the internal key numbers (see p.142 of the
 \ Advanced User Guide for a list of internal key numbers). We pass the key that
@@ -14647,7 +14661,8 @@ LOAD_F% = LOAD% + P% - CODE%
 
                         \ --- And replaced by: -------------------------------->
 
- CPY #&48               \ AJD
+ CPY #&48               \ The last toggle key is &47 (@), so check whether we
+                        \ have just done that one
 
                         \ --- End of replacement ------------------------------>
 
@@ -14689,7 +14704,8 @@ LOAD_F% = LOAD% + P% - CODE%
 
                         \ --- And replaced by: -------------------------------->
 
- JMP escape             \ AJD
+ JMP escape             \ ESCAPE is being pressed, so jump to escape to end
+                        \ the game
 
                         \ --- End of replacement ------------------------------>
 
@@ -15945,7 +15961,9 @@ LOAD_G% = LOAD% + P% - CODE%
 
                         \ --- And replaced by: -------------------------------->
 
- JMP TT48               \ AJD
+ JMP TT48               \ This instruction has no effect, as TT48 contains an
+                        \ RTS (it replaces a call to DOEXP in the flight code,
+                        \ which we don't need to do here as we are docked)
 
                         \ --- End of replacement ------------------------------>
 
@@ -17623,7 +17641,9 @@ LOAD_G% = LOAD% + P% - CODE%
 
                         \ --- And replaced by: -------------------------------->
 
- JMP TT48               \ AJD
+ JMP TT48               \ This instruction has no effect, as TT48 contains an
+                        \ RTS (it replaces a call to DOEXP in the flight code,
+                        \ which we don't need to do here as we are docked)
 
                         \ --- End of replacement ------------------------------>
 
@@ -19992,9 +20012,9 @@ ENDMACRO
                         \
                         \ Encoded as:   ""
 
- EJMP 22                \ Token 10:     "" AJD
+ EJMP 22                \ Token 10:     "{tab 16}"
  EQUB VE                \
-                        \ Encoded as:   ""
+                        \ Encoded as:   "{22}"
 
  EQUB VE                \ Token 11:     ""
                         \
