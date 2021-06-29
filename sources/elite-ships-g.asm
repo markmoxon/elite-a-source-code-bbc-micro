@@ -414,7 +414,7 @@ ENDMACRO
 .SHIP_ESCAPE_POD
 
  EQUB 0 + (2 << 4)      \ Max. canisters on demise = 0
-                        \ Market item when scooped = 2 + 1 = 3 (Slaves)
+                        \ Market item when scooped = 2 + 1 = 3 (slaves)
  EQUW 16 * 16           \ Targetable area          = 16 * 16
  EQUB &2C               \ Edges data offset (low)  = &002C
  EQUB &44               \ Faces data offset (low)  = &0044
@@ -678,7 +678,7 @@ ENDMACRO
                         \ --- And replaced by: -------------------------------->
 
  EQUB 3 + (15 << 4)     \ Max. canisters on demise = 3
-                        \ Market item when scooped = 15 + 1 = 16 (Alien items)
+                        \ Market item when scooped = 15 + 1 = 16 (alien items)
  EQUW 99 * 99           \ Targetable area          = 99 * 99
 
                         \ --- End of replacement ------------------------------>
