@@ -4992,7 +4992,7 @@ LOAD_B% = LOAD% + P% - CODE%
 \
 \ ******************************************************************************
 
- CLC
+ CLC                    \ AJD
 
 .pr2
 
@@ -37160,9 +37160,9 @@ LOAD_J% = LOAD% + P% - CODE%
  INC new_hold           \ AJD
 
  LDA new_range          \ Our replacement ship is delivered with a full tank of
- STA QQ14               \ so fetch our current ship's hyperspace range from
-                        \ new_range and set the current fuel level in QQ14 to
-                        \ this value
+ STA QQ14               \ fuel, so fetch our current ship's hyperspace range
+                        \ from new_range and set the current fuel level in QQ14
+                        \ to this value
 
  JSR update_pod
  JSR ping
@@ -37803,13 +37803,16 @@ LOAD_K% = LOAD% + P% - CODE%
 
  JSR DORND              \ Set A and X to random numbers
 
- AND #15                \ Restrict A to a random number in the range 0-15
+ AND #15                \ Restrict A to a random number in the range 0-15,
+                        \ which makes it much more likely that ships will fire
+                        \ missiles when compared to the disc version
 
  CMP T                  \ If A >= T, which is quite likely, though less likely
- BCS TA3                \ with higher numbers of missiles, jump to TA3
+ BCS TA3                \ with higher numbers of missiles, jump to TA3 to skip
+                        \ firing a missile
 
  LDA ECMA               \ If an E.C.M. is currently active (either our's or an
- BNE TA3                \ opponent's), jump to TA3
+ BNE TA3                \ opponent's), jump to TA3 to skip firing a missile
 
  DEC INWK+31            \ We're done with the checks, so it's time to fire off a
                         \ missile, so reduce the missile count in byte #31 by 1
@@ -39141,9 +39144,8 @@ LOAD_K% = LOAD% + P% - CODE%
  STY MSAR
  STX &45
 
- JMP n_sound30          \ Call n_sound30 to make the sound of a missile being
-                        \ launched and return from the subroutine using a tail
-                        \ call
+ JMP n_sound30          \ Call n_sound30 to make the sound of a missile launch,
+                        \ returning from the subroutine using a tail call
 
 \ ******************************************************************************
 \
@@ -39581,8 +39583,8 @@ LOAD_K% = LOAD% + P% - CODE%
 
 .LAUN
 
- JSR n_sound30          \ Call n_sound30 to make the sound of a missile being
-                        \ launched
+ JSR n_sound30          \ Call n_sound30 to make the sound of the ship launching
+                        \ from the station
 
  LDA #8                 \ Set the step size for the launch tunnel rings to 8, so
                         \ there are fewer sections in the rings and they are

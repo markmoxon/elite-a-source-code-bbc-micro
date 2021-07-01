@@ -3141,11 +3141,10 @@ LOAD_A% = LOAD%
 
 .slvy2
 
-                        \ By the time we get here, we are scooping, and A
-                        \ contains the type of item we are scooping (a random
-
                         \ --- Original Acornsoft code removed: ---------------->
 
+\                       \ By the time we get here, we are scooping, and A
+\                       \ contains the type of item we are scooping (a random
 \                       \ number 0-7 if we are scooping a cargo canister, 3 if
 \                       \ we are scooping an escape pod, or 16 if we are
 \                       \ scooping a Thargon). These numbers correspond to the
@@ -3184,6 +3183,8 @@ LOAD_A% = LOAD%
 
                         \ --- And replaced by: -------------------------------->
 
+                        \ By the time we get here, we are scooping, and A
+                        \ contains the type of item we are scooping (a random
                         \ number 0-15 if we are scooping a cargo canister, 3 if
                         \ we are scooping an escape pod, or 16 if we are
                         \ scooping a Thargon). These numbers correspond to the
@@ -3538,23 +3539,6 @@ LOAD_A% = LOAD%
 \ LDA LAS               \ Did we kill the asteroid using mining lasers? If not,
 \ CMP #Mlas             \ jump to nosp, otherwise keep going
 \ BNE nosp
-\
-\ JSR DORND             \ Set A and X to random numbers
-\
-\ LDX #SPL              \ Set X to the ship type for a splinter
-\
-\ AND #3                \ Reduce the random number in A to the range 0-3
-\
-\ JSR SPIN2             \ Call SPIN2 to spawn A items of type X (i.e. spawn
-\                       \ 0-3 spliters)
-\
-\.nosp
-\
-\ LDY #PLT              \ Randomly spawn some alloy plates
-\ JSR SPIN
-\
-\ LDY #OIL              \ Randomly spawn some cargo canisters
-\ JSR SPIN
 
                         \ --- And replaced by: -------------------------------->
 
@@ -3583,6 +3567,8 @@ LOAD_A% = LOAD%
  CMP new_mining         \ jump to nosp, otherwise keep going AJD
  BNE nosp
 
+                        \ --- End of replacement ------------------------------>
+
  JSR DORND              \ Set A and X to random numbers
 
  LDX #SPL               \ Set X to the ship type for a splinter
@@ -3599,8 +3585,6 @@ LOAD_A% = LOAD%
 
  LDY #OIL               \ Randomly spawn some cargo canisters
  JSR SPIN
-
-                        \ --- End of replacement ------------------------------>
 
  JSR EXNO2              \ Call EXNO2 to process the fact that we have killed a
                         \ ship (so increase the kill tally, make an explosion
@@ -7509,17 +7493,15 @@ NEXT
 
 \ LDX #6                \ Move the text cursor to column 6
 \ STX XC
-\
-\ RTS                   \ Return from the subroutine
 
                         \ --- And replaced by: -------------------------------->
 
  LDX #8                 \ Move the text cursor to column 8
  STX XC
 
- RTS                    \ Return from the subroutine
-
                         \ --- End of replacement ------------------------------>
+
+ RTS                    \ Return from the subroutine
 
 \ ******************************************************************************
 \
@@ -7888,7 +7870,7 @@ NEXT
 
                         \ --- Code added for Elite-A: ------------------------->
 
- CLC
+ CLC                    \ AJD
 
                         \ --- End of added code ------------------------------->
 
@@ -9402,9 +9384,9 @@ NEXT
  INC new_hold           \ AJD
 
  LDA new_range          \ Our replacement ship is delivered with a full tank of
- STA QQ14               \ so fetch our current ship's hyperspace range from
-                        \ new_range and set the current fuel level in QQ14 to
-                        \ this value
+ STA QQ14               \ fuel, so fetch our current ship's hyperspace range
+                        \ from new_range and set the current fuel level in QQ14
+                        \ to this value
 
  JSR ping
  JSR TT111
@@ -9581,20 +9563,15 @@ LOAD_C% = LOAD% +P% - CODE%
  BNE TA35               \ If the target ship is already exploding, jump to TA35
                         \ to destroy this missile
 
-                        \ --- Original Acornsoft code removed: ---------------->
-
-\ ORA #%10000000        \ Otherwise set bit 7 of the target's byte #31 to mark
-\ STA (V),Y             \ the ship as having been killed, so it explodes
-
-                        \ --- And replaced by: -------------------------------->
-
  ORA #%10000000         \ Otherwise set bit 7 of the target's byte #31 to mark
+
+                        \ --- Code added for Elite-A: ------------------------->
 
 .n_misshit
 
- STA (V),Y              \ the ship as having been killed, so it explodes
+                        \ --- End of added code ------------------------------->
 
-                        \ --- End of replacement ------------------------------>
+ STA (V),Y              \ the ship as having been killed, so it explodes
 
 .TA35
 
@@ -9724,46 +9701,17 @@ LOAD_C% = LOAD% +P% - CODE%
  CPX #SST               \ If this is not the space station, jump down to TA13
  BNE TA13
 
-                        \ --- Original Acornsoft code removed: ---------------->
-
-\ LDA NEWB              \ This is the space station, so check whether bit 2 of
-\ AND #%00000100        \ the ship's NEWB flags is set, and if it is (i.e. the
-\ BNE TN5               \ station is hostile), jump to TN5 to spawn some cops
-\
-\ LDA MANY+SHU+1        \ The station is not hostile, so check how many
-\ BNE TA1               \ Transporters there are in the vicinity, and if we
-\                       \ already have one, return from the subroutine (as TA1
-\                       \ contains an RTS)
-\
-\                       \ If we get here then the station is not hostile, so we
-\                       \ can consider spawning a Transporter or Shuttle
-\
-\ JSR DORND             \ Set A and X to random numbers
-\
-\ CMP #253              \ If A < 253 (99.2% chance), return from the subroutine
-\ BCC TA1               \ (as TA1 contains an RTS)
-\
-\ AND #1                \ Set A = a random number that's either 0 or 1
-\
-\ ADC #SHU-1            \ The C flag is set (as we didn't take the BCC above),
-\ TAX                   \ so this sets X to a value of either #SHU or #SHU + 1,
-\                       \ which is the ship type for a Shuttle or a Transporter
-\
-\ BNE TN6               \ Jump to TN6 to spawn this ship type and return from
-\                       \ the subroutine using a tail call (this BNE is
-\                       \ effectively a JMP as A is never zero)
-\
-\.TN5
-
-                        \ --- And replaced by: -------------------------------->
-
  LDA NEWB               \ This is the space station, so check whether bit 2 of
  AND #%00000100         \ the ship's NEWB flags is set, and if it is (i.e. the
  BNE TN5                \ station is hostile), jump to TN5 to spawn some cops
 
  LDA MANY+SHU+1         \ The station is not hostile, so check how many
 
+                        \ --- Code added for Elite-A: ------------------------->
+
  ORA auto               \ AJD no shuttles if docking computer on
+
+                        \ --- End of added code ------------------------------->
 
  BNE TA1                \ Transporters there are in the vicinity, and if we
                         \ already have one, return from the subroutine (as TA1
@@ -9788,8 +9736,6 @@ LOAD_C% = LOAD% +P% - CODE%
                         \ effectively a JMP as A is never zero)
 
 .TN5
-
-                        \ --- End of replacement ------------------------------>
 
                         \ We only call the tactics routine for the space station
                         \ when it is hostile, so if we get here then this is the
@@ -10146,15 +10092,18 @@ LOAD_C% = LOAD% +P% - CODE%
 
                         \ --- And replaced by: -------------------------------->
 
- AND #15                \ Restrict A to a random number in the range 0-15
+ AND #15                \ Restrict A to a random number in the range 0-15,
+                        \ which makes it much more likely that ships will fire
+                        \ missiles when compared to the disc version
 
                         \ --- End of replacement ------------------------------>
 
  CMP T                  \ If A >= T, which is quite likely, though less likely
- BCS TA3                \ with higher numbers of missiles, jump to TA3
+ BCS TA3                \ with higher numbers of missiles, jump to TA3 to skip
+                        \ firing a missile
 
  LDA ECMA               \ If an E.C.M. is currently active (either our's or an
- BNE TA3                \ opponent's), jump to TA3
+ BNE TA3                \ opponent's), jump to TA3 to skip firing a missile
 
  DEC INWK+31            \ We're done with the checks, so it's time to fire off a
                         \ missile, so reduce the missile count in byte #31 by 1
@@ -11517,9 +11466,8 @@ LOAD_C% = LOAD% +P% - CODE%
  STY MSAR
  STX &45
 
- JMP n_sound30          \ Call n_sound30 to make the sound of a missile being
-                        \ launched and return from the subroutine using a tail
-                        \ call
+ JMP n_sound30          \ Call n_sound30 to make the sound of a missile launch,
+                        \ returning from the subroutine using a tail call
 
                         \ --- End of replacement ------------------------------>
 
@@ -11968,8 +11916,8 @@ LOAD_C% = LOAD% +P% - CODE%
 
                         \ --- And replaced by: -------------------------------->
 
- JSR n_sound30          \ Call n_sound30 to make the sound of a missile being
-                        \ launched
+ JSR n_sound30          \ Call n_sound30 to make the sound of the ship launching
+                        \ from the station
 
                         \ --- End of replacement ------------------------------>
 
@@ -25212,21 +25160,6 @@ LOAD_F% = LOAD% + P% - CODE%
 \ AND #31               \ Set the ship speed to our random number, set to a
 \ ORA #16               \ minimum of 16 and a maximum of 31
 \ STA INWK+27
-\
-\ BCC MTT3              \ Jump down to MTT3, skipping the following (this BCC
-\                       \ is effectively a JMP as we know the C flag is clear,
-\                       \ having passed through the BCS above)
-\
-\.MTT2
-\
-\ ORA #%01111111        \ Set bits 0-6 of A to 127, leaving bit 7 as random, so
-\ STA INWK+30           \ storing this number in the pitch counter means we have
-\                       \ full pitch with no damping, with a 50% chance of
-\                       \ pitching up or down
-\
-\.MTT3
-\
-\ JSR DORND             \ Set A and X to random numbers
 
                         \ --- And replaced by: -------------------------------->
 
@@ -25251,6 +25184,8 @@ LOAD_F% = LOAD% + P% - CODE%
  AND #15                \ AJD
  STA INWK+27
 
+                        \ --- End of replacement ------------------------------>
+
  BCC MTT3               \ Jump down to MTT3, skipping the following (this BCC
                         \ is effectively a JMP as we know the C flag is clear,
                         \ having passed through the BCS above)
@@ -25265,8 +25200,6 @@ LOAD_F% = LOAD% + P% - CODE%
 .MTT3
 
  JSR DORND              \ Set A and X to random numbers
-
-                        \ --- End of replacement ------------------------------>
 
  CMP #10                \ If random A >= 10 (96% of the time), set the C flag
 

@@ -23090,11 +23090,6 @@ ENDIF
 \ STA CTLI+1            \ Store the drive number in the second byte of the
 \                       \ command string at CTLI, so it overwrites the "0" in
 \                       \ ".0" with the drive number to catalogue
-\
-\ STA DTW7              \ Store the drive number in DTW7, so printing extended
-\                       \ token 4 will show the correct drive number (as token 4
-\                       \ contains the {drive number} jump code, which calls
-\                       \ MT16 to print the character in DTW7)
 
                         \ --- And replaced by: -------------------------------->
 
@@ -23102,12 +23097,12 @@ ENDIF
                         \ command string at CTLI, so it overwrites the "0" in
                         \ ".0" with the drive number to catalogue
 
+                        \ --- End of replacement ------------------------------>
+
  STA DTW7               \ Store the drive number in DTW7, so printing extended
                         \ token 4 will show the correct drive number (as token 4
                         \ contains the {drive number} jump code, which calls
                         \ MT16 to print the character in DTW7)
-
-                        \ --- End of replacement ------------------------------>
 
  LDA #4                 \ Print extended token 4, which clears the screen and
  JSR DETOK              \ prints the boxed-out title "DRIVE {drive number}
@@ -23783,24 +23778,6 @@ ENDIF
 
  BPL LOL1               \ Loop back until we have copied all NT% bytes
 
-                        \ --- Original Acornsoft code removed: ---------------->
-
-\.LOR
-\
-\ SEC                   \ Set the C flag
-\
-\ RTS                   \ Return from the subroutine
-\
-\.ELT2F
-\
-\ BRK                   \ The error that is printed if we try to load an
-\ EQUB &49              \ invalid commander file with bit 7 of byte #0 set
-\ EQUS "Illegal "       \ (&49 is the error number)
-\ EQUS "ELITE II file"
-\ BRK
-
-                        \ --- And replaced by: -------------------------------->
-
 .LOR
 
  SEC                    \ Set the C flag
@@ -23808,6 +23785,16 @@ ENDIF
  RTS                    \ Return from the subroutine
 
 .ELT2F
+
+                        \ --- Original Acornsoft code removed: ---------------->
+
+\ BRK                   \ The error that is printed if we try to load an
+\ EQUB &49              \ invalid commander file with bit 7 of byte #0 set
+\ EQUS "Illegal "       \ (&49 is the error number)
+\ EQUS "ELITE II file"
+\ BRK
+
+                        \ --- And replaced by: -------------------------------->
 
  BRK                    \ The error that is printed if we try to load an
  EQUB &49               \ invalid commander file with bit 7 of byte #0 set
