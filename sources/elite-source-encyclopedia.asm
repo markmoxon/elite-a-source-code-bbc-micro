@@ -95,9 +95,6 @@ f7 = &16                \ Internal key number for red key f7 (Market Price)
 f8 = &76                \ Internal key number for red key f8 (Status Mode)
 f9 = &77                \ Internal key number for red key f9 (Inventory)
 
-NRU% = 25               \ The number of planetary systems with extended system
-                        \ description overrides in the RUTOK table
-
 VE = 0                  \ The obfuscation byte used to hide the extended tokens
                         \ table from crackers viewing the binary code, which is
                         \ zero in Elite-A as the token table is not obfuscated
@@ -1805,19 +1802,23 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
 
 .new_pulse
 
- SKIP 1                 \ AJD
+ SKIP 1                 \ The power level of pulse lasers when fitted to our
+                        \ current ship type
 
 .new_beam
 
- SKIP 1                 \ AJD
+ SKIP 1                 \ The power level of beam lasers when fitted to our
+                        \ current ship type
 
 .new_military
 
- SKIP 1                 \ AJD
+ SKIP 1                 \ The power level of military lasers when fitted to our
+                        \ current ship type
 
 .new_mining
 
- SKIP 1                 \ AJD
+ SKIP 1                 \ The power level of mining lasers when fitted to our
+                        \ current ship type
 
 .new_mounts
 
@@ -1825,7 +1826,8 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
 
 .new_missiles
 
- SKIP 1                 \ AJD
+ SKIP 1                 \ The maximum number of missiles that can be fitted to
+                        \ our current ship
 
 .new_shields
 
@@ -1833,7 +1835,8 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
 
 .new_energy
 
- SKIP 1                 \ AJD
+ SKIP 1                 \ Our current ship's ship energy refresh rate when
+                        \ fitted with an energy unit
 
 .new_speed
 
@@ -1841,7 +1844,10 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
 
 .new_hold
 
- SKIP 1                 \ AJD
+ SKIP 1                 \ The amount of free space in our current ship's hold
+                        \
+                        \ In Elite-A, hold space is taken up by both equipment
+                        \ and cargo
 
 .new_range
 
@@ -2349,8 +2355,8 @@ BRKV = P% - 2           \ The address of the destination address in the above
 \ Other entry points:
 \
 \   DTEN                Print recursive token number X from the token table
-\                       pointed to by (A V), used to print tokens from the RUTOK
-\                       table via calls to DETOK3
+\                       pointed to by (A V), used to print tokens from the msg_3
+\                       table via calls to write_msg3
 \
 \ ******************************************************************************
 
@@ -21663,7 +21669,8 @@ ENDMACRO
 \       Name: msg_3
 \       Type: Variable
 \   Category: Text
-\    Summary: AJD
+\    Summary: The second extended token table for recursive tokens 0-255
+\             (write_msg3)
 \
 \ ******************************************************************************
 
@@ -23215,7 +23222,7 @@ ENDMACRO
  EQUB VE                \ Encoded as:   "{4}[106]{5}"
 
  EJMP 4                 \ Token 96:     "{standard tokens, sentence case}I.F.F.
- TOKN 107               \                SYSTEM{extended tokens}" AJD
+ TOKN 107               \                SYSTEM{extended tokens}"
  EJMP 5                 \
  EQUB VE                \ Encoded as:   "{4}[107]{5}"
 
@@ -23245,7 +23252,7 @@ ENDMACRO
  EQUB VE                \ Encoded as:   "{4}[112]{5}"
 
  EJMP 4                 \ Token 102:    "{standard tokens, sentence case}
- TOKN 113               \                HYPERSPACE UNIT{extended tokens}" AJD
+ TOKN 113               \                HYPERSPACE UNIT{extended tokens}"
  EJMP 5                 \
  EQUB VE                \ Encoded as:   "{4}[113]{5}"
 

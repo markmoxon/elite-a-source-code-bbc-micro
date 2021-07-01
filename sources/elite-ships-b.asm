@@ -1285,7 +1285,7 @@ ENDMACRO
 
                         \ --- End of added section ---------------------------->
 
- EQUB 9                 \ AJD
+ EQUB 9                 \ This byte appears to be unused
 
 \ ******************************************************************************
 \

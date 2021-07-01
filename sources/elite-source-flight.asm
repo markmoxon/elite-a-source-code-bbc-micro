@@ -1795,19 +1795,23 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
 
 .new_pulse
 
- SKIP 1                 \ AJD
+ SKIP 1                 \ The power level of pulse lasers when fitted to our
+                        \ current ship type
 
 .new_beam
 
- SKIP 1                 \ AJD
+ SKIP 1                 \ The power level of beam lasers when fitted to our
+                        \ current ship type
 
 .new_military
 
- SKIP 1                 \ AJD
+ SKIP 1                 \ The power level of military lasers when fitted to our
+                        \ current ship type
 
 .new_mining
 
- SKIP 1                 \ AJD
+ SKIP 1                 \ The power level of mining lasers when fitted to our
+                        \ current ship type
 
 .new_mounts
 
@@ -1815,7 +1819,8 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
 
 .new_missiles
 
- SKIP 1                 \ AJD
+ SKIP 1                 \ The maximum number of missiles that can be fitted to
+                        \ our current ship
 
 .new_shields
 
@@ -1823,7 +1828,8 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
 
 .new_energy
 
- SKIP 1                 \ AJD
+ SKIP 1                 \ Our current ship's ship energy refresh rate when
+                        \ fitted with an energy unit
 
 .new_speed
 
@@ -1831,7 +1837,10 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
 
 .new_hold
 
- SKIP 1                 \ AJD
+ SKIP 1                 \ The amount of free space in our current ship's hold
+                        \
+                        \ In Elite-A, hold space is taken up by both equipment
+                        \ and cargo
 
 .new_range
 
@@ -2647,17 +2656,29 @@ LOAD_A% = LOAD%
 
                         \ --- And replaced by: -------------------------------->
 
- LDA KY12               \ AJD
- AND BOMB
- BEQ MA76
+ LDA KY12               \ If TAB is not being pressed (i.e. KY12 = 0) and we do
+ AND BOMB               \ not have a hyperspace unit fitted (i.e. BOMB = 0), 
+ BEQ MA76               \ jump down to MA76 to skip the following
 
- INC BOMB               \ AJD
- INC new_hold
- JSR DORND
- STA QQ9
- STX QQ10
- JSR TT111
- JSR hyper_snap
+ INC BOMB               \ The "hyperspace unit" key is being pressed and we have
+                        \ a hyperspace unit fitted, so increment BOMB from &FF
+                        \ (hyperspace unit fitted) to 0 (hyperspace unit not
+                        \ fitted), as it is a single-use item and we are now
+                        \ using it
+
+ INC new_hold           \ Free up one tonne of space in the hold, as we have
+                        \ just used up the hyperspace unit
+
+ JSR DORND              \ Set A and X to random numbers
+
+ STA QQ9                \ Set (QQ9, QQ10) to (A, X), so we jump to a random
+ STX QQ10               \ point in the galaxy
+
+ JSR TT111              \ Select the system closest to galactic coordinates
+                        \ (QQ9, QQ10)
+
+ JSR hyper_snap         \ Call hyper_snap to perform a hyperspace, but without
+                        \ using up any fuel
 
                         \ --- End of replacement ------------------------------>
 
@@ -2673,16 +2694,22 @@ LOAD_A% = LOAD%
 
                         \ --- And replaced by: -------------------------------->
 
- LDA KY19               \ AJD
- AND DKCMP
- BNE dock_toggle
- LDA KY20
- BEQ MA78
- LDA #&00
+ LDA KY19               \ If "C" is being pressed, and we have a docking
+ AND DKCMP              \ computer fitted, jump down to dock_toggle with a
+ BNE dock_toggle        \ non-zero value in A to switch on the docking computer
+
+ LDA KY20               \ If "P" is being pressed, keep going, otherwise skip
+ BEQ MA78               \ the next two instructions
+
+ LDA #0                 \ The "cancel docking computer" key is bring pressed,
+                        \ so turn it off by setting A to 0, so we set auto to 0
+                        \ in the next instruction
 
 .dock_toggle
 
- STA auto
+ STA auto               \ Set auto to the value in A, which will be non-zero
+                        \ if we just turned on the docking computer, or 0 if we
+                        \ just turned it off
 
                         \ --- End of replacement ------------------------------>
 
@@ -3395,19 +3422,20 @@ LOAD_A% = LOAD%
                         \ --- And replaced by: -------------------------------->
 
  LDA auto               \ AJD
- AND #&04
- EOR #&05
+ AND #%00000100
+ EOR #%00000101
  BNE MA63
 
 .MA58
 
- LDA #&40
+ LDA #64
  JSR n_hit
- JSR anger_8c
+
+ JSR anger_8c           \ Call anger_8c to make the current ship angry
 
 .n_crunch
 
- LDA #&80
+ LDA #128
 
                         \ --- End of replacement ------------------------------>
 
@@ -3542,19 +3570,24 @@ LOAD_A% = LOAD%
 
                         \ --- And replaced by: -------------------------------->
 
- LDA &44                \ AJD
+ LDA LAS                \ Set A to the power of the laser we just used to hit
+                        \ the ship (i.e. the laser in the current view)
 
  LDY TYPE               \ Did we just hit the space station? If so, jump to
- CPY #SST               \ MA14 to AJD
+ CPY #SST               \ MA14 to make it angry
  BEQ MA14
 
- CPY #&1F
- BNE BURN
- LSR A
+ CPY #CON               \ If the ship we hit is not a Constrictor, jump to BURN
+ BNE BURN               \ to skip the following
+
+ LSR A                  \ Divide the laser power of the current view by 2, so
+                        \ the damage inflicted on the Constrictor is half of the
+                        \ damage our military lasers would inflict on a normal
+                        \ ship
 
 .BURN
 
- LSR A
+ LSR A                  \ Divide the laser power of the current view by 2
 
  JSR n_hit              \ hit enemy AJD
  BCS MA14
@@ -3601,7 +3634,8 @@ LOAD_A% = LOAD%
 
                         \ --- And replaced by: -------------------------------->
 
- JSR anger_8c           \ AJD
+ JSR anger_8c           \ Call anger_8c to make this ship hostile angry, now
+                        \ that we have hit it
 
                         \ --- End of replacement ------------------------------>
 
@@ -3705,8 +3739,9 @@ LOAD_A% = LOAD%
 
                         \ --- And replaced by: -------------------------------->
 
- LDY #10                \ AJD
- LDA (XX0),Y
+ LDY #10                \ Fetch byte #10 of the ship's blueprint, which is the
+ LDA (XX0),Y            \ low byte of the bounty awarded when this ship is
+                        \ killed (in Cr * 10)
 
                         \ --- End of replacement ------------------------------>
 
@@ -3849,8 +3884,9 @@ LOAD_A% = LOAD%
 .b
 
  SEC                    \ Set A = ENERGY + ENGY + 1, so our ship's energy
- LDA ENGY               \ level goes up by 2 if we have an energy unit fitted,
- ADC ENERGY             \ otherwise it goes up by 1
+ LDA ENGY               \ level goes up by the correct amount for our current
+ ADC ENERGY             \ ship, depending on whether we have an energy unit
+                        \ fitted
 
  BCS P%+5               \ If the value of A did not overflow (the maximum
  STA ENERGY             \ energy level is &FF), then store A in ENERGY
@@ -4169,8 +4205,8 @@ LOAD_A% = LOAD%
 
                         \ --- And replaced by: -------------------------------->
 
- CMP new_range          \ AJD
- BCC P%+5
+ CMP new_range          \ If A > new_range then set A = new_range (as new_range
+ BCC P%+5               \ is the maximum fuel level for our current ship
  LDA new_range
 
                         \ --- End of replacement ------------------------------>
@@ -7344,7 +7380,7 @@ NEXT
 
 .l_1ce7
 
- LDA BST
+ LDA BST                \ AJD
  BEQ l_1cf1
  LDA #&6F
  JSR plf2
@@ -7398,19 +7434,19 @@ NEXT
 
                         \ --- And replaced by: -------------------------------->
 
- TXA                    \ AJD
- ORA #&60
- JSR spc
+ TXA                    \ Print recursive token 96 + X, which will print from 96
+ ORA #96                \ ("FRONT") through to 99 ("RIGHT"), followed by a space
+ JSR spc                \ (the ORA acts like an addition as 96 = %01100000)
 
                         \ --- End of replacement ------------------------------>
 
  LDA #103               \ Set A to token 103 ("PULSE LASER")
 
+ LDX CNT                \ Set Y = the laser power for view X
+ LDY LASER,X
+
                         \ --- Original Acornsoft code removed: ---------------->
 
-\ LDX CNT               \ Set Y = the laser power for view X
-\ LDY LASER,X
-\
 \ CPY #128+POW          \ If the laser power for view X is not #POW+128 (beam
 \ BNE P%+4              \ laser), skip the next LDA instruction
 \
@@ -7425,33 +7461,31 @@ NEXT
 \
 \ CPY #Mlas             \ If the laser power for view X is not #Mlas (mining
 \ BNE P%+4              \ laser), skip the next LDA instruction
-\
-\ LDA #118              \ This sets A = 118 if the laser in view X is a mining
-\                       \ laser (token 118 is "MINING  LASER")
 
                         \ --- And replaced by: -------------------------------->
 
- LDX &93                \ AJD
- LDY LASER,X
- CPY new_beam           \ beam laser
- BNE l_1b9d
- LDA #&68
+ CPY new_beam           \ If the laser power for view X is not that of a beam
+ BNE P%+4               \ laser when fitted to our current ship type, skip the
+                        \ next LDA instruction
 
-.l_1b9d
+ LDA #104               \ This sets A = 104 if the laser in view X is a beam
+                        \ laser (token 104 is "BEAM LASER")
 
- CPY new_military       \ military laser
- BNE l_1ba3
- LDA #&75
+ CPY new_military       \ If the laser power for view X is not that of a
+ BNE P%+4               \ military laser when fitted to our current ship type,
+                        \ skip the next LDA instruction
 
-.l_1ba3
+ LDA #117               \ This sets A = 117 if the laser in view X is a military
+                        \ laser (token 117 is "MILITARY  LASER")
 
- CPY new_mining         \ mining laser
- BNE l_1ba9
- LDA #&76
-
-.l_1ba9
+ CPY new_mining         \ If the laser power for view X is not that of a mining
+ BNE P%+4               \ laser when fitted to our current ship type, skip the
+                        \ next LDA instruction
 
                         \ --- End of replacement ------------------------------>
+
+ LDA #118               \ This sets A = 118 if the laser in view X is a mining
+                        \ laser (token 118 is "MINING  LASER")
 
  JSR plf2               \ Print the text token in A (which contains our legal
                         \ status) followed by a newline and an indent of 6
@@ -9381,16 +9415,24 @@ NEXT
 
                         \ --- And replaced by: -------------------------------->
 
- INC new_hold           \ AJD
+ INC new_hold           \ We just used our escape pod, and as it's a single-use
+                        \ item, we no longer have an escape pod, so increment
+                        \ the free space in our ship's hold, as the pod is no
+                        \ longer taking up space
 
  LDA new_range          \ Our replacement ship is delivered with a full tank of
  STA QQ14               \ fuel, so fetch our current ship's hyperspace range
                         \ from new_range and set the current fuel level in QQ14
                         \ to this value
 
- JSR ping
- JSR TT111
- JSR jmp
+ JSR ping               \ Set the target system to the current system (which
+                        \ will move the location in (QQ9, QQ10) to the current
+                        \ home system
+
+ JSR TT111              \ Select the system closest to galactic coordinates
+                        \ (QQ9, QQ10)
+
+ JSR jmp                \ Set the current system to the selected system
 
                         \ --- End of replacement ------------------------------>
 
@@ -11476,7 +11518,7 @@ LOAD_C% = LOAD% +P% - CODE%
 \       Name: anger_8c
 \       Type: Subroutine
 \   Category: Tactics
-\    Summary: AJD
+\    Summary: Make the current ship angry
 \
 \ ******************************************************************************
 
@@ -11484,7 +11526,9 @@ LOAD_C% = LOAD% +P% - CODE%
 
 .anger_8c
 
- LDA TYPE
+ LDA TYPE               \ Fetch the type of the current ship into A
+
+                        \ Fall through into ANGRY to make this ship hostile
 
                         \ --- End of added section ---------------------------->
 
@@ -17749,7 +17793,7 @@ LOAD_D% = LOAD% + P% - CODE%
 \
 \ Other entry points:
 \
-\   hyper_snap          AJD
+\   hyper_snap          Perform a hyperspace, but without using up any fuel
 \
 \ ******************************************************************************
 
@@ -24967,8 +25011,8 @@ LOAD_F% = LOAD% + P% - CODE%
 
                         \ --- And replaced by: -------------------------------->
 
- AND #15                \ AJD
- STA INWK+27
+ AND #15                \ Set the ship speed to our random number, set to a
+ STA INWK+27            \ minimum of 0 and a maximum of 15
 
  JSR DORND              \ Set A and X to random numbers, plus the C flag
 
@@ -24987,9 +25031,8 @@ LOAD_F% = LOAD% + P% - CODE%
 
 .nodo
 
- LDA #&0B               \ AJD
- LDX #&03
-
+ LDA #CYL               \ AJD
+ LDX #3
  JMP hordes
 
                         \ --- End of replacement ------------------------------>
@@ -27557,7 +27600,7 @@ LOAD_F% = LOAD% + P% - CODE%
 \       Name: b_table
 \       Type: Variable
 \   Category: Keyboard
-\    Summary: Lookup table for Voltmace Delta 14 joystick buttons AJD
+\    Summary: Lookup table for Delta 14b joystick buttons
 \
 \ ******************************************************************************
 
@@ -27565,7 +27608,7 @@ LOAD_F% = LOAD% + P% - CODE%
 
 .b_table
 
- EQUB &61, &31, &80, &80, &80, &80, &51
+ EQUB &61, &31, &80, &80, &80, &80, &51             \ AJD
  EQUB &64, &34, &32, &62, &52, &54, &58, &38, &68
 
                         \ --- End of added section ---------------------------->
@@ -27575,7 +27618,7 @@ LOAD_F% = LOAD% + P% - CODE%
 \       Name: b_14
 \       Type: Subroutine
 \   Category: Keyboard
-\    Summary: Check Delta 14b joystick buttons AJD
+\    Summary: Check Delta 14b joystick buttons
 \
 \ ******************************************************************************
 
@@ -27583,7 +27626,7 @@ LOAD_F% = LOAD% + P% - CODE%
 
 .b_13
 
- LDA #&00
+ LDA #&00               \ AJD
 
 .b_14
 

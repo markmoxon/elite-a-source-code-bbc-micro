@@ -1411,7 +1411,7 @@ ENDMACRO
 \FACE normal_x, normal_y, normal_z, visibility
  FACE        0,        0,        0,          0    \ Face 0
 
- EQUB 6                 \ AJD
+ EQUB 6                 \ This byte appears to be unused
 
 \ ******************************************************************************
 \

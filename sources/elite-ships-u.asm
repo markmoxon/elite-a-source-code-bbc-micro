@@ -1617,7 +1617,7 @@ ENDMACRO
  FACE       22,       56,     -137,         31    \ Face 8
  FACE       40,      110,      -38,         31    \ Face 9
 
- EQUB 8                 \ AJD
+ EQUB 8                 \ This byte appears to be unused
 
 \ ******************************************************************************
 \

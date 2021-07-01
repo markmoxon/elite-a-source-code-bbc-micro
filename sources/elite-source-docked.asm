@@ -1801,19 +1801,23 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
 
 .new_pulse
 
- SKIP 1                 \ AJD
+ SKIP 1                 \ The power level of pulse lasers when fitted to our
+                        \ current ship type
 
 .new_beam
 
- SKIP 1                 \ AJD
+ SKIP 1                 \ The power level of beam lasers when fitted to our
+                        \ current ship type
 
 .new_military
 
- SKIP 1                 \ AJD
+ SKIP 1                 \ The power level of military lasers when fitted to our
+                        \ current ship type
 
 .new_mining
 
- SKIP 1                 \ AJD
+ SKIP 1                 \ The power level of mining lasers when fitted to our
+                        \ current ship type
 
 .new_mounts
 
@@ -1821,7 +1825,8 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
 
 .new_missiles
 
- SKIP 1                 \ AJD
+ SKIP 1                 \ The maximum number of missiles that can be fitted to
+                        \ our current ship
 
 .new_shields
 
@@ -1829,7 +1834,8 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
 
 .new_energy
 
- SKIP 1                 \ AJD
+ SKIP 1                 \ Our current ship's ship energy refresh rate when
+                        \ fitted with an energy unit
 
 .new_speed
 
@@ -1837,7 +1843,10 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
 
 .new_hold
 
- SKIP 1                 \ AJD
+ SKIP 1                 \ The amount of free space in our current ship's hold
+                        \
+                        \ In Elite-A, hold space is taken up by both equipment
+                        \ and cargo
 
 .new_range
 
@@ -6583,19 +6592,19 @@ LOAD_B% = LOAD% + P% - CODE%
 
                         \ --- And replaced by: -------------------------------->
 
- TXA                    \ AJD
- ORA #&60
- JSR spc
+ TXA                    \ Print recursive token 96 + X, which will print from 96
+ ORA #96                \ ("FRONT") through to 99 ("RIGHT"), followed by a space
+ JSR spc                \ (the ORA acts like an addition as 96 = %01100000)
 
                         \ --- End of replacement ------------------------------>
 
  LDA #103               \ Set A to token 103 ("PULSE LASER")
 
+ LDX CNT                \ Set Y = the laser power for view X
+ LDY LASER,X
+
                         \ --- Original Acornsoft code removed: ---------------->
 
-\ LDX CNT               \ Set Y = the laser power for view X
-\ LDY LASER,X
-\
 \ CPY #128+POW          \ If the laser power for view X is not #POW+128 (beam
 \ BNE P%+4              \ laser), skip the next LDA instruction
 \
@@ -6610,33 +6619,31 @@ LOAD_B% = LOAD% + P% - CODE%
 \
 \ CPY #Mlas             \ If the laser power for view X is not #Mlas (mining
 \ BNE P%+4              \ laser), skip the next LDA instruction
-\
-\ LDA #118              \ This sets A = 118 if the laser in view X is a mining
-\                       \ laser (token 118 is "MINING  LASER")
 
                         \ --- And replaced by: -------------------------------->
 
- LDX &93                \ AJD
- LDY LASER,X
- CPY new_beam           \ beam laser
- BNE l_1b9d
- LDA #&68
+ CPY new_beam           \ If the laser power for view X is not that of a beam
+ BNE P%+4               \ laser when fitted to our current ship type, skip the
+                        \ next LDA instruction
 
-.l_1b9d
+ LDA #104               \ This sets A = 104 if the laser in view X is a beam
+                        \ laser (token 104 is "BEAM LASER")
 
- CPY new_military       \ military laser
- BNE l_1ba3
- LDA #&75
+ CPY new_military       \ If the laser power for view X is not that of a
+ BNE P%+4               \ military laser when fitted to our current ship type,
+                        \ skip the next LDA instruction
 
-.l_1ba3
+ LDA #117               \ This sets A = 117 if the laser in view X is a military
+                        \ laser (token 117 is "MILITARY  LASER")
 
- CPY new_mining         \ mining laser
- BNE l_1ba9
- LDA #&76
-
-.l_1ba9
+ CPY new_mining         \ If the laser power for view X is not that of a mining
+ BNE P%+4               \ laser when fitted to our current ship type, skip the
+                        \ next LDA instruction
 
                         \ --- End of replacement ------------------------------>
+
+ LDA #118               \ This sets A = 118 if the laser in view X is a mining
+                        \ laser (token 118 is "MINING  LASER")
 
  JSR plf2               \ Print the text token in A (which contains our legal
                         \ status) followed by a newline and an indent of 6
@@ -12897,7 +12904,18 @@ LOAD_D% = LOAD% + P% - CODE%
 \
 \ Other entry points:
 \
-\   Tml                 AJD
+\   Tml                 Calculate the sum of the following, returning the C flag
+\                       according to whether this all fits into the hold:
+\
+\                         * The total tonnage of the first X items of cargo
+\
+\                         * The value in A
+\
+\                         * Plus one more tonne if the C flag is set on entry
+\
+\                       This is called with X = 12, A = the number of alien
+\                       items in the hold, and the C flag set, to see if there
+\                       is room for one more tonne in the hold
 \
 \ ******************************************************************************
 
@@ -16781,7 +16799,15 @@ LOAD_D% = LOAD% + P% - CODE%
 \   err                 Beep, pause and go to the docking bay (i.e. show the
 \                       Status Mode screen)
 \
-\   pres+3              AJD
+\   pres                Given an item number A with the item name in recursive
+\                       token Y, show an error to say that the item is already
+\                       present, refund the cost of the item, and then beep and
+\                       exit to the docking bay (i.e. show the Status Mode
+\                       screen)
+\                        
+\   pres+3              Show the error to say that an item is already present,
+\                       and process a refund, but do not free up a space in the
+\                       hold
 \
 \ ******************************************************************************
 
@@ -16834,12 +16860,30 @@ LOAD_D% = LOAD% + P% - CODE%
 \ CMP #12               \ If A >= 12 then set A = 14, so A is now set to between
 \ BCC P%+4              \ 3 and 14
 \ LDA #14
+\
+\ STA Q                 \ Set QQ25 = A (so QQ25 is in the range 3-14 and
+\ STA QQ25              \ represents number of the most advanced item available
+\ INC Q                 \ in this system, which we can pass to gnum below when
+\                       \ asking which item we want to buy)
+\                       \
+\                       \ Set Q = A + 1 (so Q is in the range 4-15 and contains
+\                       \ QQ25 + 1, i.e. the highest item number on sale + 1)
+\
+\ LDA #70               \ Set A = 70 - QQ14, where QQ14 contains the current
+\ SEC                   \ fuel in light years * 10, so this leaves the amount
+\ SBC QQ14              \ of fuel we need to fill 'er up (in light years * 10)
 
                         \ --- And replaced by: -------------------------------->
 
- JSR CTRL               \ AJD
- BPL n_eqship
- JMP n_buyship
+ JSR CTRL               \ Scan the keyboard to see if CTRL is currently pressed,
+                        \ returning a negative value in A if it is
+
+ BPL n_eqship           \ If CTRL is not being pressed, jump down to n_eqship to
+                        \ keep processing the Equip Ship screen
+
+ JMP n_buyship          \ CTRL is being pressed, which means CTRL-f3 is being
+                        \ pressed, so jump to n_buyship to show the Buy Ship
+                        \ screen instead
 
 .bay
 
@@ -16850,33 +16894,24 @@ LOAD_D% = LOAD% + P% - CODE%
 
  LDA tek                \ Fetch the tech level of the current system from tek
  CLC                    \ and add 2 (the tech level is stored as 0-14, so A is
- ADC #2                 \ now set to between 2 and 16) AJD
+ ADC #2                 \ now set to between 2 and 16)
 
  CMP #12                \ If A >= 12 then set A = 14, so A is now set to between
  BCC P%+4               \ 2 and 14
  LDA #14
 
-                        \ --- End of replacement ------------------------------>
-
- STA Q                  \ Set QQ25 = A (so QQ25 is in the range 3-12 and
+ STA Q                  \ Set QQ25 = A (so QQ25 is in the range 2-14 and
  STA QQ25               \ represents number of the most advanced item available
  INC Q                  \ in this system, which we can pass to gnum below when
                         \ asking which item we want to buy)
                         \
-                        \ Set Q = A + 1 (so Q is in the range 4-13 and contains
+                        \ Set Q = A + 1 (so Q is in the range 3-15 and contains
                         \ QQ25 + 1, i.e. the highest item number on sale + 1)
 
-                        \ --- Original Acornsoft code removed: ---------------->
-
-\ LDA #70               \ Set A = 70 - QQ14, where QQ14 contains the current
-\ SEC                   \ level in light years * 10, so this leaves the amount
-\ SBC QQ14              \ of fuel we need to fill 'er up (in light years * 10)
-
-                        \ --- And replaced by: -------------------------------->
-
- LDA new_range          \ AJD
- SEC
- SBC QQ14
+ LDA new_range          \ Set A = new_range - QQ14, where QQ14 contains the
+ SEC                    \ current fuel in light years * 10, so this leaves the
+ SBC QQ14               \ amount of fuel we need to fill 'er up (in light years
+                        \ * 10)
 
                         \ --- End of replacement ------------------------------>
 
@@ -16884,14 +16919,18 @@ LOAD_D% = LOAD% + P% - CODE%
  STA PRXS               \ double A and store it in PRXS, as the first price in
                         \ the price list (which is reserved for fuel), and
                         \ because the table contains prices as price * 10, it's
-                        \ in the right format (so a full tank, or 7.0 light
-                        \ years, would be 14.0 Cr, or a PRXS value of 140)
+                        \ in the right format (so tank containing 7.0 light
+                        \ years of fuel would be 14.0 Cr, or a PRXS value of
+                        \ 140)
 
                         \ --- Code added for Elite-A: ------------------------->
 
- LDA #0                 \ AJD
- ROL A
- STA PRXS+1
+ LDA #0                 \ As the maximum amount of fuel in Elite-A can be more
+ ROL A                  \ than 25.5 light years, we need to use PRXS(1 0) to
+ STA PRXS+1             \ store the fuel level, so this catches bit 7 from the
+                        \ left shift of the low byte above (which the ASL will
+                        \ have put into the C flag), and sets bit 0 of the high
+                        \ byte in PRXS+1 accordingly
 
                         \ --- End of added code ------------------------------->
 
@@ -16978,15 +17017,29 @@ LOAD_D% = LOAD% + P% - CODE%
 
                         \ --- And replaced by: -------------------------------->
 
- PHA                    \ AJD
- CMP #&02
- BCC equip_space
- LDA QQ20+&10
- SEC
- LDX #&C
+ PHA                    \ Store A on the stack so we can restore it after the
+                        \ following code
+
+ CMP #2                 \ If A < 2, then we are buying fuel or missiles, so jump
+ BCC equip_space        \ down to equip_space to skip the checks for whether we
+                        \ have enough free space in the hold (as fuel and
+                        \ missiles don't take up hold space)
+
+ LDA QQ20+16            \ Fetch the number of alien items in the hold into A, so
+                        \ the following call to Tml will include these in the
+                        \ total
+
+ SEC                    \ Call Tml with X = 12 and the C flag set, to work out
+ LDX #12                \ if there is space for one more tonne in the hold
  JSR Tml
- BCC equip_isspace
- LDA #&0E
+
+ BCC equip_isspace      \ If the C flag is clear then there is indeed room for
+                        \ another tonne, so jump to equip_isspace so we can buy
+                        \ the new piece of equipment
+
+ LDA #14                \ Otherwise there isn't room in the hold for any more
+                        \ equipment, so set set A to the value for recursive
+                        \ token 14 ("UNIT")
 
  JMP query_beep         \ Print the recursive token given in A followed by a
                         \ question mark, then make a beep, pause and go to the
@@ -16994,14 +17047,22 @@ LOAD_D% = LOAD% + P% - CODE%
 
 .equip_isspace
 
- DEC new_hold
- PLA
- PHA
+ DEC new_hold           \ We are now going to buy the piece of equipment, so
+                        \ decrement the free space in the hold, as equipment
+                        \ takes up hold space in Elite-A
+
+ PLA                    \ Set A to the value from the top of the stack (so it
+ PHA                    \ contains the number of the item we want to buy)
 
 .equip_space
 
- JSR eq
- PLA
+ JSR eq                 \ Call eq to subtract the price of the item we want to
+                        \ buy (which is in A) from our cash pot, but only if we
+                        \ have enough cash in the pot. If we don't have enough
+                        \ cash, exit to the docking bay (i.e. show the Status
+                        \ Mode screen)
+
+ PLA                    \ Restore A from the stack
 
                         \ --- End of replacement ------------------------------>
 
@@ -17010,15 +17071,22 @@ LOAD_D% = LOAD% + P% - CODE%
 
                         \ --- Original Acornsoft code removed: ---------------->
 
-\ LDX #70               \ And set the current fuel level * 10 in QQ14 to 70, or
-\ STX QQ14              \ 7.0 light years (a full tank)
+\ LDX #70               \ Set the current fuel level * 10 in QQ14 to 70, or 7.0
+\ STX QQ14              \ light years (a full tank)
 
                         \ --- And replaced by: -------------------------------->
 
- LDX new_range          \ AJD
- STX QQ14
- JSR DIALS
- LDA #&00
+ LDX new_range          \ Set the current fuel level in QQ14 to our current
+ STX QQ14               \ ship's maximum hyperspace range from new_range, so the
+                        \ tank is now full
+
+ JSR DIALS              \ Call DIALS to update the dashboard with the new fuel
+                        \ level
+
+ LDA #0                 \ Set A to 0 as the call to DIALS will have overwritten
+                        \ the original value, and we still need it set
+                        \ correctly so we can continue through the conditional
+                        \ statements for all the other equipment
 
                         \ --- End of replacement ------------------------------>
 
@@ -17043,8 +17111,13 @@ LOAD_D% = LOAD% + P% - CODE%
 
                         \ --- And replaced by: -------------------------------->
 
- CPX new_missiles       \ AJD
- BCS pres+3
+ CPX new_missiles       \ If buying this missile would give us more than the
+ BCS pres+3             \ maximum number of missiles that our current ship can
+                        \ hold (which is stored in new_missiles), jump to pres+3
+                        \ to show the error "All Present", do not free up any
+                        \ space in the hold (as missiles do not take up hold
+                        \ space), beep and exit to the docking bay (i.e. show
+                        \ the Status Mode screen)
 
                         \ --- End of replacement ------------------------------>
 
@@ -17128,8 +17201,12 @@ LOAD_D% = LOAD% + P% - CODE%
 
                         \ --- And replaced by: -------------------------------->
 
- LDY new_pulse          \ AJD
- BNE equip_leap
+ LDY new_pulse          \ Set Y to the power level of pulse lasers when fitted
+                        \ to our current ship type
+
+ BNE equip_leap         \ Jump to equip_merge (via equip_leap) to install the
+                        \ new laser (this BNE is effectively a JMP as Y is never
+                        \ zero)
 
                         \ --- End of replacement ------------------------------>
 
@@ -17150,11 +17227,14 @@ LOAD_D% = LOAD% + P% - CODE%
 
                         \ --- And replaced by: -------------------------------->
 
- LDY new_beam           \ AJD
+ LDY new_beam           \ Set Y to the power level of beam lasers when fitted to
+                        \ our current ship type
 
 .equip_leap
 
- BNE equip_frog
+ BNE equip_frog         \ Jump to equip_merge (via equip_frog) to install the
+                        \ new laser (this BNE is effectively a JMP as Y is never
+                        \ zero)
 
                         \ --- End of replacement ------------------------------>
 
@@ -17173,15 +17253,19 @@ LOAD_D% = LOAD% + P% - CODE%
 
 .pres
 
+                        \ If we get here we need to show an error to say that
+                        \ the item whose name is in recursive token Y is already
+                        \ present, and then process a refund for the cost of
+                        \ item number A
+
                         \ --- Code added for Elite-A: ------------------------->
 
- INC new_hold           \ AJD
+ INC new_hold           \ We can't buy the requested equipment, so increment the
+                        \ free space in the hold, as we decremented it earler
+                        \ in anticipation of making a deal, but the deal has
+                        \ fallen through
 
                         \ --- End of added code ------------------------------->
-
-                        \ If we get here we need to show an error to say that
-                        \ item number A is already present, where the item's
-                        \ name is recursive token Y
 
  STY K                  \ Store the item's name in K
 
@@ -17256,7 +17340,8 @@ LOAD_D% = LOAD% + P% - CODE%
                         \ "Hyperspace Unit Present", beep and exit to the docking
                         \ bay (i.e. show the Status Mode screen)
 
- DEC BOMB               \ AJD
+ DEC BOMB               \ Otherwise we just bought an energy bomb, so set BOMB
+                        \ to &FF (as BOMB was 0 before the DEC instruction)
 
                         \ --- End of replacement ------------------------------>
 
@@ -17279,8 +17364,10 @@ LOAD_D% = LOAD% + P% - CODE%
 
                         \ --- And replaced by: -------------------------------->
 
- LDX new_energy         \ AJD
- STX ENGY
+ LDX new_energy         \ Otherwise we just picked up an energy unit, so set
+ STX ENGY               \ ENGY to new_energy, which is the value of our current
+                        \ ship's ship energy refresh rate with an energy unit
+                        \ fitted
 
                         \ --- End of replacement ------------------------------>
 
@@ -17318,11 +17405,15 @@ LOAD_D% = LOAD% + P% - CODE%
 
                         \ --- And replaced by: -------------------------------->
 
- LDX GHYP               \ AJD
+ LDX GHYP               \ Set X to the value of GHYP, which determines
+                        \ whether we have a galactic hyperdrive fitted
 
 .equip_gfrog
 
- BNE pres
+ BNE pres               \ If we already have a galactic hyperdrive fitted (i.e.
+                        \ GHYP is non-zero), jump to pres to show the error
+                        \ "Galactic Hyperspace Present", beep and exit to the
+                        \ docking bay (i.e. show the Status Mode screen)
 
                         \ --- End of replacement ------------------------------>
 
@@ -17332,13 +17423,13 @@ LOAD_D% = LOAD% + P% - CODE%
 
 .et9
 
+ INY                    \ Increment Y to recursive token 117 ("MILITARY  LASER")
+
+ CMP #12                \ If A is not 12 (i.e. the item we've just bought is not
+ BNE et10               \ a military laser), skip to et10
+
                         \ --- Original Acornsoft code removed: ---------------->
 
-\ INY                   \ Increment Y to recursive token 117 ("MILITARY  LASER")
-\
-\ CMP #12               \ If A is not 12 (i.e. the item we've just bought is not
-\ BNE et10              \ a military laser), skip to et10
-\
 \ JSR qv                \ Print a menu listing the four views, with a "View ?"
 \                       \ prompt, and ask for a view number, which is returned
 \                       \ in X (which now contains 0-3)
@@ -17364,39 +17455,63 @@ LOAD_D% = LOAD% + P% - CODE%
 
                         \ --- And replaced by: -------------------------------->
 
- INY
- CMP #&0C
- BNE et10
- LDY new_military
+ LDY new_military       \ Set Y to the power level of military lasers when
+                        \ fitted to our current ship type
 
 .equip_frog
 
- BNE equip_merge
+ BNE equip_merge        \ Jump to equip_merge to install the new laser (this BNE
+                        \ is effectively a JMP as Y is never zero)
 
 .et10
 
- INY
- CMP #&0D
- BNE et11
- LDY new_mining
+ INY                    \ Increment Y to recursive token 118 ("MINING  LASER")
+
+ CMP #13                \ If A is not 13 (i.e. the item we've just bought is not
+ BNE et11               \ a mining laser), skip to et11
+
+ LDY new_mining         \ Set Y to the power level of mining lasers when fitted
+                        \ to our current ship type
 
 .equip_merge
 
+                        \ Now to install a new laser with the laser power in Y
+                        \ and the item number in A
+
+ PHA                    \ Store the item number in A on the stack
+
+ TYA                    \ Store the laser power in Y on the stack
  PHA
- TYA
- PHA
- JSR qv
- PLA
- LDY LASER,X
- BEQ l_3113
- PLA
- LDY #&BB
- BNE equip_gfrog
+
+ JSR qv                 \ Print a menu listing the four views, with a "View ?"
+                        \ prompt, and ask for a view number, which is returned
+                        \ in X (which now contains 0-3)
+
+ PLA                    \ Retrieve the laser power of the new laser from the
+                        \ stack into A
+
+ LDY LASER,X            \ If there is no laser mounted in the chosen view (i.e.
+ BEQ l_3113             \ LASER+X, which contains the laser power for view X, is
+                        \ zero), jump to l_3113 to fit the new laser
+
+                        \ We already have a laser fitted to this view, so 
+
+ PLA                    \ Retrieve the item number from the stack into A
+
+ LDY #187               \ Set Y to token 27 (" LASER") so the following jump to
+                        \ pres will show the error "Laser Present", beep and
+                        \ exit to the docking bay (i.e. show the Status Mode
+                        \ screen)
+
+ BNE equip_gfrog        \ Jump to pres via equip_gfrog (this BNE is effectively
+                        \ a JMP as Y is never zero)
 
 .l_3113
 
- STA LASER,X
- PLA
+ STA LASER,X            \ Fit the new laser by storing the laser power in A into
+                        \ LASER+X
+
+ PLA                    \ Retrieve the item number from the stack into A
 
                         \ --- End of replacement ------------------------------>
 
@@ -17561,7 +17676,7 @@ LOAD_D% = LOAD% + P% - CODE%
 
  LDX PRXS,Y             \ Fetch the low byte of the price into X
 
- LDA PRXS+1,Y           \ Fetch the low byte of the price into A and transfer
+ LDA PRXS+1,Y           \ Fetch the high byte of the price into A and transfer
  TAY                    \ it to X, so the price is now in (Y X)
 
 .c
@@ -23027,7 +23142,7 @@ ENDIF
                         \ --- And replaced by: -------------------------------->
 
  EQUS ".:0"             \ The "0" part of the string is overwritten with the
- EQUB 13                \ actual drive number by the CATS routine AJD
+ EQUB 13                \ actual drive number by the CATS routine
 
                         \ --- End of replacement ------------------------------>
 
@@ -23289,14 +23404,19 @@ ENDIF
                         \ --- Original Acornsoft code removed: ---------------->
 
 \ LDX stack             \ Set the stack pointer to the value that we stored in
-\ TXS                   \ location stack, so that's back to the value it had
+\ TXS                   \ the stack variable, so that's back to the value it had
 \                       \ before we set BRKV to point to MEBRK in the SVE
 \                       \ routine
 
                         \ --- And replaced by: -------------------------------->
 
- LDX #&FF               \ AJD
- TXS
+ LDX #&FF               \ The #&FF part of this instruction is modified by the
+ TXS                    \ SVE routine so that it sets the stack pointer back to
+                        \ the value it had before we set BRKV to point to MEBRK
+                        \ in the SVE routine. Modifying this instruction means
+                        \ we don't need to use the stack variable, which saves
+                        \ us a both byte in this instruction, as well the byte
+                        \ of the stack variable
 
                         \ --- End of replacement ------------------------------>
 
@@ -23374,18 +23494,19 @@ ENDIF
 
 .SVE
 
+ JSR ZEBC               \ Call ZEBC to zero-fill pages &B and &C
+
                         \ --- Original Acornsoft code removed: ---------------->
 
-\ JSR ZEBC              \ Call ZEBC to zero-fill pages &B and &C
-\
 \ TSX                   \ Transfer the stack pointer to X and store it in stack,
 \ STX stack             \ so we can restore it in the MRBRK routine
 
                         \ --- And replaced by: -------------------------------->
 
- JSR ZEBC               \ AJD
- TSX
- STX MEBRK+&01
+ TSX                    \ Transfer the stack pointer to X and store it in
+ STX MEBRK+1            \ MEBRK+1, which modifies the LDX #&FF instruction at
+                        \ the start of MEBRK so that it sets X to the value of
+                        \ the stack pointer
 
                         \ --- End of replacement ------------------------------>
 
@@ -30162,6 +30283,10 @@ ENDIF
                         \ --- Whole section added for Elite-A: ---------------->
 
 .new_details
+
+\ new_pulse, new_beam, new_military, new_mining, new_mounts, new_missiles
+\ new_shields, new_energy, new_speed, new_hold, new_range, new_costs
+\ new_max \ new_min, new_space
 
  EQUB &0E, &8E, &92, &19, &02, &02 \ adder
  EQUB &04, &01,  36, &09,  60, &1A
