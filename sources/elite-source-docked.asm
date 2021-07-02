@@ -1293,7 +1293,6 @@ ORG &0300
  SKIP 1                 \ This byte appears to be unused
 
 .new_type
-.cmdr_ship
 
  SKIP 1                 \ The type of our current ship
 
@@ -6549,7 +6548,7 @@ LOAD_B% = LOAD% + P% - CODE%
 
 .stqv
 
- STX &93
+ STX CNT
  \TAY
  \LDX FRIN,Y
  LDY LASER,X
@@ -6564,7 +6563,7 @@ LOAD_B% = LOAD% + P% - CODE%
  \INC &96
  \LDA &96
  \CMP #&75
- LDX &93
+ LDX CNT
  INX
  CPX #&1E
  BCC stqv
@@ -6690,31 +6689,31 @@ LOAD_B% = LOAD% + P% - CODE%
 
                         \ --- And replaced by: -------------------------------->
 
- STX &93                \ AJD
- STA &96
+ STX CNT                \ AJD
+ STA XX4
  JSR TT27
- LDX &87
- CPX #&08
+ LDX QQ11
+ CPX #8
  BEQ status_keep
- LDA #&15
+ LDA #21
  STA XC
 
  JSR vdu_80             \ Call vdu_80 to switch to Sentence Case, with the next
                         \ letter in capitals
 
- LDA #&01
+ LDA #1
  STA QQ25
  JSR sell_yn
  BEQ status_no
  BCS status_no
- LDA &96
- CMP #&6B
+ LDA XX4
+ CMP #107
  BCS status_over
- ADC #&07
+ ADC #7
 
 .status_over
 
- SBC #&68
+ SBC #104
  JSR prx-3
  LSR A
  TAY
@@ -6723,8 +6722,8 @@ LOAD_B% = LOAD% + P% - CODE%
  TAX
  JSR MCASH
  INC new_hold
- LDX &93
- LDA #&00
+ LDX CNT
+ LDA #0
  STA LASER,X
 
 .status_no
@@ -15144,7 +15143,7 @@ LOAD_D% = LOAD% + P% - CODE%
 
                         \ --- Code added for Elite-A: ------------------------->
 
- STA &3A                \ AJD
+ STA XX12               \ AJD
 
                         \ --- End of added code ------------------------------->
 
@@ -15168,7 +15167,7 @@ LOAD_D% = LOAD% + P% - CODE%
 
                         \ --- Code added for Elite-A: ------------------------->
 
- STA &E0                \ AJD
+ STA K4                 \ AJD
 
                         \ --- End of added code ------------------------------->
 
@@ -15204,7 +15203,7 @@ LOAD_D% = LOAD% + P% - CODE%
 
                         \ --- And replaced by: -------------------------------->
 
- LDA &3A                \ AJD
+ LDA XX12               \ AJD
 
                         \ --- End of replacement ------------------------------>
 
@@ -15232,7 +15231,7 @@ LOAD_D% = LOAD% + P% - CODE%
 
                         \ --- And replaced by: -------------------------------->
 
- LDA &E0                \ AJD
+ LDA K4                 \ AJD
 
                         \ --- End of replacement ------------------------------>
 
@@ -24890,12 +24889,15 @@ ENDIF
 \ LDA JSTK              \ If JSTK is zero, then we are configured to use the
 \ BEQ DK9               \ keyboard rather than the joystick, so jump to DK9 to
 \                       \ make sure the Bitstik is disabled as well (DK9 then
-\                       \ jumps to DK4 below)
+\                       \ jumps to DK4 to scan for pause, configuration and
+\                       \ secondary flight keys)
 
                         \ --- And replaced by: -------------------------------->
 
  LDA JSTK               \ If JSTK is zero, then we are configured to use the
- BEQ DK4                \ keyboard rather than the joystick, so jump to DK4
+ BEQ DK4                \ keyboard rather than the joystick, so jump to DK4 to
+                        \ scan for pause, configuration and secondary flight
+                        \ keys
 
                         \ --- End of replacement ------------------------------>
 
@@ -29825,7 +29827,7 @@ LOAD_G% = LOAD% + P% - CODE%
  SEC
  LDA FIST
  ADC GCNT
- ADC cmdr_ship
+ ADC new_type
  STA INWK+1
  ADC INWK
  SBC cmdr_courx

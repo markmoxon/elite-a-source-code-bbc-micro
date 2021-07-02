@@ -1283,7 +1283,6 @@ ORG &0300
  SKIP 1                 \ This byte appears to be unused
 
 .new_type
-.cmdr_ship
 
  SKIP 1                 \ The type of our current ship
 
@@ -4804,7 +4803,7 @@ LOAD_B% = LOAD% + P% - CODE%
 
 .stqv
 
- STX &93
+ STX CNT
  \TAY
  \LDX FRIN,Y
  LDY LASER,X
@@ -4819,7 +4818,7 @@ LOAD_B% = LOAD% + P% - CODE%
  \INC &96
  \LDA &96
  \CMP #&75
- LDX &93
+ LDX CNT
  INX
  CPX #&1E
  BCC stqv
@@ -4900,31 +4899,31 @@ LOAD_B% = LOAD% + P% - CODE%
 
 .plf2
 
- STX &93                \ AJD
- STA &96
+ STX CNT                \ AJD
+ STA XX4
  JSR TT27
- LDX &87
- CPX #&08
+ LDX QQ11
+ CPX #8
  BEQ status_keep
- LDA #&15
+ LDA #21
  STA XC
 
  JSR vdu_80             \ Call vdu_80 to switch to Sentence Case, with the next
                         \ letter in capitals
 
- LDA #&01
+ LDA #1
  STA QQ25
  JSR sell_yn
  BEQ status_no
  BCS status_no
- LDA &96
- CMP #&6B
+ LDA XX4
+ CMP #107
  BCS status_over
- ADC #&07
+ ADC #7
 
 .status_over
 
- SBC #&68
+ SBC #104
  JSR prx-3
  LSR A
  TAY
@@ -4933,8 +4932,8 @@ LOAD_B% = LOAD% + P% - CODE%
  TAX
  JSR MCASH
  INC new_hold
- LDX &93
- LDA #&00
+ LDX CNT
+ LDA #0
  STA LASER,X
 
  JSR update_pod         \ Update the dashboard colours to reflect whether we
@@ -10958,7 +10957,7 @@ LOAD_D% = LOAD% + P% - CODE%
  SEC                    \ (s1_hi, s0_hi) and (QQ0, QQ1)
  SBC QQ0
 
- STA &3A                \ AJD
+ STA XX12               \ AJD
 
  BCS TT184              \ If a borrow didn't occur, i.e. s1_hi >= QQ0, then the
                         \ result is positive, so jump to TT184 and skip the
@@ -10978,7 +10977,7 @@ LOAD_D% = LOAD% + P% - CODE%
  SEC                    \ (s1_hi, s0_hi) and (QQ0, QQ1)
  SBC QQ1
 
- STA &E0                \ AJD
+ STA K4                 \ AJD
 
  BCS TT186              \ If a borrow didn't occur, i.e. s0_hi >= QQ1, then the
                         \ result is positive, so jump to TT186 and skip the
@@ -10999,7 +10998,7 @@ LOAD_D% = LOAD% + P% - CODE%
                         \ and set up the various variables we need to draw the
                         \ system's filled circle on the chart
 
- LDA &3A                \ AJD
+ LDA XX12               \ AJD
 
  ASL A                  \ Set XX12 = 104 + x-delta * 4
  ASL A                  \
@@ -11013,7 +11012,7 @@ LOAD_D% = LOAD% + P% - CODE%
  STA XC
  INC XC
 
- LDA &E0                \ AJD
+ LDA K4                 \ AJD
 
  ASL A                  \ Set K4 = 90 + y-delta * 2
  ADC #90                \
@@ -15414,8 +15413,8 @@ LOAD_F% = LOAD% + P% - CODE%
  STA JSTX               \ 128
  STA JSTY
 
- STA &32                \ AJD
- STA &7B
+ STA ALP2               \ Reset ALP2 (roll sign) and BET2 (pitch sign)
+ STA BET2               \ to negative, i.e. pitch and roll negative
 
  ASL A                  \ This sets A to 0
 
@@ -17755,7 +17754,9 @@ ENDIF
 .DOKEY
 
  LDA JSTK               \ If JSTK is zero, then we are configured to use the
- BEQ DK4                \ keyboard rather than the joystick, so jump to DK4
+ BEQ DK4                \ keyboard rather than the joystick, so jump to DK4 to
+                        \ scan for pause, configuration and secondary flight
+                        \ keys
 
  LDX #1                 \ Call DKS2 to fetch the value of ADC channel 1 (the
  JSR DKS2               \ joystick X value) into (A X), and OR A with 1. This
@@ -22466,7 +22467,7 @@ LOAD_G% = LOAD% + P% - CODE%
  SEC
  LDA FIST
  ADC GCNT
- ADC cmdr_ship
+ ADC new_type
  STA INWK+1
  ADC INWK
  SBC cmdr_courx
@@ -34705,8 +34706,8 @@ LOAD_J% = LOAD% + P% - CODE%
 .MA76
 
  LDA KY19               \ If "C" is being pressed, and we have a docking
- AND DKCMP              \ computer fitted, jump down to dock_toggle with a
- BNE dock_toggle        \ non-zero value in A to switch on the docking computer
+ AND DKCMP              \ computer fitted, then KY19 and DKCMP will both be &FF,
+ BNE dock_toggle        \ so jump down to dock_toggle with A set to &FF
 
  LDA KY20               \ If "P" is being pressed, keep going, otherwise skip
  BEQ MA78               \ the next two instructions
@@ -34717,9 +34718,9 @@ LOAD_J% = LOAD% + P% - CODE%
 
 .dock_toggle
 
- STA auto               \ Set auto to the value in A, which will be non-zero
-                        \ if we just turned on the docking computer, or 0 if we
-                        \ just turned it off
+ STA auto               \ Set auto to the value in A, which will be &FF if we
+                        \ just turned on the docking computer, or 0 if we just
+                        \ turned it off
 
 .MA78
 
@@ -35167,10 +35168,11 @@ LOAD_J% = LOAD% + P% - CODE%
  CMP #214               \ docking, as the angle of approach is greater than 26
  BCC MA62               \ degrees
 
- LDY #&25               \ AJD
+ LDY #NI%               \ Set Y = NI% so the following call to SPS1 calculates
+                        \ the vector to the space station rather than the planet
 
- JSR SPS1               \ Call SPS1 to calculate the vector to the planet and
-                        \ store it in XX15
+ JSR SPS1               \ Call SPS1 to calculate the vector to the space station
+                        \ and store it in XX15
 
  LDA XX15+2             \ Set A to the z-axis of the vector
 
@@ -35202,9 +35204,13 @@ LOAD_J% = LOAD% + P% - CODE%
 
                         \ If we arrive here, docking has just failed
 
- LDA &7D                \ AJD
- CMP #5
+ LDA DELTA              \ If the ship's speed is >= 5, jump to n_crunch to
+ CMP #5                 \ register a fair emount of damage to our shields (128)
  BCS n_crunch
+
+                        \ Otherwise we have just crashed gently into the
+                        \ station, so we need to check whether it's our fault or
+                        \ the docking computer
 
 \ ******************************************************************************
 \
@@ -35228,21 +35234,32 @@ LOAD_J% = LOAD% + P% - CODE%
 \
 \ ******************************************************************************
 
- LDA auto               \ AJD
- AND #%00000100
- EOR #%00000101
- BNE MA63
+ LDA auto               \ If the docking computer is on, then auto will be &FF,
+ AND #%00000100         \ so this will set A = 1, a tiny amount of damage
+ EOR #%00000101         \
+                        \ If the docking computer is off, then auto will be 0,
+                        \ so this will set A = 5, a small amount of damage
+
+ BNE MA63               \ Jump to MA63 to process the damage in A (this BNE is
+                        \ effectively a JMP as A will never be zero)
 
 .MA58
 
- LDA #64
- JSR n_hit
+                        \ If we get here, we have collided with something in a
+                        \ potentially fatal way
 
- JSR anger_8c           \ Call anger_8c to make the current ship angry
+ LDA #64                \ Call n_hit to apply a hit of strength 64 to the ship
+ JSR n_hit              \ we just collided with
+
+ JSR anger_8c           \ Call anger_8c to make the ship angry
 
 .n_crunch
 
- LDA #128
+                        \ If we get here, we have collided with something, so we
+                        \ need to take a hit to our shields
+
+ LDA #128               \ Set A = 128 to indicate a fairly large amount of
+                        \ damage
 
 .MA63
 
@@ -35352,16 +35369,22 @@ LOAD_J% = LOAD% + P% - CODE%
 
  LSR A                  \ Divide the laser power of the current view by 2
 
- JSR n_hit              \ hit enemy AJD
- BCS MA14
+ JSR n_hit              \ Call n_hit to apply a laser strike of strength A to
+                        \ the enemy ship
+
+ BCS MA14               \ If the C flag is set then the enemy ship survived the
+                        \ hit, so jump down to MA14 to make it angry
 
  LDA TYPE               \ Did we just kill an asteroid? If not, jump to nosp,
  CMP #AST               \ otherwise keep going
  BNE nosp
 
- LDA LAS                \ Did we kill the asteroid using mining lasers? If not,
- CMP new_mining         \ jump to nosp, otherwise keep going AJD
- BNE nosp
+ LDA LAS                \ Did we kill the asteroid using mining lasers? If so,
+ CMP new_mining         \ then our current laser strength in LAS will match the
+ BNE nosp               \ strength of mining lasers when fitted to our current
+                        \ ship type, which is stored in new_mining. If they
+                        \ don't match, which means we didn't use minig lasers,
+                        \ then jump to nosp, otherwise keep going
 
  JSR DORND              \ Set A and X to random numbers
 
@@ -35437,10 +35460,22 @@ LOAD_J% = LOAD% + P% - CODE%
  BEQ MAC1               \ ship is no longer exploding, so jump to MAC1 to skip
                         \ the following
 
- BIT &6A                \ AJD
- BVS n_badboy
- BEQ n_goodboy
- LDA #&80
+                        \ At this point, we know that A = %00100000 (as we
+                        \ didn't take the BEQ branch)
+
+ BIT NEWB               \ If bit 6 of the ship's NEWB flags is set, then this
+ BVS n_badboy           \ ship is a cop, so jump to n_badboy as we just killed a
+                        \ policeman
+
+ BEQ n_goodboy          \ The BIT NEWB instruction sets the Z flag according to
+                        \ the result of:
+                        \
+                        \   A AND NEWB = %00100000 AND NEWB
+                        \
+                        \ so this jumps to n_goodboy if bit 5 of NEWB is clear
+                        \ (in other words, if the ship is no longer exploding)
+
+ LDA #%10000000         \ AJD
 
 .n_badboy
 
@@ -35452,8 +35487,10 @@ LOAD_J% = LOAD% + P% - CODE%
  LSR A
  BIT FIST
  BNE n_bitlegal
+
  ADC FIST
  BCS KS1S
+
  STA FIST
  BCC KS1S
 
@@ -35487,27 +35524,60 @@ LOAD_J% = LOAD% + P% - CODE%
 
 .n_hit
 
- \ hit opponent
- STA &D1                \ AJD
- SEC
- LDY #&0E               \ opponent shield
- LDA (XX0),Y
- AND #&07
- SBC &D1
- BCS n_kill
- \BCC n_defense
- \LDA #&FF
- \n_defense
- CLC
- ADC &69
- STA &69
- BCS n_kill
- JSR TA87+3
+                        \ If we get here then we need to apply a hit of strength
+                        \ A to the enemy ship
+
+ STA T                  \ Store the strength of the hit in T
+
+ SEC                    \ Set the C flag so we can do some subtraction
+
+ LDY #14                \ Fetch byte #14 of the enemy ship's blueprint into A,
+ LDA (XX0),Y            \ which gives the ship's maximum energy/shields
+
+ AND #7                 \ Reduce the maximum energy/shields figure to the range
+                        \ 0-7
+
+ SBC T                  \ Subtract the hit strength from the maximum shields, so
+                        \ A = ship energy - hit strength
+
+ BCS n_kill             \ If the subtraction didn't underflow, then the hit was
+                        \ weaker than the ship's shields, so jump to n_kill
+                        \ with the C flag set to indicate that the ship has
+                        \ survived the attack
+
+\BCC n_defense          \ These instructions are commented out in the original
+\LDA #&FF               \ source
+\.n_defense
+
+ CLC                    \ Otherwise the hit was stronger than the enemy shields,
+ ADC INWK+35            \ so the ship's energy level needs to register some
+ STA INWK+35            \ damage. A contains a negative number whose magnitude
+                        \ is the amount by which the attack is greater than the
+                        \ shield defence, so we can simply add this figure to
+                        \ the ship's energy levels in the ship's byte #35 to
+                        \ reduce the energy by the amount that the attack was
+                        \ stronger than the defence (i.e. the shields absorb the
+                        \ amount of energy that is defined in the blueprint, and
+                        \ the rest of the hit makes it through to damage the
+                        \ energy levels)
+
+ BCS n_kill             \ Adding this negative number is the same as subtracting
+                        \ a positive number, so having the C flag set indicates
+                        \ that the subtraction didn't underflow - in other words
+                        \ the damage isn't greater than the energy levels, and
+                        \ the ship has survuved the hit. In this case we jump to
+                        \ n_kill with the C flag set to indicate that the ship
+                        \ has survived the attack
+
+ JSR TA87+3             \ If we get here then the ship has not survived the
+                        \ attack, so call TA87+3 to set bit 7 of the ship's byte
+                        \ #31, which marks the ship as being killed
 
 .n_kill
 
- \ C clear if dead
- RTS
+ RTS                    \ Return from the subroutine with the C flag set if the
+                        \ ship has survived the onslaught, or clear if it has
+                        \ been destroyed
 
 .MAC1
 
@@ -39324,7 +39394,7 @@ LOAD_K% = LOAD% + P% - CODE%
 
  JSR msblob             \ AJD redraw missiles
  STY MSAR
- STX &45
+ STX MSTG
 
  JMP n_sound30          \ Call n_sound30 to make the sound of a missile launch,
                         \ returning from the subroutine using a tail call
@@ -43335,32 +43405,34 @@ NEXT
 
  JSR SPBLB              \ Light up the space station bulb on the dashboard
 
- LDX #&81               \ AJD
- STX &66
- LDX #&FF
- STX &63
- INX
- STX &64
+ LDX #%10000001         \ Set the AI flag in byte #32 to %10000001 (hostile,
+ STX INWK+32            \ no AI, has an E.C.M.)
+
+ LDX #255               \ Set roll counter to 255 (maximum roll with no
+ STX INWK+29            \ damping)
+
+ INX                    \ Set pitch counter to 0 (no pitch, roll only)
+ STX INWK+30
 
  STX FRIN+1             \ Set the sun/space station slot at FRIN+1 to 0, to
                         \ indicate we should show the space station rather than
                         \ the sun
 
- STX &67                \ AJD
+ STX INWK+33            \ AJD
  LDA FIST
  BPL n_enemy
  LDX #&04
 
 .n_enemy
 
- STX &6A
+ STX NEWB
 
  LDX #10                \ Call NwS1 to flip the sign of nosev_x_hi (byte #10)
  JSR NwS1
 
  JSR NwS1               \ And again to flip the sign of nosev_y_hi (byte #12)
 
- STX &68                \ AJD
+ STX INWK+34            \ AJD
 
  JSR NwS1               \ And again to flip the sign of nosev_z_hi (byte #14)
 
@@ -46085,28 +46157,29 @@ LOAD_M% = LOAD% + P% - CODE%
 
 .mj1
 
- JMP MLOOP_FLIGHT       \ AJD
+ JMP MLOOP_FLIGHT       \ Jump down to MLOOP_FLIGHT, as we are done spawning
+                        \ ships
 
 .mt1
 
- LDA #&11
- LDX #&07
+ LDA #17                \ AJD
+ LDX #7
 
 .hordes
 
  STA horde_base+1
  STX horde_mask+1
  JSR DORND
- CMP #&F8
+ CMP #248
  BCS horde_large
- STA &89
+ STA XX13
  TXA
- AND &89
- AND #&03
+ AND XX13
+ AND #3
 
 .horde_large
 
- AND #7                 \ AJD
+ AND #7
 
  STA EV                 \ Delay further spawnings by this number
 
@@ -46116,9 +46189,9 @@ LOAD_M% = LOAD% + P% - CODE%
 
  JSR DORND              \ Set A and X to random numbers
 
- STA &D1                \ AJD
+ STA T
  TXA
- AND &D1
+ AND T
 
 .horde_mask
 
@@ -46135,9 +46208,9 @@ LOAD_M% = LOAD% + P% - CODE%
 .horde_base
 
  ADC #&00
- INC &61                \ space out horde
- INC &47
- INC &4A
+ INC INWK+27            \ space out horde
+ INC INWK+1
+ INC INWK+4
 
  JSR NWSHP              \ Try adding a new ship of type A to the local bubble
 
@@ -46284,7 +46357,7 @@ LOAD_M% = LOAD% + P% - CODE%
  CMP #&43               \ If "F" was not pressed, jump down to HME1, otherwise
  BNE HME1               \ keep going to process searching for systems
 
- LDA &87                \ AJD
+ LDA QQ11               \ AJD
  AND #&C0
  BEQ n_finder
  LDA dockedp
@@ -46309,7 +46382,7 @@ LOAD_M% = LOAD% + P% - CODE%
  CMP #&36               \ If "O" was pressed, do the following three jumps,
  BNE not_home           \ otherwise skip to not_home to continue AJD
 
- LDA &87                \ AJD
+ LDA QQ11               \ AJD
  AND #&C0
  BEQ t95
 
@@ -46330,7 +46403,7 @@ LOAD_M% = LOAD% + P% - CODE%
  CMP #&21               \ AJD
  BNE ee2
 
- LDA &87                \ AJD
+ LDA QQ11               \ AJD
  AND #&C0
  BEQ t95
 
@@ -46450,18 +46523,18 @@ LOAD_M% = LOAD% + P% - CODE%
 
 .d_416c
 
- LDA &2F
+ LDA QQ22+1
  BEQ d_418a
- DEC &2E
+ DEC QQ22
  BNE d_418a
- LDX &2F
+ LDX QQ22+1
  DEX
  JSR ee3
  LDA #&05
- STA &2E
- LDX &2F
+ STA QQ22
+ LDX QQ22+1
  JSR ee3
- DEC &2F
+ DEC QQ22+1
  BNE d_418a
  JMP TT18
 
@@ -46479,7 +46552,7 @@ LOAD_M% = LOAD% + P% - CODE%
 
 .NWDAV5
 
- LDA &87
+ LDA QQ11
  AND #&C0
  BEQ d_418a
  JMP TT16
@@ -47440,7 +47513,7 @@ LOAD_M% = LOAD% + P% - CODE%
 
  JSR scan_fire          \ AJD
 
- EOR #&10
+ EOR #%00010000
  STA &0307
 
  LDX #1                 \ Call DKS2 to fetch the value of ADC channel 1 (the
@@ -49241,7 +49314,7 @@ BNE MESS                \ Print recursive token A as an in-flight message,
  BCS iff_cop
  ASL A
  BCS iff_trade
- LDY &8C
+ LDY TYPE
  DEY
  BEQ iff_missle
  CPY #&08
@@ -49267,9 +49340,9 @@ BNE MESS                \ Print recursive token A as an in-flight message,
 .iff_not
 
  LDA iff_base,X
- STA &91
+ STA COL
  LDA iff_xor,X
- STA &37
+ STA Y2
 
  LDA INWK+1             \ If any of x_hi, y_hi and z_hi have a 1 in bit 6 or 7,
  ORA INWK+4             \ then the ship is too far away to be shown on the
@@ -49435,13 +49508,13 @@ BNE MESS                \ Print recursive token A as an in-flight message,
  TAX                    \ AJD
  LDA #&91
  JSR tube_write
- LDA &34
+ LDA X1
  JSR tube_write
- LDA &35
+ LDA Y1
  JSR tube_write
- LDA &91
+ LDA COL
  JSR tube_write
- LDA &37
+ LDA Y2
  JSR tube_write
  TXA
  JSR tube_write

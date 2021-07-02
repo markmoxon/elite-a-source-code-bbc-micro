@@ -1294,7 +1294,6 @@ ORG &0300
  SKIP 1                 \ This byte appears to be unused
 
 .new_type
-.cmdr_ship
 
  SKIP 1                 \ The type of our current ship
 
@@ -14570,12 +14569,15 @@ LOAD_F% = LOAD% + P% - CODE%
 \ LDA JSTK              \ If JSTK is zero, then we are configured to use the
 \ BEQ DK9               \ keyboard rather than the joystick, so jump to DK9 to
 \                       \ make sure the Bitstik is disabled as well (DK9 then
-\                       \ jumps to DK4 below)
+\                       \ jumps to DK4 to scan for pause, configuration and
+\                       \ secondary flight keys)
 
                         \ --- And replaced by: -------------------------------->
 
  LDA JSTK               \ If JSTK is zero, then we are configured to use the
- BEQ DK4                \ keyboard rather than the joystick, so jump to DK4
+ BEQ DK4                \ keyboard rather than the joystick, so jump to DK4 to
+                        \ scan for pause, configuration and secondary flight
+                        \ keys
 
                         \ --- End of replacement ------------------------------>
 
