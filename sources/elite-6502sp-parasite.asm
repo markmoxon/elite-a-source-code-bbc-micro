@@ -698,11 +698,26 @@ ORG &0000
 
 .finder
 
- SKIP 1                 \ AJD
+ SKIP 1                 \ Toggle whether the compass shows the planet or sun
+                        \
+                        \   * 0 = show the planet on the compass
+                        \
+                        \   * NI% = show the sun on the compass
+                        \
+                        \ When inside the space station's safe zone, the compass
+                        \ always shows the space station
+                        \
+                        \ Toggled by pressing "F" when paused, see the DK4
+                        \ routine for details
 
 .dockedp
 
- SKIP 1                 \ AJD
+ SKIP 1                 \ A flag that determines whether we should be running
+                        \ the docked or flight code in the parasite
+                        \
+                        \   * 0 = we are not docked, run the flight code
+                        \
+                        \   * &FF = we are docked, run the docked code
 
 ORG &00D1
 
@@ -1807,7 +1822,15 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
 
 .new_shields
 
- SKIP 1                 \ AJD
+ SKIP 1                 \ Our current ship's shield level
+                        \
+                        \ If our ship is damaged and the level of damage is less
+                        \ than our shield level, then the ship emerges unscathed
+                        \
+                        \ If the damage level is greater than the shield level,
+                        \ then the damage level is reduced by the shield level
+                        \ before being applied to the ship (i.e. the shields
+                        \ absorb the amount of damage given in new_shields)
 
 .new_energy
 
@@ -1836,7 +1859,12 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
 
 .new_costs
 
- SKIP 1                 \ AJD
+ SKIP 1                 \ The price table offset for our current ship
+                        \
+                        \ In Elite-A the PRXS table (which contains equipment
+                        \ prices) has multiple sections, for the different types
+                        \ of ship we can buy, and the offset into this table for
+                        \ our current ship is held here
 
 .new_max
 
@@ -2278,11 +2306,11 @@ ENDIF
 
 .DOENTRY
 
- LDA #&00               \ AJD
+ LDA #0                 \ Set dockedp = 0 to indicate we are docked
  STA dockedp
- LDA #&FF
 
- JSR SCRAM
+ LDA #&FF               \ Call SCRAM to set save_lock to &FF and set the break
+ JSR SCRAM              \ handler
 
  JSR RES2               \ Reset a number of flight variables and workspaces
 
@@ -2427,14 +2455,21 @@ ENDIF
 \       Name: SCRAM
 \       Type: Subroutine
 \   Category: Loader
-\    Summary: Decrypt the main docked code, reset the flight variables and start
-\             the game
+\    Summary: Set the save_lock variable and break handler
 \
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   A                   Set the save_lock flag to this value
 \ ******************************************************************************
 
 .SCRAM
 
- STA save_lock          \ AJD
+ STA save_lock          \ Set the save_lock variable to the value in A
+
+                        \ Fall through into BRKBK to set the standard BRKV
+                        \ handler for the game and return from the subroutine
 
 \ ******************************************************************************
 \
@@ -5005,7 +5040,8 @@ LOAD_B% = LOAD% + P% - CODE%
 \
 \ ******************************************************************************
 
- CLC                    \ AJD
+ CLC                    \ Clear the C flag so the routine doesn't print a
+                        \ decimal point if called via pr2-1
 
 .pr2
 
@@ -8717,7 +8753,7 @@ LOAD_C% = LOAD% +P% - CODE%
  STA DTW2               \ Set bit 7 of DTW2 to indicate we are not currently
                         \ printing a word
 
- ASL A                  \ Set A = 0 AJD
+ ASL A                  \ Set A to 0, as 128 << 1 = %10000000 << 1 = 0
 
  STA DLY                \ Set the delay in DLY to 0, to indicate that we are
                         \ no longer showing an in-flight message, so any new
@@ -10586,14 +10622,20 @@ LOAD_D% = LOAD% + P% - CODE%
  LDA R                  \ Set P to the amount of this item we just bought
  STA P
 
- LDA QQ24               \ AJD
+ LDA QQ24               \ Set Q to the item's price / 4
  STA Q
- JSR MULTU
- JSR price_xy
- JSR MCASH
- JSR MCASH
- JSR MCASH
- JSR MCASH
+
+ JSR MULTU              \ Call MULTU to calculate (A P) = P * Q
+
+ JSR price_xy           \ Call price_xy to set (Y X) = (A P) = P * Q
+
+ JSR MCASH              \ Add 4 * (Y X) cash to the cash pot in CASH, i.e.
+ JSR MCASH              \
+ JSR MCASH              \   (Y X) = P * Q * 4
+ JSR MCASH              \
+                        \ which will be the total price we make from this sale
+                        \ (as P contains the quantity we're selling and Q
+                        \ contains the item's price / 4)
 
  LDA #0                 \ We've made the sale, so set the amount
 
@@ -12149,7 +12191,7 @@ LOAD_D% = LOAD% + P% - CODE%
 \
 \ Other entry points:
 \
-\   price_xy            AJD
+\   price_xy            Set (Y X) = (A P)
 \
 \ ******************************************************************************
 
@@ -12845,13 +12887,22 @@ LOAD_D% = LOAD% + P% - CODE%
 
 .prx
 
- ASL A                  \ AJD
- BEQ n_fcost
- ADC new_costs
+ ASL A                  \ Set A = A * 2, so it can act as an index into the
+                        \ PRXS table, which has two bytes per entry
+
+ BEQ n_fcost            \ If A = 0, skip the following, as we are fetching the
+                        \ price of fuel, and fuel is always the same price,
+                        \ regardless of ship type
+
+ ADC new_costs          \ In Elite-A the PRXS table has multiple sections, for
+                        \ the different types of ship we can buy, and the offset
+                        \ to the price table for our current ship is held in
+                        \ new_costs, so this points the index in A to the
+                        \ correct section of the PRXS table for our current ship
 
 .n_fcost
 
- TAY
+ TAY                    \ Copy A into Y, so it can be used as an index
 
  LDX PRXS,Y             \ Fetch the low byte of the price into X
 
@@ -13215,8 +13266,7 @@ LOAD_E% = LOAD% + P% - CODE%
 
  JMP pr2                \ Jump to pr2, which prints the number in X to a width
                         \ of 3 figures, left-padding with spaces to a width of
-                        \ 3, and once done, return from the subroutine (as pr2
-                        \ ends with an RTS)
+                        \ 3, and return from the subroutine using a tail call
 
 \ ******************************************************************************
 \
@@ -15906,14 +15956,16 @@ LOAD_F% = LOAD% + P% - CODE%
 .BR1
 
  LDX #10                \ AJD
- LDY #&0B
- JSR install_ship
- LDX #19
- LDY #&13
+ LDY #11
  JSR install_ship
 
- LDX #&FF
- TXS
+ LDX #19
+ LDY #19
+ JSR install_ship
+
+ LDX #&FF               \ Set the stack pointer to &01FF, which is the standard
+ TXS                    \ location for the 6502 stack, so this instruction
+                        \ effectively resets the stack
 
  LDX #3                 \ Set XC = 3 (set text cursor to column 3)
  STX XC
@@ -16461,8 +16513,10 @@ ENDIF
 
  LDA #&8A               \ AJD
  JSR tube_write
+
  LDA #&81
  JSR tube_write
+
  JSR tube_read
 
  JSR FLKB               \ Call FLKB to flush the keyboard buffer
@@ -16482,8 +16536,10 @@ ENDIF
 
  LDA #&8A               \ AJD
  JSR tube_write
- LDA #&01
+
+ LDA #1
  JSR tube_write
+
  JSR tube_read
 
  JMP FEED               \ Jump to FEED to print a newline, returning from the
@@ -16777,7 +16833,7 @@ ENDIF
 
                         \ We now copy the entered filename from INWK to DELI, so
                         \ that it overwrites the filename part of the string,
-                        \ i.e. the "E.1234567" part of "DELETE:0.E.1234567"
+                        \ i.e. the "E.1234567" part of "DEL.:0.E.1234567"
 
  LDX #9                 \ Set up a counter in X to count from 9 to 1, so that we
                         \ copy the string starting at INWK+4+1 (i.e. INWK+5) to
@@ -16786,7 +16842,7 @@ ENDIF
 .DELL1
 
  LDA INWK+4,X           \ Copy the X-th byte of INWK+4 to the X-th byte of
- STA DELI+6,X           \ DELI+6 AJD
+ STA DELI+6,X           \ DELI+6
 
  DEX                    \ Decrement the loop counter
 
@@ -17055,22 +17111,34 @@ ENDIF
 
 .confirm
 
- CMP save_lock
- BEQ confirmed
- LDA #&03
+ CMP save_lock          \ If save_lock = 0, jump to confirmed to return from the
+ BEQ confirmed          \ subroutine
+
+ LDA #3                 \ Print extended token 3 ("ARE YOU SURE?")
  JSR DETOK
- JSR t
- JSR CHPR
- ORA #&20
- PHA
- JSR TT67
- JSR FEED
- PLA
- CMP #&79
+
+ JSR t                  \ Scan the keyboard until a key is pressed, returning
+                        \ the ASCII code in A and X
+
+ JSR CHPR               \ Print the character in A
+
+ ORA #%00100000         \ Set bit 5 in the value of the key pressed, which
+                        \ converts it to lower case
+
+ PHA                    \ Store A on the stack so we can retrieve it after the
+                        \ call to FEED
+
+ JSR TT67               \ Print a newline
+
+ JSR FEED               \ Print a newline
+
+ PLA                    \ Restore A from the stack
+
+ CMP #121
 
 .confirmed
 
- RTS
+ RTS                    \ Return from the subroutine
 
 \ ******************************************************************************
 \
@@ -35086,7 +35154,7 @@ LOAD_J% = LOAD% + P% - CODE%
 .oily
 
  JSR DORND              \ Set A and X to random numbers and reduce A to a
- AND #15                \ random number in the range 0-15 AJD
+ AND #15                \ random number in the range 0-15
 
 .slvy2
 
@@ -37501,8 +37569,9 @@ LOAD_K% = LOAD% + P% - CODE%
 
  JSR EXNO3              \ Make the sound of the missile exploding
 
- LDA #250               \ Call n_oops to AJD
- JMP n_oops
+ LDA #250               \ Call n_oops to damage the ship by 250 (taking the
+ JMP n_oops             \ shields into account), which is a pretty big hit, and
+                        \ return from the subroutine using a tail call
 
 .TA18
 
@@ -37591,8 +37660,11 @@ LOAD_K% = LOAD% + P% - CODE%
  BNE TA87               \ If A is non-zero then the missile is not near our
                         \ ship, so jump to TA87 to skip damaging our ship
 
- LDA #80                \ AJD
- JSR n_oops
+ LDA #80                \ Otherwise the missile just got destroyed near us, so
+ JSR n_oops             \ call n_oops to damage the ship by 80 (taking the
+                        \ shields into account), which is nowhere near as bad as
+                        \ the 250 damage from a missile slamming straight into us,
+                        \ but it's still pretty nasty
 
 .TA87
 
@@ -37703,11 +37775,18 @@ LOAD_K% = LOAD% + P% - CODE%
  AND #%00000100         \ the ship's NEWB flags is set, and if it is (i.e. the
  BNE TN5                \ station is hostile), jump to TN5 to spawn some cops
 
- LDA MANY+SHU+1         \ The station is not hostile, so check how many
+ LDA MANY+SHU+1         \ Set A to the number of Transporters in the vicinity
 
- ORA auto               \ AJD no shuttles if docking computer on
+ ORA auto               \ If the docking computer is on then auto is &FF, so
+                        \ this ensures that A is always non-zero when we are
+                        \ auto-docking, so the following jump to TA1 will be
+                        \ taken and no Transporters will be spawned from the
+                        \ space station (unlike in the disc version, where you
+                        \ can get smashed into space dust by a badly timed
+                        \ Transporter launch when using the docking computer)
 
- BNE TA1                \ Transporters there are in the vicinity, and if we
+ BNE TA1                \ The station is not hostile, so check how many
+                        \ Transporters there are in the vicinity, and if we
                         \ already have one, return from the subroutine (as TA1
                         \ contains an RTS)
 
@@ -38169,7 +38248,11 @@ LOAD_K% = LOAD% + P% - CODE%
                         \ the laser power and number of missiles) to get the
                         \ amount of damage we should take
 
- JSR n_oops             \ AJD
+ JSR n_oops             \ Call n_oops to take some damage (taking the shields
+                        \ into account), which could do anything from reducing
+                        \ the shields and energy, all the way to losing cargo
+                        \ or dying (if the latter, we don't come back from this
+                        \ subroutine)
 
  DEC INWK+28            \ Halve the attacking ship's acceleration in byte #28
 
@@ -40735,7 +40818,11 @@ LOAD_K% = LOAD% + P% - CODE%
  LDX XX                 \ Set R = XX
  STX R
 
- JMP MULT1              \ AJD
+ JMP MULT1              \ Jump to MULT1 to do the following:
+                        \
+                        \   (A P) = Q * A
+                        \
+                        \ and return from the subroutine using a tail call
 
 \ ******************************************************************************
 \
@@ -40888,7 +40975,12 @@ LOAD_K% = LOAD% + P% - CODE%
 
  LDA DELTA              \ Fetch the speed from DELTA into A
 
- JMP DVID4              \ AJD
+ JMP DVID4              \ Jump to DVID4 to do:
+                        \
+                        \   (P R) = 256 * A / Q
+                        \         = 256 * DELTA / A
+                        \
+                        \ and return from the subroutine using a tail call
 
 \ ******************************************************************************
 \
@@ -41655,10 +41747,14 @@ LOAD_L% = LOAD% + P% - CODE%
  BMI Ghy                \ If it is, then the galactic hyperdrive has been
                         \ activated, so jump to Ghy to process it
 
- LDA QQ11               \ AJD
- BNE P%+8
- JSR TT111
- JMP TTX111
+ LDA QQ11               \ If the current view is not 0 (i.e. not the space view)
+ BNE P%+8               \ then skip the following two instructions
+
+ JSR TT111              \ This is the space view, so select the system closest
+                        \ to galactic coordinates (QQ9, QQ10)
+
+ JMP TTX111             \ Skip the following instruction, as we don't want to
+                        \ draw the crosshairs in the space view
 
  JSR hm                 \ This is a chart view, so call hm to redraw the chart
                         \ crosshairs
@@ -41737,7 +41833,8 @@ LOAD_L% = LOAD% + P% - CODE%
  TAX                    \ Print the 8-bit number in X (i.e. 15) at text location
  BNE ee3                \ (0, 1), padded to 5 digits, so it appears in the top
                         \ left corner of the screen, and return from the
-                        \ subroutine using a tail call AJD
+                        \ subroutine using a tail call (the BNE is effectively a
+                        \ JMP as A is never zero)
 
 \ ******************************************************************************
 \
@@ -41777,7 +41874,8 @@ LOAD_L% = LOAD% + P% - CODE%
  BEQ zZ+1               \ hyperdrive, and if it is zero, which means we don't,
                         \ return from the subroutine (as zZ+1 contains an RTS)
 
- INC new_hold           \ AJD
+ INC new_hold           \ Free up one tonne of space in the hold, as we have
+                        \ just used up the galactic hyperdrive
 
  INX                    \ We own a galactic hyperdrive, so X is &FF, so this
                         \ instruction sets X = 0
@@ -41868,7 +41966,9 @@ LOAD_L% = LOAD% + P% - CODE%
 
  DEY                    \ Decrement Y to 0 for the high byte in pr6
 
- JMP pr6                \ AJD
+ JMP pr6                \ Jump to pr6 to print X to 5 digits, as the high byte
+                        \ in Y is 0, and return from the subroutine using a tail
+                        \ call
 
 \ ******************************************************************************
 \
@@ -42056,7 +42156,7 @@ LOAD_L% = LOAD% + P% - CODE%
  CMP #253               \ If A >= 253 (1% chance) then jump to MJP to trigger a
  BCS MJP                \ mis-jump into witchspace
 
- JSR hyp1_FLIGHT        \ AJD
+ JSR hyp1_FLIGHT        \ Jump straight to the system at (QQ9, QQ10)
 
  JSR RES2               \ Reset a number of flight variables and workspaces
 
@@ -43148,15 +43248,33 @@ LOAD_L% = LOAD% + P% - CODE%
 \       Name: n_oops
 \       Type: Subroutine
 \   Category: Flight
-\    Summary: AJD
+\    Summary: Take some damage, taking our ship's shields into consideration
+\
+\ ------------------------------------------------------------------------------
+\
+\ We just took some damage, so calculate whether the amount of damage will be
+\ sucked up by the shields, and if not, apply that damage to our ship.
+\
+\ Arguments:
+\
+\   A                   The amount of damage to take
 \
 \ ******************************************************************************
 
 .n_oops
 
- SEC                    \ reduce damage
- SBC new_shields
- BCC n_shok
+ SEC                    \ Reduce the amount of damage in A by the level of our 
+ SBC new_shields        \ shields in new_shields
+
+ BCC n_shok             \ If the amount of damage is less than the level of our
+                        \ shields, then return from the subroutine without
+                        \ taking any damage (as b_shok contains an RTS)
+
+                        \ The amount of damage is greater than our shield level,
+                        \ so we need to take some damage. The amount of damage
+                        \ has already been reduced by our shield level (as they
+                        \ absorb the amount of damage in new_shields), so fall
+                        \ into OOPS to take the remaining amount of damage
 
 \ ******************************************************************************
 \
@@ -43179,7 +43297,7 @@ LOAD_L% = LOAD% + P% - CODE%
 \
 \ Other entry points:
 \
-\   n_shok              \ AJD
+\   n_shok              Contains an RTS
 \
 \ ******************************************************************************
 
@@ -45875,8 +45993,8 @@ LOAD_M% = LOAD% + P% - CODE%
 
 .nodo
 
- LDA #CYL               \ AJD
- LDX #3
+ LDA #CYL               \ Call hordes to spawn a pack of ships from type 11 to
+ LDX #3                 \ 14, i.e. Cobra Mk III to Anaconda
  JMP hordes
 
 \ ******************************************************************************
@@ -45974,7 +46092,7 @@ LOAD_M% = LOAD% + P% - CODE%
 
 .MLOOPS
 
- JMP MLOOP_FLIGHT       \ AJD
+ JMP MLOOP_FLIGHT       \ Jump to MLOOP_FLIGHT to skip the following
 
  JSR BAD                \ Call BAD to work out how much illegal contraband we
                         \ are carrying in our hold (A is up to 40 for a
@@ -45999,17 +46117,19 @@ LOAD_M% = LOAD% + P% - CODE%
 
  CMP T                  \ If the random value in A >= our badness level, which
  BCS l_4050             \ will be the case unless we have been really, really
-                        \ bad, then skip the following two instructions (so if
-                        \ we are really bad, there's a higher chance of
+                        \ bad, then skip the following three instructions (so
+                        \ if we are really bad, there's a higher chance of
                         \ spawning a cop, otherwise we got away with it, for
                         \ now)
 
- LDA #&10               \ AJD
+ LDA #COPS              \ Set A to the ship type for a cop, so we can add a new
+                        \ police ship to the local bubble
 
 .horde_plain
 
- LDX #&00
- BEQ hordes
+ LDX #0                 \ Jump to hordes to spawn a pack of cops, i.e. Vipers,
+ BEQ hordes             \ returning from the subroutine using a tail call (the
+                        \ BEQ is effectively a JMP as X is always zero)
 
 .l_4050
 
@@ -46038,6 +46158,12 @@ LOAD_M% = LOAD% + P% - CODE%
 \
 \   * Also potentially spawn a Constrictor if this is the mission 1 endgame, or
 \     Thargoids if mission 2 is in progress
+\
+\ Other entry points:
+\
+\   hordes              Spawn a pack of ships, made up of ships from type A to
+\                       type A + X, with the pack size normally being one to
+\                       four ships, but rarely being up to eight ships
 \
 \ ******************************************************************************
 
@@ -46162,68 +46288,129 @@ LOAD_M% = LOAD% + P% - CODE%
 
 .mt1
 
- LDA #17                \ AJD
- LDX #7
+ LDA #SH3               \ Fall through into hordes to spawn a pack of ships from
+ LDX #7                 \ type 17 to 24, i.e. Sidewinder to Cobra Mk III
+                        \ (pirate)
 
 .hordes
 
- STA horde_base+1
- STX horde_mask+1
- JSR DORND
- CMP #248
- BCS horde_large
- STA XX13
- TXA
- AND XX13
- AND #3
+                        \ This routine spawns a pack of ships, made up of ships
+                        \ from type A to type A + X, with the pack size normally
+                        \ being one to four ships, but rarely being up to eight
+                        \ ships
+                        \
+                        \ Let's call A the "base ship type", and X the "ship
+                        \ type range"
+
+ STA horde_base+1       \ Modify the ADC instruction at horde_base so that it
+                        \ adds the base ship type given in A
+
+ STX horde_mask+1       \ Modify the ADC instruction at horde_mask so that it
+                        \ ANDs the ship type range given in X
+
+ JSR DORND              \ Set A and X to random numbers
+
+ CMP #248               \ If A >= 248 (3.1% chance), jump to horde_large so we
+ BCS horde_large        \ potentially spawn a larger pack (i.e. up to 8 ships)
+
+ STA XX13               \ We are going to spawn a smaller pack (i.e. up to 4
+ TXA                    \ ships), so set:
+ AND XX13               \
+ AND #3                 \   A = A AND X AND 3
+                        \
+                        \ to give a random pack size of 0-3, with a greater
+                        \ chance of the smaller numbers than the larger ones
+                        \ (due to the AND). This will be our pack size, which
+                        \ won't be affected further by the following AND
+                        \ instruction
 
 .horde_large
 
- AND #7
+ AND #7                 \ If we are going to spawn a larger pack, reduce the
+                        \ random number in A to the range 0-7, with an equal
+                        \ chance of each of the numbers. This will be our pack
+                        \ size
+
+                        \ By this point our pack size is in A, and is either
+                        \ 0-3 or 0-7
 
  STA EV                 \ Delay further spawnings by this number
 
- STA XX13               \ Store the number in XX13, the pirate counter
+ STA XX13               \ Store the number in XX13, the pack size counter
 
 .mt3
 
  JSR DORND              \ Set A and X to random numbers
 
- STA T
- TXA
- AND T
+ STA T                  \ Set A = A AND X
+ TXA                    \
+ AND T                  \ which is in the range 0-255, but with a greater chance
+                        \ of being a smaller number (due to the AND)
 
 .horde_mask
 
- AND #&FF
+ AND #&FF               \ This instruction gets modified so that it ANDs the
+                        \ ship type range given in the argument X to the
+                        \ hordes routine, i.e. it turns into AND #type_range,
+                        \ which reduces our random number to be between 0 and
+                        \ the ship type range (so if we add this number to the
+                        \ base ship type, it will pick a random ship type from
+                        \ within the range A to A + X, where A and X are the
+                        \ arguments to the original call to hordes
 
- STA CPIR               \ Set CPIR to this random number in the range 0-7
+ STA CPIR               \ Set CPIR to our random number in the range 0 to
+                        \ the ship type
 
 .more
 
  LDA CPIR               \ Set A to the ship type in CPIR
 
- CLC                    \ AJD
+ CLC                    \ Clear the C flag for the addition below
 
 .horde_base
 
- ADC #&00
- INC INWK+27            \ space out horde
- INC INWK+1
- INC INWK+4
+ ADC #0                 \ This instruction gets modified so that it adds the
+                        \ ship type given in the argument A to the hordes
+                        \ routine, i.e. it turns into ADC #ship_type, so this
+                        \ sets A to a ship type in the range we want
+
+ INC INWK+27            \ Increment the speed of the ship we are about to spawn,
+                        \ so later ships in the pack go faster
+
+ INC INWK+1             \ Increment the x_hi coordinate of the ship we are about
+                        \ to spawn, so later ships in the pack are spread out to
+                        \ the sides
+
+ INC INWK+4             \ Increment the y_hi coordinate of the ship we are about
+                        \ to spawn, so later ships in the pack are spread out
+                        \ to the top and bottom
 
  JSR NWSHP              \ Try adding a new ship of type A to the local bubble
 
- CMP #&18               \ AJD
- BCS l_40d7
- DEC CPIR
- BPL more
+ CMP #24                \ This compares the value of A (which is set to the
+                        \ x_sign value of the spawned ship by NWSHP), but the
+                        \ result isn't used anywhere, as CMP affects the Z and N
+                        \ flags (not the C flag), and these same flags will be
+                        \ overwritten by the two DEC instructions below... so
+                        \ instruction has no effect
 
-.l_40d7
+ BCS P%+7               \ If the ship was successfully added, skip the following
+                        \ two instructions
 
- DEC XX13               \ Decrement the pirate counter
+ DEC CPIR               \ The ship wasn't added, which might be because the ship
+                        \ blueprint for this ship type isn't in the currently
+                        \ loaded ship blueprints file, so decrement CPIR to
+                        \ point to the previous ship type, so we can try
+                        \ spawning that type of ship instead
 
- BPL mt3                \ If we need more pirates, loop back up to mt3,
+ BPL more               \ Loop back to more to have another go at spawning this
+                        \ ship, until CPIR is 0, in which case we have tried
+                        \ spawning all the ship types in the range, so give up
+                        \ and move on to the next pirate to spawn
+
+ DEC XX13               \ Decrement the pack size counter
+
+ BPL mt3                \ If we need more ships, loop back up to mt3,
                         \ otherwise we are done spawning, so fall through into
                         \ the end of the main loop at MLOOP
 
@@ -46315,6 +46502,8 @@ LOAD_M% = LOAD% + P% - CODE%
 \
 \   T95                 Print the distance to the selected system
 \
+\   TT107               Progress the countdown of the hyperspace counter
+\
 \ ******************************************************************************
 
 .TT102
@@ -46355,7 +46544,8 @@ LOAD_M% = LOAD% + P% - CODE%
  BEQ T95                \ to a system (if we are in one of the chart screens)
 
  CMP #&43               \ If "F" was not pressed, jump down to HME1, otherwise
- BNE HME1               \ keep going to process searching for systems
+ BNE HME1               \ keep going to process searching for systems (when
+                        \ docked) or toggle the compass display (when flying)
 
  LDA QQ11               \ AJD
  AND #&C0
@@ -46368,14 +46558,23 @@ LOAD_M% = LOAD% + P% - CODE%
 
  LDA dockedp
  BEQ t95
- LDA finder
- EOR #&25
- STA finder
- JMP WSCAN
+
+ LDA finder             \ Set the value of A to finder, which determines whether
+                        \ the compass is configured to show the sun or the
+                        \ planet
+
+ EOR #NI%               \ The value of finder is 0 (show the planet) or NI%
+                        \ (show the sun), so this toggles the value between the
+                        \ two
+
+ STA finder             \ Store the toggled value in finder
+
+ JMP WSCAN              \ Jump to WSCAN to wait for the vertical sync and return
+                        \ from the subroutine using a tail call
 
 .t95
 
- RTS
+ RTS                    \ Return from the subroutine
 
 .HME1
 
@@ -47140,7 +47339,13 @@ LOAD_M% = LOAD% + P% - CODE%
                         \ escape pods and cargo canisters, so to check whether
                         \ we can jump, we first grab the slot contents into A
 
- ORA JUNK               \ no jump if any ship AJD
+ ORA JUNK               \ If there is any junk in the vicinity, then JUNK will
+                        \ be non-zero, so OR'ing with JUNK will produce a
+                        \ a non-zero result if either A or JUNK are non-zero
+                        \ (so this prevents in-system jumps if there is any
+                        \ junk nearby, which is different to the other versions
+                        \ which allow you to jump, dragging any junk along with
+                        \ the ship)
 
  ORA SSPR               \ If there is a space station nearby, then SSPR will
                         \ be non-zero, so OR'ing with SSPR will produce a
@@ -47150,10 +47355,10 @@ LOAD_M% = LOAD% + P% - CODE%
                         \ OR'ing with MJ will produce a non-zero result if
                         \ either A or SSPR or MJ are non-zero
 
- BNE WA1                \ A is non-zero if we have either a ship or a space
-                        \ station in the vicinity, or we are in witchspace, in
-                        \ which case jump to WA1 to make a low beep to show that
-                        \ we can't do an in-system jump
+ BNE WA1                \ A is non-zero if we have either a ship, or a space
+                        \ station, or junk in the vicinity, or we are in
+                        \ witchspace, in which case jump to WA1 to make a low
+                        \ beep to show that we can't do an in-system jump
 
  LDY K%+8               \ Otherwise we can do an in-system jump, so now we fetch
                         \ the byte at K%+8, which contains the z_sign for the
@@ -48478,12 +48683,15 @@ BNE MESS                \ Print recursive token A as an in-flight message,
                         \ (z_sign z_hi z_lo) = (z_sign z_hi z_lo) + (A R)
                         \                    = (z_sign z_hi z_lo) - speed
 
- LDA TYPE               \ If the ship type is not the sun (129) then skip the
+ LDA TYPE               \ If the ship type is the sun (129) then skip the next
  AND #%10000001         \ next instruction, otherwise return from the subroutine
  CMP #129               \ as we don't need to rotate the sun around its origin.
- BEQ P%+5               \ AJD
+ BEQ P%+5               \ Having both the AND and the CMP is a little odd, as
+                        \ the sun is the only ship type with bits 0 and 7 set,
+                        \ so the AND has no effect and could be removed
 
- JMP MV3                \ AJD
+ JMP MV3                \ The ship type is not the sun, so jump to MV3, skipping
+                        \ the next instruction
 
  RTS                    \ Return from the subroutine, as the ship we are moving
                         \ is the sun and doesn't need any of the following

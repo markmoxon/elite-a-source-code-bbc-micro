@@ -2828,18 +2828,18 @@ ORG CODE%
 
 .UNWISE
 
- LDA LIL2+2             \ AJD
- EOR #&40
+ LDA LIL2+2             \ Flip bit 6 of LIL2+2 to change the EOR (SC),Y in LIL2
+ EOR #%01000000         \ to an ORA (SC),Y (or back again)
  STA LIL2+2
- \LDA LIL3+2
- \EOR #&40
- STA LIL3+2
- \LDA LIL5+2
- \EOR #&40
- STA LIL5+2
- \LDA LIL6+2
- \EOR #&40
- STA LIL6+2
+
+ STA LIL3+2             \ Change the EOR (SC),Y in LIL3 to an ORA (SC),Y (or
+                        \ back again)
+
+ STA LIL5+2             \ Change the EOR (SC),Y in LIL5 to an ORA (SC),Y (or
+                        \ back again)
+
+ STA LIL6+2             \ Change the EOR (SC),Y in LIL6 to an ORA (SC),Y (or
+                        \ back again)
 
 .HA1
 
@@ -2925,7 +2925,7 @@ ORG CODE%
  EQUB &65               \ M         KYTB+12     Fire missile
  EQUB &22               \ E         KYTB+13     E.C.M.
  EQUB &45               \ J         KYTB+14     In-system jump
- EQUB &63               \ AJD
+ EQUB &63               \ V         KYTB+15     Docking computer
 
  EQUB &37               \ P         KYTB+16     Cancel docking computer
 

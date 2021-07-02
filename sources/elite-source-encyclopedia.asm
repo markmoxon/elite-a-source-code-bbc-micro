@@ -704,7 +704,17 @@ ORG &0000
 
 .finder
 
- SKIP 1                 \ AJD
+ SKIP 1                 \ Toggle whether the compass shows the planet or sun
+                        \
+                        \   * 0 = show the planet on the compass
+                        \
+                        \   * NI% = show the sun on the compass
+                        \
+                        \ When inside the space station's safe zone, the compass
+                        \ always shows the space station
+                        \
+                        \ Toggled by pressing "F" when paused, see the DK4
+                        \ routine for details
 
                         \ --- End of added code ------------------------------->
 
@@ -1830,7 +1840,15 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
 
 .new_shields
 
- SKIP 1                 \ AJD
+ SKIP 1                 \ Our current ship's shield level
+                        \
+                        \ If our ship is damaged and the level of damage is less
+                        \ than our shield level, then the ship emerges unscathed
+                        \
+                        \ If the damage level is greater than the shield level,
+                        \ then the damage level is reduced by the shield level
+                        \ before being applied to the ship (i.e. the shields
+                        \ absorb the amount of damage given in new_shields)
 
 .new_energy
 
@@ -1859,7 +1877,12 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
 
 .new_costs
 
- SKIP 1                 \ AJD
+ SKIP 1                 \ The price table offset for our current ship
+                        \
+                        \ In Elite-A the PRXS table (which contains equipment
+                        \ prices) has multiple sections, for the different types
+                        \ of ship we can buy, and the offset into this table for
+                        \ our current ship is held here
 
 .new_max
 
@@ -7909,7 +7932,7 @@ LOAD_C% = LOAD% +P% - CODE%
 
                         \ --- And replaced by: -------------------------------->
 
- BEQ l_out              \ AJD
+ BEQ l_out              \ Keep looping up to l_out until a key is pressed
 
                         \ --- End of replacement ------------------------------>
 
@@ -10629,8 +10652,7 @@ LOAD_E% = LOAD% + P% - CODE%
 
  JMP pr2                \ Jump to pr2, which prints the number in X to a width
                         \ of 3 figures, left-padding with spaces to a width of
-                        \ 3, and once done, return from the subroutine (as pr2
-                        \ ends with an RTS)
+                        \ 3, and return from the subroutine using a tail call
 
 \ ******************************************************************************
 \
@@ -13413,6 +13435,8 @@ LOAD_F% = LOAD% + P% - CODE%
 \ Other entry points:
 \
 \   T95                 Print the distance to the selected system
+\
+\   TT107               Progress the countdown of the hyperspace counter
 \
 \ ******************************************************************************
 

@@ -703,7 +703,17 @@ ORG &0000
 
 .finder
 
- SKIP 1                 \ AJD
+ SKIP 1                 \ Toggle whether the compass shows the planet or sun
+                        \
+                        \   * 0 = show the planet on the compass
+                        \
+                        \   * NI% = show the sun on the compass
+                        \
+                        \ When inside the space station's safe zone, the compass
+                        \ always shows the space station
+                        \
+                        \ Toggled by pressing "F" when paused, see the DK4
+                        \ routine for details
 
                         \ --- End of added code ------------------------------->
 
@@ -1829,7 +1839,15 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
 
 .new_shields
 
- SKIP 1                 \ AJD
+ SKIP 1                 \ Our current ship's shield level
+                        \
+                        \ If our ship is damaged and the level of damage is less
+                        \ than our shield level, then the ship emerges unscathed
+                        \
+                        \ If the damage level is greater than the shield level,
+                        \ then the damage level is reduced by the shield level
+                        \ before being applied to the ship (i.e. the shields
+                        \ absorb the amount of damage given in new_shields)
 
 .new_energy
 
@@ -1858,7 +1876,12 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
 
 .new_costs
 
- SKIP 1                 \ AJD
+ SKIP 1                 \ The price table offset for our current ship
+                        \
+                        \ In Elite-A the PRXS table (which contains equipment
+                        \ prices) has multiple sections, for the different types
+                        \ of ship we can buy, and the offset into this table for
+                        \ our current ship is held here
 
 .new_max
 
@@ -2097,8 +2120,10 @@ BRKV = P% - 2           \ The address of the destination address in the above
 
  EQUB 0
  \ dead entry
- LDA #0
- JSR SCRAM
+
+ LDA #0                 \ Call SCRAM to set save_lock to 0 and set the break
+ JSR SCRAM              \ handler
+
  JSR RES2
  JMP TT170
 
@@ -2122,9 +2147,8 @@ BRKV = P% - 2           \ The address of the destination address in the above
 
                         \ --- And replaced by: -------------------------------->
 
- LDA #0                 \ AJD
-
- JSR SCRAM
+ LDA #0                 \ Call SCRAM to set save_lock to 0 and set the break
+ JSR SCRAM              \ handler
 
                         \ --- End of replacement ------------------------------>
 
@@ -2210,9 +2234,9 @@ BRKV = P% - 2           \ The address of the destination address in the above
 
  LDA KL+1               \ AJD
  BNE INBAY
- LDA #&FF
 
- JSR SCRAM
+ LDA #&FF               \ Call SCRAM to set save_lock to &FF and set the break
+ JSR SCRAM              \ handler
 
                         \ --- End of replacement ------------------------------>
 
@@ -2371,9 +2395,13 @@ BRKV = P% - 2           \ The address of the destination address in the above
 \       Name: SCRAM
 \       Type: Subroutine
 \   Category: Loader
-\    Summary: Decrypt the main docked code, reset the flight variables and start
-\             the game
+\    Summary: Set the save_lock variable and break handler
 \
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   A                   Set the save_lock flag to this value
 \ ******************************************************************************
 
 .SCRAM
@@ -2388,7 +2416,10 @@ BRKV = P% - 2           \ The address of the destination address in the above
 
                         \ --- And replaced by: -------------------------------->
 
- STA save_lock          \ AJD
+ STA save_lock          \ Set the save_lock variable to the value in A
+
+                        \ Fall through into BRKBK to set the standard BRKV
+                        \ handler for the game and return from the subroutine
 
                         \ --- End of replacement ------------------------------>
 
@@ -9857,12 +9888,12 @@ LOAD_C% = LOAD% +P% - CODE%
 
 .UNWISE
 
+ LDA LIL2+2             \ Flip bit 6 of LIL2+2 to change the EOR (SC),Y in LIL2
+ EOR #%01000000         \ to an ORA (SC),Y (or back again)
+ STA LIL2+2
+
                         \ --- Original Acornsoft code removed: ---------------->
 
-\ LDA LIL2+2            \ Flip bit 6 of LIL2+2 to change the EOR (SC),Y in LIL2
-\ EOR #%01000000        \ to an ORA (SC),Y (or back again)
-\ STA LIL2+2
-\
 \ LDA LIL3+2            \ Flip bit 6 of LIL3+2 to change the EOR (SC),Y in LIL3
 \ EOR #%01000000        \ to an ORA (SC),Y (or back again)
 \ STA LIL3+2
@@ -9877,18 +9908,14 @@ LOAD_C% = LOAD% +P% - CODE%
 
                         \ --- And replaced by: -------------------------------->
 
- LDA LIL2+2             \ AJD
- EOR #&40
- STA LIL2+2
- \LDA LIL3+2
- \EOR #&40
- STA LIL3+2
- \LDA LIL5+2
- \EOR #&40
- STA LIL5+2
- \LDA LIL6+2
- \EOR #&40
- STA LIL6+2
+ STA LIL3+2             \ Change the EOR (SC),Y in LIL3 to an ORA (SC),Y (or
+                        \ back again)
+
+ STA LIL5+2             \ Change the EOR (SC),Y in LIL5 to an ORA (SC),Y (or
+                        \ back again)
+
+ STA LIL6+2             \ Change the EOR (SC),Y in LIL6 to an ORA (SC),Y (or
+                        \ back again)
 
                         \ --- End of replacement ------------------------------>
 
@@ -14681,11 +14708,11 @@ LOAD_D% = LOAD% + P% - CODE%
  LDA R                  \ Set P to the amount of this item we just bought
  STA P
 
+ LDA QQ24               \ Set Q to the item's price / 4
+ STA Q
+
                         \ --- Original Acornsoft code removed: ---------------->
 
-\ LDA QQ24              \ Set Q to the item's price / 4
-\ STA Q
-\
 \ JSR GCASH             \ Call GCASH to calculate
 \                       \
 \                       \   (Y X) = P * Q * 4
@@ -14698,14 +14725,17 @@ LOAD_D% = LOAD% + P% - CODE%
 
                         \ --- And replaced by: -------------------------------->
 
- LDA QQ24               \ AJD
- STA Q
- JSR MULTU
- JSR price_xy
- JSR MCASH
- JSR MCASH
- JSR MCASH
- JSR MCASH
+ JSR MULTU              \ Call MULTU to calculate (A P) = P * Q
+
+ JSR price_xy           \ Call price_xy to set (Y X) = (A P) = P * Q
+
+ JSR MCASH              \ Add 4 * (Y X) cash to the cash pot in CASH, i.e.
+ JSR MCASH              \
+ JSR MCASH              \   (Y X) = P * Q * 4
+ JSR MCASH              \
+                        \ which will be the total price we make from this sale
+                        \ (as P contains the quantity we're selling and Q
+                        \ contains the item's price / 4)
 
                         \ --- End of replacement ------------------------------>
 
@@ -16739,7 +16769,7 @@ LOAD_D% = LOAD% + P% - CODE%
 \
 \ Other entry points:
 \
-\   price_xy            AJD
+\   price_xy            Set (Y X) = (A P)
 \
 \ ******************************************************************************
 
@@ -17663,13 +17693,22 @@ LOAD_D% = LOAD% + P% - CODE%
 
                         \ --- And replaced by: -------------------------------->
 
- ASL A                  \ AJD
- BEQ n_fcost
- ADC new_costs
+ ASL A                  \ Set A = A * 2, so it can act as an index into the
+                        \ PRXS table, which has two bytes per entry
+
+ BEQ n_fcost            \ If A = 0, skip the following, as we are fetching the
+                        \ price of fuel, and fuel is always the same price,
+                        \ regardless of ship type
+
+ ADC new_costs          \ In Elite-A the PRXS table has multiple sections, for
+                        \ the different types of ship we can buy, and the offset
+                        \ to the price table for our current ship is held in
+                        \ new_costs, so this points the index in A to the
+                        \ correct section of the PRXS table for our current ship
 
 .n_fcost
 
- TAY
+ TAY                    \ Copy A into Y, so it can be used as an index
 
                         \ --- End of replacement ------------------------------>
 
@@ -18194,8 +18233,7 @@ LOAD_E% = LOAD% + P% - CODE%
 
  JMP pr2                \ Jump to pr2, which prints the number in X to a width
                         \ of 3 figures, left-padding with spaces to a width of
-                        \ 3, and once done, return from the subroutine (as pr2
-                        \ ends with an RTS)
+                        \ 3, and return from the subroutine using a tail call
 
 \ ******************************************************************************
 \
@@ -19800,6 +19838,11 @@ LOAD_E% = LOAD% + P% - CODE%
 \
 \ Each indicator is a rectangle that's 3 pixels wide and 5 pixels high. If the
 \ indicator is set to black, this effectively removes a missile.
+\
+\ Note that there are only four missile indicators on the dashboard, but in
+\ Elite-A our ship can have up to 7 missiles, in which case the leftmost missile
+\ indicator is used for the next missile to use, and the extra missiles are
+\ implied rather than displayed.
 \
 \ Arguments:
 \
@@ -21896,6 +21939,8 @@ LOAD_F% = LOAD% + P% - CODE%
 \
 \   T95                 Print the distance to the selected system
 \
+\   TT107               Progress the countdown of the hyperspace counter
+\
 \ ******************************************************************************
 
 .TT102
@@ -23317,7 +23362,7 @@ ENDIF
 
                         \ We now copy the entered filename from INWK to DELI, so
                         \ that it overwrites the filename part of the string,
-                        \ i.e. the "E.1234567" part of "DELETE:0.E.1234567"
+                        \ i.e. the "E.1234567" part of "DEL.:0.E.1234567"
 
  LDX #9                 \ Set up a counter in X to count from 9 to 1, so that we
                         \ copy the string starting at INWK+4+1 (i.e. INWK+5) to
@@ -23333,7 +23378,7 @@ ENDIF
                         \ --- And replaced by: -------------------------------->
 
  LDA INWK+4,X           \ Copy the X-th byte of INWK+4 to the X-th byte of
- STA DELI+6,X           \ DELI+6 AJD
+ STA DELI+6,X           \ DELI+6
 
                         \ --- End of replacement ------------------------------>
 
@@ -23711,22 +23756,34 @@ ENDIF
 
 .confirm
 
- CMP save_lock
- BEQ confirmed
- LDA #&03
+ CMP save_lock          \ If save_lock = 0, jump to confirmed to return from the
+ BEQ confirmed          \ subroutine
+
+ LDA #3                 \ Print extended token 3 ("ARE YOU SURE?")
  JSR DETOK
- JSR t
- JSR CHPR
- ORA #&20
- PHA
- JSR TT67
- JSR FEED
- PLA
- CMP #&79
+
+ JSR t                  \ Scan the keyboard until a key is pressed, returning
+                        \ the ASCII code in A and X
+
+ JSR CHPR               \ Print the character in A
+
+ ORA #%00100000         \ Set bit 5 in the value of the key pressed, which
+                        \ converts it to lower case
+
+ PHA                    \ Store A on the stack so we can retrieve it after the
+                        \ call to FEED
+
+ JSR TT67               \ Print a newline
+
+ JSR FEED               \ Print a newline
+
+ PLA                    \ Restore A from the stack
+
+ CMP #121
 
 .confirmed
 
- RTS
+ RTS                    \ Return from the subroutine
 
                         \ --- End of added section ---------------------------->
 
