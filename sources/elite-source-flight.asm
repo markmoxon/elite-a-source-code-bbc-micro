@@ -59,11 +59,11 @@ SPL = 8                 \ Ship type for a splinter
 SHU = 9                 \ Ship type for a Shuttle
 CYL = 11                \ Ship type for a Cobra Mk III
 ANA = 14                \ Ship type for an Anaconda
+WRM = 15                \ Ship type for a Worm
 COPS = 16               \ Ship type for a Viper
 SH3 = 17                \ Ship type for a Sidewinder
 KRA = 19                \ Ship type for a Krait
 ADA = 20                \ Ship type for a Adder
-WRM = 23                \ Ship type for a Worm
 CYL2 = 24               \ Ship type for a Cobra Mk III (pirate)
 ASP = 25                \ Ship type for an Asp Mk II
 THG = 29                \ Ship type for a Thargoid
@@ -129,7 +129,8 @@ XX21 = &5600            \ The address of the ship blueprints lookup table, where
 E% = &563E              \ The address of the default NEWB ship bytes within the
                         \ loaded ship blueprints file
 
-iff_index = &0D7A       \ AJD
+iff_index = &0D7A       \ The address of the iff_index routine that is put in
+                        \ place by the loader in elite-loader.asm
 
 \ ******************************************************************************
 \
@@ -1401,11 +1402,13 @@ ORG &0300
 
 .cmdr_courx
 
- SKIP 1                 \ AJD
+ SKIP 1                 \ The galactic x-coordinate for the current special
+                        \ cargo delivery destination
 
 .cmdr_coury
 
- SKIP 1                 \ AJD
+ SKIP 1                 \ The galactic y-coordinate for the current special
+                        \ cargo delivery destination
 
                         \ --- End of replacement ------------------------------>
 
@@ -1856,6 +1859,10 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
 
  SKIP 1                 \ The amount of free space in our current ship's hold
                         \
+                        \ The value is actually the amount of free space plus 1,
+                        \ as this makes the maths slightly easier in the tnpr
+                        \ routine
+                        \
                         \ In Elite-A, hold space is taken up by both equipment
                         \ and cargo
 
@@ -2074,9 +2081,11 @@ LOAD_A% = LOAD%
 
                         \ --- And replaced by: -------------------------------->
 
- JMP RSHIPS             \ AJD
+ JMP RSHIPS             \ Load a new set of ship blueprints, set the space view
+                        \ and jump into the main game loop
 
- JMP RSHIPS
+ JMP RSHIPS             \ Load a new set of ship blueprints, set the space view
+                        \ and jump into the main game loop
 
                         \ --- End of replacement ------------------------------>
 
@@ -2864,7 +2873,9 @@ LOAD_A% = LOAD%
 
                         \ --- And replaced by: -------------------------------->
 
- STA LASCT              \ AJD
+ STA LASCT              \ LASCT will be set to 0 for beam lasers, and to the
+                        \ laser power (15) for pulse lasers. See MS23 below
+                        \ for more on laser pulsing and LASCT
 
                         \ --- End of replacement ------------------------------>
 
@@ -5980,11 +5991,12 @@ NEXT
 
                         \ --- And replaced by: -------------------------------->
 
- LDA ZZ                 \ AJD
- CMP #144
+ LDA ZZ                 \ If distance in ZZ < 144, then jump to thick_dot as
+ CMP #144               \ this point is not a very long way away
  BCC thick_dot
- LDA TWOS,X
- BCS PX14+3
+
+ LDA TWOS,X             \ This point is a very long way away, so fetch a 2-pixel
+ BCS PX14+3             \ dash from TWOS2 and jump to PX14+3 to EOR it into SC+Y
 
 .thick_dot
 
@@ -7417,51 +7429,6 @@ NEXT
 \ LDA #107              \ We do have a cargo bay extension, so print recursive
 \ JSR plf2              \ token 107 ("LARGE CARGO{sentence case} BAY"), followed
 \                       \ by a newline and an indent of 6 characters
-\
-\ LDA BST               \ If we don't have fuel scoops fitted, skip the
-\ BEQ P%+7              \ following two instructions
-\
-\ LDA #111              \ We do have a fuel scoops fitted, so print recursive
-\ JSR plf2              \ token 111 ("FUEL SCOOPS"), followed by a newline and
-\                       \ an indent of 6 characters
-\
-\ LDA ECM               \ If we don't have an E.C.M. fitted, skip the following
-\ BEQ P%+7              \ two instructions
-\
-\ LDA #108              \ We do have an E.C.M. fitted, so print recursive token
-\ JSR plf2              \ 108 ("E.C.M.SYSTEM"), followed by a newline and an
-\                       \ indent of 6 characters
-\
-\ LDA #113              \ We now cover the four pieces of equipment whose flags
-\ STA XX4               \ are stored in BOMB through BOMB+3, and whose names
-\                       \ correspond with text tokens 113 through 116:
-\                       \
-\                       \   BOMB+0 = BOMB  = token 113 = Energy bomb
-\                       \   BOMB+1 = ENGY  = token 114 = Energy unit
-\                       \   BOMB+2 = DKCMP = token 115 = Docking computer
-\                       \   BOMB+3 = GHYP  = token 116 = Galactic hyperdrive
-\                       \
-\                       \ We can print these out using a loop, so we set XX4 to
-\                       \ 113 as a counter (and we also set A as well, to pass
-\                       \ through to plf2)
-\
-\.stqv
-\
-\ TAY                   \ Fetch byte BOMB+0 through BOMB+4 for values of XX4
-\ LDX BOMB-113,Y        \ from 113 through 117
-\
-\ BEQ P%+5              \ If it is zero then we do not own that piece of
-\                       \ equipment, so skip the next instruction
-\
-\ JSR plf2              \ Print the recursive token in A from 113 ("ENERGY
-\                       \ BOMB") through 116 ("GALACTIC HYPERSPACE "), followed
-\                       \ by a newline and an indent of 6 characters
-\
-\ INC XX4               \ Increment the counter (and A as well)
-\ LDA XX4
-\
-\ CMP #117              \ If A < 117, loop back up to stqv to print the next
-\ BCC stqv              \ piece of equipment
 
                         \ --- And replaced by: -------------------------------->
 
@@ -7476,38 +7443,52 @@ NEXT
 
 .l_1ce7
 
- LDA BST                \ AJD
- BEQ l_1cf1
- LDA #&6F
- JSR plf2
+                        \ --- End of replacement ------------------------------>
 
-.l_1cf1
+ LDA BST                \ If we don't have fuel scoops fitted, skip the
+ BEQ P%+7               \ following two instructions
 
- LDA ECM
- BEQ l_1cfb
- LDA #&6C
- JSR plf2
+ LDA #111               \ We do have a fuel scoops fitted, so print recursive
+ JSR plf2               \ token 111 ("FUEL SCOOPS"), followed by a newline and
+                        \ an indent of 6 characters
 
-.l_1cfb
+ LDA ECM                \ If we don't have an E.C.M. fitted, skip the following
+ BEQ P%+7               \ two instructions
 
- LDA #&71
- STA XX4
+ LDA #108               \ We do have an E.C.M. fitted, so print recursive token
+ JSR plf2               \ 108 ("E.C.M.SYSTEM"), followed by a newline and an
+                        \ indent of 6 characters
+
+ LDA #113               \ We now cover the four pieces of equipment whose flags
+ STA XX4                \ are stored in BOMB through BOMB+3, and whose names
+                        \ correspond with text tokens 113 through 116:
+                        \
+                        \   BOMB+0 = BOMB  = token 113 = Energy bomb
+                        \   BOMB+1 = ENGY  = token 114 = Energy unit
+                        \   BOMB+2 = DKCMP = token 115 = Docking computer
+                        \   BOMB+3 = GHYP  = token 116 = Galactic hyperdrive
+                        \
+                        \ We can print these out using a loop, so we set XX4 to
+                        \ 113 as a counter (and we also set A as well, to pass
+                        \ through to plf2)
 
 .stqv
 
- TAY
- LDX FRIN,Y
- BEQ l_1d08
- JSR plf2
+ TAY                    \ Fetch byte BOMB+0 through BOMB+4 for values of XX4
+ LDX BOMB-113,Y         \ from 113 through 117
 
-.l_1d08
+ BEQ P%+5               \ If it is zero then we do not own that piece of
+                        \ equipment, so skip the next instruction
 
- INC XX4
+ JSR plf2               \ Print the recursive token in A from 113 ("ENERGY
+                        \ BOMB") through 116 ("GALACTIC HYPERSPACE "), followed
+                        \ by a newline and an indent of 6 characters
+
+ INC XX4                \ Increment the counter (and A as well)
  LDA XX4
- CMP #&75
- BCC stqv
 
-                        \ --- End of replacement ------------------------------>
+ CMP #117               \ If A < 117, loop back up to stqv to print the next
+ BCC stqv               \ piece of equipment
 
  LDX #0                 \ Now to print our ship's lasers, so set a counter in X
                         \ to count through the four views (0 = front, 1 = rear,
@@ -9685,11 +9666,19 @@ LOAD_C% = LOAD% +P% - CODE%
 
                         \ --- Code added for Elite-A: ------------------------->
 
- LDY #&23               \ missile damage AJD
- SEC
+ LDY #35                \ Fetch byte #35 (the energy level) of the target ship
+ SEC                    \ into A, and set the C flag for the subtraction below
  LDA (V),Y
- SBC #&40
- BCS n_misshit
+
+ SBC #64                \ Set A = A - 64
+
+ BCS n_misshit          \ If the subtraction didn't underflow, then the ship has
+                        \ an energy level of at least 64 and can take the hit,
+                        \ so jump to n_misshit to update the ship's energy level
+                        \ with the new, reduced value
+
+                        \ If we get here then the ship doesn't have enough energy
+                        \ to withstand the missile hit, so it gets destroyed
 
                         \ --- End of added code ------------------------------->
 
@@ -9703,15 +9692,24 @@ LOAD_C% = LOAD% +P% - CODE%
  BNE TA35               \ If the target ship is already exploding, jump to TA35
                         \ to destroy this missile
 
- ORA #%10000000         \ Otherwise set bit 7 of the target's byte #31 to mark
+                        \ --- Original Acornsoft code removed: ---------------->
 
-                        \ --- Code added for Elite-A: ------------------------->
+\ ORA #%10000000        \ Otherwise set bit 7 of the target's byte #31 to mark
+\ STA (V),Y             \ the ship as having been killed, so it explodes
+
+                        \ --- And replaced by: -------------------------------->
+
+ ORA #%10000000         \ Otherwise set bit 7 of the target's byte #31 to mark
+                        \ the ship as having been killed, so it explodes (we
+                        \ update the ship data block in the next instruction)
 
 .n_misshit
 
-                        \ --- End of added code ------------------------------->
+ STA (V),Y              \ Update the Y-th byte of the target ship data block,
+                        \ which will either be byte #35 (if the ship has been
+                        \ destroyed) or byte #31 (if it has survived)
 
- STA (V),Y              \ the ship as having been killed, so it explodes
+                        \ --- End of replacement ------------------------------>
 
 .TA35
 
@@ -10040,7 +10038,8 @@ LOAD_C% = LOAD% +P% - CODE%
 
                         \ --- Code added for Elite-A: ------------------------->
 
- LDY #&00               \ AJD
+ LDY #0                 \ Set Y = 0 so the call to SPS1 calculates the vector to
+                        \ the planet
 
                         \ --- End of added code ------------------------------->
 
@@ -10146,20 +10145,10 @@ LOAD_C% = LOAD% +P% - CODE%
  CMP #200               \ If A < 200 (78% chance), jump down to TN7 to skip the
  BCC TN7                \ following
 
-                        \ --- Original Acornsoft code removed: ---------------->
+ LDX #WRM               \ Set X to the ship type for a Worm
 
-\ LDX #WRM              \ Set X to the ship type for a Worm
-\
-\ JMP TN6               \ Jump to TN6 to spawn the Worm and return from
-\                       \ the subroutine using a tail call
-
-                        \ --- And replaced by: -------------------------------->
-
- LDX #15                \ AJD
-
- JMP TN6                \ Jump to TN6 to AJD
-
-                        \ --- End of replacement ------------------------------>
+ JMP TN6                \ Jump to TN6 to spawn the Worm and return from
+                        \ the subroutine using a tail call
 
 .TN7
 
@@ -11623,9 +11612,15 @@ LOAD_C% = LOAD% +P% - CODE%
 
                         \ --- And replaced by: -------------------------------->
 
- JSR msblob             \ AJD redraw missiles
- STY MSAR
- STX MSTG
+ JSR msblob             \ Reset the dashboard's missile indicators so none of
+                        \ them are targeted, returning with Y = 0 and X = &FF
+
+ STY MSAR               \ The call to msblob returns Y = 0, so this sets MSAR
+                        \ to 0 to indicate that the leftmost missile is no longer
+                        \ seeking a target lock
+
+ STX MSTG               \ The call to msblob returns X = &FF, so this resets the
+                        \ missile so that it is no longer locked on a target
 
  JMP n_sound30          \ Call n_sound30 to make the sound of a missile launch,
                         \ returning from the subroutine using a tail call
@@ -14725,7 +14720,7 @@ LOAD_D% = LOAD% + P% - CODE%
  BCS n_cargo
  DEY
  BPL l_2af9
- CMP new_hold
+ CMP new_hold           \ new_hold is free space + 1
 
 .n_cargo
 
@@ -15120,7 +15115,8 @@ LOAD_D% = LOAD% + P% - CODE%
 
                         \ --- And replaced by: -------------------------------->
 
- JSR pr2-1              \ AJD
+ JSR pr2-1              \ Call pr2-1 to print the technology level as a 3-digit
+                        \ number without a decimal point
 
                         \ --- End of replacement ------------------------------>
 
@@ -15924,12 +15920,17 @@ LOAD_D% = LOAD% + P% - CODE%
 
                         \ --- And replaced by: -------------------------------->
 
- LDA #&0E               \ AJD
- JSR TT68
- LDX new_hold
- DEX
- JSR pr2-1
- JSR TT160
+ LDA #14                \ Print recursive token 128 ("SPACE") followed by a
+ JSR TT68               \ colon
+
+ LDX new_hold           \ Set X to the amount of free space in our current
+ DEX                    \ ship's hold, minus 1 as new_hold contains the amount
+                        \ of free space plus 1
+
+ JSR pr2-1              \ Call pr2-1 to print the amount of free space as a
+                        \ 3-digit number without a decimal point
+
+ JSR TT160              \ Print "t" (for tonne) and a space
 
                         \ --- End of replacement ------------------------------>
 
@@ -16243,7 +16244,8 @@ LOAD_D% = LOAD% + P% - CODE%
 
                         \ --- Code added for Elite-A: ------------------------->
 
- STA XX12               \ AJD
+ STA XX12               \ Store the horizontal distance in XX12, so we can
+                        \ retrieve it later
 
                         \ --- End of added code ------------------------------->
 
@@ -16267,7 +16269,8 @@ LOAD_D% = LOAD% + P% - CODE%
 
                         \ --- Code added for Elite-A: ------------------------->
 
- STA K4                 \ AJD
+ STA K4                 \ Store the vertical distance in K4, so we can retrieve
+                        \ it later
 
                         \ --- End of added code ------------------------------->
 
@@ -16303,7 +16306,15 @@ LOAD_D% = LOAD% + P% - CODE%
 
                         \ --- And replaced by: -------------------------------->
 
- LDA XX12               \ AJD
+ LDA XX12               \ Retrieve the horizontal distance from XX12, so A now
+                        \ contains the horizontal distance between this system
+                        \ and the current system
+                        \
+                        \ Let's call this the x-delta, as it's the horizontal
+                        \ difference between the current system at the centre of
+                        \ the chart, and this system (so A is negative if it's
+                        \ to the left of the chart's centre, or positive if it's
+                        \ to the right)
 
                         \ --- End of replacement ------------------------------>
 
@@ -16331,7 +16342,14 @@ LOAD_D% = LOAD% + P% - CODE%
 
                         \ --- And replaced by: -------------------------------->
 
- LDA K4                 \ AJD
+ LDA K4                 \ Retrieve the vertical distance from XX12, so A now
+                        \ contains the vertical distance between this system
+                        \ and the current system
+                        \
+                        \ Let's call this the y-delta, as it's the vertical
+                        \ difference between the current system at the centre of
+                        \ the chart, and this system (so A is negative if it's
+                        \ above the chart's centre, or positive if it's below)
 
                         \ --- End of replacement ------------------------------>
 
@@ -16982,8 +17000,8 @@ LOAD_D% = LOAD% + P% - CODE%
 
                         \ --- Code added for Elite-A: ------------------------->
 
- STX cmdr_cour          \ AJD
- STX cmdr_cour+1
+ STX cmdr_cour          \ Reset the special cargo delivery mission details in
+ STX cmdr_cour+1        \ cmdr_cour(1 0)
 
                         \ --- End of added code ------------------------------->
 
@@ -18165,10 +18183,21 @@ LOAD_D% = LOAD% + P% - CODE%
 
                         \ --- And replaced by: -------------------------------->
 
- BCC TT113              \ AJD
- INC CASH+1
- BNE n_addmny
- INC CASH
+ BCC TT113              \ If the above addition didn't overflow, then the
+                        \ addition is done, so jump to TT113 to return from the
+                        \ subroutine with the C flag clear
+
+ INC CASH+1             \ Otherwise we need to add the C flag to the third most
+                        \ significant byte of CASH, which we can do with an
+                        \ increment
+
+ BNE n_addmny           \ If the result of the above increment is non-zero, then
+                        \ we have nothing further to carry and the addition is
+                        \ complete, so skip the following instruction
+
+ INC CASH               \ Otherwise we need to add the C flag to the most
+                        \ significant byte of CASH, which we can do with an
+                        \ increment
 
 .n_addmny
 
@@ -19733,6 +19762,7 @@ LOAD_E% = LOAD% + P% - CODE%
  ROR A
  DEY
  BNE legal_div
+
  SEC
  SBC FIST
  BCC legal_over
@@ -20893,14 +20923,25 @@ LOAD_E% = LOAD% + P% - CODE%
 
                         \ --- And replaced by: -------------------------------->
 
- STX INWK+33            \ AJD
- LDA FIST
- BPL n_enemy
- LDX #&04
+ STX INWK+33            \ As part of the setup, we want to point INWK(34 33) to
+                        \ LSO, the line heap for the space station. LSO is at
+                        \ &0E00, so this sets the low byte at byte #33 to 0 (we
+                        \ set the high byte below)
+
+ LDA FIST               \ If bit 7 of FIST is clear, i.e. FIST < 128, then jump
+ BPL n_enemy            \ to n_enemy with X = 0 to skip the following
+                        \ instruction and set the NEWB flags to 0 (so the
+                        \ station is not hostile)
+
+ LDX #%00000100         \ Bit 7 of FIST is set, i.e. FIST >= 128 (so our
+                        \ "fugitive/innocent status" is very bad!), so set bit
+                        \ #3 of X so we the following sets the NEWB flags to
+                        \ make the station hostile
 
 .n_enemy
 
- STX NEWB
+ STX NEWB               \ Set the station's NEWB flag with the value in X, so it
+                        \ be hostile if FIST > 127, or friendly otherwise
 
                         \ --- End of replacement ------------------------------>
 
@@ -20911,7 +20952,14 @@ LOAD_E% = LOAD% + P% - CODE%
 
                         \ --- Code added for Elite-A: ------------------------->
 
- STX INWK+34            \ AJD
+                        \ NwS1 increments X by 2 for each call, so at this point
+                        \ the value of X is 10 + 2 + 2 = 14 = &E, which we can
+                        \ use to set the correct INWK+34 value in the following
+
+ STX INWK+34            \ As part of the setup, we want to point INWK(34 33) to
+                        \ LSO, the line heap for the space station. LSO is at
+                        \ &0E00, so this sets the high byte at byte #34 to &0E
+                        \ (we already set the low byte above)
 
                         \ --- End of added code ------------------------------->
 
@@ -22472,10 +22520,12 @@ LOAD_E% = LOAD% + P% - CODE%
 
                         \ --- And replaced by: -------------------------------->
 
- TXA                    \ AJD
- EOR #&FF
- TAX
- INX
+ TXA                    \ Negate X using two's complement, so X = ~X + 1
+ EOR #%11111111         \
+ TAX                    \ We do this because X is negative at this point, as it
+ INX                    \ is calculated as 191 - the y-coordinate of the sun's
+                        \ centre, and the centre is off the bottom of the
+                        \ screen, past 191. So we negate it to make it positive
 
                         \ --- End of replacement ------------------------------>
 
@@ -24883,6 +24933,12 @@ LOAD_F% = LOAD% + P% - CODE%
 \ Display the dashboard's missile indicators, with all the missiles reset to
 \ green/cyan (i.e. not armed or locked).
 \
+\ Returns:
+\
+\   X                   X is set to &FF
+\
+\   Y                   Y is set to 0
+\
 \ ******************************************************************************
 
 .msblob
@@ -24933,7 +24989,8 @@ LOAD_F% = LOAD% + P% - CODE%
 
 .miss_miss
 
- JSR MSBAR              \ Draw the missile indicator at position X in colour Y
+ JSR MSBAR              \ Draw the missile indicator at position X in colour Y,
+                        \ and return with Y = 0
 
                         \ --- End of replacement ------------------------------>
 
@@ -24945,7 +25002,8 @@ LOAD_F% = LOAD% + P% - CODE%
 
                         \ --- And replaced by: -------------------------------->
 
- BPL ss                 \ Loop back to ss if we still have missiles to draw
+ BPL ss                 \ Loop back to ss if we still have missiles to draw,
+                        \ ending when X = &FF
 
                         \ --- End of replacement ------------------------------>
 
@@ -25022,7 +25080,8 @@ LOAD_F% = LOAD% + P% - CODE%
 
                         \ --- And replaced by: -------------------------------->
 
- JSR rand_posn          \ AJD
+ JSR rand_posn          \ Call rand_posn to set up the INWK workspace for a ship
+                        \ in a random ship position
 
                         \ --- End of replacement ------------------------------>
 
@@ -25278,8 +25337,9 @@ LOAD_F% = LOAD% + P% - CODE%
 
                         \ --- And replaced by: -------------------------------->
 
- CMP #&33               \ trader fraction AJD
- BCS MTT1
+ CMP #51                \ If A >= 51 (80% chance), jump down to MTT1 to skip
+ BCS MTT1               \ the spawning of an asteroid or cargo canister and
+                        \ potentially spawn something else
 
                         \ --- End of replacement ------------------------------>
 
@@ -25360,8 +25420,11 @@ LOAD_F% = LOAD% + P% - CODE%
 
                         \ --- And replaced by: -------------------------------->
 
- JSR rand_posn          \ AJD
- BVS MTT4
+ JSR rand_posn          \ Call rand_posn to set up the INWK workspace for a ship
+                        \ in a random ship position
+
+ BVS MTT4               \ If V flag is set (50% chance), jump up to MTT4 to
+                        \ spawn a trader
 
  ORA #%01101111         \ Take the random number in A and set bits 0-3 and 5-6,
  STA INWK+29            \ so the result has a 50% chance of being positive or
@@ -25372,14 +25435,14 @@ LOAD_F% = LOAD% + P% - CODE%
                         \ rolling clockwise or anti-clockwise
 
  LDA SSPR               \ If we are inside the space station safe zone, jump
- BNE MLOOPS             \ down to MLOOPS to AJD
+ BNE MLOOPS             \ down to MLOOPS to stop spawning
 
  TXA                    \ Set A to the random X we set above, which we haven't
  BCS MTT2               \ used yet, and if the C flag is set (50% chance) jump
                         \ down to MTT2 to skip the following
 
- AND #15                \ AJD
- STA INWK+27
+ AND #15                \ Set the ship speed to our random number, reduced to
+ STA INWK+27            \ the range 0 to 15
 
                         \ --- End of replacement ------------------------------>
 
@@ -25413,7 +25476,10 @@ LOAD_F% = LOAD% + P% - CODE%
 
                         \ --- And replaced by: -------------------------------->
 
- BNE horde_plain        \ AJD
+ BNE horde_plain        \ Jump to horde_plain to spawn a whole pack of cargo
+                        \ canisters, boulders or asteroids, according to the
+                        \ value of A (the BNE is effectivey a JMP, as A will
+                        \ never be zero)
 
                         \ --- End of replacement ------------------------------>
 
@@ -25487,12 +25553,12 @@ LOAD_F% = LOAD% + P% - CODE%
                         \ spawning a cop, otherwise we got away with it, for
                         \ now)
 
- LDA #COPS              \ Set A to the ship type for a cop, so we can add a new
-                        \ police ship to the local bubble
+ LDA #COPS              \ Set A to the ship type for a cop, so the following
+                        \ call to hordes will spawn a pack of cops
 
 .horde_plain
 
- LDX #0                 \ Jump to hordes to spawn a pack of cops, i.e. Vipers,
+ LDX #0                 \ Jump to hordes to spawn a pack of ships of type A,
  BEQ hordes             \ returning from the subroutine using a tail call (the
                         \ BEQ is effectively a JMP as X is always zero)
 
@@ -25501,8 +25567,9 @@ LOAD_F% = LOAD% + P% - CODE%
                         \ --- End of replacement ------------------------------>
 
  LDA MANY+COPS          \ If we now have at least one cop in the local bubble,
- BNE MLOOPS             \ jump down to MLOOPS, otherwise fall through into the
-                        \ next part to look at spawning something else
+ BNE MLOOPS             \ jump down to MLOOPS to stop spawning, otherwise fall
+                        \ through into the next part to look at spawning
+                        \ something else
 
 \ ******************************************************************************
 \
@@ -25534,9 +25601,10 @@ LOAD_F% = LOAD% + P% - CODE%
 \
 \ ******************************************************************************
 
- DEC EV                 \ Decrement EV, the extra vessels spawning delay, and
- BPL MLOOPS             \ jump to MLOOPS if it is still positive, so we only
-                        \ do the following when the EV counter runs down
+ DEC EV                 \ Decrement EV, the extra vessels spawning delay, and if
+ BPL MLOOPS             \ it is still positive, jump to MLOOPS to stop spawning,
+                        \ so we only do the following when the EV counter runs
+                        \ down
 
  INC EV                 \ EV is negative, so bump it up again, setting it back
                         \ to 0
@@ -25595,8 +25663,9 @@ LOAD_F% = LOAD% + P% - CODE%
 
                         \ --- And replaced by: -------------------------------->
 
- CPX #&64               \ AJD
- BCS mt1
+ CPX #100               \ If the random number in X >= 100 (61% chance), jump
+ BCS mt1                \ to mt1 to spawn pirates, otherwise keep going to
+                        \ spawn a lone bounty hunter or a Thargoid
 
                         \ --- End of replacement ------------------------------>
 
@@ -25615,10 +25684,10 @@ LOAD_F% = LOAD% + P% - CODE%
 
                         \ --- And replaced by: -------------------------------->
 
- ADC #CYL2+1            \ Add A to #CYL2 (we know the C flag is clear as we
-                        \ passed through the BCS above), so A is now one of the
-                        \ lone bounty hunter ships, i.e. Cobra Mk III (pirate),
-                        \ Asp Mk II, Python (pirate) or Fer-de-lance AJD
+ ADC #25                \ Add A to 25 (we know the C flag is clear as we passed
+                        \ through the BCS above), so A is now a ship slot in the
+                        \ range 25-28, which is where the pirate ships live in
+                        \ the ship files
 
                         \ --- End of replacement ------------------------------>
 
@@ -26012,7 +26081,8 @@ LOAD_F% = LOAD% + P% - CODE%
 \       Name: TT102
 \       Type: Subroutine
 \   Category: Keyboard
-\    Summary: Process function key, save, hyperspace and chart key presses
+\    Summary: Process function key, save key, hyperspace and chart key presses
+\             and update the hyperspace counter
 \
 \ ------------------------------------------------------------------------------
 \
@@ -26037,6 +26107,9 @@ LOAD_F% = LOAD% + P% - CODE%
 \   T95                 Print the distance to the selected system
 \
 \   TT107               Progress the countdown of the hyperspace counter
+\
+\   BAD                 Work out how bad we are from the amount of contraband in
+\                       our hold
 \
 \ ******************************************************************************
 
@@ -26140,7 +26213,8 @@ LOAD_F% = LOAD% + P% - CODE%
 
  LDA QQ11               \ If the current view is a chart (QQ11 = 64 or 128),
  AND #%11000000         \ keep going, otherwise jump down to TT107 to skip the
- BEQ TT107              \ following AJD
+ BEQ TT107              \ following and move on to updating the hyperspace
+                        \ counter
 
                         \ --- End of replacement ------------------------------>
 
@@ -26155,7 +26229,8 @@ LOAD_F% = LOAD% + P% - CODE%
                         \ --- And replaced by: -------------------------------->
 
  CMP #&36               \ If "O" was pressed, do the following three jumps,
- BNE not_home           \ otherwise skip to not_home to continue AJD
+ BNE not_home           \ otherwise skip to not_home to continue checking key
+                        \ presses
 
                         \ --- End of replacement ------------------------------>
 
@@ -26237,11 +26312,15 @@ LOAD_F% = LOAD% + P% - CODE%
 
 .BAD
 
- LDA QQ20+&03           \ AJD
- CLC
- ADC QQ20+&06
- ASL A
- ADC QQ20+&0A
+ LDA QQ20+3             \ Set A to the number of tonnes of slaves in the hold
+
+ CLC                    \ Clear the C flag so we can do addition without the
+                        \ C flag affecting the result
+
+ ADC QQ20+6             \ Add the number of tonnes of narcotics in the hold
+
+ ASL A                  \ Double the result and add the number of tonnes of
+ ADC QQ20+10            \ firearms in the hold
 
                         \ --- End of added code ------------------------------->
 
@@ -26253,19 +26332,25 @@ LOAD_F% = LOAD% + P% - CODE%
 
 .not_home
 
- CMP #&21               \ AJD
- BNE ee2
+ CMP #&21               \ If "W" was pressed, continue on to move the crosshairs
+ BNE ee2                \ to the special cargo destination, otherwise skip to
+                        \ ee2 to continue
 
- LDA cmdr_cour
- ORA cmdr_cour+1
- BEQ ee2
+ LDA cmdr_cour          \ If there is no special cargo delivery mission in
+ ORA cmdr_cour+1        \ progress, then cmdr_cour(1 0) will be zero, so skip
+ BEQ ee2                \ to ee2 to continue
 
- JSR TT103              \ AJD
- LDA cmdr_courx
- STA QQ9
- LDA cmdr_coury
+ JSR TT103              \ Draw small crosshairs at coordinates (QQ9, QQ10),
+                        \ which will erase the crosshairs currently there
+
+ LDA cmdr_courx         \ Set the galactic coordinates in (QQ9, QQ10) to the
+ STA QQ9                \ current special cargo delivery destination in
+ LDA cmdr_coury         \ (cmdr_courx, cmdr_coury)
  STA QQ10
- JSR TT103
+
+ JSR TT103              \ Draw small crosshairs at coordinates (QQ9, QQ10),
+                        \ which will draw the crosshairs at our current home
+                        \ system
 
                         \ --- End of added code ------------------------------->
 
@@ -26678,7 +26763,25 @@ LOAD_F% = LOAD% + P% - CODE%
 
                         \ --- And replaced by: -------------------------------->
 
- ADC GCNT               \ 16+7 -> 23 files ! AJD
+                        \ By this point, A is:
+                        \
+                        \   * Bit 0    = 0 for low tech level (Coriolis station)
+                        \                1 for high tech level (Dodo station)
+                        \   * Bit 1    = 0 for more dangerous systems
+                        \                1 for safer systems
+                        \   * Bit 2    = random
+                        \   * Bit 3    = random
+                        \   * Bits 4-7 = 0
+                        \
+                        \ So A is in the range 0-15. This corresponds to the
+                        \ ship blueprints files in the original disc version,
+                        \ which are D.MOA to D.MOP, but we're not done yet,
+                        \ as Elite-A has 23 ship blueprint files
+
+ ADC GCNT               \ Add the galaxy number in GCNT to A, which moves A into
+                        \ the range 0-22, which corresponds to the appropriate
+                        \ Elite-A ship file (where 0 is file S.A and 23 is file
+                        \ S.W)
 
                         \ --- End of replacement ------------------------------>
 
@@ -26712,7 +26815,7 @@ LOAD_F% = LOAD% + P% - CODE%
                         \ --- Original Acornsoft code removed: ---------------->
 
 \ STA SHIPI+6           \ Store the letter of the ship blueprints file we want
-\                       \ in the sixth byte of the command string at SHIPI, so
+\                       \ in the seventh byte of the command string at SHIPI, so
 \                       \ it overwrites the "0" in "D.MO0" with the file letter
 \                       \ to load, from D.MOA to D.MOP
 \
@@ -26720,7 +26823,10 @@ LOAD_F% = LOAD% + P% - CODE%
 
                         \ --- And replaced by: -------------------------------->
 
- STA SHIPI+4            \ AJD
+ STA SHIPI+4            \ Store the letter of the ship blueprints file we want
+                        \ in the fifth byte of the command string at SHIPI, so
+                        \ it overwrites the "0" in "S.0" with the file letter
+                        \ to load, from S.A to S.W
 
                         \ --- End of replacement ------------------------------>
 
@@ -35324,11 +35430,17 @@ LOAD_H% = LOAD% + P% - CODE%
 
                         \ --- And replaced by: -------------------------------->
 
- JSR iff_index          \ AJD
- LDA iff_base,X
- STA COL
- LDA iff_xor,X
- STA Y2
+ JSR iff_index          \ Call iff_index to work out the index of the colour we
+                        \ should use for the dot and stick for this ship,
+                        \ according to whether we have an I.F.F. system fitted
+
+ LDA iff_base,X         \ Set COL to the base colour for this ship, given the
+ STA COL                \ I.F.F. colour index in X (this colour is used for both
+                        \ the dot and stick)
+
+ LDA iff_xor,X          \ Set Y2 to the alternating colour for this ship, given
+ STA Y2                 \ the I.F.F. colour index in X (this colour is used for
+                        \ making the stick striped, where appropriate)
 
                         \ --- End of replacement ------------------------------>
 
@@ -35542,14 +35654,18 @@ LOAD_H% = LOAD% + P% - CODE%
 
                         \ --- And replaced by: -------------------------------->
 
- LDA TWOS+&11,X         \ AJD
- TAX
- AND COL                \ iff
- STA X1
- TXA
- AND Y2
- STA Y1
- PLA
+ LDA CTWOS+1,X          \ Load the same mode 5 1-pixel byte that we just used
+ TAX                    \ and make a copy in X
+
+ AND COL                \ Mask the 1-pixel byte with the same colour, storing
+ STA X1                 \ the result in X1, so we can use it as the character
+                        \ rowbyte for the stick
+
+ TXA                    \ Mask the 1-pixel byte with the colour in Y2, which
+ AND Y2                 \ we set to the alternating colour for the stick, and
+ STA Y1                 \ store the result in Y1
+
+ PLA                    \ Restore the stick height from the stack into A
 
  TAX                    \ Copy the stick height into X
 
@@ -35557,7 +35673,8 @@ LOAD_H% = LOAD% + P% - CODE%
                         \ draw, so return from the subroutine (as RTS contains
                         \ an RTS)
 
- BMI RTS+1              \ AJD
+ BMI RTS+1              \ If the stick height in A is negative, jump down to
+                        \ RTS+1
 
                         \ --- End of replacement ------------------------------>
 
@@ -35651,8 +35768,11 @@ LOAD_H% = LOAD% + P% - CODE%
 
                         \ --- And replaced by: -------------------------------->
 
- EOR Y1                 \ iff AJD
- STA X1                 \ iff
+ EOR Y1                 \ Apply the alternating colour in Y1 to the stick
+
+ STA X1                 \ Update the value in X1 so the alternating colour is
+                        \ applied every other row (as doing an EOR twice
+                        \ reverses it)
 
  EOR (SC),Y             \ Draw the stick on row Y of the character block using
  STA (SC),Y             \ EOR logic
@@ -35712,8 +35832,11 @@ LOAD_H% = LOAD% + P% - CODE%
                         \ pattern as the bottom-right pixel of the dot (so the
                         \ stick comes out of the right side of the dot)
 
- EOR Y1                 \ iff AJD
- STA X1                 \ iff
+ EOR Y1                 \ Apply the alternating colour in Y1 to the stick
+
+ STA X1                 \ Update the value in X1 so the alternating colour is
+                        \ applied every other row (as doing an EOR twice
+                        \ reverses it)
 
                         \ --- End of replacement ------------------------------>
 

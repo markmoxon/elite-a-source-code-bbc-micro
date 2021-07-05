@@ -85,7 +85,9 @@ LASCT = &0346           \ The laser pulse count for the current laser, matching
 HFX = &0348             \ A flag that toggles the hyperspace colour effect,
                         \ matching the address in the main game code
 
-cmdr_iff = &036E        \ AJD
+CRGO = &036E            \ The flag that determines whether we have an I.F.F.
+                        \ system fitted, matching the address in the main game
+                        \ code
 
 ESCP = &0386            \ The flag that determines whether we have an escape pod
                         \ fitted, matching the address in the main game code
@@ -880,11 +882,27 @@ ORG &0D7A
 \       Name: iff_index
 \       Type: Subroutine
 \   Category: Dashboard
-\    Summary: AJD
+\    Summary: Return the colour index for this ship on the I.F.F. system
 \
 \ ------------------------------------------------------------------------------
 \
 \ This routine is copied to &0D7A in part 1 above.
+\
+\ Returns:
+\
+\   X                   The colour index for the current ship type:
+\
+\                         * 0 = no I.F.F. system fitted, or ship is an innocent
+\                               bystander, trader or innocent bounty hunter
+\
+\                         * 1 = cop, space station or escape pod
+\
+\                         * 2 = cargo canister, alloy plate, boulder, asteroid
+\                               or splinter
+\
+\                         * 3 = missile
+\
+\                         * 4 = pirate or a non-innocent bounty hunter
 \
 \ ******************************************************************************
 
@@ -892,41 +910,66 @@ ORG &0D7A
 
 .iff_index
 
- LDX cmdr_iff           \ iff code
- BEQ iff_not
- LDY #&24
- LDA (INF),Y
- ASL A
- ASL A
+ LDX CRGO               \ If we do not have an I.F.F. fitted (i.e. CRGO is
+ BEQ iff_not            \ zero), jump to iff_not to return from the routine with
+                        \ X = 0
+
+                        \ If we get here then X = &FF (as CRGO is &FF if we have
+                        \ an I.F.F. fitted)
+
+ LDY #36                \ Set A to byte #36 of the ship's blueprint, i.e. the
+ LDA (INF),Y            \ NEWB flags
+
+ ASL A                  \ If bit 6 is set, i.e. this is a cop, a space station
+ ASL A                  \ or an escape pod, jump to iff_cop to return X = 1
  BCS iff_cop
- ASL A
- BCS iff_trade
- LDY TYPE
+
+ ASL A                  \ If bit 5 is set, i.e. this is an innocent bystander
+ BCS iff_trade          \ (which applies to traders and some bounty hunters),
+                        \ jump to iff_trade to return X = 0
+
+ LDY TYPE               \ Set Y to the ship's type - 1
  DEY
- BEQ iff_missle
- CPY #&08
- BCC iff_aster
- INX \ X=4
+
+ BEQ iff_missle         \ If Y = 0, i.e. this is a missile, then jump to
+                        \ iff_missle to return X = 3
+
+ CPY #8                 \ If Y < 8, i.e. this is a cargo canister, alloy plate,
+ BCC iff_aster          \ boulder, asteroid or splinter, then jump to iff_aster
+                        \ to return X = 2
+
+                        \ If we get here then the ship is not the following:
+                        \
+                        \   * A cop/station/escape pod
+                        \   * An innocent bystander/trader/good bounty hunter
+                        \   * A missile
+                        \   * Cargo or an asteroid
+                        \
+                        \ So it must be a pirate or a non-innocent bounty hunter
+
+ INX                    \ X is &FF at this point, so this INX sets X = 0, and we
+                        \ then fall through into the four INX instructions below
+                        \ to return X = 4
 
 .iff_missle
 
- INX \ X=3
+ INX                    \ If we jump to this point, then return X = 3
 
 .iff_aster
 
- INX \ X=2
+ INX                    \ If we jump to this point, then return X = 2
 
 .iff_cop
 
- INX \ X=1
+ INX                    \ If we jump to this point, then return X = 1
 
 .iff_trade
 
- INX \ X=0
+ INX                    \ If we jump to this point, then return X = 0
 
 .iff_not
 
- RTS \ X=0
+ RTS                    \ Return from the subroutine
 
                         \ --- End of added section ---------------------------->
 

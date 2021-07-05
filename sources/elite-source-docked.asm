@@ -59,11 +59,11 @@ SPL = 8                 \ Ship type for a splinter
 SHU = 9                 \ Ship type for a Shuttle
 CYL = 11                \ Ship type for a Cobra Mk III
 ANA = 14                \ Ship type for an Anaconda
+WRM = 15                \ Ship type for a Worm
 COPS = 16               \ Ship type for a Viper
 SH3 = 17                \ Ship type for a Sidewinder
 KRA = 19                \ Ship type for a Krait
 ADA = 20                \ Ship type for a Adder
-WRM = 23                \ Ship type for a Worm
 CYL2 = 24               \ Ship type for a Cobra Mk III (pirate)
 ASP = 25                \ Ship type for an Asp Mk II
 THG = 29                \ Ship type for a Thargoid
@@ -1407,11 +1407,13 @@ ORG &0300
 
 .cmdr_courx
 
- SKIP 1                 \ AJD
+ SKIP 1                 \ The galactic x-coordinate for the current special
+                        \ cargo delivery destination
 
 .cmdr_coury
 
- SKIP 1                 \ AJD
+ SKIP 1                 \ The galactic y-coordinate for the current special
+                        \ cargo delivery destination
 
                         \ --- End of replacement ------------------------------>
 
@@ -1861,6 +1863,10 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
 .new_hold
 
  SKIP 1                 \ The amount of free space in our current ship's hold
+                        \
+                        \ The value is actually the amount of free space plus 1,
+                        \ as this makes the maths slightly easier in the tnpr
+                        \ routine
                         \
                         \ In Elite-A, hold space is taken up by both equipment
                         \ and cargo
@@ -14804,13 +14810,18 @@ LOAD_D% = LOAD% + P% - CODE%
 
                         \ --- And replaced by: -------------------------------->
 
- LDA #&E                \ print hold size AJD
- JSR TT68
- LDX new_hold
- DEX
- CLC
- JSR pr2
- JSR TT160
+ LDA #14                \ Print recursive token 128 ("SPACE") followed by a
+ JSR TT68               \ colon
+
+ LDX new_hold           \ Set X to the amount of free space in our current
+ DEX                    \ ship's hold, minus 1 as new_hold contains the amount
+                        \ of free space plus 1
+
+ CLC                    \ Call pr2 to print the amount of free space as a
+ JSR pr2                \ 3-digit number without a decimal point (by clearing
+                        \ the C flag)
+
+ JSR TT160              \ Print "t" (for tonne) and a space
 
                         \ --- End of replacement ------------------------------>
 
@@ -15173,7 +15184,8 @@ LOAD_D% = LOAD% + P% - CODE%
 
                         \ --- Code added for Elite-A: ------------------------->
 
- STA XX12               \ AJD
+ STA XX12               \ Store the horizontal distance in XX12, so we can
+                        \ retrieve it later
 
                         \ --- End of added code ------------------------------->
 
@@ -15197,7 +15209,8 @@ LOAD_D% = LOAD% + P% - CODE%
 
                         \ --- Code added for Elite-A: ------------------------->
 
- STA K4                 \ AJD
+ STA K4                 \ Store the vertical distance in K4, so we can retrieve
+                        \ it later
 
                         \ --- End of added code ------------------------------->
 
@@ -15233,7 +15246,15 @@ LOAD_D% = LOAD% + P% - CODE%
 
                         \ --- And replaced by: -------------------------------->
 
- LDA XX12               \ AJD
+ LDA XX12               \ Retrieve the horizontal distance from XX12, so A now
+                        \ contains the horizontal distance between this system
+                        \ and the current system
+                        \
+                        \ Let's call this the x-delta, as it's the horizontal
+                        \ difference between the current system at the centre of
+                        \ the chart, and this system (so A is negative if it's
+                        \ to the left of the chart's centre, or positive if it's
+                        \ to the right)
 
                         \ --- End of replacement ------------------------------>
 
@@ -15261,7 +15282,14 @@ LOAD_D% = LOAD% + P% - CODE%
 
                         \ --- And replaced by: -------------------------------->
 
- LDA K4                 \ AJD
+ LDA K4                 \ Retrieve the vertical distance from XX12, so A now
+                        \ contains the vertical distance between this system
+                        \ and the current system
+                        \
+                        \ Let's call this the y-delta, as it's the vertical
+                        \ difference between the current system at the centre of
+                        \ the chart, and this system (so A is negative if it's
+                        \ above the chart's centre, or positive if it's below)
 
                         \ --- End of replacement ------------------------------>
 
@@ -21502,6 +21530,12 @@ LOAD_F% = LOAD% + P% - CODE%
 \ Display the dashboard's missile indicators, with all the missiles reset to
 \ green/cyan (i.e. not armed or locked).
 \
+\ Returns:
+\
+\   X                   X is set to &FF
+\
+\   Y                   Y is set to 0
+\
 \ ******************************************************************************
 
 .msblob
@@ -21552,7 +21586,8 @@ LOAD_F% = LOAD% + P% - CODE%
 
 .miss_miss
 
- JSR MSBAR              \ Draw the missile indicator at position X in colour Y
+ JSR MSBAR              \ Draw the missile indicator at position X in colour Y,
+                        \ and return with Y = 0
 
                         \ --- End of replacement ------------------------------>
 
@@ -21564,7 +21599,8 @@ LOAD_F% = LOAD% + P% - CODE%
 
                         \ --- And replaced by: -------------------------------->
 
- BPL ss                 \ Loop back to ss if we still have missiles to draw
+ BPL ss                 \ Loop back to ss if we still have missiles to draw,
+                        \ ending when X = &FF
 
                         \ --- End of replacement ------------------------------>
 
@@ -21912,7 +21948,7 @@ LOAD_F% = LOAD% + P% - CODE%
 \       Name: TT102
 \       Type: Subroutine
 \   Category: Keyboard
-\    Summary: Process function key, save, hyperspace and chart key presses
+\    Summary: Process function key, save key, hyperspace and chart key presses
 \
 \ ------------------------------------------------------------------------------
 \
@@ -21940,6 +21976,9 @@ LOAD_F% = LOAD% + P% - CODE%
 \   T95                 Print the distance to the selected system
 \
 \   TT107               Progress the countdown of the hyperspace counter
+\
+\   BAD                 Work out how bad we are from the amount of contraband in
+\                       our hold
 \
 \ ******************************************************************************
 
@@ -21983,17 +22022,21 @@ LOAD_F% = LOAD% + P% - CODE%
 
                         \ --- And replaced by: -------------------------------->
 
- CMP #f0                \ AJD
- BNE fvw
+ CMP #f0                \ If red key f0 was not pressed, jump to fvw to check
+ BNE fvw                \ for the next key
 
- JSR CTRL
- BMI jump_stay
+ JSR CTRL               \ Red key f0 was pressed, so check whether CTRL was
+ BMI jump_stay          \ also pressed, and if so, jump to jump_stay to skip the
+                        \ following instruction
 
- JMP TT110
+ JMP TT110              \ Red key f0 was pressed on its own, so jump to TT110 to
+                        \ launch our ship, returning from the subroutine using a
+                        \ tail call
 
 .jump_stay
 
- JMP stay_here
+ JMP stay_here          \ CTRL-f0 was pressed, so jump to stay_here to pay the
+                        \ docking fee and refresh prices
 
                         \ --- End of replacement ------------------------------>
 
@@ -22082,7 +22125,8 @@ LOAD_F% = LOAD% + P% - CODE%
                         \ --- And replaced by: -------------------------------->
 
  CMP #&36               \ If "O" was pressed, do the following three jumps,
- BNE not_home           \ otherwise skip to not_home to continue AJD
+ BNE not_home           \ otherwise skip to not_home to continue checking key
+                        \ presses
 
                         \ --- End of replacement ------------------------------>
 
@@ -22111,19 +22155,25 @@ LOAD_F% = LOAD% + P% - CODE%
 
 .not_home
 
- CMP #&21               \ AJD
- BNE ee2
+ CMP #&21               \ If "W" was pressed, continue on to move the crosshairs
+ BNE ee2                \ to the special cargo destination, otherwise skip to
+                        \ ee2 to continue
 
- LDA cmdr_cour
- ORA cmdr_cour+1
- BEQ ee2
+ LDA cmdr_cour          \ If there is no special cargo delivery mission in
+ ORA cmdr_cour+1        \ progress, then cmdr_cour(1 0) will be zero, so skip
+ BEQ ee2                \ to ee2 to continue
 
- JSR TT103              \ AJD
- LDA cmdr_courx
- STA QQ9
- LDA cmdr_coury
+ JSR TT103              \ Draw small crosshairs at coordinates (QQ9, QQ10),
+                        \ which will erase the crosshairs currently there
+
+ LDA cmdr_courx         \ Set the galactic coordinates in (QQ9, QQ10) to the
+ STA QQ9                \ current special cargo delivery destination in
+ LDA cmdr_coury         \ (cmdr_courx, cmdr_coury)
  STA QQ10
- JSR TT103
+
+ JSR TT103              \ Draw small crosshairs at coordinates (QQ9, QQ10),
+                        \ which will draw the crosshairs at our current home
+                        \ system
 
                         \ --- End of added code ------------------------------->
 
@@ -30127,7 +30177,7 @@ LOAD_G% = LOAD% + P% - CODE%
 \       Name: stay_here
 \       Type: Subroutine
 \   Category: Buying ships
-\    Summary: AJD
+\    Summary: Pay docking fee and refresh prices AJD
 \
 \ ******************************************************************************
 

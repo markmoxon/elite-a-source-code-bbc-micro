@@ -59,11 +59,11 @@ SPL = 8                 \ Ship type for a splinter
 SHU = 9                 \ Ship type for a Shuttle
 CYL = 11                \ Ship type for a Cobra Mk III
 ANA = 14                \ Ship type for an Anaconda
+WRM = 15                \ Ship type for a Worm
 COPS = 16               \ Ship type for a Viper
 SH3 = 17                \ Ship type for a Sidewinder
 KRA = 19                \ Ship type for a Krait
 ADA = 20                \ Ship type for a Adder
-WRM = 23                \ Ship type for a Worm
 CYL2 = 24               \ Ship type for a Cobra Mk III (pirate)
 ASP = 25                \ Ship type for an Asp Mk II
 THG = 29                \ Ship type for a Thargoid
@@ -1408,11 +1408,13 @@ ORG &0300
 
 .cmdr_courx
 
- SKIP 1                 \ AJD
+ SKIP 1                 \ The galactic x-coordinate for the current special
+                        \ cargo delivery destination
 
 .cmdr_coury
 
- SKIP 1                 \ AJD
+ SKIP 1                 \ The galactic y-coordinate for the current special
+                        \ cargo delivery destination
 
                         \ --- End of replacement ------------------------------>
 
@@ -1863,6 +1865,10 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
 
  SKIP 1                 \ The amount of free space in our current ship's hold
                         \
+                        \ The value is actually the amount of free space plus 1,
+                        \ as this makes the maths slightly easier in the tnpr
+                        \ routine
+                        \
                         \ In Elite-A, hold space is taken up by both equipment
                         \ and cargo
 
@@ -2149,7 +2155,7 @@ BRKV = P% - 2           \ The address of the destination address in the above
 \       Name: launch
 \       Type: Subroutine
 \   Category: Loader
-\    Summary: AJD
+\    Summary: Load and run the main docked code AJD
 \
 \ ******************************************************************************
 
@@ -13412,7 +13418,7 @@ LOAD_F% = LOAD% + P% - CODE%
 \       Name: TT102
 \       Type: Subroutine
 \   Category: Keyboard
-\    Summary: Process function key, save, hyperspace and chart key presses
+\    Summary: Process function key, save key, hyperspace and chart key presses
 \
 \ ------------------------------------------------------------------------------
 \
@@ -13437,6 +13443,9 @@ LOAD_F% = LOAD% + P% - CODE%
 \   T95                 Print the distance to the selected system
 \
 \   TT107               Progress the countdown of the hyperspace counter
+\
+\   BAD                 Work out how bad we are from the amount of contraband in
+\                       our hold
 \
 \ ******************************************************************************
 
@@ -13466,8 +13475,8 @@ LOAD_F% = LOAD% + P% - CODE%
 
                         \ --- And replaced by: -------------------------------->
 
- CMP #f8                \ If red key f8 was pressed, AJD
- BNE P%+5               \ , returning from the subroutine
+ CMP #f8                \ If red key f8 was pressed, jump to info_menu to show
+ BNE P%+5               \ the encyclopedia menu, returning from the subroutine
  JMP info_menu          \ using a tail call
 
  CMP #f4                \ If red key f4 was pressed, jump to TT22 to show the
@@ -13478,16 +13487,26 @@ LOAD_F% = LOAD% + P% - CODE%
  BNE P%+5               \ Short-range Chart, returning from the subroutine using
  JMP TT23               \ a tail call
 
- CMP #&75               \ AJD
- BNE TT92
- JSR CTRL
- BPL jump_data
- JMP launch
+ CMP #f6                \ If red key f6 was not pressed, jump to TT92 to check
+ BNE TT92               \ for the next key
+
+ JSR CTRL               \ Red key f6 was pressed, so check whether CTRL was
+ BPL jump_data          \ also pressed, and if it wasn't pressed, jump to
+                        \ jump_data to skip the following instruction
+
+ JMP launch             \ CTRL-f6 was pressed, so jump to launch to load and run
+                        \ the main docked code (i.e. to exit the encyclopedia)
 
 .jump_data
 
- JSR TT111
- JMP TT25
+ JSR TT111              \ Red key f6 was pressed on its own, so call TT111 to
+                        \ select the system nearest to galactic coordinates
+                        \ (QQ9, QQ10) (the location of the chart crosshairs) and
+                        \ set ZZ to the system number
+
+ JMP TT25               \ Jump to TT25 to show the Data on System screen, along
+                        \ with an extended system description for the system in
+                        \ ZZ, returning from the subroutine using a tail call
 
                         \ --- End of replacement ------------------------------>
 
@@ -13509,15 +13528,15 @@ LOAD_F% = LOAD% + P% - CODE%
 
                         \ --- And replaced by: -------------------------------->
 
- CMP #&77               \ AJD
- BNE not_invnt
- JMP info_menu
+ CMP #f9                \ If red key f9 was pressed, jump to info_menu to show
+ BNE not_invnt          \ the encyclopedia menu, returning from the subroutine
+ JMP info_menu          \ using a tail call
 
 .not_invnt
 
- CMP #&16
- BNE not_price
- JMP info_menu
+ CMP #f7                \ If red key f7 was pressed, jump to info_menu to show
+ BNE not_price          \ the encyclopedia menu, returning from the subroutine
+ JMP info_menu          \ using a tail call
 
 .not_price
 
@@ -13558,13 +13577,16 @@ LOAD_F% = LOAD% + P% - CODE%
 
                         \ --- And replaced by: -------------------------------->
 
- CMP #&20               \ AJD
+ CMP #f0                \ AJD
  BEQ jump_menu
- CMP #&71
+
+ CMP #f1
  BEQ jump_menu
- CMP #&72
+
+ CMP #f2
  BEQ jump_menu
- CMP #&73
+
+ CMP #f3
  BNE LABEL_3
 
 .jump_menu
@@ -13627,7 +13649,8 @@ LOAD_F% = LOAD% + P% - CODE%
                         \ --- And replaced by: -------------------------------->
 
  CMP #&36               \ If "O" was pressed, do the following three jumps,
- BNE not_home           \ otherwise skip to not_home to continue AJD
+ BNE not_home           \ otherwise skip to not_home to continue checking key
+                        \ presses
 
                         \ --- End of replacement ------------------------------>
 
@@ -13656,19 +13679,25 @@ LOAD_F% = LOAD% + P% - CODE%
 
 .not_home
 
- CMP #&21               \ AJD
- BNE ee2
+ CMP #&21               \ If "W" was pressed, continue on to move the crosshairs
+ BNE ee2                \ to the special cargo destination, otherwise skip to
+                        \ ee2 to continue
 
- LDA cmdr_cour
- ORA cmdr_cour+1
- BEQ ee2
+ LDA cmdr_cour          \ If there is no special cargo delivery mission in
+ ORA cmdr_cour+1        \ progress, then cmdr_cour(1 0) will be zero, so skip
+ BEQ ee2                \ to ee2 to continue
 
- JSR TT103              \ AJD
- LDA cmdr_courx
- STA QQ9
- LDA cmdr_coury
+ JSR TT103              \ Draw small crosshairs at coordinates (QQ9, QQ10),
+                        \ which will erase the crosshairs currently there
+
+ LDA cmdr_courx         \ Set the galactic coordinates in (QQ9, QQ10) to the
+ STA QQ9                \ current special cargo delivery destination in
+ LDA cmdr_coury         \ (cmdr_courx, cmdr_coury)
  STA QQ10
- JSR TT103
+
+ JSR TT103              \ Draw small crosshairs at coordinates (QQ9, QQ10),
+                        \ which will draw the crosshairs at our current home
+                        \ system
 
                         \ --- End of added code ------------------------------->
 

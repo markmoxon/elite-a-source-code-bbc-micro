@@ -65,11 +65,11 @@ SPL = 8                 \ Ship type for a splinter
 SHU = 9                 \ Ship type for a Shuttle
 CYL = 11                \ Ship type for a Cobra Mk III
 ANA = 14                \ Ship type for an Anaconda
+WRM = 15                \ Ship type for a Worm
 COPS = 16               \ Ship type for a Viper
 SH3 = 17                \ Ship type for a Sidewinder
 KRA = 19                \ Ship type for a Krait
 ADA = 20                \ Ship type for a Adder
-WRM = 23                \ Ship type for a Worm
 CYL2 = 24               \ Ship type for a Cobra Mk III (pirate)
 ASP = 25                \ Ship type for an Asp Mk II
 THG = 29                \ Ship type for a Thargoid
@@ -712,12 +712,11 @@ ORG &0000
 
 .dockedp
 
- SKIP 1                 \ A flag that determines whether we should be running
-                        \ the docked or flight code in the parasite
+ SKIP 1                 \ A flag that determines whether or not we are docked
                         \
-                        \   * 0 = we are not docked, run the flight code
+                        \   * 0 = we are docked
                         \
-                        \   * &FF = we are docked, run the docked code
+                        \   * &FF = we are not docked
 
 ORG &00D1
 
@@ -1394,11 +1393,13 @@ ORG &0300
 
 .cmdr_courx
 
- SKIP 1                 \ AJD
+ SKIP 1                 \ The galactic x-coordinate for the current special
+                        \ cargo delivery destination
 
 .cmdr_coury
 
- SKIP 1                 \ AJD
+ SKIP 1                 \ The galactic y-coordinate for the current special
+                        \ cargo delivery destination
 
 .NOMSL
 
@@ -1844,6 +1845,10 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
 .new_hold
 
  SKIP 1                 \ The amount of free space in our current ship's hold
+                        \
+                        \ The value is actually the amount of free space plus 1,
+                        \ as this makes the maths slightly easier in the tnpr
+                        \ routine
                         \
                         \ In Elite-A, hold space is taken up by both equipment
                         \ and cargo
@@ -10691,13 +10696,18 @@ LOAD_D% = LOAD% + P% - CODE%
  JSR fwl                \ Call fwl to print the fuel and cash levels on two
                         \ separate lines
 
- LDA #&E                \ print hold size AJD
- JSR TT68
- LDX new_hold
- DEX
- CLC
- JSR pr2
- JSR TT160
+ LDA #14                \ Print recursive token 128 ("SPACE") followed by a
+ JSR TT68               \ colon
+
+ LDX new_hold           \ Set X to the amount of free space in our current
+ DEX                    \ ship's hold, minus 1 as new_hold contains the amount
+                        \ of free space plus 1
+
+ CLC                    \ Call pr2 to print the amount of free space as a
+ JSR pr2                \ 3-digit number without a decimal point (by clearing
+                        \ the C flag)
+
+ JSR TT160              \ Print "t" (for tonne) and a space
 
  JMP TT210              \ Jump to TT210 to print the contents of our cargo bay
                         \ and return from the subroutine using a tail call
@@ -10999,7 +11009,8 @@ LOAD_D% = LOAD% + P% - CODE%
  SEC                    \ (s1_hi, s0_hi) and (QQ0, QQ1)
  SBC QQ0
 
- STA XX12               \ AJD
+ STA XX12               \ Store the horizontal distance in XX12, so we can
+                        \ retrieve it later
 
  BCS TT184              \ If a borrow didn't occur, i.e. s1_hi >= QQ0, then the
                         \ result is positive, so jump to TT184 and skip the
@@ -11019,7 +11030,8 @@ LOAD_D% = LOAD% + P% - CODE%
  SEC                    \ (s1_hi, s0_hi) and (QQ0, QQ1)
  SBC QQ1
 
- STA K4                 \ AJD
+ STA K4                 \ Store the vertical distance in K4, so we can retrieve
+                        \ it later
 
  BCS TT186              \ If a borrow didn't occur, i.e. s0_hi >= QQ1, then the
                         \ result is positive, so jump to TT186 and skip the
@@ -11040,7 +11052,15 @@ LOAD_D% = LOAD% + P% - CODE%
                         \ and set up the various variables we need to draw the
                         \ system's filled circle on the chart
 
- LDA XX12               \ AJD
+ LDA XX12               \ Retrieve the horizontal distance from XX12, so A now
+                        \ contains the horizontal distance between this system
+                        \ and the current system
+                        \
+                        \ Let's call this the x-delta, as it's the horizontal
+                        \ difference between the current system at the centre of
+                        \ the chart, and this system (so A is negative if it's
+                        \ to the left of the chart's centre, or positive if it's
+                        \ to the right)
 
  ASL A                  \ Set XX12 = 104 + x-delta * 4
  ASL A                  \
@@ -11054,7 +11074,14 @@ LOAD_D% = LOAD% + P% - CODE%
  STA XC
  INC XC
 
- LDA K4                 \ AJD
+ LDA K4                 \ Retrieve the vertical distance from XX12, so A now
+                        \ contains the vertical distance between this system
+                        \ and the current system
+                        \
+                        \ Let's call this the y-delta, as it's the vertical
+                        \ difference between the current system at the centre of
+                        \ the chart, and this system (so A is negative if it's
+                        \ above the chart's centre, or positive if it's below)
 
  ASL A                  \ Set K4 = 90 + y-delta * 2
  ADC #90                \
@@ -15586,6 +15613,12 @@ LOAD_F% = LOAD% + P% - CODE%
 \ Display the dashboard's missile indicators, with all the missiles reset to
 \ green/cyan (i.e. not armed or locked).
 \
+\ Returns:
+\
+\   X                   X is set to &FF
+\
+\   Y                   Y is set to 0
+\
 \ ******************************************************************************
 
 .msblob
@@ -15604,11 +15637,13 @@ LOAD_F% = LOAD% + P% - CODE%
 
 .miss_miss
 
- JSR MSBAR              \ Draw the missile indicator at position X in colour Y
+ JSR MSBAR              \ Draw the missile indicator at position X in colour Y,
+                        \ and return with Y = 0
 
  DEX                    \ Decrement the counter to point to the next missile
 
- BPL ss                 \ Loop back to ss if we still have missiles to draw
+ BPL ss                 \ Loop back to ss if we still have missiles to draw,
+                        \ ending when X = &FF
 
  RTS                    \ Return from the subroutine
 
@@ -22772,7 +22807,7 @@ LOAD_G% = LOAD% + P% - CODE%
 \       Name: stay_here
 \       Type: Subroutine
 \   Category: Buying ships
-\    Summary: AJD
+\    Summary: Pay docking fee and refresh prices AJD
 \
 \ ******************************************************************************
 
@@ -34888,7 +34923,10 @@ LOAD_J% = LOAD% + P% - CODE%
 
 .ma1
 
- JSR write_0346         \ AJD
+ JSR write_0346         \ Call write_0346 to set LASCT in the I/O processor to 0
+                        \ for beam lasers, and to the laser power (15) for pulse
+                        \ lasers. See MS23 below for more on laser pulsing and
+                        \ LASCT
 
 \ ******************************************************************************
 \
@@ -37629,11 +37667,19 @@ LOAD_K% = LOAD% + P% - CODE%
  BEQ TA35               \ space station), jump to TA35 to destroy this missile,
                         \ as the space station ain't kidding around
 
- LDY #&23               \ missile damage AJD
- SEC
+ LDY #35                \ Fetch byte #35 (the energy level) of the target ship
+ SEC                    \ into A, and set the C flag for the subtraction below
  LDA (V),Y
- SBC #&40
- BCS n_misshit
+
+ SBC #64                \ Set A = A - 64
+
+ BCS n_misshit          \ If the subtraction didn't underflow, then the ship has
+                        \ an energy level of at least 64 and can take the hit,
+                        \ so jump to n_misshit to update the ship's energy level
+                        \ with the new, reduced value
+
+                        \ If we get here then the ship doesn't have enough energy
+                        \ to withstand the missile hit, so it gets destroyed
 
  LDY #31                \ Fetch byte #31 (the exploding flag) of the target ship
  LDA (V),Y              \ into A
@@ -37646,10 +37692,14 @@ LOAD_K% = LOAD% + P% - CODE%
                         \ to destroy this missile
 
  ORA #%10000000         \ Otherwise set bit 7 of the target's byte #31 to mark
+                        \ the ship as having been killed, so it explodes (we
+                        \ update the ship data block in the next instruction)
 
 .n_misshit
 
- STA (V),Y              \ the ship as having been killed, so it explodes
+ STA (V),Y              \ Update the Y-th byte of the target ship data block,
+                        \ which will either be byte #35 (if the ship has been
+                        \ destroyed) or byte #31 (if it has survived)
 
 .TA35
 
@@ -37944,7 +37994,8 @@ LOAD_K% = LOAD% + P% - CODE%
 
 .GOPL
 
- LDY #&00               \ AJD
+ LDY #0                 \ Set Y = 0 so the call to SPS1 calculates the vector to
+                        \ the planet
 
  JSR SPS1               \ The ship is not hostile and it is not docking, so call
                         \ SPS1 to calculate the vector to the planet and store
@@ -38048,9 +38099,10 @@ LOAD_K% = LOAD% + P% - CODE%
  CMP #200               \ If A < 200 (78% chance), jump down to TN7 to skip the
  BCC TN7                \ following
 
- LDX #15                \ AJD
+ LDX #WRM               \ Set X to the ship type for a Worm
 
- JMP TN6                \ Jump to TN6 to AJD
+ JMP TN6                \ Jump to TN6 to spawn the Worm and return from
+                        \ the subroutine using a tail call
 
 .TN7
 
@@ -39475,9 +39527,15 @@ LOAD_K% = LOAD% + P% - CODE%
 
  DEC NOMSL              \ Reduce the number of missiles we have by 1
 
- JSR msblob             \ AJD redraw missiles
- STY MSAR
- STX MSTG
+ JSR msblob             \ Reset the dashboard's missile indicators so none of
+                        \ them are targeted, returning with Y = 0 and X = &FF
+
+ STY MSAR               \ The call to msblob returns Y = 0, so this sets MSAR
+                        \ to 0 to indicate that the leftmost missile is no longer
+                        \ seeking a target lock
+
+ STX MSTG               \ The call to msblob returns X = &FF, so this resets the
+                        \ missile so that it is no longer locked on a target
 
  JMP n_sound30          \ Call n_sound30 to make the sound of a missile launch,
                         \ returning from the subroutine using a tail call
@@ -41688,7 +41746,7 @@ LOAD_L% = LOAD% + P% - CODE%
  BCS n_cargo
  DEY
  BPL l_2af9
- CMP new_hold
+ CMP new_hold           \ new_hold is free space + 1
 
 .n_cargo
 
@@ -41886,8 +41944,8 @@ LOAD_L% = LOAD% + P% - CODE%
  STX FIST               \ Changing galaxy also clears our criminal record, so
                         \ set our legal status in FIST to 0 ("clean")
 
- STX cmdr_cour          \ AJD
- STX cmdr_cour+1
+ STX cmdr_cour          \ Reset the special cargo delivery mission details in
+ STX cmdr_cour+1        \ cmdr_cour(1 0)
 
  JSR wW                 \ Call wW to start the hyperspace countdown
 
@@ -42757,6 +42815,7 @@ LOAD_L% = LOAD% + P% - CODE%
  ROR A
  DEY
  BNE legal_div
+
  SEC
  SBC FIST
  BCC legal_over
@@ -43536,21 +43595,39 @@ NEXT
                         \ indicate we should show the space station rather than
                         \ the sun
 
- STX INWK+33            \ AJD
- LDA FIST
- BPL n_enemy
- LDX #&04
+ STX INWK+33            \ As part of the setup, we want to point INWK(34 33) to
+                        \ LSO, the line heap for the space station. LSO is at
+                        \ &0E00, so this sets the low byte at byte #33 to 0 (we
+                        \ set the high byte below)
+
+ LDA FIST               \ If bit 7 of FIST is clear, i.e. FIST < 128, then jump
+ BPL n_enemy            \ to n_enemy with X = 0 to skip the following
+                        \ instruction and set the NEWB flags to 0 (so the
+                        \ station is not hostile)
+
+ LDX #%00000100         \ Bit 7 of FIST is set, i.e. FIST >= 128 (so our
+                        \ "fugitive/innocent status" is very bad!), so set bit
+                        \ #3 of X so we the following sets the NEWB flags to
+                        \ make the station hostile
 
 .n_enemy
 
- STX NEWB
+ STX NEWB               \ Set the station's NEWB flag with the value in X, so it
+                        \ be hostile if FIST > 127, or friendly otherwise
 
  LDX #10                \ Call NwS1 to flip the sign of nosev_x_hi (byte #10)
  JSR NwS1
 
  JSR NwS1               \ And again to flip the sign of nosev_y_hi (byte #12)
 
- STX INWK+34            \ AJD
+                        \ NwS1 increments X by 2 for each call, so at this point
+                        \ the value of X is 10 + 2 + 2 = 14 = &E, which we can
+                        \ use to set the correct INWK+34 value in the following
+
+ STX INWK+34            \ As part of the setup, we want to point INWK(34 33) to
+                        \ LSO, the line heap for the space station. LSO is at
+                        \ &0E00, so this sets the high byte at byte #34 to &0E
+                        \ (we already set the low byte above)
 
  JSR NwS1               \ And again to flip the sign of nosev_z_hi (byte #14)
 
@@ -45899,7 +45976,8 @@ LOAD_M% = LOAD% + P% - CODE%
 
 .Ze
 
- JSR rand_posn          \ AJD
+ JSR rand_posn          \ Call rand_posn to set up the INWK workspace for a ship
+                        \ in a random ship position
 
  CMP #245               \ Set the C flag if X >= 245 (4% chance)
 
@@ -46041,8 +46119,13 @@ LOAD_M% = LOAD% + P% - CODE%
  LDA JUNK
  CMP #&03
  BCS MTT1
- JSR rand_posn \ IN
- BVS MTT4
+
+ JSR rand_posn          \ Call rand_posn to set up the INWK workspace for a ship
+                        \ in a random ship position
+
+ BVS MTT4               \ If V flag is set (50% chance), jump up to MTT4 to
+                        \ spawn a trader
+
  ORA #&6F
  STA INWK+29
  LDA SSPR
@@ -46122,20 +46205,21 @@ LOAD_M% = LOAD% + P% - CODE%
                         \ spawning a cop, otherwise we got away with it, for
                         \ now)
 
- LDA #COPS              \ Set A to the ship type for a cop, so we can add a new
-                        \ police ship to the local bubble
+ LDA #COPS              \ Set A to the ship type for a cop, so the following
+                        \ call to hordes will spawn a pack of cops
 
 .horde_plain
 
- LDX #0                 \ Jump to hordes to spawn a pack of cops, i.e. Vipers,
+ LDX #0                 \ Jump to hordes to spawn a pack of ships of type A,
  BEQ hordes             \ returning from the subroutine using a tail call (the
                         \ BEQ is effectively a JMP as X is always zero)
 
 .l_4050
 
  LDA MANY+COPS          \ If we now have at least one cop in the local bubble,
- BNE MLOOPS             \ jump down to MLOOPS, otherwise fall through into the
-                        \ next part to look at spawning something else
+ BNE MLOOPS             \ jump down to MLOOPS to stop spawning, otherwise fall
+                        \ through into the next part to look at spawning
+                        \ something else
 
 \ ******************************************************************************
 \
@@ -46167,9 +46251,10 @@ LOAD_M% = LOAD% + P% - CODE%
 \
 \ ******************************************************************************
 
- DEC EV                 \ Decrement EV, the extra vessels spawning delay, and
- BPL MLOOPS             \ jump to MLOOPS if it is still positive, so we only
-                        \ do the following when the EV counter runs down
+ DEC EV                 \ Decrement EV, the extra vessels spawning delay, and if
+ BPL MLOOPS             \ it is still positive, jump to MLOOPS to stop spawning,
+                        \ so we only do the following when the EV counter runs
+                        \ down
 
  INC EV                 \ EV is negative, so bump it up again, setting it back
                         \ to 0
@@ -46217,8 +46302,9 @@ LOAD_M% = LOAD% + P% - CODE%
                         \ Now to spawn a lone bounty hunter, a Thargoid or a
                         \ group of pirates
 
- CPX #&64               \ AJD
- BCS mt1
+ CPX #100               \ If the random number in X >= 100 (61% chance), jump
+ BCS mt1                \ to mt1 to spawn pirates, otherwise keep going to
+                        \ spawn a lone bounty hunter or a Thargoid
 
  INC EV                 \ Increase the extra vessels spawning counter, to
                         \ prevent the next attempt to spawn extra vessels
@@ -46226,10 +46312,10 @@ LOAD_M% = LOAD% + P% - CODE%
  AND #3                 \ Set A = random number in the range 0-3, which we
                         \ will now use to determine the type of ship
 
- ADC #CYL2+1            \ Add A to #CYL2 (we know the C flag is clear as we
-                        \ passed through the BCS above), so A is now one of the
-                        \ lone bounty hunter ships, i.e. Cobra Mk III (pirate),
-                        \ Asp Mk II, Python (pirate) or Fer-de-lance AJD
+ ADC #25                \ Add A to 25 (we know the C flag is clear as we passed
+                        \ through the BCS above), so A is now a ship slot in the
+                        \ range 25-28, which is where the pirate ships live in
+                        \ the ship files
 
  TAY                    \ Copy the new ship type to Y
 
@@ -46478,7 +46564,7 @@ LOAD_M% = LOAD% + P% - CODE%
 \       Name: TT102
 \       Type: Subroutine
 \   Category: Keyboard
-\    Summary: Process function key, save, hyperspace and chart key presses
+\    Summary: Process function key, save key, hyperspace and chart key presses
 \
 \ ------------------------------------------------------------------------------
 \
@@ -46503,6 +46589,9 @@ LOAD_M% = LOAD% + P% - CODE%
 \   T95                 Print the distance to the selected system
 \
 \   TT107               Progress the countdown of the hyperspace counter
+\
+\   BAD                 Work out how bad we are from the amount of contraband in
+\                       our hold
 \
 \ ******************************************************************************
 
@@ -46547,17 +46636,22 @@ LOAD_M% = LOAD% + P% - CODE%
  BNE HME1               \ keep going to process searching for systems (when
                         \ docked) or toggle the compass display (when flying)
 
- LDA QQ11               \ AJD
- AND #&C0
+ LDA QQ11               \ If the current view is a chart (QQ11 = 64 or 128),
+ AND #%11000000         \ keep going, otherwise jump to n_finder
  BEQ n_finder
- LDA dockedp
- BNE t95
- JMP HME2
+
+ LDA dockedp            \ If dockedp is non-zero, then we are not docked and
+ BNE t95                \ can't search for a system, so return from the
+                        \ subroutine (as t95 contains an RTS)
+
+ JMP HME2               \ Jump to HME2 to let us search for a system, returning
+                        \ from the subroutine using a tail call
 
 .n_finder
 
- LDA dockedp
- BEQ t95
+ LDA dockedp            \ If dockedp is zero, then we are docked and we can't
+ BEQ t95                \ change the compass configuration, so return from the
+                        \ subroutine (as t95 contains an RTS)
 
  LDA finder             \ Set the value of A to finder, which determines whether
                         \ the compass is configured to show the sun or the
@@ -46578,12 +46672,13 @@ LOAD_M% = LOAD% + P% - CODE%
 
 .HME1
 
- CMP #&36               \ If "O" was pressed, do the following three jumps,
- BNE not_home           \ otherwise skip to not_home to continue AJD
+ CMP #&36               \ If "O" was pressed, do the following, otherwise skip
+ BNE not_home           \ to not_home to continue checking key presses
 
- LDA QQ11               \ AJD
- AND #&C0
- BEQ t95
+ LDA QQ11               \ If both bits 6 or 7 of the view number are clear - so
+ AND #%11000000         \ this is not the Short-range or Long-range Chart -
+ BEQ t95                \ then jump to t95 to return from the subroutine,
+                        \ otherwise do the following three jumps
 
  JSR TT103              \ Draw small crosshairs at coordinates (QQ9, QQ10),
                         \ which will erase the crosshairs currently there
@@ -46599,23 +46694,30 @@ LOAD_M% = LOAD% + P% - CODE%
 
 .not_home
 
- CMP #&21               \ AJD
- BNE ee2
+ CMP #&21               \ If "W" was pressed, continue on to move the crosshairs
+ BNE ee2                \ to the special cargo destination, otherwise skip to
+                        \ ee2 to continue
 
- LDA QQ11               \ AJD
- AND #&C0
- BEQ t95
+ LDA QQ11               \ If both bits 6 or 7 of the view number are clear - so
+ AND #%11000000         \ this is not the Short-range or Long-range Chart -
+ BEQ t95                \ then jump to t95 to return from the subroutine,
+                        \ otherwise do the following three jumps
 
- LDA cmdr_cour
- ORA cmdr_cour+1
- BEQ t95
+ LDA cmdr_cour          \ If there is no special cargo delivery mission in
+ ORA cmdr_cour+1        \ progress, then cmdr_cour(1 0) will be zero, so return
+ BEQ t95                \ from the subroutine (as t95 contains an RTS)
 
- JSR TT103              \ AJD
- LDA cmdr_courx
- STA QQ9
- LDA cmdr_coury
+ JSR TT103              \ Draw small crosshairs at coordinates (QQ9, QQ10),
+                        \ which will erase the crosshairs currently there
+
+ LDA cmdr_courx         \ Set the galactic coordinates in (QQ9, QQ10) to the
+ STA QQ9                \ current special cargo delivery destination in
+ LDA cmdr_coury         \ (cmdr_courx, cmdr_coury)
  STA QQ10
- JSR TT103
+
+ JSR TT103              \ Draw small crosshairs at coordinates (QQ9, QQ10),
+                        \ which will draw the crosshairs at our current home
+                        \ system
 
 .T95
 
@@ -47003,7 +47105,8 @@ LOAD_M% = LOAD% + P% - CODE%
                         \ reach LOOK1 after calling FRCE below, it sets up a
                         \ new space view
 
- STA dockedp            \ AJD
+ STA dockedp            \ Set dockedp to &FF to indicate that we are no longer
+                        \ docked
 
  LDA #f0                \ Jump into the main game loop at FRCE_FLIGHT, setting
  JMP FRCE_FLIGHT        \ the key "pressed" to red key f0 (so we launch from the
@@ -49513,44 +49616,73 @@ BNE MESS                \ Print recursive token A as an in-flight message,
                         \ scanner, so return from the subroutine (as SC5
                         \ contains an RTS)
 
- LDX CRGO               \ iff code AJD, same as loader code, CRGO = cmdr_iff
- BEQ iff_not
- LDY #&24
- LDA (&20),Y
- ASL A
- ASL A
+ LDX CRGO               \ If we do not have an I.F.F. fitted (i.e. CRGO is
+ BEQ iff_not            \ zero), jump to iff_not to fetch the default colours,
+                        \ which are those for a trader or innocent bystander
+                        \ (i.e. X = 0)
+
+                        \ If we get here then X = &FF (as CRGO is &FF if we have
+                        \ an I.F.F. fitted)
+
+ LDY #36                \ Set A to byte #36 of the ship's blueprint, i.e. the
+ LDA (INF),Y            \ NEWB flags
+
+ ASL A                  \ If bit 6 is set, i.e. this is a cop, a space station
+ ASL A                  \ or an escape pod, jump to iff_cop to set X = 1
  BCS iff_cop
- ASL A
- BCS iff_trade
- LDY TYPE
+
+ ASL A                  \ If bit 5 is set, i.e. this is an innocent bystander
+ BCS iff_trade          \ (which applies to traders and some bounty hunters),
+                        \ jump to iff_trade to set X = 0
+
+ LDY TYPE               \ Set Y to the ship's type - 1
  DEY
- BEQ iff_missle
- CPY #&08
- BCC iff_aster
- INX \ X=4
+
+ BEQ iff_missle         \ If Y = 0, i.e. this is a missile, then jump to
+                        \ iff_missle to set X = 3
+
+ CPY #8                 \ If Y < 8, i.e. this is a cargo canister, alloy plate,
+ BCC iff_aster          \ boulder, asteroid or splinter, then jump to iff_aster
+                        \ to set X = 2
+
+                        \ If we get here then the ship is not the following:
+                        \
+                        \   * A cop/station/escape pod
+                        \   * An innocent bystander/trader/good bounty hunter
+                        \   * A missile
+                        \   * Cargo or an asteroid
+                        \
+                        \ So it must be a pirate or a non-innocent bounty hunter
+
+ INX                    \ X is &FF at this point, so this INX sets X = 0, and we
+                        \ then fall through into the four INX instructions below
+                        \ to set X = 4
 
 .iff_missle
 
- INX \ X=3
+ INX                    \ If we jump to this point, then set X = 3
 
 .iff_aster
 
- INX \ X=2
+ INX                    \ If we jump to this point, then set X = 2
 
 .iff_cop
 
- INX \ X=1
+ INX                    \ If we jump to this point, then set X = 1
 
 .iff_trade
 
- INX \ X=0
+ INX                    \ If we jump to this point, then set X = 0
 
 .iff_not
 
- LDA iff_base,X
- STA COL
- LDA iff_xor,X
- STA Y2
+ LDA iff_base,X         \ Set COL to the base colour for this ship, given the
+ STA COL                \ I.F.F. colour index in X (this colour is used for both
+                        \ the dot and stick)
+
+ LDA iff_xor,X          \ Set Y2 to the alternating colour for this ship, given
+ STA Y2                 \ the I.F.F. colour index in X (this colour is used for
+                        \ making the stick striped, where appropriate)
 
  LDA INWK+1             \ If any of x_hi, y_hi and z_hi have a 1 in bit 6 or 7,
  ORA INWK+4             \ then the ship is too far away to be shown on the
