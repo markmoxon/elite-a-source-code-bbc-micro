@@ -1383,7 +1383,13 @@ ORG &0300
 
 .cmdr_cour
 
- SKIP 2                 \ AJD
+ SKIP 2                 \ The mission counter for the current special cargo
+                        \ delivery destination
+                        \
+                        \ While doing a special cargo delivery, this counter is
+                        \ halved on every visit to a station (and again if we
+                        \ choose to pay a docking fee), and if it runs down to
+                        \ zero, the mission is lost
 
 .cmdr_courx
 
@@ -1875,7 +1881,8 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
 
 .new_space
 
- SKIP 1                 \ AJD
+ SKIP 1                 \ This byte appears to be unused, though it does have a
+                        \ label in the original source
 
 \ ******************************************************************************
 \
@@ -8969,9 +8976,8 @@ LOAD_D% = LOAD% + P% - CODE%
 \ Given a market item and an amount, work out whether there is room in the
 \ cargo hold for this item.
 \
-\ For standard tonne canisters, the limit is given by the type of cargo hold we
-\ have, with a standard cargo hold having a capacity of 20t and an extended
-\ cargo bay being 35t.
+\ For standard tonne canisters, the limit is given by size of the cargo hold of
+\ our current ship.
 \
 \ For items measured in kg (gold, platinum), g (gem-stones) and alien items,
 \ there is no limit.
@@ -12272,7 +12278,6 @@ LOAD_D% = LOAD% + P% - CODE%
 \                       exit to the docking bay (i.e. show the Status Mode
 \                       screen)
 \                        
-\
 \   pres+3              Show the error to say that an item is already present,
 \                       and process a refund, but do not free up a space in the
 \                       hold
@@ -22542,10 +22547,14 @@ LOAD_G% = LOAD% + P% - CODE%
 
 .cour_buy
 
- LDA cmdr_cour
- ORA cmdr_cour+1
- BEQ cour_start
- JMP jmp_start3
+ LDA cmdr_cour          \ If there is no special cargo delivery mission in
+ ORA cmdr_cour+1        \ progress, then the mission counter in cmdr_cour(1 0)
+ BEQ cour_start         \ will be zero, so jump to cour_start to skip the next
+                        \ instruction
+
+ JMP jmp_start3         \ There is already a special cargo delivery mission in
+                        \ progress, so jump to jmp_start3 to make a beep and
+                        \ show the cargo bay
 
 .cour_start
 
@@ -22757,9 +22766,11 @@ LOAD_G% = LOAD% + P% - CODE%
 
 .cour_dock
 
- LDA cmdr_cour
- ORA cmdr_cour+1
- BEQ cour_quit
+ LDA cmdr_cour          \ If there is no special cargo delivery mission in
+ ORA cmdr_cour+1        \ progress, then the mission counter in cmdr_cour(1 0)
+ BEQ cour_quit          \ will be zero, so jump to cour_quit to return from the
+                        \ subroutine
+
  LDA QQ0
  CMP cmdr_courx
  BNE cour_half
@@ -32927,6 +32938,13 @@ LOAD_I% = LOAD% + P% - CODE%
 \   Category: Encyclopedia
 \    Summary: AJD
 \
+\ ------------------------------------------------------------------------------
+\
+\ Other entry points:
+\
+\   jmp_start3          Make a short, high beep, delay for one second, and go to
+\                       the docking bay (i.e. show the Status Mode screen)
+\
 \ ******************************************************************************
 
 .encyclopedia
@@ -35205,8 +35223,8 @@ LOAD_J% = LOAD% + P% - CODE%
 
  TAX                    \ Copy the type of cargo we are scooping into X
 
- JSR tnpr_FLIGHT        \ Call tnpr_FLIGHT to work out whether we have room in
-                        \ the hold for the scooped item (the C flag contains the
+ JSR tnpr1              \ Call tnpr1 to work out whether we have room in the
+                        \ hold for the scooped item (the C flag contains the
                         \ result)
 
  BCS MA58               \ If the C flag is set then we have no room in the hold
@@ -41723,43 +41741,95 @@ LOAD_L% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
 \
-\       Name: tnpr_FLIGHT
+\       Name: tnpr1
 \       Type: Subroutine
 \   Category: Market
-\    Summary: AJD
+\    Summary: Work out if we have space for one tonne of cargo
+\
+\ ------------------------------------------------------------------------------
+\
+\ Given a market item, work out whether there is room in the cargo hold for one
+\ tonne of this item.
+\
+\ For standard tonne canisters, the limit is given by size of the cargo hold of
+\ our current ship.
+\
+\ For items measured in kg (gold, platinum), g (gem-stones) and alien items,
+\ there is no limit.
+\
+\ Arguments:
+\
+\   X                   The type of market item (see QQ23 for a list of market
+\                       item numbers)
+\
+\ Returns:
+\
+\   A                   The new number of items of type X in the hold
+\
+\   C flag              Returns the result:
+\
+\                         * Set if there is no room for this item
+\
+\                         * Clear if there is room for this item
 \
 \ ******************************************************************************
 
-.tnpr_FLIGHT
+.tnpr1
 
- CPX #&10
- BEQ n_aliens
- CPX #&0D
- BCS l_2b04
+ CPX #16                \ If we are checking whether to add alien items (item
+ BEQ n_aliens           \ type 16), jump to n_aliens to skip the following two
+                        \ instructions
+
+ CPX #13                \ If X >= 13, then X = 13, 14 or 15 (gold, platinum or
+ BCS l_2b04             \ gem-stones), for which there is no storage limit, so
+                        \ jump to l_2b04 to return the 
 
 .n_aliens
 
- LDY #&0C               \ Related to tnpr, but not the same
- SEC
- LDA QQ20+16
+ LDY #12                \ Here we count the tonne canisters we have in the hold
+                        \ and add 1 to see if we have enough room for one more
+                        \ tonne of cargo, using Y as the loop counter, starting
+                        \ with Y = 12
+
+ SEC                    \ Set the C flag, so the addition below has one extra,
+                        \ representing the extra tonne we want to try to add
+
+ LDA QQ20+16            \ Set A to the number of alien items we already have in
+                        \ the hold
 
 .l_2af9
 
- ADC QQ20,Y
- BCS n_cargo
- DEY
- BPL l_2af9
- CMP new_hold           \ new_hold is free space + 1
+ ADC QQ20,Y             \ Set A = A + the number of tonnes we have in the hold
+                        \ of market item number Y
+
+ BCS n_cargo            \ If the addition overflowed, jump to n_cargo to return
+                        \ from the subroutine with the C flag set, as the hold
+                        \ is already full
+
+ DEY                    \ Decrement the loop counter
+
+ BPL l_2af9             \ Loop back to add in the next market item in the hold,
+                        \ until we have added up all market items from 12
+                        \ (minerals) down to 0 (food)
+
+ CMP new_hold           \ If A < new_hold then the C flag will be clear (we have
+                        \ room in the hold)
+                        \
+                        \ If A >= new_hold then the C flag will be set (we do
+                        \ not have room in the hold)
 
 .n_cargo
 
- RTS
+ RTS                    \ Return from the subroutine
 
 .l_2b04
 
- LDA QQ20,X
- ADC #&00
- RTS
+ LDA QQ20,X             \ Set A to the number of units of this item that we
+                        \ already have in the hold
+
+ ADC #0                 \ AJD
+
+ RTS                    \ Return from the subroutine
 
 \ ******************************************************************************
 \
@@ -41947,7 +42017,7 @@ LOAD_L% = LOAD% + P% - CODE%
  STX FIST               \ Changing galaxy also clears our criminal record, so
                         \ set our legal status in FIST to 0 ("clean")
 
- STX cmdr_cour          \ Reset the special cargo delivery mission details in
+ STX cmdr_cour          \ Reset the special cargo delivery mission counter in
  STX cmdr_cour+1        \ cmdr_cour(1 0)
 
  JSR wW                 \ Call wW to start the hyperspace countdown
@@ -46705,8 +46775,9 @@ LOAD_M% = LOAD% + P% - CODE%
                         \ otherwise do the following three jumps
 
  LDA cmdr_cour          \ If there is no special cargo delivery mission in
- ORA cmdr_cour+1        \ progress, then cmdr_cour(1 0) will be zero, so return
- BEQ t95                \ from the subroutine (as t95 contains an RTS)
+ ORA cmdr_cour+1        \ progress, then the mission counter in cmdr_cour(1 0)
+ BEQ t95                \ will be zero, so return from the subroutine (as t95
+                        \ contains an RTS)
 
  JSR TT103              \ Draw small crosshairs at coordinates (QQ9, QQ10),
                         \ which will erase the crosshairs currently there
@@ -49559,26 +49630,123 @@ BNE MESS                \ Print recursive token A as an in-flight message,
 \       Name: iff_xor
 \       Type: Variable
 \   Category: Dashboard
-\    Summary: AJD
+\    Summary: The EOR value for different types of ship in the the I.F.F. system
+\             for creating striped sticks in the scanner
+\
+\ ------------------------------------------------------------------------------
+\
+\ These are the EOR values for the I.F.F. system, which shows ships on the
+\ scanner in the following colours, depending on the type index for this ship
+\ (as returned by the iff_index routine). The EOR values determine whether the
+\ stick is striped.
+\
+\ The colours for the normal dashboard palette are:
+\
+\   Index     Dot colour  Stick colour(s)     Ship types
+\   0         Green       Green               Clean
+\   1         Yellow      Yellow              Station tracked
+\   2         Green       Green and yellow    Debris
+\   3         Yellow      Yellow and red      Missile
+\   4         Green       Green and red       Offender/fugitive
+\
+\ The colours for the escape pod dashboard palette are:
+\
+\   Index     Dot colour  Stick colour(s)     Ship types
+\   0         Cyan        Cyan                Clean
+\   1         White       White               Station tracked
+\   2         Cyan        Cyan and white      Debris
+\   3         White       White and red       Missile
+\   4         Cyan        Cyan and red        Offender/fugitive
+\
+\ The EOR values have the following effect on the colour of the stick:
+\
+\   %00000000       Stick is a solid colour, in the base colour
+\   %00001111       Stick is striped, in the base colour and base colour EOR %01
+\   %11110000       Stick is striped, in the base colour and base colour EOR %10
+\   %11111111       Stick is striped, in the base colour and base colour EOR %11
+\
+\ Taking the example of debris, the base colour from iff_base+2 is &FF, which is
+\ %11111111, or a four-pixel byte of colour %11, or colour 3 in mode 5, or
+\ green/cyan (green for the normal palette, cyan in the escape pod palette).
+\
+\ The EOR value from iff_xor+2 is &0F, which is %00001111, or a four-pixel byte
+\ of %01 values. Applying this EOR to the base colour (%11) gives:
+\
+\   %11 EOR %01 = %10 = 2
+\
+\ and colour 2 in mode 5 is yellow/white (yellow for the normal palette, white
+\ in the escape pod palette). So the stick colour for debris when we have an
+\ I.F.F. system fitted is:
+\
+\   Green/cyan (the base colour) striped with yellow/white (the colour after
+\   applying the EOR value)
+\
+\ If there is no I.F.F. system fitted, the index is 0 and the EOR value is 0,
+\ which doesn't affect the default colour.
+\
+\ The last two entries are the same as the first two entries in iff_base, which
+\ is the next variable, so they are commented out here to save two bytes.
 \
 \ ******************************************************************************
 
 .iff_xor
 
- EQUB &00, &00, &0F \, &FF, &F0 overlap
+ EQUB &00               \ Index 0: Clean = %00000000
+
+ EQUB &00               \ Index 1: Station tracked = %00000000
+
+ EQUB &0F               \ Index 2: Debris = %00001111
+
+\EQUB &FF               \ Index 3: Missile = %11111111
+
+\EQUB &F0               \ Index 4: Offender/fugitive = %11110000
 
 \ ******************************************************************************
 \
 \       Name: iff_base
 \       Type: Variable
 \   Category: Dashboard
-\    Summary: AJD
+\    Summary: Base colours for different types of ship in the the I.F.F. system
+\
+\ ------------------------------------------------------------------------------
+\
+\ These are the base colours for the I.F.F. system, which shows ships on the
+\ scanner in the following colours, depending on the type index for this ship
+\ (as returned by the iff_index routine). The base colours determine the colour
+\ of the dot, as well as the underlying colour of the stick (which can be
+\ striped, depending on the corresponding EOR colour from iff_xor).
+\
+\ The colours for the normal dashboard palette are:
+\
+\   Index     Dot colour  Stick colour(s)     Ship types
+\   0         Green       Green               Clean
+\   1         Yellow      Yellow              Station tracked
+\   2         Green       Green and yellow    Debris
+\   3         Yellow      Yellow and red      Missile
+\   4         Green       Green and red       Offender/fugitive
+\
+\ The colours for the escape pod dashboard palette are:
+\
+\   Index     Dot colour  Stick colour(s)     Ship types
+\   0         Cyan        Cyan                Clean
+\   1         White       White               Station tracked
+\   2         Cyan        Cyan and white      Debris
+\   3         White       White and red       Missile
+\   4         Cyan        Cyan and red        Offender/fugitive
 \
 \ ******************************************************************************
 
 .iff_base
 
- EQUB &FF, &F0, &FF, &F0, &FF
+ EQUB &FF               \ Index 0: Clean = green/cyan
+
+ EQUB &F0               \ Index 1: Station tracked = yellow/white
+
+ EQUB &FF               \ Index 2: Debris = green/cyan
+
+ EQUB &F0               \ Index 3: Missile = yellow/white
+
+ EQUB &FF               \ Index 4: Offender/fugitive = green/cyan
 
 \ ******************************************************************************
 \

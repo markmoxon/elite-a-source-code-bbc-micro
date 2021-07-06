@@ -882,7 +882,7 @@ ORG &0D7A
 \       Name: iff_index
 \       Type: Subroutine
 \   Category: Dashboard
-\    Summary: Return the colour index for this ship on the I.F.F. system
+\    Summary: Return the type index for this ship in the I.F.F. system
 \
 \ ------------------------------------------------------------------------------
 \
@@ -890,19 +890,24 @@ ORG &0D7A
 \
 \ Returns:
 \
-\   X                   The colour index for the current ship type:
+\   X                   The index for the current ship in the I.F.F. system:
 \
-\                         * 0 = no I.F.F. system fitted, or ship is an innocent
-\                               bystander, trader or innocent bounty hunter
+\                         * 0 = Clean
+\                               Innocent trader, innocent bounty hunter
 \
-\                         * 1 = cop, space station or escape pod
+\                         * 1 = Station tracked
+\                               Cop, space station, escape pod
 \
-\                         * 2 = cargo canister, alloy plate, boulder, asteroid
-\                               or splinter
+\                         * 2 = Debris
+\                               Cargo, alloy plate, asteroid, boulder, splinter
 \
-\                         * 3 = missile
+\                         * 3 = Missile
 \
-\                         * 4 = pirate or a non-innocent bounty hunter
+\                         * 4 = Offender/fugitive
+\                               Pirate, non-innocent bounty hunter
+\
+\                       If there is no I.F.F. system fitted, the index returned
+\                       in X is always 0
 \
 \ ******************************************************************************
 

@@ -1384,7 +1384,13 @@ ORG &0300
 
 .cmdr_cour
 
- SKIP 2                 \ AJD
+ SKIP 2                 \ The mission counter for the current special cargo
+                        \ delivery destination
+                        \
+                        \ While doing a special cargo delivery, this counter is
+                        \ halved on every visit to a station (and again if we
+                        \ choose to pay a docking fee), and if it runs down to
+                        \ zero, the mission is lost
 
 .cmdr_courx
 
@@ -1880,7 +1886,8 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
 
 .new_space
 
- SKIP 1                 \ AJD
+ SKIP 1                 \ This byte appears to be unused, though it does have a
+                        \ label in the original source
 
                         \ --- End of added code ------------------------------->
 
@@ -13664,8 +13671,8 @@ LOAD_F% = LOAD% + P% - CODE%
                         \ ee2 to continue
 
  LDA cmdr_cour          \ If there is no special cargo delivery mission in
- ORA cmdr_cour+1        \ progress, then cmdr_cour(1 0) will be zero, so skip
- BEQ ee2                \ to ee2 to continue
+ ORA cmdr_cour+1        \ progress, then the mission counter in cmdr_cour(1 0)
+ BEQ ee2                \ will be zero, so skip to ee2 to continue
 
  JSR TT103              \ Draw small crosshairs at coordinates (QQ9, QQ10),
                         \ which will erase the crosshairs currently there
@@ -19164,6 +19171,13 @@ LOAD_H% = LOAD% + P% - CODE%
 \   Category: Encyclopedia
 \    Summary: AJD
 \
+\ ------------------------------------------------------------------------------
+\
+\ Other entry points:
+\
+\   jmp_start3          Make a short, high beep, delay for one second, and go to
+\                       the docking bay (i.e. show the Status Mode screen)
+\
 \ ******************************************************************************
 
                         \ --- Whole section added for Elite-A: ---------------->
@@ -19202,8 +19216,11 @@ LOAD_H% = LOAD% + P% - CODE%
 
 .jmp_start3
 
- JSR dn2
- JMP BAY
+ JSR dn2                \ Call dn2 to make a short, high beep and delay for 1
+                        \ second
+
+ JMP BAY                \ Jump to BAY to go to the docking bay (i.e. show the
+                        \ Status Mode screen)
 
                         \ --- End of added section ---------------------------->
 

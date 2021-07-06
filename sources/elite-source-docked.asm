@@ -1387,7 +1387,13 @@ ORG &0300
 
 .cmdr_cour
 
- SKIP 2                 \ AJD
+ SKIP 2                 \ The mission counter for the current special cargo
+                        \ delivery destination
+                        \
+                        \ While doing a special cargo delivery, this counter is
+                        \ halved on every visit to a station (and again if we
+                        \ choose to pay a docking fee), and if it runs down to
+                        \ zero, the mission is lost
 
 .cmdr_courx
 
@@ -1883,7 +1889,8 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
 
 .new_space
 
- SKIP 1                 \ AJD
+ SKIP 1                 \ This byte appears to be unused, though it does have a
+                        \ label in the original source
 
                         \ --- End of added code ------------------------------->
 
@@ -12896,9 +12903,8 @@ LOAD_D% = LOAD% + P% - CODE%
 \ Given a market item and an amount, work out whether there is room in the
 \ cargo hold for this item.
 \
-\ For standard tonne canisters, the limit is given by the type of cargo hold we
-\ have, with a standard cargo hold having a capacity of 20t and an extended
-\ cargo bay being 35t.
+\ For standard tonne canisters, the limit is given by size of the cargo hold of
+\ our current ship.
 \
 \ For items measured in kg (gold, platinum), g (gem-stones) and alien items,
 \ there is no limit.
@@ -22143,8 +22149,8 @@ LOAD_F% = LOAD% + P% - CODE%
                         \ ee2 to continue
 
  LDA cmdr_cour          \ If there is no special cargo delivery mission in
- ORA cmdr_cour+1        \ progress, then cmdr_cour(1 0) will be zero, so skip
- BEQ ee2                \ to ee2 to continue
+ ORA cmdr_cour+1        \ progress, then the mission counter in cmdr_cour(1 0)
+ BEQ ee2                \ will be zero, so skip to ee2 to continue
 
  JSR TT103              \ Draw small crosshairs at coordinates (QQ9, QQ10),
                         \ which will erase the crosshairs currently there
@@ -29893,10 +29899,14 @@ LOAD_G% = LOAD% + P% - CODE%
 
 .cour_buy
 
- LDA cmdr_cour
- ORA cmdr_cour+1
- BEQ cour_start
- JMP jmp_start3
+ LDA cmdr_cour          \ If there is no special cargo delivery mission in
+ ORA cmdr_cour+1        \ progress, then the mission counter in cmdr_cour(1 0)
+ BEQ cour_start         \ will be zero, so jump to cour_start to skip the next
+                        \ instruction
+
+ JMP jmp_start3         \ There is already a special cargo delivery mission in
+                        \ progress, so jump to jmp_start3 to make a beep and
+                        \ show the cargo bay
 
 .cour_start
 
@@ -30111,9 +30121,11 @@ LOAD_G% = LOAD% + P% - CODE%
 
 .cour_dock
 
- LDA cmdr_cour
- ORA cmdr_cour+1
- BEQ cour_quit
+ LDA cmdr_cour          \ If there is no special cargo delivery mission in
+ ORA cmdr_cour+1        \ progress, then the mission counter in cmdr_cour(1 0)
+ BEQ cour_quit          \ will be zero, so jump to cour_quit to return from the
+                        \ subroutine
+
  LDA QQ0
  CMP cmdr_courx
  BNE cour_half
