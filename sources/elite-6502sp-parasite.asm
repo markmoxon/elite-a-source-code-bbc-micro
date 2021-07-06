@@ -64,14 +64,8 @@ AST = 7                 \ Ship type for an asteroid
 SPL = 8                 \ Ship type for a splinter
 SHU = 9                 \ Ship type for a Shuttle
 CYL = 11                \ Ship type for a Cobra Mk III
-ANA = 14                \ Ship type for an Anaconda
-WRM = 15                \ Ship type for a Worm
 COPS = 16               \ Ship type for a Viper
-SH3 = 17                \ Ship type for a Sidewinder
 KRA = 19                \ Ship type for a Krait
-ADA = 20                \ Ship type for a Adder
-CYL2 = 24               \ Ship type for a Cobra Mk III (pirate)
-ASP = 25                \ Ship type for an Asp Mk II
 THG = 29                \ Ship type for a Thargoid
 TGL = 30                \ Ship type for a Thargon
 CON = 31                \ Ship type for a Constrictor
@@ -1296,7 +1290,7 @@ ORG &0300
 
  SKIP 1                 \ This byte appears to be unused
 
-.new_type
+.cmdr_type
 
  SKIP 1                 \ The type of our current ship
 
@@ -1349,7 +1343,7 @@ ORG &0300
                         \
                         \   * 0 = not fitted
                         \
-                        \   * &7F = fitted
+                        \   * &FF = fitted
                         \
                         \ Elite-A replaces the energy bomb with the hyperspace
                         \ unit, reusing the BOMB variable to determine whether
@@ -2134,25 +2128,25 @@ ELSE
  EQUD &88130000         \ CASH = Amount of cash (500 Cr), #9-12
 ENDIF
 
- EQUB 60                \ QQ14 = Fuel level, #13
+ EQUB 60+(15 AND Q%)    \ QQ14 = Fuel level, #13
 
  EQUB 0                 \ COK = Competition flags, #14
 
  EQUB 0                 \ GCNT = Galaxy number, 0-7, #15
 
- EQUB 0                 \ LASER = Front laser, #16
+ EQUB &9C AND Q%        \ LASER = Front laser, #16
 
- EQUB 0                 \ LASER+1 = Rear laser, #17
+ EQUB &9C AND Q%        \ LASER+1 = Rear laser, #17
 
  EQUB 0                 \ LASER+2 = Left laser, #18
 
  EQUB 0                 \ LASER+3 = Right laser, #19
 
- EQUW 0                 \ These bytes appear to be unused (they were originally
-                        \ used for up/down lasers, but they were dropped),
-                        \ #20-21
+ EQUB 0                 \ This byte appears to be unused, #20
 
- EQUB 0                 \ CRGO = Cargo capacity, #22
+ EQUB 8 AND Q%          \ cmdr_type = Type of our current ship, #21
+
+ EQUB Q%                \ CRGO = I.F.F. system, #22
 
  EQUB 0                 \ QQ20+0  = Amount of food in cargo hold, #23
  EQUB 0                 \ QQ20+1  = Amount of textiles in cargo hold, #24
@@ -2172,11 +2166,11 @@ ENDIF
  EQUB 0                 \ QQ20+15 = Amount of gem-stones in cargo hold, #38
  EQUB 0                 \ QQ20+16 = Amount of alien items in cargo hold, #39
 
- EQUB Q%                \ ECM = E.C.M., #40
+ EQUB Q%                \ ECM = E.C.M. system, #40
 
  EQUB Q%                \ BST = Fuel scoops ("barrel status"), #41
 
- EQUB Q% AND 127        \ BOMB = Hyperspace unit, #42
+ EQUB Q%                \ BOMB = Hyperspace unit, #42
 
  EQUB Q% AND 1          \ ENGY = Energy/shield level, #43
 
@@ -2186,7 +2180,11 @@ ENDIF
 
  EQUB Q%                \ ESCP = Escape pod, #46
 
- EQUD 0                 \ These four bytes appear to be unused, #47-50
+ EQUW 0                 \ cmdr_cour = Special cargo mission counter, #47
+
+ EQUB 0                 \ cmdr_courx = Special cargo destination x-coord, #49
+
+ EQUB 0                 \ cmdr_coury = Special cargo destination y-coord, #50
 
  EQUB 0                 \ NOMSL = Number of missiles, #51
 
@@ -10114,8 +10112,7 @@ LOAD_D% = LOAD% + P% - CODE%
 .TT219
 
  LDA #2                 \ Clear the top part of the screen, draw a white border,
- JSR TT66               \ Clear the top part of the screen, draw a white border,
-                        \ and set the current view type in QQ11 to 2
+ JSR TT66               \ and set the current view type in QQ11 to 2
 
  JSR CTRL               \ AJD
  BPL buy_ctrl
@@ -22354,7 +22351,7 @@ LOAD_G% = LOAD% + P% - CODE%
  STX XC
  INC YC
  STA Q
- LDY new_type
+ LDY cmdr_type
  JSR n_price
  CLC
  LDX #3
@@ -22410,7 +22407,7 @@ LOAD_G% = LOAD% + P% - CODE%
  STA LASER,Y
  DEY
  BPL n_wipe
- STX new_type
+ STX cmdr_type
  JSR n_load
  LDA new_range
  STA QQ14
@@ -22432,7 +22429,7 @@ LOAD_G% = LOAD% + P% - CODE%
 
 .n_load
 
- LDY new_type
+ LDY cmdr_type
  LDX new_offsets,Y
  LDY #0
 
@@ -22570,7 +22567,7 @@ LOAD_G% = LOAD% + P% - CODE%
  SEC
  LDA FIST
  ADC GCNT
- ADC new_type
+ ADC cmdr_type
  STA INWK+1
  ADC INWK
  SBC cmdr_courx
@@ -38068,7 +38065,8 @@ LOAD_K% = LOAD% + P% - CODE%
 \
 \ This section works out what kind of condition the ship is in. Specifically:
 \
-\   * If this is an Anaconda, consider spawning (22% chance) a Worm
+\   * If this is a large ship that can spawn smaller ships, such as an Anaconda
+\     or a Dragon, then consider spawning (22% chance) a Worm
 \
 \   * Rarely (2.5% chance) roll the ship by a noticeable amount
 \
@@ -38091,15 +38089,20 @@ LOAD_K% = LOAD% + P% - CODE%
  JMP TA20               \ This is a missile, so jump down to TA20 to get
                         \ straight into some aggressive manoeuvring
 
- CMP #ANA               \ If this is not an Anaconda, jump down to TN7 to skip
- BNE TN7                \ the following
+ CMP #14                \ If this is not a large ship that can spawn smaller
+ BNE TN7                \ ships (e.g. an Anaconda or Dragon), which will be in
+                        \ slot 14 in the ship files, jump down to TN7 to skip
+                        \ the following
 
  JSR DORND              \ Set A and X to random numbers
 
  CMP #200               \ If A < 200 (78% chance), jump down to TN7 to skip the
  BCC TN7                \ following
 
- LDX #WRM               \ Set X to the ship type for a Worm
+ LDX #15                \ Set X to the ship in slot 15, which will be the kind
+                        \ of ship that the large ship in slot 14 can spawn
+                        \ (e.g. an Anaconda can spawn a Worm, while a Dragon can
+                        \ spawn a Sidewinder)
 
  JMP TN6                \ Jump to TN6 to spawn the Worm and return from
                         \ the subroutine using a tail call
@@ -39610,8 +39613,8 @@ LOAD_K% = LOAD% + P% - CODE%
  LDY #30                \ starts pitching
  STA (INF),Y
 
- LDA TYPE               \ If the ship's type is < #CYL (i.e. a missile, Coriolis
- CMP #CYL               \ space station, escape pod, plate, cargo canister,
+ LDA TYPE               \ If the ship's type is < 11 (i.e. a missile, Coriolis
+ CMP #11                \ space station, escape pod, plate, cargo canister,
  BCC AN3                \ boulder, asteroid, splinter, Shuttle or Transporter),
                         \ then jump to AN3 to skip the following
 
@@ -46071,9 +46074,9 @@ LOAD_M% = LOAD% + P% - CODE%
 
 .nodo
 
- LDA #CYL               \ Call hordes to spawn a pack of ships from type 11 to
- LDX #3                 \ 14, i.e. Cobra Mk III to Anaconda
- JMP hordes
+ LDA #11                \ Call hordes to spawn a pack of ships from ship slots
+ LDX #3                 \ 11 to 14, which is where the trader ships live in the
+ JMP hordes             \ ship files
 
 \ ******************************************************************************
 \
@@ -46235,10 +46238,8 @@ LOAD_M% = LOAD% + P% - CODE%
 \
 \ This section covers the following:
 \
-\   * Potentially spawn (47% chance) either a lone bounty hunter (a Cobra Mk
-\     III, Asp Mk II, Python or Fer-de-lance), a Thargoid, or a group of up to 4
-\     pirates (a mix of Sidewinders, Mambas, Kraits, Adders, Geckos, Cobras Mk I
-\     and III, and Worms)
+\   * Potentially spawn (47% chance) either a pack of up to 8 bounty hunters,
+\     a Thargoid, or a pack of up to 8 pirates
 \
 \   * Also potentially spawn a Constrictor if this is the mission 1 endgame, or
 \     Thargoids if mission 2 is in progress
@@ -46282,12 +46283,12 @@ LOAD_M% = LOAD% + P% - CODE%
  JSR DORND              \ Set A and X to random numbers
 
  LDY gov                \ If the government of this system is 0 (anarchy), jump
- BEQ LABEL_2            \ straight to LABEL_2 to start spawning pirates or a
-                        \ lone bounty hunter
+ BEQ LABEL_2            \ straight to LABEL_2 to start spawning pirates or
+                        \ bounty hunters
 
  CMP #120               \ If the random number in A >= 120 (53% chance), jump to
  BCS MLOOPS             \ MLOOPS to stop spawning (so there's a 47% chance of
-                        \ spawning pirates or a lone bounty hunter)
+                        \ spawning pirates or bounty hunters)
 
  AND #7                 \ Reduce the random number in A to the range 0-7, and
  CMP gov                \ if A is less than government of this system, jump
@@ -46299,12 +46300,12 @@ LOAD_M% = LOAD% + P% - CODE%
 
 .LABEL_2
 
-                        \ Now to spawn a lone bounty hunter, a Thargoid or a
-                        \ group of pirates
+                        \ Now to spawn a group of bounty hunters, a Thargoid or
+                        \ a pack of pirates
 
  CPX #100               \ If the random number in X >= 100 (61% chance), jump
  BCS mt1                \ to mt1 to spawn pirates, otherwise keep going to
-                        \ spawn a lone bounty hunter or a Thargoid
+                        \ spawn bounty hunters or a Thargoid
 
  INC EV                 \ Increase the extra vessels spawning counter, to
                         \ prevent the next attempt to spawn extra vessels
@@ -46314,8 +46315,8 @@ LOAD_M% = LOAD% + P% - CODE%
 
  ADC #25                \ Add A to 25 (we know the C flag is clear as we passed
                         \ through the BCS above), so A is now a ship slot in the
-                        \ range 25-28, which is where the pirate ships live in
-                        \ the ship files
+                        \ range 25-28, which is where the bounty hunter ships
+                        \ live in the ship files
 
  TAY                    \ Copy the new ship type to Y
 
@@ -46374,9 +46375,9 @@ LOAD_M% = LOAD% + P% - CODE%
 
 .mt1
 
- LDA #SH3               \ Fall through into hordes to spawn a pack of ships from
- LDX #7                 \ type 17 to 24, i.e. Sidewinder to Cobra Mk III
-                        \ (pirate)
+ LDA #17                \ Fall through into hordes to spawn a pack of ships from
+ LDX #7                 \ ship slots 17 to 24,, which is where the pirate ships
+                        \ live in the ship files
 
 .hordes
 

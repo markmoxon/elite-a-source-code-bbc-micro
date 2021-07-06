@@ -121,7 +121,12 @@ Let's look at how to build Elite-A from the source.
 
 ### Build targets
 
-There is only one build target available: `build`. Unlike the official versions of Elite, Elite-A is not encrypted, so there is no need for an `encrypt` target.
+There are two main build targets available. They are:
+
+* `build` - A version with a maxed-out commander flying a Fer-de-Lance
+* `encrypt` - A version that exactly matches the released version of the game
+
+Unlike the official versions of Elite, Elite-A is not encrypted, so there is no difference in encryption between the two targets. I have used the same target names for consistency, but the only difference is in the commander file.
 
 Builds are supported for both Windows and Mac/Linux systems. In all cases the build process is defined in the `Makefile` provided.
 
@@ -131,10 +136,14 @@ Note that the build ends with a warning that there is no `SAVE` command in the s
 
 For Windows users, there is a batch file called `make.bat` to which you can pass one of the build targets above. Before this will work, you should edit the batch file and change the values of the `BEEBASM` and `PYTHON` variables to point to the locations of your `beebasm.exe` and `python.exe` executables. You also need to change directory to the repository folder (i.e. the same folder as `make.exe`).
 
-All being well, doing the following:
+All being well, doing one of the following:
 
 ```
 make.bat build
+```
+
+```
+make.bat encrypt
 ```
 
 will produce a file called `elite-a-released.ssd` containing the released version of Elite-A, which you can then load into an emulator, or into a real BBC Micro using a device like a Gotek.
@@ -143,10 +152,14 @@ will produce a file called `elite-a-released.ssd` containing the released versio
 
 The build process uses a standard GNU `Makefile`, so you just need to install `make` if your system doesn't already have it. If BeebAsm or Python are not on your path, then you can either fix this, or you can edit the `Makefile` and change the `BEEBASM` and `PYTHON` variables in the first two lines to point to their locations. You also need to change directory to the repository folder (i.e. the same folder as `Makefile`).
 
-All being well, doing the following:
+All being well, doing one of the following:
 
 ```
 make build
+```
+
+```
+make encrypt
 ```
 
 will produce a file called `elite-a-released.ssd` containing the released version of Elite-A, which you can then load into an emulator, or into a real BBC Micro using a device like a Gotek.
@@ -170,13 +183,13 @@ make verify
 To run a build and then verify the results, you can add two targets, like this on Windows:
 
 ```
-make.bat build verify
+make.bat encrypt verify
 ```
 
 or this on Mac/Linux:
 
 ```
-make build verify
+make encrypt verify
 ```
 
 The Python script `crc32.py` does the actual verification, and shows the checksums and file sizes of both sets of files, alongside each other, and with a Match column that flags any discrepancies.

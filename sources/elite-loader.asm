@@ -1999,6 +1999,8 @@ ORG LOADcode + P% - LOAD
 
 .TVT1code
 
+EQUB &FF
+
 ORG &1100
 
 \ ******************************************************************************
@@ -2325,7 +2327,7 @@ ELSE
  EQUD &88130000         \ CASH = Amount of cash (500 Cr), #9-12
 ENDIF
 
- EQUB 60                \ QQ14 = Fuel level, #13
+ EQUB 60+(15 AND Q%)    \ QQ14 = Fuel level, #13
 
                         \ --- End of replacement ------------------------------>
 
@@ -2341,9 +2343,9 @@ ENDIF
 
                         \ --- And replaced by: -------------------------------->
 
- EQUB 0                 \ LASER = Front laser, #16
+ EQUB &9C AND Q%        \ LASER = Front laser, #16
 
- EQUB 0                 \ LASER+1 = Rear laser, #17
+ EQUB &9C AND Q%        \ LASER+1 = Rear laser, #17
 
                         \ --- End of replacement ------------------------------>
 
@@ -2351,17 +2353,21 @@ ENDIF
 
  EQUB 0                 \ LASER+3 = Right laser, #19
 
- EQUW 0                 \ These bytes appear to be unused (they were originally
-                        \ used for up/down lasers, but they were dropped),
-                        \ #20-21
-
                         \ --- Original Acornsoft code removed: ---------------->
 
+\ EQUW 0                \ These bytes appear to be unused (they were originally
+\                       \ used for up/down lasers, but they were dropped),
+\                       \ #20-21
+\
 \ EQUB 22+(15 AND Q%)   \ CRGO = Cargo capacity, #22
 
                         \ --- And replaced by: -------------------------------->
 
- EQUB 0                 \ CRGO = Cargo capacity, #22
+ EQUB 0                 \ This byte appears to be unused, #20
+
+ EQUB 8 AND Q%          \ cmdr_type = Type of our current ship, #21
+
+ EQUB Q%                \ CRGO = I.F.F. system, #22
 
                         \ --- End of replacement ------------------------------>
 
@@ -2383,11 +2389,19 @@ ENDIF
  EQUB 0                 \ QQ20+15 = Amount of gem-stones in cargo hold, #38
  EQUB 0                 \ QQ20+16 = Amount of alien items in cargo hold, #39
 
- EQUB Q%                \ ECM = E.C.M., #40
+ EQUB Q%                \ ECM = E.C.M. system, #40
 
  EQUB Q%                \ BST = Fuel scoops ("barrel status"), #41
 
- EQUB Q% AND 127        \ BOMB = Hyperspace unit, #42
+                        \ --- Original Acornsoft code removed: ---------------->
+
+\ EQUB Q% AND 127       \ BOMB = Energy bomb, #42
+
+                        \ --- And replaced by: -------------------------------->
+
+ EQUB Q%                \ BOMB = Hyperspace unit, #42
+
+                        \ --- End of replacement ------------------------------>
 
  EQUB Q% AND 1          \ ENGY = Energy/shield level, #43
 
@@ -2397,13 +2411,19 @@ ENDIF
 
  EQUB Q%                \ ESCP = Escape pod, #46
 
- EQUD 0                 \ These four bytes appear to be unused, #47-50
-
                         \ --- Original Acornsoft code removed: ---------------->
 
+\ EQUD 0                \ These four bytes appear to be unused, #47-50
+\
 \ EQUB 3+(Q% AND 1)     \ NOMSL = Number of missiles, #51
 
                         \ --- And replaced by: -------------------------------->
+
+ EQUW 0                 \ cmdr_cour = Special cargo mission counter, #47
+
+ EQUB 0                 \ cmdr_courx = Special cargo destination x-coord, #49
+
+ EQUB 0                 \ cmdr_coury = Special cargo destination y-coord, #50
 
  EQUB 0                 \ NOMSL = Number of missiles, #51
 

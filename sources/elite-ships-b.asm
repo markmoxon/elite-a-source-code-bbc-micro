@@ -66,7 +66,7 @@ ORG CODE%
  EQUW 0
  EQUW 0
  EQUW 0
- EQUW SHIP_SHUTTLE_MK_2 \         9 = Shuttle Mk II
+ EQUW SHIP_SHUTTLE_MK_2 \ SHU  =  9 = Shuttle Mk II
  EQUW 0
  EQUW SHIP_GHAVIAL      \        11 = Ghavial
  EQUW SHIP_MONITOR      \        12 = Monitor

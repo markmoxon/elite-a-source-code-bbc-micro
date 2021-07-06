@@ -49,26 +49,7 @@ NOSH = 12               \ The maximum number of ships in our local bubble of
 
 NTY = 31                \ The number of different ship types
 
-MSL = 1                 \ Ship type for a missile
 SST = 2                 \ Ship type for a Coriolis space station
-ESC = 3                 \ Ship type for an escape pod
-PLT = 4                 \ Ship type for an alloy plate
-OIL = 5                 \ Ship type for a cargo canister
-AST = 7                 \ Ship type for an asteroid
-SPL = 8                 \ Ship type for a splinter
-SHU = 9                 \ Ship type for a Shuttle
-CYL = 11                \ Ship type for a Cobra Mk III
-ANA = 14                \ Ship type for an Anaconda
-WRM = 15                \ Ship type for a Worm
-COPS = 16               \ Ship type for a Viper
-SH3 = 17                \ Ship type for a Sidewinder
-KRA = 19                \ Ship type for a Krait
-ADA = 20                \ Ship type for a Adder
-CYL2 = 24               \ Ship type for a Cobra Mk III (pirate)
-ASP = 25                \ Ship type for an Asp Mk II
-THG = 29                \ Ship type for a Thargoid
-TGL = 30                \ Ship type for a Thargon
-CON = 31                \ Ship type for a Constrictor
 
 NI% = 37                \ The number of bytes in each ship's data block (as
                         \ stored in INWK and K%)
@@ -1303,7 +1284,7 @@ ORG &0300
 
  SKIP 1                 \ This byte appears to be unused
 
-.new_type
+.cmdr_type
 
  SKIP 1                 \ The type of our current ship
 
@@ -1358,8 +1339,7 @@ ORG &0300
                         \
                         \   * 0 = not fitted
                         \
-                        \   * &7F = fitted
-
+                        \   * &FF = fitted
                         \
                         \ Elite-A replaces the energy bomb with the hyperspace
                         \ unit, reusing the BOMB variable to determine whether

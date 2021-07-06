@@ -66,7 +66,7 @@ ORG CODE%
  EQUW SHIP_BOULDER      \         6 = Boulder
  EQUW SHIP_ASTEROID     \ AST  =  7 = Asteroid
  EQUW SHIP_SPLINTER     \ SPL  =  8 = Splinter
- EQUW SHIP_SHUTTLE_MK_2 \         9 = Shuttle Mk II
+ EQUW SHIP_SHUTTLE_MK_2 \ SHU  =  9 = Shuttle Mk II
  EQUW 0
  EQUW SHIP_PYTHON       \        11 = Python
  EQUW SHIP_MORAY        \        12 = Moray
