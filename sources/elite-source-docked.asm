@@ -6479,15 +6479,15 @@ LOAD_B% = LOAD% + P% - CODE%
  ADC #21                \ range 136 ("HARMLESS") to 144 ("---- E L I T E ----")
  JSR plf                \ followed by a newline
 
- LDA #18                \ Print recursive token 132, which prints the next bit
- JSR plf2               \ of the Status Mode screen:
-                        \
-                        \   EQUIPMENT:
-                        \
-                        \ followed by a newline and an indent of 6 characters
-
                         \ --- Original Acornsoft code removed: ---------------->
 
+\ LDA #18               \ Print recursive token 132, which prints the next bit
+\ JSR plf2              \ of the Status Mode screen:
+\                       \
+\                       \   EQUIPMENT:
+\                       \
+\                       \ followed by a newline and an indent of 6 characters
+\
 \ LDA CRGO              \ If our ship's cargo capacity is < 26 (i.e. we do not
 \ CMP #26               \ have a cargo bay extension), skip the following two
 \ BCC P%+7              \ instructions
@@ -6543,6 +6543,13 @@ LOAD_B% = LOAD% + P% - CODE%
 
                         \ --- And replaced by: -------------------------------->
 
+ LDA #18                \ Print recursive token 132, which prints the next bit
+ JSR status_equip       \ of the Status Mode screen:
+                        \
+                        \   EQUIPMENT:
+                        \
+                        \ followed by a newline and an indent of 6 characters AJD
+
 .sell_equip
 
  LDA CRGO               \ If we don't have an I.F.F. system fitted (i.e. CRGO is
@@ -6550,7 +6557,7 @@ LOAD_B% = LOAD% + P% - CODE%
 
  LDA #107               \ We do have an I.F.F. system fitted, so print recursive
  LDX #6                 \ token 107 ("I.F.F.SYSTEM")
- JSR plf2               \ AJD
+ JSR status_equip       \ AJD
 
 .l_1b57
 
@@ -6558,7 +6565,7 @@ LOAD_B% = LOAD% + P% - CODE%
  BEQ l_1b61
  LDA #&6F
  LDX #&19
- JSR plf2
+ JSR status_equip
 
 .l_1b61
 
@@ -6566,7 +6573,7 @@ LOAD_B% = LOAD% + P% - CODE%
  BEQ l_1b6b
  LDA #&6C
  LDX #&18
- JSR plf2
+ JSR status_equip
 
 .l_1b6b
 
@@ -6584,7 +6591,7 @@ LOAD_B% = LOAD% + P% - CODE%
  TXA
  CLC
  ADC #&57
- JSR plf2
+ JSR status_equip
 
 .l_1b78
 
@@ -6646,6 +6653,13 @@ LOAD_B% = LOAD% + P% - CODE%
 \
 \ CPY #Mlas             \ If the laser power for view X is not #Mlas (mining
 \ BNE P%+4              \ laser), skip the next LDA instruction
+\
+\ LDA #118              \ This sets A = 118 if the laser in view X is a mining
+\                       \ laser (token 118 is "MINING  LASER")
+\
+\ JSR plf2              \ Print the text token in A (which contains our legal
+\                       \ status) followed by a newline and an indent of 6
+\                       \ characters
 
                         \ --- And replaced by: -------------------------------->
 
@@ -6667,14 +6681,12 @@ LOAD_B% = LOAD% + P% - CODE%
  BNE P%+4               \ laser when fitted to our current ship type, skip the
                         \ next LDA instruction
 
-                        \ --- End of replacement ------------------------------>
-
  LDA #118               \ This sets A = 118 if the laser in view X is a mining
                         \ laser (token 118 is "MINING  LASER")
 
- JSR plf2               \ Print the text token in A (which contains our legal
-                        \ status) followed by a newline and an indent of 6
-                        \ characters
+ JSR status_equip       \ AJD
+
+                        \ --- End of replacement ------------------------------>
 
 .st1
 
@@ -6688,7 +6700,7 @@ LOAD_B% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
 \
-\       Name: plf2
+\       Name: plf2 (Removed)
 \       Type: Subroutine
 \   Category: Text
 \    Summary: Print text followed by a newline and indent of 6 characters
@@ -6704,18 +6716,40 @@ LOAD_B% = LOAD% + P% - CODE%
 \
 \ ******************************************************************************
 
-.plf2
-
-                        \ --- Original Acornsoft code removed: ---------------->
-
+                        \ --- Original Acornsoft section removed: ------------->
+\
+\.plf2
+\
 \ JSR plf               \ Print the text token in A followed by a newline
 \
 \ LDX #6                \ Move the text cursor to column 6
 \ STX XC
 \
 \ RTS                   \ Return from the subroutine
+\
+                        \ --- End of removed section -------------------------->
 
-                        \ --- And replaced by: -------------------------------->
+\ ******************************************************************************
+\
+\       Name: status_equip
+\       Type: Subroutine
+\   Category: Text
+\    Summary: Print text followed by a newline and indent of 6 characters
+\
+\ ------------------------------------------------------------------------------
+\
+\ Print a text token followed by a newline, and indent the next line to text
+\ column 6.
+\
+\ Arguments:
+\
+\   A                   The text token to be printed
+\
+\ ******************************************************************************
+
+                        \ --- Whole section added for Elite-A: ---------------->
+
+.status_equip
 
  STX CNT                \ AJD
  STA XX4
@@ -6764,7 +6798,7 @@ LOAD_B% = LOAD% + P% - CODE%
  LDA #10
  JMP TT27
 
-                        \ --- End of replacement ------------------------------>
+                        \ --- End of added section ---------------------------->
 
 \ ******************************************************************************
 \
@@ -14501,7 +14535,7 @@ LOAD_D% = LOAD% + P% - CODE%
  BEQ sell_escape
  LDA #&70
  LDX #&1E
- JSR plf2
+ JSR status_equip
 
 .sell_escape
 
@@ -29890,7 +29924,7 @@ LOAD_G% = LOAD% + P% - CODE%
 \
 \       Name: cour_buy
 \       Type: Subroutine
-\   Category: Buying ships
+\   Category: Missions
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -30112,7 +30146,7 @@ LOAD_G% = LOAD% + P% - CODE%
 \
 \       Name: cour_dock
 \       Type: Subroutine
-\   Category: Buying ships
+\   Category: Missions
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -30272,8 +30306,6 @@ LOAD_G% = LOAD% + P% - CODE%
                         \ --- Whole section added for Elite-A: ---------------->
 
 .new_ships
-
-.new_adder
 
  EQUS "ADDER    "
 

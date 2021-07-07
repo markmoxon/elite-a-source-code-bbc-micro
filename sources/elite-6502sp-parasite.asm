@@ -4809,11 +4809,11 @@ LOAD_B% = LOAD% + P% - CODE%
  JSR plf                \ followed by a newline
 
  LDA #18                \ Print recursive token 132, which prints the next bit
- JSR plf2               \ of the Status Mode screen:
+ JSR status_equip       \ of the Status Mode screen:
                         \
                         \   EQUIPMENT:
                         \
-                        \ followed by a newline and an indent of 6 characters
+                        \ followed by a newline and an indent of 6 characters AJD
 
 .sell_equip
 
@@ -4822,7 +4822,7 @@ LOAD_B% = LOAD% + P% - CODE%
 
  LDA #107               \ We do have an I.F.F. system fitted, so print recursive
  LDX #6                 \ token 107 ("I.F.F.SYSTEM")
- JSR plf2               \ AJD
+ JSR status_equip       \ AJD
 
 .l_1b57
 
@@ -4830,7 +4830,7 @@ LOAD_B% = LOAD% + P% - CODE%
  BEQ l_1b61
  LDA #&6F
  LDX #&19
- JSR plf2
+ JSR status_equip
 
 .l_1b61
 
@@ -4838,7 +4838,7 @@ LOAD_B% = LOAD% + P% - CODE%
  BEQ l_1b6b
  LDA #&6C
  LDX #&18
- JSR plf2
+ JSR status_equip
 
 .l_1b6b
 
@@ -4856,7 +4856,7 @@ LOAD_B% = LOAD% + P% - CODE%
  TXA
  CLC
  ADC #&57
- JSR plf2
+ JSR status_equip
 
 .l_1b78
 
@@ -4910,9 +4910,7 @@ LOAD_B% = LOAD% + P% - CODE%
  LDA #118               \ This sets A = 118 if the laser in view X is a mining
                         \ laser (token 118 is "MINING  LASER")
 
- JSR plf2               \ Print the text token in A (which contains our legal
-                        \ status) followed by a newline and an indent of 6
-                        \ characters
+ JSR status_equip       \ AJD
 
 .st1
 
@@ -4926,7 +4924,7 @@ LOAD_B% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
 \
-\       Name: plf2
+\       Name: status_equip
 \       Type: Subroutine
 \   Category: Text
 \    Summary: Print text followed by a newline and indent of 6 characters
@@ -4942,7 +4940,7 @@ LOAD_B% = LOAD% + P% - CODE%
 \
 \ ******************************************************************************
 
-.plf2
+.status_equip
 
  STX CNT                \ AJD
  STA XX4
@@ -10459,7 +10457,7 @@ LOAD_D% = LOAD% + P% - CODE%
  BEQ sell_escape
  LDA #&70
  LDX #&1E
- JSR plf2
+ JSR status_equip
 
 .sell_escape
 
@@ -22540,7 +22538,7 @@ LOAD_G% = LOAD% + P% - CODE%
 \
 \       Name: cour_buy
 \       Type: Subroutine
-\   Category: Buying ships
+\   Category: Missions
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -22759,7 +22757,7 @@ LOAD_G% = LOAD% + P% - CODE%
 \
 \       Name: cour_dock
 \       Type: Subroutine
-\   Category: Buying ships
+\   Category: Missions
 \    Summary: AJD
 \
 \ ******************************************************************************
@@ -22963,8 +22961,6 @@ LOAD_G% = LOAD% + P% - CODE%
 \ ******************************************************************************
 
 .new_ships
-
-.new_adder
 
  EQUS "ADDER    "
 
