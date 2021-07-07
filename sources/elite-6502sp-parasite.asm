@@ -27889,7 +27889,7 @@ ENDMACRO
  ECHR ':'
  EQUB VE
 
- ETWO 'G', 'E'          \ Token 48:     "GREAT STARSEEKER"
+ ETWO 'G', 'E'          \ Token 48:     "GERET STARSEEKER"
  ECHR 'R'               \
  ETWO 'E', 'T'          \ Encoded as:   "<231>R<221> <222><238><218>EK<244>"
  ECHR ' '
@@ -33537,841 +33537,1927 @@ LOAD_I% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
 \
+\       Name: CTOK
+\       Type: Macro
+\   Category: Text
+\    Summary: Macro definition for recursive tokens in encyclopedia ship cards
+\
+\ ------------------------------------------------------------------------------
+\
+\ The following macro is used when building the recursive token table:
+\
+\   CTOK n              Insert recursive token [n]
+\
+\                         * Tokens 0-127 get stored as n + 128
+\
+\ See the deep dive on "Printing text tokens" for details on how recursive
+\ tokens are stored in the recursive token table.
+\
+\ Arguments:
+\
+\   n                   The number of the recursive token to insert into the
+\                       table, in the range 0 to 127
+\
+\ ******************************************************************************
+
+MACRO CTOK n
+
+  EQUB n + 128
+
+ENDMACRO
+
+\ ******************************************************************************
+\
 \       Name: adder
 \       Type: Variable
 \   Category: Encyclopedia
-\    Summary: AJD
+\    Summary: Card data for the encyclopedia entry for the Adder
 \
 \ ******************************************************************************
 
 .adder
 
- EQUB 1
- EQUS "2914", &D5, &C5, &D1
- EQUB 0, 2
- EQUS "6"
- EQUB 0, 3
- EQUS "45/8/30", &AA
- EQUB 0, 4
- EQUS "0.24", &C0
- EQUB 0, 5
- EQUS "1"
- EQUB 0, 6
- EQUS "6", &BF
- EQUB 0, 7
- EQUS "4", &BE
- EQUB 0, 8
- EQUS &B8, " 1928 AZ ", &F7, "am", &B1, &0C, &B0, &AE
- EQUB 0, 9
- EQUS "D4-18", &D3
- EQUB 0, 10
- EQUS "AM 18 ", &EA, " ", &C2
- EQUB 0, 0
+ EQUB 1                 \ Inservice date: "2914 ({single cap}OUTWORLD
+ EQUS "2914"            \                  WORKSHOPS)"
+ CTOK 85                \
+ CTOK 69                \ Encoded as:     "2914[85][69][81]"
+ CTOK 81
+ EQUB 0
+
+ EQUB 2                 \ Combat factor:  "6"
+ EQUS "6"               \
+ EQUB 0                 \ Encoded as:     "6"
+
+ EQUB 3                 \ Dimensions:     "45/8/30FT"
+ EQUS "45/8/30"         \
+ CTOK 42                \ Encoded as:     "45/8/30[42]"
+ EQUB 0
+
+ EQUB 4                 \ Speed:          "0.24LM"
+ EQUS "0.24"            \
+ CTOK 64                \ Encoded as:     "0.24[64]"
+ EQUB 0
+
+ EQUB 5                 \ Crew:           "1"
+ EQUS "1"               \
+ EQUB 0                 \ Encoded as:     "1"
+
+ EQUB 6                 \ Range:          "6LY"
+ EQUS "6"               \
+ CTOK 63                \ Encoded as:     "6[63]"
+ EQUB 0
+
+ EQUB 7                 \ Cargo space:    "4TC"
+ EQUS "4"               \
+ CTOK 62                \ Encoded as:     "4[62]"
+ EQUB 0
+
+ EQUB 8                 \ Armaments:      "INGRAM 1928 AZ BEAM LASER{crlf}
+ CTOK 56                \                  GERET STARSEEKER MISSILES"
+ EQUS " 1928 AZ "       \
+ ETWO 'B', 'E'          \ Encoded as:     "[56] 1928 AZ <247>am[49]{12}[48][46]"
+ EQUS "am"
+ CTOK 49
+ EQUB 12
+ CTOK 48
+ CTOK 46
+ EQUB 0
+
+ EQUB 9                 \ Hull:           "D4-18/2L"
+ EQUS "D4-18"           \
+ CTOK 83                \ Encoded as:     "D4-18[83]"
+ EQUB 0
+
+ EQUB 10                \ Drive motors:   "AM 18 BI THRUST"
+ EQUS "AM 18 "          \
+ ETWO 'B', 'I'          \ Encoded as:     "AM 18 <234> [66]"
+ EQUS " "
+ CTOK 66
+ EQUB 0
+
+ EQUB 0
 
 \ ******************************************************************************
 \
 \       Name: anaconda
 \       Type: Variable
 \   Category: Encyclopedia
-\    Summary: AJD
+\    Summary: Card data for the encyclopedia entry for the Anaconda
 \
 \ ******************************************************************************
 
 .anaconda
 
- EQUB 1
- EQUS "2856", &D5, "Riml", &F0, &F4, " G", &E4, "ac", &FB, "c)"
- EQUB 0, 2
- EQUS "3"
- EQUB 0, 3
- EQUS "170/60/75", &AA
- EQUB 0, 4
- EQUS "0.14", &C0
- EQUB 0, 5
- EQUS "2-10"
- EQUB 0, 6
- EQUS "10", &BF
- EQUB 0, 7
- EQUS "245", &BE
- EQUB 0, 8
- EQUS &BB, " Hi-", &F8, "d", &B2, &B1, &0C, &B0, &AE
- EQUB 0, 9
- EQUS "M8-**", &D4
- EQUB 0, 10
- EQUS &C9, "32.24", &0C, &F4, "g", &EF, &DE, &F4, "s"
- EQUB 0, 0
+ EQUB 1                 \ Inservice date: "2856 ({single cap}RIMLINER GALACTIC)"
+ EQUS "2856"            \
+ CTOK 85                \ Encoded as:     "2856[85]Riml<240><244> G<228>ac<251>
+ EQUS "Riml"            \                  c)"
+ ETWO 'I', 'N'
+ ETWO 'E', 'R'
+ EQUS " G"
+ ETWO 'A', 'L'
+ EQUS "ac"
+ ETWO 'T', 'I'
+ EQUS "c)"
+ EQUB 0
+
+ EQUB 2                 \ Combat factor:  "3"
+ EQUS "3"               \
+ EQUB 0                 \ Encoded as:     "3"
+
+ EQUB 3                 \ Dimensions:     "170/60/75FT"
+ EQUS "170/60/75"       \
+ CTOK 42                \ Encoded as:     "170/60/75[42]"
+ EQUB 0
+
+ EQUB 4                 \ Speed:          "0.14LM"
+ EQUS "0.14"            \
+ CTOK 64                \ Encoded as:     "0.14[64]"
+ EQUB 0
+
+ EQUB 5                 \ Crew:           "2-10"
+ EQUS "2-10"            \
+ EQUB 0                 \ Encoded as:     "2-10"
+
+ EQUB 6                 \ Range:          "10LY"
+ EQUS "10"              \
+ CTOK 63                \ Encoded as:     "10[63]"
+ EQUB 0
+
+ EQUB 7                 \ Cargo space:    "245TC"
+ EQUS "245"             \
+ CTOK 62                \ Encoded as:     "245[62]"
+ EQUB 0
+
+ EQUB 8                 \ Armaments:      "HASSONI HI-RAD PULSE LASER{crlf}
+ CTOK 59                \                  GERET STARSEEKER MISSILES"
+ EQUS " Hi-"            \
+ ETWO 'R', 'A'          \ Encoded as:     "[59] Hi-<248>d[50][49]{12}[48][46]"
+ EQUS "d"
+ CTOK 50
+ CTOK 49
+ EQUB 12
+ CTOK 48
+ CTOK 46
+ EQUB 0
+
+ EQUB 9                 \ Hull:           "M8-**{all caps}/4L{sentence case}"
+ EQUS "M8-**"           \
+ CTOK 84                \ Encoded as:     "M8-**[84]"
+ EQUB 0
+
+ EQUB 10                \ Drive motors:   "V & K 32.24{crlf}
+ CTOK 73                \                  ERGMASTERS"
+ EQUS "32.24"           \
+ EQUB 12                \ Encoded as:     "[73]32.24{12}<244>g<239><222><244>s"
+ ETWO 'E', 'R'
+ EQUS "g"
+ ETWO 'M', 'A'
+ ETWO 'S', 'T'
+ ETWO 'E', 'R'
+ EQUS "s"
+ EQUB 0
+
+ EQUB 0
 
 \ ******************************************************************************
 \
 \       Name: asp_2
 \       Type: Variable
 \   Category: Encyclopedia
-\    Summary: AJD
+\    Summary: Card data for the encyclopedia entry for the Asp Mk II
 \
 \ ******************************************************************************
 
 .asp_2
 
- EQUB 1
- EQUS "2878", &D5, "G", &E4, "cop", &D1
- EQUB 0, 2
- EQUS "6"
- EQUB 0, 3
- EQUS "70/20/65", &AA
- EQUB 0, 4
- EQUS "0.40", &C0
- EQUB 0, 5
- EQUS "1"
- EQUB 0, 6
- EQUS "12.5", &BF
- EQUB 0, 7
- EQUS "0", &BE
- EQUB 0, 8
- EQUS &BB, "-", &BA, "Bur", &DE, &B1, &0C, &B0, &AE
- EQUB 0, 9
- EQUS "J6-31", &D2
- EQUB 0, 10
- EQUS &BC, " Whip", &F9, "sh", &0C, &01, "HK", &02, " ", &B2, &B5
- EQUB 0, 0
+ EQUB 1                 \ Inservice date: ""
+ EQUS "2878"            \
+ CTOK 85                \ Encoded as:     ""
+ EQUS "G"
+ ETWO 'A', 'L'
+ EQUS "cop"
+ CTOK 81
+ EQUB 0
+
+ EQUB 2                 \ Combat factor:  "6"
+ EQUS "6"               \
+ EQUB 0                 \ Encoded as:     "6"
+
+ EQUB 3                 \ Dimensions:     "70/20/65FT"
+ EQUS "70/20/65"        \
+ CTOK 42                \ Encoded as:     "70/20/65[42]"
+ EQUB 0
+
+ EQUB 4                 \ Speed:          "0.40LM"
+ EQUS "0.40"            \
+ CTOK 64                \ Encoded as:     "0.40[64]"
+ EQUB 0
+
+ EQUB 5                 \ Crew:           "1"
+ EQUS "1"               \
+ EQUB 0                 \ Encoded as:     "1"
+
+ EQUB 6                 \ Range:          "12.5LY"
+ EQUS "12.5"            \
+ CTOK 63                \ Encoded as:     "12.5[63]"
+ EQUB 0
+
+ EQUB 7                 \ Cargo space:    "0TC"
+ EQUS "0"               \
+ CTOK 62                \ Encoded as:     "0[62]"
+ EQUB 0
+
+ EQUB 8                 \ Armaments:      ""
+ CTOK 59                \
+ EQUS "-"               \ Encoded as:     ""
+ CTOK 58
+ EQUS "Bur"
+ ETWO 'S', 'T'
+ CTOK 49
+ EQUB 12
+ CTOK 48
+ CTOK 46
+ EQUB 0
+
+ EQUB 9                 \ Hull:           "J6-31{all caps}/1L{sentence case}"
+ EQUS "J6-31"           \
+ CTOK 82                \ Encoded as:     "J6-31[82]"
+ EQUB 0
+
+ EQUB 10                \ Drive motors:   ""
+ CTOK 60                \
+ EQUS " Whip"           \ Encoded as:     ""
+ ETWO 'L', 'A'
+ EQUS "sh"
+ EQUB 12
+ EQUB &01
+ EQUS "HK"
+ EQUB &02
+ EQUS " "
+ CTOK 50
+ CTOK 53
+ EQUB 0
+
+ EQUB 0
 
 \ ******************************************************************************
 \
 \       Name: boa
 \       Type: Variable
 \   Category: Encyclopedia
-\    Summary: AJD
+\    Summary: Card data for the encyclopedia entry for the Boa
 \
 \ ******************************************************************************
 
 .boa
 
- EQUB 1
- EQUS "3017", &D5, &E7, &F2, &E7, " ", &CC, ")"
- EQUB 0, 2
- EQUS "4"
- EQUB 0, 3
- EQUS "115/60/65", &AA
- EQUB 0, 4
- EQUS "0.24", &C0
- EQUB 0, 5
- EQUS "2-6"
- EQUB 0, 6
- EQUS "9", &BF
- EQUB 0, 7
- EQUS "125", &BE
- EQUB 0, 8
- EQUS &B4, &B1, &B3, &0C, &D6, &B6, " & ", &CF, &AE
- EQUB 0, 9
- EQUS "J7-24", &D3
- EQUB 0, 10
- EQUS &C8, &0C, &B6, &B7, " ", &C2, &F4, "s"
- EQUB 0, 0
+ EQUB 1                 \ Inservice date: ""
+ EQUS "3017"            \
+ CTOK 85                \ Encoded as:     ""
+ ETWO 'G', 'E'
+ ETWO 'R', 'E'
+ ETWO 'G', 'E'
+ EQUS " "
+ CTOK 76
+ EQUS ")"
+ EQUB 0
+
+ EQUB 2                 \ Combat factor:  "4"
+ EQUS "4"               \
+ EQUB 0                 \ Encoded as:     "4"
+
+ EQUB 3                 \ Dimensions:     "115/60/65FT"
+ EQUS "115/60/65"       \
+ CTOK 42                \ Encoded as:     "115/60/65[42]"
+ EQUB 0
+
+ EQUB 4                 \ Speed:          "0.24LM"
+ EQUS "0.24"            \
+ CTOK 64                \ Encoded as:     "0.24[64]"
+ EQUB 0
+
+ EQUB 5                 \ Crew:           "2-6"
+ EQUS "2-6"             \
+ EQUB 0                 \ Encoded as:     "2-6"
+
+ EQUB 6                 \ Range:          "9LY"
+ EQUS "9"               \
+ CTOK 63                \ Encoded as:     "9[63]"
+ EQUB 0
+
+ EQUB 7                 \ Cargo space:    "125TC"
+ EQUS "125"             \
+ CTOK 62                \ Encoded as:     "125[62]"
+ EQUB 0
+
+ EQUB 8                 \ Armaments:      ""
+ CTOK 52                \
+ CTOK 49                \ Encoded as:     ""
+ CTOK 51
+ EQUB 12
+ CTOK 86
+ CTOK 54
+ EQUS " & "
+ CTOK 79
+ CTOK 46
+ EQUB 0
+
+ EQUB 9                 \ Hull:           "J7-24{all caps}/2L{sentence case}"
+ EQUS "J7-24"           \
+ CTOK 83                \ Encoded as:     "J7-24[83]"
+ EQUB 0
+
+ EQUB 10                \ Drive motors:   ""
+ CTOK 72                \
+ EQUB 12                \ Encoded as:     ""
+ CTOK 54
+ CTOK 55
+ EQUS " "
+ CTOK 66
+ ETWO 'E', 'R'
+ EQUS "s"
+ EQUB 0
+
+ EQUB 0
 
 \ ******************************************************************************
 \
 \       Name: bushmaster
 \       Type: Variable
 \   Category: Encyclopedia
-\    Summary: AJD
+\    Summary: Card data for the encyclopedia entry for the Bushmaster
 \
 \ ******************************************************************************
 
 .bushmaster
 
- EQUB 1
- EQUS "3001", &D5, &DF, "ri", &F8, " ", &FD, "b", &DB, &E4, ")"
- EQUB 0, 2
- EQUS "8"
- EQUB 0, 3
- EQUS "50/20/50", &AA
- EQUB 0, 4
- EQUS "0.35", &C0
- EQUB 0, 5
- EQUS "1-2"
- EQUB 0, 8
- EQUS "Du", &E4, " 22-18", &B1, &0C, &B0, &AE
- \EQUB 0, 9
- \EQUA "3|!R"
- EQUB 0, 10
- EQUS &BC, " Whip", &F9, "sh", &0C, &01, "HT", &02, " ", &B2, &B5
- EQUB 0, 0
+ EQUB 1                 \ Inservice date: ""
+ EQUS "3001"            \
+ CTOK 85                \ Encoded as:     ""
+ ETWO 'O', 'N'
+ EQUS "ri"
+ ETWO 'R', 'A'
+ EQUS " "
+ ETWO 'O', 'R'
+ EQUS "b"
+ ETWO 'I', 'T'
+ ETWO 'A', 'L'
+ EQUS ")"
+ EQUB 0
+
+ EQUB 2                 \ Combat factor:  "8"
+ EQUS "8"               \
+ EQUB 0                 \ Encoded as:     "8"
+
+ EQUB 3                 \ Dimensions:     "50/20/50FT"
+ EQUS "50/20/50"        \
+ CTOK 42                \ Encoded as:     "50/20/50[42]"
+ EQUB 0
+
+ EQUB 4                 \ Speed:          "0.35LM"
+ EQUS "0.35"            \
+ CTOK 64                \ Encoded as:     "0.35[64]"
+ EQUB 0
+
+ EQUB 5                 \ Crew:           "1-2"
+ EQUS "1-2"             \
+ EQUB 0                 \ Encoded as:     "1-2"
+
+ EQUB 8                 \ Armaments:      ""
+ EQUS "Du"              \
+ ETWO 'A', 'L'          \ Encoded as:     ""
+ EQUS " 22-18"
+ CTOK 49
+ EQUB 12
+ CTOK 48
+ CTOK 46
+ EQUB 0
+
+\EQUB 0, 9              \ This data is commented out in the original source
+\EQUA "3|!R"
+
+ EQUB 10                \ Drive motors:   ""
+ CTOK 60                \
+ EQUS " Whip"           \ Encoded as:     ""
+ ETWO 'L', 'A'
+ EQUS "sh"
+ EQUB 12
+ EQUB &01
+ EQUS "HT"
+ EQUB &02
+ EQUS " "
+ CTOK 50
+ CTOK 53
+ EQUB 0
+
+ EQUB 0
 
 \ ******************************************************************************
 \
 \       Name: chameleon
 \       Type: Variable
 \   Category: Encyclopedia
-\    Summary: AJD
+\    Summary: Card data for the encyclopedia entry for the Chameleon
 \
 \ ******************************************************************************
 
 .chameleon
 
- EQUB 1
- EQUS "3122", &D5, &EE, "d", &F6, " Co-op", &F4, "a", &FB, &FA, ")"
- EQUB 0, 2
- EQUS "6"
- EQUB 0, 3
- EQUS "75/24/40", &AA
- EQUB 0, 4
- EQUS "0.29", &C0
- EQUB 0, 5
- EQUS "1-4"
- EQUB 0, 6
- EQUS "8", &BF
- EQUB 0, 7
- EQUS "30", &BE
- EQUB 0, 8
- EQUS &B8, " Mega", &CA, &B2, &B1, &0C, &B6, &F4, " X3", &AE
- EQUB 0, 9
- EQUS "H5-23", &D3
- EQUB 0, 10
- EQUS &BC, " ", &DE, &F0, "g", &F4, &0C, "Pul", &DA, &B5
- EQUB 0, 0
+ EQUB 1                 \ Inservice date: ""
+ EQUS "3122"            \
+ CTOK 85                \ Encoded as:     ""
+ ETWO 'A', 'R'
+ EQUS "d"
+ ETWO 'E', 'N'
+ EQUS " Co-op"
+ ETWO 'E', 'R'
+ EQUS "a"
+ ETWO 'T', 'I'
+ ETWO 'V', 'E'
+ EQUS ")"
+ EQUB 0
+
+ EQUB 2                 \ Combat factor:  "6"
+ EQUS "6"               \
+ EQUB 0                 \ Encoded as:     "6"
+
+ EQUB 3                 \ Dimensions:     "75/24/40FT"
+ EQUS "75/24/40"        \
+ CTOK 42                \ Encoded as:     "75/24/40[42]"
+ EQUB 0
+
+ EQUB 4                 \ Speed:          "0.29LM"
+ EQUS "0.29"            \
+ CTOK 64                \ Encoded as:     "0.29[64]"
+ EQUB 0
+
+ EQUB 5                 \ Crew:           "1-4"
+ EQUS "1-4"             \
+ EQUB 0                 \ Encoded as:     "1-4"
+
+ EQUB 6                 \ Range:          "8LY"
+ EQUS "8"               \
+ CTOK 63                \ Encoded as:     "8[63]"
+ EQUB 0
+
+ EQUB 7                 \ Cargo space:    "30TC"
+ EQUS "30"              \
+ CTOK 62                \ Encoded as:     "30[62]"
+ EQUB 0
+
+ EQUB 8                 \ Armaments:      ""
+ CTOK 56                \
+ EQUS " Mega"           \ Encoded as:     ""
+ CTOK 74
+ CTOK 50
+ CTOK 49
+ EQUB 12
+ CTOK 54
+ ETWO 'E', 'R'
+ EQUS " X3"
+ CTOK 46
+ EQUB 0
+
+ EQUB 9                 \ Hull:           "H5-23{all caps}/2L{sentence case}"
+ EQUS "H5-23"           \
+ CTOK 83                \ Encoded as:     "H5-23[83]"
+ EQUB 0
+
+ EQUB 10                \ Drive motors:   ""
+ CTOK 60                \
+ EQUS " "               \ Encoded as:     ""
+ ETWO 'S', 'T'
+ ETWO 'I', 'N'
+ EQUS "g"
+ ETWO 'E', 'R'
+ EQUB 12
+ EQUS "Pul"
+ ETWO 'S', 'E'
+ CTOK 53
+ EQUB 0
+
+ EQUB 0
 
 \ ******************************************************************************
 \
 \       Name: cobra_1
 \       Type: Variable
 \   Category: Encyclopedia
-\    Summary: AJD
+\    Summary: Card data for the encyclopedia entry for the Cobra Mk I
 \
 \ ******************************************************************************
 
 .cobra_1
 
- EQUB 1
- EQUS "2855", &D5, "Payn", &D9, ", ", &D0, "& S", &E4, "em)"
- EQUB 0, 2
- EQUS "5"
- EQUB 0, 3
- EQUS "55/15/70", &AA
- EQUB 0, 4
- EQUS "0.26", &C0
- EQUB 0, 5
- EQUS "1"
- EQUB 0, 6
- EQUS "6", &BF
- EQUB 0, 7
- EQUS "10", &BE
- EQUB 0, 8
- EQUS &BB, " V", &EE, "isc", &FF, &B1, &0C, &B9, &AE
- EQUB 0, 9
- EQUS "E4-20", &D4
- EQUB 0, 10
- EQUS &D0, &B5
- EQUB 0, 0
+ EQUB 1                 \ Inservice date: ""
+ EQUS "2855"            \
+ CTOK 85                \ Encoded as:     ""
+ EQUS "Payn"
+ CTOK 89
+ EQUS ", "
+ CTOK 80
+ EQUS "& S"
+ ETWO 'A', 'L'
+ EQUS "em)"
+ EQUB 0
+
+ EQUB 2                 \ Combat factor:  "5"
+ EQUS "5"               \
+ EQUB 0                 \ Encoded as:     "5"
+
+ EQUB 3                 \ Dimensions:     "55/15/70FT"
+ EQUS "55/15/70"        \
+ CTOK 42                \ Encoded as:     "55/15/70[42]"
+ EQUB 0
+
+ EQUB 4                 \ Speed:          "0.26LM"
+ EQUS "0.26"            \
+ CTOK 64                \ Encoded as:     "0.26[64]"
+ EQUB 0
+
+ EQUB 5                 \ Crew:           "1"
+ EQUS "1"               \
+ EQUB 0                 \ Encoded as:     "1"
+
+ EQUB 6                 \ Range:          "6LY"
+ EQUS "6"               \
+ CTOK 63                \ Encoded as:     "6[63]"
+ EQUB 0
+
+ EQUB 7                 \ Cargo space:    "10TC"
+ EQUS "10"              \
+ CTOK 62                \ Encoded as:     "10[62]"
+ EQUB 0
+
+ EQUB 8                 \ Armaments:      ""
+ CTOK 59                \
+ EQUS " V"              \ Encoded as:     ""
+ ETWO 'A', 'R'
+ EQUS "isc"
+ ETWO 'A', 'N'
+ CTOK 49
+ EQUB 12
+ CTOK 57
+ CTOK 46
+ EQUB 0
+
+ EQUB 9                 \ Hull:           "E4-20{all caps}/4L{sentence case}"
+ EQUS "E4-20"           \
+ CTOK 84                \ Encoded as:     "E4-20[84]"
+ EQUB 0
+
+ EQUB 10                \ Drive motors:   ""
+ CTOK 80                \
+ CTOK 53                \ Encoded as:     ""
+ EQUB 0
+
+ EQUB 0
 
 \ ******************************************************************************
 \
 \       Name: cobra_3
 \       Type: Variable
 \   Category: Encyclopedia
-\    Summary: AJD
+\    Summary: Card data for the encyclopedia entry for the Cobra Mk III
 \
 \ ******************************************************************************
 
 .cobra_3
 
- EQUB 1
- EQUS "3100", &D5, "Cowell & Mg", &13, &F8, &E2, ", ", &F9, &FA, ")"
- EQUB 0, 2
- EQUS "7"
- EQUB 0, 3
- EQUS "65/30/130", &AA
- EQUB 0, 4
- EQUS "0.28", &C0
- EQUB 0, 5
- EQUS "1-3"
- EQUB 0, 6
- EQUS "7", &BF
- EQUB 0, 7
- EQUS "35", &BE
- EQUB 0, 8
- EQUS &B8, &B1, &B3, &0C, &B9, &AE
- EQUB 0, 9
- EQUS "G7-24", &D4
- EQUB 0, 10
- EQUS &BA, &B7, "fa", &DE, &0C, "Irrik", &FF, " Thru", &CD
- EQUB 0, 0
+ EQUB 1                 \ Inservice date: ""
+ EQUS "3100"            \
+ CTOK 85                \ Encoded as:     ""
+ EQUS "Cowell & Mg"
+ EQUB &13
+ ETWO 'R', 'A'
+ ETWO 'T', 'H'
+ EQUS ", "
+ ETWO 'L', 'A'
+ ETWO 'V', 'E'
+ EQUS ")"
+ EQUB 0
+
+ EQUB 2                 \ Combat factor:  "7"
+ EQUS "7"               \
+ EQUB 0                 \ Encoded as:     "7"
+
+ EQUB 3                 \ Dimensions:     "65/30/130FT"
+ EQUS "65/30/130"       \
+ CTOK 42                \ Encoded as:     "65/30/130[42]"
+ EQUB 0
+
+ EQUB 4                 \ Speed:          "0.28LM"
+ EQUS "0.28"            \
+ CTOK 64                \ Encoded as:     "0.28[64]"
+ EQUB 0
+
+ EQUB 5                 \ Crew:           "1-3"
+ EQUS "1-3"             \
+ EQUB 0                 \ Encoded as:     "1-3"
+
+ EQUB 6                 \ Range:          "7LY"
+ EQUS "7"               \
+ CTOK 63                \ Encoded as:     "7[63]"
+ EQUB 0
+
+ EQUB 7                 \ Cargo space:    "35TC"
+ EQUS "35"              \
+ CTOK 62                \ Encoded as:     "35[62]"
+ EQUB 0
+
+ EQUB 8                 \ Armaments:      ""
+ CTOK 56                \
+ CTOK 49                \ Encoded as:     ""
+ CTOK 51
+ EQUB 12
+ CTOK 57
+ CTOK 46
+ EQUB 0
+
+ EQUB 9                 \ Hull:           "G7-24{all caps}/4L{sentence case}"
+ EQUS "G7-24"           \
+ CTOK 84                \ Encoded as:     "G7-24[84]"
+ EQUB 0
+
+ EQUB 10                \ Drive motors:   ""
+ CTOK 58                \
+ CTOK 55                \ Encoded as:     ""
+ EQUS "fa"
+ ETWO 'S', 'T'
+ EQUB 12
+ EQUS "Irrik"
+ ETWO 'A', 'N'
+ EQUS " Thru"
+ CTOK 77
+ EQUB 0
+
+ EQUB 0
 
 \ ******************************************************************************
 \
 \       Name: coriolis
 \       Type: Variable
 \   Category: Encyclopedia
-\    Summary: AJD
+\    Summary: Card data for the encyclopedia entry for the Coriolis station
 \
 \ ******************************************************************************
 
 .coriolis
 
- EQUB 1
- EQUS "2752", &CB
- EQUB 0, 3
- EQUS "1/1/1km"
- EQUB 0, 11
- EQUS "2000", &C3, "s"
- EQUB 0, 0
+ EQUB 1                 \ Inservice date: ""
+ EQUS "2752"            \
+ CTOK 75                \ Encoded as:     ""
+ EQUB 0
+
+ EQUB 3                 \ Dimensions:     ""
+ EQUS "1/1/1km"         \
+ EQUB 0                 \ Encoded as:     ""
+
+ EQUB 11                \ Space: ""
+ EQUS "2000"            \
+ CTOK 67                \ Encoded as:     ""
+ EQUS "s"
+ EQUB 0
+
+ EQUB 0
 
 \ ******************************************************************************
 \
 \       Name: dodecagon
 \       Type: Variable
 \   Category: Encyclopedia
-\    Summary: AJD
+\    Summary: Card data for the encyclopedia entry for the Dodo station
 \
 \ ******************************************************************************
 
 .dodecagon
 
- EQUB 1
- EQUS "3152", &CB
- EQUB 0, 3
- EQUS "1/1/1km"
- EQUB 0, 11
- EQUS "2700", &C3, "s"
- EQUB 0, 0
+ EQUB 1                 \ Inservice date: ""
+ EQUS "3152"            \
+ CTOK 75                \ Encoded as:     ""
+ EQUB 0
+
+ EQUB 3                 \ Dimensions:     ""
+ EQUS "1/1/1km"         \
+ EQUB 0                 \ Encoded as:     ""
+
+ EQUB 11                \ Space: ""
+ EQUS "2700"            \
+ CTOK 67                \ Encoded as:     ""
+ EQUS "s"
+ EQUB 0
+
+ EQUB 0
 
 \ ******************************************************************************
 \
 \       Name: escape_pod
 \       Type: Variable
 \   Category: Encyclopedia
-\    Summary: AJD
+\    Summary: Card data for the encyclopedia entry for the escape pod
 \
 \ ******************************************************************************
 
 .escape_pod
 
- EQUB 1
- EQUS "p", &F2, "-2500"
- EQUB 0, 3
- EQUS "10/5/5", &AA
- EQUB 0, 4
- EQUS "0.08", &C0
- EQUB 0, 5
- EQUS "1-2"
- EQUB 0, 0
+ EQUB 1                 \ Inservice date: ""
+ EQUS "p"               \
+ ETWO 'R', 'E'          \ Encoded as:     ""
+ EQUS "-2500"
+ EQUB 0
+
+ EQUB 3                 \ Dimensions:     ""
+ EQUS "10/5/5"          \
+ CTOK 42                \ Encoded as:     ""
+ EQUB 0
+
+ EQUB 4                 \ Speed:          "0.08LM"
+ EQUS "0.08"            \
+ CTOK 64                \ Encoded as:     "0.08[64]"
+ EQUB 0
+
+ EQUB 5                 \ Crew:           "1-2"
+ EQUS "1-2"             \
+ EQUB 0                 \ Encoded as:     "1-2"
+
+ EQUB 0
 
 \ ******************************************************************************
 \
 \       Name: fer_de_lance
 \       Type: Variable
 \   Category: Encyclopedia
-\    Summary: AJD
+\    Summary: Card data for the encyclopedia entry for the Fer-de-Lance
 \
 \ ******************************************************************************
 
 .fer_de_lance
 
- EQUB 1
- EQUS "3100", &D5, &C6
- EQUB 0, 2
- EQUS "6"
- EQUB 0, 3
- EQUS "85/20/45", &AA
- EQUB 0, 4
- EQUS "0.30", &C0
- EQUB 0, 5
- EQUS "1-3"
- EQUB 0, 6
- EQUS "8.5", &BF
- EQUB 0, 7
- EQUS "2", &BE
- EQUB 0, 8
- EQUS &B4, &B1, &B3, &0C, &D6, &B6, " & ", &CF, &AE
- EQUB 0, 9
- EQUS "H7-28", &D4
- EQUB 0, 10
- EQUS "T", &DB, "r", &DF, "ix ", &F0, "t", &F4, "sun", &0C, &01, "LT", &02, " ", &CE
- EQUB 0, 0
+ EQUB 1                 \ Inservice date: ""
+ EQUS "3100"            \
+ CTOK 85                \ Encoded as:     ""
+ CTOK 70
+ EQUB 0
+
+ EQUB 2                 \ Combat factor:  "6"
+ EQUS "6"               \
+ EQUB 0                 \ Encoded as:     "6"
+
+ EQUB 3                 \ Dimensions:     "85/20/45FT"
+ EQUS "85/20/45"        \
+ CTOK 42                \ Encoded as:     "85/20/45[42]"
+ EQUB 0
+
+ EQUB 4                 \ Speed:          "0.30LM"
+ EQUS "0.30"            \
+ CTOK 64                \ Encoded as:     "0.30[64]"
+ EQUB 0
+
+ EQUB 5                 \ Crew:           "1-3"
+ EQUS "1-3"             \
+ EQUB 0                 \ Encoded as:     "1-3"
+
+ EQUB 6                 \ Range:          "8.5LY"
+ EQUS "8.5"             \
+ CTOK 63                \ Encoded as:     "8.5[63]"
+ EQUB 0
+
+ EQUB 7                 \ Cargo space:    "2TC"
+ EQUS "2"               \
+ CTOK 62                \ Encoded as:     "2[62]"
+ EQUB 0
+
+ EQUB 8                 \ Armaments:      ""
+ CTOK 52                \
+ CTOK 49                \ Encoded as:     ""
+ CTOK 51
+ EQUB 12
+ CTOK 86
+ CTOK 54
+ EQUS " & "
+ CTOK 79
+ CTOK 46
+ EQUB 0
+
+ EQUB 9                 \ Hull:           "H7-28{all caps}/4L{sentence case}"
+ EQUS "H7-28"           \
+ CTOK 84                \ Encoded as:     "H7-28[84]"
+ EQUB 0
+
+ EQUB 10                \ Drive motors:   ""
+ EQUS "T"               \
+ ETWO 'I', 'T'          \ Encoded as:     ""
+ EQUS "r"
+ ETWO 'O', 'N'
+ EQUS "ix "
+ ETWO 'I', 'N'
+ EQUS "t"
+ ETWO 'E', 'R'
+ EQUS "sun"
+ EQUB 12
+ EQUB &01
+ EQUS "LT"
+ EQUB &02
+ EQUS " "
+ CTOK 78
+ EQUB 0
+
+ EQUB 0
 
 \ ******************************************************************************
 \
 \       Name: gecko
 \       Type: Variable
 \   Category: Encyclopedia
-\    Summary: AJD
+\    Summary: Card data for the encyclopedia entry for the Gecko
 \
 \ ******************************************************************************
 
 .gecko
 
- EQUB 1
- EQUS "2852", &D5, "A", &E9, " & F", &D8, &F4, ", ", &E5, &F2, &F9, &E9, ")"
- EQUB 0, 2
- EQUS "7"
- EQUB 0, 3
- EQUS "40/12/65", &AA
- EQUB 0, 4
- EQUS "0.30", &C0
- EQUB 0, 5
- EQUS "1-2"
- EQUB 0, 6
- EQUS "7", &BF
- EQUB 0, 7
- EQUS "3", &BE
- EQUB 0, 8
- EQUS &B8, " 1919 A4", &B1, &0C, &C0, " Hom", &F0, "g", &AE
- EQUB 0, 9
- EQUS "E6-19", &D3
- EQUB 0, 10
- EQUS "B", &F2, "am", &B2, &B7, " ", &01, "XL", &02
- EQUB 0, 0
+ EQUB 1                 \ Inservice date: ""
+ EQUS "2852"            \
+ CTOK 85                \ Encoded as:     ""
+ EQUS "A"
+ ETWO 'C', 'E'
+ EQUS " & F"
+ CTOK 88
+ ETWO 'E', 'R'
+ EQUS ", "
+ ETWO 'L', 'E'
+ ETWO 'R', 'E'
+ ETWO 'L', 'A'
+ ETWO 'C', 'E'
+ EQUS ")"
+ EQUB 0
+
+ EQUB 2                 \ Combat factor:  "7"
+ EQUS "7"               \
+ EQUB 0                 \ Encoded as:     "7"
+
+ EQUB 3                 \ Dimensions:     "40/12/65FT"
+ EQUS "40/12/65"        \
+ CTOK 42                \ Encoded as:     "40/12/65[42]"
+ EQUB 0
+
+ EQUB 4                 \ Speed:          "0.30LM"
+ EQUS "0.30"            \
+ CTOK 64                \ Encoded as:     "0.30[64]"
+ EQUB 0
+
+ EQUB 5                 \ Crew:           "1-2"
+ EQUS "1-2"             \
+ EQUB 0                 \ Encoded as:     "1-2"
+
+ EQUB 6                 \ Range:          "7LY"
+ EQUS "7"               \
+ CTOK 63                \ Encoded as:     "7[63]"
+ EQUB 0
+
+ EQUB 7                 \ Cargo space:    "3TC"
+ EQUS "3"               \
+ CTOK 62                \ Encoded as:     "3[62]"
+ EQUB 0
+
+ EQUB 8                 \ Armaments:      ""
+ CTOK 56                \
+ EQUS " 1919 A4"        \ Encoded as:     ""
+ CTOK 49
+ EQUB 12
+ CTOK 64
+ EQUS " Hom"
+ ETWO 'I', 'N'
+ EQUS "g"
+ CTOK 46
+ EQUB 0
+
+ EQUB 9                 \ Hull:           "E6-19{all caps}/2L{sentence case}"
+ EQUS "E6-19"           \
+ CTOK 83                \ Encoded as:     "E6-19[83]"
+ EQUB 0
+
+ EQUB 10                \ Drive motors:   ""
+ EQUS "B"               \
+ ETWO 'R', 'E'          \ Encoded as:     ""
+ EQUS "am"
+ CTOK 50
+ CTOK 55
+ EQUS " "
+ EQUB &01
+ EQUS "XL"
+ EQUB &02
+ EQUB 0
+
+ EQUB 0
 
 \ ******************************************************************************
 \
 \       Name: ghavial
 \       Type: Variable
 \   Category: Encyclopedia
-\    Summary: AJD
+\    Summary: Card data for the encyclopedia entry for the Ghavial
 \
 \ ******************************************************************************
 
 .ghavial
 
- EQUB 1
- EQUS "3077", &D5, &EE, "d", &F6, " Co-op", &F4, "a", &FB, &FA, ")"
- EQUB 0, 2
- EQUS "5"
- EQUB 0, 3
- EQUS "80/30/60", &AA
- EQUB 0, 4
- EQUS "0.25", &C0
- EQUB 0, 5
- EQUS "2-7"
- EQUB 0, 6
- EQUS "8", &BF
- EQUB 0, 7
- EQUS "50", &BE
- EQUB 0, 8
- EQUS "Fai", &F2, "y", &B2, &B1, &0C, &B9, &AE
- EQUB 0, 9
- EQUS "I5-25", &D4
- EQUB 0, 10
- EQUS "Sp", &E4, "d", &F4, " & Prime ", &01, "TT1", &02
- EQUB 0, 0
+ EQUB 1                 \ Inservice date: ""
+ EQUS "3077"            \
+ CTOK 85                \ Encoded as:     ""
+ ETWO 'A', 'R'
+ EQUS "d"
+ ETWO 'E', 'N'
+ EQUS " Co-op"
+ ETWO 'E', 'R'
+ EQUS "a"
+ ETWO 'T', 'I'
+ ETWO 'V', 'E'
+ EQUS ")"
+ EQUB 0
+
+ EQUB 2                 \ Combat factor:  "5"
+ EQUS "5"               \
+ EQUB 0                 \ Encoded as:     "5"
+
+ EQUB 3                 \ Dimensions:     "80/30/60FT"
+ EQUS "80/30/60"        \
+ CTOK 42                \ Encoded as:     "80/30/60[42]"
+ EQUB 0
+
+ EQUB 4                 \ Speed:          "0.25LM"
+ EQUS "0.25"            \
+ CTOK 64                \ Encoded as:     "0.25[64]"
+ EQUB 0
+
+ EQUB 5                 \ Crew:           "2-7"
+ EQUS "2-7"             \
+ EQUB 0                 \ Encoded as:     "2-7"
+
+ EQUB 6                 \ Range:          "8LY"
+ EQUS "8"               \
+ CTOK 63                \ Encoded as:     "8[63]"
+ EQUB 0
+
+ EQUB 7                 \ Cargo space:    "50TC"
+ EQUS "50"              \
+ CTOK 62                \ Encoded as:     "50[62]"
+ EQUB 0
+
+ EQUB 8                 \ Armaments:      ""
+ EQUS "Fai"             \
+ ETWO 'R', 'E'          \ Encoded as:     ""
+ EQUS "y"
+ CTOK 50
+ CTOK 49
+ EQUB 12
+ CTOK 57
+ CTOK 46
+ EQUB 0
+
+ EQUB 9                 \ Hull:           "I5-25{all caps}/4L{sentence case}"
+ EQUS "I5-25"           \
+ CTOK 84                \ Encoded as:     "I5-25[84]"
+ EQUB 0
+
+ EQUB 10                \ Drive motors:   ""
+ EQUS "Sp"              \
+ ETWO 'A', 'L'          \ Encoded as:     ""
+ EQUS "d"
+ ETWO 'E', 'R'
+ EQUS " & Prime "
+ EQUB &01
+ EQUS "TT1"
+ EQUB &02
+ EQUB 0
+
+ EQUB 0
 
 \ ******************************************************************************
 \
 \       Name: iguana
 \       Type: Variable
 \   Category: Encyclopedia
-\    Summary: AJD
+\    Summary: Card data for the encyclopedia entry for the Iguana
 \
 \ ******************************************************************************
 
 .iguana
 
- EQUB 1
- EQUS "3095", &D5, "Faulc", &DF, " ", &EF, "n", &CD, ")"
- EQUB 0, 2
- EQUS "6"
- EQUB 0, 3
- EQUS "65/20/40", &AA
- EQUB 0, 4
- EQUS "0.33", &C0
- EQUB 0, 5
- EQUS "1-3"
- EQUB 0, 6
- EQUS "7.5", &BF
- EQUB 0, 7
- EQUS "15", &BE
- EQUB 0, 8
- EQUS &B9, &B1, &0C, &B6, &F4, " X1", &AE
- EQUB 0, 9
- EQUS "G6-20", &D4
- EQUB 0, 10
- EQUS &C7, " Sup", &F4, " ", &C2, &0C, &01, "VC", &02, "9"
- EQUB 0, 0
+ EQUB 1                 \ Inservice date: ""
+ EQUS "3095"            \
+ CTOK 85                \ Encoded as:     ""
+ EQUS "Faulc"
+ ETWO 'O', 'N'
+ EQUS " "
+ ETWO 'M', 'A'
+ EQUS "n"
+ CTOK 77
+ EQUS ")"
+ EQUB 0
+
+ EQUB 2                 \ Combat factor:  "6"
+ EQUS "6"               \
+ EQUB 0                 \ Encoded as:     "6"
+
+ EQUB 3                 \ Dimensions:     "65/20/40FT"
+ EQUS "65/20/40"        \
+ CTOK 42                \ Encoded as:     "65/20/40[42]"
+ EQUB 0
+
+ EQUB 4                 \ Speed:          "0.33LM"
+ EQUS "0.33"            \
+ CTOK 64                \ Encoded as:     "0.33[64]"
+ EQUB 0
+
+ EQUB 5                 \ Crew:           "1-3"
+ EQUS "1-3"             \
+ EQUB 0                 \ Encoded as:     "1-3"
+
+ EQUB 6                 \ Range:          "7.5LY"
+ EQUS "7.5"             \
+ CTOK 63                \ Encoded as:     "7.5[63]"
+ EQUB 0
+
+ EQUB 7                 \ Cargo space:    "15TC"
+ EQUS "15"              \
+ CTOK 62                \ Encoded as:     "15[62]"
+ EQUB 0
+
+ EQUB 8                 \ Armaments:      ""
+ CTOK 57                \
+ CTOK 49                \ Encoded as:     ""
+ EQUB 12
+ CTOK 54
+ ETWO 'E', 'R'
+ EQUS " X1"
+ CTOK 46
+ EQUB 0
+
+ EQUB 9                 \ Hull:           "G6-20{all caps}/4L{sentence case}"
+ EQUS "G6-20"           \
+ CTOK 84                \ Encoded as:     "G6-20[84]"
+ EQUB 0
+
+ EQUB 10                \ Drive motors:   ""
+ CTOK 71                \
+ EQUS " Sup"            \ Encoded as:     ""
+ ETWO 'E', 'R'
+ EQUS " "
+ CTOK 66
+ EQUB 12
+ EQUB &01
+ EQUS "VC"
+ EQUB &02
+ EQUS "9"
+ EQUB 0
+
+ EQUB 0
 
 \ ******************************************************************************
 \
 \       Name: krait
 \       Type: Variable
 \   Category: Encyclopedia
-\    Summary: AJD
+\    Summary: Card data for the encyclopedia entry for the Krait
 \
 \ ******************************************************************************
 
 .krait
 
- EQUB 1
- EQUS "3027", &D5, &C7, &C3, "W", &FD, "ks, ", &F0, &F0, &ED, ")"
- EQUB 0, 2
- EQUS "7"
- EQUB 0, 3
- EQUS "80/20/90", &AA
- EQUB 0, 4
- EQUS "0.30", &C0
- EQUB 0, 5
- EQUS "1"
- EQUB 0, 7
- EQUS "10", &BE
- EQUB 0, 8
- EQUS &B4, &B1, &B3
- \EQUB 0, 9
- \EQUA "8|!S"
- EQUB 0, 10
- EQUS &C7, " Sp", &F0, &CE, " ZX14"
- EQUB 0, 0
+ EQUB 1                 \ Inservice date: ""
+ EQUS "3027"            \
+ CTOK 85                \ Encoded as:     ""
+ CTOK 71
+ CTOK 67
+ EQUS "W"
+ ETWO 'O', 'R'
+ EQUS "ks, "
+ ETWO 'I', 'N'
+ ETWO 'I', 'N'
+ ETWO 'E', 'S'
+ EQUS ")"
+ EQUB 0
+
+ EQUB 2                 \ Combat factor:  "7"
+ EQUS "7"               \
+ EQUB 0                 \ Encoded as:     "7"
+
+ EQUB 3                 \ Dimensions:     "80/20/90FT"
+ EQUS "80/20/90"        \
+ CTOK 42                \ Encoded as:     "80/20/90[42]"
+ EQUB 0
+
+ EQUB 4                 \ Speed:          "0.30LM"
+ EQUS "0.30"            \
+ CTOK 64                \ Encoded as:     "0.30[64]"
+ EQUB 0
+
+ EQUB 5                 \ Crew:           "1"
+ EQUS "1"               \
+ EQUB 0                 \ Encoded as:     "1"
+
+ EQUB 7                 \ Cargo space:    "10TC"
+ EQUS "10"              \
+ CTOK 62                \ Encoded as:     "10[62]"
+ EQUB 0
+
+ EQUB 8                 \ Armaments:      ""
+ CTOK 52                \
+ CTOK 49                \ Encoded as:     ""
+ CTOK 51
+ EQUB 0
+
+\EQUB 0, 9              \ This data is commented out in the original source
+\EQUA "8|!S"
+
+ EQUB 10                \ Drive motors:   ""
+ CTOK 71                \
+ EQUS " Sp"             \ Encoded as:     ""
+ ETWO 'I', 'N'
+ CTOK 78
+ EQUS " ZX14"
+ EQUB 0
+
+ EQUB 0
 
 \ ******************************************************************************
 \
 \       Name: mamba
 \       Type: Variable
 \   Category: Encyclopedia
-\    Summary: AJD
+\    Summary: Card data for the encyclopedia entry for the Mamba
 \
 \ ******************************************************************************
 
 .mamba
 
- EQUB 1
- EQUS "3110", &D5, &F2, &FD, "te", &C3, " ", &CC, ")"
- EQUB 0, 2
- EQUS "8"
- EQUB 0, 3
- EQUS "55/12/65", &AA
- EQUB 0, 4
- EQUS "0.30", &C0
- EQUB 0, 5
- EQUS "1-2"
- EQUB 0, 7
- EQUS "10", &BE
- EQUB 0, 8
- EQUS &B4, &B1, &B3, &0C, &D6, &B6, " & ", &CF, &AE
- \EQUB 0, 9
- \EQUA "7|!R"
- EQUB 0, 10
- EQUS &B6, &B7, " ", &01, "HV", &02, " ", &C2
- EQUB 0, 0
+ EQUB 1                 \ Inservice date: ""
+ EQUS "3110"            \
+ CTOK 85                \ Encoded as:     ""
+ ETWO 'R', 'E'
+ ETWO 'O', 'R'
+ EQUS "te"
+ CTOK 67
+ EQUS " "
+ CTOK 76
+ EQUS ")"
+ EQUB 0
+
+ EQUB 2                 \ Combat factor:  "8"
+ EQUS "8"               \
+ EQUB 0                 \ Encoded as:     "8"
+
+ EQUB 3                 \ Dimensions:     "55/12/65FT"
+ EQUS "55/12/65"        \
+ CTOK 42                \ Encoded as:     "55/12/65[42]"
+ EQUB 0
+
+ EQUB 4                 \ Speed:          "0.30LM"
+ EQUS "0.30"            \
+ CTOK 64                \ Encoded as:     "0.30[64]"
+ EQUB 0
+
+ EQUB 5                 \ Crew:           "1-2"
+ EQUS "1-2"             \
+ EQUB 0                 \ Encoded as:     "1-2"
+
+ EQUB 7                 \ Cargo space:    "10TC"
+ EQUS "10"              \
+ CTOK 62                \ Encoded as:     "10[62]"
+ EQUB 0
+
+ EQUB 8                 \ Armaments:      ""
+ CTOK 52                \
+ CTOK 49                \ Encoded as:     ""
+ CTOK 51
+ EQUB 12
+ CTOK 86
+ CTOK 54
+ EQUS " & "
+ CTOK 79
+ CTOK 46
+ EQUB 0
+
+\EQUB 0, 9              \ This data is commented out in the original source
+\EQUA "7|!R"
+
+ EQUB 10                \ Drive motors:   ""
+ CTOK 54                \
+ CTOK 55                \ Encoded as:     ""
+ EQUS " "
+ EQUB &01
+ EQUS "HV"
+ EQUB &02
+ EQUS " "
+ CTOK 66
+ EQUB 0
+
+ EQUB 0
 
 \ ******************************************************************************
 \
 \       Name: monitor
 \       Type: Variable
 \   Category: Encyclopedia
-\    Summary: AJD
+\    Summary: Card data for the encyclopedia entry for the Monitor
 \
 \ ******************************************************************************
 
 .monitor
 
- EQUB 1
- EQUS "3112", &D5, &C6
- EQUB 0, 2
- EQUS "4"
- EQUB 0, 3
- EQUS "100/40/50", &AA
- EQUB 0, 4
- EQUS "0.16", &C0
- EQUB 0, 5
- EQUS "7-19"
- EQUB 0, 6
- EQUS "11", &BF
- EQUB 0, 7
- EQUS "75", &BE
- EQUB 0, 8
- EQUS &BA, &01, "HMB", &02, &B1, &0C, &B0, &AE
- EQUB 0, 9
- EQUS "J6-28", &D4
- EQUB 0, 10
- EQUS &C9, "29.01", &0C, &B7, " ", &CA, &F4, "s"
- EQUB 0, 0
+ EQUB 1                 \ Inservice date: ""
+ EQUS "3112"            \
+ CTOK 85                \ Encoded as:     ""
+ CTOK 70
+ EQUB 0
+
+ EQUB 2                 \ Combat factor:  "4"
+ EQUS "4"               \
+ EQUB 0                 \ Encoded as:     "4"
+
+ EQUB 3                 \ Dimensions:     "100/40/50FT"
+ EQUS "100/40/50"       \
+ CTOK 42                \ Encoded as:     "100/40/50[42]"
+ EQUB 0
+
+ EQUB 4                 \ Speed:          "0.16LM"
+ EQUS "0.16"            \
+ CTOK 64                \ Encoded as:     "0.16[64]"
+ EQUB 0
+
+ EQUB 5                 \ Crew:           "7-19"
+ EQUS "7-19"            \
+ EQUB 0                 \ Encoded as:     "7-19"
+
+ EQUB 6                 \ Range:          "11LY"
+ EQUS "11"              \
+ CTOK 63                \ Encoded as:     "11[63]"
+ EQUB 0
+
+ EQUB 7                 \ Cargo space:    "75TC"
+ EQUS "75"             \
+ CTOK 62                \ Encoded as:     "75[62]"
+ EQUB 0
+
+ EQUB 8                 \ Armaments:      ""
+ CTOK 58                \
+ EQUB &01               \ Encoded as:     ""
+ EQUS "HMB"
+ EQUB &02
+ CTOK 49
+ EQUB 12
+ CTOK 48
+ CTOK 46
+ EQUB 0
+
+ EQUB 9                 \ Hull:           "J6-28{all caps}/4L{sentence case}"
+ EQUS "J6-28"           \
+ CTOK 84                \ Encoded as:     "J6-28[84]"
+ EQUB 0
+
+ EQUB 10                \ Drive motors:   ""
+ CTOK 73                \
+ EQUS "29.01"           \ Encoded as:     ""
+ EQUB 12
+ CTOK 55
+ EQUS " "
+ CTOK 74
+ ETWO 'E', 'R'
+ EQUS "s"
+ EQUB 0
+
+ EQUB 0
 
 \ ******************************************************************************
 \
 \       Name: moray
 \       Type: Variable
 \   Category: Encyclopedia
-\    Summary: AJD
+\    Summary: Card data for the encyclopedia entry for the Moray
 \
 \ ******************************************************************************
 
 .moray
 
- EQUB 1
- EQUS "3028", &D5, "M", &EE, &F0, "e T", &F2, "nch Co.)"
- EQUB 0, 2
- EQUS "7"
- EQUB 0, 3
- EQUS "60/25/60", &AA
- EQUB 0, 4
- EQUS "0.25", &C0
- EQUB 0, 5
- EQUS "1-4"
- EQUB 0, 6
- EQUS "8", &BF
- EQUB 0, 7
- EQUS "7", &BE
- EQUB 0, 8
- EQUS &B8, &B1, &B3, &0C, &B0, &AE
- EQUB 0, 9
- EQUS "F4-22", &D4
- EQUB 0, 10
- EQUS "Turbul", &F6, " ", &FE, &EE, "k", &0C, &F2, "-ch", &EE, "g", &F4, " 1287"
- EQUB 0, 0
+ EQUB 1                 \ Inservice date: ""
+ EQUS "3028"            \
+ CTOK 85                \ Encoded as:     ""
+ EQUS "M"
+ ETWO 'A', 'R'
+ ETWO 'I', 'N'
+ EQUS "e T"
+ ETWO 'R', 'E'
+ EQUS "nch Co.)"
+ EQUB 0
+
+ EQUB 2                 \ Combat factor:  "7"
+ EQUS "7"               \
+ EQUB 0                 \ Encoded as:     "7"
+
+ EQUB 3                 \ Dimensions:     "60/25/60FT"
+ EQUS "60/25/60"        \
+ CTOK 42                \ Encoded as:     "60/25/60[42]"
+ EQUB 0
+
+ EQUB 4                 \ Speed:          "0.25LM"
+ EQUS "0.25"            \
+ CTOK 64                \ Encoded as:     "0.25[64]"
+ EQUB 0
+
+ EQUB 5                 \ Crew:           "1-4"
+ EQUS "1-4"             \
+ EQUB 0                 \ Encoded as:     "1-4"
+
+ EQUB 6                 \ Range:          "8LY"
+ EQUS "8"               \
+ CTOK 63                \ Encoded as:     "8[63]"
+ EQUB 0
+
+ EQUB 7                 \ Cargo space:    "7TC"
+ EQUS "7"              \
+ CTOK 62                \ Encoded as:     "7[62]"
+ EQUB 0
+
+ EQUB 8                 \ Armaments:      ""
+ CTOK 56                \
+ CTOK 49                \ Encoded as:     ""
+ CTOK 51
+ EQUB 12
+ CTOK 48
+ CTOK 46
+ EQUB 0
+
+ EQUB 9                 \ Hull:           "F4-22{all caps}/4L{sentence case}"
+ EQUS "F4-22"           \
+ CTOK 84                \ Encoded as:     "F4-22[84]"
+ EQUB 0
+
+ EQUB 10                \ Drive motors:   ""
+ EQUS "Turbul"          \
+ ETWO 'E', 'N'          \ Encoded as:     ""
+ EQUS " "
+ ETWO 'Q', 'U'
+ ETWO 'A', 'R'
+ EQUS "k"
+ EQUB 12
+ ETWO 'R', 'E'
+ EQUS "-ch"
+ ETWO 'A', 'R'
+ EQUS "g"
+ ETWO 'E', 'R'
+ EQUS " 1287"
+ EQUB 0
+
+ EQUB 0
 
 \ ******************************************************************************
 \
 \       Name: ophidian
 \       Type: Variable
 \   Category: Encyclopedia
-\    Summary: AJD
+\    Summary: Card data for the encyclopedia entry for the Ophidian
 \
 \ ******************************************************************************
 
 .ophidian
 
- EQUB 1
- EQUS "2981", &D5, &C5, &D1
- EQUB 0, 2
- EQUS "8"
- EQUB 0, 3
- EQUS "65/15/30", &AA
- EQUB 0, 4
- EQUS "0.34", &C0
- EQUB 0, 5
- EQUS "1-3"
- EQUB 0, 6
- EQUS "7", &BF
- EQUB 0, 7
- EQUS "20", &BE
- EQUB 0, 8
- EQUS &B9, &B1, &0C, &B6, &F4, " X1", &AE
- EQUB 0, 9
- EQUS "D4-16", &D2
- EQUB 0, 10
- EQUS &BC, " ", &DE, &F0, "g", &F4, &0C, "Pul", &DA, &B5
- EQUB 0, 0
+ EQUB 1                 \ Inservice date: ""
+ EQUS "2981"            \
+ CTOK 85                \ Encoded as:     ""
+ CTOK 69
+ CTOK 81
+ EQUB 0
+
+ EQUB 2                 \ Combat factor:  "8"
+ EQUS "8"               \
+ EQUB 0                 \ Encoded as:     "8"
+
+ EQUB 3                 \ Dimensions:     "65/15/30FT"
+ EQUS "65/15/30"        \
+ CTOK 42                \ Encoded as:     "65/15/30[42]"
+ EQUB 0
+
+ EQUB 4                 \ Speed:          "0.34LM"
+ EQUS "0.34"            \
+ CTOK 64                \ Encoded as:     "0.34[64]"
+ EQUB 0
+
+ EQUB 5                 \ Crew:           "1-3"
+ EQUS "1-3"             \
+ EQUB 0                 \ Encoded as:     "1-3"
+
+ EQUB 6                 \ Range:          "7LY"
+ EQUS "7"               \
+ CTOK 63                \ Encoded as:     "7[63]"
+ EQUB 0
+
+ EQUB 7                 \ Cargo space:    "20TC"
+ EQUS "20"             \
+ CTOK 62                \ Encoded as:     "20[62]"
+ EQUB 0
+
+ EQUB 8                 \ Armaments:      ""
+ CTOK 57                \
+ CTOK 49                \ Encoded as:     ""
+ EQUB 12
+ CTOK 54
+ ETWO 'E', 'R'
+ EQUS " X1"
+ CTOK 46
+ EQUB 0
+
+ EQUB 9                 \ Hull:           "D4-16{all caps}/1L{sentence case}"
+ EQUS "D4-16"           \
+ CTOK 82                \ Encoded as:     "D4-16[82]"
+ EQUB 0
+
+ EQUB 10                \ Drive motors:   ""
+ CTOK 60                \
+ EQUS " "               \ Encoded as:     ""
+ ETWO 'S', 'T'
+ ETWO 'I', 'N'
+ EQUS "g"
+ ETWO 'E', 'R'
+ EQUB 12
+ EQUS "Pul"
+ ETWO 'S', 'E'
+ CTOK 53
+ EQUB 0
+
+ EQUB 0
 
 \ ******************************************************************************
 \
 \       Name: python
 \       Type: Variable
 \   Category: Encyclopedia
-\    Summary: AJD
+\    Summary: Card data for the encyclopedia entry for the Python
 \
 \ ******************************************************************************
 
 .python
 
- EQUB 1
- EQUS "2700", &D5, "Wh", &F5, "t & Pr", &DB, "ney SC)"
- EQUB 0, 2
- EQUS "3"
- EQUB 0, 3
- EQUS "130/40/80", &AA
- EQUB 0, 4
- EQUS "0.20", &C0
- EQUB 0, 5
- EQUS "2-9"
- EQUB 0, 6
- EQUS "8", &BF
- EQUB 0, 7
- EQUS "100", &BE
- EQUB 0, 8
- EQUS "Volt-", &13, "V", &EE, "isc", &FF, &B2, &B1
- EQUB 0, 9
- EQUS "K6-27", &D4
- EQUB 0, 10
- EQUS &C8, &0C, "Exl", &DF, " 76NN Model"
- EQUB 0, 0
+ EQUB 1                 \ Inservice date: ""
+ EQUS "2700"            \
+ CTOK 85                \ Encoded as:     ""
+ EQUS "Wh"
+ ETWO 'A', 'T'
+ EQUS "t & Pr"
+ ETWO 'I', 'T'
+ EQUS "ney SC)"
+ EQUB 0
+
+ EQUB 2                 \ Combat factor:  "3"
+ EQUS "3"               \
+ EQUB 0                 \ Encoded as:     "3"
+
+ EQUB 3                 \ Dimensions:     "130/40/80FT"
+ EQUS "130/40/80"       \
+ CTOK 42                \ Encoded as:     "130/40/80[42]"
+ EQUB 0
+
+ EQUB 4                 \ Speed:          "0.20LM"
+ EQUS "0.20"            \
+ CTOK 64                \ Encoded as:     "0.20[64]"
+ EQUB 0
+
+ EQUB 5                 \ Crew:           "2-9"
+ EQUS "2-9"             \
+ EQUB 0                 \ Encoded as:     "2-9"
+
+ EQUB 6                 \ Range:          "8LY"
+ EQUS "8"               \
+ CTOK 63                \ Encoded as:     "8[63]"
+ EQUB 0
+
+ EQUB 7                 \ Cargo space:    "100TC"
+ EQUS "100"            \
+ CTOK 62                \ Encoded as:     "100[62]"
+ EQUB 0
+
+ EQUB 8                 \ Armaments:      ""
+ EQUS "Volt-"           \
+ EQUB &13               \ Encoded as:     ""
+ EQUS "V"
+ ETWO 'A', 'R'
+ EQUS "isc"
+ ETWO 'A', 'N'
+ CTOK 50
+ CTOK 49
+ EQUB 0
+
+ EQUB 9                 \ Hull:           "K6-27{all caps}/4L{sentence case}"
+ EQUS "K6-27"           \
+ CTOK 84                \ Encoded as:     "K6-27[84]"
+ EQUB 0
+
+ EQUB 10                \ Drive motors:   ""
+ CTOK 72                \
+ EQUB 12                \ Encoded as:     ""
+ EQUS "Exl"
+ ETWO 'O', 'N'
+ EQUS " 76NN Model"
+ EQUB 0
+
+ EQUB 0
 
 \ ******************************************************************************
 \
 \       Name: shuttle
 \       Type: Variable
 \   Category: Encyclopedia
-\    Summary: AJD
+\    Summary: Card data for the encyclopedia entry for the Shuttle
 \
 \ ******************************************************************************
 
 .shuttle
 
- EQUB 1
- EQUS "2856", &D5, "Saud-", &BA, "A", &DE, "ro)"
- EQUB 0, 2
- EQUS "4"
- EQUB 0, 3
- EQUS "35/20/20", &AA
- EQUB 0, 4
- EQUS "0.08", &C0
- EQUB 0, 5
- EQUS "2"
- EQUB 0, 7
- EQUS "60", &BE
- EQUB 0, 10
- EQUS &C9, "20.20", &0C, &DE, &EE, &EF, "t ", &B5
- EQUB 0, 0
+ EQUB 1                 \ Inservice date: ""
+ EQUS "2856"            \
+ CTOK 85                \ Encoded as:     ""
+ EQUS "Saud-"
+ CTOK 58
+ EQUS "A"
+ ETWO 'S', 'T'
+ EQUS "ro)"
+ EQUB 0
+
+ EQUB 2                 \ Combat factor:  "4"
+ EQUS "4"               \
+ EQUB 0                 \ Encoded as:     "4"
+
+ EQUB 3                 \ Dimensions:     "35/20/20FT"
+ EQUS "35/20/20"        \
+ CTOK 42                \ Encoded as:     "35/20/20[42]"
+ EQUB 0
+
+ EQUB 4                 \ Speed:          "0.08LM"
+ EQUS "0.08"            \
+ CTOK 64                \ Encoded as:     "0.08[64]"
+ EQUB 0
+
+ EQUB 5                 \ Crew:           "2"
+ EQUS "2"               \
+ EQUB 0                 \ Encoded as:     "2"
+
+ EQUB 7                 \ Cargo space:    "60TC"
+ EQUS "60"              \
+ CTOK 62                \ Encoded as:     "60[62]"
+ EQUB 0
+
+ EQUB 10                \ Drive motors:   ""
+ CTOK 73                \
+ EQUS "20.20"           \ Encoded as:     ""
+ EQUB 12
+ ETWO 'S', 'T'
+ ETWO 'A', 'R'
+ ETWO 'M', 'A'
+ EQUS "t "
+ CTOK 53
+ EQUB 0
+
+ EQUB 0
 
 \ ******************************************************************************
 \
 \       Name: sidewinder
 \       Type: Variable
 \   Category: Encyclopedia
-\    Summary: AJD
+\    Summary: Card data for the encyclopedia entry for the Sidewinder
 \
 \ ******************************************************************************
 
 .sidewinder
 
- EQUB 1
- EQUS "2982", &D5, &DF, "ri", &F8, " ", &FD, "b", &DB, &E4, ")"
- EQUB 0, 2
- EQUS "9"
- EQUB 0, 3
- EQUS "35/15/65", &AA
- EQUB 0, 4
- EQUS "0.37", &C0
- EQUB 0, 5
- EQUS "1"
- EQUB 0, 8
- EQUS "Du", &E4, " 22-18", &B1
- \EQUB 0, 9
- \EQUA "3|!R"
- EQUB 0, 10
- EQUS &C7, " Sp", &F0, &CE, " ", &01, "MV", &02
- EQUB 0, 0
+ EQUB 1                 \ Inservice date: ""
+ EQUS "2982"            \
+ CTOK 85                \ Encoded as:     ""
+ ETWO 'O', 'N'
+ EQUS "ri"
+ ETWO 'R', 'A'
+ EQUS " "
+ ETWO 'O', 'R'
+ EQUS "b"
+ ETWO 'I', 'T'
+ ETWO 'A', 'L'
+ EQUS ")"
+ EQUB 0
+
+ EQUB 2                 \ Combat factor:  "9"
+ EQUS "9"               \
+ EQUB 0                 \ Encoded as:     "9"
+
+ EQUB 3                 \ Dimensions:     "35/15/65FT"
+ EQUS "35/15/65"        \
+ CTOK 42                \ Encoded as:     "35/15/65[42]"
+ EQUB 0
+
+ EQUB 4                 \ Speed:          "0.37LM"
+ EQUS "0.37"            \
+ CTOK 64                \ Encoded as:     "0.37[64]"
+ EQUB 0
+
+ EQUB 5                 \ Crew:           "1"
+ EQUS "1"               \
+ EQUB 0                 \ Encoded as:     "1"
+
+ EQUB 8                 \ Armaments:      ""
+ EQUS "Du"              \
+ ETWO 'A', 'L'          \ Encoded as:     ""
+ EQUS " 22-18"
+ CTOK 49
+ EQUB 0
+
+\EQUB 0, 9              \ This data is commented out in the orginal source
+\EQUA "3|!R"
+
+ EQUB 10                \ Drive motors:   ""
+ CTOK 71                \
+ EQUS " Sp"             \ Encoded as:     ""
+ ETWO 'I', 'N'
+ CTOK 78
+ EQUS " "
+ EQUB &01
+ EQUS "MV"
+ EQUB &02
+ EQUB 0
+
+ EQUB 0
 
 \ ******************************************************************************
 \
 \       Name: thargoid
 \       Type: Variable
 \   Category: Encyclopedia
-\    Summary: AJD
+\    Summary: Card data for the encyclopedia entry for the Thargoid
 \
 \ ******************************************************************************
 
 .thargoid
 
- EQUB 2
- EQUS "6"
- EQUB 0, 3
- EQUS "180/40/180", &AA
- EQUB 0, 4
- EQUS "0.39", &C0
- EQUB 0, 5
- EQUS "50"
- EQUB 0, 6
- EQUS "Unk", &E3, "wn"
- EQUB 0, 8
- EQUS "Widely v", &EE, "y", &F0, "g"
- \EQUB 0, 9
- \EQUA "Unk|!cwn"
- EQUB 0, 10
- EQUS &9E, " ", &C4
- EQUB 0, 0
+ EQUB 2                 \ Combat factor:  "6"
+ EQUS "6"               \
+ EQUB 0                 \ Encoded as:     "6"
+
+ EQUB 3                 \ Dimensions:     ""
+ EQUS "180/40/180"      \
+ CTOK 42                \ Encoded as:     ""
+ EQUB 0
+
+ EQUB 4                 \ Speed:          "0.39LM"
+ EQUS "0.39"            \
+ CTOK 64                \ Encoded as:     "0.39[64]"
+ EQUB 0
+
+ EQUB 5                 \ Crew:           "50"
+ EQUS "50"              \
+ EQUB 0                 \ Encoded as:     "50"
+
+ EQUB 6                 \ Range:          ""
+ EQUS "Unk"             \
+ ETWO 'N', 'O'          \ Encoded as:     ""
+ EQUS "wn"
+ EQUB 0
+
+ EQUB 8                 \ Armaments:      ""
+ EQUS "Widely v"        \
+ ETWO 'A', 'R'          \ Encoded as:     ""
+ EQUS "y"
+ ETWO 'I', 'N'
+ EQUS "g"
+ EQUB 0
+
+\EQUB 0, 9              \ This data is commented out in the original source
+\EQUA "Unk|!cwn"
+
+ EQUB 10                \ Drive motors:   ""
+ CTOK 30                \
+ EQUS " "               \ Encoded as:     ""
+ CTOK 68
+ EQUB 0
+
+ EQUB 0
 
 \ ******************************************************************************
 \
 \       Name: thargon
 \       Type: Variable
 \   Category: Encyclopedia
-\    Summary: AJD
+\    Summary: Card data for the encyclopedia entry for the Thargon
 \
 \ ******************************************************************************
 
 .thargon
 
- EQUB 2
- EQUS "6"
- EQUB 0, 3
- EQUS "40/10/35", &AA
- EQUB 0, 4
- EQUS "0.30", &C0
- EQUB 0, 5
- EQUS &E3, "ne"
- EQUB 0, 8
- EQUS &9E, &B1
- \EQUB 0, 9
- \EQUA "|!cne"
- EQUB 0, 10
- EQUS &9E, " ", &C4
- EQUB 0, 0
+ EQUB 2                 \ Combat factor:  "6"
+ EQUS "6"               \
+ EQUB 0                 \ Encoded as:     "6"
+
+ EQUB 3                 \ Dimensions:     "40/10/35FT"
+ EQUS "40/10/35"        \
+ CTOK 42                \ Encoded as:     "40/10/35[42]"
+ EQUB 0
+
+ EQUB 4                 \ Speed:          "0.30LM"
+ EQUS "0.30"            \
+ CTOK 64                \ Encoded as:     "0.30[64]"
+ EQUB 0
+
+ EQUB 5                 \ Crew:           "NONE"
+ ETWO 'N', 'O'          \
+ EQUS "ne"              \ Encoded as:     "<227>ne"
+ EQUB 0
+
+ EQUB 8                 \ Armaments:      ""
+ CTOK 30                \
+ CTOK 49                \ Encoded as:     ""
+ EQUB 0
+
+\EQUB 0, 9              \ This data is commented out in the original source
+\EQUA "|!cne"
+
+ EQUB 10                \ Drive motors:   ""
+ CTOK 30                \
+ EQUS " "               \ Encoded as:     ""
+ CTOK 68
+ EQUB 0
+
+ EQUB 0
 
 \ ******************************************************************************
 \
 \       Name: transporter
 \       Type: Variable
 \   Category: Encyclopedia
-\    Summary: AJD
+\    Summary: Card data for the encyclopedia entry for the Transporter
 \
 \ ******************************************************************************
 
 .transporter
 
- EQUB 1
- EQUS "p", &F2, "-2500", &D5, &CD, "L", &F0, "k", &C3, "y", &EE, "ds)"
- EQUB 0, 3
- EQUS "35/10/30", &AA
- EQUB 0, 4
- EQUS "0.10", &C0
- EQUB 0, 5
- EQUS "5"
- EQUB 0, 7
- EQUS "10", &BE
- EQUB 0, 0
+ EQUB 1                 \ Inservice date: ""
+ EQUS "p"               \
+ ETWO 'R', 'E'          \ Encoded as:     ""
+ EQUS "-2500"
+ CTOK 85
+ CTOK 77
+ EQUS "L"
+ ETWO 'I', 'N'
+ EQUS "k"
+ CTOK 67
+ EQUS "y"
+ ETWO 'A', 'R'
+ EQUS "ds)"
+ EQUB 0
+
+ EQUB 3                 \ Dimensions:     "35/10/30FT"
+ EQUS "35/10/30"        \
+ CTOK 42                \ Encoded as:     "35/10/30[42]"
+ EQUB 0
+
+ EQUB 4                 \ Speed:          "0.10LM"
+ EQUS "0.10"            \
+ CTOK 64                \ Encoded as:     "0.10[64]"
+ EQUB 0
+
+ EQUB 5                 \ Crew:           "5"
+ EQUS "5"               \
+ EQUB 0                 \ Encoded as:     "5"
+
+ EQUB 7                 \ Cargo space:    "10TC"
+ EQUS "10"              \
+ CTOK 62                \ Encoded as:     "10[62]"
+ EQUB 0
+
+ EQUB 0
 
 \ ******************************************************************************
 \
 \       Name: viper
 \       Type: Variable
 \   Category: Encyclopedia
-\    Summary: AJD
+\    Summary: Card data for the encyclopedia entry for the Viper
 \
 \ ******************************************************************************
 
 .viper
 
- EQUB 1
- EQUS "2762", &D5, "Faulc", &DF, " ", &EF, "n", &CD, ")"
- EQUB 0, 2
- EQUS "7"
- EQUB 0, 3
- EQUS "55/20/50", &AA
- EQUB 0, 4
- EQUS "0.32", &C0
- EQUB 0, 5
- EQUS "1-10"
- EQUB 0, 8
- EQUS &B8, " Mega", &CA, &B2, &B1, &0C, &B6, &F4, " X3", &AE
- \EQUB 0, 9
- \EQUA "9|!R"
- EQUB 0, 10
- EQUS &C7, " Sup", &F4, " ", &C2, &0C, &01, "VC", &02, "10"
- EQUB 0, 0
+ EQUB 1                 \ Inservice date: ""
+ EQUS "2762"            \
+ CTOK 85                \ Encoded as:     ""
+ EQUS "Faulc"
+ ETWO 'O', 'N'
+ EQUS " "
+ ETWO 'M', 'A'
+ EQUS "n"
+ CTOK 77
+ EQUS ")"
+ EQUB 0
+
+ EQUB 2                 \ Combat factor:  "7"
+ EQUS "7"               \
+ EQUB 0                 \ Encoded as:     "7"
+
+ EQUB 3                 \ Dimensions:     "55/20/50FT"
+ EQUS "55/20/50"        \
+ CTOK 42                \ Encoded as:     "55/20/50[42]"
+ EQUB 0
+
+ EQUB 4                 \ Speed:          "0.32LM"
+ EQUS "0.32"            \
+ CTOK 64                \ Encoded as:     "0.32[64]"
+ EQUB 0
+
+ EQUB 5                 \ Crew:           "1-10"
+ EQUS "1-10"            \
+ EQUB 0                 \ Encoded as:     "1-10"
+
+ EQUB 8                 \ Armaments:      ""
+ CTOK 56                \
+ EQUS " Mega"           \ Encoded as:     ""
+ CTOK 74
+ CTOK 50
+ CTOK 49
+ EQUB 12
+ CTOK 54
+ ETWO 'E', 'R'
+ EQUS " X3"
+ CTOK 46
+ EQUB 0
+
+\EQUB 0, 9              \ This data is commented out in the original source
+\EQUA "9|!R"
+
+ EQUB 10                \ Drive motors:   ""
+ CTOK 71                \
+ EQUS " Sup"            \ Encoded as:     ""
+ ETWO 'E', 'R'
+ EQUS " "
+ CTOK 66
+ EQUB 12
+ EQUB &01
+ EQUS "VC"
+ EQUB &02
+ EQUS "10"
+ EQUB 0
+
+ EQUB 0
 
 \ ******************************************************************************
 \
 \       Name: worm
 \       Type: Variable
 \   Category: Encyclopedia
-\    Summary: AJD
+\    Summary: Card data for the encyclopedia entry for the Worm
 \
 \ ******************************************************************************
 
 .worm
 
- EQUB 1
- EQUS "3101"
- EQUB 0, 2
- EQUS "6"
- EQUB 0, 3
- EQUS "35/12/35", &AA
- EQUB 0, 4
- EQUS "0.23", &C0
- EQUB 0, 5
- EQUS "1"
- EQUB 0, 8
- EQUS &B8, &B2, &B1
- \EQUB 0, 9
- \EQUA "3|!R"
- EQUB 0, 10
- EQUS &B6, &B7, " ", &01, "HV", &02, " ", &C2
- EQUB 0, 0
+ EQUB 1                 \ Inservice date: "3101"
+ EQUS "3101"            \
+ EQUB 0                 \ Encoded as:     ""
+
+ EQUB 2                 \ Combat factor:  "6"
+ EQUS "6"               \
+ EQUB 0                 \ Encoded as:     "6"
+
+ EQUB 3                 \ Dimensions:     "35/12/35FT"
+ EQUS "35/12/35"        \
+ CTOK 42                \ Encoded as:     "35/12/35[42]"
+ EQUB 0
+
+ EQUB 4                 \ Speed:          "0.23LM"
+ EQUS "0.23"            \
+ CTOK 64                \ Encoded as:     "0.23[64]"
+ EQUB 0
+
+ EQUB 5                 \ Crew:           "1"
+ EQUS "1"               \
+ EQUB 0                 \ Encoded as:     "1"
+
+ EQUB 8                 \ Armaments:      ""
+ CTOK 56                \
+ CTOK 50                \ Encoded as:     ""
+ CTOK 49
+ EQUB 0
+
+\EQUB 0, 9              \ This data is commented out in the original source
+\EQUA "3|!R"
+
+ EQUB 10                \ Drive motors:   ""
+ CTOK 54                \
+ CTOK 55                \ Encoded as:     ""
+ EQUS " "
+ EQUB &01
+ EQUS "HV"
+ EQUB &02
+ EQUS " "
+ CTOK 66
+ EQUB 0
+
+ EQUB 0
 
 \ ******************************************************************************
 \
