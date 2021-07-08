@@ -6543,12 +6543,9 @@ LOAD_B% = LOAD% + P% - CODE%
 
                         \ --- And replaced by: -------------------------------->
 
- LDA #18                \ Print recursive token 132, which prints the next bit
- JSR status_equip       \ of the Status Mode screen:
-                        \
-                        \   EQUIPMENT:
-                        \
-                        \ followed by a newline and an indent of 6 characters AJD
+ LDA #18                \ Call status_equip with A set to recursive token 132
+ JSR status_equip       \ ("{cr}{all caps}EQUIPMENT: {sentence case}") to
+                        \ show the equipment selling screen
 
 .sell_equip
 
@@ -17417,8 +17414,8 @@ LOAD_D% = LOAD% + P% - CODE%
 
  LDX BOMB               \ If we already have a hyperspace unit fitted (i.e. BOMB
  BNE pres               \ is non-zero), jump to pres to show the error
-                        \ "Hyperspace Unit Present", beep and exit to the docking
-                        \ bay (i.e. show the Status Mode screen)
+                        \ "Hyperspace Unit Present", beep and exit to the
+                        \ docking bay (i.e. show the Status Mode screen)
 
  DEC BOMB               \ Otherwise we just bought an energy bomb, so set BOMB
                         \ to &FF (as BOMB was 0 before the DEC instruction)
@@ -23821,7 +23818,7 @@ ENDIF
 \       Name: confirm
 \       Type: Subroutine
 \   Category: Save and load
-\    Summary: AJD
+\    Summary: Print "ARE YOU SURE?" and wait for a response
 \
 \ ******************************************************************************
 
@@ -23852,7 +23849,7 @@ ENDIF
 
  PLA                    \ Restore A from the stack
 
- CMP #121
+ CMP #121               \ AJD
 
 .confirmed
 

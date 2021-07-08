@@ -7436,8 +7436,8 @@ NEXT
  BEQ l_1ce7             \ zero), skip the following three instructions
 
  LDA #107               \ We do have an I.F.F. system fitted, so print recursive
- JSR plf2               \ token 107 ("I.F.F.SYSTEM"), followed by a newline and an
-                        \ indent of 6 characters
+ JSR plf2               \ token 107 ("I.F.F.SYSTEM"), followed by a newline and
+                        \ an indent of 6 characters
 
 .l_1ce7
 
@@ -9675,8 +9675,9 @@ LOAD_C% = LOAD% +P% - CODE%
                         \ so jump to n_misshit to update the ship's energy level
                         \ with the new, reduced value
 
-                        \ If we get here then the ship doesn't have enough energy
-                        \ to withstand the missile hit, so it gets destroyed
+                        \ If we get here then the ship doesn't have enough
+                        \ energy to withstand the missile hit, so it gets
+                        \ destroyed
 
                         \ --- End of added code ------------------------------->
 
@@ -9730,8 +9731,8 @@ LOAD_C% = LOAD% +P% - CODE%
  LDA #80                \ Otherwise the missile just got destroyed near us, so
  JSR n_oops             \ call n_oops to damage the ship by 80 (taking the
                         \ shields into account), which is nowhere near as bad as
-                        \ the 250 damage from a missile slamming straight into us,
-                        \ but it's still pretty nasty
+                        \ the 250 damage from a missile slamming straight into
+                        \ us, but it's still pretty nasty
 
                         \ --- End of replacement ------------------------------>
 
@@ -11636,8 +11637,8 @@ LOAD_C% = LOAD% +P% - CODE%
                         \ them are targeted, returning with Y = 0 and X = &FF
 
  STY MSAR               \ The call to msblob returns Y = 0, so this sets MSAR
-                        \ to 0 to indicate that the leftmost missile is no longer
-                        \ seeking a target lock
+                        \ to 0 to indicate that the leftmost missile is no
+                        \ longer seeking a target lock
 
  STX MSTG               \ The call to msblob returns X = &FF, so this resets the
                         \ missile so that it is no longer locked on a target
