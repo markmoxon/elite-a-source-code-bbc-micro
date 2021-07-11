@@ -1764,9 +1764,9 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
 
  SKIP 1                 \ Delta 14b joystick configuration setting
                         \
-                        \   * Positive (0-127) = keyboard
+                        \   * 127 = keyboard
                         \
-                        \   * Negative (127-255) = Delta 14b joystick
+                        \   * 128 = Delta 14b joystick
                         \
                         \ Elite-A doesn't support the Bitstik, but instead it
                         \ supports the multi-button Volmace Delta 14b joystick,
@@ -2067,31 +2067,34 @@ LOAD_A% = LOAD%
                         \ --- Original Acornsoft code removed: ---------------->
 
 \ JMP DOBEGIN           \ Decrypt the main docked code and start a new game
+\
+\ JMP CHPR              \ WRCHV is set to point here by elite-loader3.asm
+\
+\ EQUW IRQ1             \ IRQ1V is set to point here by elite-loader3.asm
+\
+\ JMP BRBR1             \ BRKV is set to point here by elite-loader3.asm
+\
+\BRKV = P% - 2          \ The address of the destination address in the above
+\                       \ JMP BRBR1 instruction. This ensures that any code that
+\                       \ updates BRKV will update this instruction instead of
+\                       \ the actual vector
 
                         \ --- And replaced by: -------------------------------->
 
  JMP DOENTRY            \ Decrypt the main docked code and dock at the station
 
-                        \ --- End of replacement ------------------------------>
+ JMP CHPR               \ WRCHV is set to point here by elite-loader.asm
 
- JMP CHPR               \ WRCHV is set to point here by elite-loader3.asm
+ EQUW IRQ1              \ IRQ1V is set to point here by elite-loader.asm
 
- EQUW IRQ1              \ IRQ1V is set to point here by elite-loader3.asm
-
-                        \ --- Original Acornsoft code removed: ---------------->
-
-\ JMP BRBR1             \ BRKV is set to point here by elite-loader3.asm
-
-                        \ --- And replaced by: -------------------------------->
-
- JMP BRBR               \ AJD
-
-                        \ --- End of replacement ------------------------------>
+ JMP BRBR               \ BRKV is set to point here by elite-loader.asm
 
 BRKV = P% - 2           \ The address of the destination address in the above
-                        \ JMP BRBR1 instruction. This ensures that any code that
+                        \ JMP BRBR instruction. This ensures that any code that
                         \ updates BRKV will update this instruction instead of
                         \ the actual vector
+
+                        \ --- End of replacement ------------------------------>
 
 \ ******************************************************************************
 \

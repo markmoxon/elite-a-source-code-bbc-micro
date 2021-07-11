@@ -687,9 +687,14 @@ ENDMACRO
 
                         \ --- And replaced by: -------------------------------->
 
- LDA #&F0               \ set up DDRB AJD
- STA &FE62
- LDA #0 \ Set up palatte flags
+ LDA #%11110000         \ Set the Data Direction Register (DDR) of port B of the
+ STA VIA+&62            \ user port so we can read the buttons on the Delta 14b
+                        \ joystick, using PB4 to PB7 as output (so we can write
+                        \ to the button columns to select the column we are
+                        \ interested in) and PB0 to PB3 as input (so we can read
+                        \ from the button rows)
+
+ LDA #0                 \ Set up palatte flags AJD
  STA &348
  STA &346
  LDA #&FF

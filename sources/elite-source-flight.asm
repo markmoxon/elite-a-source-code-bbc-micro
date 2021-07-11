@@ -1773,9 +1773,9 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
 
  SKIP 1                 \ Delta 14b joystick configuration setting
                         \
-                        \   * Positive (0-127) = keyboard
+                        \   * 127 = keyboard
                         \
-                        \   * Negative (127-255) = Delta 14b joystick
+                        \   * 128 = Delta 14b joystick
                         \
                         \ Elite-A doesn't support the Bitstik, but instead it
                         \ supports the multi-button Volmace Delta 14b joystick,
@@ -2076,6 +2076,12 @@ LOAD_A% = LOAD%
 \ JMP scramble          \ Decrypt the main flight code and join the main loop
 \
 \ JMP scramble          \ Decrypt the main flight code and start a new game
+\
+\ JMP TT26              \ WRCHV is set to point here by elite-loader3.asm
+\
+\ EQUW IRQ1             \ IRQ1V is set to point here by elite-loader3.asm
+\
+\ JMP BRBR1             \ BRKV is set to point here by elite-loader3.asm
 
                         \ --- And replaced by: -------------------------------->
 
@@ -2085,13 +2091,13 @@ LOAD_A% = LOAD%
  JMP RSHIPS             \ Load a new set of ship blueprints, set the space view
                         \ and jump into the main game loop
 
+ JMP TT26               \ WRCHV is set to point here by elite-loader.asm
+
+ EQUW IRQ1              \ IRQ1V is set to point here by elite-loader.asm
+
+ JMP BRBR1              \ BRKV is set to point here by elite-loader.asm
+
                         \ --- End of replacement ------------------------------>
-
- JMP TT26               \ WRCHV is set to point here by elite-loader3.asm
-
- EQUW IRQ1              \ IRQ1V is set to point here by elite-loader3.asm
-
- JMP BRBR1              \ BRKV is set to point here by elite-loader3.asm
 
 \ ******************************************************************************
 \
@@ -14767,7 +14773,8 @@ LOAD_D% = LOAD% + P% - CODE%
 
  CPX #13                \ If X >= 13, then X = 13, 14 or 15 (gold, platinum or
  BCS l_2b04             \ gem-stones), for which there is no storage limit, so
-                        \ jump to l_2b04 to return the 
+                        \ jump to l_2b04 to signal that there is room for this
+                        \ item
 
 .n_aliens
 
@@ -14809,10 +14816,15 @@ LOAD_D% = LOAD% + P% - CODE%
 
 .l_2b04
 
+                        \ If we get here then the item is gold, platinum or
+                        \ gem-stones, for which there is no storage limit, and
+                        \ the C flag is set
+
  LDA QQ20,X             \ Set A to the number of units of this item that we
                         \ already have in the hold
 
- ADC #0                 \ AJD
+ ADC #0                 \ The C flag is set, so this adds one for the item we
+                        \ just scooped
 
  RTS                    \ Return from the subroutine
 
@@ -24723,7 +24735,40 @@ LOAD_F% = LOAD% + P% - CODE%
 \       Name: rand_posn
 \       Type: Subroutine
 \   Category: Universe
-\    Summary: AJD
+\    Summary: Set up the INWK workspace for a ship in a random ship position
+\
+\ ------------------------------------------------------------------------------
+\
+\ This routine sets up a new ship, with the following coordinates:
+\
+\   * (x_sign x_hi x_lo) is a random number in the range -8191 to +8191:
+\
+\     * x_sign is randomly positive or negative
+\     * x_hi is a random number in the range 0 to 31
+\     * x_lo is a random number in the range 0 to 255
+\
+\   * (y_sign y_hi y_lo) is a random number in the range -8191 to +8191:
+\
+\     * y_sign is randomly positive or negative
+\     * y_hi is a random number in the range 0 to 31
+\     * y_lo is a random number in the range 0 to 255
+\
+\   * z_sign is a random number in the range 4352 to 20224:
+\
+\     * z_sign is 0 (positive)
+\     * z_hi is a random number in the range 17 to 79
+\     * z_lo is 0
+\
+\ In other words, the ship is randomly up, down, left or right, but is always in
+\ front of us.
+\
+\ Returns:
+\
+\   A                   A is set to a random number
+\
+\   X                   X is set to a random number
+\
+\   T1                  T1 is set to a random number
 \
 \ ******************************************************************************
 
@@ -24731,25 +24776,40 @@ LOAD_F% = LOAD% + P% - CODE%
 
 .rand_posn
 
- JSR ZINF
- JSR DORND
- STA INWK
- STX INWK+3
- STA T1
- LSR A
- ROR INWK+2
- LSR A
- ROR INWK+5
- LSR A
- STA INWK+4
- TXA
- AND #&1F
+ JSR ZINF               \ Call ZINF to reset the INWK ship workspace
+
+ JSR DORND              \ Set A and X to random numbers
+
+ STA INWK               \ Set x_lo to the random number in A
+
+ STX INWK+3             \ Set y_lo to the random number in X
+
+ STA T1                 \ Store x_lo in T1
+
+ LSR A                  \ Set bit 7 of x_sign randomly (to bit 0 of the random
+ ROR INWK+2             \ number in A), so the x-coordinate it is randomly
+                        \ positive or negative
+
+ LSR A                  \ Set bit 7 of y_sign randomly (to bit 1 of the random
+ ROR INWK+5             \ number in A), so the y-coordinate it is randomly
+                        \ positive or negative
+
+ LSR A                  \ Set bits 0-4 of y_hi randomly (to bits 3-7 of the
+ STA INWK+4             \ random number in A), so the high byte of the
+                        \ y-coordinate is in the range 0 to 31
+
+ TXA                    \ Set x_hi to the random number X, reduced to the range
+ AND #31                \ 0 to 31
  STA INWK+1
- LDA #&50
- SBC INWK+1
- SBC INWK+4
- STA INWK+7
- JMP DORND
+
+ LDA #80                \ Set z_hi = 80 - x_hi - y_hi - 1
+ SBC INWK+1             \
+ SBC INWK+4             \ The C flag is clear as INWK+4 was 0 before the ROR
+ STA INWK+7             \ above, so this sets z_hi in the range 17 to 79
+                        \ (as x_hi and y_hi are both in the range 0 to 31)
+
+ JMP DORND              \ Set A and X to random numbers and return from the
+                        \ subroutine using a tail call
 
                         \ --- End of added section ---------------------------->
 
@@ -25165,7 +25225,8 @@ LOAD_F% = LOAD% + P% - CODE%
                         \ --- And replaced by: -------------------------------->
 
  JSR rand_posn          \ Call rand_posn to set up the INWK workspace for a ship
-                        \ in a random ship position
+                        \ in a random ship position, and set T1 to a random
+                        \ number
 
                         \ --- End of replacement ------------------------------>
 
@@ -28050,14 +28111,54 @@ LOAD_F% = LOAD% + P% - CODE%
 \   Category: Keyboard
 \    Summary: Lookup table for Delta 14b joystick buttons
 \
+\ ------------------------------------------------------------------------------
+\
+\ In the following table, which maps buttons on the Delta 14b to the flight
+\ controls, the top nibble of the value gives the column:
+\
+\   &6 = %110 = left column
+\   &5 = %101 = middle column
+\   &3 = %011 = right column
+\
+\ while the lower nibble gives the row:
+\
+\   &1 = %0001 = top row
+\   &2 = %0010 = second row
+\   &4 = %0100 = third row
+\   &8 = %1000 = bottom row
+\
+\ This results in the following mapping (as the top two fire buttons are treated
+\ the same as the top button in the middle row):
+\
+\   Fire laser                               Fire laser
+\
+\   Slow down              Fire laser        Speed up
+\   Unarm Missile          Fire Missile      Target missile
+\   Hyperspace Unit        E.C.M.            Escape pod
+\   Docking computer on	   In-system jump    Docking computer off
+\
 \ ******************************************************************************
 
                         \ --- Whole section added for Elite-A: ---------------->
 
 .b_table
 
- EQUB &61, &31, &80, &80, &80, &80, &51             \ AJD
- EQUB &64, &34, &32, &62, &52, &54, &58, &38, &68
+ EQUB &61               \ Left column    Top row      KYTB+1    Slow down
+ EQUB &31               \ Right column   Top row      KYTB+2    Speed up
+ EQUB &80               \ -                           KYTB+3    Roll left
+ EQUB &80               \ -                           KYTB+4    Roll right
+ EQUB &80               \ -                           KYTB+5    Pitch up
+ EQUB &80               \ -                           KYTB+6    Pitch down
+ EQUB &51               \ Middle column  Top row      KYTB+7    Fire lasers
+ EQUB &64               \ Left column    Third row    KYTB+8    Hyperspace unit
+ EQUB &34               \ Right column   Third row    KYTB+9    Escape pod
+ EQUB &32               \ Right column   Second row   KYTB+10   Arm missile
+ EQUB &62               \ Left column    Second row   KYTB+11   Unarm missile
+ EQUB &52               \ Middle column  Second row   KYTB+12   Fire missile
+ EQUB &54               \ Middle column  Third row    KYTB+13   E.C.M.
+ EQUB &58               \ Middle column  Bottom row   KYTB+14   In-system jump
+ EQUB &38               \ Right column   Bottom row   KYTB+15   Docking computer
+ EQUB &68               \ Left column    Bottom row   KYTB+16   Cancel docking
 
                         \ --- End of added section ---------------------------->
 
@@ -28068,27 +28169,140 @@ LOAD_F% = LOAD% + P% - CODE%
 \   Category: Keyboard
 \    Summary: Check Delta 14b joystick buttons
 \
+\ ------------------------------------------------------------------------------
+\
+\ Scan the Delta 14b for the flight key given in register Y, where Y is the
+\ offset into the KYTB table above (so this is the same approach as in DKS1).
+\
+\ The keys on the Delta 14b are laid out as follows (the top two fire buttons
+\ are treated the same as the top button in the middle row):
+\
+\   Fire laser                               Fire laser
+\
+\   Slow down              Fire laser        Speed up
+\   Unarm Missile          Fire Missile      Target missile
+\   Hyperspace Unit        E.C.M.            Escape pod
+\   Docking computer on	   In-system jump    Docking computer off
+\
+\ Arguments:
+\
+\   Y                   The offset into the KYTB table of the key that we want
+\                       to scan on the Delta 14b
+\
 \ ******************************************************************************
 
                         \ --- Whole section added for Elite-A: ---------------->
 
 .b_13
 
- LDA #&00               \ AJD
+ LDA #0                 \ Set A = 0 for the second pass through the following,
+                        \ so we can check the joystick plugged into the rear
+                        \ socket of the Delta 14b adaptor
 
 .b_14
 
- TAX
- EOR b_table-1,Y
- BEQ b_quit
- STA &FE60
- AND #&0F
- AND &FE60
- BEQ b_pressed
- TXA
- BMI b_13
+                        \ This is the entry point for the routine, which is
+                        \ called with A = 128 (the value of BTSK when the Delta
+                        \ 14b is enabled), and if the key we are checking has a
+                        \ corresponding button on the Delta 14b, it is run a
+                        \ second time with A = 0
 
- RTS
+ TAX                    \ Store A in X so we can restore it below
+
+ EOR b_table-1,Y        \ We now EOR the value in A with the Y-th entry in
+ BEQ b_quit             \ b_table, and jump to b_quit to return from the
+                        \ subroutine if the table entry is 128 (&80) - in other
+                        \ words, we quite if Y is the offset for the roll and
+                        \ pitch controls
+
+                        \ If we get here, then the offset in Y points to a
+                        \ control with a corresponding button on the Delta 14b,
+                        \ and we pass through the following twice, once with a
+                        \ starting value of A = 128, and again with a starting
+                        \ value of A = 0
+                        \
+                        \ On the first pass, the EOR will set A to the value
+                        \ from b_table but with bit 7 set, which means we scan
+                        \ the joystick plugged into the side socket of the
+                        \ Delta 14b adaptor
+                        \
+                        \ On the second pass, the EOR will set A to the value
+                        \ from b_table (i.e. with bit 7 clear), which means we
+                        \ scan the joystick plugged into the rear socket of the
+                        \ Delta 14b adaptor
+
+ STA VIA+&60            \ Set 6522 User VIA output register ORB (SHEILA &60) to
+                        \ the value in A, which tells the Delta 14b adaptor box
+                        \ that we want to read the buttons specified in PB4 to
+                        \ PB7 (i.e. bits 4-7), as follows:
+                        \
+                        \ On the side socket joystick (bit 7 set):
+                        \
+                        \   %1110 = read buttons in left column   (bit 4 clear)
+                        \   %1101 = read buttons in middle column (bit 5 clear)
+                        \   %1011 = read buttons in right column  (bit 6 clear)
+                        \
+                        \ On the rear socket joystick (bit 7 clear):
+                        \
+                        \   %0110 = read buttons in left column   (bit 4 clear)
+                        \   %0101 = read buttons in middle column (bit 5 clear)
+                        \   %0011 = read buttons in right column  (bit 6 clear)
+
+ AND #%00001111         \ We now read the 6522 User VIA to fetch PB0 to PB3 from
+ AND VIA+&60            \ the user port (PB0 = bit 0 to PB3 = bit 4), which
+                        \ tells us whether any buttons in the specified column
+                        \ are being pressed, and if they are, in which row. The
+                        \ values read are as follows:
+                        \
+                        \   %1111 = no button is being pressed in this column
+                        \   %1110 = button pressed in top row    (bit 0 clear)
+                        \   %1101 = button pressed in second row (bit 1 clear)
+                        \   %1011 = button pressed in third row  (bit 2 clear)
+                        \   %0111 = button pressed in bottom row (bit 3 clear)
+                        \
+                        \ In other words, if a button is being pressed in the
+                        \ top row in the previously specified column, then PB0
+                        \ (bit 0) will go low in the value we read from the user
+                        \ port
+
+ BEQ b_pressed          \ In the above we AND'd the result from the user port
+                        \ with the bottom four bits of the table value (the
+                        \ lower nibble). The lower nibble in b_table contains
+                        \ a 1 in the relevant position for that row that
+                        \ corresponds with the clear bit in the response from
+                        \ the user port, so if we AND the two together and get
+                        \ a zero, that means that button is being pressed, in
+                        \ which case we jump to b_pressed to update the key
+                        \ logger for that button
+                        \
+                        \ For example, take the b_table entry for the escape pod
+                        \ button, in the right column and third row. The value
+                        \ in b_table is &34. The top nibble contains the column,
+                        \ which is &3 = %011, which means in the STA VIA+&60
+                        \ above, we write %1011 in the first pass (when A = 128)
+                        \ to set the right column for the side socket joystick,
+                        \ and we write %0011 in the first pass (when A = 0) to
+                        \ set the right column for the rear socket joystick
+                        \
+                        \ Now for the row. The lower nibble of the &34 value
+                        \ from b_table contains the row, so that's &4 = %0100.
+                        \ When we read the user port, then we will fetch %1011
+                        \ from VIA+&60 if the button in the third row is being
+                        \ pressed, so when we AND the two together, we get:
+                        \
+                        \   %0100 AND %1011 = 0
+                        \
+                        \ which will indicate the button is being pressed. If
+                        \ any other button is being pressed, or no buttons at
+                        \ all, then the result will be non-zero and we move on
+                        \ to the next buttton
+
+ TXA                    \ Restore the original value of A that we stored in X
+
+ BMI b_13               \ If we just did the above with A = 128, then loop back
+                        \ to b_13 to do it again with A = 0
+
+ RTS                    \ Return from the subroutine
 
                         \ --- End of added section ---------------------------->
 
@@ -28406,8 +28620,10 @@ LOAD_F% = LOAD% + P% - CODE%
 
                         \ --- Code added for Elite-A: ------------------------->
 
- LDA #%01010001         \ AJD
- STA VIA+&60
+ LDA #&51               \ Set 6522 User VIA output register ORB (SHEILA &60) to
+ STA VIA+&60            \ the Delta 14b joystick button in the middle column
+                        \ (upper nibble &5) and top row (lower nibble &1), which
+                        \ corresponds to the fire button
 
                         \ --- End of added code ------------------------------->
 

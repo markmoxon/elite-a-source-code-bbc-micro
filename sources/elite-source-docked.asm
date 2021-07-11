@@ -1771,9 +1771,9 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
 
  SKIP 1                 \ Delta 14b joystick configuration setting
                         \
-                        \   * Positive (0-127) = keyboard
+                        \   * 127 = keyboard
                         \
-                        \   * Negative (127-255) = Delta 14b joystick
+                        \   * 128 = Delta 14b joystick
                         \
                         \ Elite-A doesn't support the Bitstik, but instead it
                         \ supports the multi-button Volmace Delta 14b joystick,
@@ -2073,24 +2073,33 @@ LOAD_A% = LOAD%
 
  JMP DOBEGIN            \ Decrypt the main docked code and start a new game
 
- JMP CHPR               \ WRCHV is set to point here by elite-loader3.asm
-
- EQUW IRQ1              \ IRQ1V is set to point here by elite-loader3.asm
-
                         \ --- Original Acornsoft code removed: ---------------->
 
+\ JMP CHPR              \ WRCHV is set to point here by elite-loader3.asm
+\
+\ EQUW IRQ1             \ IRQ1V is set to point here by elite-loader3.asm
+\
 \ JMP BRBR1             \ BRKV is set to point here by elite-loader3.asm
+\
+\BRKV = P% - 2          \ The address of the destination address in the above
+\                       \ JMP BRBR1 instruction. This ensures that any code that
+\                       \ updates BRKV will update this instruction instead of
+\                       \ the actual vector
 
                         \ --- And replaced by: -------------------------------->
 
- JMP BRBR               \ AJD
+ JMP CHPR               \ WRCHV is set to point here by elite-loader.asm
 
-                        \ --- End of replacement ------------------------------>
+ EQUW IRQ1              \ IRQ1V is set to point here by elite-loader.asm
+
+ JMP BRBR               \ BRKV is set to point here by elite-loader.asm
 
 BRKV = P% - 2           \ The address of the destination address in the above
-                        \ JMP BRBR1 instruction. This ensures that any code that
+                        \ JMP BRBR instruction. This ensures that any code that
                         \ updates BRKV will update this instruction instead of
                         \ the actual vector
+
+                        \ --- End of replacement ------------------------------>
 
 \ ******************************************************************************
 \
@@ -6545,7 +6554,7 @@ LOAD_B% = LOAD% + P% - CODE%
 
  LDA #18                \ Call status_equip with A set to recursive token 132
  JSR status_equip       \ ("{cr}{all caps}EQUIPMENT: {sentence case}") to
-                        \ show the equipment selling screen
+                        \ show the equipment selling screen AJD
 
 .sell_equip
 
@@ -22818,8 +22827,10 @@ ENDIF
 
                         \ --- Code added for Elite-A: ------------------------->
 
- LDA #&51               \ AJD
- STA &FE60
+ LDA #&51               \ Set 6522 User VIA output register ORB (SHEILA &60) to
+ STA VIA+&60            \ the Delta 14b joystick button in the middle column
+                        \ (upper nibble &5) and top row (lower nibble &1), which
+                        \ corresponds to the fire button
 
                         \ --- End of added code ------------------------------->
 
