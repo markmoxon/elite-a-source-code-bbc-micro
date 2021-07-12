@@ -39,8 +39,6 @@ _SOURCE_DISC            = (_RELEASE = 2)
 \
 \ ******************************************************************************
 
-LS% = &0CFF             \ The start of the descending ship line heap
-
 NOST = 18               \ The number of stardust particles in normal space (this
                         \ goes down to 3 in witchspace)
 
@@ -92,8 +90,28 @@ VE = 0                  \ The obfuscation byte used to hide the extended tokens
 LL = 30                 \ The length of lines (in characters) of justified text
                         \ in the extended tokens system
 
+save_lock = &0233       \ This flag indicates whether we should be asking for
+                        \ confirmation before saving or loading a commander
+                        \ file:
+                        \
+                        \   * 0 = last file operation was a save, or we just
+                        \         started a new game, so there are no unsaved
+                        \         changes (so ask for confirmation on saving)
+                        \
+                        \   * &FF = last file operation was a load, or we have
+                        \           just docked and have unsaved changes (so ask
+                        \           for confirmation on loading)
+                        \
+                        \ It shares a location with the IND2V+1 vector, which we
+                        \ do not use, so we can reuse the location
+
 QQ18 = &0400            \ The address of the text token table, as set in
                         \ elite-loader.asm
+
+new_name = &074D        \ This points to recursive token 132 in the QQ18 table.
+                        \ We update the token's text at this address whenever we
+                        \ buy a new ship, so that printing token 132 will always
+                        \ show the current ship type
 
 SNE = &07C0             \ The address of the sine lookup table, as set in
                         \ elite-loader.asm
@@ -101,6 +119,8 @@ SNE = &07C0             \ The address of the sine lookup table, as set in
 QQ16_FLIGHT = &0880     \ The address of the two-letter text token table in the
                         \ flight code (this gets populated by the docked code at
                         \ the start of the game)
+
+LS% = &0CFF             \ The start of the descending ship line heap
 
 IRQ1 = &114B            \ The address of the IRQ1 routine that implements the
                         \ split screen interrupt handler, as set in
@@ -117,10 +137,6 @@ CHK = &11D4             \ The address of the first checksum byte for the saved
 
 SHIP_MISSILE = &7F00    \ The address of the missile ship blueprint, as set in
                         \ elite-loader.asm
-
-save_lock = &0233       \ AJD, shares location with IND2V+1
-
-new_name = &074D        \ AJD
 
 \ ******************************************************************************
 \
@@ -2106,7 +2122,8 @@ BRKV = P% - 2           \ The address of the destination address in the above
 \       Name: INBAY
 \       Type: Subroutine
 \   Category: Loader
-\    Summary: This routine is unused and is never run
+\    Summary: Set the break handler and enter the docking bay without showing
+\             the tunnel or ship hanger, or checking mission progress
 \
 \ ******************************************************************************
 
@@ -2124,12 +2141,9 @@ BRKV = P% - 2           \ The address of the destination address in the above
  JSR BRKBK              \ AJD
  JMP icode_set
 
- EQUB 0
- \ dead entry
-
- LDA #0                 \ Call SCRAM to set save_lock to 0 and set the break
- JSR SCRAM              \ handler
-
+ BRK                    \ This code is never run, and seems to have no effect
+ LDA #0
+ JSR SCRAM
  JSR RES2
  JMP TT170
 
@@ -2153,8 +2167,8 @@ BRKV = P% - 2           \ The address of the destination address in the above
 
                         \ --- And replaced by: -------------------------------->
 
- LDA #0                 \ Call SCRAM to set save_lock to 0 and set the break
- JSR SCRAM              \ handler
+ LDA #0                 \ Call SCRAM to set save_lock to 0 (i.e. this is a new
+ JSR SCRAM              \ game) and set the break handler
 
                         \ --- End of replacement ------------------------------>
 
@@ -2407,7 +2421,14 @@ BRKV = P% - 2           \ The address of the destination address in the above
 \
 \ Arguments:
 \
-\   A                   Set the save_lock flag to this value
+\   A                   Set the save_lock flag as follows:
+\
+\                         * 0 = this is a new game, so there are no unsaved
+\                               changes in the commander file
+\
+\                         * &FF = we just docked, so there are unsaved changes
+\                                 in the commander file
+\
 \ ******************************************************************************
 
 .SCRAM
@@ -2422,7 +2443,8 @@ BRKV = P% - 2           \ The address of the destination address in the above
 
                         \ --- And replaced by: -------------------------------->
 
- STA save_lock          \ Set the save_lock variable to the value in A
+ STA save_lock          \ Set the save_lock variable to the value in A (which
+                        \ will be either 0 or &FF)
 
                         \ Fall through into BRKBK to set the standard BRKV
                         \ handler for the game and return from the subroutine
@@ -23685,15 +23707,21 @@ ENDIF
 \ BNE CAT               \ We get here following the CMP #'2' above, so this
 \                       \ jumps to CAT if option 2 was not chosen - in other
 \                       \ words, if option 3 (catalogue) was chosen
+\
+\ JSR GTNMEW            \ If we get here then option 2 (save) was chosen, so
+\                       \ call GTNMEW to fetch the name of the commander file
+\                       \ to save (including drive number and directory) into
+\                       \ INWK
 
                         \ --- And replaced by: -------------------------------->
 
- LDA #0                 \ AJD
- JSR confirm
- BNE SVEX
+                        \ If we get here then option 1 (load) was chosen
 
- JSR GTNMEW             \ If we get here then option 1 (load) was chosen, so
-                        \ call GTNMEW to fetch the name of the commander file
+ LDA #0                 \ If save_lock = &FF, then there are unsaved changes, so
+ JSR confirm            \ ask for confirmation before proceeding with the load,
+ BNE SVEX               \ jumping to SVEX to exit if confirmation is not given
+
+ JSR GTNMEW             \ Call GTNMEW to fetch the name of the commander file
                         \ to load (including drive number and directory) into
                         \ INWK
 
@@ -23711,16 +23739,18 @@ ENDIF
                         \ jumps to CAT if option 2 was not chosen - in other
                         \ words, if option 3 (catalogue) was chosen
 
- LDA #&FF               \ AJD
- JSR confirm
- BNE SVEX
+                        \ If we get here then option 2 (save) was chosen
 
-                        \ --- End of replacement ------------------------------>
+ LDA #&FF               \ If save_lock = 0, then there are no unsaved changes,
+ JSR confirm            \ so ask for confirmation before proceeding with the
+ BNE SVEX               \ save, jumping to SVEX to exit if confirmation is not
+                        \ given
 
- JSR GTNMEW             \ If we get here then option 2 (save) was chosen, so
-                        \ call GTNMEW to fetch the name of the commander file
+JSR GTNMEW              \ Call GTNMEW to fetch the name of the commander file
                         \ to save (including drive number and directory) into
                         \ INWK
+
+                        \ --- End of replacement ------------------------------>
 
  JSR TRNME              \ Transfer the commander filename from INWK to NA%
 
@@ -23831,14 +23861,27 @@ ENDIF
 \   Category: Save and load
 \    Summary: Print "ARE YOU SURE?" and wait for a response
 \
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   A                   If save_lock matches this value, then we do not ask for
+\                       confirmation and instead assume the answer was "Y"
+\
+\ Returns:
+\
+\   Z flag              If "Y" is pressed, then BEQ will branch (Z flag is set),
+\                       otherwise BNE will branch (Z flag is clear)
+\
 \ ******************************************************************************
 
                         \ --- Whole section added for Elite-A: ---------------->
 
 .confirm
 
- CMP save_lock          \ If save_lock = 0, jump to confirmed to return from the
- BEQ confirmed          \ subroutine
+ CMP save_lock          \ If A = save_lock, jump to confirmed to return from the
+ BEQ confirmed          \ subroutine without asking for confirmation, but
+                        \ assuming a positive response
 
  LDA #3                 \ Print extended token 3 ("ARE YOU SURE?")
  JSR DETOK
@@ -23860,7 +23903,8 @@ ENDIF
 
  PLA                    \ Restore A from the stack
 
- CMP #121               \ AJD
+ CMP #'y'               \ Set the C flag if A >= ASCII y' (i.e. if "Y" was
+                        \ pressed and not "N"), otherwise clear it
 
 .confirmed
 
@@ -23916,7 +23960,12 @@ ENDIF
 
                         \ --- Code added for Elite-A: ------------------------->
 
- STA save_lock          \ AJD
+ STA save_lock          \ Set save_lock to 0 (when we save a file) or &FF (when
+                        \ we load a file) to indicate:
+                        \
+                        \   * 0 = last file operation was a save
+                        \
+                        \   * &FF = last file operation was a load
 
                         \ --- End of added code ------------------------------->
 

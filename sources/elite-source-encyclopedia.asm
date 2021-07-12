@@ -39,8 +39,6 @@ _SOURCE_DISC            = (_RELEASE = 2)
 \
 \ ******************************************************************************
 
-LS% = &0CFF             \ The start of the descending ship line heap
-
 NOST = 18               \ The number of stardust particles in normal space (this
                         \ goes down to 3 in witchspace)
 
@@ -53,14 +51,6 @@ SST = 2                 \ Ship type for a Coriolis space station
 
 NI% = 37                \ The number of bytes in each ship's data block (as
                         \ stored in INWK and K%)
-
-OSBYTE = &FFF4          \ The address for the OSBYTE routine
-OSWORD = &FFF1          \ The address for the OSWORD routine
-OSCLI = &FFF7           \ The address for the OSCLI routine
-
-VIA = &FE00             \ Memory-mapped space for accessing internal hardware,
-                        \ such as the video ULA, 6845 CRTC and 6522 VIAs (also
-                        \ known as SHEILA)
 
 X = 128                 \ The centre x-coordinate of the 256 x 192 space view
 Y = 96                  \ The centre y-coordinate of the 256 x 192 space view
@@ -89,6 +79,8 @@ QQ18 = &0400            \ The address of the text token table, as set in
 SNE = &07C0             \ The address of the sine lookup table, as set in
                         \ elite-loader.asm
 
+LS% = &0CFF             \ The start of the descending ship line heap
+
 IRQ1 = &114B            \ The address of the IRQ1 routine that implements the
                         \ split screen interrupt handler, as set in
                         \ elite-loader.asm
@@ -96,24 +88,16 @@ IRQ1 = &114B            \ The address of the IRQ1 routine that implements the
 NA% = &1181             \ The address of the data block for the last saved
                         \ commander, as set in elite-loader.asm
 
-CHK2 = &11D3            \ The address of the second checksum byte for the saved
-                        \ commander data file, as set in elite-loader.asm
-
-CHK = &11D4             \ The address of the first checksum byte for the saved
-                        \ commander data file, as set in elite-loader.asm
-
 XX21 = &5600            \ The address of the ship blueprints lookup table, where
                         \ the chosen ship blueprints file is loaded
 
-E% = &563E              \ The address of the default NEWB ship bytes within the
-                        \ loaded ship blueprints file
+VIA = &FE00             \ Memory-mapped space for accessing internal hardware,
+                        \ such as the video ULA, 6845 CRTC and 6522 VIAs (also
+                        \ known as SHEILA)
 
-SHIP_MISSILE = &7F00    \ The address of the missile ship blueprint, as set in
-                        \ elite-loader.asm
-
-save_lock = &0233       \ AJD, shares location with IND2V+1
-
-new_name = &074D        \ AJD
+OSBYTE = &FFF4          \ The address for the OSBYTE routine
+OSWORD = &FFF1          \ The address for the OSWORD routine
+OSCLI = &FFF7           \ The address for the OSCLI routine
 
 \ ******************************************************************************
 \

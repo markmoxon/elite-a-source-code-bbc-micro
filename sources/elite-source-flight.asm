@@ -39,8 +39,6 @@ _SOURCE_DISC            = (_RELEASE = 2)
 \
 \ ******************************************************************************
 
-LS% = &0CFF             \ The RSHIPS of the descending ship line heap
-
 NOST = 18               \ The number of stardust particles in normal space (this
                         \ goes down to 3 in witchspace)
 
@@ -108,6 +106,11 @@ QQ16 = &0880            \ The address of the two-letter text token table in the
                         \ flight code (this gets populated by the docked code at
                         \ the start of the game)
 
+LS% = &0CFF             \ The RSHIPS of the descending ship line heap
+
+iff_index = &0D7A       \ The address of the iff_index routine that is put in
+                        \ place by the loader in elite-loader.asm
+
 IRQ1 = &114B            \ The address of the IRQ1 routine that implements the
                         \ split screen interrupt handler, as set in
                         \ elite-loader.asm
@@ -120,9 +123,6 @@ XX21 = &5600            \ The address of the ship blueprints lookup table, where
 
 E% = &563E              \ The address of the default NEWB ship bytes within the
                         \ loaded ship blueprints file
-
-iff_index = &0D7A       \ The address of the iff_index routine that is put in
-                        \ place by the loader in elite-loader.asm
 
 \ ******************************************************************************
 \
@@ -3765,7 +3765,15 @@ LOAD_A% = LOAD%
 
                         \ --- And replaced by: -------------------------------->
 
-                        \ At this point, we know that A = %00100000 (as we
+                        \ We now update our FIST flag ("fugitive/innocent
+                        \ status") by 1 if we didn't kill a cop, or by a large
+                        \ amount if we did - specifically, if we killed a cop,
+                        \ then the most significant bit in FIST that is
+                        \ currently clear will be set, which means we increase
+                        \ FIST by the highest multiple of 2 that we can add and
+                        \ still fit the result in a byte
+                        \
+                        \ Also, at this point, we know that A = %00100000 (as we
                         \ didn't take the BEQ branch)
 
  BIT NEWB               \ If bit 6 of the ship's NEWB flags is set, then this
@@ -3777,27 +3785,54 @@ LOAD_A% = LOAD%
                         \
                         \   A AND NEWB = %00100000 AND NEWB
                         \
-                        \ so this jumps to n_goodboy if bit 5 of NEWB is clear
-                        \ (in other words, if the ship is no longer exploding)
+                        \ so this jumps to n_goodboy if bit 5 of NEWB is clear,
+                        \ so in other words, if the ship is no longer exploding,
+                        \ we don't update FIST
 
- LDA #%10000000         \ AJD
+ LDA #%10000000         \ Set A so that the shift and rotate instructions we're
+                        \ about to do set A = %00000001, so we increase our FIST
+                        \ status by just 1
 
 .n_badboy
 
- ASL A
- ROL A
+                        \ We get here with two possible values of A:
+                        \
+                        \   * A = %00100000 if we just killed a cop
+                        \   * A = %10000000 otherwise
+
+ ASL A                  \ Shift and rotate A so that we get:
+ ROL A                  \
+                        \   * A = %10000000 if we just killed a cop
+                        \   * A = %00000001 otherwise
 
 .n_bitlegal
 
- LSR A
- BIT FIST
- BNE n_bitlegal
+ LSR A                  \ We now shift A to the right and AND it with FIST,
+ BIT FIST               \ repeating the process until the single set bit in A
+ BNE n_bitlegal         \ matches a clear bit in FIST, so this shifts A right
+                        \ so that the set bit matches the highest clear bit in
+                        \ FIST (if we just killed a cop), or it sets A to 0 and
+                        \ sets the C flag (if we didn't)
 
- ADC FIST
- BCS KS1S
+ ADC FIST               \ Set A = A + C + FIST, so:
+                        \
+                        \   * A = A + 0 + FIST if we just killed a cop
+                        \   * A = 0 + 1 + FIST otherwise
+                        \
+                        \ so if we just killed a cop, this will effectively set
+                        \ the highest clear bit in FIST, otherwise we just add 1
+                        \ to FIST
 
- STA FIST
- BCC KS1S
+ BCS KS1S               \ If the addition overflowed, jump to KS1S to skip
+                        \ showing an on-screen bounty for this kill, and without
+                        \ updating FIST first (as we are too bad to get any
+                        \ worse)
+
+ STA FIST               \ Otherwise update the value of FIST to the new value
+
+ BCC KS1S               \ Jump to KS1S to skip showing an on-screen bounty for
+                        \ this kill (the BCC is effectively a JMP as we just
+                        \ passed through a BCS)
 
 .n_goodboy
 
@@ -19849,25 +19884,54 @@ LOAD_E% = LOAD% + P% - CODE%
 
                         \ --- And replaced by: -------------------------------->
 
- LDA QQ8                \ AJD
- LDY #3
+                        \ We now want to extract bits 3-10 of QQ8(1 0) into A,
+                        \ so we can subtract this value from our legal status in
+                        \ FIST (so the further we travel, the quicker our legal
+                        \ status drops back down to clean, as we put more
+                        \ distance between us and our crimes - specifically, we
+                        \ drop 1.2 FIST points for each light year, as we
+                        \ subtract (QQ8 / 8) from FIST, and QQ8 contains the
+                        \ distance in light years * 10)
+
+ LDA QQ8                \ Set A to the low byte of the distance to the selected
+                        \ system in QQ8(1 0), so (QQ8+1 A) contains the distance
+
+ LDY #3                 \ We're going to extract bits 3-10 by shifting QQ8(1 0)
+                        \ right by 3 places, so we start by setting a loop
+                        \ counter in Y
 
 .legal_div
 
- LSR QQ8+1
+ LSR QQ8+1              \ Shift (QQ8+1 A) to the right by one place
  ROR A
- DEY
- BNE legal_div
 
- SEC
+ DEY                    \ Decrement the loop counter
+
+ BNE legal_div          \ Loop back until we have shifted right by 3 places, by
+                        \ which point A will contain bits 3-10 of QQ8(1 0)
+
+                        \ We now subtract A from FIST, and subtract 1 more,
+                        \ making sure we don't reduce FIST beyond 0, which we do
+                        \ by doing the subtraction in reverse and then negating
+                        \ the result with one's complement
+
+ SEC                    \ Set A = A - FIST (which we will negate later)
  SBC FIST
- BCC legal_over
- LDA #&FF
+
+ BCC legal_over         \ If the subtraction underflowed, i.e. A < FIST, skip
+                        \ the following instruction
+
+ LDA #&FF               \ A > FIST, so we set A = &FF so the EOR flips this to
+                        \ 0, so FIST gets set to 0 when we travel far enough to
+                        \ clear our name
 
 .legal_over
 
- EOR #&FF
- STA FIST
+ EOR #&FF               \ Flip all the bits in A to negate the result, so if the
+                        \ subtraction underflowed, i.e. A < FIST, we now have
+                        \ A = FIST - A - 1
+
+ STA FIST               \ Update the value of FIST to the new value in A
 
                         \ --- End of replacement ------------------------------>
 

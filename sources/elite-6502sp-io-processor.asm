@@ -39,13 +39,6 @@ _SOURCE_DISC            = (_RELEASE = 2)
 \
 \ ******************************************************************************
 
-OSBYTE = &FFF4          \ The address for the OSBYTE routine
-OSCLI = &FFF7           \ The address for the OSCLI routine
-
-VIA = &FE00             \ Memory-mapped space for accessing internal hardware,
-                        \ such as the video ULA, 6845 CRTC and 6522 VIAs (also
-                        \ known as SHEILA)
-
 X = 128                 \ The centre x-coordinate of the 256 x 192 space view
 Y = 96                  \ The centre y-coordinate of the 256 x 192 space view
 
@@ -66,6 +59,10 @@ HFX = &0348             \ A flag that toggles the hyperspace colour effect,
 ESCP = &0386            \ The flag that determines whether we have an escape pod
                         \ fitted, matching the address in the main game code
 
+VIA = &FE00             \ Memory-mapped space for accessing internal hardware,
+                        \ such as the video ULA, 6845 CRTC and 6522 VIAs (also
+                        \ known as SHEILA)
+
 tube_r1s = &FEE0        \ AJD
 tube_r1d = &FEE1
 tube_r2s = &FEE2
@@ -76,6 +73,9 @@ tube_r4s = &FEE6
 tube_r4d = &FEE7
 
 rawrch = &FFBC          \ AJD
+
+OSBYTE = &FFF4          \ The address for the OSBYTE routine
+OSCLI = &FFF7           \ The address for the OSCLI routine
 
 \ ******************************************************************************
 \

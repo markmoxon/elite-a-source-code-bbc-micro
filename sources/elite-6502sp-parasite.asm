@@ -43,8 +43,6 @@ Q% = _REMOVE_CHECKSUMS  \ Set Q% to TRUE to max out the default commander, FALSE
                         \ for the standard default commander (this is set to
                         \ TRUE if checksums are disabled, just for convenience)
 
-LS% = &0CFF             \ The start of the descending ship line heap
-
 NOST = 18               \ The number of stardust particles in normal space (this
                         \ goes down to 3 in witchspace)
 
@@ -93,6 +91,21 @@ VIA = &FE00             \ Memory-mapped space for accessing internal hardware,
 
 BRKV = &0202            \ The address of the break vector
 
+save_lock = &0233       \ This flag indicates whether we should be asking for
+                        \ confirmation before saving or loading a commander
+                        \ file:
+                        \
+                        \   * 0 = last file operation was a save, or we just
+                        \         started a new game, so there are no unsaved
+                        \         changes (so ask for confirmation on saving)
+                        \
+                        \   * &FF = last file operation was a load, or we have
+                        \           just docked and have unsaved changes (so ask
+                        \           for confirmation on loading)
+                        \
+                        \ It shares a location with the IND2V+1 vector, which we
+                        \ do not use, so we can reuse the location
+
 X = 128                 \ The centre x-coordinate of the 256 x 192 space view
 Y = 96                  \ The centre y-coordinate of the 256 x 192 space view
 
@@ -117,7 +130,7 @@ VE = 0                  \ The obfuscation byte used to hide the extended tokens
 LL = 30                 \ The length of lines (in characters) of justified text
                         \ in the extended tokens system
 
-save_lock = &0233       \ AJD, shares location with IND2V+1
+LS% = &0CFF             \ The start of the descending ship line heap
 
 tube_r1s = &FEF8        \ AJD
 tube_r1d = &FEF9
@@ -2319,8 +2332,9 @@ ENDIF
  LDA #0                 \ Set dockedp = 0 to indicate we are docked
  STA dockedp
 
- LDA #&FF               \ Call SCRAM to set save_lock to &FF and set the break
- JSR SCRAM              \ handler
+ LDA #&FF               \ Call SCRAM to set save_lock to &FF (i.e. we have just
+ JSR SCRAM              \ docked and have unsaved changes) and set the break
+                        \ handler
 
  JSR RES2               \ Reset a number of flight variables and workspaces
 
@@ -2471,12 +2485,20 @@ ENDIF
 \
 \ Arguments:
 \
-\   A                   Set the save_lock flag to this value
+\   A                   Set the save_lock flag as follows:
+\
+\                         * 0 = this is a new game, so there are no unsaved
+\                               changes in the commander file
+\
+\                         * &FF = we just docked, so there are unsaved changes
+\                                 in the commander file
+\
 \ ******************************************************************************
 
 .SCRAM
 
- STA save_lock          \ Set the save_lock variable to the value in A
+ STA save_lock          \ Set the save_lock variable to the value in A (which
+                        \ will be either 0 or &FF)
 
                         \ Fall through into BRKBK to set the standard BRKV
                         \ handler for the game and return from the subroutine
@@ -17040,12 +17062,13 @@ ENDIF
  CMP #'2'               \ If A >= ASCII "2" (i.e. save or catalogue), skip to
  BCS SV1                \ SV1
 
- LDA #0                 \ AJD
- JSR confirm
- BNE SVEX
+                        \ If we get here then option 1 (load) was chosen
 
- JSR GTNMEW             \ If we get here then option 1 (load) was chosen, so
-                        \ call GTNMEW to fetch the name of the commander file
+ LDA #0                 \ If save_lock = &FF, then there are unsaved changes, so
+ JSR confirm            \ ask for confirmation before proceeding with the load,
+ BNE SVEX               \ jumping to SVEX to exit if confirmation is not given
+
+ JSR GTNMEW             \ Call GTNMEW to fetch the name of the commander file
                         \ to load (including drive number and directory) into
                         \ INWK
 
@@ -17063,12 +17086,14 @@ ENDIF
                         \ jumps to CAT if option 2 was not chosen - in other
                         \ words, if option 3 (catalogue) was chosen
 
- LDA #&FF               \ AJD
- JSR confirm
- BNE SVEX
+                        \ If we get here then option 2 (save) was chosen
 
- JSR GTNMEW             \ If we get here then option 2 (save) was chosen, so
-                        \ call GTNMEW to fetch the name of the commander file
+ LDA #&FF               \ If save_lock = 0, then there are no unsaved changes,
+ JSR confirm            \ so ask for confirmation before proceeding with the
+ BNE SVEX               \ save, jumping to SVEX to exit if confirmation is not
+                        \ given
+
+JSR GTNMEW              \ Call GTNMEW to fetch the name of the commander file
                         \ to save (including drive number and directory) into
                         \ INWK
 
@@ -17139,12 +17164,25 @@ ENDIF
 \   Category: Save and load
 \    Summary: Print "ARE YOU SURE?" and wait for a response
 \
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   A                   If save_lock matches this value, then we do not ask for
+\                       confirmation and instead assume the answer was "Y"
+\
+\ Returns:
+\
+\   Z flag              If "Y" is pressed, then BEQ will branch (Z flag is set),
+\                       otherwise BNE will branch (Z flag is clear)
+\
 \ ******************************************************************************
 
 .confirm
 
- CMP save_lock          \ If save_lock = 0, jump to confirmed to return from the
- BEQ confirmed          \ subroutine
+ CMP save_lock          \ If A = save_lock, jump to confirmed to return from the
+ BEQ confirmed          \ subroutine without asking for confirmation, but
+                        \ assuming a positive response
 
  LDA #3                 \ Print extended token 3 ("ARE YOU SURE?")
  JSR DETOK
@@ -17166,7 +17204,8 @@ ENDIF
 
  PLA                    \ Restore A from the stack
 
- CMP #121               \ AJD
+ CMP #'y'               \ Set the C flag if A >= ASCII y' (i.e. if "Y" was
+                        \ pressed and not "N"), otherwise clear it
 
 .confirmed
 
@@ -17218,7 +17257,12 @@ ENDIF
  BCS QUR                \ If the C flag is set, then an invalid drive number was
                         \ entered, so jump to QUR to return from the subroutine
 
- STA save_lock          \ AJD
+ STA save_lock          \ Set save_lock to 0 (when we save a file) or &FF (when
+                        \ we load a file) to indicate:
+                        \
+                        \   * 0 = last file operation was a save
+                        \
+                        \   * &FF = last file operation was a load
 
  LDX #INWK              \ Store a pointer to INWK at the start of the block at
  STX &0C00              \ &0C00, storing #INWK in the low byte because INWK is
@@ -36675,7 +36719,15 @@ LOAD_J% = LOAD% + P% - CODE%
  BEQ MAC1               \ ship is no longer exploding, so jump to MAC1 to skip
                         \ the following
 
-                        \ At this point, we know that A = %00100000 (as we
+                        \ We now update our FIST flag ("fugitive/innocent
+                        \ status") by 1 if we didn't kill a cop, or by a large
+                        \ amount if we did - specifically, if we killed a cop,
+                        \ then the most significant bit in FIST that is
+                        \ currently clear will be set, which means we increase
+                        \ FIST by the highest multiple of 2 that we can add and
+                        \ still fit the result in a byte
+                        \
+                        \ Also, at this point, we know that A = %00100000 (as we
                         \ didn't take the BEQ branch)
 
  BIT NEWB               \ If bit 6 of the ship's NEWB flags is set, then this
@@ -36687,27 +36739,54 @@ LOAD_J% = LOAD% + P% - CODE%
                         \
                         \   A AND NEWB = %00100000 AND NEWB
                         \
-                        \ so this jumps to n_goodboy if bit 5 of NEWB is clear
-                        \ (in other words, if the ship is no longer exploding)
+                        \ so this jumps to n_goodboy if bit 5 of NEWB is clear,
+                        \ so in other words, if the ship is no longer exploding,
+                        \ we don't update FIST
 
- LDA #%10000000         \ AJD
+ LDA #%10000000         \ Set A so that the shift and rotate instructions we're
+                        \ about to do set A = %00000001, so we increase our FIST
+                        \ status by just 1
 
 .n_badboy
 
- ASL A
- ROL A
+                        \ We get here with two possible values of A:
+                        \
+                        \   * A = %00100000 if we just killed a cop
+                        \   * A = %10000000 otherwise
+
+ ASL A                  \ Shift and rotate A so that we get:
+ ROL A                  \
+                        \   * A = %10000000 if we just killed a cop
+                        \   * A = %00000001 otherwise
 
 .n_bitlegal
 
- LSR A
- BIT FIST
- BNE n_bitlegal
+ LSR A                  \ We now shift A to the right and AND it with FIST,
+ BIT FIST               \ repeating the process until the single set bit in A
+ BNE n_bitlegal         \ matches a clear bit in FIST, so this shifts A right
+                        \ so that the set bit matches the highest clear bit in
+                        \ FIST (if we just killed a cop), or it sets A to 0 and
+                        \ sets the C flag (if we didn't)
 
- ADC FIST
- BCS KS1S
+ ADC FIST               \ Set A = A + C + FIST, so:
+                        \
+                        \   * A = A + 0 + FIST if we just killed a cop
+                        \   * A = 0 + 1 + FIST otherwise
+                        \
+                        \ so if we just killed a cop, this will effectively set
+                        \ the highest clear bit in FIST, otherwise we just add 1
+                        \ to FIST
 
- STA FIST
- BCC KS1S
+ BCS KS1S               \ If the addition overflowed, jump to KS1S to skip
+                        \ showing an on-screen bounty for this kill, and without
+                        \ updating FIST first (as we are too bad to get any
+                        \ worse)
+
+ STA FIST               \ Otherwise update the value of FIST to the new value
+
+ BCC KS1S               \ Jump to KS1S to skip showing an on-screen bounty for
+                        \ this kill (the BCC is effectively a JMP as we just
+                        \ passed through a BCS)
 
 .n_goodboy
 
@@ -43980,25 +44059,54 @@ LOAD_L% = LOAD% + P% - CODE%
 
 .SOLAR
 
- LDA QQ8                \ AJD
- LDY #3
+                        \ We now want to extract bits 3-10 of QQ8(1 0) into A,
+                        \ so we can subtract this value from our legal status in
+                        \ FIST (so the further we travel, the quicker our legal
+                        \ status drops back down to clean, as we put more
+                        \ distance between us and our crimes - specifically, we
+                        \ drop 1.2 FIST points for each light year, as we
+                        \ subtract (QQ8 / 8) from FIST, and QQ8 contains the
+                        \ distance in light years * 10)
+
+ LDA QQ8                \ Set A to the low byte of the distance to the selected
+                        \ system in QQ8(1 0), so (QQ8+1 A) contains the distance
+
+ LDY #3                 \ We're going to extract bits 3-10 by shifting QQ8(1 0)
+                        \ right by 3 places, so we start by setting a loop
+                        \ counter in Y
 
 .legal_div
 
- LSR QQ8+1
+ LSR QQ8+1              \ Shift (QQ8+1 A) to the right by one place
  ROR A
- DEY
- BNE legal_div
 
- SEC
+ DEY                    \ Decrement the loop counter
+
+ BNE legal_div          \ Loop back until we have shifted right by 3 places, by
+                        \ which point A will contain bits 3-10 of QQ8(1 0)
+
+                        \ We now subtract A from FIST, and subtract 1 more,
+                        \ making sure we don't reduce FIST beyond 0, which we do
+                        \ by doing the subtraction in reverse and then negating
+                        \ the result with one's complement
+
+ SEC                    \ Set A = A - FIST (which we will negate later)
  SBC FIST
- BCC legal_over
- LDA #&FF
+
+ BCC legal_over         \ If the subtraction underflowed, i.e. A < FIST, skip
+                        \ the following instruction
+
+ LDA #&FF               \ A > FIST, so we set A = &FF so the EOR flips this to
+                        \ 0, so FIST gets set to 0 when we travel far enough to
+                        \ clear our name
 
 .legal_over
 
- EOR #&FF
- STA FIST
+ EOR #&FF               \ Flip all the bits in A to negate the result, so if the
+                        \ subtraction underflowed, i.e. A < FIST, we now have
+                        \ A = FIST - A - 1
+
+ STA FIST               \ Update the value of FIST to the new value in A
 
  JSR ZINF               \ Call ZINF to reset the INWK ship workspace, which
                         \ doesn't affect the C flag
