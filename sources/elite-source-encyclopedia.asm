@@ -1799,7 +1799,11 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
 
 .new_mounts
 
- SKIP 1                 \ The number of laser mounts in our current ship
+ SKIP 1                 \ The available laser mounts in our current ship
+                        \
+                        \   * 1 = Front only
+                        \   * 2 = Front and rear
+                        \   * 4 = Front, rear, left and right
 
 .new_missiles
 
@@ -2046,10 +2050,10 @@ LOAD_A% = LOAD%
 
 .S%
 
- JMP DOENTRY            \ Decrypt the main docked code and dock at the station
-
                         \ --- Original Acornsoft code removed: ---------------->
 
+\ JMP DOENTRY           \ Decrypt the main docked code and dock at the station
+\
 \ JMP DOBEGIN           \ Decrypt the main docked code and start a new game
 \
 \ JMP CHPR              \ WRCHV is set to point here by elite-loader3.asm
@@ -2065,7 +2069,9 @@ LOAD_A% = LOAD%
 
                         \ --- And replaced by: -------------------------------->
 
- JMP DOENTRY            \ Decrypt the main docked code and dock at the station
+ JMP DOENTRY            \ Initialise the encyclopedia and show the menu screen
+
+ JMP DOENTRY            \ Initialise the encyclopedia and show the menu screen
 
  JMP CHPR               \ WRCHV is set to point here by elite-loader.asm
 
@@ -2085,17 +2091,17 @@ BRKV = P% - 2           \ The address of the destination address in the above
 \       Name: INBAY
 \       Type: Subroutine
 \   Category: Loader
-\    Summary: Load and run the main docked code in T.CODE
+\    Summary: Load and run the main docked code in 1.D
 \
 \ ******************************************************************************
 
 .INBAY
 
- LDX #LO(LTLI)          \ Set (Y X) to point to LTLI ("L.T.CODE", which gets
- LDY #HI(LTLI)          \ modified to "R.T.CODE" in the DOENTRY routine)
+ LDX #LO(LTLI)          \ Set (Y X) to point to LTLI ("L.1.D", which gets
+ LDY #HI(LTLI)          \ modified to "R.1.D" in the launch routine)
 
  JSR OSCLI              \ Call OSCLI to run the OS command in LTLI, which *RUNs
-                        \ the main docked code in T.CODE
+                        \ the main docked code in 1.D
 
 \ ******************************************************************************
 \
@@ -2125,7 +2131,7 @@ BRKV = P% - 2           \ The address of the destination address in the above
 \       Name: launch
 \       Type: Subroutine
 \   Category: Loader
-\    Summary: Load and run the main docked code AJD
+\    Summary: Load and run the main docked code in 1.D
 \
 \ ******************************************************************************
 
@@ -2133,10 +2139,18 @@ BRKV = P% - 2           \ The address of the destination address in the above
 
 .launch
 
- LDA #'R'
- STA LTLI
+ LDA #'R'               \ Set the first byte of LDLI to "R", so it changes from
+ STA LTLI               \ "L.1.D" into "R.1.D", so when we fall through into
+                        \ escape, we load and run the docked code in 1.D
 
- EQUB &2C
+ EQUB &2C               \ Skip the next instruction by turning it into
+                        \ &2C &A9 &52, or BIT &52A9, which does nothing apart
+                        \ from affect the flags
+
+                        \ Fall through into escape to set KL+1 to the non-zero
+                        \ value in A before running the docking code (which will
+                        \ not show the docking tunnel and ship hanger, as KL+1
+                        \ is now non-zero)
 
                         \ --- End of added section ---------------------------->
 
@@ -2145,7 +2159,7 @@ BRKV = P% - 2           \ The address of the destination address in the above
 \       Name: escape
 \       Type: Subroutine
 \   Category: Start and end
-\    Summary: AJD
+\    Summary: Load the main docked code so that it shows the docking tunnel
 \
 \ ******************************************************************************
 
@@ -2153,9 +2167,10 @@ BRKV = P% - 2           \ The address of the destination address in the above
 
 .escape
 
- LDA #0
- STA KL+1
- JMP INBAY
+ LDA #0                 \ Set the value of KL+1 to 0, so when the main docked
+ STA KL+1               \ loads, we show the docking tunnel and ship hanger
+
+ JMP INBAY              \ Jump to INBAY to load the main docked code
 
                         \ --- End of added section ---------------------------->
 
@@ -2164,7 +2179,7 @@ BRKV = P% - 2           \ The address of the destination address in the above
 \       Name: DOENTRY
 \       Type: Subroutine
 \   Category: Loader
-\    Summary: AJD
+\    Summary: Initialise the encyclopedia and show the menu screen
 \
 \ ******************************************************************************
 
@@ -2172,9 +2187,12 @@ BRKV = P% - 2           \ The address of the destination address in the above
 
 .DOENTRY
 
- JSR BRKBK
- JSR RES2
- JMP BAY
+ JSR BRKBK              \ Set the standard BRKV handler for the game
+
+ JSR RES2               \ Reset a number of flight variables and workspaces
+
+ JMP BAY                \ Go to the docking bay (i.e. show the Encyclopedia
+                        \ Galactica menu screen)
 
                         \ --- End of added section ---------------------------->
 
@@ -2507,7 +2525,8 @@ BRKV = P% - 2           \ The address of the destination address in the above
 \                       address within the extended two-letter token tables of
 \                       TKN2 and QQ16
 \
-\   msg_pairs           AJD
+\   msg_pairs           Print the extended two-letter token in A (where A is in
+\                       the range 215 to 255)
 \
 \ ******************************************************************************
 
@@ -19488,7 +19507,8 @@ LOAD_H% = LOAD% + P% - CODE%
 
 .card_pairs
 
- JSR msg_pairs
+ JSR msg_pairs          \ Print the extended two-letter token in A
+
  JMP card_loop
 
 .card_end

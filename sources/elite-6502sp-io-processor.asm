@@ -2212,7 +2212,7 @@ ORG CODE%
 \       Name: scan_fire
 \       Type: Subroutine
 \   Category: Keyboard
-\    Summary: AJD
+\    Summary: Check whether the joystick's fire button is being pressed
 \
 \ ******************************************************************************
 
@@ -2229,7 +2229,7 @@ ORG CODE%
                         \ button is pressed, otherwise it is set, so AND'ing
                         \ the value of IRB with %10000 extracts this bit
 
- JMP tube_put
+ JMP tube_put           \ AJD
 
 \ ******************************************************************************
 \

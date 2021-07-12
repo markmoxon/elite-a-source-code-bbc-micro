@@ -1824,7 +1824,11 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
 
 .new_mounts
 
- SKIP 1                 \ The number of laser mounts in our current ship
+ SKIP 1                 \ The available laser mounts in our current ship
+                        \
+                        \   * 1 = Front only
+                        \   * 2 = Front and rear
+                        \   * 4 = Front, rear, left and right
 
 .new_missiles
 
@@ -2104,17 +2108,17 @@ LOAD_A% = LOAD%
 \       Name: INBAY
 \       Type: Subroutine
 \   Category: Loader
-\    Summary: Load and run the main docked code in T.CODE
+\    Summary: Load and run the main docked code in 1.D
 \
 \ ******************************************************************************
 
 .INBAY
 
- LDX #LO(LTLI)          \ Set (Y X) to point to LTLI ("L.T.CODE", which gets
- LDY #HI(LTLI)          \ modified to "R.T.CODE" in the DOENTRY routine)
+ LDX #LO(LTLI)          \ Set (Y X) to point to LTLI ("L.1.D", which gets
+ LDY #HI(LTLI)          \ modified to "R.1.D" in the DOENTRY routine)
 
  JSR OSCLI              \ Call OSCLI to run the OS command in LTLI, which *RUNs
-                        \ the main docked code in T.CODE
+                        \ the main docked code in 1.D
 
 \ ******************************************************************************
 \

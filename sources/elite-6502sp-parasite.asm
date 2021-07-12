@@ -1827,7 +1827,11 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
 
 .new_mounts
 
- SKIP 1                 \ The number of laser mounts in our current ship
+ SKIP 1                 \ The available laser mounts in our current ship
+                        \
+                        \   * 1 = Front only
+                        \   * 2 = Front and rear
+                        \   * 4 = Front, rear, left and right
 
 .new_missiles
 
@@ -2854,7 +2858,8 @@ ENDIF
 \                       address within the extended two-letter token tables of
 \                       TKN2 and QQ16
 \
-\   msg_pairs           AJD
+\   msg_pairs           Print the extended two-letter token in A (where A is in
+\                       the range 215 to 255)
 \
 \ ******************************************************************************
 
@@ -4975,7 +4980,10 @@ LOAD_B% = LOAD% + P% - CODE%
 
  LDA #1
  STA QQ25
- JSR sell_yn
+
+ JSR sell_yn            \ Call sell_yn to print a "SELL (Y/N)?" prompt and get a
+                        \ number from the keyboard
+
  BEQ status_no
  BCS status_no
  LDA XX4
@@ -10308,16 +10316,36 @@ LOAD_D% = LOAD% + P% - CODE%
 \       Name: sell_yn
 \       Type: Subroutine
 \   Category: Text
-\    Summary: AJD
+\    Summary: Print a "SELL (Y/N)?" prompt and get a number from the keyboard
+\
+\ ------------------------------------------------------------------------------
+\
+\ The arguments and results for this routine are the same as for gnum.
+\
+\ Arguments:
+\
+\   QQ25                The maximum number allowed
+\
+\ Returns:
+\
+\   A                   The number entered
+\
+\   R                   Also contains the number entered
+\
+\   C flag              Set if the number is too large (> QQ25), clear otherwise
 \
 \ ******************************************************************************
 
 .sell_yn
 
- LDA #&CD
+ LDA #205               \ Print recursive token 45 ("SELL")
  JSR TT27
- LDA #&CE
+
+ LDA #206               \ Print extended token 206 ("{all caps}(Y/N)?")
  JSR DETOK
+
+                        \ Fall through into gnum to get a number from the
+                        \ keyboard
 
 \ ******************************************************************************
 \
@@ -10624,9 +10652,18 @@ LOAD_D% = LOAD% + P% - CODE%
  CMP #4                 \ screen), jump to TT212 to skip the option to sell
  BNE TT212              \ items
 
- JSR sell_yn            \ AJD
- BEQ TT212
- BCS NWDAV4
+ JSR sell_yn            \ Call sell_yn to print a "SELL (Y/N)?" prompt and get a
+                        \ number from the keyboard, which will be the number of
+                        \ the item we want to sell, returning the number entered
+                        \ in A and R, and setting the C flag if the number is
+                        \ bigger than the available amount of this item in QQ25
+
+ BEQ TT212              \ If no number was entered, jump to TT212 to move on to
+                        \ the next item
+
+ BCS NWDAV4             \ If the number entered was too big, jump to NWDAV4 to
+                        \ print an "ITEM?" error, make a beep and rejoin the
+                        \ routine at NWDAVxx above
 
  LDA QQ29               \ We are selling this item, so fetch the item number
                         \ from QQ29
@@ -12997,7 +13034,8 @@ LOAD_D% = LOAD% + P% - CODE%
                         \ Ship screen)
 
  LDY #16                \ Move the text cursor to row 16, and at the same time
- STY YC                 \ set YC to a counter going from 16-20 in the loop below
+ STY YC                 \ set YC to a counter going from 16 to 19 in the loop
+                        \ below
 
 .qv1
 
@@ -13007,23 +13045,28 @@ LOAD_D% = LOAD% + P% - CODE%
  LDA YC                 \ Fetch the counter value from YC into A
 
  CLC                    \ Print ASCII character "0" - 16 + A, so as A goes from
- ADC #'0'-16            \ 16 to 20, this prints "0" through "3" followed by a
+ ADC #'0'-16            \ 16 to 19, this prints "0" through "3" followed by a
  JSR spc                \ space
 
  LDA YC                 \ Print recursive text token 80 + YC, so as YC goes from
- CLC                    \ 16 to 20, this prints "FRONT", "REAR", "LEFT" and
+ CLC                    \ 16 to 19, this prints "FRONT", "REAR", "LEFT" and
  ADC #80                \ "RIGHT"
  JSR TT27
 
  INC YC                 \ Move the text cursor down a row, at the same time
                         \ incrementing the counter in YC
 
- LDA new_mounts         \ AJD
- ORA #&10
+ LDA new_mounts         \ Set A = new_mounts + 16, so A now contains a value of
+ ORA #16                \ 17, 18 or 20, depending on the number of laser mounts
+                        \ that our current ship supports (in other words, it's
+                        \ one more than the corresponding value in the YC
+                        \ counter, which is going from 16 to 19, not 17 to 20)
 
  CMP YC                 \ If the loop counter in YC hasn't yet reached the
- BNE qv1                \ number of mounts in A then loop back up to qv1 to
-                        \ print the next view in the menu
+ BNE qv1                \ value in A, then loop back up to qv1 to print the next
+                        \ view in the menu, so this loops us back until we have
+                        \ printed all of the laser mounts defined by the value
+                        \ of new_mounts
 
  JSR CLYNS              \ Clear the bottom three text rows of the upper screen,
                         \ and move the text cursor to column 1 on row 21, i.e.
@@ -13040,10 +13083,14 @@ LOAD_D% = LOAD% + P% - CODE%
  SEC                    \ Subtract ASCII '0' from the key pressed, to leave the
  SBC #'0'               \ numeric value of the key in A (if it was a number key)
 
- CMP new_mounts         \ AJD
- BCC qv3
- JSR CLYNS
- JMP qv2
+ CMP new_mounts         \ If A < new_mounts, then our current ship supports this
+ BCC qv3                \ view number, so jump down to qv3 as we are done
+
+ JSR CLYNS              \ Otherwise we didn't get a valid view number, so clear
+                        \ the bottom three text rows of the upper screen, and
+                        \ move the text cursor to column 1 on row 21
+
+ JMP qv2                \ Jump back to qv2 to try again
 
 .qv3
 
@@ -16162,7 +16209,9 @@ ELSE
 
 ENDIF
 
- JMP n_load             \ AJD load ship details
+ JMP n_load             \ Jump to n_load to load the blueprint for the current
+                        \ ship type, returning from the subroutine using a tail
+                        \ call
 
 \ ******************************************************************************
 \
@@ -16210,7 +16259,7 @@ ENDIF
  LDA #96                \ Set nosev_z hi = 96 (96 is the value of unity in the
  STA INWK+14            \ rotation vector)
 
- LDA #&DB               \ AJD
+ LDA #219               \ Set A = 219 as the distance that the ship starts at
 
  STA INWK+7             \ Set z_hi, the high byte of the ship's z-coordinate,
                         \ to 96, which is the distance at which the rotating
@@ -16245,13 +16294,13 @@ ENDIF
  LDA #13                \ Print extended token 13 ("BY D.BRABEN & I.BELL")
  JSR DETOK
 
- INC YC                 \ AJD
+ INC YC                 \ Move the text cursor down two rows
  INC YC
 
- LDA #3
+ LDA #3                 \ Move the text cursor to column 3
  STA XC
 
- LDA #&72
+ LDA #114               \ Print extended token 114 (" MODIFIED BY A.J.C.DUGGAN")
  JSR DETOK
 
 .awe
@@ -16339,7 +16388,8 @@ ENDIF
 
  DEC MCNT               \ Decrement the main loop counter
 
- JSR scan_fire          \ AJD
+ JSR scan_fire          \ Call scan_fire to check whether the joystick's fire
+                        \ button is being pressed
 
  BEQ TL2                \ If the joystick fire button is pressed, jump to TL2
 
@@ -16823,7 +16873,7 @@ ENDIF
  JSR tube_write
  LDA YC
  JSR tube_write
- LDA #&00
+ LDA #0
  JSR tube_write
 
  STA XC                 \ Move the text cursor to column 1
@@ -22451,8 +22501,12 @@ LOAD_G% = LOAD% + P% - CODE%
  STA LASER,Y
  DEY
  BPL n_wipe
- STX cmdr_type
- JSR n_load
+
+ STX cmdr_type          \ Set the current ship type in cmdr_type to X
+
+ JSR n_load             \ Call n_load to load the blueprint for the new ship
+                        \ type
+
  LDA new_range
  STA QQ14
  JSR msblob
@@ -22467,13 +22521,13 @@ LOAD_G% = LOAD% + P% - CODE%
 \       Name: n_load
 \       Type: Subroutine
 \   Category: Buying ships
-\    Summary: AJD
+\    Summary: Load the blueprint for the current ship type
 \
 \ ******************************************************************************
 
 .n_load
 
- LDY cmdr_type
+ LDY cmdr_type          \ AJD
  LDX new_offsets,Y
  LDY #0
 
@@ -33318,7 +33372,8 @@ LOAD_I% = LOAD% + P% - CODE%
 
 .card_pairs
 
- JSR msg_pairs
+ JSR msg_pairs          \ Print the extended two-letter token in A
+
  JMP card_loop
 
 .card_end
@@ -49149,9 +49204,10 @@ LOAD_M% = LOAD% + P% - CODE%
  INY                    \ Update the key logger for key 2 in the KYTB table, so
  JSR DKS1               \ KY2 will be &FF if Space (speed up) is being pressed
 
- JSR scan_fire          \ AJD
+ JSR scan_fire          \ Call scan_fire to check whether the joystick's fire
+                        \ button is being pressed
 
- EOR #%00010000
+ EOR #%00010000         \ AJD
  STA &0307
 
  LDX #1                 \ Call DKS2 to fetch the value of ADC channel 1 (the

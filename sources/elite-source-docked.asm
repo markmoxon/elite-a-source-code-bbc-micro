@@ -1838,7 +1838,11 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
 
 .new_mounts
 
- SKIP 1                 \ The number of laser mounts in our current ship
+ SKIP 1                 \ The available laser mounts in our current ship
+                        \
+                        \   * 1 = Front only
+                        \   * 2 = Front and rear
+                        \   * 4 = Front, rear, left and right
 
 .new_missiles
 
@@ -2122,7 +2126,7 @@ BRKV = P% - 2           \ The address of the destination address in the above
 \       Name: INBAY
 \       Type: Subroutine
 \   Category: Loader
-\    Summary: Set the break handler and enter the docking bay without showing
+\    Summary: Set the break handler and go to the docking bay without showing
 \             the tunnel or ship hanger, or checking mission progress
 \
 \ ******************************************************************************
@@ -2138,8 +2142,11 @@ BRKV = P% - 2           \ The address of the destination address in the above
 
                         \ --- And replaced by: -------------------------------->
 
- JSR BRKBK              \ AJD
- JMP icode_set
+ JSR BRKBK              \ Call BRKBK to set BRKV to point to the BRBR routine
+
+ JMP icode_set          \ Jump to icode_set to reset a number of flight
+                        \ variables and workspaces and go to the docking bay
+                        \ (i.e. show the Status Mode screen)
 
  BRK                    \ This code is never run, and seems to have no effect
  LDA #0
@@ -2242,6 +2249,13 @@ BRKV = P% - 2           \ The address of the destination address in the above
 \    Summary: Dock at the space station, show the ship hanger and work out any
 \             mission progression
 \
+\ ------------------------------------------------------------------------------
+\
+\ Other entry points:
+\
+\   icode_set           Reset a number of flight variables and workspaces and go
+\                       to the docking bay (i.e. show the Status Mode screen)
+\
 \ ******************************************************************************
 
 .DOENTRY
@@ -2252,8 +2266,15 @@ BRKV = P% - 2           \ The address of the destination address in the above
 
                         \ --- And replaced by: -------------------------------->
 
- LDA KL+1               \ AJD
- BNE INBAY
+ LDA KL+1               \ Before loading the docked code, the encyclopedia code
+ BNE INBAY              \ sets KL+1 to a non-zero value (in the launch routine),
+                        \ so this jumps to INBAY if we just came from the
+                        \ encyclopedia, thereby skipping the docking tunnel and
+                        \ ship hanger when we swap between the docked and
+                        \ encyclopedia views. The flight code zeroes the key
+                        \ logger before loading the docked code, so when we dock
+                        \ we keep going and show the docking tunnel and ship
+                        \ hanger
 
  LDA #&FF               \ Call SCRAM to set save_lock to &FF and set the break
  JSR SCRAM              \ handler
@@ -2400,7 +2421,7 @@ BRKV = P% - 2           \ The address of the destination address in the above
 
 .icode_set
 
- JSR RES2               \ AJD
+ JSR RES2               \ Reset a number of flight variables and workspaces
 
                         \ --- End of added code ------------------------------->
 
@@ -2831,7 +2852,8 @@ BRKV = P% - 2           \ The address of the destination address in the above
 \                       address within the extended two-letter token tables of
 \                       TKN2 and QQ16
 \
-\   msg_pairs           AJD
+\   msg_pairs           Print the extended two-letter token in A (where A is in
+\                       the range 215 to 255)
 \
 \ ******************************************************************************
 
@@ -6793,7 +6815,10 @@ LOAD_B% = LOAD% + P% - CODE%
 
  LDA #1
  STA QQ25
- JSR sell_yn
+
+ JSR sell_yn            \ Call sell_yn to print a "SELL (Y/N)?" prompt and get a
+                        \ number from the keyboard
+
  BEQ status_no
  BCS status_no
  LDA XX4
@@ -14389,7 +14414,23 @@ LOAD_D% = LOAD% + P% - CODE%
 \       Name: sell_yn
 \       Type: Subroutine
 \   Category: Text
-\    Summary: AJD
+\    Summary: Print a "SELL (Y/N)?" prompt and get a number from the keyboard
+\
+\ ------------------------------------------------------------------------------
+\
+\ The arguments and results for this routine are the same as for gnum.
+\
+\ Arguments:
+\
+\   QQ25                The maximum number allowed
+\
+\ Returns:
+\
+\   A                   The number entered
+\
+\   R                   Also contains the number entered
+\
+\   C flag              Set if the number is too large (> QQ25), clear otherwise
 \
 \ ******************************************************************************
 
@@ -14397,10 +14438,14 @@ LOAD_D% = LOAD% + P% - CODE%
 
 .sell_yn
 
- LDA #&CD
+ LDA #205               \ Print recursive token 45 ("SELL")
  JSR TT27
- LDA #&CE
+
+ LDA #206               \ Print extended token 206 ("{all caps}(Y/N)?")
  JSR DETOK
+
+                        \ Fall through into gnum to get a number from the
+                        \ keyboard
 
                         \ --- End of added section ---------------------------->
 
@@ -14730,21 +14775,23 @@ LOAD_D% = LOAD% + P% - CODE%
 \                       \ returning the number entered in A and R, and setting
 \                       \ the C flag if the number is bigger than the available
 \                       \ amount of this item in QQ25
-\
-\ BEQ TT212             \ If no number was entered, jump to TT212 to move on to
-\                       \ the next item
-\
-\ BCS NWDAV4            \ If the number entered was too big, jump to NWDAV4 to
-\                       \ print an "ITEM?" error, make a beep and rejoin the
-\                       \ routine at NWDAVxx above
 
                         \ --- And replaced by: -------------------------------->
 
- JSR sell_yn            \ AJD
- BEQ TT212
- BCS NWDAV4
+ JSR sell_yn            \ Call sell_yn to print a "SELL (Y/N)?" prompt and get a
+                        \ number from the keyboard, which will be the number of
+                        \ the item we want to sell, returning the number entered
+                        \ in A and R, and setting the C flag if the number is
+                        \ bigger than the available amount of this item in QQ25
 
                         \ --- End of replacement ------------------------------>
+
+ BEQ TT212              \ If no number was entered, jump to TT212 to move on to
+                        \ the next item
+
+ BCS NWDAV4             \ If the number entered was too big, jump to NWDAV4 to
+                        \ print an "ITEM?" error, make a beep and rejoin the
+                        \ routine at NWDAVxx above
 
  LDA QQ29               \ We are selling this item, so fetch the item number
                         \ from QQ29
@@ -16653,7 +16700,7 @@ LOAD_D% = LOAD% + P% - CODE%
 \       Name: encyclopedia
 \       Type: Subroutine
 \   Category: Loader
-\    Summary: AJD
+\    Summary: Load and run the encyclopedia code in 1.E
 \
 \ ******************************************************************************
 
@@ -16661,8 +16708,10 @@ LOAD_D% = LOAD% + P% - CODE%
 
 .encyclopedia
 
- LDA #'E'
- STA RDLI+4
+ LDA #'E'               \ Set the fifth byte of RDLI in EDLI+4 to "E", so it
+ STA RDLI+4             \ changes the command to "R.1.E", and fall through into
+                        \ TT110 to execute the command, which will load and run
+                        \ the encyclopedia code in 1.E
 
                         \ --- End of added section ---------------------------->
 
@@ -17838,7 +17887,8 @@ LOAD_D% = LOAD% + P% - CODE%
                         \ Ship screen)
 
  LDY #16                \ Move the text cursor to row 16, and at the same time
- STY YC                 \ set YC to a counter going from 16-20 in the loop below
+ STY YC                 \ set YC to a counter going from 16 to 19 in the loop
+                        \ below
 
 .qv1
 
@@ -17856,11 +17906,11 @@ LOAD_D% = LOAD% + P% - CODE%
                         \ --- End of replacement ------------------------------>
 
  CLC                    \ Print ASCII character "0" - 16 + A, so as A goes from
- ADC #'0'-16            \ 16 to 20, this prints "0" through "3" followed by a
+ ADC #'0'-16            \ 16 to 19, this prints "0" through "3" followed by a
  JSR spc                \ space
 
  LDA YC                 \ Print recursive text token 80 + YC, so as YC goes from
- CLC                    \ 16 to 20, this prints "FRONT", "REAR", "LEFT" and
+ CLC                    \ 16 to 19, this prints "FRONT", "REAR", "LEFT" and
  ADC #80                \ "RIGHT"
  JSR TT27
 
@@ -17878,12 +17928,17 @@ LOAD_D% = LOAD% + P% - CODE%
  INC YC                 \ Move the text cursor down a row, at the same time
                         \ incrementing the counter in YC
 
- LDA new_mounts         \ AJD
- ORA #&10
+ LDA new_mounts         \ Set A = new_mounts + 16, so A now contains a value of
+ ORA #16                \ 17, 18 or 20, depending on the number of laser mounts
+                        \ that our current ship supports (in other words, it's
+                        \ one more than the corresponding value in the YC
+                        \ counter, which is going from 16 to 19, not 17 to 20)
 
  CMP YC                 \ If the loop counter in YC hasn't yet reached the
- BNE qv1                \ number of mounts in A then loop back up to qv1 to
-                        \ print the next view in the menu
+ BNE qv1                \ value in A, then loop back up to qv1 to print the next
+                        \ view in the menu, so this loops us back until we have
+                        \ printed all of the laser mounts defined by the value
+                        \ of new_mounts
 
                         \ --- End of replacement ------------------------------>
 
@@ -17906,21 +17961,19 @@ LOAD_D% = LOAD% + P% - CODE%
 
 \ CMP #4                \ If the number entered in A < 4, then it is a valid
 \ BCC qv3               \ view number, so jump down to qv3 as we are done
-\
-\ JSR CLYNS             \ Otherwise we didn't get a valid view number, so clear
-\                       \ the bottom three text rows of the upper screen, and
-\                       \ move the text cursor to column 1 on row 21
-\
-\ JMP qv2               \ Jump back to qv2 to try again
 
                         \ --- And replaced by: -------------------------------->
 
- CMP new_mounts         \ AJD
- BCC qv3
- JSR CLYNS
- JMP qv2
+ CMP new_mounts         \ If A < new_mounts, then our current ship supports this
+ BCC qv3                \ view number, so jump down to qv3 as we are done
 
                         \ --- End of replacement ------------------------------>
+
+ JSR CLYNS              \ Otherwise we didn't get a valid view number, so clear
+                        \ the bottom three text rows of the upper screen, and
+                        \ move the text cursor to column 1 on row 21
+
+ JMP qv2                \ Jump back to qv2 to try again
 
 .qv3
 
@@ -22636,7 +22689,9 @@ ENDIF
 
                         \ --- And replaced by: -------------------------------->
 
- JMP n_load             \ AJD load ship details
+ JMP n_load             \ Jump to n_load to load the blueprint for the current
+                        \ ship type, returning from the subroutine using a tail
+                        \ call
 
                         \ --- End of replacement ------------------------------>
 
@@ -22703,7 +22758,7 @@ ENDIF
 
                         \ --- And replaced by: -------------------------------->
 
- LDA #&DB               \ AJD
+ LDA #219               \ Set A = 219 as the distance that the ship starts at
 
                         \ --- End of replacement ------------------------------>
 
@@ -22751,13 +22806,13 @@ ENDIF
 
                         \ --- Code added for Elite-A: ------------------------->
 
- INC YC                 \ AJD
+ INC YC                 \ Move the text cursor down two rows
  INC YC
 
- LDA #3
+ LDA #3                 \ Move the text cursor to column 3
  STA XC
 
- LDA #&72
+ LDA #114               \ Print extended token 114 (" MODIFIED BY A.J.C.DUGGAN")
  JSR DETOK
 
                         \ --- End of added code ------------------------------->
@@ -23377,9 +23432,12 @@ ENDIF
 
                         \ --- And replaced by: -------------------------------->
 
- LDA #&01               \ AJD
- STA NAME+5
- STA CATF
+ LDA #1                 \ Set byte #6 of the commander name at NAME+5 to 1
+ STA NAME+5             \ (I am not sure why we do this, but it is reversed
+                        \ below, after the disc is catalogued)
+
+ STA CATF               \ Set the CATF flag to 1, so that the TT26 routine will
+                        \ print out the disc catalogue correctly
 
                         \ --- End of replacement ------------------------------>
 
@@ -23398,8 +23456,9 @@ ENDIF
 
                         \ --- Code added for Elite-A: ------------------------->
 
- LDA NA%+5              \ AJD
- STA NAME+5
+ LDA NA%+5              \ Revert byte #6 of the commander name at NAME+5 to the
+ STA NAME+5             \ correct character from the name at NA%, reversing the
+                        \ change we did above
 
                         \ --- End of added code ------------------------------->
 
@@ -29838,8 +29897,12 @@ LOAD_G% = LOAD% + P% - CODE%
  STA LASER,Y
  DEY
  BPL n_wipe
- STX cmdr_type
- JSR n_load
+
+ STX cmdr_type          \ Set the current ship type in cmdr_type to X
+
+ JSR n_load             \ Call n_load to load the blueprint for the new ship
+                        \ type
+
  LDA new_range
  STA QQ14
  JSR msblob
@@ -29853,7 +29916,7 @@ LOAD_G% = LOAD% + P% - CODE%
 \       Name: n_load
 \       Type: Subroutine
 \   Category: Buying ships
-\    Summary: AJD
+\    Summary: Load the blueprint for the current ship type
 \
 \ ******************************************************************************
 
@@ -29861,7 +29924,7 @@ LOAD_G% = LOAD% + P% - CODE%
 
 .n_load
 
- LDY cmdr_type
+ LDY cmdr_type          \ AJD
  LDX new_offsets,Y
  LDY #0
 
