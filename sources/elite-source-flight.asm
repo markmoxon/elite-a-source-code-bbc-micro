@@ -7273,6 +7273,11 @@ NEXT
 \    Summary: Show the Status Mode screen (red key f8)
 \  Deep dive: Combat rank
 \
+\ Other entry points:
+\
+\   sell_equip          Show the Sell Equipment screen, i.e. show a "Sell(Y/N)?"
+\                       prompt as we print each item of equipment
+\
 \ ******************************************************************************
 
 .st4
@@ -7478,13 +7483,11 @@ NEXT
 .sell_equip
 
  LDA CRGO               \ If we don't have an I.F.F. system fitted (i.e. CRGO is
- BEQ l_1ce7             \ zero), skip the following three instructions
+ BEQ P%+7               \ zero), skip the following two instructions
 
  LDA #107               \ We do have an I.F.F. system fitted, so print recursive
  JSR plf2               \ token 107 ("I.F.F.SYSTEM"), followed by a newline and
                         \ an indent of 6 characters
-
-.l_1ce7
 
                         \ --- End of replacement ------------------------------>
 
@@ -7562,11 +7565,11 @@ NEXT
 
  LDA #103               \ Set A to token 103 ("PULSE LASER")
 
- LDX CNT                \ Set Y = the laser power for view X
- LDY LASER,X
-
                         \ --- Mod: Original Acornsoft code removed: ----------->
 
+\ LDX CNT               \ Set Y = the laser power for view X
+\ LDY LASER,X
+\
 \ CPY #128+POW          \ If the laser power for view X is not #POW+128 (beam
 \ BNE P%+4              \ laser), skip the next LDA instruction
 \
@@ -7583,6 +7586,10 @@ NEXT
 \ BNE P%+4              \ laser), skip the next LDA instruction
 
                         \ --- And replaced by: -------------------------------->
+
+ LDX CNT                \ Retrieve the view number from CNT that we stored above
+
+ LDY LASER,X            \ Set Y = the laser power for view X
 
  CPY new_beam           \ If the laser power for view X is not that of a beam
  BNE P%+4               \ laser when fitted to our current ship type, skip the

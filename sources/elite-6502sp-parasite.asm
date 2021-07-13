@@ -4637,6 +4637,12 @@ LOAD_B% = LOAD% + P% - CODE%
 \    Summary: Show the Status Mode screen (red key f8)
 \  Deep dive: Combat rank
 \
+\
+\ Other entry points:
+\
+\   sell_equip          Show the Sell Equipment screen, i.e. show a "Sell(Y/N)?"
+\                       prompt as we print each item of equipment
+\
 \ ******************************************************************************
 
 .st4
@@ -4836,61 +4842,87 @@ LOAD_B% = LOAD% + P% - CODE%
  JSR plf                \ followed by a newline
 
  LDA #18                \ Call status_equip with A set to recursive token 132
- JSR status_equip       \ ("{cr}{all caps}EQUIPMENT: {sentence case}") to
-                        \ show the equipment selling screen AJD
+ JSR status_equip       \ to print the next bit of the Status Mode screen:
+                        \
+                        \   EQUIPMENT:
+                        \
+                        \ followed by a newline and an indent of 8 characters
 
 .sell_equip
 
  LDA CRGO               \ If we don't have an I.F.F. system fitted (i.e. CRGO is
- BEQ l_1b57             \ zero), skip the following three instructions
+ BEQ P%+9               \ zero), skip the following three instructions
 
  LDA #107               \ We do have an I.F.F. system fitted, so print recursive
- LDX #6                 \ token 107 ("I.F.F.SYSTEM")
- JSR status_equip       \ AJD
+ LDX #6                 \ token 107 ("I.F.F.SYSTEM"). If this is the Status Mode
+ JSR status_equip       \ or Inventory screen, print a newline and an indent of
+                        \ 8 characters, or if this is the Sell Equipment screen,
+                        \ show and process a sell prompt for the piece of
+                        \ equipment at LASER+X = LASER+6 = CRGO before printing
+                        \ a newline
 
-.l_1b57
+ LDA BST                \ If we don't have fuel scoops fitted, skip the
+ BEQ P%+9               \ following three instructions
 
- LDA BST                \ AJD
- BEQ l_1b61
- LDA #&6F
- LDX #&19
- JSR status_equip
+ LDA #111               \ We do have a fuel scoops fitted, so print recursive
+ LDX #25                \ token 111 ("FUEL SCOOPS"). If this is the Status Mode
+ JSR status_equip       \ or Inventory screen, print a newline and an indent of
+                        \ 8 characters, or if this is the Sell Equipment screen,
+                        \ show and process a sell prompt for the piece of
+                        \ equipment at LASER+X = LASER+25 = BST before printing
+                        \ a newline
 
-.l_1b61
+ LDA ECM                \ If we don't have an E.C.M. fitted, skip the following
+ BEQ P%+9               \ three instructions
 
- LDA ECM
- BEQ l_1b6b
- LDA #&6C
- LDX #&18
- JSR status_equip
+ LDA #108               \ We do have an E.C.M. fitted, so print recursive token
+ LDX #24                \ 108 ("E.C.M.SYSTEM"). If this is the Status Mode or
+ JSR status_equip       \ Inventory screen, print a newline and an indent of 8
+                        \ characters, or if this is the Sell Equipment screen,
+                        \ show and process a sell prompt for the piece of
+                        \ equipment at LASER+X = LASER+24 = ECM before printing
+                        \ a newline
 
-.l_1b6b
+\LDA #113               \ These instructions are commented out in the original
+\STA XX4                \ source
 
- \LDA #&71
- \STA &96
- LDX #&1A
+ LDX #26                \ Set X = 26 so we now process equipment from LASER+26
+                        \ onwards (i.e. BOMB onwards), using X as a counter
+                        \ going from LASER+26 (BOMB) to LASER+29 (GHYP)
 
 .stqv
 
- STX CNT
- \TAY
- \LDX FRIN,Y
- LDY LASER,X
- BEQ l_1b78
- TXA
- CLC
- ADC #&57
- JSR status_equip
+ STX CNT                \ Store the X counter in CNT so we can retrieve it below
 
-.l_1b78
+\TAY                    \ These instructions are commented out in the original
+\LDX FRIN,Y             \ source
 
- \INC &96
- \LDA &96
- \CMP #&75
- LDX CNT
- INX
- CPX #&1E
- BCC stqv
+ LDY LASER,X            \ Fetch the equipment flag from LASER+X, and if we do not
+ BEQ P%+9               \ have that equipment fitted, skip the following four
+                        \ instructions to move onto the next piece of equipment
+
+ TXA                    \ Set A = X + 87
+ CLC                    \
+ ADC #87                \ so A is now a token number between 113 ("HYPERSPACE
+                        \ UNIT") and 116 ("GALACTIC HYPERSPACE ")
+
+ JSR status_equip       \ Print the recursive token in A. If this is the Status
+                        \ Mode or Inventory screen, print a newline and an
+                        \ indent of 8 characters, or if this is the Sell
+                        \ Equipment screen, show and process a sell prompt for
+                        \ the piece of equipment at LASER+X before printing a
+                        \ newline
+
+\INC XX4                \ These instructions are commented out in the original
+\LDA XX4                \ source
+\CMP #117
+
+ LDX CNT                \ Retrieve the X counter from CNT that we stored above
+
+ INX                    \ Increment the loop counter
+
+ CPX #30                \ Loop back to print the next piece of equipment until
+ BCC stqv               \ we have done LASER+26 (BOMB) to LASER+29 (GHYP)
 
  LDX #0                 \ Now to print our ship's lasers, so set a counter in X
                         \ to count through the four views (0 = front, 1 = rear,
@@ -4910,8 +4942,9 @@ LOAD_B% = LOAD% + P% - CODE%
 
  LDA #103               \ Set A to token 103 ("PULSE LASER")
 
- LDX CNT                \ Set Y = the laser power for view X
- LDY LASER,X
+ LDX CNT                \ Retrieve the view number from CNT that we stored above
+
+ LDY LASER,X            \ Set Y = the laser power for view X
 
  CPY new_beam           \ If the laser power for view X is not that of a beam
  BNE P%+4               \ laser when fitted to our current ship type, skip the
@@ -4934,7 +4967,12 @@ LOAD_B% = LOAD% + P% - CODE%
  LDA #118               \ This sets A = 118 if the laser in view X is a mining
                         \ laser (token 118 is "MINING  LASER")
 
- JSR status_equip       \ AJD
+ JSR status_equip       \ Print the recursive token in A. If this is the Status
+                        \ Mode or Inventory screen, print a newline and an
+                        \ indent of 8 characters, or if this is the Sell
+                        \ Equipment screen, show and process a sell prompt for
+                        \ the piece of equipment at LASER+X before printing a
+                        \ newline
 
 .st1
 
@@ -4951,73 +4989,130 @@ LOAD_B% = LOAD% + P% - CODE%
 \       Name: status_equip
 \       Type: Subroutine
 \   Category: Text
-\    Summary: Print text followed by a newline and indent of 6 characters
+\    Summary: Print equipment name, adding a sell prompt if appropriate
 \
 \ ------------------------------------------------------------------------------
 \
-\ Print a text token followed by a newline, and indent the next line to text
-\ column 6.
+\ Print a text token containing the equipment name. Then:
+\
+\   * If this is the Status Mode or Inventory screen, print a newline and move
+\     the text cursor to column 8
+\
+\   * If this is the Sell Equipment screen, show and process a "Sell(Y/N)?"
+\     prompt on the end of the same line as the equipment name, and move the
+\     text cursor to the start of the next line
 \
 \ Arguments:
 \
 \   A                   The text token to be printed
 \
+\   X                   If this is the Sell Equipment screen, this contains the
+\                       offset from LASER where this piece of equipment's flag
+\                       is stored (e.g. X = 25 means LASER+25, which is BST,
+\                       the flag for the fuel scoops)
+\
 \ ******************************************************************************
 
 .status_equip
 
- STX CNT                \ AJD
- STA XX4
- JSR TT27
- LDX QQ11
- CPX #8
- BEQ status_keep
- LDA #21
+ STX CNT                \ Store the tab indent in CNT, so we can use it later
+
+ STA XX4                \ Store the text token in XX4, so we can use it later
+
+ JSR TT27               \ Print the text token in A
+
+ LDX QQ11               \ If the current view is the Status Mode screen or the
+ CPX #8                 \ Inventory screen, jump to status_keep to print a tab
+ BEQ status_keep        \ to column 8 (as X = 8) and return from the subroutine,
+                        \ as we don't want to show a sell prompt
+
+ LDA #21                \ Move the text cursor to column 21
  STA XC
 
  JSR vdu_80             \ Call vdu_80 to switch to Sentence Case, with the next
                         \ letter in capitals
 
- LDA #1
- STA QQ25
+ LDA #1                 \ Set QQ25 to 1, which sets the maximum number of items
+ STA QQ25               \ we can sell in the following call to sell_yn
 
- JSR sell_yn            \ Call sell_yn to print a "SELL (Y/N)?" prompt and get a
+ JSR sell_yn            \ Call sell_yn to print a "Sell(Y/N)?" prompt and get a
                         \ number from the keyboard
 
- BEQ status_no
- BCS status_no
- LDA XX4
- CMP #107
- BCS status_over
- ADC #7
+ BEQ status_no          \ If no number was entered, jump to status_no to move to
+                        \ the next line and return from the subroutine
+
+ BCS status_no          \ If the number entered was too big, jump to status_no
+                        \ to move to the next line and return from the
+                        \ subroutine
+
+ LDA XX4                \ If XX4 >= 107, then the token is a piece of equipment
+ CMP #107               \ ("I.F.F.SYSTEM" onwards) rather a laser, so skip the
+ BCS status_over        \ following instruction to reach status_over with
+                        \ A >= 107 and the C flag set
+
+ ADC #7                 \ The token in A is < 107, so it must be a pulse laser 
+                        \ (103) or beam laser (104), so add 7 to set A to 110
+                        \ or 111 (as we know the C flag is clear), and fall
+                        \ through into status_over with the C flag clear
 
 .status_over
 
- SBC #104
- JSR prx-3
- LSR A
- TAY
- TXA
+                        \ We get here with one of the following:
+                        \
+                        \   * A >= 107 and the C flag set, if this is not a
+                        \     pulse or beam laser
+                        \
+                        \   * A = 110 or 111 with the C flag clear, if this is a
+                        \     pulse or beam laser
+
+ SBC #104               \ Subtract 104 - (1 - C) from the token number, so
+                        \ either:
+                        \
+                        \   * A is now 1 for fuel, 2 for missiles, 3 for the
+                        \     I.F.F. system, and so on
+                        \
+                        \   * A = 5 or 6 for pulse or beam lasers
+                        \
+                        \ In each case, A contains the equipment number from the
+                        \ PRXS table, plus 1
+
+ JSR prx-3              \ Call prx-3 to set (A X) to the price of the item with
+                        \ number A - 1
+
+ LSR A                  \ We now halve the price in (A X) and put the result
+ TAY                    \ into (Y X), starting with the high byte in A
+
+ TXA                    \ And then halving the low byte in X
  ROR A
  TAX
- JSR MCASH
- INC new_hold
- LDX CNT
- LDA #0
- STA LASER,X
+
+ JSR MCASH              \ Call MCASH to add (Y X) to the cash pot, so we get
+                        \ half of the original price back when selling equipment
+
+ INC new_hold           \ We just sold a piece of equipment, so increment the
+                        \ amount of free space in the hold
+
+ LDX CNT                \ Set X to the value we stored in CNT above, so it now
+                        \ contains the equipment flag's offset from LASER
+
+ LDA #0                 \ We just sold this pieve of equipment, so set the flag
+ STA LASER,X            \ to zero to indicate we no longer have the equipment
+                        \ fitted
 
  JSR update_pod         \ Update the dashboard colours to reflect whether we
                         \ have an escape pod
 
 .status_no
 
- LDX #1
+ LDX #1                 \ Set X = 1 so we move the text cursor to column 1 in
+                        \ in the next instruction
 
 .status_keep
 
- STX XC
- LDA #10
- JMP TT27
+ STX XC                 \ Move the text cursor to the column specified in X
+
+ LDA #10                \ Print a line feed to move the text cursor down a line
+ JMP TT27               \ and return from the subroutine using a tail call
 
 \ ******************************************************************************
 \
@@ -10316,7 +10411,7 @@ LOAD_D% = LOAD% + P% - CODE%
 \       Name: sell_yn
 \       Type: Subroutine
 \   Category: Text
-\    Summary: Print a "SELL (Y/N)?" prompt and get a number from the keyboard
+\    Summary: Print a "Sell(Y/N)?" prompt and get a number from the keyboard
 \
 \ ------------------------------------------------------------------------------
 \
@@ -10502,8 +10597,8 @@ LOAD_D% = LOAD% + P% - CODE%
  JSR sell_equip
  LDA ESCP
  BEQ sell_escape
- LDA #&70
- LDX #&1E
+ LDA #112
+ LDX #30
  JSR status_equip
 
 .sell_escape
@@ -10652,7 +10747,7 @@ LOAD_D% = LOAD% + P% - CODE%
  CMP #4                 \ screen), jump to TT212 to skip the option to sell
  BNE TT212              \ items
 
- JSR sell_yn            \ Call sell_yn to print a "SELL (Y/N)?" prompt and get a
+ JSR sell_yn            \ Call sell_yn to print a "Sell(Y/N)?" prompt and get a
                         \ number from the keyboard, which will be the number of
                         \ the item we want to sell, returning the number entered
                         \ in A and R, and setting the C flag if the number is
@@ -12950,12 +13045,14 @@ LOAD_D% = LOAD% + P% - CODE%
 \
 \ Arguments:
 \
-\   A                   The item number of the piece of equipment (0-11) as
+\   A                   The item number of the piece of equipment (0-13) as
 \                       shown in the table at PRXS
 \
 \ Returns:
 \
 \   (Y X)               The item price in Cr * 10 (Y = high byte, X = low byte)
+\
+\   (A X)               Contains the same as (Y X)
 \
 \ Other entry points:
 \
