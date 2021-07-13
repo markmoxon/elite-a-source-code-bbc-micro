@@ -477,7 +477,7 @@ ENDMACRO
  TWOK 'A', 'L'
  EQUB 0
 
-                        \ --- Original Acornsoft code removed: ---------------->
+                        \ --- Mod: Original Acornsoft code removed: ----------->
 
 \ CHAR 'H'              \ Token 29:     "HYPERSPACE "
 \ CHAR 'Y'              \
@@ -714,7 +714,7 @@ ENDMACRO
  CHAR 'Y'
  EQUB 0
 
-                        \ --- Original Acornsoft code removed: ---------------->
+                        \ --- Mod: Original Acornsoft code removed: ----------->
 
 \ CHAR 'A'              \ Token 57:     "ALLOYS"
 \ CHAR 'L'              \
@@ -1061,7 +1061,7 @@ ENDMACRO
  TWOK 'L', 'E'
  EQUB 0
 
-                        \ --- Original Acornsoft code removed: ---------------->
+                        \ --- Mod: Original Acornsoft code removed: ----------->
 
 \ RTOK 67               \ Token 107:    "LARGE CARGO{sentence case} BAY"
 \ RTOK 46               \
@@ -1124,7 +1124,7 @@ ENDMACRO
  CHAR 'D'
  EQUB 0
 
-                        \ --- Original Acornsoft code removed: ---------------->
+                        \ --- Mod: Original Acornsoft code removed: ----------->
 
 \ RTOK 121              \ Token 113:    "ENERGY BOMB"
 \ CHAR 'B'              \
@@ -1160,7 +1160,7 @@ ENDMACRO
  RTOK 29                \ Encoded as:   "[122] [29]"
  EQUB 0
 
-                        \ --- Original Acornsoft code removed: ---------------->
+                        \ --- Mod: Original Acornsoft code removed: ----------->
 
 \ CHAR 'M'              \ Token 117:    "MILITARY  LASER"
 \ CHAR 'I'              \
@@ -1230,7 +1230,7 @@ ENDMACRO
  CHAR 'C'
  EQUB 0
 
-                        \ --- Original Acornsoft code removed: ---------------->
+                        \ --- Mod: Original Acornsoft code removed: ----------->
 
 \ RTOK 115              \ Token 123:    "DOCKING COMPUTERS ON"
 \ CHAR ' '              \
@@ -1293,7 +1293,7 @@ ENDMACRO
  CHAR 'M'               \ Encoded as:   "I<156>M"
  EQUB 0
 
-                        \ --- Original Acornsoft code removed: ---------------->
+                        \ --- Mod: Original Acornsoft code removed: ----------->
 
 \ EQUB 0                \ Token 128:    ""
 \                       \
@@ -1325,7 +1325,7 @@ ENDMACRO
  CHAR ' '               \ Encoded as:   " <159> "
  EQUB 0
 
-                        \ --- Original Acornsoft code removed: ---------------->
+                        \ --- Mod: Original Acornsoft code removed: ----------->
 
 \ CONT 12               \ Token 132:    "{cr}
 \ CONT 8                \                {all caps}EQUIPMENT: {sentence case}"

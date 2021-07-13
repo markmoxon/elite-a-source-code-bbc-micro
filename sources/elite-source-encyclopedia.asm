@@ -661,7 +661,7 @@ ORG &0000
 
  SKIP 4                 \ Temporary storage, used in a number of places
 
-                        \ --- Code added for Elite-A: ------------------------->
+                        \ --- Mod: Code added for Elite-A: -------------------->
 
 .finder
 
@@ -1255,7 +1255,7 @@ ORG &0300
                         \       (0 = pulse or mining laser) or is always on
                         \       (1 = beam or military laser)
 
-                        \ --- Original Acornsoft code removed: ---------------->
+                        \ --- Mod: Original Acornsoft code removed: ----------->
 
 \ SKIP 2                \ These bytes appear to be unused (they were originally
 \                       \ used for up/down lasers, but they were dropped)
@@ -1356,7 +1356,7 @@ ORG &0300
                         \
                         \   * &FF = fitted
 
-                        \ --- Original Acornsoft code removed: ---------------->
+                        \ --- Mod: Original Acornsoft code removed: ----------->
 
 \ SKIP 4                \ These bytes appear to be unused
 
@@ -1775,7 +1775,7 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
                         \ of the catalogue, between the two lists of filenames,
                         \ so it can be dropped without affecting the layout)
 
-                        \ --- Code added for Elite-A: ------------------------->
+                        \ --- Mod: Code added for Elite-A: -------------------->
 
 .new_pulse
 
@@ -2050,7 +2050,7 @@ LOAD_A% = LOAD%
 
 .S%
 
-                        \ --- Original Acornsoft code removed: ---------------->
+                        \ --- Mod: Original Acornsoft code removed: ----------->
 
 \ JMP DOENTRY           \ Decrypt the main docked code and dock at the station
 \
@@ -2114,7 +2114,7 @@ BRKV = P% - 2           \ The address of the destination address in the above
 
 .LTLI
 
-                        \ --- Original Acornsoft code removed: ---------------->
+                        \ --- Mod: Original Acornsoft code removed: ----------->
 
 \ EQUS "L.T.CODE"
 \ EQUB 13
@@ -2135,7 +2135,7 @@ BRKV = P% - 2           \ The address of the destination address in the above
 \
 \ ******************************************************************************
 
-                        \ --- Whole section added for Elite-A: ---------------->
+                        \ --- Mod: Whole section added for Elite-A: ----------->
 
 .launch
 
@@ -2163,7 +2163,7 @@ BRKV = P% - 2           \ The address of the destination address in the above
 \
 \ ******************************************************************************
 
-                        \ --- Whole section added for Elite-A: ---------------->
+                        \ --- Mod: Whole section added for Elite-A: ----------->
 
 .escape
 
@@ -2183,7 +2183,7 @@ BRKV = P% - 2           \ The address of the destination address in the above
 \
 \ ******************************************************************************
 
-                        \ --- Whole section added for Elite-A: ---------------->
+                        \ --- Mod: Whole section added for Elite-A: ----------->
 
 .DOENTRY
 
@@ -2238,7 +2238,7 @@ BRKV = P% - 2           \ The address of the destination address in the above
 \
 \ ******************************************************************************
 
-                        \ --- Whole section added for Elite-A: ---------------->
+                        \ --- Mod: Whole section added for Elite-A: ----------->
 
 .write_msg3
 
@@ -2338,7 +2338,7 @@ BRKV = P% - 2           \ The address of the destination address in the above
  CLC                    \ range 220-221, as this is only called in galaxies 0
  ADC GCNT               \ and 1
 
-                        \ --- Original Acornsoft code removed: ---------------->
+                        \ --- Mod: Original Acornsoft code removed: ----------->
 
 \ BNE DETOK             \ Jump to DETOK to print extended token 220-221,
 \                       \ returning from the subroutine using a tail call (this
@@ -2415,7 +2415,7 @@ BRKV = P% - 2           \ The address of the destination address in the above
  LDA (V),Y              \ Load the character at offset Y in the token table,
                         \ which is the next character from the token table
 
-                        \ --- Original Acornsoft code removed: ---------------->
+                        \ --- Mod: Original Acornsoft code removed: ----------->
 
 \ EOR #VE               \ Tokens are stored in memory having been EOR'd with
 \                       \ #VE, so we repeat the EOR to get the actual character
@@ -2465,7 +2465,7 @@ BRKV = P% - 2           \ The address of the destination address in the above
                         \ which is the next character from the token we want to
                         \ print
 
-                        \ --- Original Acornsoft code removed: ---------------->
+                        \ --- Mod: Original Acornsoft code removed: ----------->
 
 \ EOR #VE               \ Tokens are stored in memory having been EOR'd with
 \                       \ #VE, so we repeat the EOR to get the actual character
@@ -2578,7 +2578,7 @@ BRKV = P% - 2           \ The address of the destination address in the above
                         \ If we get here then A >= 215, so this is a two-letter
                         \ token from the extended TKN2/QQ16 table
 
-                        \ --- Code added for Elite-A: ------------------------->
+                        \ --- Mod: Code added for Elite-A: -------------------->
 
 .msg_pairs
 
@@ -2799,7 +2799,7 @@ BRKV = P% - 2           \ The address of the destination address in the above
 \
 \ ******************************************************************************
 
-                        \ --- Whole section added for Elite-A: ---------------->
+                        \ --- Mod: Whole section added for Elite-A: ----------->
 
 .column_16
 
@@ -2835,7 +2835,7 @@ BRKV = P% - 2           \ The address of the destination address in the above
  LDA #6                 \ Move the text cursor to column 6
  STA XC
 
-                        \ --- Code added for Elite-A: ------------------------->
+                        \ --- Mod: Code added for Elite-A: -------------------->
 
 .set_token
 
@@ -2910,7 +2910,7 @@ BRKV = P% - 2           \ The address of the destination address in the above
 \
 \ ******************************************************************************
 
-                        \ --- Whole section added for Elite-A: ---------------->
+                        \ --- Mod: Whole section added for Elite-A: ----------->
 
 .clr_vdustat
 
@@ -3207,7 +3207,7 @@ BRKV = P% - 2           \ The address of the destination address in the above
  EQUW MT2               \ Token  2: Switch to Sentence Case
  EQUW TT27              \ Token  3: Print the selected system name
 
-                        \ --- Original Acornsoft code removed: ---------------->
+                        \ --- Mod: Original Acornsoft code removed: ----------->
 
 \ EQUW TT27             \ Token  4: Print the commander's name
 
@@ -3219,7 +3219,7 @@ BRKV = P% - 2           \ The address of the destination address in the above
 
  EQUW MT5               \ Token  5: Switch to extended tokens
 
-                        \ --- Original Acornsoft code removed: ---------------->
+                        \ --- Mod: Original Acornsoft code removed: ----------->
 
 \ EQUW MT6              \ Token  6: Switch to standard tokens, in Sentence Case
 
@@ -3245,7 +3245,7 @@ BRKV = P% - 2           \ The address of the destination address in the above
  EQUW DASC              \ Token 20: Unused
  EQUW CLYNS             \ Token 21: Clear the bottom few lines of the space view
 
-                        \ --- Original Acornsoft code removed: ---------------->
+                        \ --- Mod: Original Acornsoft code removed: ----------->
 
 \ EQUW PAUSE            \ Token 22: Display ship and wait for key press
 
@@ -3257,7 +3257,7 @@ BRKV = P% - 2           \ The address of the destination address in the above
 
  EQUW MT23              \ Token 23: Move to row 10, white text, set lower case
 
-                        \ --- Original Acornsoft code removed: ---------------->
+                        \ --- Mod: Original Acornsoft code removed: ----------->
 
 \ EQUW PAUSE2           \ Token 24: Wait for a key press
 \ EQUW BRIS             \ Token 25: Show incoming message screen, wait 2 seconds
@@ -7720,7 +7720,7 @@ LOAD_C% = LOAD% +P% - CODE%
 
 .PDESC
 
-                        \ --- Original Acornsoft code removed: ---------------->
+                        \ --- Mod: Original Acornsoft code removed: ----------->
 
 \ LDA QQ8               \ If either byte in QQ18(1 0) is non-zero, meaning that
 \ ORA QQ8+1             \ the distance from the current system to the selected
@@ -7911,7 +7911,7 @@ LOAD_C% = LOAD% +P% - CODE%
                         \ this routine, keep looping back up to PAUSE2, until
                         \ the key is released
 
-                        \ --- Code added for Elite-A: ------------------------->
+                        \ --- Mod: Code added for Elite-A: -------------------->
 
 .l_out
 
@@ -7921,7 +7921,7 @@ LOAD_C% = LOAD% +P% - CODE%
                         \ start scanning the keyboard again, returning the
                         \ internal key number in X (or 0 for no key press)
 
-                        \ --- Original Acornsoft code removed: ---------------->
+                        \ --- Mod: Original Acornsoft code removed: ----------->
 
 \ BEQ PAUSE2            \ Keep looping up to PAUSE2 until a key is pressed
 
@@ -8811,7 +8811,7 @@ LOAD_D% = LOAD% + P% - CODE%
                         \ routine, which calls TT111 to populate ZZ before
                         \ calling TT25 (this routine)
 
-                        \ --- Original Acornsoft code removed: ---------------->
+                        \ --- Mod: Original Acornsoft code removed: ----------->
 
 \ JMP PDESC             \ Jump to PDESC to print the system's extended
 \                       \ description, returning from the subroutine using a
@@ -10179,7 +10179,7 @@ LOAD_D% = LOAD% + P% - CODE%
 \
 \ ******************************************************************************
 
-                        \ --- Whole section added for Elite-A: ---------------->
+                        \ --- Mod: Whole section added for Elite-A: ----------->
 
 .func_tab
 
@@ -10196,7 +10196,7 @@ LOAD_D% = LOAD% + P% - CODE%
 \
 \ ******************************************************************************
 
-                        \ --- Whole section added for Elite-A: ---------------->
+                        \ --- Mod: Whole section added for Elite-A: ----------->
 
 .buy_invnt
 
@@ -10267,7 +10267,7 @@ LOAD_D% = LOAD% + P% - CODE%
  LDX R                  \ If R is non-zero then skip to NWDAV2, as we are
  BNE NWDAV2             \ already building a number
 
-                        \ --- Original Acornsoft code removed: ---------------->
+                        \ --- Mod: Original Acornsoft code removed: ----------->
 
 \ CMP #'y'              \ If "Y" was pressed, jump to NWDAV1 to return the
 \ BEQ NWDAV1            \ maximum number allowed (i.e. buy/sell the whole stock)
@@ -10288,7 +10288,7 @@ LOAD_D% = LOAD% + P% - CODE%
                         \ with a result of 0, as the key pressed was not a
                         \ number or letter and is less than ASCII "0"
 
-                        \ --- Original Acornsoft code removed: ---------------->
+                        \ --- Mod: Original Acornsoft code removed: ----------->
 
 \ CMP #10               \ If A >= 10, jump to BAY2 to display the Inventory
 \ BCS BAY2              \ screen, as the key pressed was a letter or other
@@ -10343,7 +10343,7 @@ LOAD_D% = LOAD% + P% - CODE%
 
  RTS                    \ Return from the subroutine
 
-                        \ --- Original Acornsoft code removed: ---------------->
+                        \ --- Mod: Original Acornsoft code removed: ----------->
 
 \.NWDAV1
 \
@@ -11624,7 +11624,7 @@ LOAD_E% = LOAD% + P% - CODE%
  STA XX0+1              \ blueprint and store it in XX0+1, so XX0(1 0) now
                         \ contains the address of this ship's blueprint
 
-                        \ --- Original Acornsoft code removed: ---------------->
+                        \ --- Mod: Original Acornsoft code removed: ----------->
 
 \ CPY #2*SST            \ If the ship type is a space station (SST), then jump
 \ BEQ NW6               \ to NW6, skipping the heap space steps below, as the
@@ -13025,7 +13025,7 @@ LOAD_F% = LOAD% + P% - CODE%
 
  STA MCNT               \ Reset MCNT (the main loop counter) to 0
 
-                        \ --- Original Acornsoft code removed: ---------------->
+                        \ --- Mod: Original Acornsoft code removed: ----------->
 
 \.modify
 
@@ -13057,7 +13057,7 @@ LOAD_F% = LOAD% + P% - CODE%
  LDA #HI(LS%)           \ to indicate that the heap is empty
  STA SLSP+1
 
-                        \ --- Original Acornsoft code removed: ---------------->
+                        \ --- Mod: Original Acornsoft code removed: ----------->
 
 \ JSR DIALS             \ Update the dashboard
 
@@ -13165,7 +13165,7 @@ LOAD_F% = LOAD% + P% - CODE%
 \
 \ ******************************************************************************
 
-                        \ --- Original Acornsoft code removed: ---------------->
+                        \ --- Mod: Original Acornsoft code removed: ----------->
 
 \.DORND2
 \
@@ -13238,7 +13238,7 @@ LOAD_F% = LOAD% + P% - CODE%
 
  DEC MCNT               \ Decrement the main loop counter in MCNT
 
-                        \ --- Original Acornsoft code removed: ---------------->
+                        \ --- Mod: Original Acornsoft code removed: ----------->
 
 \ BEQ P%+5              \ If the counter has reached zero, which it will do
 \                       \ every 256 main loops, skip the next JMP instruction
@@ -13337,7 +13337,7 @@ LOAD_F% = LOAD% + P% - CODE%
  TXS                    \ location for the 6502 stack, so this instruction
                         \ effectively resets the stack
 
-                        \ --- Original Acornsoft code removed: ---------------->
+                        \ --- Mod: Original Acornsoft code removed: ----------->
 
 \ LDX GNTMP             \ If the laser temperature in GNTMP is non-zero,
 \ BEQ EE20              \ decrement it (i.e. cool it down a bit)
@@ -13440,7 +13440,7 @@ LOAD_F% = LOAD% + P% - CODE%
 
 .TT102
 
-                        \ --- Original Acornsoft code removed: ---------------->
+                        \ --- Mod: Original Acornsoft code removed: ----------->
 
 \ CMP #f8               \ If red key f8 was pressed, jump to STATUS to show the
 \ BNE P%+5              \ Status Mode screen, returning from the subroutine
@@ -13501,7 +13501,7 @@ LOAD_F% = LOAD% + P% - CODE%
 
 .TT92
 
-                        \ --- Original Acornsoft code removed: ---------------->
+                        \ --- Mod: Original Acornsoft code removed: ----------->
 
 \ CMP #f9               \ If red key f9 was pressed, jump to TT213 to show the
 \ BNE P%+5              \ Inventory screen, returning from the subroutine
@@ -13533,7 +13533,7 @@ LOAD_F% = LOAD% + P% - CODE%
 
 .fvw
 
-                        \ --- Original Acornsoft code removed: ---------------->
+                        \ --- Mod: Original Acornsoft code removed: ----------->
 
 \ CMP #f3               \ If red key f3 was pressed, jump to EQSHP to show the
 \ BNE P%+5              \ Equip Ship screen, returning from the subroutine using
@@ -13630,7 +13630,7 @@ LOAD_F% = LOAD% + P% - CODE%
  LDA T1                 \ Restore the original value of A (the key that's been
                         \ pressed) from T1
 
-                        \ --- Original Acornsoft code removed: ---------------->
+                        \ --- Mod: Original Acornsoft code removed: ----------->
 
 \ CMP #&36              \ If "O" was pressed, do the following three jumps,
 \ BNE ee2               \ otherwise skip to ee2 to continue
@@ -13664,7 +13664,7 @@ LOAD_F% = LOAD% + P% - CODE%
 
  RTS                    \ Return from the subroutine
 
-                        \ --- Code added for Elite-A: ------------------------->
+                        \ --- Mod: Code added for Elite-A: -------------------->
 
 .not_home
 
@@ -13749,7 +13749,7 @@ LOAD_F% = LOAD% + P% - CODE%
 
 .BR1
 
-                        \ --- Original Acornsoft code removed: ---------------->
+                        \ --- Mod: Original Acornsoft code removed: ----------->
 
 \ LDX #3                \ Set XC = 3 (set text cursor to column 3)
 \ STX XC
@@ -13860,7 +13860,7 @@ LOAD_F% = LOAD% + P% - CODE%
  LDA #&FF               \ Set QQ12 = &FF (the docked flag) to indicate that we
  STA QQ12               \ are docked
 
-                        \ --- Original Acornsoft code removed: ---------------->
+                        \ --- Mod: Original Acornsoft code removed: ----------->
 
 \ LDA #f8               \ Jump into the main loop at FRCE, setting the key
 \ JMP FRCE              \ that's "pressed" to red key f8 (so we show the Status
@@ -14255,7 +14255,7 @@ LOAD_F% = LOAD% + P% - CODE%
 
 .BEEP
 
-                        \ --- Original Acornsoft code removed: ---------------->
+                        \ --- Mod: Original Acornsoft code removed: ----------->
 
 \ LDA #32               \ Call the NOISE routine with A = 32 to make a short,
 \ BNE NOISE             \ high beep, returning from the subroutine using a tail
@@ -14606,7 +14606,7 @@ LOAD_F% = LOAD% + P% - CODE%
 
 .DOKEY
 
-                        \ --- Original Acornsoft code removed: ---------------->
+                        \ --- Mod: Original Acornsoft code removed: ----------->
 
 \ LDA JSTK              \ If JSTK is zero, then we are configured to use the
 \ BEQ DK9               \ keyboard rather than the joystick, so jump to DK9 to
@@ -14704,7 +14704,7 @@ LOAD_F% = LOAD% + P% - CODE%
 
  INY                    \ Increment Y to point to the next toggle key
 
-                        \ --- Original Acornsoft code removed: ---------------->
+                        \ --- Mod: Original Acornsoft code removed: ----------->
 
 \ CPY #&47              \ The last toggle key is &46 (K), so check whether we
 \                       \ have just done that one
@@ -14731,7 +14731,7 @@ LOAD_F% = LOAD% + P% - CODE%
  CPX #&70               \ If ESCAPE is not being pressed, skip over the next
  BNE P%+5               \ instruction
 
-                        \ --- Original Acornsoft code removed: ---------------->
+                        \ --- Mod: Original Acornsoft code removed: ----------->
 
 \ JMP BR1               \ ESCAPE is being pressed, so jump to BR1 to end the
 \                       \ game
@@ -14780,7 +14780,7 @@ LOAD_F% = LOAD% + P% - CODE%
  LDA #&FF               \ Set A to &FF so we can store this in the keyboard
                         \ logger for keys that are being pressed
 
-                        \ --- Original Acornsoft code removed: ---------------->
+                        \ --- Mod: Original Acornsoft code removed: ----------->
 
 \.DK5
 
@@ -14788,7 +14788,7 @@ LOAD_F% = LOAD% + P% - CODE%
 
  RTS                    \ Return from the subroutine
 
-                        \ --- Original Acornsoft code removed: ---------------->
+                        \ --- Mod: Original Acornsoft code removed: ----------->
 
 \.DK9
 \
@@ -16003,7 +16003,7 @@ LOAD_G% = LOAD% + P% - CODE%
  AND #%11110111         \ byte #31 to denote that the ship is no longer being
  STA XX1+31             \ drawn on-screen
 
-                        \ --- Original Acornsoft code removed: ---------------->
+                        \ --- Mod: Original Acornsoft code removed: ----------->
 
 \ JMP DOEXP             \ Jump to DOEXP to return from the subroutine using a
 \                       \ tail call, as in the docked code DOEXP just contains
@@ -17684,7 +17684,7 @@ LOAD_G% = LOAD% + P% - CODE%
  ORA #8                 \ #31 to denote that we are drawing something on-screen
  STA XX1+31             \ for this ship
 
-                        \ --- Original Acornsoft code removed: ---------------->
+                        \ --- Mod: Original Acornsoft code removed: ----------->
 
 \ JMP DOEXP             \ Jump to DOEXP to display the explosion cloud,
 \                       \ returning from the subroutine using a tail call
@@ -19182,7 +19182,7 @@ LOAD_H% = LOAD% + P% - CODE%
 \
 \ ******************************************************************************
 
-                        \ --- Whole section added for Elite-A: ---------------->
+                        \ --- Mod: Whole section added for Elite-A: ----------->
 
 .info_menu
 
@@ -19235,7 +19235,7 @@ LOAD_H% = LOAD% + P% - CODE%
 \
 \ ******************************************************************************
 
-                        \ --- Whole section added for Elite-A: ---------------->
+                        \ --- Mod: Whole section added for Elite-A: ----------->
 
 .ships_ag
 
@@ -19334,7 +19334,7 @@ LOAD_H% = LOAD% + P% - CODE%
 \
 \ ******************************************************************************
 
-                        \ --- Whole section added for Elite-A: ---------------->
+                        \ --- Mod: Whole section added for Elite-A: ----------->
 
 .controls
 
@@ -19369,7 +19369,7 @@ LOAD_H% = LOAD% + P% - CODE%
 \
 \ ******************************************************************************
 
-                        \ --- Whole section added for Elite-A: ---------------->
+                        \ --- Mod: Whole section added for Elite-A: ----------->
 
 .equip_data
 
@@ -19408,7 +19408,7 @@ LOAD_H% = LOAD% + P% - CODE%
 \
 \ ******************************************************************************
 
-                        \ --- Whole section added for Elite-A: ---------------->
+                        \ --- Mod: Whole section added for Elite-A: ----------->
 
 .trading
 
@@ -19429,7 +19429,7 @@ LOAD_H% = LOAD% + P% - CODE%
 \
 \ ******************************************************************************
 
-                        \ --- Whole section added for Elite-A: ---------------->
+                        \ --- Mod: Whole section added for Elite-A: ----------->
 
 .write_card
 
@@ -19536,7 +19536,7 @@ LOAD_H% = LOAD% + P% - CODE%
 \
 \ ******************************************************************************
 
-                        \ --- Whole section added for Elite-A: ---------------->
+                        \ --- Mod: Whole section added for Elite-A: ----------->
 
 .ship_load
 
@@ -19554,7 +19554,7 @@ LOAD_H% = LOAD% + P% - CODE%
 \
 \ ******************************************************************************
 
-                        \ --- Whole section added for Elite-A: ---------------->
+                        \ --- Mod: Whole section added for Elite-A: ----------->
 
 .ship_file
 
@@ -19574,7 +19574,7 @@ LOAD_H% = LOAD% + P% - CODE%
 \
 \ ******************************************************************************
 
-                        \ --- Whole section added for Elite-A: ---------------->
+                        \ --- Mod: Whole section added for Elite-A: ----------->
 
 .ship_posn
 
@@ -19594,7 +19594,7 @@ LOAD_H% = LOAD% + P% - CODE%
 \
 \ ******************************************************************************
 
-                        \ --- Whole section added for Elite-A: ---------------->
+                        \ --- Mod: Whole section added for Elite-A: ----------->
 
 .ship_dist
 
@@ -19614,7 +19614,7 @@ LOAD_H% = LOAD% + P% - CODE%
 \
 \ ******************************************************************************
 
-                        \ --- Whole section added for Elite-A: ---------------->
+                        \ --- Mod: Whole section added for Elite-A: ----------->
 
 .menu
 
@@ -19687,7 +19687,7 @@ LOAD_H% = LOAD% + P% - CODE%
 \
 \ ******************************************************************************
 
-                        \ --- Whole section added for Elite-A: ---------------->
+                        \ --- Mod: Whole section added for Elite-A: ----------->
 
 .menu_title
 
@@ -19704,7 +19704,7 @@ LOAD_H% = LOAD% + P% - CODE%
 \
 \ ******************************************************************************
 
-                        \ --- Whole section added for Elite-A: ---------------->
+                        \ --- Mod: Whole section added for Elite-A: ----------->
 
 .menu_titlex
 
@@ -19721,7 +19721,7 @@ LOAD_H% = LOAD% + P% - CODE%
 \
 \ ******************************************************************************
 
-                        \ --- Whole section added for Elite-A: ---------------->
+                        \ --- Mod: Whole section added for Elite-A: ----------->
 
 .menu_offset
 
@@ -19738,7 +19738,7 @@ LOAD_H% = LOAD% + P% - CODE%
 \
 \ ******************************************************************************
 
-                        \ --- Whole section added for Elite-A: ---------------->
+                        \ --- Mod: Whole section added for Elite-A: ----------->
 
 .menu_entry
 
@@ -19755,7 +19755,7 @@ LOAD_H% = LOAD% + P% - CODE%
 \
 \ ******************************************************************************
 
-                        \ --- Whole section added for Elite-A: ---------------->
+                        \ --- Mod: Whole section added for Elite-A: ----------->
 
 .menu_query
 
@@ -20019,7 +20019,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-                        \ --- Whole section added for Elite-A: ---------------->
+                        \ --- Mod: Whole section added for Elite-A: ----------->
 
 .TKN1
 
@@ -21729,7 +21729,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-                        \ --- Whole section added for Elite-A: ---------------->
+                        \ --- Mod: Whole section added for Elite-A: ----------->
 
 .msg_3
 
@@ -25694,7 +25694,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-                        \ --- Whole section added for Elite-A: ---------------->
+                        \ --- Mod: Whole section added for Elite-A: ----------->
 
 .ship_centre
 
@@ -25714,7 +25714,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-                        \ --- Whole section added for Elite-A: ---------------->
+                        \ --- Mod: Whole section added for Elite-A: ----------->
 
 .card_pattern
 
@@ -25755,7 +25755,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-                        \ --- Whole section added for Elite-A: ---------------->
+                        \ --- Mod: Whole section added for Elite-A: ----------->
 
 .card_addr
 
@@ -25808,7 +25808,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-                        \ --- Whole section added for Elite-A: ---------------->
+                        \ --- Mod: Whole section added for Elite-A: ----------->
 
 .adder
 
@@ -25883,7 +25883,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-                        \ --- Whole section added for Elite-A: ---------------->
+                        \ --- Mod: Whole section added for Elite-A: ----------->
 
 .anaconda
 
@@ -25970,7 +25970,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-                        \ --- Whole section added for Elite-A: ---------------->
+                        \ --- Mod: Whole section added for Elite-A: ----------->
 
 .asp_2
 
@@ -26055,7 +26055,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-                        \ --- Whole section added for Elite-A: ---------------->
+                        \ --- Mod: Whole section added for Elite-A: ----------->
 
 .boa
 
@@ -26139,7 +26139,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-                        \ --- Whole section added for Elite-A: ---------------->
+                        \ --- Mod: Whole section added for Elite-A: ----------->
 
 .bushmaster
 
@@ -26217,7 +26217,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-                        \ --- Whole section added for Elite-A: ---------------->
+                        \ --- Mod: Whole section added for Elite-A: ----------->
 
 .chameleon
 
@@ -26307,7 +26307,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-                        \ --- Whole section added for Elite-A: ---------------->
+                        \ --- Mod: Whole section added for Elite-A: ----------->
 
 .cobra_1
 
@@ -26386,7 +26386,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-                        \ --- Whole section added for Elite-A: ---------------->
+                        \ --- Mod: Whole section added for Elite-A: ----------->
 
 .cobra_3
 
@@ -26470,7 +26470,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-                        \ --- Whole section added for Elite-A: ---------------->
+                        \ --- Mod: Whole section added for Elite-A: ----------->
 
 .coriolis
 
@@ -26502,7 +26502,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-                        \ --- Whole section added for Elite-A: ---------------->
+                        \ --- Mod: Whole section added for Elite-A: ----------->
 
 .dodecagon
 
@@ -26534,7 +26534,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-                        \ --- Whole section added for Elite-A: ---------------->
+                        \ --- Mod: Whole section added for Elite-A: ----------->
 
 .escape_pod
 
@@ -26571,7 +26571,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-                        \ --- Whole section added for Elite-A: ---------------->
+                        \ --- Mod: Whole section added for Elite-A: ----------->
 
 .fer_de_lance
 
@@ -26657,7 +26657,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-                        \ --- Whole section added for Elite-A: ---------------->
+                        \ --- Mod: Whole section added for Elite-A: ----------->
 
 .gecko
 
@@ -26747,7 +26747,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-                        \ --- Whole section added for Elite-A: ---------------->
+                        \ --- Mod: Whole section added for Elite-A: ----------->
 
 .ghavial
 
@@ -26833,7 +26833,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-                        \ --- Whole section added for Elite-A: ---------------->
+                        \ --- Mod: Whole section added for Elite-A: ----------->
 
 .iguana
 
@@ -26918,7 +26918,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-                        \ --- Whole section added for Elite-A: ---------------->
+                        \ --- Mod: Whole section added for Elite-A: ----------->
 
 .krait
 
@@ -26991,7 +26991,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-                        \ --- Whole section added for Elite-A: ---------------->
+                        \ --- Mod: Whole section added for Elite-A: ----------->
 
 .mamba
 
@@ -27071,7 +27071,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-                        \ --- Whole section added for Elite-A: ---------------->
+                        \ --- Mod: Whole section added for Elite-A: ----------->
 
 .monitor
 
@@ -27149,7 +27149,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-                        \ --- Whole section added for Elite-A: ---------------->
+                        \ --- Mod: Whole section added for Elite-A: ----------->
 
 .moray
 
@@ -27235,7 +27235,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-                        \ --- Whole section added for Elite-A: ---------------->
+                        \ --- Mod: Whole section added for Elite-A: ----------->
 
 .ophidian
 
@@ -27315,7 +27315,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-                        \ --- Whole section added for Elite-A: ---------------->
+                        \ --- Mod: Whole section added for Elite-A: ----------->
 
 .python
 
@@ -27394,7 +27394,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-                        \ --- Whole section added for Elite-A: ---------------->
+                        \ --- Mod: Whole section added for Elite-A: ----------->
 
 .shuttle
 
@@ -27455,7 +27455,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-                        \ --- Whole section added for Elite-A: ---------------->
+                        \ --- Mod: Whole section added for Elite-A: ----------->
 
 .sidewinder
 
@@ -27525,7 +27525,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-                        \ --- Whole section added for Elite-A: ---------------->
+                        \ --- Mod: Whole section added for Elite-A: ----------->
 
 .thargoid
 
@@ -27586,7 +27586,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-                        \ --- Whole section added for Elite-A: ---------------->
+                        \ --- Mod: Whole section added for Elite-A: ----------->
 
 .thargon
 
@@ -27638,7 +27638,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-                        \ --- Whole section added for Elite-A: ---------------->
+                        \ --- Mod: Whole section added for Elite-A: ----------->
 
 .transporter
 
@@ -27689,7 +27689,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-                        \ --- Whole section added for Elite-A: ---------------->
+                        \ --- Mod: Whole section added for Elite-A: ----------->
 
 .viper
 
@@ -27767,7 +27767,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-                        \ --- Whole section added for Elite-A: ---------------->
+                        \ --- Mod: Whole section added for Elite-A: ----------->
 
 .worm
 

@@ -439,7 +439,7 @@ ENDMACRO
  EQUB 16                \ Number of faces          = 16 / 4 = 4
  EQUB 8                 \ Visibility distance      = 8
 
-                        \ --- Original Acornsoft code removed: ---------------->
+                        \ --- Mod: Original Acornsoft code removed: ----------->
 
 \ EQUB 17               \ Max. energy              = 17
 
@@ -500,7 +500,7 @@ ENDMACRO
  EQUB 60                \ Number of vertices       = 60 / 6 = 10
  EQUB 15                \ Number of edges          = 15
 
-                        \ --- Original Acornsoft code removed: ---------------->
+                        \ --- Mod: Original Acornsoft code removed: ----------->
 
 \ EQUW 0                \ Bounty                   = 0
 
@@ -513,7 +513,7 @@ ENDMACRO
  EQUB 28                \ Number of faces          = 28 / 4 = 7
  EQUB 12                \ Visibility distance      = 12
 
-                        \ --- Original Acornsoft code removed: ---------------->
+                        \ --- Mod: Original Acornsoft code removed: ----------->
 
 \ EQUB 17               \ Max. energy              = 17
 
@@ -595,7 +595,7 @@ ENDMACRO
  EQUB 28                \ Number of faces          = 28 / 4 = 7
  EQUB 23                \ Visibility distance      = 23
 
-                        \ --- Original Acornsoft code removed: ---------------->
+                        \ --- Mod: Original Acornsoft code removed: ----------->
 
 \ EQUB 100              \ Max. energy              = 100
 
@@ -610,7 +610,7 @@ ENDMACRO
  EQUB &00               \ Faces data offset (high) = &00BE
  EQUB 1                 \ Normals are scaled by    = 2^1 = 2
 
-                        \ --- Original Acornsoft code removed: ---------------->
+                        \ --- Mod: Original Acornsoft code removed: ----------->
 
 \ EQUB %00010001        \ Laser power              = 2
 \                       \ Missiles                 = 1
@@ -692,7 +692,7 @@ ENDMACRO
  EQUB 90                \ Number of vertices       = 90 / 6 = 15
  EQUB 25                \ Number of edges          = 25
 
-                        \ --- Original Acornsoft code removed: ---------------->
+                        \ --- Mod: Original Acornsoft code removed: ----------->
 
 \ EQUW 0                \ Bounty                   = 0
 
@@ -710,7 +710,7 @@ ENDMACRO
  EQUB &00               \ Faces data offset (high) = &00D2
  EQUB 1                 \ Normals are scaled by    = 2^1 = 2
 
-                        \ --- Original Acornsoft code removed: ---------------->
+                        \ --- Mod: Original Acornsoft code removed: ----------->
 
 \ EQUB %00111111        \ Laser power              = 7
 \                       \ Missiles                 = 7
@@ -805,7 +805,7 @@ ENDMACRO
  EQUB 32                \ Number of faces          = 32 / 4 = 8
  EQUB 19                \ Visibility distance      = 19
 
-                        \ --- Original Acornsoft code removed: ---------------->
+                        \ --- Mod: Original Acornsoft code removed: ----------->
 
 \ EQUB 30               \ Max. energy              = 30
 
@@ -820,7 +820,7 @@ ENDMACRO
  EQUB &00               \ Faces data offset (high) = &0090
  EQUB 3                 \ Normals are scaled by    = 2^3 = 8
 
-                        \ --- Original Acornsoft code removed: ---------------->
+                        \ --- Mod: Original Acornsoft code removed: ----------->
 
 \ EQUB %00001000        \ Laser power              = 1
 \                       \ Missiles                 = 0
@@ -897,7 +897,7 @@ ENDMACRO
  EQUB 40                \ Number of faces          = 40 / 4 = 10
  EQUB 19                \ Visibility distance      = 19
 
-                        \ --- Original Acornsoft code removed: ---------------->
+                        \ --- Mod: Original Acornsoft code removed: ----------->
 
 \ EQUB 90               \ Max. energy              = 90
 
@@ -912,7 +912,7 @@ ENDMACRO
  EQUB &00               \ Faces data offset (high) = &009E
  EQUB 2                 \ Normals are scaled by    = 2^2 = 4
 
-                        \ --- Original Acornsoft code removed: ---------------->
+                        \ --- Mod: Original Acornsoft code removed: ----------->
 
 \ EQUB %00010010        \ Laser power              = 2
 \                       \ Missiles                 = 2
@@ -979,7 +979,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-                        \ --- Whole section added for Elite-A: ---------------->
+                        \ --- Mod: Whole section added for Elite-A: ----------->
 
 .SHIP_RATTLER
 
@@ -1090,7 +1090,7 @@ ENDMACRO
  EQUB 60                \ Number of faces          = 60 / 4 = 15
  EQUB 23                \ Visibility distance      = 23
 
-                        \ --- Original Acornsoft code removed: ---------------->
+                        \ --- Mod: Original Acornsoft code removed: ----------->
 
 \ EQUB 85               \ Max. energy              = 85
 
@@ -1105,7 +1105,7 @@ ENDMACRO
  EQUB &00               \ Faces data offset (high) = &00F4
  EQUB 2                 \ Normals are scaled by    = 2^2 = 4
 
-                        \ --- Original Acornsoft code removed: ---------------->
+                        \ --- Mod: Original Acornsoft code removed: ----------->
 
 \ EQUB %00010000        \ Laser power              = 2
 \                       \ Missiles                 = 0
@@ -1195,7 +1195,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-                        \ --- Whole section added for Elite-A: ---------------->
+                        \ --- Mod: Whole section added for Elite-A: ----------->
 
 .SHIP_GHAVIAL
 
@@ -1296,7 +1296,7 @@ ENDMACRO
  EQUB 24                \ Number of vertices       = 24 / 6 = 4
  EQUB 4                 \ Number of edges          = 4
 
-                        \ --- Original Acornsoft code removed: ---------------->
+                        \ --- Mod: Original Acornsoft code removed: ----------->
 
 \ EQUW 0                \ Bounty                   = 0
 
@@ -1309,7 +1309,7 @@ ENDMACRO
  EQUB 4                 \ Number of faces          = 4 / 4 = 1
  EQUB 5                 \ Visibility distance      = 5
 
-                        \ --- Original Acornsoft code removed: ---------------->
+                        \ --- Mod: Original Acornsoft code removed: ----------->
 
 \ EQUB 16               \ Max. energy              = 16
 

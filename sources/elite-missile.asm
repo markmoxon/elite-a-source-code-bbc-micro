@@ -303,7 +303,7 @@ ENDMACRO
  FACE        0,      -32,        0,         31    \ Face 5
  FACE      -32,        0,        0,         31    \ Face 6
 
-                        \ --- Original Acornsoft code removed: ---------------->
+                        \ --- Mod: Original Acornsoft code removed: ----------->
 
 \ FACE        0,      160,      110,         31   \ Face 7
 \ FACE        0,       64,        4,          0   \ Face 8
@@ -326,7 +326,7 @@ ENDMACRO
 
 .VEC
 
-                        \ --- Original Acornsoft code removed: ---------------->
+                        \ --- Mod: Original Acornsoft code removed: ----------->
 
 \ EQUW &0004            \ VEC = &7FFE
 \                       \
