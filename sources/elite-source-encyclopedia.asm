@@ -2192,7 +2192,7 @@ BRKV = P% - 2           \ The address of the destination address in the above
  JSR RES2               \ Reset a number of flight variables and workspaces
 
  JMP BAY                \ Go to the docking bay (i.e. show the Encyclopedia
-                        \ Galactica menu screen)
+                        \ screen)
 
                         \ --- End of added section ---------------------------->
 
@@ -2795,7 +2795,8 @@ BRKV = P% - 2           \ The address of the destination address in the above
 \       Name: column_16
 \       Type: Subroutine
 \   Category: Text
-\    Summary: AJD
+\    Summary: Tab to column 16 and start a new word when printing extended
+\             tokens
 \
 \ ******************************************************************************
 
@@ -2803,8 +2804,15 @@ BRKV = P% - 2           \ The address of the destination address in the above
 
 .column_16
 
- LDA #&10
- EQUB &2C
+ LDA #16                \ Set X to 16 so when we fall through into MT8 we move
+                        \ the text cursor to column 16 instead of 6
+
+ EQUB &2C               \ Skip the next instruction by turning it into
+                        \ &2C &A9 &06, or BIT &06A9, which does nothing apart
+                        \ from affect the flags
+
+                        \ Fall through into MT8 to move the text cursor to
+                        \ column 16 and start a new word
 
                         \ --- End of added section ---------------------------->
 
@@ -2906,7 +2914,7 @@ BRKV = P% - 2           \ The address of the destination address in the above
 \       Name: clr_vdustat
 \       Type: Subroutine
 \   Category: Text
-\    Summary: AJD
+\    Summary: Switch to standard tokens in lower case
 \
 \ ******************************************************************************
 
@@ -2914,11 +2922,17 @@ BRKV = P% - 2           \ The address of the destination address in the above
 
 .clr_vdustat
 
- LDA #%00000001         
+ LDA #%00000001         \ Set A to %00000001 so when we fall through into MT6 we
+                        \ set QQ17 to %00000001 instead of %10000000, so we
+                        \ switch to lower case instead of Sentence Case
 
  EQUB &2C               \ Skip the next instruction by turning it into
                         \ &2C &A9 &80, or BIT &80A9, which does nothing apart
                         \ from affect the flags
+
+                        \ Fall through into MT6 to switch to standard tokens in
+                        \ lower case
+
                         \ --- End of added section ---------------------------->
 
 \ ******************************************************************************
@@ -3264,7 +3278,7 @@ BRKV = P% - 2           \ The address of the destination address in the above
 
                         \ --- And replaced by: -------------------------------->
 
- EQUW clr_vdustat       \ Token 24: AJD
+ EQUW clr_vdustat       \ Token 24: Switch to standard tokens in lower case
  EQUW DASC              \ Token 25: Unused
 
                         \ --- End of replacement ------------------------------>
@@ -8515,7 +8529,8 @@ LOAD_D% = LOAD% + P% - CODE%
 \       Name: TT25
 \       Type: Subroutine
 \   Category: Universe
-\    Summary: Show the Data on System screen (red key f6)
+\    Summary: Show the Data on System screen (red key f6) or Encyclopedia screen
+\             (CTRL-f6)
 \  Deep dive: Generating system data
 \             Galaxy and system seeds
 \
@@ -8827,7 +8842,9 @@ LOAD_D% = LOAD% + P% - CODE%
 
                         \ --- And replaced by: -------------------------------->
 
- JMP PD1                \ AJD
+ JMP PD1                \ Jump to PD1 to print the standard "goat soup" system
+                        \ description without checking for overrides, returning
+                        \ from the subroutine using a tail call
 
                         \ --- End of replacement ------------------------------>
 
@@ -10175,7 +10192,7 @@ LOAD_D% = LOAD% + P% - CODE%
 \       Name: func_tab
 \       Type: Variable
 \   Category: Keyboard
-\    Summary: AJD
+\    Summary: Lookup table for internal numbers of red function keys
 \
 \ ******************************************************************************
 
@@ -10192,7 +10209,13 @@ LOAD_D% = LOAD% + P% - CODE%
 \       Name: buy_invnt
 \       Type: Subroutine
 \   Category: Buying ships
-\    Summary: AJD
+\    Summary: Process key presses in the encyclopedia
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   A                   The ASCII value of the key pressed, minus ASCII "0"
 \
 \ ******************************************************************************
 
@@ -10200,20 +10223,36 @@ LOAD_D% = LOAD% + P% - CODE%
 
 .buy_invnt
 
- SBC #&50
- BCC buy_top
- CMP #&0A
- BCC buy_func
+ SBC #(128 - '0')       \ We already subtracted ASCII "0" from the ASCII value
+                        \ of the key pressed, so this subtracts 128 from the
+                        \ original ASCII value of the key pressed. As red key f0
+                        \ is given ASCII value 128, and f1 is 129 and so on,
+                        \ this reduces a key press of f0 to A = 0, a key press
+                        \ of f1 to A = 1, and so on
+
+ BCC buy_top            \ If the subtraction just underflowed, then the key
+                        \ pressed was not a red function key, so jump to buy_top
+                        \ to "press" red key f1 (Encyclopedia screen)
+
+ CMP #10                \ If A < 10, then the key pressed was a red function
+ BCC buy_func           \ key, so jump to buy_func so we press the red key whose
+                        \ number is in A (so A = 0 "presses" red key f0, A = 1
+                        \ "presses" red key f1, and so on)
+
+                        \ Otherwise A >= 10, so the key pressed is something
+                        \ else, so fall through into buy_top to "press" red key
+                        \ f1 (Encyclopedia screen)
 
 .buy_top
 
- LDA #&01
+ LDA #1                 \ Set A = 1 so we "press" red key f1 (Encyclopedia
+                        \ screen) in the following
 
 .buy_func
 
- TAX
- LDA func_tab,X
- JMP FRCE
+ TAX                    \ Jump into the main loop at FRCE, setting the key to
+ LDA func_tab,X         \ the X-th red key (so X = 0 "presses" red key f0, X = 1
+ JMP FRCE               \ "presses" red key f1, and so on)
 
                         \ --- End of added section ---------------------------->
 
@@ -10281,7 +10320,7 @@ LOAD_D% = LOAD% + P% - CODE%
 
  STA Q                  \ Store the key pressed in Q
 
- SEC                    \ Subtract ASCII '0' from the key pressed, to leave the
+ SEC                    \ Subtract ASCII "0" from the key pressed, to leave the
  SBC #'0'               \ numeric value of the key in A (if it was a number key)
 
  BCC OUT                \ If A < 0, jump to OUT to return from the subroutine
@@ -10296,8 +10335,10 @@ LOAD_D% = LOAD% + P% - CODE%
 
                         \ --- And replaced by: -------------------------------->
 
- CMP #10                \ If A >= 10, jump to buy_invnt to AJD
- BCS buy_invnt
+ CMP #10                \ If A >= 10, jump to buy_invnt to decide which screen
+ BCS buy_invnt          \ to display, as the key pressed was a letter or other
+                        \ non-digit and is greater than ASCII "9" (so it could
+                        \ be a red function key, for example)
 
                         \ --- End of replacement ------------------------------>
 
@@ -13465,7 +13506,7 @@ LOAD_F% = LOAD% + P% - CODE%
                         \ --- And replaced by: -------------------------------->
 
  CMP #f8                \ If red key f8 was pressed, jump to info_menu to show
- BNE P%+5               \ the encyclopedia menu, returning from the subroutine
+ BNE P%+5               \ the Encyclopedia screen, returning from the subroutine
  JMP info_menu          \ using a tail call
 
  CMP #f4                \ If red key f4 was pressed, jump to TT22 to show the
@@ -13518,13 +13559,13 @@ LOAD_F% = LOAD% + P% - CODE%
                         \ --- And replaced by: -------------------------------->
 
  CMP #f9                \ If red key f9 was pressed, jump to info_menu to show
- BNE not_invnt          \ the encyclopedia menu, returning from the subroutine
+ BNE not_invnt          \ the Encyclopedia screen, returning from the subroutine
  JMP info_menu          \ using a tail call
 
 .not_invnt
 
  CMP #f7                \ If red key f7 was pressed, jump to info_menu to show
- BNE not_price          \ the encyclopedia menu, returning from the subroutine
+ BNE not_price          \ the Encyclopedia screen, returning from the subroutine
  JMP info_menu          \ using a tail call
 
 .not_price
@@ -13566,21 +13607,21 @@ LOAD_F% = LOAD% + P% - CODE%
 
                         \ --- And replaced by: -------------------------------->
 
- CMP #f0                \ AJD
- BEQ jump_menu
+ CMP #f0                \ If red key f0 was pressed, jump to jump_menu to show
+ BEQ jump_menu          \ the Encyclopedia screen
 
- CMP #f1
- BEQ jump_menu
+ CMP #f1                \ If red key f1 was pressed, jump to jump_menu to show
+ BEQ jump_menu          \ the Encyclopedia screen
 
- CMP #f2
- BEQ jump_menu
+ CMP #f2                \ If red key f2 was pressed, jump to jump_menu to show
+ BEQ jump_menu          \ the Encyclopedia screen
 
- CMP #f3
- BNE LABEL_3
+ CMP #f3                \ If red key f3 was not pressed, jump to LABEL_3 to
+ BNE LABEL_3            \ skip the following and keep checking for other keys
 
 .jump_menu
 
- JMP info_menu
+ JMP info_menu          \ Jump to info_menu to show the Encyclopedia screen
 
                         \ --- End of replacement ------------------------------>
 
@@ -13778,7 +13819,8 @@ LOAD_F% = LOAD% + P% - CODE%
 
                         \ --- And replaced by: -------------------------------->
 
- JMP escape             \ AJD
+ JMP escape             \ Jump to escape to load the main docked code so that it
+                        \ shows the docking tunnel and ship hanger
 
                         \ --- End of replacement ------------------------------>
 
@@ -13842,8 +13884,7 @@ LOAD_F% = LOAD% + P% - CODE%
 \       Name: BAY
 \       Type: Subroutine
 \   Category: Status
-\    Summary: Go to the docking bay (i.e. show the Encyclopedia Galactica menu
-\             screen)
+\    Summary: Go to the docking bay (i.e. show the Encyclopedia screen)
 \
 \ ------------------------------------------------------------------------------
 \
@@ -13870,7 +13911,7 @@ LOAD_F% = LOAD% + P% - CODE%
 
  LDA #f3                \ Jump into the main loop at FRCE, setting the key
  JMP FRCE               \ that's "pressed" to red key f3 (so we show the
-                        \ Encyclopedia Galactica menu screen)
+                        \ Encyclopedia screen)
 
                         \ --- End of replacement ------------------------------>
 
@@ -14601,6 +14642,9 @@ LOAD_F% = LOAD% + P% - CODE%
 \       Name: DOKEY
 \       Type: Subroutine
 \   Category: Keyboard
+\    Summary: Scan for the seven primary flight controls
+\  Deep dive: The key logger
+\             The docking computer
 \
 \ ******************************************************************************
 
@@ -19171,7 +19215,7 @@ LOAD_H% = LOAD% + P% - CODE%
 \       Name: info_menu
 \       Type: Subroutine
 \   Category: Encyclopedia
-\    Summary: AJD
+\    Summary: Show the Encyclopedia screen
 \
 \ ------------------------------------------------------------------------------
 \
@@ -19186,7 +19230,7 @@ LOAD_H% = LOAD% + P% - CODE%
 
 .info_menu
 
- LDX #&00
+ LDX #0                 \ AJD
  JSR menu
  CMP #&01
  BNE n_shipsag
@@ -25751,7 +25795,7 @@ ENDMACRO
 \       Name: card_addr
 \       Type: Variable
 \   Category: Encyclopedia
-\    Summary: AJD
+\    Summary: Lookup table for the encyclopedia's ship cards
 \
 \ ******************************************************************************
 
@@ -25759,12 +25803,34 @@ ENDMACRO
 
 .card_addr
 
- EQUW adder, anaconda, asp_2, boa, bushmaster, chameleon, cobra_1
- EQUW cobra_3, coriolis, dodecagon, escape_pod
- EQUW fer_de_lance, gecko, ghavial
- EQUW iguana, krait, mamba, monitor, moray, ophidian, python
- EQUW shuttle, sidewinder, thargoid, thargon
- EQUW transporter, viper, worm
+ EQUW adder
+ EQUW anaconda
+ EQUW asp_2
+ EQUW boa
+ EQUW bushmaster
+ EQUW chameleon
+ EQUW cobra_1
+ EQUW cobra_3
+ EQUW coriolis
+ EQUW dodecagon
+ EQUW escape_pod
+ EQUW fer_de_lance
+ EQUW gecko
+ EQUW ghavial
+ EQUW iguana
+ EQUW krait
+ EQUW mamba
+ EQUW monitor
+ EQUW moray
+ EQUW ophidian
+ EQUW python
+ EQUW shuttle
+ EQUW sidewinder
+ EQUW thargoid
+ EQUW thargon
+ EQUW transporter
+ EQUW viper
+ EQUW worm
 
                         \ --- End of added section ---------------------------->
 
@@ -25773,7 +25839,8 @@ ENDMACRO
 \       Name: CTOK
 \       Type: Macro
 \   Category: Text
-\    Summary: Macro definition for recursive tokens in encyclopedia ship cards
+\    Summary: Macro definition for recursive tokens in the encyclopedia's ship
+\             cards
 \
 \ ------------------------------------------------------------------------------
 \

@@ -15136,7 +15136,8 @@ LOAD_D% = LOAD% + P% - CODE%
 \       Name: TT25
 \       Type: Subroutine
 \   Category: Universe
-\    Summary: Show the Data on System screen (red key f6)
+\    Summary: Show the Data on System screen (red key f6) or Encyclopedia screen
+\             (CTRL-f6)
 \  Deep dive: Generating system data
 \             Galaxy and system seeds
 \

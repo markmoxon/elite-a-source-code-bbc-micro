@@ -2292,7 +2292,7 @@ BRKV = P% - 2           \ The address of the destination address in the above
 
                         \ --- Mod: Code added for Elite-A: -------------------->
 
- JSR cour_dock          \ AJD
+ JSR cour_dock          \ Update the current special cargo delivery mission
 
                         \ --- End of added code ------------------------------->
 
@@ -6326,6 +6326,12 @@ LOAD_B% = LOAD% + P% - CODE%
 \ Equipment prices are stored as 10 * the actual value, so we can support prices
 \ with fractions of credits (0.1 Cr). This is used for the price of fuel only.
 \
+\ Different ships have different equipment prices (apart from fuel which is the
+\ same price for all ships). Each ship type has an offset that is used when
+\ accessing this table; the offset to the price table for our current ship is
+\ held in the new_costs variable, and the offset values for all the different
+\ ships we can buy are defined in the new_details table.
+\
 \ ******************************************************************************
 
 .PRXS
@@ -6349,22 +6355,87 @@ LOAD_B% = LOAD% + P% - CODE%
 
                         \ --- And replaced by: -------------------------------->
 
- EQUW &0001
- \ 00 Cobra 3, Boa
- EQUW   250,  4000,  6000,  4000, 10000,  5250, 3000
- EQUW  5500, 15000, 15000, 50000, 30000,  2500
- \ 1A Adder, Cobra 1, Python
- EQUW   250,  2000,  4000,  2000,  4500,  3750, 2000
- EQUW  3750,  9000,  8000, 30000, 23000,  2500
- \ 34 Fer-de-Lance, Asp 2
- EQUW   250,  4000,  5000,  5000, 10000,  7000, 6000
- EQUW  4000, 25000, 10000, 40000, 50000,  2500
- \ 4E Monitor, Anaconda
- EQUW   250,  3000,  8000,  6000,  8000,  6500, 4500
- EQUW  8000, 19000, 20000, 60000, 25000,  2500
- \ 68 Moray, Ophidian
- EQUW   250,  1500,  3000,  3500,  7000,  4500, 2500
- EQUW  4500,  7000,  7000, 30000, 19000,  2500
+ EQUW 1                 \ 0  Fuel, calculated in EQSHP  140.0 Cr (full tank)
+
+                        \ Offset 0: Boa, Cobra Mk III
+
+ EQUW 250               \ 1  Missile                     25.0 Cr
+ EQUW 4000              \ 2  I.F.F. System              400.0 Cr
+ EQUW 6000              \ 3  E.C.M. System              600.0 Cr
+ EQUW 4000              \ 4  Extra Pulse Lasers         400.0 Cr
+ EQUW 10000             \ 5  Extra Beam Lasers         1000.0 Cr
+ EQUW 5250              \ 6  Fuel Scoops                525.0 Cr
+ EQUW 3000              \ 7  Escape Pod                 300.0 Cr
+ EQUW 5500              \ 8  Hyperspace Unit            550.0 Cr
+ EQUW 15000             \ 9  Energy Unit               1500.0 Cr
+ EQUW 15000             \ 10 Docking Computer          1500.0 Cr
+ EQUW 50000             \ 11 Galactic Hyperspace       5000.0 Cr
+ EQUW 30000             \ 12 Extra Military Lasers     3000.0 Cr
+ EQUW 2500              \ 13 Extra Mining Lasers        250.0 Cr
+
+                        \ Offset 26: Adder, Cobra Mk I, Python
+
+ EQUW 250               \ 1  Missile                     25.0 Cr
+ EQUW 2000              \ 2  I.F.F. System              200.0 Cr
+ EQUW 4000              \ 3  E.C.M. System              400.0 Cr
+ EQUW 2000              \ 4  Extra Pulse Lasers         200.0 Cr
+ EQUW 4500              \ 5  Extra Beam Lasers          450.0 Cr
+ EQUW 3750              \ 6  Fuel Scoops                375.0 Cr
+ EQUW 2000              \ 7  Escape Pod                 200.0 Cr
+ EQUW 3750              \ 8  Hyperspace Unit            375.0 Cr
+ EQUW 9000              \ 9  Energy Unit                900.0 Cr
+ EQUW 8000              \ 10 Docking Computer           800.0 Cr
+ EQUW 30000             \ 11 Galactic Hyperspace       3000.0 Cr
+ EQUW 23000             \ 12 Extra Military Lasers     2300.0 Cr
+ EQUW 2500              \ 13 Extra Mining Lasers        250.0 Cr
+
+                        \ Offset 52: Asp Mk II, Fer-de-Lance
+
+ EQUW 250               \ 1  Missile                     25.0 Cr
+ EQUW 4000              \ 2  I.F.F. System              400.0 Cr
+ EQUW 5000              \ 3  E.C.M. System              500.0 Cr
+ EQUW 5000              \ 4  Extra Pulse Lasers         500.0 Cr
+ EQUW 10000             \ 5  Extra Beam Lasers         1000.0 Cr
+ EQUW 7000              \ 6  Fuel Scoops                700.0 Cr
+ EQUW 6000              \ 7  Escape Pod                 600.0 Cr
+ EQUW 4000              \ 8  Hyperspace Unit            400.0 Cr
+ EQUW 25000             \ 9  Energy Unit               2500.0 Cr
+ EQUW 10000             \ 10 Docking Computer          1000.0 Cr
+ EQUW 40000             \ 11 Galactic Hyperspace       4000.0 Cr
+ EQUW 50000             \ 12 Extra Military Lasers     5000.0 Cr
+ EQUW 2500              \ 13 Extra Mining Lasers        250.0 Cr
+
+                        \ Offset 78: Anaconda, Monitor
+
+ EQUW 250               \ 1  Missile                     25.0 Cr
+ EQUW 3000              \ 2  I.F.F. System              300.0 Cr
+ EQUW 8000              \ 3  E.C.M. System              800.0 Cr
+ EQUW 6000              \ 4  Extra Pulse Lasers         600.0 Cr
+ EQUW 8000              \ 5  Extra Beam Lasers          800.0 Cr
+ EQUW 6500              \ 6  Fuel Scoops                650.0 Cr
+ EQUW 4500              \ 7  Escape Pod                 450.0 Cr
+ EQUW 8000              \ 8  Hyperspace Unit            800.0 Cr
+ EQUW 19000             \ 9  Energy Unit               1900.0 Cr
+ EQUW 20000             \ 10 Docking Computer          2000.0 Cr
+ EQUW 60000             \ 11 Galactic Hyperspace       6000.0 Cr
+ EQUW 25000             \ 12 Extra Military Lasers     2500.0 Cr
+ EQUW 2500              \ 13 Extra Mining Lasers        250.0 Cr
+
+                        \ Offset 104: Moray, Ophidian
+
+ EQUW 250               \ 1  Missile                     25.0 Cr
+ EQUW 1500              \ 2  I.F.F. System              150.0 Cr
+ EQUW 3000              \ 3  E.C.M. System              300.0 Cr
+ EQUW 3500              \ 4  Extra Pulse Lasers         350.0 Cr
+ EQUW 7000              \ 5  Extra Beam Lasers          700.0 Cr
+ EQUW 4500              \ 6  Fuel Scoops                450.0 Cr
+ EQUW 2500              \ 7  Escape Pod                 250.0 Cr
+ EQUW 4500              \ 8  Hyperspace Unit            450.0 Cr
+ EQUW 7000              \ 9  Energy Unit                700.0 Cr
+ EQUW 7000              \ 10 Docking Computer           700.0 Cr
+ EQUW 30000             \ 11 Galactic Hyperspace       3000.0 Cr
+ EQUW 19000             \ 12 Extra Military Lasers     1900.0 Cr
+ EQUW 2500              \ 13 Extra Mining Lasers        250.0 Cr
 
                         \ --- End of replacement ------------------------------>
 
@@ -8867,7 +8938,9 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
                         \ --- And replaced by: -------------------------------->
 
- EQUB &2C               \ AJD
+ EQUB &2C               \ Skip the next instruction by turning it into
+                        \ &2C &A5 &40, or BIT &40A5, which does nothing apart
+                        \ from affect the flags
 
                         \ --- End of replacement ------------------------------>
 
@@ -12175,9 +12248,13 @@ LOAD_C% = LOAD% +P% - CODE%
 
                         \ --- Mod: Code added for Elite-A: -------------------->
 
- LDA ENGY               \ AJD
- BNE rew_notgot
- DEC new_hold           \** NOT TRAPPED FOR NO SPACE
+ LDA ENGY               \ If we already have an energy unit fitted (i.e. ENGY is
+ BNE rew_notgot         \ non-zero), jump to rew_notgot to skip the following
+                        \ instruction
+
+ DEC new_hold           \ We're about to be given a special navy energy unit,
+                        \ which doesn't take up space in the hold, so decrement
+                        \ new_hold to reclaim the space for our old energy unit
 
 .rew_notgot
 
@@ -13493,7 +13570,8 @@ LOAD_D% = LOAD% + P% - CODE%
 \       Name: TT25
 \       Type: Subroutine
 \   Category: Universe
-\    Summary: Show the Data on System screen (red key f6)
+\    Summary: Show the Data on System screen (red key f6) or Encyclopedia screen
+\             (CTRL-f6)
 \  Deep dive: Generating system data
 \             Galaxy and system seeds
 \
@@ -13510,9 +13588,14 @@ LOAD_D% = LOAD% + P% - CODE%
 
                         \ --- Mod: Code added for Elite-A: -------------------->
 
- JSR CTRL               \ AJD
- BPL not_cyclop
- JMP encyclopedia
+ JSR CTRL               \ Scan the keyboard to see if CTRL is currently pressed,
+                        \ returning a negative value in A if it is
+
+ BPL not_cyclop         \ If CTRL is not being pressed, jump to not_cyclop to
+                        \ skip the next instruction
+
+ JMP encyclopedia       \ CTRL-f6 is being pressed, so jump to encyclopedia to
+                        \ load and run the encyclopedia code
 
 .not_cyclop
 
@@ -14301,7 +14384,8 @@ LOAD_D% = LOAD% + P% - CODE%
 \       Name: TT219
 \       Type: Subroutine
 \   Category: Market
-\    Summary: Show the Buy Cargo screen (red key f1)
+\    Summary: Show the Buy Cargo screen (red key f1) or Special Cargo screen
+\             (CTRL-f1)
 \
 \ ------------------------------------------------------------------------------
 \
@@ -14320,10 +14404,15 @@ LOAD_D% = LOAD% + P% - CODE%
 
                         \ --- Mod: Code added for Elite-A: -------------------->
 
- JSR CTRL               \ AJD
- BPL buy_ctrl
- JMP cour_buy
+ JSR CTRL               \ Scan the keyboard to see if CTRL is currently pressed,
+                        \ returning a negative value in A if it is
 
+ BPL buy_ctrl           \ If CTRL is not being pressed, jump to buy_ctrl to skip
+                        \ the next instruction
+
+ JMP cour_buy           \ CTRL-f1 is being pressed, so jump to cour_buy to show
+                        \ the Special Cargo screen, returning from the
+                        \ subroutine using a tail call
 .buy_ctrl
 
                         \ --- End of added code ------------------------------->
@@ -14606,7 +14695,7 @@ LOAD_D% = LOAD% + P% - CODE%
 
  STA Q                  \ Store the key pressed in Q
 
- SEC                    \ Subtract ASCII '0' from the key pressed, to leave the
+ SEC                    \ Subtract ASCII "0" from the key pressed, to leave the
  SBC #'0'               \ numeric value of the key in A (if it was a number key)
 
  BCC OUT                \ If A < 0, jump to OUT to return from the subroutine
@@ -14686,8 +14775,8 @@ LOAD_D% = LOAD% + P% - CODE%
 \
 \       Name: sell_jump
 \       Type: Subroutine
-\   Category: Buying ships
-\    Summary: AJD
+\   Category: Equipment
+\    Summary: Show the Sell Equipment screen (CTRL-f2)
 \
 \ ******************************************************************************
 
@@ -14695,7 +14784,7 @@ LOAD_D% = LOAD% + P% - CODE%
 
 .sell_jump
 
- INC XC
+ INC XC                 \ AJD
  LDA #&CF
  JSR NLIN3
  JSR TT69
@@ -14741,7 +14830,8 @@ LOAD_D% = LOAD% + P% - CODE%
 \       Name: TT208
 \       Type: Subroutine
 \   Category: Market
-\    Summary: Show the Sell Cargo screen (red key f2)
+\    Summary: Show the Sell Cargo screen (red key f2) or Sell Equipment screen
+\             (CTRL-f2)
 \
 \ ******************************************************************************
 
@@ -14761,8 +14851,11 @@ LOAD_D% = LOAD% + P% - CODE%
 
                         \ --- Mod: Code added for Elite-A: -------------------->
 
- JSR CTRL               \ AJD
- BMI sell_jump
+ JSR CTRL               \ Scan the keyboard to see if CTRL is currently pressed,
+                        \ returning a negative value in A if it is
+
+ BMI sell_jump          \ If CTRL is being pressed, jump to sell_jump to show
+                        \ the Sell Equipment screen (CTRL-f2)
 
                         \ --- End of added code ------------------------------->
 
@@ -18053,7 +18146,7 @@ LOAD_D% = LOAD% + P% - CODE%
  JSR TT217              \ Scan the keyboard until a key is pressed, and return
                         \ the key's ASCII code in A (and X)
 
- SEC                    \ Subtract ASCII '0' from the key pressed, to leave the
+ SEC                    \ Subtract ASCII "0" from the key pressed, to leave the
  SBC #'0'               \ numeric value of the key in A (if it was a number key)
 
                         \ --- Mod: Original Acornsoft code removed: ----------->
@@ -23904,7 +23997,7 @@ ENDIF
  BNE SVEX               \ save, jumping to SVEX to exit if confirmation is not
                         \ given
 
-JSR GTNMEW              \ Call GTNMEW to fetch the name of the commander file
+ JSR GTNMEW             \ Call GTNMEW to fetch the name of the commander file
                         \ to save (including drive number and directory) into
                         \ INWK
 
@@ -29999,7 +30092,7 @@ LOAD_G% = LOAD% + P% - CODE%
 
  STX cmdr_type          \ Set the current ship type in cmdr_type to X
 
- JSR n_load             \ Call n_load to load the blueprint for the new ship
+ JSR n_load             \ Call n_load to load the details block for the new ship
                         \ type
 
  LDA new_range
@@ -30015,7 +30108,7 @@ LOAD_G% = LOAD% + P% - CODE%
 \       Name: n_load
 \       Type: Subroutine
 \   Category: Buying ships
-\    Summary: Load the blueprint for the current ship type
+\    Summary: Load the details block for the current ship type
 \
 \ ******************************************************************************
 
@@ -30144,7 +30237,7 @@ LOAD_G% = LOAD% + P% - CODE%
 \       Name: cour_buy
 \       Type: Subroutine
 \   Category: Missions
-\    Summary: AJD
+\    Summary: Show the Special Cargo screen (CTRL-f1)
 \
 \ ******************************************************************************
 
@@ -30163,10 +30256,12 @@ LOAD_G% = LOAD% + P% - CODE%
 
 .cour_start
 
- LDA #&0A
+ LDA #&0A               \ AJD
  STA XC
- LDA #&6F
- JSR DETOK
+
+ LDA #111               \ Print extended recursive token 111 ("{all caps}SPECIAL
+ JSR DETOK              \ CARGO")
+
  JSR NLIN4
 
  JSR vdu_80             \ Call vdu_80 to switch to Sentence Case
@@ -30366,7 +30461,7 @@ LOAD_G% = LOAD% + P% - CODE%
 \       Name: cour_dock
 \       Type: Subroutine
 \   Category: Missions
-\    Summary: AJD
+\    Summary: Update the current special cargo delivery mission on docking
 \
 \ ******************************************************************************
 
@@ -30379,7 +30474,7 @@ LOAD_G% = LOAD% + P% - CODE%
  BEQ cour_quit          \ will be zero, so jump to cour_quit to return from the
                         \ subroutine
 
- LDA QQ0
+ LDA QQ0                \ AJD
  CMP cmdr_courx
  BNE cour_half
  LDA QQ1
@@ -30424,7 +30519,7 @@ LOAD_G% = LOAD% + P% - CODE%
 \
 \       Name: stay_here
 \       Type: Subroutine
-\   Category: Buying ships
+\   Category: Market
 \    Summary: Pay docking fee and refresh prices AJD
 \
 \ ******************************************************************************
@@ -30437,7 +30532,9 @@ LOAD_G% = LOAD% + P% - CODE%
  LDY #&01
  JSR LCASH
  BCC stay_quit
- JSR cour_dock
+
+ JSR cour_dock          \ Update the current special cargo delivery mission
+
  JSR DORND
  STA QQ26
 
@@ -30494,7 +30591,8 @@ LOAD_G% = LOAD% + P% - CODE%
 \       Name: new_offsets
 \       Type: Variable
 \   Category: Buying ships
-\    Summary: AJD
+\    Summary: Table of offsets, measured from new_ships, for each ship's details
+\             block
 \
 \ ******************************************************************************
 
@@ -30502,14 +30600,9 @@ LOAD_G% = LOAD% + P% - CODE%
 
 .new_offsets
 
- EQUB   0,  13,  26,  39,  52,  65,  78,  91
- EQUB 104, 117, 130, 143, 156, 169, 182 \, 195
-
- \ Name
- \ Price
- \ Pulse, Beam, Military, Mining Lasers, Mounts, Missiles
- \ Shields, Energy, Speed, Hold, Range, Costs
- \ Manouvre-h, Manoevre-l \, Spare, Spare
+FOR I%, 0, 14
+  EQUB I% * 13          \ Offset of the 13-byte details block for ship I%
+NEXT
 
                         \ --- End of added section ---------------------------->
 
@@ -30639,95 +30732,376 @@ ENDIF
 
 .new_details
 
-\ new_pulse, new_beam, new_military, new_mining, new_mounts, new_missiles
-\ new_shields, new_energy, new_speed, new_hold, new_range, new_costs
-\ new_max \ new_min, new_space
+                        \ Adder
 
- EQUB &0E, &8E, &92, &19, &02, &02 \ adder
- EQUB &04, &01,  36, &09,  60, &1A
- EQUB &DF \, &21, &05, &00
+ EQUB 14                \ Pulse laser power
+ EQUB 142               \ Beam laser power
+ EQUB 146               \ Military laser power
+ EQUB 25                \ Mining laser power
+ EQUB 2                 \ Laser mounts
+ EQUB 2                 \ Maximum missile count
+ EQUB 4                 \ Shields
+ EQUB 1                 \ Maximum energy
+ EQUB 36                \ Maximum energy
+ EQUB 9                 \ Cargo hold capacity
+ EQUB 60                \ Hyperspace range
+ EQUB 2 * 13            \ Equipment prices offset
+ EQUB 223               \ Maximum roll/pitch rate
+\EQUB 33                \ Minimum roll/pitch rate
+\EQUB 5                 \ Not used (new_space)
+\EQUB 0                 \ Not used
 
- EQUB &0E, &8F, &93, &19, &04, &03 \ gecko
- EQUB &05, &01,  45, &0A,  70, &1A
- EQUB &EF \, &11, &06, &00
+                        \ Gecko
 
- EQUB &10, &8F, &96, &19, &04, &03 \ moray
- EQUB &06, &01,  38, &0C,  80, &68
- EQUB &EF \, &11, &07, &00
+ EQUB 14                \ Pulse laser power
+ EQUB 143               \ Beam laser power
+ EQUB 147               \ Military laser power
+ EQUB 25                \ Mining laser power
+ EQUB 4                 \ Laser mounts
+ EQUB 3                 \ Maximum missile count
+ EQUB 5                 \ Shields
+ EQUB 1                 \ Maximum energy
+ EQUB 45                \ Maximum speed
+ EQUB 10                \ Cargo hold capacity
+ EQUB 70                \ Hyperspace range
+ EQUB 2 * 13            \ Equipment prices offset
+ EQUB 239               \ Maximum roll/pitch rate
+\EQUB 17                \ Minimum roll/pitch rate
+\EQUB 6                 \ Not used (new_space)
+\EQUB 0                 \ Not used
 
- EQUB &0E, &8E, &94, &19, &04, &04 \ cobra 1
- EQUB &05, &01,  39, &0F,  60, &1A
- EQUB &CF \, &31, &08, &00
+                        \ Moray
 
- EQUB &0E, &8E, &94, &19, &04, &04 \ iguana
- EQUB &07, &01,  50, &16,  75, &00
- EQUB &DF \, &21, &08, &00
+ EQUB 16                \ Pulse laser power
+ EQUB 143               \ Beam laser power
+ EQUB 150               \ Military laser power
+ EQUB 25                \ Mining laser power
+ EQUB 4                 \ Laser mounts
+ EQUB 3                 \ Maximum missile count
+ EQUB 6                 \ Shields
+ EQUB 1                 \ Maximum energy
+ EQUB 38                \ Maximum speed
+ EQUB 12                \ Cargo hold capacity
+ EQUB 80                \ Hyperspace range
+ EQUB 8 * 13            \ Equipment prices offset
+ EQUB 239               \ Maximum roll/pitch rate
+\EQUB 17                \ Minimum roll/pitch rate
+\EQUB 7                 \ Not used (new_space)
+\EQUB 0                 \ Not used
 
- EQUB &0D, &8D, &90, &0C, &01, &03 \ ophidian
- EQUB &04, &01,  51, &19,  70, &68
- EQUB &FF \, &01, &06, &00
+                        \ Cobra Mk I
 
- EQUB &10, &8F, &97, &32, &02, &04 \ chameleon
- EQUB &08, &01,  43, &24,  80, &68
- EQUB &DF \, &21, &05, &00
+ EQUB 14                \ Pulse laser power
+ EQUB 142               \ Beam laser power
+ EQUB 148               \ Military laser power
+ EQUB 25                \ Mining laser power
+ EQUB 4                 \ Laser mounts
+ EQUB 4                 \ Maximum missile count
+ EQUB 5                 \ Shields
+ EQUB 1                 \ Maximum energy
+ EQUB 39                \ Maximum speed
+ EQUB 15                \ Cargo hold capacity
+ EQUB 60                \ Hyperspace range
+ EQUB 2 * 13            \ Equipment prices offset
+ EQUB 207               \ Maximum roll/pitch rate
+\EQUB 49                \ Minimum roll/pitch rate
+\EQUB 8                 \ Not used (new_space)
+\EQUB 0                 \ Not used
 
- EQUB &12, &8F, &98, &32, &04, &05 \ cobra 3
- EQUB &07, &01,  42, &2B,  70, &00
- EQUB &EF \, &11, &0A, &00
+                        \ Iguana
+
+ EQUB 14                \ Pulse laser power
+ EQUB 142               \ Beam laser power
+ EQUB 148               \ Military laser power
+ EQUB 25                \ Mining laser power
+ EQUB 4                 \ Laser mounts
+ EQUB 4                 \ Maximum missile count
+ EQUB 7                 \ Shields
+ EQUB 1                 \ Maximum energy
+ EQUB 50                \ Maximum speed
+ EQUB 22                \ Cargo hold capacity
+ EQUB 75                \ Hyperspace range
+ EQUB 0 * 13            \ Equipment prices offset
+ EQUB 223               \ Maximum roll/pitch rate
+\EQUB 33                \ Minimum roll/pitch rate
+\EQUB 8                 \ Not used (new_space)
+\EQUB 0                 \ Not used
+
+                        \ Ophidian
+
+ EQUB 13                \ Pulse laser power
+ EQUB 141               \ Beam laser power
+ EQUB 144               \ Military laser power
+ EQUB 12                \ Mining laser power
+ EQUB 1                 \ Laser mounts
+ EQUB 3                 \ Maximum missile count
+ EQUB 4                 \ Shields
+ EQUB 1                 \ Maximum energy
+ EQUB 51                \ Maximum speed
+ EQUB 25                \ Cargo hold capacity
+ EQUB 70                \ Hyperspace range
+ EQUB 8 * 13            \ Equipment prices offset
+ EQUB 255               \ Maximum roll/pitch rate
+\EQUB 1                 \ Minimum roll/pitch rate
+\EQUB 6                 \ Not used (new_space)
+\EQUB 0                 \ Not used
+
+                        \ Chameleon
+
+ EQUB 16                \ Pulse laser power
+ EQUB 143               \ Beam laser power
+ EQUB 151               \ Military laser power
+ EQUB 50                \ Mining laser power
+ EQUB 2                 \ Laser mounts
+ EQUB 4                 \ Maximum missile count
+ EQUB 8                 \ Shields
+ EQUB 1                 \ Maximum energy
+ EQUB 43                \ Maximum speed
+ EQUB 36                \ Cargo hold capacity
+ EQUB 80                \ Hyperspace range
+ EQUB 8 * 13            \ Equipment prices offset
+ EQUB 223               \ Maximum roll/pitch rate
+\EQUB 33                \ Minimum roll/pitch rate
+\EQUB 5                 \ Not used (new_space)
+\EQUB 0                 \ Not used
+
+                        \ Cobra Mk III
+
+ EQUB 18                \ Pulse laser power
+ EQUB 143               \ Beam laser power
+ EQUB 152               \ Military laser power
+ EQUB 50                \ Mining laser power
+ EQUB 4                 \ Laser mounts
+ EQUB 5                 \ Maximum missile count
+ EQUB 7                 \ Shields
+ EQUB 1                 \ Maximum energy
+ EQUB 42                \ Maximum speed
+ EQUB 43                \ Cargo hold capacity
+ EQUB 70                \ Hyperspace range
+ EQUB 0 * 13            \ Equipment prices offset
+ EQUB 239               \ Maximum roll/pitch rate
+\EQUB 17                \ Minimum roll/pitch rate
+\EQUB 10                \ Not used (new_space)
+\EQUB 0                 \ Not used
 
 IF _SOURCE_DISC
 
- EQUB &11, &90, &99, &32, &04, &04 \ ghavial
- EQUB &09, &01,  37, &38,  80, &00
- EQUB &CF \, &31, &09, &00
+                        \ Ghavial
 
- EQUB &12, &92, &9C, &32, &04, &04 \ fer-de-lance
- EQUB &08, &02,  45, &0A,  85, &34
- EQUB &DF \, &21, &09, &00
+ EQUB 17                \ Pulse laser power
+ EQUB 144               \ Beam laser power
+ EQUB 153               \ Military laser power
+ EQUB 50                \ Mining laser power
+ EQUB 4                 \ Laser mounts
+ EQUB 4                 \ Maximum missile count
+ EQUB 9                 \ Shields
+ EQUB 1                 \ Maximum energy
+ EQUB 37                \ Maximum speed
+ EQUB 56                \ Cargo hold capacity
+ EQUB 80                \ Hyperspace range
+ EQUB 0 * 13            \ Equipment prices offset
+ EQUB 207               \ Maximum roll/pitch rate
+\EQUB 49                \ Minimum roll/pitch rate
+\EQUB 9                 \ Not used (new_space)
+\EQUB 0                 \ Not used
+
+                        \ Fer-de-lance
+
+ EQUB 18                \ Pulse laser power
+ EQUB 146               \ Beam laser power
+ EQUB 156               \ Military laser power
+ EQUB 50                \ Mining laser power
+ EQUB 4                 \ Laser mounts
+ EQUB 4                 \ Maximum missile count
+ EQUB 8                 \ Shields
+ EQUB 2                 \ Maximum energy
+ EQUB 45                \ Maximum speed
+ EQUB 10                \ Cargo hold capacity
+ EQUB 85                \ Hyperspace range
+ EQUB 4 * 13            \ Equipment prices offset
+ EQUB 223               \ Maximum roll/pitch rate
+\EQUB 33                \ Minimum roll/pitch rate
+\EQUB 9                 \ Not used (new_space)
+\EQUB 0                 \ Not used
 
 ELIF _RELEASED
 
- EQUB &12, &92, &9C, &32, &04, &04 \ fer-de-lance
- EQUB &08, &02,  45, &0A,  85, &34
- EQUB &DF \, &21, &09, &00
+                        \ Fer-de-lance
 
- EQUB &11, &90, &99, &32, &04, &04 \ ghavial
- EQUB &09, &01,  37, &38,  80, &00
- EQUB &CF \, &31, &09, &00
+ EQUB 18                \ Pulse laser power
+ EQUB 146               \ Beam laser power
+ EQUB 156               \ Military laser power
+ EQUB 50                \ Mining laser power
+ EQUB 4                 \ Laser mounts
+ EQUB 4                 \ Maximum missile count
+ EQUB 8                 \ Shields
+ EQUB 2                 \ Maximum energy
+ EQUB 45                \ Maximum speed
+ EQUB 10                \ Cargo hold capacity
+ EQUB 85                \ Hyperspace range
+ EQUB 4 * 13            \ Equipment prices offset
+ EQUB 223               \ Maximum roll/pitch rate
+\EQUB 33                \ Minimum roll/pitch rate
+\EQUB 9                 \ Not used (new_space)
+\EQUB 0                 \ Not used
+
+                        \ Ghavial
+
+ EQUB 17                \ Pulse laser power
+ EQUB 144               \ Beam laser power
+ EQUB 153               \ Military laser power
+ EQUB 50                \ Mining laser power
+ EQUB 4                 \ Laser mounts
+ EQUB 4                 \ Maximum missile count
+ EQUB 9                 \ Shields
+ EQUB 1                 \ Maximum energy
+ EQUB 37                \ Maximum speed
+ EQUB 56                \ Cargo hold capacity
+ EQUB 80                \ Hyperspace range
+ EQUB 0 * 13            \ Equipment prices offset
+ EQUB 207               \ Maximum roll/pitch rate
+\EQUB 49                \ Minimum roll/pitch rate
+\EQUB 9                 \ Not used (new_space)
+\EQUB 0                 \ Not used
 
 ENDIF
 
- EQUB &18, &93, &9C, &32, &04, &09 \ monitor
- EQUB &0A, &01,  24, &52, 110, &4E
- EQUB &BF \, &41, &0C, &00
+                        \ Monitor
 
- EQUB &18, &92, &9B, &32, &04, &05 \ python
- EQUB &0B, &01,  30, &6B,  80, &1A
- EQUB &AF \, &51, &09, &00
+ EQUB 24                \ Pulse laser power
+ EQUB 147               \ Beam laser power
+ EQUB 156               \ Military laser power
+ EQUB 50                \ Mining laser power
+ EQUB 4                 \ Laser mounts
+ EQUB 9                 \ Maximum missile count
+ EQUB 10                \ Shields
+ EQUB 1                 \ Maximum energy
+ EQUB 24                \ Maximum speed
+ EQUB 82                \ Cargo hold capacity
+ EQUB 110               \ Hyperspace range
+ EQUB 6 * 13            \ Equipment prices offset
+ EQUB 191               \ Maximum roll/pitch rate
+\EQUB 65                \ Minimum roll/pitch rate
+\EQUB 12                \ Not used (new_space)
+\EQUB 0                 \ Not used
 
- EQUB &14, &8E, &98, &32, &02, &07 \ boa
- EQUB &0A, &01,  36, &85,  90, &00
- EQUB &BF \, &41, &0A, &00
+                        \ Python
+
+ EQUB 24                \ Pulse laser power
+ EQUB 146               \ Beam laser power
+ EQUB 155               \ Military laser power
+ EQUB 50                \ Mining laser power
+ EQUB 4                 \ Laser mounts
+ EQUB 5                 \ Maximum missile count
+ EQUB 11                \ Shields
+ EQUB 1                 \ Maximum energy
+ EQUB 30                \ Maximum speed
+ EQUB 107               \ Cargo hold capacity
+ EQUB 80                \ Hyperspace range
+ EQUB 2 * 13            \ Equipment prices offset
+ EQUB 175               \ Maximum roll/pitch rate
+\EQUB 81                \ Minimum roll/pitch rate
+\EQUB 9                 \ Not used (new_space)
+\EQUB 0                 \ Not used
+
+                        \ Boa
+
+ EQUB 20                \ Pulse laser power
+ EQUB 142               \ Beam laser power
+ EQUB 152               \ Military laser power
+ EQUB 50                \ Mining laser power
+ EQUB 2                 \ Laser mounts
+ EQUB 7                 \ Maximum missile count
+ EQUB 10                \ Shields
+ EQUB 1                 \ Maximum energy
+ EQUB 36                \ Maximum speed
+ EQUB 133               \ Cargo hold capacity
+ EQUB 90                \ Hyperspace range
+ EQUB 0 * 13            \ Equipment prices offset
+ EQUB 191               \ Maximum roll/pitch rate
+\EQUB 65                \ Minimum roll/pitch rate
+\EQUB 10                \ Not used (new_space)
+\EQUB 0                 \ Not used
 
 IF _SOURCE_DISC
 
- EQUB &1C, &90, &7F, &32, &04, &11 \ anaconda
- EQUB &0D, &01,  21, &FE, 100, &4E
- EQUB &AF \, &51, &0C, &00
+                        \ Anaconda
 
- EQUB &10, &91, &9F, &0C, &01, &02 \ asp 2
- EQUB &0A, &01,  60, &07, 125, &34
- EQUB &DF \, &21, &07, &00
+ EQUB 28                \ Pulse laser power
+ EQUB 144               \ Beam laser power
+ EQUB 127               \ Military laser power
+ EQUB 50                \ Mining laser power
+ EQUB 4                 \ Laser mounts
+ EQUB 17                \ Maximum missile count
+ EQUB 13                \ Shields
+ EQUB 1                 \ Maximum energy
+ EQUB 21                \ Maximum speed
+ EQUB 254               \ Cargo hold capacity
+ EQUB 100               \ Hyperspace range
+ EQUB 6 * 13            \ Equipment prices offset
+ EQUB 175               \ Maximum roll/pitch rate
+\EQUB 81                \ Minimum roll/pitch rate
+\EQUB 12                \ Not used (new_space)
+\EQUB 0                 \ Not used
+
+                        \ Asp Mk II
+
+ EQUB 16                \ Pulse laser power
+ EQUB 145               \ Beam laser power
+ EQUB 159               \ Military laser power
+ EQUB 12                \ Mining laser power
+ EQUB 1                 \ Laser mounts
+ EQUB 2                 \ Maximum missile count
+ EQUB 10                \ Shields
+ EQUB 1                 \ Maximum energy
+ EQUB 60                \ Maximum speed
+ EQUB 7                 \ Cargo hold capacity
+ EQUB 125               \ Hyperspace range
+ EQUB 4 * 13            \ Equipment prices offset
+ EQUB 223               \ Maximum roll/pitch rate
+\EQUB 33                \ Minimum roll/pitch rate
+\EQUB 7                 \ Not used (new_space)
+\EQUB 0                 \ Not used
 
 ELIF _RELEASED
 
- EQUB &10, &91, &9F, &0C, &01, &02 \ asp 2
- EQUB &0A, &01,  60, &07, 125, &34
- EQUB &DF \, &21, &07, &00
+                        \ Asp Mk II
 
- EQUB &1C, &90, &7F, &32, &04, &11 \ anaconda
- EQUB &0D, &01,  21, &FE, 100, &4E
- EQUB &AF \, &51, &0C, &00
+ EQUB 16                \ Pulse laser power
+ EQUB 145               \ Beam laser power
+ EQUB 159               \ Military laser power
+ EQUB 12                \ Mining laser power
+ EQUB 1                 \ Laser mounts
+ EQUB 2                 \ Maximum missile count
+ EQUB 10                \ Shields
+ EQUB 1                 \ Maximum energy
+ EQUB 60                \ Maximum speed
+ EQUB 7                 \ Cargo hold capacity
+ EQUB 125               \ Hyperspace range
+ EQUB 4 * 13            \ Equipment prices offset
+ EQUB 223               \ Maximum roll/pitch rate
+\EQUB 33                \ Minimum roll/pitch rate
+\EQUB 7                 \ Not used (new_space)
+\EQUB 0                 \ Not used
+
+                        \ Anaconda
+
+ EQUB 28                \ Pulse laser power
+ EQUB 144               \ Beam laser power
+ EQUB 127               \ Military laser power
+ EQUB 50                \ Mining laser power
+ EQUB 4                 \ Laser mounts
+ EQUB 17                \ Maximum missile count
+ EQUB 13                \ Shields
+ EQUB 1                 \ Maximum energy
+ EQUB 21                \ Maximum speed
+ EQUB 254               \ Cargo hold capacity
+ EQUB 100               \ Hyperspace range
+ EQUB 6 * 13            \ Equipment prices offset
+ EQUB 175               \ Maximum roll/pitch rate
+\EQUB 81                \ Minimum roll/pitch rate
+\EQUB 12                \ Not used (new_space)
+\EQUB 0                 \ Not used
 
 ENDIF
 
