@@ -30701,7 +30701,7 @@ LOAD_G% = LOAD% + P% - CODE%
 \       Name: stay_here
 \       Type: Subroutine
 \   Category: Market
-\    Summary: Pay docking fee and refresh prices AJD
+\    Summary: Pay a docking fee and refresh the system's market prices
 \
 \ ******************************************************************************
 
@@ -30709,63 +30709,138 @@ LOAD_G% = LOAD% + P% - CODE%
 
 .stay_here
 
- LDX #&F4
- LDY #&01
- JSR LCASH
- BCC stay_quit
+ LDX #&F4               \ It costs 50.0 Cr to refresh the station's market
+ LDY #&01               \ prices, which is represented as a value of 500, so
+                        \ this sets (Y X) = &1F4 = 500
+
+ JSR LCASH              \ Subtract (Y X) cash from the cash pot, but only if
+                        \ we have enough cash
+
+ BCC stay_quit          \ If the C flag is clear then we did not have enough
+                        \ cash for the transaction, so jump to stay_quit to
+                        \ return from the subroutine without refreshing the
+                        \ market prices
 
  JSR cour_dock          \ Update the current special cargo delivery mission
 
- JSR DORND
- STA QQ26
+                        \ --- End of added section ---------------------------->
 
- LDX #&00
- STX XX4
+\ ******************************************************************************
+\
+\       Name: GVL
+\       Type: Subroutine
+\   Category: Universe
+\    Summary: Calculate the availability of market items
+\  Deep dive: Market item prices and availability
+\             Galaxy and system seeds
+\
+\ ------------------------------------------------------------------------------
+\
+\ Calculate the availability for each market item and store it in AVL. This is
+\ called on arrival in a new system.
+\
+\ Other entry points:
+\
+\   hyR                 Contains an RTS
+\
+\   stay_quit           Go to the docking bay (i.e. show the Status Mode
+\                       screen)
+\
+\ ******************************************************************************
 
-.d_31d8
+.GVL
 
- LDA QQ23+1,X
- STA QQ19+1
- JSR var
- LDA QQ23+3,X
- AND QQ26
- CLC
- ADC QQ23+2,X
- LDY QQ19+1
- BMI d_31f4
- SEC
- SBC QQ19+3
- JMP d_31f7
+ JSR DORND              \ Set A and X to random numbers
 
-.d_31f4
+ STA QQ26               \ Set QQ26 to the random byte that's used in the market
+                        \ calculations
 
- CLC
- ADC QQ19+3
+ LDX #0                 \ We are now going to loop through the market item
+ STX XX4                \ availability table in AVL, so set a counter in XX4
+                        \ (and X) for the market item number, starting with 0
 
-.d_31f7
+.hy9
 
- BPL d_31fb
- LDA #&00
+ LDA QQ23+1,X           \ Fetch byte #1 from the market prices table (units and
+ STA QQ19+1             \ economic_factor) for item number X and store it in
+                        \ QQ19+1
 
-.d_31fb
+ JSR var                \ Call var to set QQ19+3 = economy * |economic_factor|
+                        \ (and set the availability of alien items to 0)
 
- LDY XX4
- AND #&3F
- STA AVL,Y
- INY
+ LDA QQ23+3,X           \ Fetch byte #3 from the market prices table (mask) and
+ AND QQ26               \ AND with the random number for this system visit
+                        \ to give:
+                        \
+                        \   A = random AND mask
+
+ CLC                    \ Add byte #2 from the market prices table
+ ADC QQ23+2,X           \ (base_quantity) so we now have:
+                        \
+                        \   A = base_quantity + (random AND mask)
+
+ LDY QQ19+1             \ Fetch the byte #1 that we stored above and jump to
+ BMI TT157              \ TT157 if it is negative (i.e. if the economic_factor
+                        \ is negative)
+
+ SEC                    \ Set A = A - QQ19+3
+ SBC QQ19+3             \
+                        \       = base_quantity + (random AND mask)
+                        \         - (economy * |economic_factor|)
+                        \
+                        \ which is the result we want, as the economic_factor
+                        \ is positive
+
+ JMP TT158              \ Jump to TT158 to skip TT157
+
+.TT157
+
+ CLC                    \ Set A = A + QQ19+3
+ ADC QQ19+3             \
+                        \       = base_quantity + (random AND mask)
+                        \         + (economy * |economic_factor|)
+                        \
+                        \ which is the result we want, as the economic_factor
+                        \ is negative
+
+.TT158
+
+ BPL TT159              \ If A < 0, then set A = 0, so we don't have negative
+ LDA #0                 \ availability
+
+.TT159
+
+ LDY XX4                \ Fetch the counter (the market item number) into Y
+
+ AND #%00111111         \ Take bits 0-5 of A, i.e. A mod 64, and store this as
+ STA AVL,Y              \ this item's availability in the Y=th byte of AVL, so
+                        \ each item has a maximum availability of 63t
+
+ INY                    \ Increment the counter into XX44, Y and A
  TYA
  STA XX4
- ASL A
- ASL A
- TAX
- CMP #&3F
- BCC d_31d8
+
+ ASL A                  \ Set X = counter * 4, so that X points to the next
+ ASL A                  \ item's entry in the four-byte market prices table,
+ TAX                    \ ready for the next loop
+
+ CMP #63                \ If A < 63, jump back up to hy9 to set the availability
+ BCC hy9                \ for the next market item
+
+                        \ --- Mod: Original Acornsoft code removed: ----------->
+
+\.hyR
+\
+\ RTS                   \ Return from the subroutine
+
+                        \ --- And replaced by: -------------------------------->
 
 .stay_quit
 
- JMP BAY
+ JMP BAY                \ Go to the docking bay (i.e. show the Status Mode
+                        \ screen)
 
-                        \ --- End of added section ---------------------------->
+                        \ --- End of replacement ------------------------------>
 
 \ ******************************************************************************
 \
