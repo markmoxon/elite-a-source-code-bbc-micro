@@ -1808,7 +1808,8 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
                         \ current ship type
                         \
                         \ When we buy a new ship, this is set to the relevant
-                        \ value from the new_details table
+                        \ value from the ship's flight characteristics table
+                        \ at new_details
 
 .new_beam
 
@@ -1816,7 +1817,8 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
                         \ current ship type
                         \
                         \ When we buy a new ship, this is set to the relevant
-                        \ value from the new_details table
+                        \ value from the ship's flight characteristics table
+                        \ at new_details
 
 .new_military
 
@@ -1824,7 +1826,8 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
                         \ current ship type
                         \
                         \ When we buy a new ship, this is set to the relevant
-                        \ value from the new_details table
+                        \ value from the ship's flight characteristics table
+                        \ at new_details
 
 .new_mining
 
@@ -1832,7 +1835,8 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
                         \ current ship type
                         \
                         \ When we buy a new ship, this is set to the relevant
-                        \ value from the new_details table
+                        \ value from the ship's flight characteristics table
+                        \ at new_details
 
 .new_mounts
 
@@ -1843,7 +1847,8 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
                         \   * 4 = Front, rear, left and right
                         \
                         \ When we buy a new ship, this is set to the relevant
-                        \ value from the new_details table
+                        \ value from the ship's flight characteristics table
+                        \ at new_details
 
 .new_missiles
 
@@ -1851,7 +1856,8 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
                         \ our current ship
                         \
                         \ When we buy a new ship, this is set to the relevant
-                        \ value from the new_details table
+                        \ value from the ship's flight characteristics table
+                        \ at new_details
 
 .new_shields
 
@@ -1866,7 +1872,8 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
                         \ absorb the amount of damage given in new_shields)
                         \
                         \ When we buy a new ship, this is set to the relevant
-                        \ value from the new_details table
+                        \ value from the ship's flight characteristics table
+                        \ at new_details
 
 .new_energy
 
@@ -1874,14 +1881,16 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
                         \ fitted with an energy unit
                         \
                         \ When we buy a new ship, this is set to the relevant
-                        \ value from the new_details table
+                        \ value from the ship's flight characteristics table
+                        \ at new_details
 
 .new_speed
 
  SKIP 1                 \ Our current ship's maximum speed
                         \
                         \ When we buy a new ship, this is set to the relevant
-                        \ value from the new_details table
+                        \ value from the ship's flight characteristics table
+                        \ at new_details
 
 .new_hold
 
@@ -1895,7 +1904,8 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
                         \ and cargo
                         \
                         \ When we buy a new ship, this is set to the relevant
-                        \ value from the new_details table
+                        \ value from the ship's flight characteristics table
+                        \ at new_details
 
 .new_range
 
@@ -1907,7 +1917,8 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
                         \ years, while 70 represents 7.0 light years
                         \
                         \ When we buy a new ship, this is set to the relevant
-                        \ value from the new_details table
+                        \ value from the ship's flight characteristics table
+                        \ at new_details
 
 .new_costs
 
@@ -1919,14 +1930,16 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
                         \ our current ship is held here
                         \
                         \ When we buy a new ship, this is set to the relevant
-                        \ value from the new_details table
+                        \ value from the ship's flight characteristics table
+                        \ at new_details
 
 .new_max
 
  SKIP 1                 \ Our current ship's maximum pitch/roll rate
                         \
                         \ When we buy a new ship, this is set to the relevant
-                        \ value from the new_details table
+                        \ value from the ship's flight characteristics table
+                        \ at new_details
 
 .new_min
 

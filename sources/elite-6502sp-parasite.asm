@@ -1811,7 +1811,8 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
                         \ current ship type
                         \
                         \ When we buy a new ship, this is set to the relevant
-                        \ value from the new_details table
+                        \ value from the ship's flight characteristics table
+                        \ at new_details
 
 .new_beam
 
@@ -1819,7 +1820,8 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
                         \ current ship type
                         \
                         \ When we buy a new ship, this is set to the relevant
-                        \ value from the new_details table
+                        \ value from the ship's flight characteristics table
+                        \ at new_details
 
 .new_military
 
@@ -1827,7 +1829,8 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
                         \ current ship type
                         \
                         \ When we buy a new ship, this is set to the relevant
-                        \ value from the new_details table
+                        \ value from the ship's flight characteristics table
+                        \ at new_details
 
 .new_mining
 
@@ -1835,7 +1838,8 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
                         \ current ship type
                         \
                         \ When we buy a new ship, this is set to the relevant
-                        \ value from the new_details table
+                        \ value from the ship's flight characteristics table
+                        \ at new_details
 
 .new_mounts
 
@@ -1846,7 +1850,8 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
                         \   * 4 = Front, rear, left and right
                         \
                         \ When we buy a new ship, this is set to the relevant
-                        \ value from the new_details table
+                        \ value from the ship's flight characteristics table
+                        \ at new_details
 
 .new_missiles
 
@@ -1854,7 +1859,8 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
                         \ our current ship
                         \
                         \ When we buy a new ship, this is set to the relevant
-                        \ value from the new_details table
+                        \ value from the ship's flight characteristics table
+                        \ at new_details
 
 .new_shields
 
@@ -1869,7 +1875,8 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
                         \ absorb the amount of damage given in new_shields)
                         \
                         \ When we buy a new ship, this is set to the relevant
-                        \ value from the new_details table
+                        \ value from the ship's flight characteristics table
+                        \ at new_details
 
 .new_energy
 
@@ -1877,14 +1884,16 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
                         \ fitted with an energy unit
                         \
                         \ When we buy a new ship, this is set to the relevant
-                        \ value from the new_details table
+                        \ value from the ship's flight characteristics table
+                        \ at new_details
 
 .new_speed
 
  SKIP 1                 \ Our current ship's maximum speed
                         \
                         \ When we buy a new ship, this is set to the relevant
-                        \ value from the new_details table
+                        \ value from the ship's flight characteristics table
+                        \ at new_details
 
 .new_hold
 
@@ -1898,7 +1907,8 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
                         \ and cargo
                         \
                         \ When we buy a new ship, this is set to the relevant
-                        \ value from the new_details table
+                        \ value from the ship's flight characteristics table
+                        \ at new_details
 
 .new_range
 
@@ -1910,7 +1920,8 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
                         \ years, while 70 represents 7.0 light years
                         \
                         \ When we buy a new ship, this is set to the relevant
-                        \ value from the new_details table
+                        \ value from the ship's flight characteristics table
+                        \ at new_details
 
 .new_costs
 
@@ -1922,14 +1933,16 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
                         \ our current ship is held here
                         \
                         \ When we buy a new ship, this is set to the relevant
-                        \ value from the new_details table
+                        \ value from the ship's flight characteristics table
+                        \ at new_details
 
 .new_max
 
  SKIP 1                 \ Our current ship's maximum pitch/roll rate
                         \
                         \ When we buy a new ship, this is set to the relevant
-                        \ value from the new_details table
+                        \ value from the ship's flight characteristics table
+                        \ at new_details
 
 .new_min
 
@@ -10732,21 +10745,33 @@ LOAD_D% = LOAD% + P% - CODE%
 
 .sell_jump
 
- INC XC                 \ AJD
- LDA #&CF
- JSR NLIN3
- JSR TT69
- JSR TT67
- JSR sell_equip
- LDA ESCP
- BEQ sell_escape
- LDA #112
- LDX #30
- JSR status_equip
+ INC XC                 \ Move the text cursor down one line
+
+ LDA #207               \ Print recursive token 47 ("EQUIP") and draw a
+ JSR NLIN3              \ horizontal line at pixel row 19 to box in the title
+
+ JSR TT69               \ Call TT69 to set Sentence Case and print a newline
+
+ JSR TT67               \ Print a newline
+
+ JSR sell_equip         \ Call sell_equip to show the Sell Equipment screen,
+                        \ which will run through all the equipment apart from
+                        \ the escape pod
+
+ LDA ESCP               \ If we do not have an escape pod fitted, in which case
+ BEQ sell_escape        \ ESCP will be 0, jump to sell_escape
+
+ LDA #112               \ We do have an E.C.M. fitted, so print recursive token
+ LDX #30                \ 112 ("ESCAPE POD"), and as this is the Sell Equipment
+ JSR status_equip       \ screen, show and process a sell prompt for the piece of
+                        \ equipment at LASER+X = LASER+30 = ESCP before printing
+                        \ a newline
 
 .sell_escape
 
- JMP BAY
+ JMP BAY                \ Go to the docking bay (i.e. show the Status Mode
+                        \ screen) and return from the subroutine with a tail
+                        \ call
 
 \ ******************************************************************************
 \
@@ -22768,113 +22793,221 @@ LOAD_G% = LOAD% + P% - CODE%
 \       Name: n_load
 \       Type: Subroutine
 \   Category: Buying ships
-\    Summary: Load the details block for the current ship type
+\    Summary: Load the name and flight characteristics for the current ship type
 \
 \ ******************************************************************************
 
 .n_load
 
- LDY cmdr_type          \ AJD
- LDX new_offsets,Y
- LDY #0
+ LDY cmdr_type          \ Set Y to the type of our current ship, which is stored
+                        \ in new_type
+
+ LDX new_offsets,Y      \ Set X to the offset, measured from new_ships, for this
+                        \ ship's details block, so X now points to the offset of
+                        \ the first character of the ship's type in the
+                        \ new_ships table, as well as the first byte of flight
+                        \ characteristics data in new_details
+
+ LDY #0                 \ We now want to do two things:
+                        \
+                        \   * Update extended text token 132 in the QQ18 table
+                        \     with the name of the ship type, so that printing
+                        \     token 132 always shows the current ship type
+                        \
+                        \   * Copy the flight characteristics of the specified
+                        \     ship type from the new_details table to our
+                        \     current ship data block, which is stored between
+                        \     new_pulse and new_max
+                        \
+                        \ We can do these two at the same time in one loop, so
+                        \ set a counter in Y to count through the above
 
 .n_lname
 
- CPY #9
- BCS n_linfo
- LDA new_ships,X
- EOR #&23
- STA new_name,Y
+ CPY #9                 \ If Y >= 9, jump to n_linfo to skip copying the name,
+ BCS n_linfo            \ as the ship type contains a maximum of 9 characters or
+                        \ tokens, and there are more than 9 bytes of flight
+                        \ characteristics data
+
+ LDA new_ships,X        \ Set A to the character/token we want to fetch from
+                        \ the new_ships table
+
+ EOR #35                \ Tokens in the new_ships table are stored as token
+                        \ numbers that are not EOR'd with 35, but the extended
+                        \ text token table at QQ18 expects all tokens to be
+                        \ obfuscated, so we add the obfuscation here
+
+ STA new_name,Y         \ Store the obfuscated character/token into extended
+                        \ text token 132 at the Y-th character of new_name
 
 .n_linfo
 
- LDA new_details,X
- STA new_pulse,Y
- INX
- INY
- CPY #13
- BNE n_lname
- LDA new_max
- EOR #&FE
- STA new_min
- LDY #&0B
+                        \ We now want to copy the flight characteristics data
+                        \ for this ship type
+
+ LDA new_details,X      \ Set A to the flight characteristic byte we want to
+                        \ fetch from the new_details table
+
+ STA new_pulse,Y        \ And store it in the Y-th byte of the new_pulse block
+                        \ to set our current ship accordingly
+
+ INX                    \ Increment the offset so we can fetch the next
+                        \ character (for the name) and the next byte (for the
+                        \ flight characteristics)
+
+ INY                    \ Increment the loop counter
+
+ CPY #13                \ If Y < 13 then we still have data to copy, so loop
+ BNE n_lname            \ back to n_lname until we have copied 9 characters from
+                        \ the name and 13 bytes of flight characteristics
+
+ LDA new_max            \ Set the minimum roll/pitch rate in new_min to 255 -
+ EOR #%11111110         \ the maximum roll/pitch rate, which we can achieve
+ STA new_min            \ by EOR'ing with %11111110
+
+ LDY #11                \ We now work our way through the equipment that takes
+                        \ up space in the hold, and reduce the amount of free
+                        \ space for each item on the list that is fitted. The
+                        \ items that take up space are defined in the count_offs
+                        \ table, so set a counter in Y so we can work our way
+                        \ through the table, checking each of the items in turn
 
 .count_lasers
 
- LDX count_offs,Y
- LDA LASER,X
- BEQ count_sys
- DEC new_hold
+ LDX count_offs,Y       \ Set X to the Y-th entry in the count_offs table, which
+                        \ contains offsets from LASER for each of the equipment
+                        \ items that take up space in the hold
+
+ LDA LASER,X            \ Check whether we have this item fitted, by testing
+ BEQ count_sys          \ whether LASER+X is zero, and if it is, then this item
+                        \ is not fitted, so skip the following instruction
+
+ DEC new_hold           \ The item at offset X is fitted, so decrement the free
+                        \ space in new_hold
 
 .count_sys
 
- DEY
- BPL count_lasers
- RTS
+ DEY                    \ Decrement the loop counter in Y
+
+ BPL count_lasers       \ Loop back to process the next item of equipment until
+                        \ we have checked them all and reduced the free space
+                        \ accordingly
+
+ RTS                    \ Return from the subroutine
 
 \ ******************************************************************************
 \
 \       Name: count_offs
 \       Type: Variable
 \   Category: Buying ships
-\    Summary: AJD
+\    Summary: Offsets from LASER for equipment that takes up space in the hold
 \
 \ ******************************************************************************
 
 .count_offs
 
- EQUB &00, &01, &02, &03, &06, &18, &19, &1A, &1B, &1C, &1D, &1E
+ EQUB 0                 \ LASER+0 = Front laser
+ EQUB 1                 \ LASER+1 = Rear laser
+ EQUB 2                 \ LASER+2 = Left laser
+ EQUB 3                 \ LASER+3 = Right laser
+ EQUB 6                 \ LASER+6 = CRGO = I.F.F. system
+ EQUB 24                \ LASER+24 = ECM = E.C.M. system
+ EQUB 25                \ LASER+25 = BST = Fuel scoops
+ EQUB 26                \ LASER+26 = BOMB = Hyperspace unit
+ EQUB 27                \ LASER+27 = ENGY = Energy unit
+ EQUB 28                \ LASER+28 = DKCMP = Docking computer
+ EQUB 29                \ LASER+29 = GHYP = Galactic hyperdrive
+ EQUB 30                \ LASER+30 = ESCP = Escape pod
 
 \ ******************************************************************************
 \
 \       Name: n_name
 \       Type: Subroutine
-\   Category: Buying ships
-\    Summary: AJD
+\   Category: Text
+\    Summary: Print the type of a given ship
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   Y                   The ship type number, in the range 0 to 14, as defined
+\                       in the new_ships table
 \
 \ ******************************************************************************
 
 .n_name
 
- \ name ship in 0 <= Y <= &C
- LDX new_offsets,Y
- LDA #9
- STA K+1
+ LDX new_offsets,Y      \ Set X to the offset, measured from new_ships, for this
+                        \ ship's details block, so X now points to the offset of
+                        \ the first character of the ship's type in the
+                        \ new_ships table
+
+ LDA #9                 \ Each ship type consists of exactly 9 characters
+ STA K+1                \ (including spaces), so set K+1 = 9 as a character
+                        \ counter in the following loop
 
 .n_lprint
 
- LDA new_ships,X
- STX K
- JSR TT27
- LDX K
- INX
- DEC K+1
- BNE n_lprint
- RTS
+ LDA new_ships,X        \ Set A to the character we want to print from the
+                        \ new_ships table
+
+ STX K                  \ Store the offset in K so we can retrieve it after the
+                        \ call to TT27
+
+ JSR TT27               \ Call TT27 to print the text token in A
+
+ LDX K                  \ Restore the offset from K back into X
+
+ INX                    \ Increment X to point to the next character
+
+ DEC K+1                \ Decrement the character counter in K+1
+
+ BNE n_lprint           \ Loop back to print the next character until we have
+                        \ printed all 9 of them
+
+ RTS                    \ Return from the subroutine
 
 \ ******************************************************************************
 \
 \       Name: n_price
 \       Type: Subroutine
 \   Category: Buying ships
-\    Summary: AJD
+\    Summary: Set K(3 2 1 0) to the price of a given ship
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   Y                   The ship type number, in the range 0 to 14, as defined
+\                       in the new_ships table
 \
 \ ******************************************************************************
 
 .n_price
 
- \ put price 0 <= Y <= &C into 40-43
- LDX new_offsets,Y
- LDY #3
+ LDX new_offsets,Y      \ Set X to the offset, measured from new_price, for this
+                        \ ship's details block, so X now points to the offset of
+                        \ the ship's price in the new_ships table
+
+ LDY #3                 \ Each ship price consists of exactly four bytes (as it
+                        \ is a 32-bit number), so set Y = 3 to act as a byte
+                        \ counter in the following loop
 
 .n_lprice
 
- LDA new_price,X
- STA K,Y
- INX
- DEY
- BPL n_lprice
- RTS
+ LDA new_price,X        \ Set A to X-th byte of the ship's price from the
+                        \ new_ships table
+
+ STA K,Y                \ Store it in the X-th byte of K(3 2 1 0)
+
+ INX                    \ Increment X to point to the next price byte
+
+ DEY                    \ Decrement the byte counter
+
+ BPL n_lprice           \ Loop back to copy the next byte until we have copied
+                        \ all 4 of them
+
+ RTS                    \ Return from the subroutine
 
 \ ******************************************************************************
 \
@@ -23282,8 +23415,25 @@ LOAD_G% = LOAD% + P% - CODE%
 \       Name: new_offsets
 \       Type: Variable
 \   Category: Buying ships
-\    Summary: Table of offsets, measured from new_ships, for each ship's details
-\             block
+\    Summary: Table of offsets for each ship type
+\
+\ ------------------------------------------------------------------------------
+\
+\ There are 13 bytes in of flight characteristics for each ship type in the
+\ new_details table.
+\
+\ There are also 13 bytes of name and price data for each ship type in the
+\ new_ships table (9 characters in the name plus 4 bytes in the 32-bit price).
+\
+\ As a result, the offset in this table at position X can be used for any of the
+\ following:
+\
+\   * An offset into the new_details to fetch the flight characteristics for
+\     ship type X
+\
+\   * An offset into the new_ships table to fetch the type name of ship type X
+\
+\   * An offset into the new_price table to fetch the price of ship type X
 \
 \ ******************************************************************************
 
@@ -23298,106 +23448,118 @@ NEXT
 \       Name: new_ships
 \       Type: Variable
 \   Category: Buying ships
-\    Summary: AJD
+\    Summary: Ship names and prices for the different ship types we can buy
 \
 \ ******************************************************************************
 
 .new_ships
 
- EQUS "ADDER    "
+IF _SOURCE_DISC
+
+ EQUS "ADDER    "       \ #0 = Adder         = 27,000.0 Cr
 
 .new_price
 
-IF _SOURCE_DISC
-
  EQUD 270000
 
- EQUS "GECKO    "
+ EQUS "GECKO    "       \ #1 = Gecko         = 32,500.0 Cr
  EQUD 325000
 
- EQUS "MORAY    "
+ EQUS "MORAY    "       \ #2 = Moray         = 36,000.0 Cr
  EQUD 360000
 
- EQUS "COBRA MK1"
+ EQUS "COBRA MK1"       \ #3 = Cobra Mk I    = 39,500.0 Cr
  EQUD 395000
 
- EQUS "IGUANA   "
+ EQUS "IGUANA   "       \ #4 = Iguana        = 64,000.0 Cr
  EQUD 640000
 
- EQUS "OPHIDIAN "
+ EQUS "OPHIDIAN "       \ #5 = Ophidian      = 64,500.0 Cr
  EQUD 645000
 
- EQUS "CHAMELEON"
+ EQUS "CHAMELEON"       \ #6 = Chameleon     = 97,500.0 Cr
  EQUD 975000
 
- EQUS "COBRA MK3"
+ EQUS "COBRA MK3"       \ #7 = Cobra Mk III  = 100,000.0 Cr
  EQUD 1000000
 
- EQUS "GHAVIAL  "
+ EQUS "GHAVIAL  "       \ #8 = Ghavial       = 136,500.0 Cr
  EQUD 1365000
 
- EQUS "F", &90, "-DE-L", &9B, &85
+ EQUS "F"               \ #9 = Fer-de-Lance  = 143,500.0 Cr
+ EQUB 144               \
+ EQUS "-DE-L"           \ 144 = Two-letter token 'ER'
+ EQUB 155               \ 155 = Two-letter token 'AN'
+ EQUB 133               \ 133 = Two-letter token 'CE'
  EQUD 1435000
 
- EQUS "MONITOR  "
+ EQUS "MONITOR  "       \ #10 = Monitor      = 175,000.0 Cr
  EQUD 1750000
 
- EQUS "PYTHON   "
+ EQUS "PYTHON   "       \ #11 = Python       = 205,000.0 Cr
  EQUD 2050000
 
- EQUS "BOA      "
+ EQUS "BOA      "       \ #12 = Boa          = 240,000.0 Cr
  EQUD 2400000
 
- EQUS "ANACONDA "
+ EQUS "ANACONDA "       \ #13 = Anaconda     = 400,000.0 Cr
  EQUD 4000000
 
- EQUS "ASP MK2  "
+ EQUS "ASP MK2  "       \ #14 = Asp Mk II    = 895,000.0 Cr
  EQUD 8950000
 
 ELIF _RELEASED
 
+ EQUS "ADDER    "       \ #0 = Adder         = 31,000.0 Cr
+
+.new_price
+
  EQUD 310000
 
- EQUS "GECKO    "
+ EQUS "GECKO    "       \ #1 = Gecko         = 40,000.0 Cr
  EQUD 400000
 
- EQUS "MORAY    "
+ EQUS "MORAY    "       \ #2 = Moray         = 56,500.0 Cr
  EQUD 565000
 
- EQUS "COBRA MK1"
+ EQUS "COBRA MK1"       \ #3 = Cobra Mk I    = 75,000.0 Cr
  EQUD 750000
 
- EQUS "IGUANA   "
+ EQUS "IGUANA   "       \ #4 = Iguana        = 131,500.0 Cr
  EQUD 1315000
 
- EQUS "OPHIDIAN "
+ EQUS "OPHIDIAN "       \ #5 = Ophidian      = 147,000.0 Cr
  EQUD 1470000
 
- EQUS "CHAMELEON"
+ EQUS "CHAMELEON"       \ #6 = Chameleon     = 225,000.0 Cr
  EQUD 2250000
 
- EQUS "COBRA MK3"
+ EQUS "COBRA MK3"       \ #7 = Cobra Mk III  = 287,000.0 Cr
  EQUD 2870000
 
- EQUS "F", &90, "-DE-L", &9B, &85
+ EQUS "F"               \ #8 = Fer-de-Lance  = 359,500.0 Cr
+ EQUB 144               \
+ EQUS "-DE-L"           \ 144 = Two-letter token 'ER'
+ EQUB 155               \ 155 = Two-letter token 'AN'
+ EQUB 133               \ 133 = Two-letter token 'CE'
  EQUD 3595000
 
- EQUS "GHAVIAL  "
+ EQUS "GHAVIAL  "       \ #9 = Ghavial       = 379,500.0 Cr
  EQUD 3795000
 
- EQUS "MONITOR  "
+ EQUS "MONITOR  "       \ #10 = Monitor      = 585,500.0 Cr
  EQUD 5855000
 
- EQUS "PYTHON   "
+ EQUS "PYTHON   "       \ #11 = Python       = 762,000.0 Cr
  EQUD 7620000
 
- EQUS "BOA      "
+ EQUS "BOA      "       \ #12 = Boa          = 960,000.0 Cr
  EQUD 9600000
 
- EQUS "ASP MK2  "
+ EQUS "ASP MK2  "       \ #13 = Asp Mk II    = 1012,000.0 Cr
  EQUD 10120000
 
- EQUS "ANACONDA "
+ EQUS "ANACONDA "       \ #14 = Anaconda     = 1869,500.0 Cr
  EQUD 18695000
 
 ENDIF
@@ -23407,7 +23569,7 @@ ENDIF
 \       Name: new_details
 \       Type: Variable
 \   Category: Buying ships
-\    Summary: AJD
+\    Summary: The flight characteristics for each of the different ship types
 \
 \ ******************************************************************************
 
