@@ -1781,21 +1781,33 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
 
  SKIP 1                 \ The power level of pulse lasers when fitted to our
                         \ current ship type
+                        \
+                        \ When we buy a new ship, this is set to the relevant
+                        \ value from the new_details table
 
 .new_beam
 
  SKIP 1                 \ The power level of beam lasers when fitted to our
                         \ current ship type
+                        \
+                        \ When we buy a new ship, this is set to the relevant
+                        \ value from the new_details table
 
 .new_military
 
  SKIP 1                 \ The power level of military lasers when fitted to our
                         \ current ship type
+                        \
+                        \ When we buy a new ship, this is set to the relevant
+                        \ value from the new_details table
 
 .new_mining
 
  SKIP 1                 \ The power level of mining lasers when fitted to our
                         \ current ship type
+                        \
+                        \ When we buy a new ship, this is set to the relevant
+                        \ value from the new_details table
 
 .new_mounts
 
@@ -1804,11 +1816,17 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
                         \   * 1 = Front only
                         \   * 2 = Front and rear
                         \   * 4 = Front, rear, left and right
+                        \
+                        \ When we buy a new ship, this is set to the relevant
+                        \ value from the new_details table
 
 .new_missiles
 
  SKIP 1                 \ The maximum number of missiles that can be fitted to
                         \ our current ship
+                        \
+                        \ When we buy a new ship, this is set to the relevant
+                        \ value from the new_details table
 
 .new_shields
 
@@ -1821,15 +1839,24 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
                         \ then the damage level is reduced by the shield level
                         \ before being applied to the ship (i.e. the shields
                         \ absorb the amount of damage given in new_shields)
+                        \
+                        \ When we buy a new ship, this is set to the relevant
+                        \ value from the new_details table
 
 .new_energy
 
  SKIP 1                 \ Our current ship's ship energy refresh rate when
                         \ fitted with an energy unit
+                        \
+                        \ When we buy a new ship, this is set to the relevant
+                        \ value from the new_details table
 
 .new_speed
 
  SKIP 1                 \ Our current ship's maximum speed
+                        \
+                        \ When we buy a new ship, this is set to the relevant
+                        \ value from the new_details table
 
 .new_hold
 
@@ -1841,6 +1868,9 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
                         \
                         \ In Elite-A, hold space is taken up by both equipment
                         \ and cargo
+                        \
+                        \ When we buy a new ship, this is set to the relevant
+                        \ value from the new_details table
 
 .new_range
 
@@ -1850,6 +1880,9 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
                         \ The range is stored as the number of light years
                         \ multiplied by 10, so QQ14 = 1 represents 0.1 light
                         \ years, while 70 represents 7.0 light years
+                        \
+                        \ When we buy a new ship, this is set to the relevant
+                        \ value from the new_details table
 
 .new_costs
 
@@ -1859,19 +1892,34 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
                         \ prices) has multiple sections, for the different types
                         \ of ship we can buy, and the offset into this table for
                         \ our current ship is held here
+                        \
+                        \ When we buy a new ship, this is set to the relevant
+                        \ value from the new_details table
 
 .new_max
 
  SKIP 1                 \ Our current ship's maximum pitch/roll rate
+                        \
+                        \ When we buy a new ship, this is set to the relevant
+                        \ value from the new_details table
 
 .new_min
 
  SKIP 1                 \ Our current ship's minimum pitch/roll rate
+                        \
+                        \ This is always equal to 255 - new_max, so when we buy
+                        \ a new ship, the correct value is calculated rather
+                        \ than being fetched from the new_details table (there
+                        \ are default values for this in the new_details table,
+                        \ though these are commented out)
 
 .new_space
 
- SKIP 1                 \ This byte appears to be unused, though it does have a
-                        \ label in the original source
+ SKIP 1                 \ This byte appears to be unused
+                        \
+                        \ It does have a label in the original source, and there
+                        \ are default values for it in the new_details table,
+                        \ though these are commented out
 
                         \ --- End of added code ------------------------------->
 
