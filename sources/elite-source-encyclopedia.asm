@@ -1364,10 +1364,10 @@ ORG &0300
 
 .cmdr_cour
 
- SKIP 2                 \ The mission counter for the current special cargo
+ SKIP 2                 \ The mission timer for the current special cargo
                         \ delivery destination
                         \
-                        \ While doing a special cargo delivery, this counter is
+                        \ While doing a special cargo delivery, this timer is
                         \ halved on every visit to a station (and again if we
                         \ choose to pay a docking fee), and if it runs down to
                         \ zero, the mission is lost
@@ -1529,8 +1529,19 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
 
 .QQ28
 
- SKIP 1                 \ Temporary storage, used to store the economy byte of
-                        \ the current system in routine var
+ SKIP 1                 \ The current system's economy (0-7)
+                        \
+                        \   * 0 = Rich Industrial
+                        \   * 1 = Average Industrial
+                        \   * 2 = Poor Industrial
+                        \   * 3 = Mainly Industrial
+                        \   * 4 = Mainly Agricultural
+                        \   * 5 = Rich Agricultural
+                        \   * 6 = Average Agricultural
+                        \   * 7 = Poor Agricultural
+                        \
+                        \ See the deep dive on "Generating system data" for more
+                        \ information on economies
 
 .QQ29
 
@@ -1572,6 +1583,15 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
 .QQ3
 
  SKIP 1                 \ The selected system's economy (0-7)
+                        \
+                        \   * 0 = Rich Industrial
+                        \   * 1 = Average Industrial
+                        \   * 2 = Poor Industrial
+                        \   * 3 = Mainly Industrial
+                        \   * 4 = Mainly Agricultural
+                        \   * 5 = Rich Agricultural
+                        \   * 6 = Average Agricultural
+                        \   * 7 = Poor Agricultural
                         \
                         \ See the deep dive on "Generating system data" for more
                         \ information on economies
@@ -10819,11 +10839,11 @@ LOAD_E% = LOAD% + P% - CODE%
 
  BPL pc1                \ Loop back for the next byte to copy
 
- LDA #9                 \ We want to print the cash using up to 9 digits
+ LDA #9                 \ We want to print the cash amount using up to 9 digits
  STA U                  \ (including the decimal point), so store this in U
                         \ for BRPNT to take as an argument
 
- SEC                    \ We want to print the fuel level with a decimal point,
+ SEC                    \ We want to print the cash amount with a decimal point,
                         \ so set the C flag for BRPNT to take as an argument
 
  JSR BPRNT              \ Print the amount of cash to 9 digits with a decimal
@@ -13775,7 +13795,7 @@ LOAD_F% = LOAD% + P% - CODE%
                         \ ee2 to continue
 
  LDA cmdr_cour          \ If there is no special cargo delivery mission in
- ORA cmdr_cour+1        \ progress, then the mission counter in cmdr_cour(1 0)
+ ORA cmdr_cour+1        \ progress, then the mission timer in cmdr_cour(1 0)
  BEQ ee2                \ will be zero, so skip to ee2 to continue
 
  JSR TT103              \ Draw small crosshairs at coordinates (QQ9, QQ10),

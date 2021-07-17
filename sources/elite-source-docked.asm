@@ -1403,10 +1403,10 @@ ORG &0300
 
 .cmdr_cour
 
- SKIP 2                 \ The mission counter for the current special cargo
+ SKIP 2                 \ The mission timer for the current special cargo
                         \ delivery destination
                         \
-                        \ While doing a special cargo delivery, this counter is
+                        \ While doing a special cargo delivery, this timer is
                         \ halved on every visit to a station (and again if we
                         \ choose to pay a docking fee), and if it runs down to
                         \ zero, the mission is lost
@@ -1568,8 +1568,19 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
 
 .QQ28
 
- SKIP 1                 \ Temporary storage, used to store the economy byte of
-                        \ the current system in routine var
+ SKIP 1                 \ The current system's economy (0-7)
+                        \
+                        \   * 0 = Rich Industrial
+                        \   * 1 = Average Industrial
+                        \   * 2 = Poor Industrial
+                        \   * 3 = Mainly Industrial
+                        \   * 4 = Mainly Agricultural
+                        \   * 5 = Rich Agricultural
+                        \   * 6 = Average Agricultural
+                        \   * 7 = Poor Agricultural
+                        \
+                        \ See the deep dive on "Generating system data" for more
+                        \ information on economies
 
 .QQ29
 
@@ -1611,6 +1622,15 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
 .QQ3
 
  SKIP 1                 \ The selected system's economy (0-7)
+                        \
+                        \   * 0 = Rich Industrial
+                        \   * 1 = Average Industrial
+                        \   * 2 = Poor Industrial
+                        \   * 3 = Mainly Industrial
+                        \   * 4 = Mainly Agricultural
+                        \   * 5 = Rich Agricultural
+                        \   * 6 = Average Agricultural
+                        \   * 7 = Poor Agricultural
                         \
                         \ See the deep dive on "Generating system data" for more
                         \ information on economies
@@ -18700,11 +18720,11 @@ LOAD_E% = LOAD% + P% - CODE%
 
  BPL pc1                \ Loop back for the next byte to copy
 
- LDA #9                 \ We want to print the cash using up to 9 digits
+ LDA #9                 \ We want to print the cash amount using up to 9 digits
  STA U                  \ (including the decimal point), so store this in U
                         \ for BRPNT to take as an argument
 
- SEC                    \ We want to print the fuel level with a decimal point,
+ SEC                    \ We want to print the cash amount with a decimal point,
                         \ so set the C flag for BRPNT to take as an argument
 
  JSR BPRNT              \ Print the amount of cash to 9 digits with a decimal
@@ -22529,7 +22549,7 @@ LOAD_F% = LOAD% + P% - CODE%
                         \ ee2 to continue
 
  LDA cmdr_cour          \ If there is no special cargo delivery mission in
- ORA cmdr_cour+1        \ progress, then the mission counter in cmdr_cour(1 0)
+ ORA cmdr_cour+1        \ progress, then the mission timer in cmdr_cour(1 0)
  BEQ ee2                \ will be zero, so skip to ee2 to continue
 
  JSR TT103              \ Draw small crosshairs at coordinates (QQ9, QQ10),
@@ -30055,7 +30075,18 @@ LOAD_G% = LOAD% + P% - CODE%
 \       Name: n_buyship
 \       Type: Subroutine
 \   Category: Buying ships
-\    Summary: AJD
+\    Summary: Show the Buy Ship screen (CTRL-f3)
+\
+\ ------------------------------------------------------------------------------
+\
+\ Other entry points:
+\
+\   cash_query          Print "CASH?", make a short, high beep, delay for 1
+\                       second and go to the docking bay (i.e. show the Status
+\                       Mode screen)
+\
+\   jmp_start3          Make a short, high beep, and delay for 1 second and go
+\                       to the docking bay (i.e. show the Status Mode screen)
 \
 \ ******************************************************************************
 
@@ -30063,116 +30094,226 @@ LOAD_G% = LOAD% + P% - CODE%
 
 .n_buyship
 
- LDX #&00
- SEC
- LDA #&0F   \LDA #&0D
- SBC QQ28
- SBC QQ28   \++
- STA QQ25
+ LDX #0                 \ Set a counter in X so we can work our way through the
+                        \ available ships, starting with X = 0, and working our
+                        \ way through the types in the new_ships table (where
+                        \ the ships are in order of increasing price)
+ 
+ SEC                    \ Set QQ25 = 15 - 2 * QQ28
+ LDA #15                \
+ SBC QQ28               \ QQ25 contains the number of ship types that we offer
+ SBC QQ28               \ for sale, so the number is smaller in less advanced
+ STA QQ25               \ economies, and ranges from 15 ship types for rich
+                        \ industrial economies, down to 1 for poor agricultural
+                        \ economies
 
 .n_bloop
 
- STX XX13
- JSR TT67
- LDX XX13
- INX
- CLC
- JSR pr2
- JSR TT162
- LDY XX13
+ STX XX13               \ Store the loop counter X in XX13 so we can retrieve it
+                        \ after the call to TT67, and throughout the following
+
+ JSR TT67               \ Print a newline
+
+ LDX XX13               \ Set X = XX13 + 1, so X contains 1 for the first ship
+ INX                    \ type, 2 for the second ship type, and so on
+
+ CLC                    \ Clear the C flag so the call to pr2 doesn't show a
+                        \ decimal point
+
+ JSR pr2                \ Call pr2 to print the number in X to a width of 3
+                        \ 3 figures, so this prints the item number at the start
+                        \ of the menu item, starting with item 1 at the top
+
+ JSR TT162              \ Print a space
+
+ LDY XX13               \ Print the name of the ship type given in XX13
  JSR n_name
- LDY XX13
+
+ LDY XX13               \ Set K(3 2 1 0) to the price of the ship given in XX13
  JSR n_price
- LDA #&16
+
+ LDA #22                \ Move the text cursor to column 22
  STA XC
- LDA #&09
- STA U
- SEC
- JSR BPRNT
- LDX XX13
- INX
- CPX QQ25
- BCC n_bloop
- JSR CLYNS
- LDA #&B9
- JSR prq
- JSR gnum
- BEQ jmp_start3
- BCS jmp_start3
- SBC #&00
- CMP QQ25
- BCS jmp_start3
- LDX #&02
+
+ LDA #9                 \ We want to print the ship price using up to 9 digits
+ STA U                  \ (including the decimal point), so store this in U
+                        \ for BRPNT to take as an argument
+
+ SEC                    \ We want to print the price with a decimal point,
+                        \ so set the C flag for BRPNT to take as an argument
+
+ JSR BPRNT              \ Print the amount of cash to 9 digits with a decimal
+                        \ point
+
+ LDX XX13               \ Fetch the loop counter from XX13
+ 
+ INX                    \ Increment the loop counter
+
+ CPX QQ25               \ Loop back to n_bloop until we have shown the first
+ BCC n_bloop            \ QQ25 ship types (ordered by price)
+
+ JSR CLYNS              \ Clear the bottom three text rows of the upper screen,
+                        \ and move the text cursor to column 1 on row 21, i.e.
+                        \ the start of the top row of the three bottom rows
+
+ LDA #185               \ Print recursive token 25 ("SHIP") followed by a
+ JSR prq                \ question mark
+
+ JSR gnum               \ Call gnum to get a number from the keyboard, which
+                        \ will be the menu item number of the ship we want to
+                        \ buy, returning the number entered in A and R, and
+                        \ setting the C flag if the number is bigger than the
+                        \ highest menu item number in QQ25
+
+ BEQ jmp_start3         \ If no number was entered, jump to jmp_start3 to make a
+                        \ beep and show the cargo bay
+
+ BCS jmp_start3         \ If the number entered was too big, jump to jmp_start3
+                        \ to make a beep and show the cargo bay
+
+ SBC #0                 \ Set A = A - 1 (as we know the C flag is clear)
+
+ CMP QQ25               \ If A >= QQ25 then the number entered is bigger than
+ BCS jmp_start3         \ the number of entries in the menu, so jump to
+                        \ jmp_start3 to make a beep and show the cargo bay
+
+ LDX #2                 \ Move the text cursor to column 2
  STX XC
- INC YC
- STA Q
- LDY cmdr_type
- JSR n_price
- CLC
- LDX #3
+
+ INC YC                 \ Move the text cursor down one line
+
+ STA Q                  \ Set INWK to the number of the ship type we want to buy
+
+ LDY cmdr_type          \ Set K(0 1 2 3) to the price of our current ship, whose
+ JSR n_price            \ type is in new_type
+
+                        \ We now want to do the following 32-bit addition:
+                        \
+                        \   XX16(0 1 2 3) = CASH(0 1 2 3) + K(0 1 2 3)
+                        \
+                        \ so XX16 contains the cash pot after we get a refund
+                        \ for the price of our existing ship
+
+ CLC                    \ Clear the C flag for the addition below
+
+ LDX #3                 \ Set a counter in X to loop through the four bytes in
+                        \ the addition
 
 .n_addl
 
- LDA CASH,X
- ADC K,X
+ LDA CASH,X             \ Add the X-th bytes of CASH and K and store the result
+ ADC K,X                \ in the X-th byte of XX16
  STA XX16,X
- DEX
- BPL n_addl
- LDY Q
- JSR n_price
- SEC
- LDX #3
+
+ DEX                    \ Decrement the loop counter
+
+ BPL n_addl             \ Loop back until we have added all four bytes
+
+ LDY Q                  \ Fetch the number of the ship type that we want to buy
+                        \ into Y
+
+ JSR n_price            \ Set K(0 1 2 3) to the price of the ship we want to buy
+
+                        \ We now want to do the following 32-bit subtraction:
+                        \
+                        \   K(0 1 2 3) = XX16(0 1 2 3) - K(0 1 2 3)
+                        \
+                        \ so K(0 1 2 3) contains the cash we have left after we
+                        \ buy our new ship
+
+ SEC                    \ Set the C flag for the subtraction below
+
+ LDX #3                 \ Set a counter in X to loop through the four bytes in
+                        \ the subtraction
 
 .n_subl
 
- LDA XX16,X
- SBC K,X
+ LDA XX16,X             \ Subtract the X-th byte of K from the X-th byte of XX16
+ SBC K,X                \ and store the result in the X-th byte of K
  STA K,X
- DEX
- BPL n_subl
- LDA Q
- BCS n_buy
+
+ DEX                    \ Decrement the loop counter
+
+ BPL n_subl             \ Loop back until we have subtracted all four bytes
+
+ LDA Q                  \ Fetch the number of the ship type that we just bought
+                        \ into A
+
+ BCS n_buy              \ If the subtraction didn't underflow, then we have
+                        \ enough cash after the refund to buy the ship, so jump
+                        \ to n_buy to skip the following
 
 .cash_query
 
- LDA #&C5
- JSR prq
+ LDA #197               \ We don't have enough cash to buy this ship, so print
+ JSR prq                \ recursive token 37 ("CASH") followed by a question
+                        \ mark
 
 .jmp_start3
 
- JSR dn2
- JMP BAY
+ JSR dn2                \ Call dn2 to make a short, high beep and delay for 1
+                        \ second
+
+ JMP BAY                \ Jump to BAY to go to the docking bay (i.e. show the
+                        \ Status Mode screen)
 
 .n_buy
 
- TAX
- LDY #3
+ TAX                    \ Store the number of the ship type that we just bought
+                        \ in X
+
+ LDY #3                 \ As the transaction has gone through, we now update our
+                        \ cash levels in CASH(0 1 2 3) to the amount we have
+                        \ left after buying our new ship, which is in K(0 1 2 3)
 
 .n_cpyl
 
- LDA K,Y
- STA CASH,Y
- DEY
- BPL n_cpyl
- LDA #&00
- LDY #&24
+ LDA K,Y                \ Copy the Y-th byte of K(0 1 2 3) to the Y-th byte of
+ STA CASH,Y             \ CASH(0 1 2 3)
+
+ DEY                    \ Decrement the loop counter
+
+ BPL n_cpyl             \ Loop back until we have copied all four bytes
+
+                        \ Next we want to reset the current ship's equipment, so
+                        \ we start with nothing and don't carry anything over
+                        \ from our previous ship, and we also want to reset
+                        \ any special cargo missions, as well as our legal
+                        \ status (so buying a new ship is a good way to get the
+                        \ law off our backs)
+
+ LDA #0                 \ Set A = 0 so we can use it to zero the settings
+
+ LDY #36                \ We want to zero everything from LASER (the start of
+                        \ our current ship's equipment table) to LASER+36 (our
+                        \ legal status in FIST), so set Y as an index, starting
+                        \ at 36
 
 .n_wipe
 
- STA LASER,Y
- DEY
- BPL n_wipe
+ STA LASER,Y            \ Zero the Y-th byte of the block starting with LASER
 
- STX cmdr_type          \ Set the current ship type in cmdr_type to X
+ DEY                    \ Decrement the index
 
- JSR n_load             \ Call n_load to load the details block for the new ship
-                        \ type
+ BPL n_wipe             \ Loop back until we have zeroed from LASER+36 down to
+                        \ LASER+0
 
- LDA new_range
- STA QQ14
- JSR msblob
+ STX cmdr_type          \ Store the type of ship we just bought in cmdr_type, to
+                        \ set our current ship type to our new purchase
 
- JMP BAY
+ JSR n_load             \ Call n_load to load the flight characteristics and set
+                        \ the name token for our new ship
+
+ LDA new_range          \ Set our fuel level in QQ14 to the hyperspace range of
+ STA QQ14               \ of our new ship, so our new ship comes with a full
+                        \ tank
+
+ JSR msblob             \ Reset the dashboard's missile indicators so they show
+                        \ the correct number of missiles fitted to our new ship
+                        \ (which will be zero)
+
+ JMP BAY                \ Jump to BAY to go to the docking bay (i.e. show the
+                        \ Status Mode screen)
 
                         \ --- End of added section ---------------------------->
 
@@ -30372,9 +30513,14 @@ LOAD_G% = LOAD% + P% - CODE%
 \       Name: n_price
 \       Type: Subroutine
 \   Category: Buying ships
-\    Summary: Set K(3 2 1 0) to the price of a given ship
+\    Summary: Set K(0 1 2 3) to the price of a given ship
 \
 \ ------------------------------------------------------------------------------
+\
+\ This routine fetches the ship price from the new_price table, where prices are
+\ stored in the standard little-endian manner of 6502 assembly (i.e. using an
+\ EQUD), and copies it in to K(0 1 2 3), which is a big-endian number like the
+\ CASH variable.
 \
 \ Arguments:
 \
@@ -30400,7 +30546,7 @@ LOAD_G% = LOAD% + P% - CODE%
  LDA new_price,X        \ Set A to X-th byte of the ship's price from the
                         \ new_ships table
 
- STA K,Y                \ Store it in the X-th byte of K(3 2 1 0)
+ STA K,Y                \ Store it in the X-th byte of K(0 1 2 3)
 
  INX                    \ Increment X to point to the next price byte
 
@@ -30427,7 +30573,7 @@ LOAD_G% = LOAD% + P% - CODE%
 .cour_buy
 
  LDA cmdr_cour          \ If there is no special cargo delivery mission in
- ORA cmdr_cour+1        \ progress, then the mission counter in cmdr_cour(1 0)
+ ORA cmdr_cour+1        \ progress, then the mission timer in cmdr_cour(1 0)
  BEQ cour_start         \ will be zero, so jump to cour_start to skip the next
                         \ instruction
 
@@ -30437,203 +30583,461 @@ LOAD_G% = LOAD% + P% - CODE%
 
 .cour_start
 
- LDA #&0A               \ AJD
+ LDA #10                \ Move the text cursor to column 10
  STA XC
 
  LDA #111               \ Print extended recursive token 111 ("{all caps}SPECIAL
  JSR DETOK              \ CARGO")
 
- JSR NLIN4
+ JSR NLIN4              \ Draw a horizontal line at pixel row 19 to box in the
+                        \ title
 
  JSR vdu_80             \ Call vdu_80 to switch to Sentence Case
 
- LDA QQ26
- EOR QQ0
- EOR QQ1
- EOR FIST
- EOR TALLY
- STA INWK
- SEC
- LDA FIST
- ADC GCNT
- ADC cmdr_type
- STA INWK+1
- ADC INWK
- SBC cmdr_courx
- SBC cmdr_coury
- AND #&0F
- STA QQ25
- BEQ cour_pres
- LDA #&00
- STA INWK+3
- STA INWK+6
- JSR TT81
+ LDA QQ26               \ Set INWK = the random market seed for this system in
+ EOR QQ0                \ QQ26, EOR'd with the current system's galactic
+ EOR QQ1                \ x-coordinate in QQ0, the current system's galactic
+ EOR FIST               \ y-coordinate in QQ1, our legal status in FIST, and
+ EOR TALLY              \ the low byte of our combat rank, which should give us
+ STA INWK               \ a pretty random number that will stay the same until
+                        \ we leave the station
+                        \
+                        \ We use this to determine the number of systems to skip
+                        \ when generating the first delivery mission in the menu
+
+ SEC                    \ Set INWK+1 = 1 + our legal status in FIST + the
+ LDA FIST               \ current galaxy number in GCNT + the type of our
+ ADC GCNT               \ current ship in cmdr_type, which again will give us
+ ADC cmdr_type          \ a random number that will stay the same until we
+ STA INWK+1             \ leave the station, as well as randomising the C flag
+                        \
+                        \ We use this to determine the number of systems to skip
+                        \ when generating subsequent delivery missions in the
+                        \ menu
+
+ ADC INWK               \ Set QQ25 = INWK+1 + INWK + C - cmdr_courx - cmdr_coury
+ SBC cmdr_courx         \
+ SBC cmdr_coury         \ where (cmdr_courx, cmdr_coury) are the coordinates of
+ AND #15                \ the previous special cargo delivery destination (which
+ STA QQ25               \ will be (0, 0) if this is the first) and reduce the
+                        \ result to be in the range 0 to 15
+                        \
+                        \ We use this to determine the maximum number of
+                        \ delivery missions in the menu
+
+ BEQ cour_pres          \ If the value of QQ25 = 0, jump to cour_pres to make a
+                        \ beep and show the cargo bay (as QQ25 contains the
+                        \ number of missions in the menu, so if it's zero we
+                        \ have nothing more to do)
+
+ LDA #0                 \ Set INWK+3 = 0 to act as a counter of the number of
+ STA INWK+3             \ delivery missions we have displayed in the menu so far
+
+ STA INWK+6             \ Set INWK+6 = 0 to act as a system counter that runs
+                        \ from 0 to 255 as we work our way through all the
+                        \ systems in the galaxy
+
+ JSR TT81               \ Set the seeds in QQ15 to those of system 0 in the
+                        \ current galaxy (i.e. copy the seeds from QQ21 to QQ15)
+
+                        \ We now iterate around the cour_loop loop, working our
+                        \ way through systems in the galaxy and picking suitable
+                        \ destinations for display in the Special Cargo menu. We
+                        \ use the following counters as we go:
+                        \
+                        \   * QQ25 contains the maximum number of delivery
+                        \     missions to display in the menu
+                        \
+                        \   * INWK is the number of systems we skip past for the
+                        \     very first menu item, when generating destinations
+                        \     in cour_count
+                        \
+                        \   * INWK+1 is the number of systems we skip past for
+                        \     subsequent menu items, when generating
+                        \     destinations in cour_count
+                        \
+                        \   * INWK+3 counts the number of delivery missions we
+                        \     have already displayed in the menu, starting at 0
+                        \
+                        \   * INWK+6 contains the system number we are currently
+                        \     considering, starting at 0 and working through to
+                        \     255, at which point we are done (even if we
+                        \     haven't managed to find QQ25 delivery missions)
 
 .cour_loop
 
- LDA INWK+3
- CMP QQ25
- BCC cour_count
+ LDA INWK+3             \ If INWK+3 < QQ25 then jump to cour_count to add
+ CMP QQ25               \ another destination to the menu, as we have not yet
+ BCC cour_count         \ shown QQ25 delivery missions in the menu
 
 .cour_menu
 
- JSR CLYNS
- LDA #&CE
- JSR prq
- JSR gnum
- BEQ cour_pres
- BCS cour_pres
- TAX
- DEX
- CPX INWK+3
- BCS cour_pres
- LDA #&02
+                        \ If we get here then we have either got QQ25 items in
+                        \ the menu, or we have worked our way through the whole
+                        \ galaxy, so in either case we want to display the menu
+                        \ of destinations
+
+ JSR CLYNS              \ Clear the bottom three text rows of the upper screen,
+                        \ and move the text cursor to column 1 on row 21, i.e.
+                        \ the start of the top row of the three bottom rows
+
+ LDA #206               \ Print recursive token 206 (" CR") followed by a
+ JSR prq                \ question mark
+
+ JSR gnum               \ Call gnum to get a number from the keyboard, which
+                        \ will be the menu item number of the mission we want to
+                        \ take, returning the number entered in A and R, and
+                        \ setting the C flag if the number is bigger than the
+                        \ highest menu item number in QQ25
+
+ BEQ cour_pres          \ If no number was entered, jump to cour_pres to make a
+                        \ beep and show the cargo bay
+
+ BCS cour_pres          \ If the number entered was too big, jump to cour_pres
+                        \ to make a beep and show the cargo bay
+
+ TAX                    \ Set X = A - 1, so X is now 0 if we picked the first
+ DEX                    \ destination, 1 if we picked the second, and so on
+
+ CPX INWK+3             \ If X >= INWK+3 then the number entered is bigger than
+ BCS cour_pres          \ the number of entries in the menu, so jump to
+                        \ cour_pres to make a beep and show the cargo bay
+
+ LDA #2                 \ Move the text cursor to column 2
  STA XC
- INC YC
- STX INWK
- LDY &0C50,X
- LDA &0C40,X
+
+ INC YC                 \ Move the text cursor down one line
+
+ STX INWK               \ Set INWK to the number of the chosen mission
+
+ LDY &0C50,X            \ Set (Y X) to the cost of this mission in 
+ LDA &0C40,X            \ (&0C50+X &0C40+X)
  TAX
- JSR LCASH
- BCS cour_cash
- JMP cash_query
+
+ JSR LCASH              \ Subtract (Y X) cash from the cash pot, but only if
+                        \ we have enough cash
+
+ BCS cour_cash          \ If the transaction was successful, we have just bought
+                        \ ourselves a delivery mission, so jump to cour_cash
+
+ JMP cash_query         \ Otherwise we didn't have enough cash, so jump to
+                        \ cash_query to print "CASH?", make a short, high beep,
+                        \ delay for 1 second and go to the docking bay (i.e.
+                        \ show the Status Mode screen)
 
 .cour_cash
 
- LDX INWK
- LDA &0C00,X
- STA cmdr_courx
- LDA &0C10,X
- STA cmdr_coury
- CLC
- LDA &0C20,X
- ADC FIST
- STA FIST
- LDA &0C30,X
- STA cmdr_cour+1
+                        \ We have now taken on the delivery mission, so we need
+                        \ to set variables that govern the mission progress,
+                        \ i.e. the destination and the mission timer
+
+ LDX INWK               \ Set X to the number of the chosen mission which we
+                        \ stored in INWK above
+
+ LDA &0C00,X            \ Set cmdr_courx to the galactic x-coordinate of the
+ STA cmdr_courx         \ destination of the chosen mission, which we stored in
+                        \ &0C00+X when setting up the menu
+
+ LDA &0C10,X            \ Set cmdr_coury to the galactic y-coordinate of the
+ STA cmdr_coury         \ destination of the chosen mission, which we stored in
+                        \ &0C10+X when setting up the menu
+
+ CLC                    \ When setting up the menu, we set &0C20+X to the legal
+ LDA &0C20,X            \ status of taking this mission, so we add this value to
+ ADC FIST               \ our legal status in FIST, so taking on dodgy delivery
+ STA FIST               \ missions adversely affects our legal status
+
+ LDA &0C30,X            \ Set the mission timer in cmdr_cour(1 0) to the value
+ STA cmdr_cour+1        \ we set in (&0C30+X &0C40+X) when setting up the menu
  LDA &0C40,X
  STA cmdr_cour
 
 .cour_pres
 
- JMP jmp_start3
+ JMP jmp_start3         \ Jump to jmp_start3 to make a beep and show the cargo
+                        \ bay
 
 .cour_count
 
- JSR TT20
- INC INWK+6
- BEQ cour_menu
- DEC INWK
- BNE cour_count
- LDX INWK+3
- LDA QQ15+3
- CMP QQ0
- BNE cour_star
- LDA QQ15+1
- CMP QQ1
- BNE cour_star
- JMP cour_next
+                        \ If we get here then we want to display another item
+                        \ in the menu, so first we need to skip our way through
+                        \ the number of systems given in INWK
+
+ JSR TT20               \ We want to move on to the next system, so call TT20
+                        \ to twist the three 16-bit seeds in QQ15
+
+ INC INWK+6             \ We also increment the counter in INWK+6 to point to
+                        \ the next system
+
+ BEQ cour_menu          \ If INWK+6 has wrapped around back to 0, then we have
+                        \ worked our way through the entire galaxy, so jump to
+                        \ cour_menu to display the menu
+
+ DEC INWK               \ Loop back to keep twisting the seeds until we have
+ BNE cour_count         \ stepped through the number of systems in INWK
+
+                        \ We now have a system that we can consider for
+                        \ inclusion in the destination menu
+
+ LDX INWK+3             \ Set X = INWK+3, which counts the number of delivery
+                        \ missions we have already displayed in the menu, and
+                        \ which we can use as an index when populating the menu
+                        \ data in &0C00 below
+
+ LDA QQ15+3             \ Fetch the s1_hi seed of the system we are considering
+                        \ adding to the menu into A, which gives us the galactic
+                        \ x-coordinate of the system we are considering
+
+ CMP QQ0                \ If the x-coordinate of the system we are considering
+ BNE cour_star          \ is different to the current system's galactic
+                        \ x-coordinate in QQ0, then jump to cour_star to keep
+                        \ going
+
+ LDA QQ15+1             \ Fetch the s0_hi seed of the system we are considering
+                        \ adding to the menu into A, which gives us the galactic
+                        \ y-coordinate of the system we are considering
+
+ CMP QQ1                \ If the y-coordinate of the system we are considering
+ BNE cour_star          \ is different to the current system's galactic
+                        \ y-coordinate in QQ1, then jump to cour_star to keep
+                        \ going
+
+ JMP cour_next          \ If we get here then the system we are considering has
+                        \ the same coordinates as the current system, and we
+                        \ can't offer a cargo mission to the system we are
+                        \ already in, so jump to cour_next to move onto the next
+                        \ system
 
 .cour_star
 
- LDA QQ15+3
- EOR QQ15+5
- EOR INWK+1
- CMP FIST
- BCC cour_legal
- LDA #0
+                        \ If we get here then this destination is a suitable
+                        \ system for a delivery mission, so we now want to add
+                        \ the destination's data to the block at &0C00, which is
+                        \ where we build up the menu data
+                        \
+                        \ We build up the data as follows, where X is the number
+                        \ of the menu item (0-15):
+                        \
+                        \   * &0C00+X = x-coordinate of the delivery destination
+                        \   * &0C10+X = y-coordinate of the delivery destination
+                        \   * &0C20+X = legal status of the delivery mission
+                        \   * &0C30+X = high byte of the mission timer
+                        \   * &0C40+X = low byte of the mission timer
+                        \               low byte of the mission cost
+                        \   * &0C50+X = high byte of the mission cost
+                        \
+                        \ In other words, when we take on a mission, the timer
+                        \ in cmdr_cour(1 0) is set to (&0C30+X &0C40+X), we pay
+                        \ the mission cost of (&0C50+X &0C40+X), and our legal
+                        \ status goes up by the amount in &0C20+X
+
+ LDA QQ15+3             \ Set A = s1_hi EOR s2_hi EOR INWK+1
+ EOR QQ15+5             \
+ EOR INWK+1             \ which is a pretty random number based on the seeds for
+                        \ the destination system, plus the random INWK+1 that we
+                        \ generated above
+
+ CMP FIST               \ If A < FIST then jump to cour_legal, so we will only
+ BCC cour_legal         \ jump if FIST is non-zero, with a bigger chance of
+                        \ jumping if we've been bad
+
+ LDA #0                 \ We have either been very good or very lucky, so set
+                        \ A = 0 to indicate that this delivery mission is legit
 
 .cour_legal
 
- STA &0C20,X
- LDA QQ15+3
- STA &0C00,X
- SEC
- SBC QQ0
- BCS cour_negx
- EOR #&FF
- ADC #&01
+ STA &0C20,X            \ Store A in the X-th byte of &0C20, which is the legal
+                        \ status of this delivery mission (A = 0 means it's
+                        \ legit, while higher numbers are increasingly bad)
+
+ LDA QQ15+3             \ Set the X-th byte of &0C00 to s1_hi, the galactic
+ STA &0C00,X            \ x-coordinate of the delivery destination
+
+                        \ We need to calculate the distance from the current
+                        \ system to the delivery destination, as the mission
+                        \ timer is based on the distance of the delivery (as
+                        \ well as the legality of the mission)
+                        \
+                        \ We do this using Pythagoras, so let's denote the
+                        \ current system's coordinates as (current_x, current_y)
+                        \ and the delivery destination's coordinates as
+                        \ (destination_x, destination_y)
+
+ SEC                    \ Set A = A - QQ0
+ SBC QQ0                \       = destination_x - current_x
+
+ BCS cour_negx          \ If the subtraction didn't underflow, jump to cour_negx
+
+ EOR #&FF               \ The subtraction underflowed, so negate the result
+ ADC #1                 \ using two's complement, so we know A is positive, i.e.
+                        \
+                        \   A = |destination_x - current_x|
 
 .cour_negx
 
- JSR SQUA2
- STA K+1
+ JSR SQUA2              \ Set K(1 0) = A * A
+ STA K+1                \            = |destination_x - current_x| ^ 2
  LDA P
  STA K
- LDX INWK+3
- LDA QQ15+1
- STA &0C10,X
- SEC
- SBC QQ1
- BCS cour_negy
- EOR #&FF
- ADC #&01
+
+ LDX INWK+3             \ Set X = INWK+3 again, so we can use as an index when
+                        \ populating the menu data in &0C00
+
+ LDA QQ15+1             \ Set the X-th byte of &0C10 to s0_hi, the galactic
+ STA &0C10,X            \ y-coordinate of the delivery destination
+
+ SEC                    \ Set A = A - QQ1
+ SBC QQ1                \       = destination_y - current_y
+
+ BCS cour_negy          \ If the subtraction didn't underflow, jump to cour_negy
+
+ EOR #&FF               \ The subtraction underflowed, so negate the result
+ ADC #1                 \ using two's complement, so we know A is positive, i.e.
+                        \
+                        \   A = |destination_y - current_y|
 
 .cour_negy
 
- LSR A
- JSR SQUA2
- PHA
- LDA P
- CLC
- ADC K
+ LSR A                  \ Set A = A / 2
+
+                        \ A now contains the difference between the two
+                        \ systems' y-coordinates, with the sign removed, and
+                        \ halved. We halve the value because the galaxy in
+                        \ in Elite is rectangular rather than square, and is
+                        \ twice as wide (x-axis) as it is high (y-axis), so to
+                        \ get a distance that matches the shape of the
+                        \ long-range galaxy chart, we need to halve the
+                        \ distance between the vertical y-coordinates
+
+ JSR SQUA2              \ Set (A P) = A * A
+                        \           = (|destination_x - current_x| / 2) ^ 2
+
+                        \ We now want to add the two so we can then apply
+                        \ Pythagoras, so first we do this:
+                        \
+                        \   (R Q) = K(1 0) + (A P))
+                        \         = (destination_x - current_x) ^ 2
+                        \           + (|destination_x - current_x| / 2) ^ 2
+                        \
+                        \ and then the distance will be the square root:
+                        \
+                        \   Q = SQRT(R Q)
+
+ PHA                    \ Store the high byte of the result on the stack 
+
+ LDA P                  \ Set Q = P + K
+ CLC                    \
+ ADC K                  \ which adds the low bytes
  STA Q
- PLA
- ADC K+1
- STA R
- JSR LL5
- LDX INWK+3
- LDA QQ15+1
- EOR QQ15+5
- EOR INWK+1
+
+ PLA                    \ Set R = A + K+1
+ ADC K+1                \
+ STA R                  \ which adds the high bytes
+
+ JSR LL5                \ Set Q = SQRT(R Q), so Q now contains the distance
+                        \ between the two systems, in terms of coordinates,
+                        \ which we can use to determine the reward for this
+                        \ delivery mission
+
+ LDX INWK+3             \ Set X = INWK+3 again, so we can use as an index when
+                        \ populating the menu data in &0C00
+
+ LDA QQ15+1             \ Set A = (s0_hi EOR s2_hi EOR INWK+1) / 8
+ EOR QQ15+5             \
+ EOR INWK+1             \ which is another pretty random number based on the
+ LSR A                  \ seeds for the destination system, plus the random
+ LSR A                  \ INWK+1 that we generated above
  LSR A
- LSR A
- LSR A
- CMP Q
+
+ CMP Q                  \ If A >= Q then skip the following
  BCS cour_dist
- LDA Q
+
+ LDA Q                  \ A < Q, so set A = Q, so A has a minimum value of Q,
+                        \ i.e. our mission reward is always at least the
+                        \ distance we have to travel
 
 .cour_dist
 
- ORA &0C20,X
- STA &0C30,X
- STA INWK+4
- LSR A
- ROR INWK+4
- LSR A
- ROR INWK+4
+ ORA &0C20,X            \ We now OR this value with the legal status of this
+                        \ delivery mission, so a legit mission (which has a
+                        \ status of 0) will not change the value in A, but more
+                        \ dangerous missions will bump the value up, with a
+                        \ higher premium paid for more illegal missions
+
+ STA &0C30,X            \ Set the X-th byte of &0C30 to A, which we use as the
+                        \ high byte of the mission timer (which is also the
+                        \ potential reward for completing this mission, though
+                        \ it does halve every time we dock)
+
+ STA INWK+4             \ Set INWK(5 4) = (A A) / 8
+ LSR A                  \
+ ROR INWK+4             \ which we use as the mission cost (i.e. the amount of
+ LSR A                  \ cash we have to part with in order to take on the
+ ROR INWK+4             \ delivery mission)
  LSR A
  ROR INWK+4
  STA INWK+5
- STA &0C50,X
- LDA INWK+4
- STA &0C40,X
- LDA #&01
+
+ STA &0C50,X            \ Store INWK+5 in the X-th byte of &0C50, so it contains
+                        \ the high byte of the mission cost
+
+ LDA INWK+4             \ Store INWK+4 in the X-th byte of &0C40, so it contains
+ STA &0C40,X            \ the low byte of the mission cost (and the same value
+                        \ is used as the low byte of the mission timer)
+
+ LDA #1                 \ Move the text cursor to column 1
  STA XC
- CLC
- LDA INWK+3
- ADC #&03
- STA YC
- LDX INWK+3
- INX
- CLC
- JSR pr2
- JSR TT162
- JSR cpl
- LDX INWK+4
- LDY INWK+5
- SEC
- LDA #&19
- STA XC
- LDA #&06
- JSR TT11
- INC INWK+3
+
+ CLC                    \ Move the text cursor to row INWK+3 plus 3, where
+ LDA INWK+3             \ INWK+3 is the menu item number, starting from 0 (so
+ ADC #3                 \ the first menu item is on row 3, the next is on row 4
+ STA YC                 \ and so on)
+
+ LDX INWK+3             \ Set X to INWK+3 + 1, which we can use as the menu item
+ INX                    \ number on-screen (so the first menu item with is shown
+                        \ as item 1 on screen, the next is shown as item 2, and
+                        \ so on)
+
+ CLC                    \ Clear the C flag so the call to pr2 doesn't show a
+                        \ decimal point
+
+ JSR pr2                \ Call pr2 to print the number in X to a width of 3
+                        \ 3 figures, so this prints the item number at the start
+                        \ of the menu item
+
+ JSR TT162              \ Print a space
+
+ JSR cpl                \ Call cpl to print the name of the selected system
+                        \ (i.e. the destination system)
+
+ LDX INWK+4             \ Set (Y X) = INWK(5 4)
+ LDY INWK+5             \
+                        \ so (Y X) contains the mission cost, as we set up
+                        \ INWK(5 4) with this value above
+
+ SEC                    \ Set the C flag so the call to TT11 below includes a
+                        \ decimal point
+
+ LDA #25                \ Move the text cursor to column 25, so we can print the
+ STA XC                 \ mission price
+
+ LDA #6                 \ Set A = 6, for the call to TT11 below, so we pad out
+                        \ the number to 6 digits
+
+ JSR TT11               \ Call TT11 to print the mission timer in (Y X), padded
+                        \ to six digits and with a decimal point
+
+ INC INWK+3             \ We have just printed a menu item, so increment the
+                        \ counter in INWK+3, as it contains a count of menu
+                        \ items we have printed
 
 .cour_next
 
- LDA INWK+1
- STA INWK
- JMP cour_loop
+ LDA INWK+1             \ Reset INWK to the value in INWK+1, so the next time we
+ STA INWK               \ iterate round the loop, we skip over INWK+1 systems
+                        \ before adding to the menu
+
+ JMP cour_loop          \ Loop back to cour_loop to add the next menu item
 
                         \ --- End of added section ---------------------------->
 
@@ -30651,48 +31055,74 @@ LOAD_G% = LOAD% + P% - CODE%
 .cour_dock
 
  LDA cmdr_cour          \ If there is no special cargo delivery mission in
- ORA cmdr_cour+1        \ progress, then the mission counter in cmdr_cour(1 0)
+ ORA cmdr_cour+1        \ progress, then the mission timer in cmdr_cour(1 0)
  BEQ cour_quit          \ will be zero, so jump to cour_quit to return from the
                         \ subroutine
 
- LDA QQ0                \ AJD
- CMP cmdr_courx
- BNE cour_half
- LDA QQ1
- CMP cmdr_coury
- BNE cour_half
- LDA #&02
- JSR TT66
- LDA #&06
+ LDA QQ0                \ Set A = the current system's galactic x-coordinate
+
+ CMP cmdr_courx         \ If A does not match the x-coordinate of the cargo
+ BNE cour_half          \ mission's destination in cmdr_courx then we aren't at
+                        \ the destination station, so jump to cour_half to
+                        \ advance the mission timer
+
+ LDA QQ1                \ Set A = the current system's galactic y-coordinate
+
+ CMP cmdr_coury         \ If A does not match the y-coordinate of the cargo
+ BNE cour_half          \ mission's destination in cmdr_coury then we aren't at
+                        \ the destination station, so jump to cour_half to
+                        \ advance the mission timer
+
+ LDA #2                 \ We have arrived at the destination for the special
+ JSR TT66               \ cargo mission, so clear the top part of the screen,
+                        \ draw a white border, and set the current view type
+                        \ in QQ11 to 2 (for the Buy Cargo screen)
+
+ LDA #6                 \ Move the text cursor to column 6
  STA XC
- LDA #&0A
+
+ LDA #10                \ Move the text cursor to row 10
  STA YC
- LDA #&71
+
+ LDA #113               \ Print extended token 113 ("CARGO VALUE:")
  JSR DETOK
- LDX cmdr_cour
- LDY cmdr_cour+1
- SEC
- LDA #&06
- JSR TT11
- LDA #&E2
+
+ LDX cmdr_cour          \ Set (Y X) to the value of the mission timer in
+ LDY cmdr_cour+1        \ cmdr_cour(1 0), which is going to be our reward for
+                        \ completing the delivery mission
+
+ SEC                    \ Set the C flag so the call to TT11 includes a decimal
+                        \ point
+
+ LDA #6                 \ Set A = 6, for the call to TT11 below, so we pad out
+                        \ the number to 6 digits
+
+ JSR TT11               \ Call TT11 to print the mission timer in (Y X), padded
+                        \ to six digits and with a decimal point
+
+ LDA #226               \ Print recursive text token 66 (" CR")
  JSR TT27
- LDX cmdr_cour
- LDY cmdr_cour+1
- JSR MCASH
- LDA #0
+
+ LDX cmdr_cour          \ Set (Y X) to the value of the mission timer in
+ LDY cmdr_cour+1        \ cmdr_cour(1 0)
+
+ JSR MCASH              \ Call MCASH to add (Y X) to the cash pot
+
+ LDA #0                 \ Reset the mission timer by doing cmdr_cour(1 0) = 0
  STA cmdr_cour
  STA cmdr_cour+1
- LDY #&60
+
+ LDY #96                \ Wait for 96 vertical syncs (96/50 = 1.92 seconds)
  JSR DELAY
 
 .cour_half
 
- LSR cmdr_cour+1
+ LSR cmdr_cour+1        \ Halve the value of the mission timer in cmdr_cour(1 0)
  ROR cmdr_cour
 
 .cour_quit
 
- RTS
+ RTS                    \ Return from the subroutine
 
                         \ --- End of added section ---------------------------->
 

@@ -2429,7 +2429,7 @@ ENDIF
 
                         \ --- And replaced by: -------------------------------->
 
- EQUW 0                 \ cmdr_cour = Special cargo mission counter, #47
+ EQUW 0                 \ cmdr_cour = Special cargo mission timer, #47
 
  EQUB 0                 \ cmdr_courx = Special cargo destination x-coord, #49
 
