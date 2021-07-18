@@ -27077,9 +27077,9 @@ LOAD_F% = LOAD% + P% - CODE%
                         \   * Bits 4-7 = 0
                         \
                         \ So A is in the range 0-15. This corresponds to the
-                        \ ship blueprints files in the original disc version,
-                        \ which are D.MOA to D.MOP, but we're not done yet,
-                        \ as Elite-A has 23 ship blueprint files
+                        \ range of ship blueprint files in the original disc
+                        \ version, which are D.MOA to D.MOP, but we're not done
+                        \ yet, as Elite-A has 23 ship blueprint files
 
  ADC GCNT               \ Add the galaxy number in GCNT to A, which moves A into
                         \ the range 0-22, which corresponds to the appropriate

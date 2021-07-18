@@ -19303,7 +19303,7 @@ LOAD_H% = LOAD% + P% - CODE%
 \ Other entry points:
 \
 \   jmp_start3          Make a short, high beep, delay for one second, and go to
-\                       the docking bay (i.e. show the Status Mode screen)
+\                       the docking bay (i.e. show the Encyclopedia screen)
 \
 \ ******************************************************************************
 
@@ -19311,35 +19311,49 @@ LOAD_H% = LOAD% + P% - CODE%
 
 .info_menu
 
- LDX #0                 \ AJD
- JSR menu
- CMP #&01
- BNE n_shipsag
- JMP ships_ag
+ LDX #0                 \ Call menu with X = 0 to show menu 0, the main menu for
+ JSR menu               \ the Encyclopedia Galactica, and return the choice in A
+
+ CMP #1                 \ If A <> 1, skip the following instruction to check the
+ BNE n_shipsag          \ other options
+
+ JMP ships_ag           \ Option 1 was chosen, so jump to ships_ag to show the
+                        \ Ships A-G menu
 
 .n_shipsag
 
- CMP #&02
- BNE n_shipskw
- JMP ships_kw
+ CMP #2                 \ If A <> 2, skip the following instruction to check the
+ BNE n_shipskw          \ other options
+
+ JMP ships_kw           \ Option 2 was chosen, so jump to ships_kw to show the
+                        \ Ships K-W menu
 
 .n_shipskw
 
- CMP #&03
- BNE n_equipdat
- JMP equip_data
+ CMP #3                 \ If A <> 3, skip the following instruction to check the
+ BNE n_equipdat         \ other options
+
+ JMP equip_data         \ Option 3 was chosen, so jump to equip_data to show the
+                        \ Equipment menu
 
 .n_equipdat
 
- CMP #&04
- BNE n_controls
- JMP controls
+ CMP #4                 \ If A <> 4, skip the following instruction to check the
+ BNE n_controls         \ other options
+
+ JMP controls           \ Option 4 was chosen, so jump to controls to show the
+                        \ Controls menu
 
 .n_controls
 
- CMP #&05
- BNE jmp_start3
- JMP trading
+ CMP #5                 \ If A <> 5, skip the following instruction and jump to
+ BNE jmp_start3         \ jmp_start3 to make a beep and show the main menu
+
+ JMP trading            \ Option 5 was chosen, so jump to trading to pause and
+                        \ show the main menu (there is no option 5 in the main
+                        \ menu, so this code is never reached and is presumably
+                        \ a remnant of a fifth menu about trading that was
+                        \ removed)
 
 .jmp_start3
 
@@ -19347,7 +19361,7 @@ LOAD_H% = LOAD% + P% - CODE%
                         \ second
 
  JMP BAY                \ Jump to BAY to go to the docking bay (i.e. show the
-                        \ Status Mode screen)
+                        \ Encyclopedia screen)
 
                         \ --- End of added section ---------------------------->
 
@@ -19368,35 +19382,48 @@ LOAD_H% = LOAD% + P% - CODE%
 
  PHA
  TAX
+
  JSR menu
- SBC #&00
+
+ SBC #0
  PLP
  BCS ship_over
+
  ADC menu_entry+1
 
 .ship_over
 
  STA TYPE
  CLC
- ADC #&07
+ ADC #7
  PHA
- LDA #&20
+
+ LDA #32
  JSR TT66
+
  JSR MT1
+
  LDX TYPE
 
- LDA ship_file,X
+ LDA ship_file,X        \ Set A to the letter of the relevant ship blueprints
+                        \ file that we need to load for this ship card (fetched
+                        \ from the ship_file table)
+
  CMP ship_load+4
  BEQ ship_skip
+
  STA ship_load+4
+
  LDX #LO(ship_load)
  LDY #HI(ship_load)
+
  JSR OSCLI
 
 .ship_skip
 
- LDX TYPE
- LDA ship_centre,X
+ LDX TYPE               \ Set A to the column positions for this ship card's
+ LDA ship_centre,X      \ title (fetched from the ship_centre table)
+
  STA XC
  PLA
  JSR write_msg3
@@ -19414,9 +19441,12 @@ LOAD_H% = LOAD% + P% - CODE%
  LDA TYPE
  JSR write_card
 
- LDX TYPE
- LDA ship_posn,X
- JSR NWSHP
+ LDX TYPE               \ Set A to the number of this ship blueprint within the
+ LDA ship_posn,X        \ ship blueprints file that we loaded (fetched from the
+                        \ ship_posn table)
+
+ JSR NWSHP              \ Add a new ship of type A to the local bubble (or, in
+                        \ this case, the encyclopedia ship card)
 
 .l_release
 
@@ -19463,7 +19493,7 @@ LOAD_H% = LOAD% + P% - CODE%
 
 .controls
 
- LDX #&03
+ LDX #3
  JSR menu
  ADC #&56
  PHA
@@ -19498,7 +19528,7 @@ LOAD_H% = LOAD% + P% - CODE%
 
 .equip_data
 
- LDX #&04
+ LDX #4
  JSR menu
  ADC #&6B
  PHA
@@ -19675,7 +19705,8 @@ LOAD_H% = LOAD% + P% - CODE%
 \       Name: ship_file
 \       Type: Variable
 \   Category: Encyclopedia
-\    Summary: AJD
+\    Summary: Table containing the letter of the relevant ship blueprints file
+\             that we load for each ship card
 \
 \ ******************************************************************************
 
@@ -19683,10 +19714,34 @@ LOAD_H% = LOAD% + P% - CODE%
 
 .ship_file
 
- EQUB 'A', 'H', 'I', 'K', 'J', 'P', 'B'
- EQUB 'N', 'A', 'B', 'A', 'M', 'E', 'B'
- EQUB 'G', 'I', 'M', 'A', 'O', 'F', 'E'
- EQUB 'L', 'L', 'C', 'C', 'P', 'A', 'H'
+ EQUB 'A'               \ Adder
+ EQUB 'H'               \ Anaconda
+ EQUB 'I'               \ Asp Mk II
+ EQUB 'K'               \ Boa
+ EQUB 'J'               \ Bushmaster
+ EQUB 'P'               \ Chameleon
+ EQUB 'B'               \ Cobra Mk I
+ EQUB 'N'               \ Cobra Mk III
+ EQUB 'A'               \ Coriolis
+ EQUB 'B'               \ Dodecagon
+ EQUB 'A'               \ Escape Pod
+ EQUB 'M'               \ Fer-de-Lance
+ EQUB 'E'               \ Gecko
+ EQUB 'B'               \ Ghavial
+ EQUB 'G'               \ Iguana
+ EQUB 'I'               \ Krait
+ EQUB 'M'               \ Mamba
+ EQUB 'A'               \ Monitor
+ EQUB 'O'               \ Moray
+ EQUB 'F'               \ Ophidian
+ EQUB 'E'               \ Python
+ EQUB 'L'               \ Shuttle
+ EQUB 'L'               \ Sidewinder
+ EQUB 'C'               \ Thargoid
+ EQUB 'C'               \ Thargon
+ EQUB 'P'               \ Transporter
+ EQUB 'A'               \ Viper
+ EQUB 'H'               \ Worm
 
                         \ --- End of added section ---------------------------->
 
@@ -19695,7 +19750,8 @@ LOAD_H% = LOAD% + P% - CODE%
 \       Name: ship_posn
 \       Type: Variable
 \   Category: Encyclopedia
-\    Summary: AJD
+\    Summary: Table containing the number of this ship blueprint within the ship
+\             blueprints file that we load for each ship card
 \
 \ ******************************************************************************
 
@@ -19703,10 +19759,34 @@ LOAD_H% = LOAD% + P% - CODE%
 
 .ship_posn
 
- EQUB 19, 14, 27, 11, 20, 12, 17
- EQUB 11,  2,  2,  3, 25, 17, 11
- EQUB 20, 17, 17, 11, 22, 21, 11
- EQUB  9, 17, 29, 30, 10, 16, 15
+ EQUB 19                \ Adder
+ EQUB 14                \ Anaconda
+ EQUB 27                \ Asp Mk II
+ EQUB 11                \ Boa
+ EQUB 20                \ Bushmaster
+ EQUB 12                \ Chameleon
+ EQUB 17                \ Cobra Mk I
+ EQUB 11                \ Cobra Mk III
+ EQUB 2                 \ Coriolis
+ EQUB 2                 \ Dodecagon
+ EQUB 3                 \ Escape Pod
+ EQUB 25                \ Fer-de-Lance
+ EQUB 17                \ Gecko
+ EQUB 11                \ Ghavial
+ EQUB 20                \ Iguana
+ EQUB 17                \ Krait
+ EQUB 17                \ Mamba
+ EQUB 11                \ Monitor
+ EQUB 22                \ Moray
+ EQUB 21                \ Ophidian
+ EQUB 11                \ Python
+ EQUB 9                 \ Shuttle
+ EQUB 17                \ Sidewinder
+ EQUB 29                \ Thargoid
+ EQUB 30                \ Thargon
+ EQUB 10                \ Transporter
+ EQUB 16                \ Viper
+ EQUB 15                \ Worm
 
                         \ --- End of added section ---------------------------->
 
@@ -19715,7 +19795,8 @@ LOAD_H% = LOAD% + P% - CODE%
 \       Name: ship_dist
 \       Type: Variable
 \   Category: Encyclopedia
-\    Summary: AJD
+\    Summary: Table containing the closest distance to show the ship for each
+\             ship card
 \
 \ ******************************************************************************
 
@@ -19723,10 +19804,34 @@ LOAD_H% = LOAD% + P% - CODE%
 
 .ship_dist
 
- EQUB &01, &02, &01, &02, &01, &01, &01
- EQUB &02, &04, &04, &01, &01, &01, &02
- EQUB &01, &02, &01, &02, &01, &01, &02
- EQUB &01, &01, &03, &01, &01, &01, &01
+ EQUB 1                 \ Adder
+ EQUB 2                 \ Anaconda
+ EQUB 1                 \ Asp Mk II
+ EQUB 2                 \ Boa
+ EQUB 1                 \ Bushmaster
+ EQUB 1                 \ Chameleon
+ EQUB 1                 \ Cobra Mk I
+ EQUB 2                 \ Cobra Mk III
+ EQUB 4                 \ Coriolis
+ EQUB 4                 \ Dodecagon
+ EQUB 1                 \ Escape Pod
+ EQUB 1                 \ Fer-de-Lance
+ EQUB 1                 \ Gecko
+ EQUB 2                 \ Ghavial
+ EQUB 1                 \ Iguana
+ EQUB 2                 \ Krait
+ EQUB 1                 \ Mamba
+ EQUB 2                 \ Monitor
+ EQUB 1                 \ Moray
+ EQUB 1                 \ Ophidian
+ EQUB 2                 \ Python
+ EQUB 1                 \ Shuttle
+ EQUB 1                 \ Sidewinder
+ EQUB 3                 \ Thargoid
+ EQUB 1                 \ Thargon
+ EQUB 1                 \ Transporter
+ EQUB 1                 \ Viper
+ EQUB 1                 \ Worm
 
                         \ --- End of added section ---------------------------->
 
@@ -19735,7 +19840,21 @@ LOAD_H% = LOAD% + P% - CODE%
 \       Name: menu
 \       Type: Subroutine
 \   Category: Encyclopedia
-\    Summary: AJD
+\    Summary: Display a menu and ask for a choice
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   X                   The number of the menu to display (0 to 4)
+\
+\ Returns:
+\
+\   A                   The number entered
+\
+\   R                   Also contains the number entered
+\
+\   C flag              Set if the number is too large, clear otherwise
 \
 \ ******************************************************************************
 
@@ -19743,63 +19862,106 @@ LOAD_H% = LOAD% + P% - CODE%
 
 .menu
 
- LDA menu_entry,X
- STA QQ25
- LDA menu_offset,X
- STA QQ29
- LDA menu_query,X
- PHA
- LDA menu_title,X
- PHA
- LDA menu_titlex,X
- PHA
- LDA #&20
- JSR TT66
- JSR MT1
- PLA
- STA XC
- PLA
- JSR write_msg3
- JSR NLIN4
+ LDA menu_entry,X       \ Store the menu's size (i.e. the number of entries) in
+ STA QQ25               \ QQ25
 
- JSR MT2
- LDA #&80
- STA QQ17
+ LDA menu_offset,X      \ Store the token number of the menu's first item in
+ STA QQ29               \ QQ29
 
- INC YC
- LDX #&00
+ LDA menu_query,X       \ Store the menu's query token number on the stack,
+ PHA                    \ which contains the query prompt we show at the bottom
+                        \ of the menu
+
+ LDA menu_title,X       \ Store the menu's title token number on the stack
+ PHA
+
+ LDA menu_titlex,X      \ Store the menu's title x-coordinate on the stack
+ PHA
+
+ LDA #32                \ Clear the top part of the screen, draw a white border,
+ JSR TT66               \ and set the current view type in QQ11 to 32
+
+ JSR MT1                \ Switch to ALL CAPS when printing extended tokens
+
+ PLA                    \ Retrieve the menu's title x-coordinate from the stack
+ STA XC                 \ and move the text cursor to it
+
+ PLA                    \ Retrieve the menu's title token number from the stack
+ JSR write_msg3         \ and print it (the menu tokens are in the msg_3 table)
+
+ JSR NLIN4              \ Draw a horizontal line at pixel row 19 to box in the
+                        \ title
+
+ JSR MT2                \ Switch to Sentence Case when printing extended tokens
+
+ LDA #%10000000         \ Set bit 7 of QQ17 to switch standard tokens to
+ STA QQ17               \ Sentence Case
+
+ INC YC                 \ Move the text cursor down a line
+
+ LDX #0                 \ We are now going to work our way through the items in
+                        \ the menu, printing as we go, so set a counter in X to
+                        \ hold the number of the current item (starting from 0)
 
 .menu_loop
 
- STX XX13
- JSR TT67
- LDX XX13
- INX
- CLC
- JSR pr2
- JSR TT162
+ STX XX13               \ Store the current menu item number in XX13
 
- CLC
- LDA XX13
- ADC QQ29
- JSR write_msg3
- LDX XX13
- INX
- CPX QQ25
- BCC menu_loop
- JSR CLYNS
- PLA
- JSR write_msg3
- LDA #'?'
+ JSR TT67               \ Print a newline
+
+ LDX XX13               \ Print the current item number + 1 to 3 digits, left-
+ INX                    \ padding with spaces, and with no decimal point, so the
+ CLC                    \ items are numbered from 1
+ JSR pr2
+
+ JSR TT162              \ Print a space
+
+ CLC                    \ Set A = XX13 + QQ29
+ LDA XX13               \
+ ADC QQ29               \ This will contain the token number for the first entry
+                        \ in this menu, as QQ29 contains the number of the first
+                        \ token in this menu, and XX13 contains the number of
+                        \ this entry within the menu
+
+ JSR write_msg3         \ Print the extended token for this menu item (the menu
+                        \ tokens are in the msg_3 table)
+
+ LDX XX13               \ Fetch the menu item number from XX13
+ 
+ INX                    \ Increment the menu item number to point to the next
+                        \ item
+
+ CPX QQ25               \ Loop back to menu_loop until we have shown all QQ25
+ BCC menu_loop          \ menu items
+
+ JSR CLYNS              \ Clear the bottom three text rows of the upper screen,
+                        \ and move the text cursor to column 1 on row 21, i.e.
+                        \ the start of the top row of the three bottom rows
+
+ PLA                    \ Retrieve the menu's query token number from the stack
+ JSR write_msg3         \ and print it
+
+ LDA #'?'               \ Print a question mark
  JSR DASC
- JSR gnum
- BEQ menu_start
- BCS menu_start
- RTS
+
+ JSR gnum               \ Call gnum to get a number from the keyboard, which
+                        \ will be the menu item number of the menu item we want
+                        \ to show, returning the number entered in A and R, and
+                        \ setting the C flag if the number is bigger than the
+                        \ highest menu item number in QQ25
+
+ BEQ menu_start         \ If no number was entered, jump to menu_start to show
+                        \ the cargo bay
+
+ BCS menu_start         \ If the number entered was too big, jump to menu_start
+                        \ show the cargo bay
+
+ RTS                    \ Return from the subroutine
 
 .menu_start
 
- JMP BAY
+ JMP BAY                \ Jump to BAY to go to the docking bay (i.e. show the
+                        \ Encyclopedia screen)
 
                         \ --- End of added section ---------------------------->
 
@@ -19808,7 +19970,19 @@ LOAD_H% = LOAD% + P% - CODE%
 \       Name: menu_title
 \       Type: Variable
 \   Category: Encyclopedia
-\    Summary: AJD
+\    Summary: Table containing text token numbers for each menu's title
+\
+\ ------------------------------------------------------------------------------
+\
+\ Text tokens for the menu system can be found in the msg_3 table.
+\
+\ The menus are as follows:
+\
+\   0 = Encyclopedia Galactica
+\   1 = Ships A-G
+\   2 = Ships I-W
+\   3 = Equipment
+\   4 = Controls
 \
 \ ******************************************************************************
 
@@ -19816,7 +19990,25 @@ LOAD_H% = LOAD% + P% - CODE%
 
 .menu_title
 
- EQUB &01, &02, &03, &05, &04
+ EQUB 1                 \ Menu 0: Title is text token 1:
+                        \
+                        \         "ENCYCLOPEDIA GALACTICA"
+
+ EQUB 2                 \ Menu 1: Title is text token 2:
+                        \
+                        \         "SHIPS {all caps}A-G{sentence case}"
+
+ EQUB 3                 \ Menu 2: Title is text token 3:
+                        \
+                        \         "SHIPS {all caps}I-W{sentence case}"
+
+ EQUB 5                 \ Menu 3: Title is text token 5:
+                        \
+                        \         "CONTROLS"
+
+ EQUB 4                 \ Menu 4: Title is text token 4:
+                        \
+                        \         "EQUIPMENT"
 
                         \ --- End of added section ---------------------------->
 
@@ -19825,7 +20017,19 @@ LOAD_H% = LOAD% + P% - CODE%
 \       Name: menu_titlex
 \       Type: Variable
 \   Category: Encyclopedia
-\    Summary: AJD
+\    Summary: Table containing column positions for each menu's title
+\
+\ ------------------------------------------------------------------------------
+\
+\ Text tokens for the menu system can be found in the msg_3 table.
+\
+\ The menus are as follows:
+\
+\   0 = Encyclopedia Galactica
+\   1 = Ships A-G
+\   2 = Ships I-W
+\   3 = Equipment
+\   4 = Controls
 \
 \ ******************************************************************************
 
@@ -19833,7 +20037,15 @@ LOAD_H% = LOAD% + P% - CODE%
 
 .menu_titlex
 
- EQUB &05, &0C, &0C, &0C, &0B
+ EQUB 5                 \ Menu 0: Show menu title at column 5
+
+ EQUB 12                \ Menu 1: Show menu title at column 12
+
+ EQUB 12                \ Menu 2: Show menu title at column 12
+
+ EQUB 12                \ Menu 3: Show menu title at column 12
+
+ EQUB 11                \ Menu 4: Show menu title at column 11
 
                         \ --- End of added section ---------------------------->
 
@@ -19842,7 +20054,19 @@ LOAD_H% = LOAD% + P% - CODE%
 \       Name: menu_offset
 \       Type: Variable
 \   Category: Encyclopedia
-\    Summary: AJD
+\    Summary: Table containing token numbers for the first item in each menu
+\
+\ ------------------------------------------------------------------------------
+\
+\ Text tokens for the menu system can be found in the msg_3 table.
+\
+\ The menus are as follows:
+\
+\   0 = Encyclopedia Galactica
+\   1 = Ships A-G
+\   2 = Ships I-W
+\   3 = Equipment
+\   4 = Controls
 \
 \ ******************************************************************************
 
@@ -19850,7 +20074,26 @@ LOAD_H% = LOAD% + P% - CODE%
 
 .menu_offset
 
- EQUB &02, &07, &15, &5B, &5F
+ EQUB 2                 \ Menu 0: First item is text token 2:
+                        \
+                        \         "SHIPS {all caps}A-G{sentence case}"
+
+ EQUB 7                 \ Menu 1: First item is text token 7:
+                        \
+                        \         "ADDER"
+
+ EQUB 21                \ Menu 2: First item is text token 21:
+                        \
+                        \         "KRAIT"
+
+ EQUB 91                \ Menu 3: First item is text token 91:
+                        \
+                        \         "FLIGHT"
+
+ EQUB 95                \ Menu 4: First item is text token 95:
+                        \
+                        \         "{standard tokens, sentence case}
+                        \          MISSILE{extended tokens}"
 
                         \ --- End of added section ---------------------------->
 
@@ -19859,7 +20102,19 @@ LOAD_H% = LOAD% + P% - CODE%
 \       Name: menu_entry
 \       Type: Variable
 \   Category: Encyclopedia
-\    Summary: AJD
+\    Summary: Table containing the number of entries in each menu
+\
+\ ------------------------------------------------------------------------------
+\
+\ Text tokens for the menu system can be found in the msg_3 table.
+\
+\ The menus are as follows:
+\
+\   0 = Encyclopedia Galactica
+\   1 = Ships A-G
+\   2 = Ships I-W
+\   3 = Equipment
+\   4 = Controls
 \
 \ ******************************************************************************
 
@@ -19867,7 +20122,15 @@ LOAD_H% = LOAD% + P% - CODE%
 
 .menu_entry
 
- EQUB &04, &0E, &0E, &04, &0D
+ EQUB 4                 \ Menu 0: Contains 4 entries
+
+ EQUB 14                \ Menu 1: Contains 14 entries
+
+ EQUB 14                \ Menu 2: Contains 14 entries
+
+ EQUB 4                 \ Menu 3: Contains 4 entries
+
+ EQUB 13                \ Menu 4: Contains 13 entries
 
                         \ --- End of added section ---------------------------->
 
@@ -19876,7 +20139,19 @@ LOAD_H% = LOAD% + P% - CODE%
 \       Name: menu_query
 \       Type: Variable
 \   Category: Encyclopedia
-\    Summary: AJD
+\    Summary: Table containing token numbers for each menu's query prompt
+\
+\ ------------------------------------------------------------------------------
+\
+\ Text tokens for the menu system can be found in the msg_3 table.
+\
+\ The menus are as follows:
+\
+\   0 = Encyclopedia Galactica
+\   1 = Ships A-G
+\   2 = Ships I-W
+\   3 = Equipment
+\   4 = Controls
 \
 \ ******************************************************************************
 
@@ -19884,7 +20159,25 @@ LOAD_H% = LOAD% + P% - CODE%
 
 .menu_query
 
- EQUB &06, &43, &43, &05, &04
+ EQUB 6                 \ Menu 0: Query prompt is text token 6:
+                        \
+                        \         "INFORMATION"
+
+ EQUB 67                \ Menu 1: Query prompt is text token 67:
+                        \
+                        \         " SHIP"
+
+ EQUB 67                \ Menu 2: Query prompt is text token 67:
+                        \
+                        \         " SHIP"
+
+ EQUB 5                 \ Menu 3: Query prompt is text token 5:
+                        \
+                        \         "CONTROLS"
+
+ EQUB 4                 \ Menu 4: Query prompt is text token 4:
+                        \
+                        \         "EQUIPMENT"
 
                         \ --- End of added section ---------------------------->
 
@@ -25815,7 +26108,7 @@ ENDMACRO
 \       Name: ship_centre
 \       Type: Variable
 \   Category: Encyclopedia
-\    Summary: AJD
+\    Summary: Table containing column positions for each ship card's title
 \
 \ ******************************************************************************
 
@@ -25823,10 +26116,34 @@ ENDMACRO
 
 .ship_centre
 
- EQUB &0D, &0C, &0C, &0B, &0D, &0C, &0B
- EQUB &0B, &08, &07, &09, &0A, &0D, &0C
- EQUB &0D, &0D, &0D, &0C, &0D, &0C, &0D
- EQUB &0C, &0B, &0C, &0C, &0A, &0D, &0E
+ EQUB 13                \ Adder
+ EQUB 12                \ Anaconda
+ EQUB 12                \ Asp Mk II
+ EQUB 11                \ Boa
+ EQUB 13                \ Bushmaster
+ EQUB 12                \ Chameleon
+ EQUB 11                \ Cobra Mk I
+ EQUB 11                \ Cobra Mk III
+ EQUB 8                 \ Coriolis
+ EQUB 7                 \ Dodecagon
+ EQUB 9                 \ Escape Pod
+ EQUB 10                \ Fer-de-Lance
+ EQUB 13                \ Gecko
+ EQUB 12                \ Ghavial
+ EQUB 13                \ Iguana
+ EQUB 13                \ Krait
+ EQUB 13                \ Mamba
+ EQUB 12                \ Monitor
+ EQUB 13                \ Moray
+ EQUB 12                \ Ophidian
+ EQUB 13                \ Python
+ EQUB 12                \ Shuttle
+ EQUB 11                \ Sidewinder
+ EQUB 12                \ Thargoid
+ EQUB 12                \ Thargon
+ EQUB 10                \ Transporter
+ EQUB 13                \ Viper
+ EQUB 14                \ Worm
 
                         \ --- End of added section ---------------------------->
 
