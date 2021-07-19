@@ -13923,7 +13923,7 @@ LOAD_F% = LOAD% + P% - CODE%
 \ BRKV is set to this routine in the decryption routine at DEEOR just before the
 \ game is run for the first time, and at the end of the SVE routine after the
 \ disc access menu has been processed. In other words, this is the standard
-\ BRKV handler for the game, and it's swapped out to MRBRK for disc access
+\ BRKV handler for the game, and it's swapped out to MEBRK for disc access
 \ operations only.
 \
 \ When it is the BRKV handler, the routine can be triggered using a BRK
@@ -19318,16 +19318,16 @@ LOAD_H% = LOAD% + P% - CODE%
  CMP #1                 \ If A <> 1, skip the following instruction to check the
  BNE n_shipsag          \ other options
 
- JMP ships_ag           \ Option 1 was chosen, so jump to ships_ag to show the
-                        \ Ships A-G menu
+ JMP ships_ag           \ Option 1 was chosen, so jump to ships_ag with A = 1 to
+                        \ show the Ships A-G menu
 
 .n_shipsag
 
  CMP #2                 \ If A <> 2, skip the following instruction to check the
  BNE n_shipskw          \ other options
 
- JMP ships_kw           \ Option 2 was chosen, so jump to ships_kw to show the
-                        \ Ships K-W menu
+ JMP ships_kw           \ Option 2 was chosen, so jump to ships_kw with A = 2 to
+                        \ show the Ships K-W menu
 
 .n_shipskw
 
@@ -19371,7 +19371,24 @@ LOAD_H% = LOAD% + P% - CODE%
 \       Name: ships_ag
 \       Type: Subroutine
 \   Category: Encyclopedia
-\    Summary: AJD
+\    Summary: Show the Ships A-G or Ships K-W menu and display the chosen ship
+\             card
+\
+\ ------------------------------------------------------------------------------
+\
+\ Agruments:
+\
+\   A                   The menu to show:
+\
+\                         * 1 = Show the Ships A-G menu
+\
+\                         * 2 = Show the Ships K-W menu
+\
+\   C flag              Set if this is the second menu (Ships K-W)
+\
+\ Other entry points:
+\
+\   ships_kw            Does exactly the same as a call to ships_kw
 \
 \ ******************************************************************************
 
@@ -19381,66 +19398,121 @@ LOAD_H% = LOAD% + P% - CODE%
 
 .ships_kw
 
- PHA
- TAX
+ PHA                    \ Store the menu number on the stack
 
- JSR menu
+ TAX                    \ Call menu with X = A to show the correct menu, so A
+ JSR menu               \ is now set to the type of ship card we need to show,
+                        \ depending on which ships menu we just displayed:
+                        \
+                        \   * 1 for Adder to 14 for Ghavial
+                        \   * 1 for Iguana to 14 for Worm
 
- SBC #0
- PLP
- BCS ship_over
+ SBC #0                 \ Decrement A so it is now in the range 0 to 13 (as menu
+                        \ clears the C flag when the number entered is within
+                        \ range), so we now have:
+                        \
+                        \   * 0 for Adder to 13 for Ghavial
+                        \   * 0 for Iguana to 13 for Worm
 
- ADC menu_entry+1
+ PLP                    \ Pull the menu number from the stack into the processor
+                        \ flags, which will set the C flag to bit 0 of the value
+                        \ on the stack (so if we called the routine with A = 1,
+                        \ the C flag will be set, and if we called it with A = 2
+                        \ it will be clear)
+
+ BCS ship_over          \ If the C flag is set, then we called the routine with
+                        \ A = 1, so jump to ship_over as the choice number is
+                        \ already correct (i.e. 0 for Adder to 13 for Ghavial)
+
+ ADC menu_entry+1       \ We just showed the the second menu, so the choice
+                        \ number is currently:
+                        \
+                        \   * 0 for Iguana to 13 for Worm
+                        \
+                        \ which is not right - we want the range to follow on
+                        \ from the end of the first menu. To fix this, we need
+                        \ to add the number of entries in the first menu to A
+                        \ to get the correct choice number. The menu_entry table
+                        \ contains the menu sizes, and menu_entry+1 contains the
+                        \ size of menu 1 (the Ships A-G menu), so this adds the
+                        \ number of entries in the first menu to give the
+                        \ correct choice range, as follows:
+                        \
+                        \   * 14 for Iguana to 27 for Worm
 
 .ship_over
 
- STA TYPE
- CLC
- ADC #7
- PHA
+ STA TYPE               \ A contains the ship that we just chose from the Ships
+                        \ menu, so store it in TYPE, so TYPE is now:
+                        \
+                        \   * 0 for Adder to 27 for Worm
 
- LDA #32
- JSR TT66
+ CLC                    \ Store type + 7 on the stack, to give the token number
+ ADC #7                 \ of the title to show for the relevant ship card, from
+ PHA                    \ Adder (token 7) to Worm (token 34)
 
- JSR MT1
+ LDA #32                \ Clear the top part of the screen, draw a white border,
+ JSR TT66               \ and set the current view type in QQ11 to 32
 
- LDX TYPE
+ JSR MT1                \ Switch to ALL CAPS when printing extended tokens
 
- LDA ship_file,X        \ Set A to the letter of the relevant ship blueprints
-                        \ file that we need to load for this ship card (fetched
+ LDX TYPE               \ Set A to the letter of the relevant ship blueprints
+ LDA ship_file,X        \ file that we need to load for this ship card (fetched
                         \ from the ship_file table)
 
- CMP ship_load+4
- BEQ ship_skip
+ CMP ship_load+4        \ If the fifth character of the OS command in ship_load
+ BEQ ship_skip          \ already matches the ship blueprints file letter, then
+                        \ we've already loaded this file, so jump to ship_skip
+                        \ to skip the following instruction
 
- STA ship_load+4
+ STA ship_load+4        \ Store the file letter in the fifth byte of ship_load,
+                        \ which replaces the "0" in "L.S.0" with the relevant
+                        \ letter (so if the letter is M, for example, the
+                        \ command will become "L.S.M" to load the S.M file)
 
- LDX #LO(ship_load)
- LDY #HI(ship_load)
+ LDX #LO(ship_load)     \ Set (Y X) to point to ship_load (the updated "L.S.0"
+ LDY #HI(ship_load)     \ command)
 
- JSR OSCLI
+ JSR OSCLI              \ Call OSCLI to run the OS command in ship_load, which
+                        \ loads the ship blueprints file that contains the ship
+                        \ we want to display
 
 .ship_skip
 
- LDX TYPE               \ Set A to the column positions for this ship card's
- LDA ship_centre,X      \ title (fetched from the ship_centre table)
+ LDX TYPE               \ Set A to the cards's title x-coordinate (fetched from
+ LDA ship_centre,X      \ the ship_centre table)
 
- STA XC
- PLA
- JSR write_msg3
- JSR NLIN4
- JSR ZINF
- LDA #&60
- STA INWK+14
- LDA #&B0
+ STA XC                 \ Move the text cursor to the correct column for the
+                        \ title
+
+ PLA                    \ Pull the token number for the title from the stack
+ JSR write_msg3         \ (type + 7) and print it
+
+ JSR NLIN4              \ Draw a horizontal line at pixel row 19 to box in the
+                        \ title
+
+ JSR ZINF               \ Call ZINF to reset the INWK ship workspace, so we can
+                        \ spawn a rotating ship to display in the centre of the
+                        \ ship card
+
+ LDA #&60               \ Set byte #14 (nosev_z_hi) to 1 (&60), so the ship will
+ STA INWK+14            \ be pointing away from us
+
+ LDA #176               \ Set z_hi = 176 (very far away)
  STA INWK+7
- LDX #&7F
+
+ LDX #127               \ Set roll counter = 127, so don't dampen the roll
  STX INWK+29
- STX INWK+30
- INX
- STA QQ17
- LDA TYPE
- JSR write_card
+
+ STX INWK+30            \ Set pitch counter = 127, so don't dampen the pitch
+
+ INX                    \ Set X = 128
+
+ STA QQ17               \ Set QQ17 = %10110000, which has bit 7 set, to
+                        \ switch standard tokens to Sentence Case
+
+ LDA TYPE               \ Call write_card to display the ship card for the ship
+ JSR write_card         \ type in TYPE
 
  LDX TYPE               \ Set A to the number of this ship blueprint within the
  LDA ship_posn,X        \ ship blueprints file that we loaded (fetched from the
@@ -19451,33 +19523,54 @@ LOAD_H% = LOAD% + P% - CODE%
 
 .l_release
 
- JSR RDKEY
- BNE l_release
+ JSR RDKEY              \ Scan the keyboard for a key press and return the
+                        \ internal key number in X (or 0 for no key press)
+
+ BNE l_release          \ If a key is being pressed, loop back to l_release
+                        \ until it is released
 
 .l_395a
 
- LDX TYPE
- LDA ship_dist,X
- CMP INWK+7
- BEQ l_3962
- DEC INWK+7
+ LDX TYPE               \ Set A to the closest distance that we want to show the 
+ LDA ship_dist,X        \ ship (fetched from the ship_dist table)
+
+ CMP INWK+7             \ If z_hi (the ship's distance) is equal to A, jump to
+ BEQ l_3962             \ l_3962 to skip the following decrement, as the ship is
+                        \ already close enough
+
+ DEC INWK+7             \ Decrement the ship's distance, to bring the ship
+                        \ a bit closer to us
 
 .l_3962
 
- JSR MVEIT
- LDA #&80
- STA INWK+6
- ASL A
- STA INWK
- STA INWK+3
- JSR LL9
- DEC MCNT
+ JSR MVEIT              \ Move the ship in space according to the orientation
+                        \ vectors and the new value in z_hi
 
- JSR WSCAN
- JSR RDKEY
+ LDA #128               \ Set z_lo = 128, so the closest the ship gets to us is
+ STA INWK+6             \ z_hi * 256 + 128 (where z_hi is the value in the
+                        \ ship_dist table)
 
- BEQ l_395a
- JMP BAY
+ ASL A                  \ Set A = 0
+
+ STA INWK               \ Set x_lo = 0, so the ship remains in the screen centre
+
+ STA INWK+3             \ Set y_lo = 0, so the ship remains in the screen centre
+
+ JSR LL9                \ Call LL9 to display the ship
+
+ DEC MCNT               \ Decrement the main loop counter
+
+ JSR WSCAN              \ Call WSCAN to wait for the vertical sync, so the ship
+                        \ rotates smoothly
+
+ JSR RDKEY              \ Scan the keyboard for a key press and return the
+                        \ internal key number in X (or 0 for no key press)
+
+ BEQ l_395a             \ If no key is being pressed, loop back to l_395a to
+                        \ keep rotating the ship
+
+ JMP BAY                \ Jump to BAY to go to the docking bay (i.e. show the
+                        \ Encyclopedia screen)
 
                         \ --- End of added section ---------------------------->
 
@@ -19486,7 +19579,7 @@ LOAD_H% = LOAD% + P% - CODE%
 \       Name: controls
 \       Type: Subroutine
 \   Category: Encyclopedia
-\    Summary: AJD
+\    Summary: Show the Controls menu and display the chosen page
 \
 \ ******************************************************************************
 
@@ -19494,25 +19587,47 @@ LOAD_H% = LOAD% + P% - CODE%
 
 .controls
 
- LDX #3
- JSR menu
- ADC #&56
- PHA
- ADC #&04
- PHA
- LDA #&20
- JSR TT66
- JSR MT1
- LDA #&0B
+ LDX #3                 \ Call menu with X = 4 to show menu 4, the Controls
+ JSR menu               \ menu, and return the choice in A, so A is now:
+                        \
+                        \   * 1 = Flight
+                        \   * 2 = Combat
+                        \   * 3 = Navigation
+                        \   * 4 = Trading
+
+ ADC #86                \ Store the choice + 86 on the stack, to give the token
+ PHA                    \ number of the body to show for the relevant choice,
+                        \ from flight controls (token 87) to trading controls
+                        \ (token 90)
+
+ ADC #4                 \ Store the choice + 90 on the stack, to give the token
+ PHA                    \ number of the title to show for the relevant choice,
+                        \ from flight controls (token 91) to trading controls
+                        \ (token 94)
+
+ LDA #32                \ Clear the top part of the screen, draw a white border,
+ JSR TT66               \ and set the current view type in QQ11 to 32
+
+ JSR MT1                \ Switch to ALL CAPS when printing extended tokens
+
+ LDA #11                \ Move the text cursor to column 11
  STA XC
- PLA
- JSR write_msg3
- JSR NLIN4
- JSR MT2
- INC YC
- PLA
- JSR write_msg3
- JMP l_restart
+
+ PLA                    \ Pull the token number for the title from the stack
+ JSR write_msg3         \ (choice + 90) and print it
+
+ JSR NLIN4              \ Draw a horizontal line at pixel row 19 to box in the
+                        \ title
+
+ JSR MT2                \ Switch to Sentence Case when printing extended tokens
+
+ INC YC                 \ Move the text cursor down one line
+
+ PLA                    \ Pull the token number for the body from the stack
+ JSR write_msg3         \ (choice + 86) and print it
+
+ JMP l_restart          \ Jump to l_restart to wait until a key is pressed and
+                        \ show the Encyclopedia screen
 
                         \ --- End of added section ---------------------------->
 
@@ -19521,7 +19636,7 @@ LOAD_H% = LOAD% + P% - CODE%
 \       Name: equip_data
 \       Type: Subroutine
 \   Category: Encyclopedia
-\    Summary: AJD
+\    Summary: Show the Equipment menu and display the chosen page
 \
 \ ******************************************************************************
 
@@ -19529,29 +19644,64 @@ LOAD_H% = LOAD% + P% - CODE%
 
 .equip_data
 
- LDX #4
- JSR menu
- ADC #&6B
- PHA
- SBC #&0C
- PHA
- LDA #&20
- JSR TT66
- JSR MT1
- LDA #&0B
+ LDX #4                 \ Call menu with X = 4 to show menu 4, the Equipment
+ JSR menu               \ menu, and return the choice in A, so A is now:
+                        \
+                        \   *  1 = Missiles
+                        \   *  2 = I.F.F. system
+                        \   *  3 = E.C.M. system
+                        \   *  4 = Pulse lasers
+                        \   *  5 = Beam lasers
+                        \   *  6 = Fuel scoops
+                        \   *  7 = Escape pod
+                        \   *  8 = Hyperspace unit
+                        \   *  9 = Energy unit
+                        \   * 10 = Docking computers
+                        \   * 11 = Galactic hyperdrive
+                        \   * 12 = Military lasers
+                        \   * 13 = Mining lasers
+
+ ADC #107               \ Store the choice + 107 on the stack, to give the token
+ PHA                    \ number of the body to show for the relevant choice,
+                        \ from missiles (token 108) to mining lasers (token 120)
+
+ SBC #12                \ Store the choice + 94 on the stack, to give the token
+ PHA                    \ number of the title to show for the relevant choice,
+                        \ from missiles (token 95) to mining lasers (token 107)
+
+ LDA #32                \ Clear the top part of the screen, draw a white border,
+ JSR TT66               \ and set the current view type in QQ11 to 32
+
+ JSR MT1                \ Switch to ALL CAPS when printing extended tokens
+
+ LDA #11                \ Move the text cursor to column 11
  STA XC
- PLA
- JSR write_msg3
- JSR NLIN4
- JSR MT2
- JSR MT13
+
+ PLA                    \ Pull the token number for the title from the stack
+ JSR write_msg3         \ (choice + 95) and print it
+
+ JSR NLIN4              \ Draw a horizontal line at pixel row 19 to box in the
+                        \ title
+
+ JSR MT2                \ Switch to Sentence Case when printing extended tokens
+                        \ (though this gets overridden by the following
+                        \ instruction, so this has no effect)
+
+ JSR MT13               \ Switch to lower case when printing extended tokens, so
+                        \ the text is shown in justified paragraphs of lower
+                        \ case text
+
+ INC YC                 \ Move the text cursor down two lines
  INC YC
- INC YC
- LDA #&01
+
+ LDA #1                 \ Move the text cursor to column 1
  STA XC
- PLA
- JSR write_msg3
- JMP l_restart
+
+ PLA                    \ Pull the token number for the body from the stack
+ JSR write_msg3         \ (choice + 107) and print it
+
+ JMP l_restart          \ Jump to l_restart to wait until a key is pressed and
+                        \ show the Encyclopedia screen
 
                         \ --- End of added section ---------------------------->
 
@@ -19560,7 +19710,13 @@ LOAD_H% = LOAD% + P% - CODE%
 \       Name: trading
 \       Type: Subroutine
 \   Category: Encyclopedia
-\    Summary: AJD
+\    Summary: Wait until a key is pressed and show the Encyclopedia screen
+\
+\ ------------------------------------------------------------------------------
+\
+\ Other entry points:
+\
+\   l_restart           Does exactly the same as a call to trading
 \
 \ ******************************************************************************
 
@@ -19570,9 +19726,11 @@ LOAD_H% = LOAD% + P% - CODE%
 
 .l_restart
 
- JSR PAUSE2
+ JSR PAUSE2             \ Call PAUSE2 to wait until a key is pressed, ignoring
+                        \ any existing key press
 
- JMP BAY
+ JMP BAY                \ Jump to BAY to go to the docking bay (i.e. show the
+                        \ Encyclopedia screen)
 
                         \ --- End of added section ---------------------------->
 
@@ -19826,7 +19984,7 @@ LOAD_H% = LOAD% + P% - CODE%
 \       Name: ship_load
 \       Type: Variable
 \   Category: Encyclopedia
-\    Summary: AJD
+\    Summary: The OS command string for loading a ship blueprints file
 \
 \ ******************************************************************************
 

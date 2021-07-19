@@ -22684,7 +22684,7 @@ LOAD_F% = LOAD% + P% - CODE%
 \ BRKV is set to this routine in the decryption routine at DEEOR just before the
 \ game is run for the first time, and at the end of the SVE routine after the
 \ disc access menu has been processed. In other words, this is the standard
-\ BRKV handler for the game, and it's swapped out to MRBRK for disc access
+\ BRKV handler for the game, and it's swapped out to MEBRK for disc access
 \ operations only.
 \
 \ When it is the BRKV handler, the routine can be triggered using a BRK
@@ -23881,7 +23881,7 @@ ENDIF
 \ BRKV is set to this routine at the start of the SVE routine, just before the
 \ disc access menu is shown, and it reverts to BRBR at the end of the SVE
 \ routine after the disc access menu has been processed. In other words, BRBR is
-\ the standard BRKV handler for the game, and it's swapped out to MRBRK for disc
+\ the standard BRKV handler for the game, and it's swapped out to MEBRK for disc
 \ access operations only.
 \
 \ When it is the BRKV handler, the routine can be triggered using a BRK
@@ -23907,7 +23907,7 @@ ENDIF
                         \ the value it had before we set BRKV to point to MEBRK
                         \ in the SVE routine. Modifying this instruction means
                         \ we don't need to use the stack variable, which saves
-                        \ us a both byte in this instruction, as well the byte
+                        \ us both a byte in this instruction, as well the byte
                         \ of the stack variable
 
                         \ --- End of replacement ------------------------------>
@@ -23991,7 +23991,7 @@ ENDIF
                         \ --- Mod: Original Acornsoft code removed: ----------->
 
 \ TSX                   \ Transfer the stack pointer to X and store it in stack,
-\ STX stack             \ so we can restore it in the MRBRK routine
+\ STX stack             \ so we can restore it in the MEBRK routine
 
                         \ --- And replaced by: -------------------------------->
 

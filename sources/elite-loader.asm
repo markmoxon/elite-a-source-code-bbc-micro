@@ -57,11 +57,11 @@ IRQ1V = &0204           \ The IRQ1V vector that we intercept to implement the
 WRCHV = &020E           \ The WRCHV vector that we intercept with our custom
                         \ text printing routine
 
-BYTEV = &020A           \ The BYTEV vector that we intercept to AJD
+BYTEV = &020A           \ The BYTEV vector that we intercept on the BBC Master
 
-FILEV = &0212           \ The FILEV vector that we intercept to AJD
+FILEV = &0212           \ The FILEV vector that we intercept on the BBC Master
 
-FSCV = &021E            \ The FSCV vector that we intercept to AJD
+FSCV = &021E            \ The FSCV vector that we intercept on the BBC Master
 
 NETV = &0224            \ The NETV vector that we intercept as part of the copy
                         \ protection
@@ -107,9 +107,11 @@ VEC = &7FFE             \ VEC is where we store the original value of the IRQ1
 
 ORG &0004
 
-.key_io
+.TRTB%
 
- SKIP 1                 \ AJD
+ SKIP 2                 \ TRTB%(1 0) points to the keyboard translation table,
+                        \ which is used to translate internal key numbers to
+                        \ ASCII
 
 ORG &0020
 
@@ -501,8 +503,8 @@ ENDMACRO
 
                         \ --- Mod: Code added for Elite-A: -------------------->
 
- LDA #&77               \ AJD
- JSR OSBYTE
+ LDA #119               \ Call OSBYTE with A = 119 to close any *SPOOL or *EXEC
+ JSR OSBYTE             \ files
 
                         \ --- End of added code ------------------------------->
 
@@ -522,9 +524,9 @@ ENDMACRO
 
                         \ --- Mod: Code added for Elite-A: -------------------->
 
- LDA #&EE               \ AJD
- STA BRKV
- LDA #&11
+ LDA #LO(S%+11)         \ Point BRKV to the fifth entry in the main docked
+ STA BRKV               \ code's S% workspace, which contains JMP BRBR
+ LDA #HI(S%+11)
  STA BRKV+1
 
                         \ --- End of added code ------------------------------->
@@ -701,7 +703,7 @@ ENDMACRO
  STA &386
  SEI 
  LDA &FE44
- \ STA &01
+\STA &01
  LDA #&39
  STA &FE4E
  LDA #&7F
@@ -775,8 +777,8 @@ ENDMACRO
  LDX #&00
  LDY #&FF
  JSR OSBYTE
- STX key_io
- STY key_io+&01
+ STX TRTB%
+ STY TRTB%+1
 
  LDA #&00               \ Set the following:
  STA ZP                 \
@@ -826,30 +828,33 @@ ENDMACRO
  JSR OSBYTE
  STX key_tube
  STY key_tube+&01
- \ LDX #LO(tube_400)
- \ LDY #HI(tube_400)
- \ LDA #1
- \ JSR &0406
- \ LDA #LO(WORDS)
- \ STA &72
- \ LDA #HI(WORDS)
- \ STA &73
- \ LDX #&04
- \ LDY #&00
- \tube_wr LDA (&72),Y
- \ JSR tube_wait
- \ BIT tube_r3s
- \ BVC tube_wr
- \ STA tube_r3d
- \ INY
- \ BNE tube_wr
- \ INC &73
- \ DEX
- \ BNE tube_wr
- \ LDA #LO(tube_wrch)
- \ STA WRCHV
- \ LDA #HI(tube_wrch)
- \ STA WRCHV+&01
+
+\LDX #LO(tube_400)
+\LDY #HI(tube_400)
+\LDA #1
+\JSR &0406
+\LDA #LO(WORDS)
+\STA &72
+\LDA #HI(WORDS)
+\STA &73
+\LDX #&04
+\LDY #&00
+\.tube_wr
+\LDA (&72),Y
+\JSR tube_wait
+\BIT tube_r3s
+\BVC tube_wr
+\STA tube_r3d
+\INY
+\BNE tube_wr
+\INC &73
+\DEX
+\BNE tube_wr
+\LDA #LO(tube_wrch)
+\STA WRCHV
+\LDA #HI(tube_wrch)
+\STA WRCHV+&01
+
  LDX #LO(tube_run)
  LDY #HI(tube_run)
  JMP OSCLI
@@ -858,14 +863,14 @@ ENDMACRO
 
  EQUS "R.2.H", &0D
 
- \tube_400 EQUD &0400
-
- \tube_wait
- \ JSR tube_wait2
- \tube_wait2
- \ JSR tube_wait3
- \tube_wait3
- \ RTS
+\.tube_400
+\EQUD &0400
+\.tube_wait
+\JSR tube_wait2
+\.tube_wait2
+\JSR tube_wait3
+\.tube_wait3
+\RTS
 
                         \ --- End of replacement ------------------------------>
 
@@ -874,7 +879,8 @@ ENDMACRO
 \       Name: iff_index_code
 \       Type: Subroutine
 \   Category: Dashboard
-\    Summary: AJD
+\    Summary: The iff_index routine, bundled up in the loader so it can be moved
+\             to &0D7A to be run
 \
 \ ******************************************************************************
 
