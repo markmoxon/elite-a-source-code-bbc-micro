@@ -696,54 +696,86 @@ ENDMACRO
                         \ interested in) and PB0 to PB3 as input (so we can read
                         \ from the button rows)
 
- LDA #0                 \ Set up palatte flags AJD
- STA &348
- STA &346
- LDA #&FF
- STA &386
- SEI 
- LDA &FE44
-\STA &01
- LDA #&39
- STA &FE4E
- LDA #&7F
- STA &FE6E
- LDA IRQ1V
- STA &7FFE
- LDA IRQ1V+&01
- STA &7FFF
- LDA #&4B
- STA IRQ1V
- LDA #&11
- STA IRQ1V+&01
- LDA #&39
- STA &FE45
- CLI 
- LDA #0 \ test for BBC Master
- LDX #1
- JSR OSBYTE \ get OS version
- CPX #3
- BCC not_master
- LDX #0 \ copy master code to DD00
+ LDA #0                 \ Set HFX = 0
+ STA HFX
+
+ STA LASCT              \ Set LASCT = 0
+
+ LDA #&FF               \ Set ESCP = &FF so we show the palette for when we have
+ STA ESCP               \ an escape pod fitted (i.e. black, red, white, cyan)
+
+ SEI                    \ Disable interrupts while we set up our interrupt
+                        \ handler to support the split-screen mode
+
+ LDA VIA+&44            \ If the STA instruction were not commented out, then
+\STA &0001              \ this would set location &0001 among the random number
+                        \ seeds to a pretty random number (i.e. the value of the
+                        \ the 6522 System VIA T1C-L timer 1 low-order), but as
+                        \ the STA is commented out, this has no effect
+
+ LDA #%00111001         \ Set 6522 System VIA interrupt enable register IER
+ STA VIA+&4E            \ (SHEILA &4E) bits 0 and 3-5 (i.e. disable the Timer1,
+                        \ CB1, CB2 and CA2 interrupts from the System VIA)
+
+ LDA #%01111111         \ Set 6522 User VIA interrupt enable register IER
+ STA VIA+&6E            \ (SHEILA &6E) bits 0-7 (i.e. disable all hardware
+                        \ interrupts from the User VIA)
+
+ LDA IRQ1V              \ Copy the current IRQ1V vector address into VEC(1 0)
+ STA VEC
+ LDA IRQ1V+1
+ STA VEC+1
+
+ LDA #LO(IRQ1)          \ Set the IRQ1V vector to IRQ1, so IRQ1 is now the
+ STA IRQ1V              \ interrupt handler
+ LDA #HI(IRQ1)
+ STA IRQ1V+1
+
+ LDA #VSCAN             \ Set 6522 System VIA T1C-L timer 1 high-order counter
+ STA VIA+&45            \ (SHEILA &45) to VSCAN (57) to start the T1 counter
+                        \ counting down from 14622 at a rate of 1 MHz
+
+ CLI                    \ Re-enable interrupts
+
+ LDA #0                 \ Call OSBYTE with A = 0 and X = 1 to fetch bit 0 of the
+ LDX #1                 \ operating system version into X
+ JSR OSBYTE
+
+ CPX #3                 \ If X =< 3 then this is not a BBC Master, so jump to
+ BCC not_master         \ not_master to continue loading the BBC Micro version
+
+                        \ This is a BBC Master, so now we copy the block of
+                        \ Master-specific filing system code from to_dd00 to
+                        \ &DD00 (so we copy the following routines: do_FILEV,
+                        \ do_FSCV, do_BYTEV, set_vectors and old_BYTEV)
+
+ LDX #0                 \ Set up a counter in X for the copy
 
 .cpmaster
 
- LDA to_dd00,X
+ LDA to_dd00,X          \ Copy the X-th byte of to_dd00 to &DD00
  STA &DD00,X
- INX
- CPX #dd00_len
- BNE cpmaster
- LDA #&8F \ service call
- LDX #&21 \ ?
- LDY #&C0 \ ? top of absolute workspace
- JSR OSBYTE \ ? in XY
- STX put0+1 \ modify workspace save address
+
+ INX                    \ Increment the loop counter
+
+ CPX #dd00_len          \ Loop back until we have copied all the bytes in the
+ BNE cpmaster           \ to_dd00 block (as the length of the block is set in
+                        \ dd00_len below)
+
+ LDA #143               \ Call OSBYTE 143 to issue a paged ROM service call of
+ LDX #&21               \ type &21 with argument &C0, which is the "Indicate
+ LDY #&C0               \ static workspace in 'hidden' RAM" service call that
+ JSR OSBYTE             \ AJD
+
+ STX put0+1             \ Modify workspace save address AJD
  STX put1+1
  STX put2+1
- STX get0+1 \ modify workspace restore address
+
+ STX get0+1             \ Modify workspace restore address AJD
  STX get1+1
  STX get2+1
- STY put0+2
+
+ STY put0+2             \ AJD
  STY get0+2
  INY
  STY put1+2
@@ -751,34 +783,48 @@ ENDMACRO
  INY
  STY put2+2
  STY get2+2
- LDA FILEV \ modify address for old FILEV
+
+ LDA FILEV              \ Set old_FILEV(1 0) to the existing address for FILEV
  STA old_FILEV+1
  LDA FILEV+1
  STA old_FILEV+2
- LDA FSCV \ modify address for old FSCV
+
+ LDA FSCV               \ Set old_FSCV(1 0) to the existing address for FSCV
  STA old_FSCV+1
  LDA FSCV+1
  STA old_FSCV+2
- LDA BYTEV \ modify address for old BYTEV
+
+ LDA BYTEV              \ Set old_BYTEV(1 0) to the existing address for BYTEV
  STA old_BYTEV+1
  LDA BYTEV+1
  STA old_BYTEV+2
- JSR set_vectors \ replace FILEV and FSCV
+
+ JSR set_vectors        \ Call set_vectors to update FILEV, FSCV and BYTEV to
+                        \ point to the new handlers in do_FILEV, do_FSCV and
+                        \ do_BYTEV
 
 .not_master
 
- LDA #&EA \ test for tube
- LDY #&FF
- LDX #&00
+ LDA #234               \ Call OSBYTE with A = 234, X = 0 and Y = &FF, which
+ LDY #&FF               \ detects whether Tube hardware is present, returning
+ LDX #0                 \ X = 0 (not present) or X = &FF (present)
  JSR OSBYTE
- TXA
- BNE tube_go
- LDA #&AC \ keyboard translation table
- LDX #&00
+
+ TXA                    \ Copy the result of the Tube check from X into A
+
+ BNE tube_go            \ If X is non-zero then we are running this over the
+                        \ Tube, so jump to tube_go to set up the Tube version
+
+                        \ If we get here then we are on a BBC Micro without a
+                        \ 6502 Second Processor
+
+ LDA #172               \ Call OSBYTE 172 to read the address of the MOS
+ LDX #0                 \ keyboard translation table into (Y X)
  LDY #&FF
  JSR OSBYTE
- STX TRTB%
- STY TRTB%+1
+
+ STX TRTB%              \ Store the address of the keyboard translation table in
+ STY TRTB%+1            \ TRTB%(1 0)
 
  LDA #&00               \ Set the following:
  STA ZP                 \
@@ -810,27 +856,35 @@ ENDMACRO
  JSR MVPG               \ Call MVPG to move and decrypt a page of memory from
                         \ LOADcode to LOAD
 
- LDY #35
+ LDY #35                \ We now want to copy the iff_index routine from
+                        \ iff_index_code to iff_index, so set a counter in Y
+                        \ for the 36 bytes to copy
 
 .copy_d7a
 
- LDA iff_index_code,Y
- STA iff_index,Y
- DEY
- BPL copy_d7a
- JMP &0B00
+ LDA iff_index_code,Y   \ Copy the X-th byte of iff_index_code to the X-th byte
+ STA iff_index,Y        \ of iff_index
+
+ DEY                    \ Decrement the loop counter
+
+ BPL copy_d7a           \ Loop back to copy the next byte until they are all
+                        \ done
+
+ JMP LOAD               \ Jump to the start of the LOAD routine we moved above,
+                        \ to run the game
 
 .tube_go
 
- LDA #&AC \ keyboard translation table
- LDX #&00
+ LDA #172               \ Call OSBYTE 172 to read the address of the MOS
+ LDX #0                 \ keyboard translation table into (Y X)
  LDY #&FF
  JSR OSBYTE
- STX key_tube
- STY key_tube+&01
 
-\LDX #LO(tube_400)
-\LDY #HI(tube_400)
+ STX key_tube           \ Store the address of the keyboard translation table in
+ STY key_tube+1         \ key_tube(1 0)
+
+\LDX #LO(tube_400)      \ These instructions are commented out in the original
+\LDY #HI(tube_400)      \ version
 \LDA #1
 \JSR &0406
 \LDA #LO(WORDS)
@@ -855,16 +909,19 @@ ENDMACRO
 \LDA #HI(tube_wrch)
 \STA WRCHV+&01
 
- LDX #LO(tube_run)
+ LDX #LO(tube_run)      \ Set (Y X) to point to tube_run ("R.2.H")
  LDY #HI(tube_run)
- JMP OSCLI
+
+ JMP OSCLI              \ Call OSCLI to run the OS command in tube_run, which
+                        \ runs the I/O processor code in 2.H
 
 .tube_run
 
- EQUS "R.2.H", &0D
+ EQUS "R.2.H"           \ The OS command for running the Tube version's I/O
+ EQUB 13                \ processor code in 2.H
 
-\.tube_400
-\EQUD &0400
+\.tube_400              \ These instructions are commented out in the original
+\EQUD &0400             \ version
 \.tube_wait
 \JSR tube_wait2
 \.tube_wait2
