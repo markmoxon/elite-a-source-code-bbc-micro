@@ -2929,9 +2929,10 @@ BRKV = P% - 2           \ The address of the destination address in the above
 \
 \ Other entry points:
 \
-\   DTS                 Print the single letter pointed to by A, where A is an
-\                       address within the extended two-letter token tables of
-\                       TKN2 and QQ16
+\   DTS                 Print a single letter in the correct case
+\
+\   DT3                 Print the jump token given in A (where A is in the range
+\                       0 to 31)
 \
 \   msg_pairs           Print the extended two-letter token in A (where A is in
 \                       the range 215 to 255)

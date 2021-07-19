@@ -2602,9 +2602,10 @@ BRKV = P% - 2           \ The address of the destination address in the above
 \
 \ Other entry points:
 \
-\   DTS                 Print the single letter pointed to by A, where A is an
-\                       address within the extended two-letter token tables of
-\                       TKN2 and QQ16
+\   DTS                 Print a single letter in the correct case
+\
+\   DT3                 Print the jump token given in A (where A is in the range
+\                       0 to 31)
 \
 \   msg_pairs           Print the extended two-letter token in A (where A is in
 \                       the range 215 to 255)
@@ -19580,7 +19581,15 @@ LOAD_H% = LOAD% + P% - CODE%
 \       Name: write_card
 \       Type: Subroutine
 \   Category: Encyclopedia
-\    Summary: AJD
+\    Summary: Display a ship card in the encyclopedia
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   A                   The number of the ship whose card we want to display,
+\                       in the range 0 to 27 (see card_addr for a list of
+\                       ship numbers)
 \
 \ ******************************************************************************
 
@@ -19588,97 +19597,227 @@ LOAD_H% = LOAD% + P% - CODE%
 
 .write_card
 
- ASL A
- TAY
- LDA card_addr,Y
- STA V
- LDA card_addr+1,Y
+ ASL A                  \ Set Y = A * 2, so we can use it as an index into the
+ TAY                    \ card_addr table (which has two bytes per entry)
+
+ LDA card_addr,Y        \ Set V(1 0) to the Y-th entry from card_addr, so it
+ STA V                  \ points to the data for the ship card that we want to
+ LDA card_addr+1,Y      \ show
  STA V+1
 
 .card_repeat
 
- JSR MT1
- LDY #&00
- LDA (V),Y
- TAX
- BEQ quit_card
- BNE card_check
+                        \ We now loop around card_repeat, with each iteration
+                        \ printing a different section of the ship card. We
+                        \ update V(1 0) so it always points to the data to print
+                        \ in the ship card, and we look up the corresponding
+                        \ section of the card_pattern table to see how to lay
+                        \ out the card (card_pattern contains text coordinates
+                        \ and label data that describe the layout of the ship
+                        \ cards)
+
+ JSR MT1                \ Switch to ALL CAPS when printing extended tokens
+
+ LDY #0                 \ Fetch the byte at V(1 0) into X, which will either be
+ LDA (V),Y              \ the number of a card section (e.g. 1 for inservice
+ TAX                    \ date, 2 for combat factor and so on), or a 0 if we
+                        \ have reached the end of the card data
+
+ BEQ quit_card          \ If the byte we just fetched is a zero, jump to
+                        \ quit_card to return from the subroutine, as we have
+                        \ reached the end of the card data
+
+ BNE card_check         \ Otherwise we have found a valid card section, so jump
+                        \ to card_check to start looking for the corresponding
+                        \ layout pattern in card_pattern (the BNE is effectively
+                        \ a JMP as we just passed through a BEQ)
 
 .card_find
 
- INY
- INY
- INY
- LDA card_pattern-1,Y
- BNE card_find
+                        \ If we get here than we want to increment Y until it
+                        \ points to the start of the next pattern that comes
+                        \ after our current position of card_pattern + Y
+
+ INY                    \ Increment Y by 3 to step to the next line of data (as
+ INY                    \ the card_pattern table is made up of lines of 3 bytes
+ INY                    \ each)
+
+ LDA card_pattern-1,Y   \ Fetch the last byte of the previous 3-byte line
+
+ BNE card_find          \ If it is non-zero then we are still in the same
+                        \ pattern as in the previous iteration, so loop back to
+                        \ move onto the next line of 3 bytes
+
+                        \ Otherwise we have moved onto the next pattern, so now
+                        \ we check whether we have reached the pattern we seek
 
 .card_check
 
- DEX
- BNE card_find
+                        \ When we first jump here from above, we want to search
+                        \ through the card_pattern table for the pattern that
+                        \ corresponds to card section X, where X starts at 1. We
+                        \ also jump here with Y set to 0
+                        \
+                        \ We find what we are looking for by stepping through
+                        \ each pattern, decreasing X as we go past each pattern,
+                        \ and increasing Y so that Y points to the start of the
+                        \ next pattern to check (as an offset from card_pattern)
+                        \
+                        \ So as we iterate round the loop, at any one point, we
+                        \ want to skip over X - 1 more patterns, starting from
+                        \ the pattern at card_pattern + Y
+
+ DEX                    \ Decrement the section number in X
+
+ BNE card_find          \ If X hasn't reached 0, then we haven't stepped through
+                        \ the right number of patterns yet, so jump to card_find
+                        \ to increment Y so that it points to the start of the
+                        \ next pattern in card_pattern
 
 .card_found
 
- LDA card_pattern,Y
- STA XC
- LDA card_pattern+1,Y
- STA YC
- LDA card_pattern+2,Y
- BEQ card_details
- JSR write_msg3
- INY
- INY
- INY
- BNE card_found
+                        \ When we get here, we have stepped through the correct
+                        \ number of patterns for the card section we want to
+                        \ print, and Y will point to the pattern within the
+                        \ card_pattern table that corresponds to the section we
+                        \ want to print, so we now fetch the pattern from
+                        \ card_pattern and print the data in that pattern
+                        \
+                        \ The pattern for each section is made up of multiple
+                        \ lines of 3 bytes each, with each line consisting of:
+                        \
+                        \   * Text column
+                        \   * Text row
+                        \   * What to print (i.e. a label or ship data)
+
+ LDA card_pattern,Y     \ The first byte of each 3-byte line in the pattern is
+ STA XC                 \ the x-coordinate where we should print the text, so
+                        \ move the text cursor to the correct column
+
+ LDA card_pattern+1,Y   \ The second byte of each 3-byte line in the pattern
+ STA YC                 \ is the y-coordinate where we should print the text, so
+                        \ move the text cursor to the correct row
+
+ LDA card_pattern+2,Y   \ The third byte of each 3-byte line in the pattern is
+                        \ either a text token to print for the label (if it's
+                        \ non-zero) or it denotes that we should print the
+                        \ relevant ship data (if it's zero), so fetch the value
+                        \ into A
+
+ BEQ card_details       \ If A = 0 then we should print the relevant ship data,
+                        \ so jump to card_details to do just that
+
+ JSR write_msg3         \ Otherwise this is a label, so print the text token in
+                        \ A, which prints the label in the right place
+
+ INY                    \ We now need to fetch the next line of the pattern, so
+ INY                    \ we increment Y by 3 to step to the next 3-byte line of
+ INY                    \ pattern data
+
+ BNE card_found         \ Loop back to card_found to move onto the next line in
+                        \ the pattern (the BNE is effectively a JMP as Y is
+                        \ never zero)
 
 .card_details
 
- JSR MT2
- LDY #&00
+                        \ If we get here, then we have printed all the labels in
+                        \ the pattern, and it's time to print the ship data,
+                        \ which is at V(1 0) (the first time we get here, V(1 0)
+                        \ points to the start of the ship data, and as we loop
+                        \ through each bit of data, we update V(1 0) so that it
+                        \ always points to the next bit of data to print)
+
+ JSR MT2                \ Switch to Sentence Case when printing extended tokens
+
+ LDY #0                 \ We now loop through each character or token in the
+                        \ ship data, which is stored as a recursive token, so
+                        \ set a counter in Y for each character or token in the
+                        \ ship data (we start this at 0 and increment it
+                        \ straight away, as the first byte in the ship data at
+                        \ V(1 0) is the section number, rather than the data
+                        \ itself
 
 .card_loop
 
- INY
- LDA (V),Y
- BEQ card_end
- BMI card_msg
- CMP #&20
- BCC card_macro
- JSR DTS
- JMP card_loop
+ INY                    \ Increment the character counter to point to the next
+                        \ character or token in the ship data
+
+ LDA (V),Y              \ Set A to the next character or token to print
+
+ BEQ card_end           \ If A = 0 then we have reached the end of this bit of
+                        \ ship data, so jump to card_end to move onto the next
+                        \ one
+
+ BMI card_msg           \ If A > 127 then this is a recursive token, so jump to
+                        \ card_msg to print it
+
+ CMP #32                \ If A < 32 then this is a jump token, so jump to
+ BCC card_macro         \ card_macro to print it
+
+ JSR DTS                \ Otherwise this is a character rather than a token, so
+                        \ call DTS to print it in the correct case
+
+ JMP card_loop          \ Jump back to card_loop to print the next token in the
+                        \ the ship data
 
 .card_macro
 
- JSR DT3
- JMP card_loop
+ JSR DT3                \ Call DT3 to print the jump token given in A
+
+ JMP card_loop          \ Jump back to card_loop to print the next token in the
+                        \ the ship data
 
 .card_msg
 
- CMP #&D7
- BCS card_pairs
- AND #&7F
- JSR write_msg3
- JMP card_loop
+ CMP #215               \ If A >= 215, then this is a two-letter token, so jump
+ BCS card_pairs         \ to card_pairs to print it
+
+ AND #%01111111         \ This is a recursive token and A is in the range 128 to
+                        \ 214, so clear bit 7 to reduce it to the range 0 to 86,
+                        \ which corresponds to tokens in the msg_3 table (as we
+                        \ set bit 7 when inserting msg_3 tokens into the ship
+                        \ data with the CTOK macro)
+
+ JSR write_msg3         \ Print the extended token in A
+
+ JMP card_loop          \ Jump back to card_loop to print the next token in the
+                        \ the ship data
 
 .card_pairs
 
  JSR msg_pairs          \ Print the extended two-letter token in A
 
- JMP card_loop
+ JMP card_loop          \ Jump back to card_loop to print the next token in the
+                        \ the ship data
 
 .card_end
 
- TYA
- SEC
+                        \ We have now printed this bit of ship data and the last
+                        \ character we printed was at V(1 0) + Y, so we now
+                        \ update V(1 0) so that it points to the first byte of
+                        \ the next bit of ship data, by doing this:
+                        \
+                        \   V(1 0) = V(1 0) + Y + 1
+
+ TYA                    \ First we add the low bytes, setting the C flag to add
+ SEC                    \ an extra 1
  ADC V
  STA V
- BCC card_repeat
- INC V+1
- BCS card_repeat
+
+ BCC card_repeat        \ If the above addition didn't overflow, we are done, so
+                        \ loop back to card_repeat to move onto the next bit of
+                        \ ship data
+
+ INC V+1                \ The addition overflowed, so increment the high byte,
+                        \ as V(1 0) just passed a page boundary
+
+ BCS card_repeat        \ Loop back to card_repeat to move onto the next bit of
+                        \ ship data (this BCS is effectively a JMP as we passed
+                        \ through the BCC above)
 
 .quit_card
 
- RTS
+ RTS                    \ Return from the subroutine
 
                         \ --- End of added section ---------------------------->
 
@@ -19722,8 +19861,8 @@ LOAD_H% = LOAD% + P% - CODE%
  EQUB 'P'               \ Chameleon
  EQUB 'B'               \ Cobra Mk I
  EQUB 'N'               \ Cobra Mk III
- EQUB 'A'               \ Coriolis
- EQUB 'B'               \ Dodecagon
+ EQUB 'A'               \ Coriolis station
+ EQUB 'B'               \ Dodo station
  EQUB 'A'               \ Escape Pod
  EQUB 'M'               \ Fer-de-Lance
  EQUB 'E'               \ Gecko
@@ -19767,8 +19906,8 @@ LOAD_H% = LOAD% + P% - CODE%
  EQUB 12                \ Chameleon
  EQUB 17                \ Cobra Mk I
  EQUB 11                \ Cobra Mk III
- EQUB 2                 \ Coriolis
- EQUB 2                 \ Dodecagon
+ EQUB 2                 \ Coriolis station
+ EQUB 2                 \ Dodo station
  EQUB 3                 \ Escape Pod
  EQUB 25                \ Fer-de-Lance
  EQUB 17                \ Gecko
@@ -19812,8 +19951,8 @@ LOAD_H% = LOAD% + P% - CODE%
  EQUB 1                 \ Chameleon
  EQUB 1                 \ Cobra Mk I
  EQUB 2                 \ Cobra Mk III
- EQUB 4                 \ Coriolis
- EQUB 4                 \ Dodecagon
+ EQUB 4                 \ Coriolis station
+ EQUB 4                 \ Dodo station
  EQUB 1                 \ Escape Pod
  EQUB 1                 \ Fer-de-Lance
  EQUB 1                 \ Gecko
@@ -19981,8 +20120,8 @@ LOAD_H% = LOAD% + P% - CODE%
 \   0 = Encyclopedia Galactica
 \   1 = Ships A-G
 \   2 = Ships I-W
-\   3 = Equipment
-\   4 = Controls
+\   3 = Controls
+\   4 = Equipment
 \
 \ ******************************************************************************
 
@@ -19992,23 +20131,23 @@ LOAD_H% = LOAD% + P% - CODE%
 
  EQUB 1                 \ Menu 0: Title is text token 1:
                         \
-                        \         "ENCYCLOPEDIA GALACTICA"
+                        \   "ENCYCLOPEDIA GALACTICA"
 
  EQUB 2                 \ Menu 1: Title is text token 2:
                         \
-                        \         "SHIPS {all caps}A-G{sentence case}"
+                        \   "SHIPS {all caps}A-G{sentence case}"
 
  EQUB 3                 \ Menu 2: Title is text token 3:
                         \
-                        \         "SHIPS {all caps}I-W{sentence case}"
+                        \   "SHIPS {all caps}I-W{sentence case}"
 
  EQUB 5                 \ Menu 3: Title is text token 5:
                         \
-                        \         "CONTROLS"
+                        \   "CONTROLS"
 
  EQUB 4                 \ Menu 4: Title is text token 4:
                         \
-                        \         "EQUIPMENT"
+                        \   "EQUIPMENT"
 
                         \ --- End of added section ---------------------------->
 
@@ -20028,8 +20167,8 @@ LOAD_H% = LOAD% + P% - CODE%
 \   0 = Encyclopedia Galactica
 \   1 = Ships A-G
 \   2 = Ships I-W
-\   3 = Equipment
-\   4 = Controls
+\   3 = Controls
+\   4 = Equipment
 \
 \ ******************************************************************************
 
@@ -20065,8 +20204,8 @@ LOAD_H% = LOAD% + P% - CODE%
 \   0 = Encyclopedia Galactica
 \   1 = Ships A-G
 \   2 = Ships I-W
-\   3 = Equipment
-\   4 = Controls
+\   3 = Controls
+\   4 = Equipment
 \
 \ ******************************************************************************
 
@@ -20076,24 +20215,24 @@ LOAD_H% = LOAD% + P% - CODE%
 
  EQUB 2                 \ Menu 0: First item is text token 2:
                         \
-                        \         "SHIPS {all caps}A-G{sentence case}"
+                        \   "SHIPS {all caps}A-G{sentence case}"
 
  EQUB 7                 \ Menu 1: First item is text token 7:
                         \
-                        \         "ADDER"
+                        \   "ADDER"
 
  EQUB 21                \ Menu 2: First item is text token 21:
                         \
-                        \         "KRAIT"
+                        \   "KRAIT"
 
  EQUB 91                \ Menu 3: First item is text token 91:
                         \
-                        \         "FLIGHT"
+                        \   "FLIGHT"
 
  EQUB 95                \ Menu 4: First item is text token 95:
                         \
-                        \         "{standard tokens, sentence case}
-                        \          MISSILE{extended tokens}"
+                        \   "{standard tokens, sentence case}
+                        \    MISSILE{extended tokens}"
 
                         \ --- End of added section ---------------------------->
 
@@ -20113,8 +20252,8 @@ LOAD_H% = LOAD% + P% - CODE%
 \   0 = Encyclopedia Galactica
 \   1 = Ships A-G
 \   2 = Ships I-W
-\   3 = Equipment
-\   4 = Controls
+\   3 = Controls
+\   4 = Equipment
 \
 \ ******************************************************************************
 
@@ -20150,8 +20289,8 @@ LOAD_H% = LOAD% + P% - CODE%
 \   0 = Encyclopedia Galactica
 \   1 = Ships A-G
 \   2 = Ships I-W
-\   3 = Equipment
-\   4 = Controls
+\   3 = Controls
+\   4 = Equipment
 \
 \ ******************************************************************************
 
@@ -20161,23 +20300,23 @@ LOAD_H% = LOAD% + P% - CODE%
 
  EQUB 6                 \ Menu 0: Query prompt is text token 6:
                         \
-                        \         "INFORMATION"
+                        \   "INFORMATION"
 
  EQUB 67                \ Menu 1: Query prompt is text token 67:
                         \
-                        \         " SHIP"
+                        \   " SHIP"
 
  EQUB 67                \ Menu 2: Query prompt is text token 67:
                         \
-                        \         " SHIP"
+                        \   " SHIP"
 
  EQUB 5                 \ Menu 3: Query prompt is text token 5:
                         \
-                        \         "CONTROLS"
+                        \   "CONTROLS"
 
  EQUB 4                 \ Menu 4: Query prompt is text token 4:
                         \
-                        \         "EQUIPMENT"
+                        \   "EQUIPMENT"
 
                         \ --- End of added section ---------------------------->
 
@@ -26124,8 +26263,8 @@ ENDMACRO
  EQUB 12                \ Chameleon
  EQUB 11                \ Cobra Mk I
  EQUB 11                \ Cobra Mk III
- EQUB 8                 \ Coriolis
- EQUB 7                 \ Dodecagon
+ EQUB 8                 \ Coriolis station
+ EQUB 7                 \ Dodo station
  EQUB 9                 \ Escape Pod
  EQUB 10                \ Fer-de-Lance
  EQUB 13                \ Gecko
@@ -26152,7 +26291,40 @@ ENDMACRO
 \       Name: card_pattern
 \       Type: Variable
 \   Category: Encyclopedia
-\    Summary: AJD
+\    Summary: Layout pattern for the encyclopedia's ship cards
+\
+\ ------------------------------------------------------------------------------
+\
+\ Each ship card in the encyclopedia consists of multiple sections, each of
+\ which consists of one or more text labels, plus the corresponding ship data.
+\ The card pattern table defines these sections and how they are laid out on
+\ screen - in other words, this table contains a set of patterns, one for each
+\ section, that define how to lay out that section on-screen,
+\
+\ Each line in the table below defines a screen position and something to print
+\ there. The first two numbers are the text column and row, and the third number
+\ specifies a text token from the msg_3 table (when non-zero) or the actual data
+\ (when zero).
+\
+\ So, for example, the "cargo space" section looks like this:
+\
+\   EQUB  1, 12, 61
+\   EQUB  1, 13, 45
+\   EQUB  1, 14,  0
+\
+\ which defines the following layout pattern:
+\
+\   * Token 61 ("CARGO") at column 1, row 12
+\   * Token 45 ("SPACE:") at column 1, row 13
+\   * The relevant ship data (the ship's cargo capacity) at column 1, row 14
+\
+\ The data itself comes from the card data for the specific ship - see the table
+\ at card_addr for a list of card data blocks. Each section corresponds to the
+\ same section number in the card data, so the cargo space section is number 7,
+\ for example.
+\
+\ As well as the ship data, the ship cards show the ship itself, rotating in the
+\ middle of the card.
 \
 \ ******************************************************************************
 
@@ -26160,31 +26332,41 @@ ENDMACRO
 
 .card_pattern
 
- EQUB  1,  3, &25       \ inservice date
- EQUB  1,  4, &00
- EQUB 24,  6, &26       \ combat factor
- EQUB 24,  7, &2F
- EQUB 24,  8, &41
- EQUB 26,  8, &00
- EQUB  1,  6, &2B       \ dimensions
- EQUB  1,  7, &00
- EQUB  1,  9, &24       \ speed
- EQUB  1, 10, &00
- EQUB 24, 10, &27       \ crew
- EQUB 24, 11, &00
- EQUB 24, 13, &29       \ range
- EQUB 24, 14, &00
- EQUB  1, 12, &3D       \ cargo space
- EQUB  1, 13, &2D
- EQUB  1, 14, &00
- EQUB  1, 16, &23       \ armaments
- EQUB  1, 17, &00
- EQUB 23, 20, &2C       \ hull
- EQUB 23, 21, &00
- EQUB  1, 20, &28       \ drive motors
- EQUB  1, 21, &00
- EQUB  1, 20, &2D       \ space
- EQUB  1, 21, &00
+ EQUB  1,  3, 37        \ 1: Inservice date           "INSERVICE DATE:" @ (1, 3)
+ EQUB  1,  4,  0        \                                          Data @ (1, 4)
+
+ EQUB 24,  6, 38        \ 2: Combat factor                    "COMBAT" @ (24, 6)
+ EQUB 24,  7, 47        \                                    "FACTOR:" @ (24, 7)
+ EQUB 24,  8, 65        \                                         "CF" @ (24, 8)
+ EQUB 26,  8,  0        \                                         Data @ (26, 8)
+
+ EQUB  1,  6, 43        \ 3: Dimensions                   "DIMENSIONS:" @ (1, 6)
+ EQUB  1,  7,  0        \                                          Data @ (1, 7)        
+
+ EQUB  1,  9, 36        \ 4: Speed                            "SPEED:" @ (1,  9)
+ EQUB  1, 10,  0        \                                         Data @ (1, 10)
+
+ EQUB 24, 10, 39        \ 5: Crew                             "CREW:" @ (24, 10)
+ EQUB 24, 11,  0        \                                        Data @ (24, 11)
+
+ EQUB 24, 13, 41        \ 6: Range                           "RANGE:" @ (24, 13)
+ EQUB 24, 14,  0        \                                        Data @ (24, 14)
+
+ EQUB  1, 12, 61        \ 7: Cargo space                       "CARGO" @ (1, 12)
+ EQUB  1, 13, 45        \                                     "SPACE:" @ (1, 13)
+ EQUB  1, 14,  0        \                                        Data  @ (1, 14)
+
+ EQUB  1, 16, 35        \ 8: Armaments                    "ARMAMENTS:" @ (1, 16)
+ EQUB  1, 17,  0        \                                         Data @ (1, 17)
+
+ EQUB 23, 20, 44        \ 9: Hull                             "HULL:" @ (23, 20)
+ EQUB 23, 21,  0        \                                        Data @ (23, 21)
+
+ EQUB  1, 20, 40        \ 10: Drive motors             "DRIVE MOTORS:" @ (1, 20)
+ EQUB  1, 21,  0        \                                         Data @ (1, 21)
+
+ EQUB  1, 20, 45        \ 11: Space                           "SPACE:" @ (1, 20)
+ EQUB  1, 21,  0        \                                         Data @ (1, 21)
 
                         \ --- End of added section ---------------------------->
 
@@ -26195,40 +26377,45 @@ ENDMACRO
 \   Category: Encyclopedia
 \    Summary: Lookup table for the encyclopedia's ship cards
 \
+\ ------------------------------------------------------------------------------
+\
+\ The numbers in the table below give the ship type that can be passed to
+\ routines like write_card.
+\
 \ ******************************************************************************
 
                         \ --- Mod: Whole section added for Elite-A: ----------->
 
 .card_addr
 
- EQUW adder
- EQUW anaconda
- EQUW asp_2
- EQUW boa
- EQUW bushmaster
- EQUW chameleon
- EQUW cobra_1
- EQUW cobra_3
- EQUW coriolis
- EQUW dodecagon
- EQUW escape_pod
- EQUW fer_de_lance
- EQUW gecko
- EQUW ghavial
- EQUW iguana
- EQUW krait
- EQUW mamba
- EQUW monitor
- EQUW moray
- EQUW ophidian
- EQUW python
- EQUW shuttle
- EQUW sidewinder
- EQUW thargoid
- EQUW thargon
- EQUW transporter
- EQUW viper
- EQUW worm
+ EQUW adder             \  0: Adder
+ EQUW anaconda          \  1: Anaconda
+ EQUW asp_2             \  2: Asp Mk II
+ EQUW boa               \  3: Boa
+ EQUW bushmaster        \  4: Bushmaster
+ EQUW chameleon         \  5: Chameleon
+ EQUW cobra_1           \  6: Cobra Mk I
+ EQUW cobra_3           \  7: Cobra Mk III
+ EQUW coriolis          \  8: Coriolis station
+ EQUW dodecagon         \  9: Dodo station
+ EQUW escape_pod        \ 10: Escape pod
+ EQUW fer_de_lance      \ 11: Fer-de-Lance
+ EQUW gecko             \ 12: Gecko
+ EQUW ghavial           \ 13: Ghavial
+ EQUW iguana            \ 14: Iguana
+ EQUW krait             \ 15: Krait
+ EQUW mamba             \ 16: Mamba
+ EQUW monitor           \ 17: Monitor
+ EQUW moray             \ 18: Moray
+ EQUW ophidian          \ 19: Ophidian
+ EQUW python            \ 20: Python
+ EQUW shuttle           \ 21: Shuttle
+ EQUW sidewinder        \ 22: Sidewinder
+ EQUW thargoid          \ 23: Thargoid
+ EQUW thargon           \ 24: Thargon
+ EQUW transporter       \ 25: Transporter
+ EQUW viper             \ 26: Viper
+ EQUW worm              \ 27: Worm
 
                         \ --- End of added section ---------------------------->
 
@@ -26237,19 +26424,28 @@ ENDMACRO
 \       Name: CTOK
 \       Type: Macro
 \   Category: Text
-\    Summary: Macro definition for recursive tokens in the encyclopedia's ship
-\             cards
+\    Summary: Macro definition for ship data in the encyclopedia's ship cards
+\  Deep dive: Extended text tokens
 \
 \ ------------------------------------------------------------------------------
 \
-\ The following macro is used when building the recursive token table:
+\ The following macro is used when building the ship data:
 \
 \   CTOK n              Insert recursive token [n]
 \
 \                         * Tokens 0-127 get stored as n + 128
 \
-\ See the deep dive on "Printing text tokens" for details on how recursive
-\ tokens are stored in the recursive token table.
+\ The ship data tables work differently to the recursive token tables. Data is
+\ stored in the table as follows:
+\
+\   Value        Contents                                                  Macro
+\   ---------    ------------------------------------------------------    -----
+\   0-31         Jump tokens                                                EJMP
+\   32-127       ASCII characters with no obfuscation                       EQUS
+\   128-214      Recursive msg_3 text tokens (subtract 128 to get 0-86)     CTOK
+\   215-255      Extended two-letter tokens (subtract 215 to get 0-40)      ETWO
+\
+\ Printing of ship data is handled by the write_card routine.
 \
 \ Arguments:
 \
@@ -26269,7 +26465,7 @@ ENDMACRO
 \       Name: adder
 \       Type: Variable
 \   Category: Encyclopedia
-\    Summary: Card data for the encyclopedia entry for the Adder
+\    Summary: Ship card data for the encyclopedia entry for the Adder
 \
 \ ******************************************************************************
 
@@ -26277,60 +26473,60 @@ ENDMACRO
 
 .adder
 
- EQUB 1                 \ Inservice date: "2914 ({single cap}OUTWORLD
- EQUS "2914"            \                  WORKSHOPS)"
+ EQUB 1                 \ 1: Inservice date:  "2914 ({single cap}OUTWORLD
+ EQUS "2914"            \                      WORKSHOPS)"
  CTOK 85                \
- CTOK 69                \ Encoded as:     "2914[85][69][81]"
+ CTOK 69                \ Encoded as:         "2914[85][69][81]"
  CTOK 81
  EQUB 0
 
- EQUB 2                 \ Combat factor:  "6"
+ EQUB 2                 \ 2: Combat factor:   "6"
  EQUS "6"               \
- EQUB 0                 \ Encoded as:     "6"
+ EQUB 0                 \ Encoded as:         "6"
 
- EQUB 3                 \ Dimensions:     "45/8/30FT"
+ EQUB 3                 \ 3: Dimensions:      "45/8/30FT"
  EQUS "45/8/30"         \
- CTOK 42                \ Encoded as:     "45/8/30[42]"
+ CTOK 42                \ Encoded as:         "45/8/30[42]"
  EQUB 0
 
- EQUB 4                 \ Speed:          "0.24{all caps}LM{sentence case}"
+ EQUB 4                 \ 4: Speed:           "0.24{all caps}LM{sentence case}"
  EQUS "0.24"            \
- CTOK 64                \ Encoded as:     "0.24[64]"
+ CTOK 64                \ Encoded as:         "0.24[64]"
  EQUB 0
 
- EQUB 5                 \ Crew:           "1"
+ EQUB 5                 \ 5: Crew:            "1"
  EQUS "1"               \
- EQUB 0                 \ Encoded as:     "1"
+ EQUB 0                 \ Encoded as:         "1"
 
- EQUB 6                 \ Range:          "6{all caps}LY{sentence case}"
+ EQUB 6                 \ 6: Range:           "6{all caps}LY{sentence case}"
  EQUS "6"               \
- CTOK 63                \ Encoded as:     "6[63]"
+ CTOK 63                \ Encoded as:         "6[63]"
  EQUB 0
 
- EQUB 7                 \ Cargo space:    "4{all caps}TC{sentence case}"
+ EQUB 7                 \ 7: Cargo space:     "4{all caps}TC{sentence case}"
  EQUS "4"               \
- CTOK 62                \ Encoded as:     "4[62]"
+ CTOK 62                \ Encoded as:         "4[62]"
  EQUB 0
 
- EQUB 8                 \ Armaments:      "INGRAM 1928 AZ BEAM LASER{cr}
- CTOK 56                \                  GERET STARSEEKER MISSILES"
+ EQUB 8                 \ 8: Armaments:       "INGRAM 1928 AZ BEAM LASER{cr}
+ CTOK 56                \                      GERET STARSEEKER MISSILES"
  EQUS " 1928 AZ "       \
- ETWO 'B', 'E'          \ Encoded as:     "[56] 1928 AZ <247>am[49]{12}[48][46]"
- EQUS "am"
+ ETWO 'B', 'E'          \ Encoded as:         "[56] 1928 AZ <247>am[49]{12}[48]
+ EQUS "am"              \                      [46]"
  CTOK 49
  EJMP 12
  CTOK 48
  CTOK 46
  EQUB 0
 
- EQUB 9                 \ Hull:           "D4-18{all caps}/2L{sentence case}"
- EQUS "D4-18"           \
- CTOK 83                \ Encoded as:     "D4-18[83]"
- EQUB 0
+ EQUB 9                 \ 9: Hull:            "D4-18{all caps}/2L{sentence
+ EQUS "D4-18"           \                      case}"
+ CTOK 83                \
+ EQUB 0                 \ Encoded as:         "D4-18[83]"
 
- EQUB 10                \ Drive motors:   "AM 18 BI THRUST"
+ EQUB 10                \ 10: Drive motors:   "AM 18 BI THRUST"
  EQUS "AM 18 "          \
- ETWO 'B', 'I'          \ Encoded as:     "AM 18 <234> [66]"
+ ETWO 'B', 'I'          \ Encoded as:         "AM 18 <234> [66]"
  EQUS " "
  CTOK 66
  EQUB 0
@@ -26344,7 +26540,7 @@ ENDMACRO
 \       Name: anaconda
 \       Type: Variable
 \   Category: Encyclopedia
-\    Summary: Card data for the encyclopedia entry for the Anaconda
+\    Summary: Ship card data for the encyclopedia entry for the Anaconda
 \
 \ ******************************************************************************
 
@@ -26352,11 +26548,11 @@ ENDMACRO
 
 .anaconda
 
- EQUB 1                 \ Inservice date: "2856 ({single cap}RIMLINER GALACTIC)"
- EQUS "2856"            \
- CTOK 85                \ Encoded as:     "2856[85]Riml<240><244> G<228>ac<251>
- EQUS "Riml"            \                  c)"
- ETWO 'I', 'N'
+ EQUB 1                 \ 1: Inservice date:  "2856 ({single cap}RIMLINER
+ EQUS "2856"            \                      GALACTIC)"
+ CTOK 85                \
+ EQUS "Riml"            \ Encoded as:         "2856[85]Riml<240><244> G<228>ac
+ ETWO 'I', 'N'          \                      <251>c)"
  ETWO 'E', 'R'
  EQUS " G"
  ETWO 'A', 'L'
@@ -26365,39 +26561,39 @@ ENDMACRO
  EQUS "c)"
  EQUB 0
 
- EQUB 2                 \ Combat factor:  "3"
+ EQUB 2                 \ 2: Combat factor:   "3"
  EQUS "3"               \
- EQUB 0                 \ Encoded as:     "3"
+ EQUB 0                 \ Encoded as:         "3"
 
- EQUB 3                 \ Dimensions:     "170/60/75FT"
+ EQUB 3                 \ 3: Dimensions:      "170/60/75FT"
  EQUS "170/60/75"       \
- CTOK 42                \ Encoded as:     "170/60/75[42]"
+ CTOK 42                \ Encoded as:         "170/60/75[42]"
  EQUB 0
 
- EQUB 4                 \ Speed:          "0.14{all caps}LM{sentence case}"
+ EQUB 4                 \ 4: Speed:           "0.14{all caps}LM{sentence case}"
  EQUS "0.14"            \
- CTOK 64                \ Encoded as:     "0.14[64]"
+ CTOK 64                \ Encoded as:         "0.14[64]"
  EQUB 0
 
- EQUB 5                 \ Crew:           "2-10"
+ EQUB 5                 \ 5: Crew:            "2-10"
  EQUS "2-10"            \
- EQUB 0                 \ Encoded as:     "2-10"
+ EQUB 0                 \ Encoded as:         "2-10"
 
- EQUB 6                 \ Range:          "10{all caps}LY{sentence case}"
+ EQUB 6                 \ 6: Range:           "10{all caps}LY{sentence case}"
  EQUS "10"              \
- CTOK 63                \ Encoded as:     "10[63]"
+ CTOK 63                \ Encoded as:         "10[63]"
  EQUB 0
 
- EQUB 7                 \ Cargo space:    "245{all caps}TC{sentence case}"
+ EQUB 7                 \ 7: Cargo space:     "245{all caps}TC{sentence case}"
  EQUS "245"             \
- CTOK 62                \ Encoded as:     "245[62]"
+ CTOK 62                \ Encoded as:         "245[62]"
  EQUB 0
 
- EQUB 8                 \ Armaments:      "HASSONI HI-RAD PULSE LASER{cr}
- CTOK 59                \                  GERET STARSEEKER MISSILES"
+ EQUB 8                 \ 8: Armaments:       "HASSONI HI-RAD PULSE LASER{cr}
+ CTOK 59                \                      GERET STARSEEKER MISSILES"
  EQUS " Hi-"            \
- ETWO 'R', 'A'          \ Encoded as:     "[59] Hi-<248>d[50][49]{12}[48][46]"
- EQUS "d"
+ ETWO 'R', 'A'          \ Encoded as:         "[59] Hi-<248>d[50][49]{12}[48]
+ EQUS "d"               \                      [46]"
  CTOK 50
  CTOK 49
  EJMP 12
@@ -26405,16 +26601,16 @@ ENDMACRO
  CTOK 46
  EQUB 0
 
- EQUB 9                 \ Hull:           "M8-**{all caps}/4L{sentence case}"
- EQUS "M8-**"           \
- CTOK 84                \ Encoded as:     "M8-**[84]"
- EQUB 0
+ EQUB 9                 \ 9: Hull:            "M8-**{all caps}/4L{sentence
+ EQUS "M8-**"           \                      case}"
+ CTOK 84                \
+ EQUB 0                 \ Encoded as:         "M8-**[84]"
 
- EQUB 10                \ Drive motors:   "V & K 32.24{cr}
- CTOK 73                \                  ERGMASTERS"
+ EQUB 10                \ 10: Drive motors:   "V & K 32.24{cr}
+ CTOK 73                \                      ERGMASTERS"
  EQUS "32.24"           \
- EJMP 12                \ Encoded as:     "[73]32.24{12}<244>g<239><222><244>s"
- ETWO 'E', 'R'
+ EJMP 12                \ Encoded as:         "[73]32.24{12}<244>g<239><222>
+ ETWO 'E', 'R'          \                      <244>s"
  EQUS "g"
  ETWO 'M', 'A'
  ETWO 'S', 'T'
@@ -26431,7 +26627,7 @@ ENDMACRO
 \       Name: asp_2
 \       Type: Variable
 \   Category: Encyclopedia
-\    Summary: Card data for the encyclopedia entry for the Asp Mk II
+\    Summary: Ship card data for the encyclopedia entry for the Asp Mk II
 \
 \ ******************************************************************************
 
@@ -26439,66 +26635,66 @@ ENDMACRO
 
 .asp_2
 
- EQUB 1                 \ Inservice date: "2878 ({single cap}GALCOP WORKSHOPS)"
- EQUS "2878"            \
- CTOK 85                \ Encoded as:     "2878[85]G<228>cop[81]"
- EQUS "G"
+ EQUB 1                 \ 1: Inservice date:  "2878 ({single cap}GALCOP
+ EQUS "2878"            \                      WORKSHOPS)"
+ CTOK 85                \
+ EQUS "G"               \ Encoded as:         "2878[85]G<228>cop[81]"
  ETWO 'A', 'L'
  EQUS "cop"
  CTOK 81
  EQUB 0
 
- EQUB 2                 \ Combat factor:  "6"
+ EQUB 2                 \ 2: Combat factor:   "6"
  EQUS "6"               \
- EQUB 0                 \ Encoded as:     "6"
+ EQUB 0                 \ Encoded as:         "6"
 
- EQUB 3                 \ Dimensions:     "70/20/65FT"
+ EQUB 3                 \ 3: Dimensions:      "70/20/65FT"
  EQUS "70/20/65"        \
- CTOK 42                \ Encoded as:     "70/20/65[42]"
+ CTOK 42                \ Encoded as:         "70/20/65[42]"
  EQUB 0
 
- EQUB 4                 \ Speed:          "0.40{all caps}LM{sentence case}"
+ EQUB 4                 \ 4: Speed:           "0.40{all caps}LM{sentence case}"
  EQUS "0.40"            \
- CTOK 64                \ Encoded as:     "0.40[64]"
+ CTOK 64                \ Encoded as:         "0.40[64]"
  EQUB 0
 
- EQUB 5                 \ Crew:           "1"
+ EQUB 5                 \ 5: Crew:            "1"
  EQUS "1"               \
- EQUB 0                 \ Encoded as:     "1"
+ EQUB 0                 \ Encoded as:         "1"
 
- EQUB 6                 \ Range:          "12.5{all caps}LY{sentence case}"
+ EQUB 6                 \ 6: Range:           "12.5{all caps}LY{sentence case}"
  EQUS "12.5"            \
- CTOK 63                \ Encoded as:     "12.5[63]"
+ CTOK 63                \ Encoded as:         "12.5[63]"
  EQUB 0
 
- EQUB 7                 \ Cargo space:    "0{all caps}TC{sentence case}"
+ EQUB 7                 \ 7: Cargo space:     "0{all caps}TC{sentence case}"
  EQUS "0"               \
- CTOK 62                \ Encoded as:     "0[62]"
+ CTOK 62                \ Encoded as:         "0[62]"
  EQUB 0
 
- EQUB 8                 \ Armaments:      "HASSONI-{single cap}KRUGER BURST
- CTOK 59                \                  LASER{cr}
- EQUS "-"               \                  GERET STARSEEKER MISSILES"
+ EQUB 8                 \ 8: Armaments:       "HASSONI-{single cap}KRUGER BURST
+ CTOK 59                \                      LASER{cr}
+ EQUS "-"               \                      GERET STARSEEKER MISSILES"
  CTOK 58                \
- EQUS "Bur"             \ Encoded as:     "[59]-[58]Bur<222>[49]{12}[48][46]"
- ETWO 'S', 'T'
+ EQUS "Bur"             \ Encoded as:         "[59]-[58]Bur<222>[49]{12}[48]
+ ETWO 'S', 'T'          \                      [46]"
  CTOK 49
  EJMP 12
  CTOK 48
  CTOK 46
  EQUB 0
 
- EQUB 9                 \ Hull:           "J6-31{all caps}/1L{sentence case}"
- EQUS "J6-31"           \
- CTOK 82                \ Encoded as:     "J6-31[82]"
- EQUB 0
+ EQUB 9                 \ 9: Hull:            "J6-31{all caps}/1L{sentence
+ EQUS "J6-31"           \                      case}"
+ CTOK 82                \
+ EQUB 0                 \ Encoded as:         "J6-31[82]"
 
- EQUB 10                \ Drive motors:   "VOLTAIRE WHIPLASH{cr}
- CTOK 60                \                  {all caps}HK{sentence case}
- EQUS " Whip"           \                  PULSEDRIVE"
+ EQUB 10                \ 10: Drive motors:   "VOLTAIRE WHIPLASH{cr}
+ CTOK 60                \                      {all caps}HK{sentence case}
+ EQUS " Whip"           \                      PULSEDRIVE"
  ETWO 'L', 'A'          \
- EQUS "sh"              \ Encoded as:     "[60] Whip<249>sh{12}{all caps}HK
- EJMP 12                \                  {sentence case} [50][53]"
+ EQUS "sh"              \ Encoded as:         "[60] Whip<249>sh{12}{all caps}HK
+ EJMP 12                \                      {sentence case} [50][53]"
  EJMP 1
  EQUS "HK"
  EJMP 2
@@ -26516,7 +26712,7 @@ ENDMACRO
 \       Name: boa
 \       Type: Variable
 \   Category: Encyclopedia
-\    Summary: Card data for the encyclopedia entry for the Boa
+\    Summary: Ship card data for the encyclopedia entry for the Boa
 \
 \ ******************************************************************************
 
@@ -26524,10 +26720,10 @@ ENDMACRO
 
 .boa
 
- EQUB 1                 \ Inservice date: "3017 ({single cap}GEREGE FEDERATION)"
- EQUS "3017"            \
- CTOK 85                \ Encoded as:     "3017[85]<231><242><231> [76])"
- ETWO 'G', 'E'
+ EQUB 1                 \ 1: Inservice date:  "3017 ({single cap}GEREGE
+ EQUS "3017"            \                      FEDERATION)"
+ CTOK 85                \
+ ETWO 'G', 'E'          \ Encoded as:         "3017[85]<231><242><231> [76])"
  ETWO 'R', 'E'
  ETWO 'G', 'E'
  EQUS " "
@@ -26535,56 +26731,56 @@ ENDMACRO
  EQUS ")"
  EQUB 0
 
- EQUB 2                 \ Combat factor:  "4"
+ EQUB 2                 \ 2: Combat factor:   "4"
  EQUS "4"               \
- EQUB 0                 \ Encoded as:     "4"
+ EQUB 0                 \ Encoded as:         "4"
 
- EQUB 3                 \ Dimensions:     "115/60/65FT"
+ EQUB 3                 \ 3: Dimensions:      "115/60/65FT"
  EQUS "115/60/65"       \
- CTOK 42                \ Encoded as:     "115/60/65[42]"
+ CTOK 42                \ Encoded as:         "115/60/65[42]"
  EQUB 0
 
- EQUB 4                 \ Speed:          "0.24{all caps}LM{sentence case}"
+ EQUB 4                 \ 4: Speed:           "0.24{all caps}LM{sentence case}"
  EQUS "0.24"            \
- CTOK 64                \ Encoded as:     "0.24[64]"
+ CTOK 64                \ Encoded as:         "0.24[64]"
  EQUB 0
 
- EQUB 5                 \ Crew:           "2-6"
+ EQUB 5                 \ 5: Crew:            "2-6"
  EQUS "2-6"             \
- EQUB 0                 \ Encoded as:     "2-6"
+ EQUB 0                 \ Encoded as:         "2-6"
 
- EQUB 6                 \ Range:          "9{all caps}LY{sentence case}"
+ EQUB 6                 \ 6: Range:           "9{all caps}LY{sentence case}"
  EQUS "9"               \
- CTOK 63                \ Encoded as:     "9[63]"
+ CTOK 63                \ Encoded as:         "9[63]"
  EQUB 0
 
- EQUB 7                 \ Cargo space:    "125{all caps}TC{sentence case}"
+ EQUB 7                 \ 7: Cargo space:     "125{all caps}TC{sentence case}"
  EQUS "125"             \
- CTOK 62                \ Encoded as:     "125[62]"
+ CTOK 62                \ Encoded as:         "125[62]"
  EQUB 0
 
- EQUB 8                 \ Armaments:      "ERGON LASER SYSTEM{cr}
- CTOK 52                \                  {all caps}IFS{sentence case} SEEK &
- CTOK 49                \                  HUNT MISSILES"
+ EQUB 8                 \ 8: Armaments:       "ERGON LASER SYSTEM{cr}
+ CTOK 52                \                      {all caps}IFS{sentence case} SEEK
+ CTOK 49                \                      & HUNT MISSILES"
  CTOK 51                \
- EJMP 12                \ Encoded as:     "[52][49][51]{12}[86][54] & [79][46]"
- CTOK 86
+ EJMP 12                \ Encoded as:         "[52][49][51]{12}[86][54] & [79]
+ CTOK 86                \                      [46]"
  CTOK 54
  EQUS " & "
  CTOK 79
  CTOK 46
  EQUB 0
 
- EQUB 9                 \ Hull:           "J7-24{all caps}/2L{sentence case}"
- EQUS "J7-24"           \
- CTOK 83                \ Encoded as:     "J7-24[83]"
- EQUB 0
+ EQUB 9                 \ 9: Hull:            "J7-24{all caps}/2L{sentence
+ EQUS "J7-24"           \                      case}"
+ CTOK 83                \
+ EQUB 0                 \ Encoded as:         "J7-24[83]"
 
- EQUB 10                \ Drive motors:   "{all caps}4*C40KV{sentence case} AMES
- CTOK 72                \                  DRIVE{cr}
- EJMP 12                \                  SEEKLIGHT THRUSTERS"
+ EQUB 10                \ 10: Drive motors:   "{all caps}4*C40KV{sentence case}
+ CTOK 72                \                      AMES DRIVE{cr}
+ EJMP 12                \                      SEEKLIGHT THRUSTERS"
  CTOK 54                \
- CTOK 55                \ Encoded as:     "[72]{12}[54][55] [66]<244>s"
+ CTOK 55                \ Encoded as:         "[72]{12}[54][55] [66]<244>s"
  EQUS " "
  CTOK 66
  ETWO 'E', 'R'
@@ -26600,7 +26796,7 @@ ENDMACRO
 \       Name: bushmaster
 \       Type: Variable
 \   Category: Encyclopedia
-\    Summary: Card data for the encyclopedia entry for the Bushmaster
+\    Summary: Ship card data for the encyclopedia entry for the Bushmaster
 \
 \ ******************************************************************************
 
@@ -26608,11 +26804,11 @@ ENDMACRO
 
 .bushmaster
 
- EQUB 1                 \ Inservice date: "3001 ({single cap}ONRIRA ORBITAL)"
- EQUS "3001"            \
- CTOK 85                \ Encoded as:     "3001[85]<223>ri<248> <253>b<219>
- ETWO 'O', 'N'          \                  <228>)"
- EQUS "ri"
+ EQUB 1                 \ 1: Inservice date:  "3001 ({single cap}ONRIRA
+ EQUS "3001"            \                      ORBITAL)"
+ CTOK 85                \
+ ETWO 'O', 'N'          \ Encoded as:         "3001[85]<223>ri<248> <253>b<219>
+ EQUS "ri"              \                      <228>)"
  ETWO 'R', 'A'
  EQUS " "
  ETWO 'O', 'R'
@@ -26622,28 +26818,28 @@ ENDMACRO
  EQUS ")"
  EQUB 0
 
- EQUB 2                 \ Combat factor:  "8"
+ EQUB 2                 \ 2: Combat factor:   "8"
  EQUS "8"               \
- EQUB 0                 \ Encoded as:     "8"
+ EQUB 0                 \ Encoded as:         "8"
 
- EQUB 3                 \ Dimensions:     "50/20/50FT"
+ EQUB 3                 \ 3: Dimensions:      "50/20/50FT"
  EQUS "50/20/50"        \
- CTOK 42                \ Encoded as:     "50/20/50[42]"
+ CTOK 42                \ Encoded as:         "50/20/50[42]"
  EQUB 0
 
- EQUB 4                 \ Speed:          "0.35{all caps}LM{sentence case}"
+ EQUB 4                 \ 4: Speed:           "0.35{all caps}LM{sentence case}"
  EQUS "0.35"            \
- CTOK 64                \ Encoded as:     "0.35[64]"
+ CTOK 64                \ Encoded as:         "0.35[64]"
  EQUB 0
 
- EQUB 5                 \ Crew:           "1-2"
+ EQUB 5                 \ 5: Crew:            "1-2"
  EQUS "1-2"             \
- EQUB 0                 \ Encoded as:     "1-2"
+ EQUB 0                 \ Encoded as:         "1-2"
 
- EQUB 8                 \ Armaments:      "DUAL 22-18 LASER{cr}
- EQUS "Du"              \                  GERET STARSEEKER MISSILES"
+ EQUB 8                 \ 8: Armaments:       "DUAL 22-18 LASER{cr}
+ EQUS "Du"              \                      GERET STARSEEKER MISSILES"
  ETWO 'A', 'L'          \
- EQUS " 22-18"          \ Encoded as:     "Du<228> 22-18[49]{12}[48][46]"
+ EQUS " 22-18"          \ Encoded as:         "Du<228> 22-18[49]{12}[48][46]"
  CTOK 49
  EJMP 12
  CTOK 48
@@ -26655,12 +26851,12 @@ ENDMACRO
 \CTOK 82                \ It would show the hull as "3{all caps}/1L{sentence
 \EQUB 0                 \ case}"
 
- EQUB 10                \ Drive motors:   "VOLTAIRE WhipLAsh{cr}
- CTOK 60                \                  {all caps}HT{sentence case}
- EQUS " Whip"           \                  PULSEDRIVE"
+ EQUB 10                \ 10: Drive motors:   "VOLTAIRE WhipLAsh{cr}
+ CTOK 60                \                      {all caps}HT{sentence case}
+ EQUS " Whip"           \                      PULSEDRIVE"
  ETWO 'L', 'A'          \
- EQUS "sh"              \ Encoded as:     "[60] Whip<249>sh{12}{all caps}HT
- EJMP 12                \                  {sentence case} [50][53]"
+ EQUS "sh"              \ Encoded as:         "[60] Whip<249>sh{12}{all caps}HT
+ EJMP 12                \                      {sentence case} [50][53]"
  EJMP 1
  EQUS "HT"
  EJMP 2
@@ -26678,7 +26874,7 @@ ENDMACRO
 \       Name: chameleon
 \       Type: Variable
 \   Category: Encyclopedia
-\    Summary: Card data for the encyclopedia entry for the Chameleon
+\    Summary: Ship card data for the encyclopedia entry for the Chameleon
 \
 \ ******************************************************************************
 
@@ -26686,11 +26882,11 @@ ENDMACRO
 
 .chameleon
 
- EQUB 1                 \ Inservice date: "3122 ({single cap}ARDEN
- EQUS "3122"            \                  CO-OPERATIVE)"
+ EQUB 1                 \ 1: Inservice date:  "3122 ({single cap}ARDEN
+ EQUS "3122"            \                      CO-OPERATIVE)"
  CTOK 85                \
- ETWO 'A', 'R'          \ Encoded as:     "3122[85]<238>d<246> Co-op<244>a<251>
- EQUS "d"               \                  <250>)"
+ ETWO 'A', 'R'          \ Encoded as:         "3122[85]<238>d<246> Co-op<244>a
+ EQUS "d"               \                      <251><250>)"
  ETWO 'E', 'N'
  EQUS " Co-op"
  ETWO 'E', 'R'
@@ -26700,39 +26896,39 @@ ENDMACRO
  EQUS ")"
  EQUB 0
 
- EQUB 2                 \ Combat factor:  "6"
+ EQUB 2                 \ 2: Combat factor:   "6"
  EQUS "6"               \
- EQUB 0                 \ Encoded as:     "6"
+ EQUB 0                 \ Encoded as:         "6"
 
- EQUB 3                 \ Dimensions:     "75/24/40FT"
+ EQUB 3                 \ 3: Dimensions:      "75/24/40FT"
  EQUS "75/24/40"        \
- CTOK 42                \ Encoded as:     "75/24/40[42]"
+ CTOK 42                \ Encoded as:         "75/24/40[42]"
  EQUB 0
 
- EQUB 4                 \ Speed:          "0.29{all caps}LM{sentence case}"
+ EQUB 4                 \ 4: Speed:           "0.29{all caps}LM{sentence case}"
  EQUS "0.29"            \
- CTOK 64                \ Encoded as:     "0.29[64]"
+ CTOK 64                \ Encoded as:         "0.29[64]"
  EQUB 0
 
- EQUB 5                 \ Crew:           "1-4"
+ EQUB 5                 \ 5: Crew:            "1-4"
  EQUS "1-4"             \
- EQUB 0                 \ Encoded as:     "1-4"
+ EQUB 0                 \ Encoded as:         "1-4"
 
- EQUB 6                 \ Range:          "8{all caps}LY{sentence case}"
+ EQUB 6                 \ 6: Range:           "8{all caps}LY{sentence case}"
  EQUS "8"               \
- CTOK 63                \ Encoded as:     "8[63]"
+ CTOK 63                \ Encoded as:         "8[63]"
  EQUB 0
 
- EQUB 7                 \ Cargo space:    "30{all caps}TC{sentence case}"
+ EQUB 7                 \ 7: Cargo space:     "30{all caps}TC{sentence case}"
  EQUS "30"              \
- CTOK 62                \ Encoded as:     "30[62]"
+ CTOK 62                \ Encoded as:         "30[62]"
  EQUB 0
 
- EQUB 8                 \ Armaments:      "INGRAM MEGABLAST PULSE LASER{cr}
- CTOK 56                \                  SEEKER X3 MISSILES"
+ EQUB 8                 \ 8: Armaments:       "INGRAM MEGABLAST PULSE LASER{cr}
+ CTOK 56                \                      SEEKER X3 MISSILES"
  EQUS " Mega"           \
- CTOK 74                \ Encoded as:     "[56] Mega[74][50][49]{12}[54]<244> X3
- CTOK 50                \                  [46]"
+ CTOK 74                \ Encoded as:         "[56] Mega[74][50][49]{12}[54]
+ CTOK 50                \                      <244> X3[46]"
  CTOK 49
  EJMP 12
  CTOK 54
@@ -26741,16 +26937,16 @@ ENDMACRO
  CTOK 46
  EQUB 0
 
- EQUB 9                 \ Hull:           "H5-23{all caps}/2L{sentence case}"
- EQUS "H5-23"           \
- CTOK 83                \ Encoded as:     "H5-23[83]"
- EQUB 0
+ EQUB 9                 \ 9: Hull:            "H5-23{all caps}/2L{sentence
+ EQUS "H5-23"           \                      case}"
+ CTOK 83                \
+ EQUB 0                 \ Encoded as:         "H5-23[83]"
 
- EQUB 10                \ Drive motors:   "VOLTAIRE STINGER{cr}
- CTOK 60                \                  PULSEDRIVE"
+ EQUB 10                \ 10: Drive motors:   "VOLTAIRE STINGER{cr}
+ CTOK 60                \                      PULSEDRIVE"
  EQUS " "               \
- ETWO 'S', 'T'          \ Encoded as:     "[60] <222><240>g<244>{12}Pul<218>
- ETWO 'I', 'N'          \                  [53]"
+ ETWO 'S', 'T'          \ Encoded as:         "[60] <222><240>g<244>{12}Pul<218>
+ ETWO 'I', 'N'          \                      [53]"
  EQUS "g"
  ETWO 'E', 'R'
  EJMP 12
@@ -26768,7 +26964,7 @@ ENDMACRO
 \       Name: cobra_1
 \       Type: Variable
 \   Category: Encyclopedia
-\    Summary: Card data for the encyclopedia entry for the Cobra Mk I
+\    Summary: Ship card data for the encyclopedia entry for the Cobra Mk I
 \
 \ ******************************************************************************
 
@@ -26776,11 +26972,11 @@ ENDMACRO
 
 .cobra_1
 
- EQUB 1                 \ Inservice date: "2855 ({single cap}PAYNOU, PROSSET &
- EQUS "2855"            \                  SALEM)"
+ EQUB 1                 \ 1: Inservice date:  "2855 ({single cap}PAYNOU, PROSSET
+ EQUS "2855"            \                      & SALEM)"
  CTOK 85                \
- EQUS "Payn"            \ Encoded as:     "2855[85]Payn[89], [80]& S<228>em)"
- ETWO 'O', 'U'
+ EQUS "Payn"            \ Encoded as:         "2855[85]Payn[89], [80]& S<228>
+ ETWO 'O', 'U'          \                      em)"
  EQUS ", "
  CTOK 80
  EQUS "& S"
@@ -26788,39 +26984,39 @@ ENDMACRO
  EQUS "em)"
  EQUB 0
 
- EQUB 2                 \ Combat factor:  "5"
+ EQUB 2                 \ 2: Combat factor:   "5"
  EQUS "5"               \
- EQUB 0                 \ Encoded as:     "5"
+ EQUB 0                 \ Encoded as:         "5"
 
- EQUB 3                 \ Dimensions:     "55/15/70FT"
+ EQUB 3                 \ 3: Dimensions:      "55/15/70FT"
  EQUS "55/15/70"        \
- CTOK 42                \ Encoded as:     "55/15/70[42]"
+ CTOK 42                \ Encoded as:         "55/15/70[42]"
  EQUB 0
 
- EQUB 4                 \ Speed:          "0.26{all caps}LM{sentence case}"
+ EQUB 4                 \ 4: Speed:           "0.26{all caps}LM{sentence case}"
  EQUS "0.26"            \
- CTOK 64                \ Encoded as:     "0.26[64]"
+ CTOK 64                \ Encoded as:         "0.26[64]"
  EQUB 0
 
- EQUB 5                 \ Crew:           "1"
+ EQUB 5                 \ 5: Crew:            "1"
  EQUS "1"               \
- EQUB 0                 \ Encoded as:     "1"
+ EQUB 0                 \ Encoded as:         "1"
 
- EQUB 6                 \ Range:          "6{all caps}LY{sentence case}"
+ EQUB 6                 \ 6: Range:           "6{all caps}LY{sentence case}"
  EQUS "6"               \
- CTOK 63                \ Encoded as:     "6[63]"
+ CTOK 63                \ Encoded as:         "6[63]"
  EQUB 0
 
- EQUB 7                 \ Cargo space:    "10{all caps}TC{sentence case}"
+ EQUB 7                 \ 7: Cargo space:     "10{all caps}TC{sentence case}"
  EQUS "10"              \
- CTOK 62                \ Encoded as:     "10[62]"
+ CTOK 62                \ Encoded as:         "10[62]"
  EQUB 0
 
- EQUB 8                 \ Armaments:      "HASSONI VARISCAN LASER{cr}
- CTOK 59                \                  LANCE & FERMAN MISSILES"
+ EQUB 8                 \ 8: Armaments:       "HASSONI VARISCAN LASER{cr}
+ CTOK 59                \                      LANCE & FERMAN MISSILES"
  EQUS " V"              \
- ETWO 'A', 'R'          \ Encoded as:     "[59] V<238>isc<255>[49]{12}[57][46]"
- EQUS "isc"
+ ETWO 'A', 'R'          \ Encoded as:         "[59] V<238>isc<255>[49]{12}[57]
+ EQUS "isc"             \                      [46]"
  ETWO 'A', 'N'
  CTOK 49
  EJMP 12
@@ -26828,14 +27024,14 @@ ENDMACRO
  CTOK 46
  EQUB 0
 
- EQUB 9                 \ Hull:           "E4-20{all caps}/4L{sentence case}"
- EQUS "E4-20"           \
- CTOK 84                \ Encoded as:     "E4-20[84]"
- EQUB 0
+ EQUB 9                 \ 9: Hull:            "E4-20{all caps}/4L{sentence
+ EQUS "E4-20"           \                      case}"
+ CTOK 84                \
+ EQUB 0                 \ Encoded as:         "E4-20[84]"
 
- EQUB 10                \ Drive motors:   "PROSSET DRIVE"
+ EQUB 10                \ 10: Drive motors:   "PROSSET DRIVE"
  CTOK 80                \
- CTOK 53                \ Encoded as:     "[80][53]"
+ CTOK 53                \ Encoded as:         "[80][53]"
  EQUB 0
 
  EQUB 0
@@ -26847,7 +27043,7 @@ ENDMACRO
 \       Name: cobra_3
 \       Type: Variable
 \   Category: Encyclopedia
-\    Summary: Card data for the encyclopedia entry for the Cobra Mk III
+\    Summary: Ship card data for the encyclopedia entry for the Cobra Mk III
 \
 \ ******************************************************************************
 
@@ -26855,11 +27051,11 @@ ENDMACRO
 
 .cobra_3
 
- EQUB 1                 \ Inservice date: "3100 ({single cap}COWELL &
- EQUS "3100"            \                  MG{all caps}RATH, LAVE)"
+ EQUB 1                 \ 1: Inservice date:  "3100 ({single cap}COWELL &
+ EQUS "3100"            \                      MG{all caps}RATH, LAVE)"
  CTOK 85                \
- EQUS "Cowell & Mg"     \ Encoded as:     "3100[85]Cowell & Mg{single cap}<248>
- EJMP 19                \                  <226>, <249><250>)"
+ EQUS "Cowell & Mg"     \ Encoded as:         "3100[85]Cowell & Mg{single cap}
+ EJMP 19                \                      <248><226>, <249><250>)"
  ETWO 'R', 'A'
  ETWO 'T', 'H'
  EQUS ", "
@@ -26868,53 +27064,53 @@ ENDMACRO
  EQUS ")"
  EQUB 0
 
- EQUB 2                 \ Combat factor:  "7"
+ EQUB 2                 \ 2: Combat factor:   "7"
  EQUS "7"               \
- EQUB 0                 \ Encoded as:     "7"
+ EQUB 0                 \ Encoded as:         "7"
 
- EQUB 3                 \ Dimensions:     "65/30/130FT"
+ EQUB 3                 \ 3: Dimensions:      "65/30/130FT"
  EQUS "65/30/130"       \
- CTOK 42                \ Encoded as:     "65/30/130[42]"
+ CTOK 42                \ Encoded as:         "65/30/130[42]"
  EQUB 0
 
- EQUB 4                 \ Speed:          "0.28{all caps}LM{sentence case}"
+ EQUB 4                 \ 4: Speed:           "0.28{all caps}LM{sentence case}"
  EQUS "0.28"            \
- CTOK 64                \ Encoded as:     "0.28[64]"
+ CTOK 64                \ Encoded as:         "0.28[64]"
  EQUB 0
 
- EQUB 5                 \ Crew:           "1-3"
+ EQUB 5                 \ 5: Crew:            "1-3"
  EQUS "1-3"             \
- EQUB 0                 \ Encoded as:     "1-3"
+ EQUB 0                 \ Encoded as:         "1-3"
 
- EQUB 6                 \ Range:          "7{all caps}LY{sentence case}"
+ EQUB 6                 \ 6: Range:           "7{all caps}LY{sentence case}"
  EQUS "7"               \
- CTOK 63                \ Encoded as:     "7[63]"
+ CTOK 63                \ Encoded as:         "7[63]"
  EQUB 0
 
- EQUB 7                 \ Cargo space:    "35{all caps}TC{sentence case}"
+ EQUB 7                 \ 7: Cargo space:     "35{all caps}TC{sentence case}"
  EQUS "35"              \
- CTOK 62                \ Encoded as:     "35[62]"
+ CTOK 62                \ Encoded as:         "35[62]"
  EQUB 0
 
- EQUB 8                 \ Armaments:      "INGRAM LASER SYSTEM{cr}
- CTOK 56                \                  LANCE & FERMAN MISSILES"
+ EQUB 8                 \ 8: Armaments:       "INGRAM LASER SYSTEM{cr}
+ CTOK 56                \                      LANCE & FERMAN MISSILES"
  CTOK 49                \
- CTOK 51                \ Encoded as:     "[56][49][51]{12}[57][46]"
+ CTOK 51                \ Encoded as:         "[56][49][51]{12}[57][46]"
  EJMP 12
  CTOK 57
  CTOK 46
  EQUB 0
 
- EQUB 9                 \ Hull:           "G7-24{all caps}/4L{sentence case}"
- EQUS "G7-24"           \
- CTOK 84                \ Encoded as:     "G7-24[84]"
- EQUB 0
+ EQUB 9                 \ 9: Hull:            "G7-24{all caps}/4L{sentence
+ EQUS "G7-24"           \                      case}"
+ CTOK 84                \
+ EQUB 0                 \ Encoded as:         "G7-24[84]"
 
- EQUB 10                \ Drive motors:   "{single cap}KRUGER LIGHTFAST{cr}
- CTOK 58                \                  IRRIKAN THRUSPACE"
+ EQUB 10                \ 10: Drive motors:   "{single cap}KRUGER LIGHTFAST{cr}
+ CTOK 58                \                      IRRIKAN THRUSPACE"
  CTOK 55                \
- EQUS "fa"              \ Encoded as:     "[58][55]fa<222>{12}Irrik<255> Thru
- ETWO 'S', 'T'          \                  [77]"
+ EQUS "fa"              \ Encoded as:         "[58][55]fa<222>{12}Irrik<255> Thr
+ ETWO 'S', 'T'          \                      u[77]"
  EJMP 12
  EQUS "Irrik"
  ETWO 'A', 'N'
@@ -26931,7 +27127,7 @@ ENDMACRO
 \       Name: coriolis
 \       Type: Variable
 \   Category: Encyclopedia
-\    Summary: Card data for the encyclopedia entry for the Coriolis station
+\    Summary: Ship card data for the encyclopedia entry for the Coriolis station
 \
 \ ******************************************************************************
 
@@ -26939,18 +27135,18 @@ ENDMACRO
 
 .coriolis
 
- EQUB 1                 \ Inservice date: "2752 ({single cap}GASEC LABS,
- EQUS "2752"            \                  VETITICE)"
+ EQUB 1                 \ 1: Inservice date:  "2752 ({single cap}GASEC LABS,
+ EQUS "2752"            \                      VETITICE)"
  CTOK 75                \
- EQUB 0                 \ Encoded as:     "2752[75]"
+ EQUB 0                 \ Encoded as:         "2752[75]"
 
- EQUB 3                 \ Dimensions:     "1/1/1km"
+ EQUB 3                 \ 3: Dimensions:      "1/1/1km"
  EQUS "1/1/1km"         \
- EQUB 0                 \ Encoded as:     "1/1/1km"
+ EQUB 0                 \ Encoded as:         "1/1/1km"
 
- EQUB 11                \ Space:          "2000 SHIPS"
+ EQUB 11                \ 11: Space:          "2000 SHIPS"
  EQUS "2000"            \
- CTOK 67                \ Encoded as:     "2000[67]s"
+ CTOK 67                \ Encoded as:         "2000[67]s"
  EQUS "s"
  EQUB 0
 
@@ -26963,7 +27159,7 @@ ENDMACRO
 \       Name: dodecagon
 \       Type: Variable
 \   Category: Encyclopedia
-\    Summary: Card data for the encyclopedia entry for the Dodo station
+\    Summary: Ship card data for the encyclopedia entry for the Dodo station
 \
 \ ******************************************************************************
 
@@ -26971,18 +27167,18 @@ ENDMACRO
 
 .dodecagon
 
- EQUB 1                 \ Inservice date: "3152 ({single cap}GASEC LABS,
- EQUS "3152"            \                  VETITICE)"
+ EQUB 1                 \ 1: Inservice date:  "3152 ({single cap}GASEC LABS,
+ EQUS "3152"            \                      VETITICE)"
  CTOK 75                \
- EQUB 0                 \ Encoded as:     "3152[75]"
+ EQUB 0                 \ Encoded as:         "3152[75]"
 
- EQUB 3                 \ Dimensions:     "1/1/1km"
+ EQUB 3                 \ 3: Dimensions:      "1/1/1km"
  EQUS "1/1/1km"         \
- EQUB 0                 \ Encoded as:     "1/1/1km"
+ EQUB 0                 \ Encoded as:         "1/1/1km"
 
- EQUB 11                \ Space:          "2700 SHIPS"
+ EQUB 11                \ 11: Space:          "2700 SHIPS"
  EQUS "2700"            \
- CTOK 67                \ Encoded as:     "2700[67]s"
+ CTOK 67                \ Encoded as:         "2700[67]s"
  EQUS "s"
  EQUB 0
 
@@ -26995,7 +27191,7 @@ ENDMACRO
 \       Name: escape_pod
 \       Type: Variable
 \   Category: Encyclopedia
-\    Summary: Card data for the encyclopedia entry for the escape pod
+\    Summary: Ship card data for the encyclopedia entry for the escape pod
 \
 \ ******************************************************************************
 
@@ -27003,25 +27199,25 @@ ENDMACRO
 
 .escape_pod
 
- EQUB 1                 \ Inservice date: "PRE-2500"
+ EQUB 1                 \ 1: Inservice date:  "PRE-2500"
  EQUS "p"               \
- ETWO 'R', 'E'          \ Encoded as:     "p<242>-2500"
+ ETWO 'R', 'E'          \ Encoded as:         "p<242>-2500"
  EQUS "-2500"
  EQUB 0
 
- EQUB 3                 \ Dimensions:     "10/5/5FT"
+ EQUB 3                 \ 3: Dimensions:      "10/5/5FT"
  EQUS "10/5/5"          \
- CTOK 42                \ Encoded as:     "10/5/5[42]"
+ CTOK 42                \ Encoded as:         "10/5/5[42]"
  EQUB 0
 
- EQUB 4                 \ Speed:          "0.08{all caps}LM{sentence case}"
+ EQUB 4                 \ 4: Speed:           "0.08{all caps}LM{sentence case}"
  EQUS "0.08"            \
- CTOK 64                \ Encoded as:     "0.08[64]"
+ CTOK 64                \ Encoded as:         "0.08[64]"
  EQUB 0
 
- EQUB 5                 \ Crew:           "1-2"
+ EQUB 5                 \ 5: Crew:            "1-2"
  EQUS "1-2"             \
- EQUB 0                 \ Encoded as:     "1-2"
+ EQUB 0                 \ Encoded as:         "1-2"
 
  EQUB 0
 
@@ -27032,7 +27228,7 @@ ENDMACRO
 \       Name: fer_de_lance
 \       Type: Variable
 \   Category: Encyclopedia
-\    Summary: Card data for the encyclopedia entry for the Fer-de-Lance
+\    Summary: Ship card data for the encyclopedia entry for the Fer-de-Lance
 \
 \ ******************************************************************************
 
@@ -27040,63 +27236,63 @@ ENDMACRO
 
 .fer_de_lance
 
- EQUB 1                 \ Inservice date: "3100 ({single cap}ZORGON PETTERSON)"
- EQUS "3100"            \
- CTOK 85                \ Encoded as:     "3100[85][70]"
- CTOK 70
+ EQUB 1                 \ 1: Inservice date:  "3100 ({single cap}ZORGON
+ EQUS "3100"            \                      PETTERSON)"
+ CTOK 85                \
+ CTOK 70                \ Encoded as:         "3100[85][70]"
  EQUB 0
 
- EQUB 2                 \ Combat factor:  "6"
+ EQUB 2                 \ 2: Combat factor:   "6"
  EQUS "6"               \
- EQUB 0                 \ Encoded as:     "6"
+ EQUB 0                 \ Encoded as:         "6"
 
- EQUB 3                 \ Dimensions:     "85/20/45FT"
+ EQUB 3                 \ 3: Dimensions:      "85/20/45FT"
  EQUS "85/20/45"        \
- CTOK 42                \ Encoded as:     "85/20/45[42]"
+ CTOK 42                \ Encoded as:         "85/20/45[42]"
  EQUB 0
 
- EQUB 4                 \ Speed:          "0.30{all caps}LM{sentence case}"
+ EQUB 4                 \ 4: Speed:           "0.30{all caps}LM{sentence case}"
  EQUS "0.30"            \
- CTOK 64                \ Encoded as:     "0.30[64]"
+ CTOK 64                \ Encoded as:         "0.30[64]"
  EQUB 0
 
- EQUB 5                 \ Crew:           "1-3"
+ EQUB 5                 \ 5: Crew:            "1-3"
  EQUS "1-3"             \
- EQUB 0                 \ Encoded as:     "1-3"
+ EQUB 0                 \ Encoded as:         "1-3"
 
- EQUB 6                 \ Range:          "8.5{all caps}LY{sentence case}"
+ EQUB 6                 \ 6: Range:           "8.5{all caps}LY{sentence case}"
  EQUS "8.5"             \
- CTOK 63                \ Encoded as:     "8.5[63]"
+ CTOK 63                \ Encoded as:         "8.5[63]"
  EQUB 0
 
- EQUB 7                 \ Cargo space:    "2{all caps}TC{sentence case}"
+ EQUB 7                 \ 7: Cargo space:     "2{all caps}TC{sentence case}"
  EQUS "2"               \
- CTOK 62                \ Encoded as:     "2[62]"
+ CTOK 62                \ Encoded as:         "2[62]"
  EQUB 0
 
- EQUB 8                 \ Armaments:      "ERGON LASER SYSTEM{cr}
- CTOK 52                \                  {all caps}IFS{sentence case} SEEK &
- CTOK 49                \                  HUNT MISSILES"
+ EQUB 8                 \ 8: Armaments:       "ERGON LASER SYSTEM{cr}
+ CTOK 52                \                      {all caps}IFS{sentence case} SEEK
+ CTOK 49                \                      & HUNT MISSILES"
  CTOK 51                \
- EJMP 12                \ Encoded as:     "[52][49][51]{12}[86][54] & [79][46]"
- CTOK 86
+ EJMP 12                \ Encoded as:         "[52][49][51]{12}[86][54] & [79]
+ CTOK 86                \                      [46]"
  CTOK 54
  EQUS " & "
  CTOK 79
  CTOK 46
  EQUB 0
 
- EQUB 9                 \ Hull:           "H7-28{all caps}/4L{sentence case}"
- EQUS "H7-28"           \
- CTOK 84                \ Encoded as:     "H7-28[84]"
- EQUB 0
+ EQUB 9                 \ 9: Hull:            "H7-28{all caps}/4L{sentence
+ EQUS "H7-28"           \                      case}"
+ CTOK 84                \
+ EQUB 0                 \ Encoded as:         "H7-28[84]"
 
- EQUB 10                \ Drive motors:   "TITRONIX INTERSUN{cr}
- EQUS "T"               \                  {all caps}LT{sentence case} {single
- ETWO 'I', 'T'          \                  cap}IONIC"
+ EQUB 10                \ 10: Drive motors:   "TITRONIX INTERSUN{cr}
+ EQUS "T"               \                      {all caps}LT{sentence case}
+ ETWO 'I', 'T'          \                      {single cap}IONIC"
  EQUS "r"               \
- ETWO 'O', 'N'          \ Encoded as:     "T<219>r<223>ix <240>t<244>sun{12}
- EQUS "ix "             \                  {all caps}LT{sentence case} [78]"
+ ETWO 'O', 'N'          \ Encoded as:         "T<219>r<223>ix <240>t<244>sun{12}
+ EQUS "ix "             \                      {all caps}LT{sentence case} [78]"
  ETWO 'I', 'N'
  EQUS "t"
  ETWO 'E', 'R'
@@ -27118,7 +27314,7 @@ ENDMACRO
 \       Name: gecko
 \       Type: Variable
 \   Category: Encyclopedia
-\    Summary: Card data for the encyclopedia entry for the Gecko
+\    Summary: Ship card data for the encyclopedia entry for the Gecko
 \
 \ ******************************************************************************
 
@@ -27126,11 +27322,11 @@ ENDMACRO
 
 .gecko
 
- EQUB 1                 \ Inservice date: "2852 ({single cap}ACE & FABER,
- EQUS "2852"            \                  LERELACE)"
+ EQUB 1                 \ 1: Inservice date:  "2852 ({single cap}ACE & FABER,
+ EQUS "2852"            \                      LERELACE)"
  CTOK 85                \
- EQUS "A"               \ Encoded as:     "2852[85]A<233> & F[88]<244>, <229>
- ETWO 'C', 'E'          \                  <242><249><233>)"
+ EQUS "A"               \ Encoded as:         "2852[85]A<233> & F[88]<244>,
+ ETWO 'C', 'E'          \                       <229><242><249><233>)"
  EQUS " & F"
  ETWO 'A', 'B'
  ETWO 'E', 'R'
@@ -27142,56 +27338,56 @@ ENDMACRO
  EQUS ")"
  EQUB 0
 
- EQUB 2                 \ Combat factor:  "7"
+ EQUB 2                 \ 2: Combat factor:   "7"
  EQUS "7"               \
- EQUB 0                 \ Encoded as:     "7"
+ EQUB 0                 \ Encoded as:         "7"
 
- EQUB 3                 \ Dimensions:     "40/12/65FT"
+ EQUB 3                 \ 3: Dimensions:      "40/12/65FT"
  EQUS "40/12/65"        \
- CTOK 42                \ Encoded as:     "40/12/65[42]"
+ CTOK 42                \ Encoded as:         "40/12/65[42]"
  EQUB 0
 
- EQUB 4                 \ Speed:          "0.30{all caps}LM{sentence case}"
+ EQUB 4                 \ 4: Speed:           "0.30{all caps}LM{sentence case}"
  EQUS "0.30"            \
- CTOK 64                \ Encoded as:     "0.30[64]"
+ CTOK 64                \ Encoded as:         "0.30[64]"
  EQUB 0
 
- EQUB 5                 \ Crew:           "1-2"
+ EQUB 5                 \ 5: Crew:            "1-2"
  EQUS "1-2"             \
- EQUB 0                 \ Encoded as:     "1-2"
+ EQUB 0                 \ Encoded as:         "1-2"
 
- EQUB 6                 \ Range:          "7{all caps}LY{sentence case}"
+ EQUB 6                 \ 6: Range:           "7{all caps}LY{sentence case}"
  EQUS "7"               \
- CTOK 63                \ Encoded as:     "7[63]"
+ CTOK 63                \ Encoded as:         "7[63]"
  EQUB 0
 
- EQUB 7                 \ Cargo space:    "3{all caps}TC{sentence case}"
+ EQUB 7                 \ 7: Cargo space:     "3{all caps}TC{sentence case}"
  EQUS "3"               \
- CTOK 62                \ Encoded as:     "3[62]"
+ CTOK 62                \ Encoded as:         "3[62]"
  EQUB 0
 
- EQUB 8                 \ Armaments:      "INGRAM 1919 A4 LASER{cr}
- CTOK 56                \                  {all caps}LM{sentence case}
- EQUS " 1919 A4"        \                  HOMING MISSILES"
+ EQUB 8                 \ 8: Armaments:       "INGRAM 1919 A4 LASER{cr}
+ CTOK 56                \                      {all caps}LM{sentence case}
+ EQUS " 1919 A4"        \                      HOMING MISSILES"
  CTOK 49                \
- EJMP 12                \ Encoded as:     "[56] 1919 A4[49]{12}[64] Hom<240>g
- CTOK 64                \                  [46]"
+ EJMP 12                \ Encoded as:         "[56] 1919 A4[49]{12}[64] Hom<240>
+ CTOK 64                \                      g[46]"
  EQUS " Hom"
  ETWO 'I', 'N'
  EQUS "g"
  CTOK 46
  EQUB 0
 
- EQUB 9                 \ Hull:           "E6-19{all caps}/2L{sentence case}"
- EQUS "E6-19"           \
- CTOK 83                \ Encoded as:     "E6-19[83]"
- EQUB 0
+ EQUB 9                 \ 9: Hull:            "E6-19{all caps}/2L{sentence
+ EQUS "E6-19"           \                      case}"
+ CTOK 83                \
+ EQUB 0                 \ Encoded as:         "E6-19[83]"
 
- EQUB 10                \ Drive motors:   "BREAM PULSELIGHT {all caps}XL
- EQUS "B"               \                  {sentence case}"
+ EQUB 10                \ 10: Drive motors:   "BREAM PULSELIGHT {all caps}XL
+ EQUS "B"               \                      {sentence case}"
  ETWO 'R', 'E'          \
- EQUS "am"              \ Encoded as:     "B<242>am[50][55] {all caps}XL
- CTOK 50                \                  {sentence case}"
+ EQUS "am"              \ Encoded as:         "B<242>am[50][55] {all caps}XL
+ CTOK 50                \                      {sentence case}"
  CTOK 55
  EQUS " "
  EJMP 1
@@ -27208,7 +27404,7 @@ ENDMACRO
 \       Name: ghavial
 \       Type: Variable
 \   Category: Encyclopedia
-\    Summary: Card data for the encyclopedia entry for the Ghavial
+\    Summary: Ship card data for the encyclopedia entry for the Ghavial
 \
 \ ******************************************************************************
 
@@ -27216,11 +27412,11 @@ ENDMACRO
 
 .ghavial
 
- EQUB 1                 \ Inservice date: "3077 ({single cap}ARDEN
- EQUS "3077"            \                  CO-OPERATIVE)"
+ EQUB 1                 \ 1: Inservice date:  "3077 ({single cap}ARDEN
+ EQUS "3077"            \                      CO-OPERATIVE)"
  CTOK 85                \
- ETWO 'A', 'R'          \ Encoded as:     "3077[85]<238>d<246> Co-op<244>a<251>
- EQUS "d"               \                  <250>)"
+ ETWO 'A', 'R'          \ Encoded as:         "3077[85]<238>d<246> Co-op<244>a
+ EQUS "d"               \                      <251><250>)"
  ETWO 'E', 'N'
  EQUS " Co-op"
  ETWO 'E', 'R'
@@ -27230,38 +27426,38 @@ ENDMACRO
  EQUS ")"
  EQUB 0
 
- EQUB 2                 \ Combat factor:  "5"
+ EQUB 2                 \ 2: Combat factor:   "5"
  EQUS "5"               \
- EQUB 0                 \ Encoded as:     "5"
+ EQUB 0                 \ Encoded as:         "5"
 
- EQUB 3                 \ Dimensions:     "80/30/60FT"
+ EQUB 3                 \ 3: Dimensions:      "80/30/60FT"
  EQUS "80/30/60"        \
- CTOK 42                \ Encoded as:     "80/30/60[42]"
+ CTOK 42                \ Encoded as:         "80/30/60[42]"
  EQUB 0
 
- EQUB 4                 \ Speed:          "0.25{all caps}LM{sentence case}"
+ EQUB 4                 \ 4: Speed:           "0.25{all caps}LM{sentence case}"
  EQUS "0.25"            \
- CTOK 64                \ Encoded as:     "0.25[64]"
+ CTOK 64                \ Encoded as:         "0.25[64]"
  EQUB 0
 
- EQUB 5                 \ Crew:           "2-7"
+ EQUB 5                 \ 5: Crew:            "2-7"
  EQUS "2-7"             \
- EQUB 0                 \ Encoded as:     "2-7"
+ EQUB 0                 \ Encoded as:         "2-7"
 
- EQUB 6                 \ Range:          "8{all caps}LY{sentence case}"
+ EQUB 6                 \ 6: Range:           "8{all caps}LY{sentence case}"
  EQUS "8"               \
- CTOK 63                \ Encoded as:     "8[63]"
+ CTOK 63                \ Encoded as:         "8[63]"
  EQUB 0
 
- EQUB 7                 \ Cargo space:    "50{all caps}TC{sentence case}"
+ EQUB 7                 \ 7: Cargo space:     "50{all caps}TC{sentence case}"
  EQUS "50"              \
- CTOK 62                \ Encoded as:     "50[62]"
+ CTOK 62                \ Encoded as:         "50[62]"
  EQUB 0
 
- EQUB 8                 \ Armaments:      "FAIREY PULSE LASER{cr}
- EQUS "Fai"             \                  LANCE & FERMAN MISSILES"
+ EQUB 8                 \ 8: Armaments:       "FAIREY PULSE LASER{cr}
+ EQUS "Fai"             \                      LANCE & FERMAN MISSILES"
  ETWO 'R', 'E'          \
- EQUS "y"               \ Encoded as:     "Fai<242>y[50][49]{12}[57][46]"
+ EQUS "y"               \ Encoded as:         "Fai<242>y[50][49]{12}[57][46]"
  CTOK 50
  CTOK 49
  EJMP 12
@@ -27269,16 +27465,16 @@ ENDMACRO
  CTOK 46
  EQUB 0
 
- EQUB 9                 \ Hull:           "I5-25{all caps}/4L{sentence case}"
- EQUS "I5-25"           \
- CTOK 84                \ Encoded as:     "I5-25[84]"
- EQUB 0
+ EQUB 9                 \ 9: Hull:            "I5-25{all caps}/4L{sentence
+ EQUS "I5-25"           \                      case}"
+ CTOK 84                \
+ EQUB 0                 \ Encoded as:         "I5-25[84]"
 
- EQUB 10                \ Drive motors:   "SPALDER & PRIME {all caps}TT1
- EQUS "Sp"              \                  {sentence case}"
+ EQUB 10                \ 10: Drive motors:   "SPALDER & PRIME {all caps}TT1
+ EQUS "Sp"              \                      {sentence case}"
  ETWO 'A', 'L'          \
- EQUS "d"               \ Encoded as:     "Sp<228>d<244> & Prime {all caps}TT1
- ETWO 'E', 'R'          \                  {sentence case}"
+ EQUS "d"               \ Encoded as:         "Sp<228>d<244> & Prime {all caps}
+ ETWO 'E', 'R'          \                      TT1{sentence case}"
  EQUS " & Prime "
  EJMP 1
  EQUS "TT1"
@@ -27294,7 +27490,7 @@ ENDMACRO
 \       Name: iguana
 \       Type: Variable
 \   Category: Encyclopedia
-\    Summary: Card data for the encyclopedia entry for the Iguana
+\    Summary: Ship card data for the encyclopedia entry for the Iguana
 \
 \ ******************************************************************************
 
@@ -27302,10 +27498,10 @@ ENDMACRO
 
 .iguana
 
- EQUB 1                 \ Inservice date: "3095 ({single cap}FAULCON MANSPACE)"
- EQUS "3095"            \
- CTOK 85                \ Encoded as:     "3095[85]Faulc<223> <239>n[77])"
- EQUS "Faulc"
+ EQUB 1                 \ 1: Inservice date:  "3095 ({single cap}FAULCON
+ EQUS "3095"            \                      MANSPACE)"
+ CTOK 85                \
+ EQUS "Faulc"           \ Encoded as:         "3095[85]Faulc<223> <239>n[77])"
  ETWO 'O', 'N'
  EQUS " "
  ETWO 'M', 'A'
@@ -27314,55 +27510,55 @@ ENDMACRO
  EQUS ")"
  EQUB 0
 
- EQUB 2                 \ Combat factor:  "6"
+ EQUB 2                 \ 2: Combat factor:   "6"
  EQUS "6"               \
- EQUB 0                 \ Encoded as:     "6"
+ EQUB 0                 \ Encoded as:         "6"
 
- EQUB 3                 \ Dimensions:     "65/20/40FT"
+ EQUB 3                 \ 3: Dimensions:      "65/20/40FT"
  EQUS "65/20/40"        \
- CTOK 42                \ Encoded as:     "65/20/40[42]"
+ CTOK 42                \ Encoded as:         "65/20/40[42]"
  EQUB 0
 
- EQUB 4                 \ Speed:          "0.33{all caps}LM{sentence case}"
+ EQUB 4                 \ 4: Speed:           "0.33{all caps}LM{sentence case}"
  EQUS "0.33"            \
- CTOK 64                \ Encoded as:     "0.33[64]"
+ CTOK 64                \ Encoded as:         "0.33[64]"
  EQUB 0
 
- EQUB 5                 \ Crew:           "1-3"
+ EQUB 5                 \ 5: Crew:            "1-3"
  EQUS "1-3"             \
- EQUB 0                 \ Encoded as:     "1-3"
+ EQUB 0                 \ Encoded as:         "1-3"
 
- EQUB 6                 \ Range:          "7.5{all caps}LY{sentence case}"
+ EQUB 6                 \ 6: Range:           "7.5{all caps}LY{sentence case}"
  EQUS "7.5"             \
- CTOK 63                \ Encoded as:     "7.5[63]"
+ CTOK 63                \ Encoded as:         "7.5[63]"
  EQUB 0
 
- EQUB 7                 \ Cargo space:    "15{all caps}TC{sentence case}"
+ EQUB 7                 \ 7: Cargo space:     "15{all caps}TC{sentence case}"
  EQUS "15"              \
- CTOK 62                \ Encoded as:     "15[62]"
+ CTOK 62                \ Encoded as:         "15[62]"
  EQUB 0
 
- EQUB 8                 \ Armaments:      "LANCE & FERMAN LASER{cr}
- CTOK 57                \                  SEEKER X1 MISSILES"
+ EQUB 8                 \ 8: Armaments:       "LANCE & FERMAN LASER{cr}
+ CTOK 57                \                      SEEKER X1 MISSILES"
  CTOK 49                \
- EJMP 12                \ Encoded as:     "[57][49]{12}[54]<244> X1[46]"
+ EJMP 12                \ Encoded as:         "[57][49]{12}[54]<244> X1[46]"
  CTOK 54
  ETWO 'E', 'R'
  EQUS " X1"
  CTOK 46
  EQUB 0
 
- EQUB 9                 \ Hull:           "G6-20{all caps}/4L{sentence case}"
- EQUS "G6-20"           \
- CTOK 84                \ Encoded as:     "G6-20[84]"
- EQUB 0
+ EQUB 9                 \ 9: Hull:            "G6-20{all caps}/4L{sentence
+ EQUS "G6-20"           \                      case}"
+ CTOK 84                \
+ EQUB 0                 \ Encoded as:         "G6-20[84]"
 
- EQUB 10                \ Drive motors:   "DE{single cap}LACY SUPER THRUST{cr}
- CTOK 71                \                  {all caps}VC{sentence case}9"
- EQUS " Sup"            \
- ETWO 'E', 'R'          \ Encoded as:     "[71] Sup<244> [66]{12}{all caps}VC
- EQUS " "               \                  {sentence case}9"
- CTOK 66
+ EQUB 10                \ 10: Drive motors:   "DE{single cap}LACY SUPER
+ CTOK 71                \                       THRUST{cr}
+ EQUS " Sup"            \                      {all caps}VC{sentence case}9"
+ ETWO 'E', 'R'          \
+ EQUS " "               \ Encoded as:         "[71] Sup<244> [66]{12}{all caps}V
+ CTOK 66                \                      C{sentence case}9"
  EJMP 12
  EJMP 1
  EQUS "VC"
@@ -27379,7 +27575,7 @@ ENDMACRO
 \       Name: krait
 \       Type: Variable
 \   Category: Encyclopedia
-\    Summary: Card data for the encyclopedia entry for the Krait
+\    Summary: Ship card data for the encyclopedia entry for the Krait
 \
 \ ******************************************************************************
 
@@ -27387,11 +27583,11 @@ ENDMACRO
 
 .krait
 
- EQUB 1                 \ Inservice date: "3027 ({single cap}DE{single cap}LACY
- EQUS "3027"            \                  SHIPWORKS, ININES)"
+ EQUB 1                 \ 1: Inservice date:  "3027 ({single cap}DE{single cap}
+ EQUS "3027"            \                      LACY SHIPWORKS, ININES)"
  CTOK 85                \
- CTOK 71                \ Encoded as:     "3027[85][71][67]W<253>ks, <240><240>
- CTOK 67                \                  <237>)"
+ CTOK 71                \ Encoded as:         "3027[85][71][67]W<253>ks, <240>
+ CTOK 67                \                      <240><237>)"
  EQUS "W"
  ETWO 'O', 'R'
  EQUS "ks, "
@@ -27401,32 +27597,32 @@ ENDMACRO
  EQUS ")"
  EQUB 0
 
- EQUB 2                 \ Combat factor:  "7"
+ EQUB 2                 \ 2: Combat factor:   "7"
  EQUS "7"               \
- EQUB 0                 \ Encoded as:     "7"
+ EQUB 0                 \ Encoded as:         "7"
 
- EQUB 3                 \ Dimensions:     "80/20/90FT"
+ EQUB 3                 \ 3: Dimensions:      "80/20/90FT"
  EQUS "80/20/90"        \
- CTOK 42                \ Encoded as:     "80/20/90[42]"
+ CTOK 42                \ Encoded as:         "80/20/90[42]"
  EQUB 0
 
- EQUB 4                 \ Speed:          "0.30{all caps}LM{sentence case}"
+ EQUB 4                 \ 4: Speed:           "0.30{all caps}LM{sentence case}"
  EQUS "0.30"            \
- CTOK 64                \ Encoded as:     "0.30[64]"
+ CTOK 64                \ Encoded as:         "0.30[64]"
  EQUB 0
 
- EQUB 5                 \ Crew:           "1"
+ EQUB 5                 \ 5: Crew:            "1"
  EQUS "1"               \
- EQUB 0                 \ Encoded as:     "1"
+ EQUB 0                 \ Encoded as:         "1"
 
- EQUB 7                 \ Cargo space:    "10{all caps}TC{sentence case}"
+ EQUB 7                 \ 7: Cargo space:     "10{all caps}TC{sentence case}"
  EQUS "10"              \
- CTOK 62                \ Encoded as:     "10[62]"
+ CTOK 62                \ Encoded as:         "10[62]"
  EQUB 0
 
- EQUB 8                 \ Armaments:      "ERGON LASER SYSTEM"
+ EQUB 8                 \ 8: Armaments:       "ERGON LASER SYSTEM"
  CTOK 52                \
- CTOK 49                \ Encoded as:     "[52][49][51]"
+ CTOK 49                \ Encoded as:         "[52][49][51]"
  CTOK 51
  EQUB 0
 
@@ -27435,10 +27631,10 @@ ENDMACRO
 \CTOK 83                \ It would show the hull as "8{all caps}/2L{sentence
 \EQUB 0                 \ case}"
 
- EQUB 10                \ Drive motors:   "DE{single cap}LACY SPIN{single cap}
- CTOK 71                \                  IONIC ZX14"
+ EQUB 10                \ 10: Drive motors:   "DE{single cap}LACY SPIN{single
+ CTOK 71                \                      cap}IONIC ZX14"
  EQUS " Sp"             \
- ETWO 'I', 'N'          \ Encoded as:     "[71] Sp<240>[78] ZX14"
+ ETWO 'I', 'N'          \ Encoded as:         "[71] Sp<240>[78] ZX14"
  CTOK 78
  EQUS " ZX14"
  EQUB 0
@@ -27452,7 +27648,7 @@ ENDMACRO
 \       Name: mamba
 \       Type: Variable
 \   Category: Encyclopedia
-\    Summary: Card data for the encyclopedia entry for the Mamba
+\    Summary: Ship card data for the encyclopedia entry for the Mamba
 \
 \ ******************************************************************************
 
@@ -27460,10 +27656,10 @@ ENDMACRO
 
 .mamba
 
- EQUB 1                 \ Inservice date: "3110 ({single cap}REORTE SHIP
- EQUS "3110"            \                  FEDERATION)"
+ EQUB 1                 \ 1: Inservice date:  "3110 ({single cap}REORTE SHIP
+ EQUS "3110"            \                      FEDERATION)"
  CTOK 85                \
- ETWO 'R', 'E'          \ Encoded as:     "3110[85]<242><253>te[67] [76])"
+ ETWO 'R', 'E'          \ Encoded as:         "3110[85]<242><253>te[67] [76])"
  ETWO 'O', 'R'
  EQUS "te"
  CTOK 67
@@ -27472,35 +27668,35 @@ ENDMACRO
  EQUS ")"
  EQUB 0
 
- EQUB 2                 \ Combat factor:  "8"
+ EQUB 2                 \ 2: Combat factor:   "8"
  EQUS "8"               \
- EQUB 0                 \ Encoded as:     "8"
+ EQUB 0                 \ Encoded as:         "8"
 
- EQUB 3                 \ Dimensions:     "55/12/65FT"
+ EQUB 3                 \ 3: Dimensions:      "55/12/65FT"
  EQUS "55/12/65"        \
- CTOK 42                \ Encoded as:     "55/12/65[42]"
+ CTOK 42                \ Encoded as:         "55/12/65[42]"
  EQUB 0
 
- EQUB 4                 \ Speed:          "0.30{all caps}LM{sentence case}"
+ EQUB 4                 \ 4: Speed:           "0.30{all caps}LM{sentence case}"
  EQUS "0.30"            \
- CTOK 64                \ Encoded as:     "0.30[64]"
+ CTOK 64                \ Encoded as:         "0.30[64]"
  EQUB 0
 
- EQUB 5                 \ Crew:           "1-2"
+ EQUB 5                 \ 5: Crew:            "1-2"
  EQUS "1-2"             \
- EQUB 0                 \ Encoded as:     "1-2"
+ EQUB 0                 \ Encoded as:         "1-2"
 
- EQUB 7                 \ Cargo space:    "10{all caps}TC{sentence case}"
+ EQUB 7                 \ 7: Cargo space:     "10{all caps}TC{sentence case}"
  EQUS "10"              \
- CTOK 62                \ Encoded as:     "10[62]"
+ CTOK 62                \ Encoded as:         "10[62]"
  EQUB 0
 
- EQUB 8                 \ Armaments:      "ERGON LASER SYSTEM{cr}
- CTOK 52                \                  {all caps}IFS{sentence case} SEEK &
- CTOK 49                \                  HUNT MISSILES"
+ EQUB 8                 \ 8: Armaments:       "ERGON LASER SYSTEM{cr}
+ CTOK 52                \                      {all caps}IFS{sentence case} SEEK
+ CTOK 49                \                      & HUNT MISSILES"
  CTOK 51                \
- EJMP 12                \ Encoded as:     "[52][49][51]{12}[86][54] & [79][46]"
- CTOK 86
+ EJMP 12                \ Encoded as:         "[52][49][51]{12}[86][54] & [79]
+ CTOK 86                \                      [46]"
  CTOK 54
  EQUS " & "
  CTOK 79
@@ -27512,11 +27708,11 @@ ENDMACRO
 \CTOK 82                \ It would show the hull as "7{all caps}/1L{sentence
 \EQUB 0                 \ case}"
 
- EQUB 10                \ Drive motors:   "SEEKLIGHT {all caps}HV{sentence case}
- CTOK 54                \                  THRUST"
+ EQUB 10                \ 10: Drive motors:   "SEEKLIGHT {all caps}HV{sentence
+ CTOK 54                \                      case}THRUST"
  CTOK 55                \
- EQUS " "               \ Encoded as:     "[54][55] {all caps}HV{sentence case} 
- EJMP 1                 \                  [66]"
+ EQUS " "               \ Encoded as:         "[54][55] {all caps}HV{sentence
+ EJMP 1                 \                      case}[66]"
  EQUS "HV"
  EJMP 2
  EQUS " "
@@ -27532,7 +27728,7 @@ ENDMACRO
 \       Name: monitor
 \       Type: Variable
 \   Category: Encyclopedia
-\    Summary: Card data for the encyclopedia entry for the Monitor
+\    Summary: Ship card data for the encyclopedia entry for the Monitor
 \
 \ ******************************************************************************
 
@@ -27540,59 +27736,59 @@ ENDMACRO
 
 .monitor
 
- EQUB 1                 \ Inservice date: "3112 ({single cap}ZORGON PETTERSON)"
- EQUS "3112"            \
- CTOK 85                \ Encoded as:     "3112[85][70]"
- CTOK 70
+ EQUB 1                 \ 1: Inservice date:  "3112 ({single cap}ZORGON
+ EQUS "3112"            \                      PETTERSON)"
+ CTOK 85                \
+ CTOK 70                \ Encoded as:         "3112[85][70]"
  EQUB 0
 
- EQUB 2                 \ Combat factor:  "4"
+ EQUB 2                 \ 2: Combat factor:   "4"
  EQUS "4"               \
- EQUB 0                 \ Encoded as:     "4"
+ EQUB 0                 \ Encoded as:         "4"
 
- EQUB 3                 \ Dimensions:     "100/40/50FT"
+ EQUB 3                 \ 3: Dimensions:      "100/40/50FT"
  EQUS "100/40/50"       \
- CTOK 42                \ Encoded as:     "100/40/50[42]"
+ CTOK 42                \ Encoded as:         "100/40/50[42]"
  EQUB 0
 
- EQUB 4                 \ Speed:          "0.16{all caps}LM{sentence case}"
+ EQUB 4                 \ 4: Speed:           "0.16{all caps}LM{sentence case}"
  EQUS "0.16"            \
- CTOK 64                \ Encoded as:     "0.16[64]"
+ CTOK 64                \ Encoded as:         "0.16[64]"
  EQUB 0
 
- EQUB 5                 \ Crew:           "7-19"
+ EQUB 5                 \ 5: Crew:            "7-19"
  EQUS "7-19"            \
- EQUB 0                 \ Encoded as:     "7-19"
+ EQUB 0                 \ Encoded as:         "7-19"
 
- EQUB 6                 \ Range:          "11{all caps}LY{sentence case}"
+ EQUB 6                 \ 6: Range:           "11{all caps}LY{sentence case}"
  EQUS "11"              \
- CTOK 63                \ Encoded as:     "11[63]"
+ CTOK 63                \ Encoded as:         "11[63]"
  EQUB 0
 
- EQUB 7                 \ Cargo space:    "75{all caps}TC{sentence case}"
+ EQUB 7                 \ 7: Cargo space:     "75{all caps}TC{sentence case}"
  EQUS "75"              \
- CTOK 62                \ Encoded as:     "75[62]"
+ CTOK 62                \ Encoded as:         "75[62]"
  EQUB 0
 
- EQUB 8                 \ Armaments:      "{single cap}KRUGER {all caps}HMB
- CTOK 58                \                  {sentence case} LASER{cr}
- EJMP 1                 \                  GERET STARSEEKER MISSILE"
+ EQUB 8                 \ 8: Armaments:       "{single cap}KRUGER {all caps}HMB
+ CTOK 58                \                      {sentence case} LASER{cr}
+ EJMP 1                 \                      GERET STARSEEKER MISSILE"
  EQUS "HMB"             \
- EJMP 2                 \ Encoded as:     "[58]{all caps}HMB{sentence case}[49]
- CTOK 49                \                  {12}[48][46]"
+ EJMP 2                 \ Encoded as:         "[58]{all caps}HMB{sentence case}
+ CTOK 49                \                      [49]{12}[48][46]"
  EJMP 12
  CTOK 48
  CTOK 46
  EQUB 0
 
- EQUB 9                 \ Hull:           "J6-28{all caps}/4L{sentence case}"
- EQUS "J6-28"           \
- CTOK 84                \ Encoded as:     "J6-28[84]"
- EQUB 0
+ EQUB 9                 \ 9: Hull:            "J6-28{all caps}/4L{sentence
+ EQUS "J6-28"           \                      case}"
+ CTOK 84                \
+ EQUB 0                 \ Encoded as:         "J6-28[84]"
 
- EQUB 10                \ Drive motors:   "V & K 29.01{cr}LIGHT BLASTERS"
+ EQUB 10                \ 10: Drive motors:   "V & K 29.01{cr}LIGHT BLASTERS"
  CTOK 73                \
- EQUS "29.01"           \ Encoded as:     "[73]29.01{12}[55] [74]<244>s"
+ EQUS "29.01"           \ Encoded as:         "[73]29.01{12}[55] [74]<244>s"
  EJMP 12
  CTOK 55
  EQUS " "
@@ -27610,7 +27806,7 @@ ENDMACRO
 \       Name: moray
 \       Type: Variable
 \   Category: Encyclopedia
-\    Summary: Card data for the encyclopedia entry for the Moray
+\    Summary: Ship card data for the encyclopedia entry for the Moray
 \
 \ ******************************************************************************
 
@@ -27618,64 +27814,64 @@ ENDMACRO
 
 .moray
 
- EQUB 1                 \ Inservice date: "3028 ({single cap}MARINE TRENCH CO.)"
- EQUS "3028"            \
- CTOK 85                \ Encoded as:     "3028[85]M<238><240>e T<242>nch Co.)"
- EQUS "M"
- ETWO 'A', 'R'
+ EQUB 1                 \ 1: Inservice date:  "3028 ({single cap}MARINE TRENCH
+ EQUS "3028"            \                      CO.)"
+ CTOK 85                \
+ EQUS "M"               \ Encoded as:         "3028[85]M<238><240>e T<242>nch C
+ ETWO 'A', 'R'          \                      o.)"
  ETWO 'I', 'N'
  EQUS "e T"
  ETWO 'R', 'E'
  EQUS "nch Co.)"
  EQUB 0
 
- EQUB 2                 \ Combat factor:  "7"
+ EQUB 2                 \ 2: Combat factor:   "7"
  EQUS "7"               \
- EQUB 0                 \ Encoded as:     "7"
+ EQUB 0                 \ Encoded as:         "7"
 
- EQUB 3                 \ Dimensions:     "60/25/60FT"
+ EQUB 3                 \ 3: Dimensions:      "60/25/60FT"
  EQUS "60/25/60"        \
- CTOK 42                \ Encoded as:     "60/25/60[42]"
+ CTOK 42                \ Encoded as:         "60/25/60[42]"
  EQUB 0
 
- EQUB 4                 \ Speed:          "0.25{all caps}LM{sentence case}"
+ EQUB 4                 \ 4: Speed:           "0.25{all caps}LM{sentence case}"
  EQUS "0.25"            \
- CTOK 64                \ Encoded as:     "0.25[64]"
+ CTOK 64                \ Encoded as:         "0.25[64]"
  EQUB 0
 
- EQUB 5                 \ Crew:           "1-4"
+ EQUB 5                 \ 5: Crew:            "1-4"
  EQUS "1-4"             \
- EQUB 0                 \ Encoded as:     "1-4"
+ EQUB 0                 \ Encoded as:         "1-4"
 
- EQUB 6                 \ Range:          "8{all caps}LY{sentence case}"
+ EQUB 6                 \ 6: Range:           "8{all caps}LY{sentence case}"
  EQUS "8"               \
- CTOK 63                \ Encoded as:     "8[63]"
+ CTOK 63                \ Encoded as:         "8[63]"
  EQUB 0
 
- EQUB 7                 \ Cargo space:    "7{all caps}TC{sentence case}"
+ EQUB 7                 \ 7: Cargo space:     "7{all caps}TC{sentence case}"
  EQUS "7"               \
- CTOK 62                \ Encoded as:     "7[62]"
+ CTOK 62                \ Encoded as:         "7[62]"
  EQUB 0
 
- EQUB 8                 \ Armaments:      "INGRAM LASER SYSTEM{cr}
- CTOK 56                \                  GERET STARSEEKER MISSILES"
+ EQUB 8                 \ 8: Armaments:       "INGRAM LASER SYSTEM{cr}
+ CTOK 56                \                      GERET STARSEEKER MISSILES"
  CTOK 49                \
- CTOK 51                \ Encoded as:     "[56][49][51]{12}[48][46]"
+ CTOK 51                \ Encoded as:         "[56][49][51]{12}[48][46]"
  EJMP 12
  CTOK 48
  CTOK 46
  EQUB 0
 
- EQUB 9                 \ Hull:           "F4-22{all caps}/4L{sentence case}"
- EQUS "F4-22"           \
- CTOK 84                \ Encoded as:     "F4-22[84]"
- EQUB 0
+ EQUB 9                 \ 9: Hull:            "F4-22{all caps}/4L{sentence
+ EQUS "F4-22"           \                      case}"
+ CTOK 84                \
+ EQUB 0                 \ Encoded as:         "F4-22[84]"
 
- EQUB 10                \ Drive motors:   "TURBULEN QUARK{cr}RE-CHARGER 1287"
- EQUS "Turbul"          \
- ETWO 'E', 'N'          \ Encoded as:     "Turbul<246> <254><238>k{12}<242>-ch
- EQUS " "               \                  <238>g<244> 1287"
- ETWO 'Q', 'U'
+ EQUB 10                \ 10: Drive motors:   "TURBULEN QUARK{cr}RE-CHARGER
+ EQUS "Turbul"          \                      1287"
+ ETWO 'E', 'N'          \
+ EQUS " "               \ Encoded as:         "Turbul<246> <254><238>k{12}<242>-
+ ETWO 'Q', 'U'          \                      ch<238>g<244> 1287"
  ETWO 'A', 'R'
  EQUS "k"
  EJMP 12
@@ -27696,7 +27892,7 @@ ENDMACRO
 \       Name: ophidian
 \       Type: Variable
 \   Category: Encyclopedia
-\    Summary: Card data for the encyclopedia entry for the Ophidian
+\    Summary: Ship card data for the encyclopedia entry for the Ophidian
 \
 \ ******************************************************************************
 
@@ -27704,61 +27900,61 @@ ENDMACRO
 
 .ophidian
 
- EQUB 1                 \ Inservice date: "2981 ({single cap}OUTWORLD
- EQUS "2981"            \                  WORKSHOPS)"
+ EQUB 1                 \ 1: Inservice date:  "2981 ({single cap}OUTWORLD
+ EQUS "2981"            \                      WORKSHOPS)"
  CTOK 85                \
- CTOK 69                \ Encoded as:     "2981[85][69][81]"
+ CTOK 69                \ Encoded as:         "2981[85][69][81]"
  CTOK 81
  EQUB 0
 
- EQUB 2                 \ Combat factor:  "8"
+ EQUB 2                 \ 2: Combat factor:   "8"
  EQUS "8"               \
- EQUB 0                 \ Encoded as:     "8"
+ EQUB 0                 \ Encoded as:         "8"
 
- EQUB 3                 \ Dimensions:     "65/15/30FT"
+ EQUB 3                 \ 3: Dimensions:      "65/15/30FT"
  EQUS "65/15/30"        \
- CTOK 42                \ Encoded as:     "65/15/30[42]"
+ CTOK 42                \ Encoded as:         "65/15/30[42]"
  EQUB 0
 
- EQUB 4                 \ Speed:          "0.34{all caps}LM{sentence case}"
+ EQUB 4                 \ 4: Speed:           "0.34{all caps}LM{sentence case}"
  EQUS "0.34"            \
- CTOK 64                \ Encoded as:     "0.34[64]"
+ CTOK 64                \ Encoded as:         "0.34[64]"
  EQUB 0
 
- EQUB 5                 \ Crew:           "1-3"
+ EQUB 5                 \ 5: Crew:            "1-3"
  EQUS "1-3"             \
- EQUB 0                 \ Encoded as:     "1-3"
+ EQUB 0                 \ Encoded as:         "1-3"
 
- EQUB 6                 \ Range:          "7{all caps}LY{sentence case}"
+ EQUB 6                 \ 6: Range:           "7{all caps}LY{sentence case}"
  EQUS "7"               \
- CTOK 63                \ Encoded as:     "7[63]"
+ CTOK 63                \ Encoded as:         "7[63]"
  EQUB 0
 
- EQUB 7                 \ Cargo space:    "20{all caps}TC{sentence case}"
+ EQUB 7                 \ 7: Cargo space:     "20{all caps}TC{sentence case}"
  EQUS "20"              \
- CTOK 62                \ Encoded as:     "20[62]"
+ CTOK 62                \ Encoded as:         "20[62]"
  EQUB 0
 
- EQUB 8                 \ Armaments:      "LANCE & FERMAN LASER{cr}
- CTOK 57                \                  SEEKER X1 MISSILES"
+ EQUB 8                 \ 8: Armaments:       "LANCE & FERMAN LASER{cr}
+ CTOK 57                \                      SEEKER X1 MISSILES"
  CTOK 49                \
- EJMP 12                \ Encoded as:     "[57][49]{12}[54]<244> X1[46]"
+ EJMP 12                \ Encoded as:         "[57][49]{12}[54]<244> X1[46]"
  CTOK 54
  ETWO 'E', 'R'
  EQUS " X1"
  CTOK 46
  EQUB 0
 
- EQUB 9                 \ Hull:           "D4-16{all caps}/1L{sentence case}"
- EQUS "D4-16"           \
- CTOK 82                \ Encoded as:     "D4-16[82]"
- EQUB 0
+ EQUB 9                 \ 9: Hull:            "D4-16{all caps}/1L{sentence
+ EQUS "D4-16"           \                      case}"
+ CTOK 82                \
+ EQUB 0                 \ Encoded as:         "D4-16[82]"
 
- EQUB 10                \ Drive motors:   "VOLTAIRE STINGER{cr}
- CTOK 60                \                  PULSEDRIVE"
+ EQUB 10                \ 10: Drive motors:   "VOLTAIRE STINGER{cr}
+ CTOK 60                \                      PULSEDRIVE"
  EQUS " "               \
- ETWO 'S', 'T'          \ Encoded as:     "[60] <222><240>g<244>{12}Pul<218>
- ETWO 'I', 'N'          \                  [53]"
+ ETWO 'S', 'T'          \ Encoded as:         "[60] <222><240>g<244>{12}Pul<218>
+ ETWO 'I', 'N'          \                      [53]"
  EQUS "g"
  ETWO 'E', 'R'
  EJMP 12
@@ -27776,7 +27972,7 @@ ENDMACRO
 \       Name: python
 \       Type: Variable
 \   Category: Encyclopedia
-\    Summary: Card data for the encyclopedia entry for the Python
+\    Summary: Ship card data for the encyclopedia entry for the Python
 \
 \ ******************************************************************************
 
@@ -27784,65 +27980,65 @@ ENDMACRO
 
 .python
 
- EQUB 1                 \ Inservice date: "2700 ({single cap}WHATT & PRITNEY
- EQUS "2700"            \                  SC)"
+ EQUB 1                 \ 1: Inservice date:  "2700 ({single cap}WHATT & PRITNEY
+ EQUS "2700"            \                      SC)"
  CTOK 85                \
- EQUS "Wh"              \ Encoded as:     "2700[85]Wh<245>t & Pr<219>ney SC)"
- ETWO 'A', 'T'
+ EQUS "Wh"              \ Encoded as:         "2700[85]Wh<245>t & Pr<219>ney S
+ ETWO 'A', 'T'          \                      C)"
  EQUS "t & Pr"
  ETWO 'I', 'T'
  EQUS "ney SC)"
  EQUB 0
 
- EQUB 2                 \ Combat factor:  "3"
+ EQUB 2                 \ 2: Combat factor:   "3"
  EQUS "3"               \
- EQUB 0                 \ Encoded as:     "3"
+ EQUB 0                 \ Encoded as:         "3"
 
- EQUB 3                 \ Dimensions:     "130/40/80FT"
+ EQUB 3                 \ 3: Dimensions:      "130/40/80FT"
  EQUS "130/40/80"       \
- CTOK 42                \ Encoded as:     "130/40/80[42]"
+ CTOK 42                \ Encoded as:         "130/40/80[42]"
  EQUB 0
 
- EQUB 4                 \ Speed:          "0.20{all caps}LM{sentence case}"
+ EQUB 4                 \ 4: Speed:           "0.20{all caps}LM{sentence case}"
  EQUS "0.20"            \
- CTOK 64                \ Encoded as:     "0.20[64]"
+ CTOK 64                \ Encoded as:         "0.20[64]"
  EQUB 0
 
- EQUB 5                 \ Crew:           "2-9"
+ EQUB 5                 \ 5: Crew:            "2-9"
  EQUS "2-9"             \
- EQUB 0                 \ Encoded as:     "2-9"
+ EQUB 0                 \ Encoded as:         "2-9"
 
- EQUB 6                 \ Range:          "8{all caps}LY{sentence case}"
+ EQUB 6                 \ 6: Range:           "8{all caps}LY{sentence case}"
  EQUS "8"               \
- CTOK 63                \ Encoded as:     "8[63]"
+ CTOK 63                \ Encoded as:         "8[63]"
  EQUB 0
 
- EQUB 7                 \ Cargo space:    "100{all caps}TC{sentence case}"
+ EQUB 7                 \ 7: Cargo space:     "100{all caps}TC{sentence case}"
  EQUS "100"             \
- CTOK 62                \ Encoded as:     "100[62]"
+ CTOK 62                \ Encoded as:         "100[62]"
  EQUB 0
 
- EQUB 8                 \ Armaments:      "VOLT-{all caps}VARISCAN PULSE LASER"
- EQUS "Volt-"           \
- EJMP 19                \ Encoded as:     "Volt-{single cap}V<238>isc<255>[50]
- EQUS "V"               \                  [49]"
- ETWO 'A', 'R'
+ EQUB 8                 \ 8: Armaments:       "VOLT-{all caps}VARISCAN PULSE
+ EQUS "Volt-"           \                      LASER"
+ EJMP 19                \
+ EQUS "V"               \ Encoded as:         "Volt-{single cap}V<238>isc<255>
+ ETWO 'A', 'R'          \                      [50][49]"
  EQUS "isc"
  ETWO 'A', 'N'
  CTOK 50
  CTOK 49
  EQUB 0
 
- EQUB 9                 \ Hull:           "K6-27{all caps}/4L{sentence case}"
- EQUS "K6-27"           \
- CTOK 84                \ Encoded as:     "K6-27[84]"
- EQUB 0
+ EQUB 9                 \ 9: Hull:            "K6-27{all caps}/4L{sentence
+ EQUS "K6-27"           \                      case}"
+ CTOK 84                \
+ EQUB 0                 \ Encoded as:         "K6-27[84]"
 
- EQUB 10                \ Drive motors:   "{all caps}4*C40KV{sentence case} AMES
- CTOK 72                \                  DRIVE{cr}
- EJMP 12                \                  EXLON 76NN MODEL"
+ EQUB 10                \ 10: Drive motors:   "{all caps}4*C40KV{sentence case}
+ CTOK 72                \                      AMES DRIVE{cr}
+ EJMP 12                \                      EXLON 76NN MODEL"
  EQUS "Exl"             \
- ETWO 'O', 'N'          \ Encoded as:     "[72]{12}Exl<223> 76NN Model"
+ ETWO 'O', 'N'          \ Encoded as:         "[72]{12}Exl<223> 76NN Model"
  EQUS " 76NN Model"
  EQUB 0
 
@@ -27855,7 +28051,7 @@ ENDMACRO
 \       Name: shuttle
 \       Type: Variable
 \   Category: Encyclopedia
-\    Summary: Card data for the encyclopedia entry for the Shuttle
+\    Summary: Ship card data for the encyclopedia entry for the Shuttle
 \
 \ ******************************************************************************
 
@@ -27863,44 +28059,44 @@ ENDMACRO
 
 .shuttle
 
- EQUB 1                 \ Inservice date: "2856 ({single cap}SAUD-{single cap}
- EQUS "2856"            \                  KRUGER ASTRO)"
+ EQUB 1                 \ 1: Inservice date:  "2856 ({single cap}SAUD-{single
+ EQUS "2856"            \                      cap}KRUGER ASTRO)"
  CTOK 85                \
- EQUS "Saud-"           \ Encoded as:     "2856[85]Saud-[58]A<222>ro)"
+ EQUS "Saud-"           \ Encoded as:         "2856[85]Saud-[58]A<222>ro)"
  CTOK 58
  EQUS "A"
  ETWO 'S', 'T'
  EQUS "ro)"
  EQUB 0
 
- EQUB 2                 \ Combat factor:  "4"
+ EQUB 2                 \ 2: Combat factor:   "4"
  EQUS "4"               \
- EQUB 0                 \ Encoded as:     "4"
+ EQUB 0                 \ Encoded as:         "4"
 
- EQUB 3                 \ Dimensions:     "35/20/20FT"
+ EQUB 3                 \ 3: Dimensions:      "35/20/20FT"
  EQUS "35/20/20"        \
- CTOK 42                \ Encoded as:     "35/20/20[42]"
+ CTOK 42                \ Encoded as:         "35/20/20[42]"
  EQUB 0
 
- EQUB 4                 \ Speed:          "0.08{all caps}LM{sentence case}"
+ EQUB 4                 \ 4: Speed:           "0.08{all caps}LM{sentence case}"
  EQUS "0.08"            \
- CTOK 64                \ Encoded as:     "0.08[64]"
+ CTOK 64                \ Encoded as:         "0.08[64]"
  EQUB 0
 
- EQUB 5                 \ Crew:           "2"
+ EQUB 5                 \ 5: Crew:            "2"
  EQUS "2"               \
- EQUB 0                 \ Encoded as:     "2"
+ EQUB 0                 \ Encoded as:         "2"
 
- EQUB 7                 \ Cargo space:    "60{all caps}TC{sentence case}"
+ EQUB 7                 \ 7: Cargo space:     "60{all caps}TC{sentence case}"
  EQUS "60"              \
- CTOK 62                \ Encoded as:     "60[62]"
+ CTOK 62                \ Encoded as:         "60[62]"
  EQUB 0
 
- EQUB 10                \ Drive motors:   "V & K 20.20{cr}
- CTOK 73                \                  STARMAT DRIVE"
+ EQUB 10                \ 10: Drive motors:   "V & K 20.20{cr}
+ CTOK 73                \                      STARMAT DRIVE"
  EQUS "20.20"           \
- EJMP 12                \ Encoded as:     "[73]20.20{12}<222><238><239>t [53]"
- ETWO 'S', 'T'
+ EJMP 12                \ Encoded as:         "[73]20.20{12}<222><238><239>t
+ ETWO 'S', 'T'          \                       [53]"
  ETWO 'A', 'R'
  ETWO 'M', 'A'
  EQUS "t "
@@ -27916,7 +28112,7 @@ ENDMACRO
 \       Name: sidewinder
 \       Type: Variable
 \   Category: Encyclopedia
-\    Summary: Card data for the encyclopedia entry for the Sidewinder
+\    Summary: Ship card data for the encyclopedia entry for the Sidewinder
 \
 \ ******************************************************************************
 
@@ -27924,11 +28120,11 @@ ENDMACRO
 
 .sidewinder
 
- EQUB 1                 \ Inservice date: "2982 ({single cap}ONRIRA ORBITAL)"
- EQUS "2982"            \
- CTOK 85                \ Encoded as:     "2982[85]<223>ri<248> <253>b<219>
- ETWO 'O', 'N'          \                  <228>)"
- EQUS "ri"
+ EQUB 1                 \ 1: Inservice date:  "2982 ({single cap}ONRIRA
+ EQUS "2982"            \                      ORBITAL)"
+ CTOK 85                \
+ ETWO 'O', 'N'          \ Encoded as:         "2982[85]<223>ri<248> <253>b<219>
+ EQUS "ri"              \                      <228>)"
  ETWO 'R', 'A'
  EQUS " "
  ETWO 'O', 'R'
@@ -27938,27 +28134,27 @@ ENDMACRO
  EQUS ")"
  EQUB 0
 
- EQUB 2                 \ Combat factor:  "9"
+ EQUB 2                 \ 2: Combat factor:   "9"
  EQUS "9"               \
- EQUB 0                 \ Encoded as:     "9"
+ EQUB 0                 \ Encoded as:         "9"
 
- EQUB 3                 \ Dimensions:     "35/15/65FT"
+ EQUB 3                 \ 3: Dimensions:      "35/15/65FT"
  EQUS "35/15/65"        \
- CTOK 42                \ Encoded as:     "35/15/65[42]"
+ CTOK 42                \ Encoded as:         "35/15/65[42]"
  EQUB 0
 
- EQUB 4                 \ Speed:          "0.37{all caps}LM{sentence case}"
+ EQUB 4                 \ 4: Speed:           "0.37{all caps}LM{sentence case}"
  EQUS "0.37"            \
- CTOK 64                \ Encoded as:     "0.37[64]"
+ CTOK 64                \ Encoded as:         "0.37[64]"
  EQUB 0
 
- EQUB 5                 \ Crew:           "1"
+ EQUB 5                 \ 5: Crew:            "1"
  EQUS "1"               \
- EQUB 0                 \ Encoded as:     "1"
+ EQUB 0                 \ Encoded as:         "1"
 
- EQUB 8                 \ Armaments:      "DUAL 22-18 LASER"
+ EQUB 8                 \ 8: Armaments:       "DUAL 22-18 LASER"
  EQUS "Du"              \
- ETWO 'A', 'L'          \ Encoded as:     "Du<228> 22-18[49]"
+ ETWO 'A', 'L'          \ Encoded as:         "Du<228> 22-18[49]"
  EQUS " 22-18"
  CTOK 49
  EQUB 0
@@ -27966,12 +28162,12 @@ ENDMACRO
 \EQUB 0, 9              \ This data is commented out in the orginal source
 \EQUA "3|!R"
 
- EQUB 10                \ Drive motors:   "DE{single cap}LACY SPIN{single cap}
- CTOK 71                \                  IONIC {all caps}MV{sentence case}"
- EQUS " Sp"             \
- ETWO 'I', 'N'          \ Encoded as:     "[71] Sp<240>[78] {all caps}MV
- CTOK 78                \                  {sentence case}"
- EQUS " "
+ EQUB 10                \ 10: Drive motors:   "DE{single cap}LACY SPIN{single
+ CTOK 71                \                      cap}IONIC {all caps}MV{sentence
+ EQUS " Sp"             \                      case}"
+ ETWO 'I', 'N'          \
+ CTOK 78                \ Encoded as:         "[71] Sp<240>[78] {all caps}MV
+ EQUS " "               \                      {sentence case}"
  EJMP 1
  EQUS "MV"
  EJMP 2
@@ -27986,7 +28182,7 @@ ENDMACRO
 \       Name: thargoid
 \       Type: Variable
 \   Category: Encyclopedia
-\    Summary: Card data for the encyclopedia entry for the Thargoid
+\    Summary: Ship card data for the encyclopedia entry for the Thargoid
 \
 \ ******************************************************************************
 
@@ -27994,33 +28190,33 @@ ENDMACRO
 
 .thargoid
 
- EQUB 2                 \ Combat factor:  "6"
+ EQUB 2                 \ 2: Combat factor:   "6"
  EQUS "6"               \
- EQUB 0                 \ Encoded as:     "6"
+ EQUB 0                 \ Encoded as:         "6"
 
- EQUB 3                 \ Dimensions:     "180/40/180FT"
+ EQUB 3                 \ 3: Dimensions:      "180/40/180FT"
  EQUS "180/40/180"      \
- CTOK 42                \ Encoded as:     "180/40/180[42]"
+ CTOK 42                \ Encoded as:         "180/40/180[42]"
  EQUB 0
 
- EQUB 4                 \ Speed:          "0.39{all caps}LM{sentence case}"
+ EQUB 4                 \ 4: Speed:           "0.39{all caps}LM{sentence case}"
  EQUS "0.39"            \
- CTOK 64                \ Encoded as:     "0.39[64]"
+ CTOK 64                \ Encoded as:         "0.39[64]"
  EQUB 0
 
- EQUB 5                 \ Crew:           "50"
+ EQUB 5                 \ 5: Crew:            "50"
  EQUS "50"              \
- EQUB 0                 \ Encoded as:     "50"
+ EQUB 0                 \ Encoded as:         "50"
 
- EQUB 6                 \ Range:          "UNKNOWN"
+ EQUB 6                 \ 6: Range:           "UNKNOWN"
  EQUS "Unk"             \
- ETWO 'N', 'O'          \ Encoded as:     "Unk<227>wn"
+ ETWO 'N', 'O'          \ Encoded as:         "Unk<227>wn"
  EQUS "wn"
  EQUB 0
 
- EQUB 8                 \ Armaments:      "WIDELY VARYING"
+ EQUB 8                 \ 8: Armaments:       "WIDELY VARYING"
  EQUS "Widely v"        \
- ETWO 'A', 'R'          \ Encoded as:     "Widely v<238>y<240>g"
+ ETWO 'A', 'R'          \ Encoded as:         "Widely v<238>y<240>g"
  EQUS "y"
  ETWO 'I', 'N'
  EQUS "g"
@@ -28032,9 +28228,9 @@ ENDMACRO
 \EQUS "wn"
 \EQUB 0
 
- EQUB 10                \ Drive motors:   "THARGOID INVENTION"
+ EQUB 10                \ 10: Drive motors:   "THARGOID INVENTION"
  CTOK 30                \
- EQUS " "               \ Encoded as:     "[30] [68]"
+ EQUS " "               \ Encoded as:         "[30] [68]"
  CTOK 68
  EQUB 0
 
@@ -28047,7 +28243,7 @@ ENDMACRO
 \       Name: thargon
 \       Type: Variable
 \   Category: Encyclopedia
-\    Summary: Card data for the encyclopedia entry for the Thargon
+\    Summary: Ship card data for the encyclopedia entry for the Thargon
 \
 \ ******************************************************************************
 
@@ -28055,28 +28251,28 @@ ENDMACRO
 
 .thargon
 
- EQUB 2                 \ Combat factor:  "6"
+ EQUB 2                 \ 2: Combat factor:   "6"
  EQUS "6"               \
- EQUB 0                 \ Encoded as:     "6"
+ EQUB 0                 \ Encoded as:         "6"
 
- EQUB 3                 \ Dimensions:     "40/10/35FT"
+ EQUB 3                 \ 3: Dimensions:      "40/10/35FT"
  EQUS "40/10/35"        \
- CTOK 42                \ Encoded as:     "40/10/35[42]"
+ CTOK 42                \ Encoded as:         "40/10/35[42]"
  EQUB 0
 
- EQUB 4                 \ Speed:          "0.30{all caps}LM{sentence case}"
+ EQUB 4                 \ 4: Speed:           "0.30{all caps}LM{sentence case}"
  EQUS "0.30"            \
- CTOK 64                \ Encoded as:     "0.30[64]"
+ CTOK 64                \ Encoded as:         "0.30[64]"
  EQUB 0
 
- EQUB 5                 \ Crew:           "NONE"
+ EQUB 5                 \ 5: Crew:            "NONE"
  ETWO 'N', 'O'          \
- EQUS "ne"              \ Encoded as:     "<227>ne"
+ EQUS "ne"              \ Encoded as:         "<227>ne"
  EQUB 0
 
- EQUB 8                 \ Armaments:      "THARGOID LASER"
+ EQUB 8                 \ 8: Armaments:       "THARGOID LASER"
  CTOK 30                \
- CTOK 49                \ Encoded as:     "[30][49]"
+ CTOK 49                \ Encoded as:         "[30][49]"
  EQUB 0
 
 \EQUB 9                 \ This data is commented out in the original source
@@ -28084,9 +28280,9 @@ ENDMACRO
 \EQUS "ne"              \ It would show the hull as "NONE"
 \EQUB 0
 
- EQUB 10                \ Drive motors:   "THARGOID INVENTION"
+ EQUB 10                \ 10: Drive motors:   "THARGOID INVENTION"
  CTOK 30                \
- EQUS " "               \ Encoded as:     "[30] [68]"
+ EQUS " "               \ Encoded as:         "[30] [68]"
  CTOK 68
  EQUB 0
 
@@ -28099,7 +28295,7 @@ ENDMACRO
 \       Name: transporter
 \       Type: Variable
 \   Category: Encyclopedia
-\    Summary: Card data for the encyclopedia entry for the Transporter
+\    Summary: Ship card data for the encyclopedia entry for the Transporter
 \
 \ ******************************************************************************
 
@@ -28107,11 +28303,11 @@ ENDMACRO
 
 .transporter
 
- EQUB 1                 \ Inservice date: "PRE-2500 ({single cap}SPACELINK
- EQUS "p"               \                  SHIPYARDS)"
+ EQUB 1                 \ 1: Inservice date:  "PRE-2500 ({single cap}SPACELINK
+ EQUS "p"               \                      SHIPYARDS)"
  ETWO 'R', 'E'          \
- EQUS "-2500"           \ Encoded as:     "p<242>-2500[85][77]L<240>k[67]y<238>
- CTOK 85                \                  ds)"
+ EQUS "-2500"           \ Encoded as:         "p<242>-2500[85][77]L<240>k[67]y
+ CTOK 85                \                      <238>ds)"
  CTOK 77
  EQUS "L"
  ETWO 'I', 'N'
@@ -28122,23 +28318,23 @@ ENDMACRO
  EQUS "ds)"
  EQUB 0
 
- EQUB 3                 \ Dimensions:     "35/10/30FT"
+ EQUB 3                 \ 3: Dimensions:      "35/10/30FT"
  EQUS "35/10/30"        \
- CTOK 42                \ Encoded as:     "35/10/30[42]"
+ CTOK 42                \ Encoded as:         "35/10/30[42]"
  EQUB 0
 
- EQUB 4                 \ Speed:          "0.10{all caps}LM{sentence case}"
+ EQUB 4                 \ 4: Speed:           "0.10{all caps}LM{sentence case}"
  EQUS "0.10"            \
- CTOK 64                \ Encoded as:     "0.10[64]"
+ CTOK 64                \ Encoded as:         "0.10[64]"
  EQUB 0
 
- EQUB 5                 \ Crew:           "5"
+ EQUB 5                 \ 5: Crew:            "5"
  EQUS "5"               \
- EQUB 0                 \ Encoded as:     "5"
+ EQUB 0                 \ Encoded as:         "5"
 
- EQUB 7                 \ Cargo space:    "10{all caps}TC{sentence case}"
+ EQUB 7                 \ 7: Cargo space:     "10{all caps}TC{sentence case}"
  EQUS "10"              \
- CTOK 62                \ Encoded as:     "10[62]"
+ CTOK 62                \ Encoded as:         "10[62]"
  EQUB 0
 
  EQUB 0
@@ -28150,7 +28346,7 @@ ENDMACRO
 \       Name: viper
 \       Type: Variable
 \   Category: Encyclopedia
-\    Summary: Card data for the encyclopedia entry for the Viper
+\    Summary: Ship card data for the encyclopedia entry for the Viper
 \
 \ ******************************************************************************
 
@@ -28158,10 +28354,10 @@ ENDMACRO
 
 .viper
 
- EQUB 1                 \ Inservice date: "2762 ({single cap}FAULCON MANSPACE)"
- EQUS "2762"            \
- CTOK 85                \ Encoded as:     "2762[85]Faulc<223> <239>n[77])"
- EQUS "Faulc"
+ EQUB 1                 \ 1: Inservice date:  "2762 ({single cap}FAULCON
+ EQUS "2762"            \                      MANSPACE)"
+ CTOK 85                \
+ EQUS "Faulc"           \ Encoded as:         "2762[85]Faulc<223> <239>n[77])"
  ETWO 'O', 'N'
  EQUS " "
  ETWO 'M', 'A'
@@ -28170,29 +28366,29 @@ ENDMACRO
  EQUS ")"
  EQUB 0
 
- EQUB 2                 \ Combat factor:  "7"
+ EQUB 2                 \ 2: Combat factor:   "7"
  EQUS "7"               \
- EQUB 0                 \ Encoded as:     "7"
+ EQUB 0                 \ Encoded as:         "7"
 
- EQUB 3                 \ Dimensions:     "55/20/50FT"
+ EQUB 3                 \ 3: Dimensions:      "55/20/50FT"
  EQUS "55/20/50"        \
- CTOK 42                \ Encoded as:     "55/20/50[42]"
+ CTOK 42                \ Encoded as:         "55/20/50[42]"
  EQUB 0
 
- EQUB 4                 \ Speed:          "0.32{all caps}LM{sentence case}"
+ EQUB 4                 \ 4: Speed:           "0.32{all caps}LM{sentence case}"
  EQUS "0.32"            \
- CTOK 64                \ Encoded as:     "0.32[64]"
+ CTOK 64                \ Encoded as:         "0.32[64]"
  EQUB 0
 
- EQUB 5                 \ Crew:           "1-10"
+ EQUB 5                 \ 5: Crew:            "1-10"
  EQUS "1-10"            \
- EQUB 0                 \ Encoded as:     "1-10"
+ EQUB 0                 \ Encoded as:         "1-10"
 
- EQUB 8                 \ Armaments:      "INGRAM MEGABLAST PULSE LASER{cr}
- CTOK 56                \                  SEEKER X3 MISSILES"
+ EQUB 8                 \ 8: Armaments:       "INGRAM MEGABLAST PULSE LASER{cr}
+ CTOK 56                \                      SEEKER X3 MISSILES"
  EQUS " Mega"           \
- CTOK 74                \ Encoded as:     "[56] Mega[74][50][49]{12}[54]<244> X3
- CTOK 50                \                  [46]"
+ CTOK 74                \ Encoded as:         "[56] Mega[74][50][49]{12}[54]
+ CTOK 50                \                      <244> X3[46]"
  CTOK 49
  EJMP 12
  CTOK 54
@@ -28206,12 +28402,12 @@ ENDMACRO
 \CTOK 82                \ It would show the hull as "9{all caps}/1L{sentence
 \EQUB 0                 \ case}"
 
- EQUB 10                \ Drive motors:   "DE{single cap}LACY SUPER THRUST{cr}
- CTOK 71                \                  {all caps}VC{sentence case}10"
- EQUS " Sup"            \
- ETWO 'E', 'R'          \ Encoded as:     "[71] Sup<244> [66]{12}{all caps}VC
- EQUS " "               \                  {sentence case}10"
- CTOK 66
+ EQUB 10                \ 10: Drive motors:   "DE{single cap}LACY SUPER
+ CTOK 71                \                      THRUST{cr}
+ EQUS " Sup"            \                      {all caps}VC{sentence case}10"
+ ETWO 'E', 'R'          \
+ EQUS " "               \ Encoded as:         "[71] Sup<244> [66]{12}{all caps}V
+ CTOK 66                \                      C{sentence case}10"
  EJMP 12
  EJMP 1
  EQUS "VC"
@@ -28228,7 +28424,7 @@ ENDMACRO
 \       Name: worm
 \       Type: Variable
 \   Category: Encyclopedia
-\    Summary: Card data for the encyclopedia entry for the Worm
+\    Summary: Ship card data for the encyclopedia entry for the Worm
 \
 \ ******************************************************************************
 
@@ -28236,31 +28432,31 @@ ENDMACRO
 
 .worm
 
- EQUB 1                 \ Inservice date: "3101"
+ EQUB 1                 \ 1: Inservice date:  "3101"
  EQUS "3101"            \
- EQUB 0                 \ Encoded as:     "3101"
+ EQUB 0                 \ Encoded as:         "3101"
 
- EQUB 2                 \ Combat factor:  "6"
+ EQUB 2                 \ 2: Combat factor:   "6"
  EQUS "6"               \
- EQUB 0                 \ Encoded as:     "6"
+ EQUB 0                 \ Encoded as:         "6"
 
- EQUB 3                 \ Dimensions:     "35/12/35FT"
+ EQUB 3                 \ 3: Dimensions:      "35/12/35FT"
  EQUS "35/12/35"        \
- CTOK 42                \ Encoded as:     "35/12/35[42]"
+ CTOK 42                \ Encoded as:         "35/12/35[42]"
  EQUB 0
 
- EQUB 4                 \ Speed:          "0.23{all caps}LM{sentence case}"
+ EQUB 4                 \ 4: Speed:           "0.23{all caps}LM{sentence case}"
  EQUS "0.23"            \
- CTOK 64                \ Encoded as:     "0.23[64]"
+ CTOK 64                \ Encoded as:         "0.23[64]"
  EQUB 0
 
- EQUB 5                 \ Crew:           "1"
+ EQUB 5                 \ 5: Crew:            "1"
  EQUS "1"               \
- EQUB 0                 \ Encoded as:     "1"
+ EQUB 0                 \ Encoded as:         "1"
 
- EQUB 8                 \ Armaments:      "INGRAM PULSE LASER"
+ EQUB 8                 \ 8: Armaments:       "INGRAM PULSE LASER"
  CTOK 56                \
- CTOK 50                \ Encoded as:     "[56][50][49]"
+ CTOK 50                \ Encoded as:         "[56][50][49]"
  CTOK 49
  EQUB 0
 
@@ -28269,11 +28465,11 @@ ENDMACRO
 \CTOK 82                \ It would show the hull as "3{all caps}/1L{sentence
 \EQUB 0                 \ case}"
 
- EQUB 10                \ Drive motors:   "SEEKLIGHT {all caps}HV{sentence case}
- CTOK 54                \                  THRUST"
+ EQUB 10                \ 10: Drive motors:   "SEEKLIGHT {all caps}HV{sentence
+ CTOK 54                \                      case} THRUST"
  CTOK 55                \
- EQUS " "               \ Encoded as:     "[54][55] {all caps}HV{sentence case}
- EJMP 1                 \                   [66]"
+ EQUS " "               \ Encoded as:         "[54][55] {all caps}HV{sentence
+ EJMP 1                 \                      case} [66]"
  EQUS "HV"
  EJMP 2
  EQUS " "
