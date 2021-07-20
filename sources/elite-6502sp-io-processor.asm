@@ -103,7 +103,10 @@ ORG &0090
 
 .key_tube
 
- SKIP 2                 \ AJD
+ SKIP 2                 \ Contains the address of the I/O processor's keyboard
+                        \ translation table (as opposed to the parasite's
+                        \ table), which is used to translate internal key
+                        \ numbers to ASCII in the I/O processor code
 
 .SC
 
@@ -368,7 +371,7 @@ ORG CODE%
  CMP #&7F
  BEQ wrch_del
  CMP #&20
- BEQ wrch_spc 
+ BEQ wrch_spc
  BCS wrch_char
  CMP #&0A
  BEQ wrch_nl
@@ -2595,7 +2598,7 @@ ORG CODE%
  JSR tube_get
  STA P
 
-.SC48 
+.SC48
 
  JSR CPIX2              \ Like SC48 in SCAN
  DEC Y1

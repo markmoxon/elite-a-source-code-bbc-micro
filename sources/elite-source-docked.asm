@@ -162,9 +162,9 @@ ORG &0000
 
 .TRTB%
 
- SKIP 2                 \ TRTB%(1 0) points to the keyboard translation table,
-                        \ which is used to translate internal key numbers to
-                        \ ASCII
+ SKIP 2                 \ Contains the address of the keyboard translation
+                        \ table, which is used to translate internal key
+                        \ numbers to ASCII
 
 .T1
 
@@ -2170,12 +2170,12 @@ LOAD_A% = LOAD%
 
 .S%
 
- JMP DOENTRY            \ Decrypt the main docked code and dock at the station
-
- JMP DOBEGIN            \ Decrypt the main docked code and start a new game
-
                         \ --- Mod: Original Acornsoft code removed: ----------->
 
+\ JMP DOENTRY           \ Decrypt the main docked code and dock at the station
+\
+\ JMP DOBEGIN           \ Decrypt the main docked code and start a new game
+\
 \ JMP CHPR              \ WRCHV is set to point here by elite-loader3.asm
 \
 \ EQUW IRQ1             \ IRQ1V is set to point here by elite-loader3.asm
@@ -2188,6 +2188,10 @@ LOAD_A% = LOAD%
 \                       \ the actual vector
 
                         \ --- And replaced by: -------------------------------->
+
+ JMP DOENTRY            \ Dock at the station
+
+ JMP DOBEGIN            \ Start a new game
 
  JMP CHPR               \ WRCHV is set to point here by elite-loader.asm
 
@@ -2242,8 +2246,7 @@ BRKV = P% - 2           \ The address of the destination address in the above
 \       Name: DOBEGIN
 \       Type: Subroutine
 \   Category: Loader
-\    Summary: Decrypt the main docked code, initialise the configuration
-\             variables and start the game
+\    Summary: Initialise the configuration variables and start the game
 \
 \ ******************************************************************************
 
@@ -6807,9 +6810,10 @@ LOAD_B% = LOAD% + P% - CODE%
 \TAY                    \ These instructions are commented out in the original
 \LDX FRIN,Y             \ source
 
- LDY LASER,X            \ Fetch the equipment flag from LASER+X, and if we do not
- BEQ P%+9               \ have that equipment fitted, skip the following four
-                        \ instructions to move onto the next piece of equipment
+ LDY LASER,X            \ Fetch the equipment flag from LASER+X, and if we do
+ BEQ P%+9               \ not have that equipment fitted, skip the following
+                        \ four instructions to move onto the next piece of
+                        \ equipment
 
  TXA                    \ Set A = X + 87
  CLC                    \
@@ -6865,11 +6869,12 @@ LOAD_B% = LOAD% + P% - CODE%
 
  LDA #103               \ Set A to token 103 ("PULSE LASER")
 
+ LDX CNT                \ Retrieve the view number from CNT that we stored above
+
+ LDY LASER,X            \ Set Y = the laser power for view X
+
                         \ --- Mod: Original Acornsoft code removed: ----------->
 
-\ LDX CNT               \ Set Y = the laser power for view X
-\ LDY LASER,X
-\
 \ CPY #128+POW          \ If the laser power for view X is not #POW+128 (beam
 \ BNE P%+4              \ laser), skip the next LDA instruction
 \
@@ -6893,10 +6898,6 @@ LOAD_B% = LOAD% + P% - CODE%
 \                       \ characters
 
                         \ --- And replaced by: -------------------------------->
-
- LDX CNT                \ Retrieve the view number from CNT that we stored above
-
- LDY LASER,X            \ Set Y = the laser power for view X
 
  CPY new_beam           \ If the laser power for view X is not that of a beam
  BNE P%+4               \ laser when fitted to our current ship type, skip the
@@ -7037,7 +7038,7 @@ LOAD_B% = LOAD% + P% - CODE%
  BCS status_over        \ following instruction to reach status_over with
                         \ A >= 107 and the C flag set
 
- ADC #7                 \ The token in A is < 107, so it must be a pulse laser 
+ ADC #7                 \ The token in A is < 107, so it must be a pulse laser
                         \ (103) or beam laser (104), so add 7 to set A to 110
                         \ or 111 (as we know the C flag is clear), and fall
                         \ through into status_over with the C flag clear
@@ -10375,7 +10376,7 @@ LOAD_C% = LOAD% +P% - CODE%
  LDX #0                 \ Set X = 0
 
  STX XX4                \ Set XX4 = 0, which we will use as a counter for
-                        \ drawing 8 concentric rings
+                        \ drawing eight concentric rings
 
  STX K3+1               \ Set the high bytes of K3(1 0) and K4(1 0) to 0
  STX K4+1
@@ -14600,7 +14601,7 @@ LOAD_D% = LOAD% + P% - CODE%
                         \ to pass to the Tc routine if we call it
 
  BCS Tc                 \ If the C flag is set, then there is no room in the
-                        \ cargo hold, jump up to Tc to print a "Cargo?" error, 
+                        \ cargo hold, jump up to Tc to print a "Cargo?" error,
                         \ beep, clear the number and try again
 
  LDA QQ24               \ There is room in the cargo hold, so now to check
@@ -14881,9 +14882,9 @@ LOAD_D% = LOAD% + P% - CODE%
 
  LDA #112               \ We do have an E.C.M. fitted, so print recursive token
  LDX #30                \ 112 ("ESCAPE POD"), and as this is the Sell Equipment
- JSR status_equip       \ screen, show and process a sell prompt for the piece of
-                        \ equipment at LASER+X = LASER+30 = ESCP before printing
-                        \ a newline
+ JSR status_equip       \ screen, show and process a sell prompt for the piece
+                        \ of equipment at LASER+X = LASER+30 = ESCP before
+                        \ printing a newline
 
 .sell_escape
 
@@ -17032,15 +17033,24 @@ LOAD_D% = LOAD% + P% - CODE%
                         \ --- Mod: Original Acornsoft code removed: ----------->
 
 \ JSR CATD              \ Call CATD to reload the disc catalogue
+\
+\ LDX #LO(RDLI)         \ Set (Y X) to point to RDLI ("R.D.CODE")
+\ LDY #HI(RDLI)
+\
+\ JMP OSCLI             \ Call OSCLI to run the OS command in RDLI, which *RUNs
+\                       \ the main flight code in D.CODE, returning from the
+\                       \ subroutine using a tail call
 
-                        \ --- End of removed code ----------------------------->
+                        \ --- And replaced by: -------------------------------->
 
- LDX #LO(RDLI)          \ Set (Y X) to point to RDLI ("R.D.CODE")
+ LDX #LO(RDLI)          \ Set (Y X) to point to RDLI ("R.1.F")
  LDY #HI(RDLI)
 
  JMP OSCLI              \ Call OSCLI to run the OS command in RDLI, which *RUNs
-                        \ the main flight code in D.CODE, returning from the
+                        \ the main flight code in 1.F, returning from the
                         \ subroutine using a tail call
+
+                        \ --- End of replacement ------------------------------>
 
 \ ******************************************************************************
 \
@@ -17242,7 +17252,7 @@ LOAD_D% = LOAD% + P% - CODE%
 \                       present, refund the cost of the item, and then beep and
 \                       exit to the docking bay (i.e. show the Status Mode
 \                       screen)
-\                        
+\
 \   pres+3              Show the error to say that an item is already present,
 \                       and process a refund, but do not free up a space in the
 \                       hold
@@ -17932,7 +17942,7 @@ LOAD_D% = LOAD% + P% - CODE%
  BEQ l_3113             \ LASER+X, which contains the laser power for view X, is
                         \ zero), jump to l_3113 to fit the new laser
 
-                        \ We already have a laser fitted to this view, so 
+                        \ We already have a laser fitted to this view, so
 
  PLA                    \ Retrieve the item number from the stack into A
 
@@ -18197,19 +18207,17 @@ LOAD_D% = LOAD% + P% - CODE%
  ADC #80                \ "RIGHT"
  JSR TT27
 
+ INC YC                 \ Move the text cursor down a row, and increment the
+                        \ counter in YC at the same time
+
                         \ --- Mod: Original Acornsoft code removed: ----------->
 
-\ INC YC                \ Move the text cursor down a row
-\
 \ LDY YC                \ Update Y with the incremented counter in YC
 \
 \ CPY #20               \ If Y < 20 then loop back up to qv1 to print the next
 \ BCC qv1               \ view in the menu
 
                         \ --- And replaced by: -------------------------------->
-
- INC YC                 \ Move the text cursor down a row, at the same time
-                        \ incrementing the counter in YC
 
  LDA new_mounts         \ Set A = new_mounts + 16, so A now contains a value of
  ORA #16                \ 17, 18 or 20, depending on the number of laser mounts
@@ -18501,7 +18509,7 @@ LOAD_E% = LOAD% + P% - CODE%
  AND #%00011111         \ extract bits 0-4 by AND'ing with %11111
 
  BEQ P%+7               \ If all those bits are zero, then skip the following
-                        \ 2 instructions to go to step 3
+                        \ two instructions to go to step 3
 
  ORA #%10000000         \ We now have a number in the range 1-31, which we can
                         \ easily convert into a two-letter token, but first we
@@ -18846,24 +18854,28 @@ LOAD_E% = LOAD% + P% - CODE%
 
                         \ --- Mod: Original Acornsoft code removed: ----------->
 
-\ DEX                   \ If token > 6, skip the following 3 instructions
+\ DEX                   \ If token > 6, skip the following three instructions
 \ BNE P%+7
 \
 \ LDA #%10000000        \ This token is control code 6 (switch to Sentence
 \ STA QQ17              \ Case), so set bit 7 of QQ17 to switch to Sentence Case
 \ RTS                   \ and return from the subroutine as we are done
 \
-\ DEX                   \ If token > 8, skip the following 2 instructions
+\ DEX                   \ If token > 8, skip the following two instructions
 \ DEX
 \ BNE P%+5
+\
+\ STX QQ17              \ This token is control code 8 (switch to ALL CAPS), so
+\ RTS                   \ set QQ17 to 0 to switch to ALL CAPS and return from
+\                       \ the subroutine as we are done
 
                         \ --- And replaced by: -------------------------------->
 
  DEX                    \ If token = 6, this is is control code 6 (switch to
  BEQ vdu_80             \ Sentence Case), so jump to vdu_80 to do just that
 
- DEX                    \ If token <> 8, skip the following 3 instructions
- DEX
+ DEX                    \ If token <> 8, jump to l_31d2 to skip the following
+ DEX                    \ four instructions
  BNE l_31d2
 
                         \ If we get here, then token = 8 (switch to ALL CAPS)
@@ -18879,17 +18891,13 @@ LOAD_E% = LOAD% + P% - CODE%
  LDX #%10000000         \ Set bit 7 of X, so when we set QQ17 below, we switch
                         \ standard tokens to Sentence Case
 
-                        \ --- End of replacement ------------------------------>
-
  STX QQ17               \ This token is control code 8 (switch to ALL CAPS), so
  RTS                    \ set QQ17 to 0 to switch to ALL CAPS and return from
                         \ the subroutine as we are done
 
-                        \ --- Mod: Code added for Elite-A: -------------------->
-
 .l_31d2
 
-                        \ --- End of added code ------------------------------->
+                        \ --- End of replacement ------------------------------>
 
  DEX                    \ If token = 9, this is control code 9 (tab to column
  BEQ crlf               \ 21 and print a colon), so jump to crlf
@@ -18901,7 +18909,7 @@ LOAD_E% = LOAD% + P% - CODE%
                         \ range (i.e. where the recursive token number is
                         \ correct and doesn't need correcting)
 
- CMP #14                \ If token < 14, skip the following 2 instructions
+ CMP #14                \ If token < 14, skip the following two instructions
  BCC P%+6
 
  CMP #32                \ If token < 32, then this means token is in 14-31, so
@@ -19306,7 +19314,7 @@ LOAD_E% = LOAD% + P% - CODE%
 
                         \ --- Mod: Original Acornsoft code removed: ----------->
 
-\ LDA #LO(QQ18)         \ Set V, V+1 to point to the recursive token table at
+\ LDA #LO(QQ18)         \ Set V(1 0) to point to the recursive token table at
 \ STA V                 \ location QQ18
 \ LDA #HI(QQ18)
 \ STA V+1
@@ -19316,10 +19324,12 @@ LOAD_E% = LOAD% + P% - CODE%
 
                         \ --- And replaced by: -------------------------------->
 
- LDY #LO(QQ18)          \ Set V, V+1 to point to the recursive token table at
+ LDY #LO(QQ18)          \ Set V(1 0) to point to the recursive token table at
  STY V                  \ location QQ18, and because QQ18 starts on a page
  LDA #HI(QQ18)          \ boundary, the lower byte of the address is 0, so this
- STA V+1                \ also sets Y = 0
+ STA V+1                \ also sets Y = 0, which we can now use as a counter to
+                        \ point to the character offset as we scan through the
+                        \ table
 
                         \ --- End of replacement ------------------------------>
 
@@ -21962,6 +21972,10 @@ LOAD_F% = LOAD% + P% - CODE%
 \
 \ LDY #&EE              \ Draw the missile indicator at position X in green/cyan
 \ JSR MSBAR
+\
+\ DEX                   \ Decrement the counter to point to the next missile
+\
+\ BNE SAL8              \ Loop back to SAL8 if we still have missiles to draw
 
                         \ --- And replaced by: -------------------------------->
 
@@ -21976,15 +21990,7 @@ LOAD_F% = LOAD% + P% - CODE%
  JSR MSBAR              \ Draw the missile indicator at position X in colour Y,
                         \ and return with Y = 0
 
-                        \ --- End of replacement ------------------------------>
-
  DEX                    \ Decrement the counter to point to the next missile
-
-                        \ --- Mod: Original Acornsoft code removed: ----------->
-
-\ BNE SAL8              \ Loop back to SAL8 if we still have missiles to draw
-
-                        \ --- And replaced by: -------------------------------->
 
  BPL ss                 \ Loop back to ss if we still have missiles to draw,
                         \ ending when X = &FF
@@ -22678,11 +22684,10 @@ LOAD_F% = LOAD% + P% - CODE%
 \ pointed to by (&FD &FE), which is where the MOS will put any system errors. It
 \ then waits for a key press and restarts the game.
 \
-\ BRKV is set to this routine in the decryption routine at DEEOR just before the
-\ game is run for the first time, and at the end of the SVE routine after the
-\ disc access menu has been processed. In other words, this is the standard
-\ BRKV handler for the game, and it's swapped out to MEBRK for disc access
-\ operations only.
+\ BRKV is set to this routine in the loader, when the docked code is loaded, and
+\ at the end of the SVE routine after the disc access menu has been processed.
+\ In other words, this is the standard BRKV handler for the game, and it's
+\ swapped out to MEBRK for disc access operations only.
 \
 \ When it is the BRKV handler, the routine can be triggered using a BRK
 \ instruction. The main differences between this routine and the MEBRK handler
@@ -30082,7 +30087,7 @@ LOAD_G% = LOAD% + P% - CODE%
                         \ available ships, starting with X = 0, and working our
                         \ way through the types in the new_ships table (where
                         \ the ships are in order of increasing price)
- 
+
  SEC                    \ Set QQ25 = 15 - 2 * QQ28
  LDA #15                \
  SBC QQ28               \ QQ25 contains the number of ship types that we offer
@@ -30130,7 +30135,7 @@ LOAD_G% = LOAD% + P% - CODE%
                         \ point
 
  LDX XX13               \ Fetch the loop counter from XX13
- 
+
  INX                    \ Increment the loop counter
 
  CPX QQ25               \ Loop back to n_bloop until we have shown the first
@@ -30694,7 +30699,7 @@ LOAD_G% = LOAD% + P% - CODE%
 
  STX INWK               \ Set INWK to the number of the chosen mission
 
- LDY &0C50,X            \ Set (Y X) to the cost of this mission in 
+ LDY &0C50,X            \ Set (Y X) to the cost of this mission in
  LDA &0C40,X            \ (&0C50+X &0C40+X)
  TAX
 
@@ -30907,7 +30912,7 @@ LOAD_G% = LOAD% + P% - CODE%
                         \
                         \   Q = SQRT(R Q)
 
- PHA                    \ Store the high byte of the result on the stack 
+ PHA                    \ Store the high byte of the result on the stack
 
  LDA P                  \ Set Q = P + K
  CLC                    \

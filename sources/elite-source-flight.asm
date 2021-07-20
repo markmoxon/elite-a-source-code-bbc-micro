@@ -148,9 +148,9 @@ ORG &0000
 
 .TRTB%
 
- SKIP 2                 \ TRTB%(1 0) points to the keyboard translation table,
-                        \ which is used to translate internal key numbers to
-                        \ ASCII
+ SKIP 2                 \ Contains the address of the keyboard translation
+                        \ table, which is used to translate internal key
+                        \ numbers to ASCII
 
 .T1
 
@@ -2294,8 +2294,8 @@ LOAD_A% = LOAD%
 
 .DOENTRY
 
- LDA #'R'               \ Modify the command in LTLI from "L.T.CODE" to
- STA LTLI               \ "R.T.CODE" so it *RUNs the code rather than loading it
+ LDA #'R'               \ Modify the command in LTLI from "L.1.D" to "R.1.D" so
+ STA LTLI               \ it *RUNs the code rather than loading it
 
                         \ Fall into DEATH2 to reset most variables and *RUN the
                         \ docked code
@@ -2395,15 +2395,9 @@ LOAD_A% = LOAD%
 \
 \ ******************************************************************************
 
-                        \ --- Mod: Original Acornsoft code removed: ----------->
-
-\ LDX JSTX              \ Set X to the current rate of roll in JSTX, and
-\ JSR cntr              \ apply keyboard damping twice (if enabled) so the roll
-\ JSR cntr              \ rate in X creeps towards the centre by 2
-
-                        \ --- And replaced by: -------------------------------->
-
  LDX JSTX               \ Set X to the current rate of roll in JSTX
+
+                        \ --- Mod: Code added for Elite-A: -------------------->
 
  CPX new_max            \ If X < new_max (where new_max is our current ship's
  BCC n_highx            \ maximum roll rate), then jump to n_highx to skip the
@@ -2423,10 +2417,10 @@ LOAD_A% = LOAD%
 
 .n_lowx
 
+                        \ --- End of added code ------------------------------->
+
  JSR cntr               \ Apply keyboard damping twice (if enabled) so the roll
  JSR cntr               \ rate in X creeps towards the centre by 2
-
-                        \ --- End of replacement ------------------------------>
 
                         \ The roll rate in JSTX increases if we press ">" (and
                         \ the RL indicator on the dashboard goes to the right).
@@ -2483,15 +2477,9 @@ LOAD_A% = LOAD%
  ORA ALP2               \ Store A in ALPHA, but with the sign set to ALP2 (so
  STA ALPHA              \ ALPHA has a different sign to the actual roll rate)
 
-                        \ --- Mod: Original Acornsoft code removed: ----------->
-
-\ LDX JSTY              \ Set X to the current rate of pitch in JSTY, and
-\ JSR cntr              \ apply keyboard damping so the pitch rate in X creeps
-\                       \ towards the centre by 1
-
-                        \ --- And replaced by: -------------------------------->
-
  LDX JSTY               \ Set X to the current rate of pitch in JSTY
+
+                        \ --- Mod: Code added for Elite-A: -------------------->
 
  CPX new_max            \ If X < new_max (where new_max is our current ship's
  BCC n_highy            \ maximum pitch rate), then jump to n_highy to skip the
@@ -2512,10 +2500,10 @@ LOAD_A% = LOAD%
 
 .n_lowy
 
+                        \ --- End of added code ------------------------------->
+
  JSR cntr               \ Apply keyboard damping so the pitch rate in X creeps
                         \ towards the centre by 1
-
-                        \ --- End of replacement ------------------------------>
 
  TXA                    \ Set A and Y to the pitch rate but with the sign bit
  EOR #%10000000         \ flipped
@@ -2777,7 +2765,7 @@ LOAD_A% = LOAD%
                         \ --- And replaced by: -------------------------------->
 
  LDA KY12               \ If TAB is not being pressed (i.e. KY12 = 0) and we do
- AND BOMB               \ not have a hyperspace unit fitted (i.e. BOMB = 0), 
+ AND BOMB               \ not have a hyperspace unit fitted (i.e. BOMB = 0),
  BEQ MA76               \ jump down to MA76 to skip the following
 
  INC BOMB               \ The "hyperspace unit" key is being pressed and we have
@@ -7646,11 +7634,12 @@ NEXT
 
  LDA #103               \ Set A to token 103 ("PULSE LASER")
 
+ LDX CNT                \ Retrieve the view number from CNT that we stored above
+
+ LDY LASER,X            \ Set Y = the laser power for view X
+
                         \ --- Mod: Original Acornsoft code removed: ----------->
 
-\ LDX CNT               \ Set Y = the laser power for view X
-\ LDY LASER,X
-\
 \ CPY #128+POW          \ If the laser power for view X is not #POW+128 (beam
 \ BNE P%+4              \ laser), skip the next LDA instruction
 \
@@ -7667,10 +7656,6 @@ NEXT
 \ BNE P%+4              \ laser), skip the next LDA instruction
 
                         \ --- And replaced by: -------------------------------->
-
- LDX CNT                \ Retrieve the view number from CNT that we stored above
-
- LDY LASER,X            \ Set Y = the laser power for view X
 
  CPY new_beam           \ If the laser power for view X is not that of a beam
  BNE P%+4               \ laser when fitted to our current ship type, skip the
@@ -12293,7 +12278,7 @@ LOAD_C% = LOAD% +P% - CODE%
  LDX #0                 \ Set X = 0
 
  STX XX4                \ Set XX4 = 0, which we will use as a counter for
-                        \ drawing 8 concentric rings
+                        \ drawing eight concentric rings
 
  STX K3+1               \ Set the high bytes of K3(1 0) and K4(1 0) to 0
  STX K4+1
@@ -18609,7 +18594,7 @@ LOAD_E% = LOAD% + P% - CODE%
  AND #%00011111         \ extract bits 0-4 by AND'ing with %11111
 
  BEQ P%+7               \ If all those bits are zero, then skip the following
-                        \ 2 instructions to go to step 3
+                        \ two instructions to go to step 3
 
  ORA #%10000000         \ We now have a number in the range 1-31, which we can
                         \ easily convert into a two-letter token, but first we
@@ -18968,21 +18953,25 @@ LOAD_E% = LOAD% + P% - CODE%
 
                         \ --- Mod: Original Acornsoft code removed: ----------->
 
-\ DEX                   \ If token > 6, skip the following 3 instructions
+\ DEX                   \ If token > 6, skip the following three instructions
 \ BNE P%+7
 \
 \ LDA #%10000000        \ This token is control code 6 (switch to Sentence
 \ STA QQ17              \ Case), so set bit 7 of QQ17 to switch to Sentence Case
 \ RTS                   \ and return from the subroutine as we are done
 \
-\ DEX                   \ If token > 8, skip the following 2 instructions
+\ DEX                   \ If token > 8, skip the following two instructions
 \ DEX
 \ BNE P%+5
+\
+\ STX QQ17              \ This token is control code 8 (switch to ALL CAPS), so
+\ RTS                   \ set QQ17 to 0 to switch to ALL CAPS and return from
+\                       \ the subroutine as we are done
 
                         \ --- And replaced by: -------------------------------->
 
- DEX                    \ If token > 6, jump to l_33b9 to skip the following 5
- BNE l_33b9             \ instructions
+ DEX                    \ If token > 6, jump to l_33b9 to skip the following
+ BNE l_33b9             \ five instructions
 
 .vdu_80
 
@@ -18998,13 +18987,9 @@ LOAD_E% = LOAD% + P% - CODE%
  LDX #0                 \ Clear bit 7 of X, so when we set QQ17 below, we switch
                         \ standard tokens to ALL CAPS
 
-                        \ --- End of replacement ------------------------------>
-
  STX QQ17               \ This token is control code 8 (switch to ALL CAPS), so
  RTS                    \ set QQ17 to 0 to switch to ALL CAPS and return from
                         \ the subroutine as we are done
-
-                        \ --- Mod: Code added for Elite-A: -------------------->
 
 .l_33b9
 
@@ -19012,7 +18997,7 @@ LOAD_E% = LOAD% + P% - CODE%
  DEX                    \ CAPS), so jump up to vdu_00 to set QQ17 to 0 to switch
  BEQ vdu_00             \ to ALL CAPS and return from the subroutine
 
-                        \ --- End of added code ------------------------------->
+                        \ --- End of replacement ------------------------------>
 
  DEX                    \ If token = 9, this is control code 9 (tab to column
  BEQ crlf               \ 21 and print a colon), so jump to crlf
@@ -19024,7 +19009,7 @@ LOAD_E% = LOAD% + P% - CODE%
                         \ range (i.e. where the recursive token number is
                         \ correct and doesn't need correcting)
 
- CMP #14                \ If token < 14, skip the following 2 instructions
+ CMP #14                \ If token < 14, skip the following two instructions
  BCC P%+6
 
  CMP #32                \ If token < 32, then this means token is in 14-31, so
@@ -19429,7 +19414,7 @@ LOAD_E% = LOAD% + P% - CODE%
 
                         \ --- Mod: Original Acornsoft code removed: ----------->
 
-\ LDA #LO(QQ18)         \ Set V, V+1 to point to the recursive token table at
+\ LDA #LO(QQ18)         \ Set V(1 0) to point to the recursive token table at
 \ STA V                 \ location QQ18
 \ LDA #HI(QQ18)
 \ STA V+1
@@ -19439,10 +19424,12 @@ LOAD_E% = LOAD% + P% - CODE%
 
                         \ --- And replaced by: -------------------------------->
 
- LDY #LO(QQ18)          \ Set V, V+1 to point to the recursive token table at
+ LDY #LO(QQ18)          \ Set V(1 0) to point to the recursive token table at
  STY V                  \ location QQ18, and because QQ18 starts on a page
  LDA #HI(QQ18)          \ boundary, the lower byte of the address is 0, so this
- STA V+1                \ also sets Y = 0
+ STA V+1                \ also sets Y = 0, which we can now use as a counter to
+                        \ point to the character offset as we scan through the
+                        \ table
 
                         \ --- End of replacement ------------------------------>
 
@@ -20878,7 +20865,7 @@ LOAD_E% = LOAD% + P% - CODE%
 
 .n_oops
 
- SEC                    \ Reduce the amount of damage in A by the level of our 
+ SEC                    \ Reduce the amount of damage in A by the level of our
  SBC new_shields        \ shields in new_shields
 
  BCC n_shok             \ If the amount of damage is less than the level of our
@@ -25279,6 +25266,10 @@ LOAD_F% = LOAD% + P% - CODE%
 \
 \ LDY #&EE              \ Draw the missile indicator at position X in green/cyan
 \ JSR MSBAR
+\
+\ DEX                   \ Decrement the counter to point to the next missile
+\
+\ BNE SAL8              \ Loop back to SAL8 if we still have missiles to draw
 
                         \ --- And replaced by: -------------------------------->
 
@@ -25293,15 +25284,7 @@ LOAD_F% = LOAD% + P% - CODE%
  JSR MSBAR              \ Draw the missile indicator at position X in colour Y,
                         \ and return with Y = 0
 
-                        \ --- End of replacement ------------------------------>
-
  DEX                    \ Decrement the counter to point to the next missile
-
-                        \ --- Mod: Original Acornsoft code removed: ----------->
-
-\ BNE SAL8              \ Loop back to SAL8 if we still have missiles to draw
-
-                        \ --- And replaced by: -------------------------------->
 
  BPL ss                 \ Loop back to ss if we still have missiles to draw,
                         \ ending when X = &FF
@@ -25492,42 +25475,13 @@ LOAD_F% = LOAD% + P% - CODE%
 \ AND #15               \ Set the ship speed to our random number, set to a
 \ ORA #16               \ minimum of 16 and a maximum of 31
 \ STA INWK+27
-\
-\ JSR DORND             \ Set A and X to random numbers, plus the C flag
-\
-\ BMI nodo              \ If A is negative (50% chance), jump to nodo to skip
-\                       \ the following
-\
-\                       \ If we get here then we are going to spawn a ship that
-\                       \ is minding its own business and trying to dock
-\
-\ LDA INWK+32           \ Set bits 6 and 7 of the ship's AI flag, to make it
-\ ORA #%11000000        \ aggressive if attacked, and enable its AI
-\ STA INWK+32
-\
-\ LDX #%00010000        \ Set bit 4 of the ship's NEWB flags, to indicate that
-\ STX NEWB              \ this ship is docking
-\
-\.nodo
-\
-\ AND #2                \ If we jumped here with a random value of A from the
-\                       \ BMI above, then this reduces A to a random value of
-\                       \ either 0 or 2; if we didn't take the BMI and made the
-\                       \ ship hostile, then A will be 0
-\
-\ ADC #CYL              \ Set A = A + C + #CYL
-\                       \
-\                       \ where A is 0 or 2 and C is 0 or 1, so this gives us a
-\                       \ ship type from the following: Cobra Mk III, Python,
-\                       \ Boa or Anaconda
-\
-\ JSR NWSHP             \ Add a new ship of type A to the local bubble and fall
-\                       \ through into the main game loop again
 
                         \ --- And replaced by: -------------------------------->
 
  AND #15                \ Set the ship speed to our random number, set to a
  STA INWK+27            \ minimum of 0 and a maximum of 15
+
+                        \ --- End of replacement ------------------------------>
 
  JSR DORND              \ Set A and X to random numbers, plus the C flag
 
@@ -25545,6 +25499,24 @@ LOAD_F% = LOAD% + P% - CODE%
  STX NEWB               \ this ship is docking
 
 .nodo
+
+                        \ --- Mod: Original Acornsoft code removed: ----------->
+
+\ AND #2                \ If we jumped here with a random value of A from the
+\                       \ BMI above, then this reduces A to a random value of
+\                       \ either 0 or 2; if we didn't take the BMI and made the
+\                       \ ship hostile, then A will be 0
+\
+\ ADC #CYL              \ Set A = A + C + #CYL
+\                       \
+\                       \ where A is 0 or 2 and C is 0 or 1, so this gives us a
+\                       \ ship type from the following: Cobra Mk III, Python,
+\                       \ Boa or Anaconda
+\
+\ JSR NWSHP             \ Add a new ship of type A to the local bubble and fall
+\                       \ through into the main game loop again
+
+                        \ --- And replaced by: -------------------------------->
 
  LDA #11                \ Call hordes to spawn a pack of ships from ship slots
  LDX #3                 \ 11 to 14, which is where the trader ships live in the
@@ -25849,7 +25821,7 @@ LOAD_F% = LOAD% + P% - CODE%
                         \ --- And replaced by: -------------------------------->
 
  CMP T                  \ If the random value in A >= our badness level, which
- BCS l_4050             \ will be the case unless we have been really, really
+ BCS P%+8               \ will be the case unless we have been really, really
                         \ bad, then skip the following three instructions (so
                         \ if we are really bad, there's a higher chance of
                         \ spawning a cop, otherwise we got away with it, for
@@ -25863,8 +25835,6 @@ LOAD_F% = LOAD% + P% - CODE%
  LDX #0                 \ Jump to hordes to spawn a pack of ships of type A,
  BEQ hordes             \ returning from the subroutine using a tail call (the
                         \ BEQ is effectively a JMP as X is always zero)
-
-.l_4050
 
                         \ --- End of replacement ------------------------------>
 
@@ -26294,21 +26264,16 @@ LOAD_F% = LOAD% + P% - CODE%
 \ AND PATG              \ If PATG = &FF (author names are shown on start-up)
 \ LSR A                 \ and bit 0 of QQ11 is 1 (the current view is type 1),
 \ BCS P%+7              \ then skip the following two instructions
-\
-\ LDY #2                \ Wait for 2/50 of a second (0.04 seconds), to slow the
-\ JSR DELAY             \ main loop down a bit
 
                         \ --- And replaced by: -------------------------------->
 
  LDA QQ11               \ If this is a space view, skip the following two
- BEQ l_40f8             \ instructions (i.e. jump to JSR TT17 below)
+ BEQ P%+7               \ instructions (i.e. jump to JSR TT17 below)
+
+                        \ --- End of replacement ------------------------------>
 
  LDY #2                 \ Wait for 2/50 of a second (0.04 seconds), to slow the
  JSR DELAY              \ main loop down a bit
-
-.l_40f8
-
-                        \ --- End of replacement ------------------------------>
 
  JSR TT17               \ Scan the keyboard for the cursor keys or joystick,
                         \ returning the cursor's delta values in X and Y and
@@ -27865,22 +27830,17 @@ LOAD_F% = LOAD% + P% - CODE%
 
 \ LDA #16               \ Call the NOISE routine with A = 16 to make the first
 \ JSR NOISE             \ death sound
-\
-\ LDA #24               \ Call the NOISE routine with A = 24 to make the second
-\ BNE NOISE             \ death sound and return from the subroutine using a
-\                       \ tail call (this BNE is effectively a JMP as A will
-\                       \ never be zero)
 
                         \ --- And replaced by: -------------------------------->
 
  JSR n_sound10          \ Call n_sound10 make the first death sound
 
- LDA #24                \ Call the NOISE routine with A = 24 to make the
+                        \ --- End of replacement ------------------------------>
+
+ LDA #24                \ Call the NOISE routine with A = 24 to make the second
  BNE NOISE              \ death sound and return from the subroutine using a
                         \ tail call (this BNE is effectively a JMP as A will
                         \ never be zero)
-
-                        \ --- End of replacement ------------------------------>
 
 \ ******************************************************************************
 \
@@ -36247,73 +36207,15 @@ LOAD_H% = LOAD% + P% - CODE%
                         \ pattern as the bottom-right pixel of the dot (so the
                         \ stick comes out of the right side of the dot)
 
-                        \ --- Mod: Original Acornsoft code removed: ----------->
-
-\ EOR (SC),Y            \ Draw the stick on row Y of the character block using
-\ STA (SC),Y            \ EOR logic
-\
-\ DEX                   \ Decrement the (positive) stick height in X
-\
-\ BNE VLL1              \ If we still have more stick to draw, jump up to VLL1
-\                       \ to draw the next pixel
-\
-\.RTS
-\
-\ RTS                   \ Return from the subroutine
-\
-\                       \ If we get here then the stick length is negative (so
-\                       \ the dot is above the ellipse and the stick is below
-\                       \ the dot, and we need to draw the stick downwards from
-\                       \ the dot)
-\
-\ INY                   \ We want to draw the stick downwards, so we first
-\                       \ increment the row counter so that it's pointing to the
-\                       \ bottom-right pixel in the dot (as opposed to the top-
-\                       \ right pixel that the call to CPIX4 finished on)
-\
-\ CPY #8                \ If the row number in Y is less than 8, then it
-\ BNE P%+6              \ correctly points at the next line down, so jump to
-\                       \ VLL2 to skip the following
-\
-\ LDY #0                \ We just incremented Y down through the bottom of the
-\                       \ character block, so we need to move it to the first
-\                       \ row in the character below, so set Y to 0, the number
-\                       \ of the first row
-\
-\ INC SC+1              \ Increment the high byte of the screen address to move
-\                       \ to the character block above
-\
-\.VLL2
-\
-\ INY                   \ We want to draw the stick itself, heading downwards,
-\                       \ so increment the pixel row in Y
-\
-\ CPY #8                \ If the row number in Y is less than 8, then it
-\ BNE VL2               \ correctly points at the next line down, so jump to
-\                       \ VL2 to skip the following
-\
-\ LDY #0                \ We just incremented Y down through the bottom of the
-\                       \ character block, so we need to move it to the first
-\                       \ row in the character below, so set Y to 0, the number
-\                       \ of the first row
-\
-\ INC SC+1              \ Increment the high byte of the screen address to move
-\                       \ to the character block above
-\
-\.VL2
-\
-\ LDA X1                \ Set A to the character row byte for the stick, which
-\                       \ we stored in X1 above, and which has the same pixel
-\                       \ pattern as the bottom-right pixel of the dot (so the
-\                       \ stick comes out of the right side of the dot)
-
-                        \ --- And replaced by: -------------------------------->
+                        \ --- Mod: Code added for Elite-A: -------------------->
 
  EOR Y1                 \ Apply the alternating colour in Y1 to the stick
 
  STA X1                 \ Update the value in X1 so the alternating colour is
                         \ applied every other row (as doing an EOR twice
                         \ reverses it)
+
+                        \ --- End of added code ------------------------------->
 
  EOR (SC),Y             \ Draw the stick on row Y of the character block using
  STA (SC),Y             \ EOR logic
@@ -36373,13 +36275,15 @@ LOAD_H% = LOAD% + P% - CODE%
                         \ pattern as the bottom-right pixel of the dot (so the
                         \ stick comes out of the right side of the dot)
 
+                        \ --- Mod: Code added for Elite-A: -------------------->
+
  EOR Y1                 \ Apply the alternating colour in Y1 to the stick
 
  STA X1                 \ Update the value in X1 so the alternating colour is
                         \ applied every other row (as doing an EOR twice
                         \ reverses it)
 
-                        \ --- End of replacement ------------------------------>
+                        \ --- End of added code ------------------------------->
 
  EOR (SC),Y             \ Draw the stick on row Y of the character block using
  STA (SC),Y             \ EOR logic

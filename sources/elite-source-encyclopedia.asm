@@ -123,9 +123,9 @@ ORG &0000
 
 .TRTB%
 
- SKIP 2                 \ TRTB%(1 0) points to the keyboard translation table,
-                        \ which is used to translate internal key numbers to
-                        \ ASCII
+ SKIP 2                 \ Contains the address of the keyboard translation
+                        \ table, which is used to translate internal key
+                        \ numbers to ASCII
 
 .T1
 
@@ -3311,21 +3311,13 @@ BRKV = P% - 2           \ The address of the destination address in the above
                         \ --- Mod: Original Acornsoft code removed: ----------->
 
 \ EQUW TT27             \ Token  4: Print the commander's name
-
-                        \ --- And replaced by: -------------------------------->
-
- EQUW MT6               \ Token  4: Switch to standard tokens, in Sentence Case
-
-                        \ --- End of replacement ------------------------------>
-
- EQUW MT5               \ Token  5: Switch to extended tokens
-
-                        \ --- Mod: Original Acornsoft code removed: ----------->
-
+\ EQUW MT5              \ Token  5: Switch to extended tokens
 \ EQUW MT6              \ Token  6: Switch to standard tokens, in Sentence Case
 
                         \ --- And replaced by: -------------------------------->
 
+ EQUW MT6               \ Token  4: Switch to standard tokens, in Sentence Case
+ EQUW MT5               \ Token  5: Switch to extended tokens
  EQUW set_token         \ Token  6: Start a new word
 
                         \ --- End of replacement ------------------------------>
@@ -3349,22 +3341,14 @@ BRKV = P% - 2           \ The address of the destination address in the above
                         \ --- Mod: Original Acornsoft code removed: ----------->
 
 \ EQUW PAUSE            \ Token 22: Display ship and wait for key press
-
-                        \ --- And replaced by: -------------------------------->
-
- EQUW column_16         \ Token 22: Tab to column 16
-
-                        \ --- End of replacement ------------------------------>
-
- EQUW MT23              \ Token 23: Move to row 10, white text, set lower case
-
-                        \ --- Mod: Original Acornsoft code removed: ----------->
-
+\ EQUW MT23             \ Token 23: Move to row 10, white text, set lower case
 \ EQUW PAUSE2           \ Token 24: Wait for a key press
 \ EQUW BRIS             \ Token 25: Show incoming message screen, wait 2 seconds
 
                         \ --- And replaced by: -------------------------------->
 
+ EQUW column_16         \ Token 22: Tab to column 16
+ EQUW MT23              \ Token 23: Move to row 10, white text, set lower case
  EQUW clr_vdustat       \ Token 24: Switch to standard tokens in lower case
  EQUW DASC              \ Token 25: Unused
 
@@ -10628,7 +10612,7 @@ LOAD_E% = LOAD% + P% - CODE%
  AND #%00011111         \ extract bits 0-4 by AND'ing with %11111
 
  BEQ P%+7               \ If all those bits are zero, then skip the following
-                        \ 2 instructions to go to step 3
+                        \ two instructions to go to step 3
 
  ORA #%10000000         \ We now have a number in the range 1-31, which we can
                         \ easily convert into a two-letter token, but first we
@@ -10967,14 +10951,14 @@ LOAD_E% = LOAD% + P% - CODE%
  DEX                    \ If token = 5, this is control code 5 (fuel, newline,
  BEQ fwl                \ cash, newline), so jump to fwl
 
- DEX                    \ If token > 6, skip the following 3 instructions
+ DEX                    \ If token > 6, skip the following three instructions
  BNE P%+7
 
  LDA #%10000000         \ This token is control code 6 (switch to Sentence
  STA QQ17               \ Case), so set bit 7 of QQ17 to switch to Sentence Case
  RTS                    \ and return from the subroutine as we are done
 
- DEX                    \ If token > 8, skip the following 2 instructions
+ DEX                    \ If token > 8, skip the following two instructions
  DEX
  BNE P%+5
 
@@ -10992,7 +10976,7 @@ LOAD_E% = LOAD% + P% - CODE%
                         \ range (i.e. where the recursive token number is
                         \ correct and doesn't need correcting)
 
- CMP #14                \ If token < 14, skip the following 2 instructions
+ CMP #14                \ If token < 14, skip the following two instructions
  BCC P%+6
 
  CMP #32                \ If token < 32, then this means token is in 14-31, so
@@ -11395,7 +11379,7 @@ LOAD_E% = LOAD% + P% - CODE%
 
  TAX                    \ Copy the token number into X
 
- LDA #LO(QQ18)          \ Set V, V+1 to point to the recursive token table at
+ LDA #LO(QQ18)          \ Set V(1 0) to point to the recursive token table at
  STA V                  \ location QQ18
  LDA #HI(QQ18)
  STA V+1
@@ -13925,11 +13909,10 @@ LOAD_F% = LOAD% + P% - CODE%
 \ pointed to by (&FD &FE), which is where the MOS will put any system errors. It
 \ then waits for a key press and restarts the game.
 \
-\ BRKV is set to this routine in the decryption routine at DEEOR just before the
-\ game is run for the first time, and at the end of the SVE routine after the
-\ disc access menu has been processed. In other words, this is the standard
-\ BRKV handler for the game, and it's swapped out to MEBRK for disc access
-\ operations only.
+\ BRKV is set to this routine in the loader, when the docked code is loaded, and
+\ at the end of the SVE routine after the disc access menu has been processed.
+\ In other words, this is the standard BRKV handler for the game, and it's
+\ swapped out to MEBRK for disc access operations only.
 \
 \ When it is the BRKV handler, the routine can be triggered using a BRK
 \ instruction. The main differences between this routine and the MEBRK handler
@@ -19538,17 +19521,15 @@ LOAD_H% = LOAD% + P% - CODE%
 
 .l_395a
 
- LDX TYPE               \ Set A to the closest distance that we want to show the 
+ LDX TYPE               \ Set A to the closest distance that we want to show the
  LDA ship_dist,X        \ ship (fetched from the ship_dist table)
 
- CMP INWK+7             \ If z_hi (the ship's distance) is equal to A, jump to
- BEQ l_3962             \ l_3962 to skip the following decrement, as the ship is
-                        \ already close enough
+ CMP INWK+7             \ If z_hi (the ship's distance) is equal to A, skip the
+ BEQ P%+4               \ following decrement, as the ship is already close
+                        \ enough
 
  DEC INWK+7             \ Decrement the ship's distance, to bring the ship
                         \ a bit closer to us
-
-.l_3962
 
  JSR MVEIT              \ Move the ship in space according to the orientation
                         \ vectors and the new value in z_hi
@@ -20231,7 +20212,7 @@ LOAD_H% = LOAD% + P% - CODE%
                         \ tokens are in the msg_3 table)
 
  LDX XX13               \ Fetch the menu item number from XX13
- 
+
  INX                    \ Increment the menu item number to point to the next
                         \ item
 
@@ -24689,7 +24670,7 @@ ENDMACRO
  ECHR 'V'               \                NDS, W<219>H <239>NY <222><248>NDS
  ECHR 'A'               \                 <240> P<238><228><229>L.<215>{19}<247>
  ETWO 'I', 'L'          \                AM <249><218>RS OV<244>HE<245> MO<242>
- ETWO 'A', 'B'          \                 <248>PIDLY <226><255> PUL<218> <249>  
+ ETWO 'A', 'B'          \                 <248>PIDLY <226><255> PUL<218> <249>
  ETWO 'L', 'E'          \                <218>RS[177]"
  ECHR ' '
  ETWO 'A', 'T'
@@ -25068,7 +25049,7 @@ ENDMACRO
  ETWO 'C', 'E'          \                <237>[201]<242>P<249><233> [147][207]
  ECHR ' '               \                [178]EQUIPM<246>T.<215>{19}P<246><228>
  ECHR 'O'               \                <251><237> F<253> <240>T<244>F<244>
- ECHR 'F'               \                [195]W<219>H <237>CAPE PODS <238>E 
+ ECHR 'F'               \                [195]W<219>H <237>CAPE PODS <238>E
  ECHR ' '               \                <218><250><242> <240> MO<222> [145]
  ECHR 'E'               \                <238>Y SY<222>EMS.<215>{19}<237>CAPE PO
  ECHR 'Q'               \                DS <239>Y <247> B<217>GHT <245> SY<222>
@@ -26502,7 +26483,7 @@ ENDMACRO
  EQUB 26,  8,  0        \                                         Data @ (26, 8)
 
  EQUB  1,  6, 43        \ 3: Dimensions                   "DIMENSIONS:" @ (1, 6)
- EQUB  1,  7,  0        \                                          Data @ (1, 7)        
+ EQUB  1,  7,  0        \                                          Data @ (1, 7)
 
  EQUB  1,  9, 36        \ 4: Speed                            "SPEED:" @ (1,  9)
  EQUB  1, 10,  0        \                                         Data @ (1, 10)

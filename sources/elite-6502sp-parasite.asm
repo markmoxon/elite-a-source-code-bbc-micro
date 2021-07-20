@@ -165,9 +165,9 @@ ORG &0000
 
 .TRTB%
 
- SKIP 2                 \ TRTB%(1 0) points to the keyboard translation table,
-                        \ which is used to translate internal key numbers to
-                        \ ASCII
+ SKIP 2                 \ Contains the address of the keyboard translation
+                        \ table, which is used to translate internal key
+                        \ numbers to ASCII
 
 .T1
 
@@ -5058,9 +5058,10 @@ LOAD_B% = LOAD% + P% - CODE%
 \TAY                    \ These instructions are commented out in the original
 \LDX FRIN,Y             \ source
 
- LDY LASER,X            \ Fetch the equipment flag from LASER+X, and if we do not
- BEQ P%+9               \ have that equipment fitted, skip the following four
-                        \ instructions to move onto the next piece of equipment
+ LDY LASER,X            \ Fetch the equipment flag from LASER+X, and if we do
+ BEQ P%+9               \ not have that equipment fitted, skip the following
+                        \ four instructions to move onto the next piece of
+                        \ equipment
 
  TXA                    \ Set A = X + 87
  CLC                    \
@@ -5211,7 +5212,7 @@ LOAD_B% = LOAD% + P% - CODE%
  BCS status_over        \ following instruction to reach status_over with
                         \ A >= 107 and the C flag set
 
- ADC #7                 \ The token in A is < 107, so it must be a pulse laser 
+ ADC #7                 \ The token in A is < 107, so it must be a pulse laser
                         \ (103) or beam laser (104), so add 7 to set A to 110
                         \ or 111 (as we know the C flag is clear), and fall
                         \ through into status_over with the C flag clear
@@ -7689,7 +7690,7 @@ LOAD_C% = LOAD% +P% - CODE%
  LDX #0                 \ Set X = 0
 
  STX XX4                \ Set XX4 = 0, which we will use as a counter for
-                        \ drawing 8 concentric rings
+                        \ drawing eight concentric rings
 
  STX K3+1               \ Set the high bytes of K3(1 0) and K4(1 0) to 0
  STX K4+1
@@ -10513,7 +10514,7 @@ LOAD_D% = LOAD% + P% - CODE%
                         \ to pass to the Tc routine if we call it
 
  BCS Tc                 \ If the C flag is set, then there is no room in the
-                        \ cargo hold, jump up to Tc to print a "Cargo?" error, 
+                        \ cargo hold, jump up to Tc to print a "Cargo?" error,
                         \ beep, clear the number and try again
 
  LDA QQ24               \ There is room in the cargo hold, so now to check
@@ -10788,9 +10789,9 @@ LOAD_D% = LOAD% + P% - CODE%
 
  LDA #112               \ We do have an E.C.M. fitted, so print recursive token
  LDX #30                \ 112 ("ESCAPE POD"), and as this is the Sell Equipment
- JSR status_equip       \ screen, show and process a sell prompt for the piece of
-                        \ equipment at LASER+X = LASER+30 = ESCP before printing
-                        \ a newline
+ JSR status_equip       \ screen, show and process a sell prompt for the piece
+                        \ of equipment at LASER+X = LASER+30 = ESCP before
+                        \ printing a newline
 
 .sell_escape
 
@@ -12623,7 +12624,7 @@ LOAD_D% = LOAD% + P% - CODE%
 \                       present, refund the cost of the item, and then beep and
 \                       exit to the docking bay (i.e. show the Status Mode
 \                       screen)
-\                        
+\
 \   pres+3              Show the error to say that an item is already present,
 \                       and process a refund, but do not free up a space in the
 \                       hold
@@ -13111,7 +13112,7 @@ LOAD_D% = LOAD% + P% - CODE%
  BEQ l_3113             \ LASER+X, which contains the laser power for view X, is
                         \ zero), jump to l_3113 to fit the new laser
 
-                        \ We already have a laser fitted to this view, so 
+                        \ We already have a laser fitted to this view, so
 
  PLA                    \ Retrieve the item number from the stack into A
 
@@ -13347,8 +13348,8 @@ LOAD_D% = LOAD% + P% - CODE%
  ADC #80                \ "RIGHT"
  JSR TT27
 
- INC YC                 \ Move the text cursor down a row, at the same time
-                        \ incrementing the counter in YC
+ INC YC                 \ Move the text cursor down a row, and increment the
+                        \ counter in YC at the same time
 
  LDA new_mounts         \ Set A = new_mounts + 16, so A now contains a value of
  ORA #16                \ 17, 18 or 20, depending on the number of laser mounts
@@ -13506,7 +13507,7 @@ LOAD_E% = LOAD% + P% - CODE%
  AND #%00011111         \ extract bits 0-4 by AND'ing with %11111
 
  BEQ P%+7               \ If all those bits are zero, then skip the following
-                        \ 2 instructions to go to step 3
+                        \ two instructions to go to step 3
 
  ORA #%10000000         \ We now have a number in the range 1-31, which we can
                         \ easily convert into a two-letter token, but first we
@@ -13852,8 +13853,8 @@ LOAD_E% = LOAD% + P% - CODE%
  DEX                    \ If token = 6, this is is control code 6 (switch to
  BEQ vdu_80             \ Sentence Case), so jump to vdu_80 to do just that
 
- DEX                    \ If token <> 8, skip the following 3 instructions
- DEX
+ DEX                    \ If token <> 8, jump to l_31d2 to skip the following
+ DEX                    \ four instructions
  BNE l_31d2
 
                         \ If we get here, then token = 8 (switch to ALL CAPS)
@@ -13885,7 +13886,7 @@ LOAD_E% = LOAD% + P% - CODE%
                         \ range (i.e. where the recursive token number is
                         \ correct and doesn't need correcting)
 
- CMP #14                \ If token < 14, skip the following 2 instructions
+ CMP #14                \ If token < 14, skip the following two instructions
  BCC P%+6
 
  CMP #32                \ If token < 32, then this means token is in 14-31, so
@@ -14288,7 +14289,7 @@ LOAD_E% = LOAD% + P% - CODE%
 
  TAX                    \ Copy the token number into X
 
- LDA #LO(QQ18)          \ Set V, V+1 to point to the recursive token table at
+ LDA #LO(QQ18)          \ Set V(1 0) to point to the recursive token table at
  STA V                  \ location QQ18
  LDA #HI(QQ18)
  STA V+1
@@ -16262,11 +16263,10 @@ LOAD_F% = LOAD% + P% - CODE%
 \ pointed to by (&FD &FE), which is where the MOS will put any system errors. It
 \ then waits for a key press and restarts the game.
 \
-\ BRKV is set to this routine in the decryption routine at DEEOR just before the
-\ game is run for the first time, and at the end of the SVE routine after the
-\ disc access menu has been processed. In other words, this is the standard
-\ BRKV handler for the game, and it's swapped out to MEBRK for disc access
-\ operations only.
+\ BRKV is set to this routine in the loader, when the docked code is loaded, and
+\ at the end of the SVE routine after the disc access menu has been processed.
+\ In other words, this is the standard BRKV handler for the game, and it's
+\ swapped out to MEBRK for disc access operations only.
 \
 \ When it is the BRKV handler, the routine can be triggered using a BRK
 \ instruction. The main differences between this routine and the MEBRK handler
@@ -22698,7 +22698,7 @@ LOAD_G% = LOAD% + P% - CODE%
                         \ available ships, starting with X = 0, and working our
                         \ way through the types in the new_ships table (where
                         \ the ships are in order of increasing price)
- 
+
  SEC                    \ Set QQ25 = 15 - 2 * QQ28
  LDA #15                \
  SBC QQ28               \ QQ25 contains the number of ship types that we offer
@@ -22746,7 +22746,7 @@ LOAD_G% = LOAD% + P% - CODE%
                         \ point
 
  LDX XX13               \ Fetch the loop counter from XX13
- 
+
  INX                    \ Increment the loop counter
 
  CPX QQ25               \ Loop back to n_bloop until we have shown the first
@@ -23295,7 +23295,7 @@ LOAD_G% = LOAD% + P% - CODE%
 
  STX INWK               \ Set INWK to the number of the chosen mission
 
- LDY &0C50,X            \ Set (Y X) to the cost of this mission in 
+ LDY &0C50,X            \ Set (Y X) to the cost of this mission in
  LDA &0C40,X            \ (&0C50+X &0C40+X)
  TAX
 
@@ -23508,7 +23508,7 @@ LOAD_G% = LOAD% + P% - CODE%
                         \
                         \   Q = SQRT(R Q)
 
- PHA                    \ Store the high byte of the result on the stack 
+ PHA                    \ Store the high byte of the result on the stack
 
  LDA P                  \ Set Q = P + K
  CLC                    \
@@ -31085,7 +31085,7 @@ ENDMACRO
  ECHR 'V'               \                NDS, W<219>H <239>NY <222><248>NDS
  ECHR 'A'               \                 <240> P<238><228><229>L.<215>{19}<247>
  ETWO 'I', 'L'          \                AM <249><218>RS OV<244>HE<245> MO<242>
- ETWO 'A', 'B'          \                 <248>PIDLY <226><255> PUL<218> <249>  
+ ETWO 'A', 'B'          \                 <248>PIDLY <226><255> PUL<218> <249>
  ETWO 'L', 'E'          \                <218>RS[177]"
  ECHR ' '
  ETWO 'A', 'T'
@@ -31464,7 +31464,7 @@ ENDMACRO
  ETWO 'C', 'E'          \                <237>[201]<242>P<249><233> [147][207]
  ECHR ' '               \                [178]EQUIPM<246>T.<215>{19}P<246><228>
  ECHR 'O'               \                <251><237> F<253> <240>T<244>F<244>
- ECHR 'F'               \                [195]W<219>H <237>CAPE PODS <238>E 
+ ECHR 'F'               \                [195]W<219>H <237>CAPE PODS <238>E
  ECHR ' '               \                <218><250><242> <240> MO<222> [145]
  ECHR 'E'               \                <238>Y SY<222>EMS.<215>{19}<237>CAPE PO
  ECHR 'Q'               \                DS <239>Y <247> B<217>GHT <245> SY<222>
@@ -34344,17 +34344,15 @@ LOAD_I% = LOAD% + P% - CODE%
 
 .l_395a
 
- LDX TYPE               \ Set A to the closest distance that we want to show the 
+ LDX TYPE               \ Set A to the closest distance that we want to show the
  LDA ship_dist,X        \ ship (fetched from the ship_dist table)
 
- CMP INWK+7             \ If z_hi (the ship's distance) is equal to A, jump to
- BEQ l_3962             \ l_3962 to skip the following decrement, as the ship is
-                        \ already close enough
+ CMP INWK+7             \ If z_hi (the ship's distance) is equal to A, skip the
+ BEQ P%+4               \ following decrement, as the ship is already close
+                        \ enough
 
  DEC INWK+7             \ Decrement the ship's distance, to bring the ship
                         \ a bit closer to us
-
-.l_3962
 
  JSR MVEIT              \ Move the ship in space according to the orientation
                         \ vectors and the new value in z_hi
@@ -34987,7 +34985,7 @@ LOAD_I% = LOAD% + P% - CODE%
                         \ tokens are in the msg_3 table)
 
  LDX XX13               \ Fetch the menu item number from XX13
- 
+
  INX                    \ Increment the menu item number to point to the next
                         \ item
 
@@ -35312,7 +35310,7 @@ LOAD_I% = LOAD% + P% - CODE%
  EQUB 26,  8,  0        \                                         Data @ (26, 8)
 
  EQUB  1,  6, 43        \ 3: Dimensions                   "DIMENSIONS:" @ (1, 6)
- EQUB  1,  7,  0        \                                          Data @ (1, 7)        
+ EQUB  1,  7,  0        \                                          Data @ (1, 7)
 
  EQUB  1,  9, 36        \ 4: Speed                            "SPEED:" @ (1,  9)
  EQUB  1, 10,  0        \                                         Data @ (1, 10)
@@ -37758,7 +37756,7 @@ LOAD_J% = LOAD% + P% - CODE%
 .MA24
 
  LDA KY12               \ If TAB is not being pressed (i.e. KY12 = 0) and we do
- AND BOMB               \ not have a hyperspace unit fitted (i.e. BOMB = 0), 
+ AND BOMB               \ not have a hyperspace unit fitted (i.e. BOMB = 0),
  BEQ MA76               \ jump down to MA76 to skip the following
 
  INC BOMB               \ The "hyperspace unit" key is being pressed and we have
@@ -46427,7 +46425,7 @@ LOAD_L% = LOAD% + P% - CODE%
 
 .n_oops
 
- SEC                    \ Reduce the amount of damage in A by the level of our 
+ SEC                    \ Reduce the amount of damage in A by the level of our
  SBC new_shields        \ shields in new_shields
 
  BCC n_shok             \ If the amount of damage is less than the level of our
@@ -49353,7 +49351,7 @@ LOAD_M% = LOAD% + P% - CODE%
                         \ ship, and set A and X to random values
 
  CMP T                  \ If the random value in A >= our badness level, which
- BCS l_4050             \ will be the case unless we have been really, really
+ BCS P%+8               \ will be the case unless we have been really, really
                         \ bad, then skip the following three instructions (so
                         \ if we are really bad, there's a higher chance of
                         \ spawning a cop, otherwise we got away with it, for
@@ -49367,8 +49365,6 @@ LOAD_M% = LOAD% + P% - CODE%
  LDX #0                 \ Jump to hordes to spawn a pack of ships of type A,
  BEQ hordes             \ returning from the subroutine using a tail call (the
                         \ BEQ is effectively a JMP as X is always zero)
-
-.l_4050
 
  LDA MANY+COPS          \ If we now have at least one cop in the local bubble,
  BNE MLOOPS             \ jump down to MLOOPS to stop spawning, otherwise fall
