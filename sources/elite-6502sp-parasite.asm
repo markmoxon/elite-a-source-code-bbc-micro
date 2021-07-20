@@ -2776,6 +2776,9 @@ ENDIF
  CLC                    \ range 220-221, as this is only called in galaxies 0
  ADC GCNT               \ and 1
 
+                        \ Fall through into DETOK to print extended token
+                        \ 220-221
+
 \ ******************************************************************************
 \
 \       Name: DETOK
@@ -5002,7 +5005,7 @@ LOAD_B% = LOAD% + P% - CODE%
  LDA #18                \ Call status_equip with A set to recursive token 132
  JSR status_equip       \ to print the next bit of the Status Mode screen:
                         \
-                        \   EQUIPMENT:
+                        \   {current ship type}:
                         \
                         \ followed by a newline and an indent of 8 characters
 
@@ -13628,7 +13631,7 @@ LOAD_E% = LOAD% + P% - CODE%
 \       Name: tal
 \       Type: Subroutine
 \   Category: Text
-\    Summary: Print the current galaxy numbe
+\    Summary: Print the current galaxy number
 \
 \ ------------------------------------------------------------------------------
 \
@@ -14930,7 +14933,7 @@ LOAD_E% = LOAD% + P% - CODE%
                         \
                         \   XX____X1____X2____XX+1      ->      +  +__+  +
                         \
-                        \ They all end up with a line between X1 and Y1, which
+                        \ They all end up with a line between X1 and X2, which
                         \ is what we want. There's probably a mathematical proof
                         \ of why this works somewhere, but the above is probably
                         \ easier to follow.
@@ -18484,38 +18487,22 @@ ENDMACRO
 
 .QQ23
 
- ITEM 19,  -2, 't',   6, %00000001   \ 0  = Food
-
- ITEM 20,  -1, 't',  10, %00000011   \ 1  = Textiles
-
- ITEM 65,  -3, 't',   2, %00000111   \ 2  = Radioactives
-
- ITEM 40,  -5, 't', 226, %00011111   \ 3  = Slaves
-
- ITEM 83,  -5, 't', 251, %00001111   \ 4  = Liquor/Wines
-
- ITEM 196,  8, 't',  54, %00000011   \ 5  = Luxuries
-
- ITEM 235, 29, 't',   8, %01111000   \ 6  = Narcotics
-
- ITEM 154, 14, 't',  56, %00000011   \ 7  = Computers
-
- ITEM 117,  6, 't',  40, %00000111   \ 8  = Machinery
-
- ITEM 78,   1, 't',  17, %00011111   \ 9  = Alloys
-
+ ITEM 19,  -2, 't',   6, %00000001   \  0 = Food
+ ITEM 20,  -1, 't',  10, %00000011   \  1 = Textiles
+ ITEM 65,  -3, 't',   2, %00000111   \  2 = Radioactives
+ ITEM 40,  -5, 't', 226, %00011111   \  3 = Slaves
+ ITEM 83,  -5, 't', 251, %00001111   \  4 = Liquor/Wines
+ ITEM 196,  8, 't',  54, %00000011   \  5 = Luxuries
+ ITEM 235, 29, 't',   8, %01111000   \  6 = Narcotics
+ ITEM 154, 14, 't',  56, %00000011   \  7 = Computers
+ ITEM 117,  6, 't',  40, %00000111   \  8 = Machinery
+ ITEM 78,   1, 't',  17, %00011111   \  9 = Alloys
  ITEM 124, 13, 't',  29, %00000111   \ 10 = Firearms
-
  ITEM 176, -9, 't', 220, %00111111   \ 11 = Furs
-
  ITEM 32,  -1, 't',  53, %00000011   \ 12 = Minerals
-
  ITEM 97,  -1, 'k',  66, %00000111   \ 13 = Gold
-
  ITEM 171, -2, 'k',  55, %00011111   \ 14 = Platinum
-
  ITEM 45,  -1, 'g', 250, %00001111   \ 15 = Gem-Stones
-
  ITEM 53,  15, 't', 192, %00000111   \ 16 = Alien items
 
 \ ******************************************************************************
@@ -35417,11 +35404,11 @@ LOAD_I% = LOAD% + P% - CODE%
 \ stored in the table as follows:
 \
 \   Value        Contents                                                  Macro
-\   ---------    ------------------------------------------------------    -----
-\   0-31         Jump tokens                                                EJMP
-\   32-127       ASCII characters with no obfuscation                       EQUS
-\   128-214      Recursive msg_3 text tokens (subtract 128 to get 0-86)     CTOK
-\   215-255      Extended two-letter tokens (subtract 215 to get 0-40)      ETWO
+\   -----        --------                                                  -----
+\   0-31         Jump tokens                                               EJMP
+\   32-127       ASCII characters with no obfuscation                      EQUS
+\   128-214      Recursive msg_3 text tokens (subtract 128 to get 0-86)    CTOK
+\   215-255      Extended two-letter tokens (subtract 215 to get 0-40)     ETWO
 \
 \ Printing of ship data is handled by the write_card routine.
 \
@@ -51475,7 +51462,7 @@ LOAD_M% = LOAD% + P% - CODE%
  INC new_hold           \ We just lost a piece of equipment, so increment the
                         \ amount of free space in the hold
 
-BNE MESS                \ Print recursive token A as an in-flight message,
+ BNE MESS               \ Print recursive token A as an in-flight message,
                         \ followed by " DESTROYED", and return from the
                         \ subroutine using a tail call
 
@@ -52739,6 +52726,7 @@ BNE MESS                \ Print recursive token A as an in-flight message,
 \ The colours for the normal dashboard palette are:
 \
 \   Index     Dot colour  Stick colour(s)     Ship types
+\   -----     ----------  ---------------     ----------
 \   0         Green       Green               Clean
 \   1         Yellow      Yellow              Station tracked
 \   2         Green       Green and yellow    Debris
@@ -52748,6 +52736,7 @@ BNE MESS                \ Print recursive token A as an in-flight message,
 \ The colours for the escape pod dashboard palette are:
 \
 \   Index     Dot colour  Stick colour(s)     Ship types
+\   -----     ----------  ---------------     ----------
 \   0         Cyan        Cyan                Clean
 \   1         White       White               Station tracked
 \   2         Cyan        Cyan and white      Debris

@@ -710,8 +710,8 @@ ENDMACRO
  LDA VIA+&44            \ If the STA instruction were not commented out, then
 \STA &0001              \ this would set location &0001 among the random number
                         \ seeds to a pretty random number (i.e. the value of the
-                        \ the 6522 System VIA T1C-L timer 1 low-order), but as
-                        \ the STA is commented out, this has no effect
+                        \ the 6522 System VIA T1C-L timer 1 low-order counter),
+                        \ but as the STA is commented out, this has no effect
 
  LDA #%00111001         \ Set 6522 System VIA interrupt enable register IER
  STA VIA+&4E            \ (SHEILA &4E) bits 0 and 3-5 (i.e. disable the Timer1,
@@ -815,8 +815,8 @@ ENDMACRO
  BNE tube_go            \ If X is non-zero then we are running this over the
                         \ Tube, so jump to tube_go to set up the Tube version
 
-                        \ If we get here then we are on a BBC Micro without a
-                        \ 6502 Second Processor
+                        \ If we get here then we are not running on a 6502
+                        \ Second Processor
 
  LDA #172               \ Call OSBYTE 172 to read the address of the MOS
  LDX #0                 \ keyboard translation table into (Y X)
@@ -884,7 +884,7 @@ ENDMACRO
  STY key_tube+1         \ key_tube(1 0)
 
 \LDX #LO(tube_400)      \ These instructions are commented out in the original
-\LDY #HI(tube_400)      \ version
+\LDY #HI(tube_400)      \ source
 \LDA #1
 \JSR &0406
 \LDA #LO(WORDS)
@@ -921,7 +921,7 @@ ENDMACRO
  EQUB 13                \ processor code in 2.H
 
 \.tube_400              \ These instructions are commented out in the original
-\EQUD &0400             \ version
+\EQUD &0400             \ source
 \.tube_wait
 \JSR tube_wait2
 \.tube_wait2
@@ -2044,8 +2044,6 @@ ORG LOADcode + P% - LOAD
 \
 \ ******************************************************************************
 
-                        \ --- Mod: Whole section added for Elite-A: ----------->
-
 .DIALS
 
  INCBIN "binaries/P.DIALS.bin"
@@ -2057,8 +2055,6 @@ ORG LOADcode + P% - LOAD
 .WORDS
 
  INCBIN "output/WORDS.bin"
-
-                        \ --- End of added section ---------------------------->
 
 \ ******************************************************************************
 \
@@ -2072,7 +2068,7 @@ ORG LOADcode + P% - LOAD
 
 .TVT1code
 
-EQUB &FF
+ EQUB &FF
 
 ORG &1100
 
@@ -2721,8 +2717,6 @@ ORG TVT1code + P% - TVT1
 \
 \ ******************************************************************************
 
-                        \ --- Mod: Whole section added for Elite-A: ----------->
-
 .ELITE
 
  INCBIN "binaries/P.ELITE.bin"
@@ -2735,14 +2729,13 @@ ORG TVT1code + P% - TVT1
 
  INCBIN "binaries/P.(C)ASFT.bin"
 
-                        \ --- End of added section ---------------------------->
-
 \ ******************************************************************************
 \
 \       Name: to_dd00
 \       Type: Subroutine
 \   Category: Loader
-\    Summary: BBC Master 128 code for save/restore characters
+\    Summary: BBC Master code for saving and restoring the MOS character set,
+\             bundled up in the loader so it can be moved to &DD00 to be run
 \
 \ ******************************************************************************
 

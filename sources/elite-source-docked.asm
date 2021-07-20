@@ -2698,7 +2698,12 @@ BRKV = P% - 2           \ The address of the destination address in the above
 \                       \ returning from the subroutine using a tail call (this
 \                       \ BNE is effectively a JMP as A is never zero)
 
-                        \ --- End of removed code ----------------------------->
+                        \ --- And replaced by: -------------------------------->
+
+                        \ Fall through into DETOK to print extended token
+                        \ 220-221
+
+                        \ --- End of replacement ------------------------------>
 
 \ ******************************************************************************
 \
@@ -3875,15 +3880,7 @@ BRKV = P% - 2           \ The address of the destination address in the above
 \       Name: MVEIT (Part 9 of 9)
 \       Type: Subroutine
 \   Category: Moving
-\    Summary: Move current ship: Redraw on scanner, if it hasn't been destroyed
-\
-\ ------------------------------------------------------------------------------
-\
-\ This routine has multiple stages. This stage does the following:
-\
-\   * If the ship is exploding or being removed, hide it on the scanner
-\
-\   * Otherwise redraw the ship on the scanner, now that it's been moved
+\    Summary: Return from the subroutine (the scanner is not used when docked)
 \
 \ ******************************************************************************
 
@@ -6757,7 +6754,7 @@ LOAD_B% = LOAD% + P% - CODE%
  LDA #18                \ Call status_equip with A set to recursive token 132
  JSR status_equip       \ to print the next bit of the Status Mode screen:
                         \
-                        \   EQUIPMENT:
+                        \   {current ship type}:
                         \
                         \ followed by a newline and an indent of 8 characters
 
@@ -18629,7 +18626,7 @@ LOAD_E% = LOAD% + P% - CODE%
 \       Name: tal
 \       Type: Subroutine
 \   Category: Text
-\    Summary: Print the current galaxy numbe
+\    Summary: Print the current galaxy number
 \
 \ ------------------------------------------------------------------------------
 \
@@ -20744,7 +20741,7 @@ LOAD_E% = LOAD% + P% - CODE%
                         \
                         \   XX____X1____X2____XX+1      ->      +  +__+  +
                         \
-                        \ They all end up with a line between X1 and Y1, which
+                        \ They all end up with a line between X1 and X2, which
                         \ is what we want. There's probably a mathematical proof
                         \ of why this works somewhere, but the above is probably
                         \ easier to follow.
@@ -25861,38 +25858,22 @@ ENDMACRO
 
 .QQ23
 
- ITEM 19,  -2, 't',   6, %00000001   \ 0  = Food
-
- ITEM 20,  -1, 't',  10, %00000011   \ 1  = Textiles
-
- ITEM 65,  -3, 't',   2, %00000111   \ 2  = Radioactives
-
- ITEM 40,  -5, 't', 226, %00011111   \ 3  = Slaves
-
- ITEM 83,  -5, 't', 251, %00001111   \ 4  = Liquor/Wines
-
- ITEM 196,  8, 't',  54, %00000011   \ 5  = Luxuries
-
- ITEM 235, 29, 't',   8, %01111000   \ 6  = Narcotics
-
- ITEM 154, 14, 't',  56, %00000011   \ 7  = Computers
-
- ITEM 117,  6, 't',  40, %00000111   \ 8  = Machinery
-
- ITEM 78,   1, 't',  17, %00011111   \ 9  = Alloys
-
+ ITEM 19,  -2, 't',   6, %00000001   \  0 = Food
+ ITEM 20,  -1, 't',  10, %00000011   \  1 = Textiles
+ ITEM 65,  -3, 't',   2, %00000111   \  2 = Radioactives
+ ITEM 40,  -5, 't', 226, %00011111   \  3 = Slaves
+ ITEM 83,  -5, 't', 251, %00001111   \  4 = Liquor/Wines
+ ITEM 196,  8, 't',  54, %00000011   \  5 = Luxuries
+ ITEM 235, 29, 't',   8, %01111000   \  6 = Narcotics
+ ITEM 154, 14, 't',  56, %00000011   \  7 = Computers
+ ITEM 117,  6, 't',  40, %00000111   \  8 = Machinery
+ ITEM 78,   1, 't',  17, %00011111   \  9 = Alloys
  ITEM 124, 13, 't',  29, %00000111   \ 10 = Firearms
-
  ITEM 176, -9, 't', 220, %00111111   \ 11 = Furs
-
  ITEM 32,  -1, 't',  53, %00000011   \ 12 = Minerals
-
  ITEM 97,  -1, 'k',  66, %00000111   \ 13 = Gold
-
  ITEM 171, -2, 'k',  55, %00011111   \ 14 = Platinum
-
  ITEM 45,  -1, 'g', 250, %00001111   \ 15 = Gem-Stones
-
  ITEM 53,  15, 't', 192, %00000111   \ 16 = Alien items
 
 \ ******************************************************************************
@@ -26941,9 +26922,10 @@ LOAD_G% = LOAD% + P% - CODE%
 
                         \ --- And replaced by: -------------------------------->
 
- JMP TT48               \ This instruction has no effect, as TT48 contains an
-                        \ RTS (it replaces a call to DOEXP in the flight code,
-                        \ which we don't need to do here as we are docked)
+ JMP TT48               \ Jump to TT48 to return from the subroutine using a
+                        \ tail call, as TT48 just contains an RTS (it replaces
+                        \ a call to DOEXP in the flight code, which we don't
+                        \ need to do here as we are docked)
 
                         \ --- End of replacement ------------------------------>
 
@@ -28621,9 +28603,10 @@ LOAD_G% = LOAD% + P% - CODE%
 
                         \ --- And replaced by: -------------------------------->
 
- JMP TT48               \ This instruction has no effect, as TT48 contains an
-                        \ RTS (it replaces a call to DOEXP in the flight code,
-                        \ which we don't need to do here as we are docked)
+ JMP TT48               \ Jump to TT48 to return from the subroutine using a
+                        \ tail call, as TT48 just contains an RTS (it replaces
+                        \ a call to DOEXP in the flight code, which we don't
+                        \ need to do here as we are docked)
 
                         \ --- End of replacement ------------------------------>
 

@@ -2425,7 +2425,12 @@ BRKV = P% - 2           \ The address of the destination address in the above
 \                       \ returning from the subroutine using a tail call (this
 \                       \ BNE is effectively a JMP as A is never zero)
 
-                        \ --- End of removed code ----------------------------->
+                        \ --- And replaced by: -------------------------------->
+
+                        \ Fall through into DETOK to print extended token
+                        \ 220-221
+
+                        \ --- End of replacement ------------------------------>
 
 \ ******************************************************************************
 \
@@ -10748,7 +10753,7 @@ LOAD_E% = LOAD% + P% - CODE%
 \       Name: tal
 \       Type: Subroutine
 \   Category: Text
-\    Summary: Print the current galaxy numbe
+\    Summary: Print the current galaxy number
 \
 \ ------------------------------------------------------------------------------
 \
@@ -12292,7 +12297,7 @@ LOAD_E% = LOAD% + P% - CODE%
                         \
                         \   XX____X1____X2____XX+1      ->      +  +__+  +
                         \
-                        \ They all end up with a line between X1 and Y1, which
+                        \ They all end up with a line between X1 and X2, which
                         \ is what we want. There's probably a mathematical proof
                         \ of why this works somewhere, but the above is probably
                         \ easier to follow.
@@ -16137,9 +16142,10 @@ LOAD_G% = LOAD% + P% - CODE%
 
                         \ --- And replaced by: -------------------------------->
 
- JMP TT48               \ This instruction has no effect, as TT48 contains an
-                        \ RTS (it replaces a call to DOEXP in the flight code,
-                        \ which we don't need to do here as we are docked)
+ JMP TT48               \ Jump to TT48 to return from the subroutine using a
+                        \ tail call, as TT48 just contains an RTS (it replaces
+                        \ a call to DOEXP in the flight code, which we don't
+                        \ need to do here as we are docked)
 
                         \ --- End of replacement ------------------------------>
 
@@ -17817,9 +17823,10 @@ LOAD_G% = LOAD% + P% - CODE%
 
                         \ --- And replaced by: -------------------------------->
 
- JMP TT48               \ This instruction has no effect, as TT48 contains an
-                        \ RTS (it replaces a call to DOEXP in the flight code,
-                        \ which we don't need to do here as we are docked)
+ JMP TT48               \ Jump to TT48 to return from the subroutine using a
+                        \ tail call, as TT48 just contains an RTS (it replaces
+                        \ a call to DOEXP in the flight code, which we don't
+                        \ need to do here as we are docked)
 
                         \ --- End of replacement ------------------------------>
 
@@ -20734,8 +20741,6 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-                        \ --- Mod: Whole section added for Elite-A: ----------->
-
 .TKN1
 
  EQUB VE                \ Token 0:      ""
@@ -22431,8 +22436,6 @@ ENDMACRO
  EQUB VE                \ Token 255:    ""
                         \
                         \ Encoded as:   ""
-
-                        \ --- End of added section ---------------------------->
 
 \ ******************************************************************************
 \
@@ -26597,11 +26600,11 @@ ENDMACRO
 \ stored in the table as follows:
 \
 \   Value        Contents                                                  Macro
-\   ---------    ------------------------------------------------------    -----
-\   0-31         Jump tokens                                                EJMP
-\   32-127       ASCII characters with no obfuscation                       EQUS
-\   128-214      Recursive msg_3 text tokens (subtract 128 to get 0-86)     CTOK
-\   215-255      Extended two-letter tokens (subtract 215 to get 0-40)      ETWO
+\   -----        --------                                                  -----
+\   0-31         Jump tokens                                               EJMP
+\   32-127       ASCII characters with no obfuscation                      EQUS
+\   128-214      Recursive msg_3 text tokens (subtract 128 to get 0-86)    CTOK
+\   215-255      Extended two-letter tokens (subtract 215 to get 0-40)     ETWO
 \
 \ Printing of ship data is handled by the write_card routine.
 \

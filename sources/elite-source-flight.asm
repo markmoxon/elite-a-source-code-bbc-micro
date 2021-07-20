@@ -18731,7 +18731,7 @@ LOAD_E% = LOAD% + P% - CODE%
 \       Name: tal
 \       Type: Subroutine
 \   Category: Text
-\    Summary: Print the current galaxy numbe
+\    Summary: Print the current galaxy number
 \
 \ ------------------------------------------------------------------------------
 \
@@ -18981,8 +18981,8 @@ LOAD_E% = LOAD% + P% - CODE%
 
                         \ --- And replaced by: -------------------------------->
 
- DEX                    \ If token > 6, skip the following 3 instructions
- BNE l_33b9
+ DEX                    \ If token > 6, jump to l_33b9 to skip the following 5
+ BNE l_33b9             \ instructions
 
 .vdu_80
 
@@ -23132,7 +23132,7 @@ LOAD_E% = LOAD% + P% - CODE%
                         \
                         \   XX____X1____X2____XX+1      ->      +  +__+  +
                         \
-                        \ They all end up with a line between X1 and Y1, which
+                        \ They all end up with a line between X1 and X2, which
                         \ is what we want. There's probably a mathematical proof
                         \ of why this works somewhere, but the above is probably
                         \ easier to follow.
@@ -29625,7 +29625,7 @@ LOAD_F% = LOAD% + P% - CODE%
  INC new_hold           \ We just lost a piece of equipment, so increment the
                         \ amount of free space in the hold
 
-BNE MESS                \ Print recursive token A as an in-flight message,
+ BNE MESS               \ Print recursive token A as an in-flight message,
                         \ followed by " DESTROYED", and return from the
                         \ subroutine using a tail call
 
@@ -29722,38 +29722,22 @@ ENDMACRO
 
 .QQ23
 
- ITEM 19,  -2, 't',   6, %00000001   \ 0  = Food
-
- ITEM 20,  -1, 't',  10, %00000011   \ 1  = Textiles
-
- ITEM 65,  -3, 't',   2, %00000111   \ 2  = Radioactives
-
- ITEM 40,  -5, 't', 226, %00011111   \ 3  = Slaves
-
- ITEM 83,  -5, 't', 251, %00001111   \ 4  = Liquor/Wines
-
- ITEM 196,  8, 't',  54, %00000011   \ 5  = Luxuries
-
- ITEM 235, 29, 't',   8, %01111000   \ 6  = Narcotics
-
- ITEM 154, 14, 't',  56, %00000011   \ 7  = Computers
-
- ITEM 117,  6, 't',  40, %00000111   \ 8  = Machinery
-
- ITEM 78,   1, 't',  17, %00011111   \ 9  = Alloys
-
+ ITEM 19,  -2, 't',   6, %00000001   \  0 = Food
+ ITEM 20,  -1, 't',  10, %00000011   \  1 = Textiles
+ ITEM 65,  -3, 't',   2, %00000111   \  2 = Radioactives
+ ITEM 40,  -5, 't', 226, %00011111   \  3 = Slaves
+ ITEM 83,  -5, 't', 251, %00001111   \  4 = Liquor/Wines
+ ITEM 196,  8, 't',  54, %00000011   \  5 = Luxuries
+ ITEM 235, 29, 't',   8, %01111000   \  6 = Narcotics
+ ITEM 154, 14, 't',  56, %00000011   \  7 = Computers
+ ITEM 117,  6, 't',  40, %00000111   \  8 = Machinery
+ ITEM 78,   1, 't',  17, %00011111   \  9 = Alloys
  ITEM 124, 13, 't',  29, %00000111   \ 10 = Firearms
-
  ITEM 176, -9, 't', 220, %00111111   \ 11 = Furs
-
  ITEM 32,  -1, 't',  53, %00000011   \ 12 = Minerals
-
  ITEM 97,  -1, 'k',  66, %00000111   \ 13 = Gold
-
  ITEM 171, -2, 'k',  55, %00011111   \ 14 = Platinum
-
  ITEM 45,  -1, 'g', 250, %00001111   \ 15 = Gem-Stones
-
  ITEM 53,  15, 't', 192, %00000111   \ 16 = Alien items
 
 \ ******************************************************************************
@@ -35824,6 +35808,7 @@ LOAD_H% = LOAD% + P% - CODE%
 \ The colours for the normal dashboard palette are:
 \
 \   Index     Dot colour  Stick colour(s)     Ship types
+\   -----     ----------  ---------------     ----------
 \   0         Green       Green               Clean
 \   1         Yellow      Yellow              Station tracked
 \   2         Green       Green and yellow    Debris
@@ -35833,6 +35818,7 @@ LOAD_H% = LOAD% + P% - CODE%
 \ The colours for the escape pod dashboard palette are:
 \
 \   Index     Dot colour  Stick colour(s)     Ship types
+\   -----     ----------  ---------------     ----------
 \   0         Cyan        Cyan                Clean
 \   1         White       White               Station tracked
 \   2         Cyan        Cyan and white      Debris
