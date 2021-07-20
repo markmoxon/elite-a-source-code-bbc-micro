@@ -109,9 +109,9 @@ ORG &0004
 
 .TRTB%
 
- SKIP 2                 \ TRTB%(1 0) points to the keyboard translation table,
-                        \ which is used to translate internal key numbers to
-                        \ ASCII
+ SKIP 2                 \ Contains the address of the keyboard translation
+                        \ table, which is used to translate internal key
+                        \ numbers to ASCII
 
 ORG &0020
 
@@ -187,7 +187,10 @@ ORG &0090
 
 .key_tube
 
- SKIP 2                 \ AJD
+ SKIP 2                 \ Contains the address of the I/O processor's keyboard
+                        \ translation table (as opposed to the parasite's
+                        \ table), which is used to translate internal key
+                        \ numbers to ASCII in the I/O processor code
 
 ORG &00F4
 
@@ -519,17 +522,22 @@ ENDMACRO
  LDA #HI(TVT1code)
  STA P+1
 
- JSR MVPG               \ Call MVPG to move and decrypt a page of memory from
-                        \ TVT1code to &1100-&11FF
+                        \ --- Mod: Original Acornsoft code removed: ----------->
 
-                        \ --- Mod: Code added for Elite-A: -------------------->
+\ JSR MVPG              \ Call MVPG to move and decrypt a page of memory from
+\                       \ TVT1code to &1100-&11FF
+
+                        \ --- And replaced by: -------------------------------->
+
+ JSR MVPG               \ Call MVPG to move a page of memory from TVT1code to
+                        \ &1100-&11FF
 
  LDA #LO(S%+11)         \ Point BRKV to the fifth entry in the main docked
  STA BRKV               \ code's S% workspace, which contains JMP BRBR
  LDA #HI(S%+11)
  STA BRKV+1
 
-                        \ --- End of added code ------------------------------->
+                        \ --- End of replacement ------------------------------>
 
  LDA #&00               \ Set the following:
  STA ZP                 \
@@ -541,11 +549,11 @@ ENDMACRO
  STA P+1
  LDX #8
 
- JSR MVBL               \ Call MVBL to move and decrypt 8 pages of memory from
-                        \ DIALS to &7800-&7FFF
-
                         \ --- Mod: Original Acornsoft code removed: ----------->
 
+\ JSR MVBL              \ Call MVBL to move and decrypt 8 pages of memory from
+\                       \ DIALS to &7800-&7FFF
+\
 \ SEI                   \ Disable interrupts while we set up our interrupt
 \                       \ handler to support the split-screen mode
 \
@@ -578,7 +586,12 @@ ENDMACRO
 \
 \ CLI                   \ Re-enable interrupts
 
-                        \ --- End of removed code ----------------------------->
+                        \ --- And replaced by: -------------------------------->
+
+ JSR MVBL               \ Call MVBL to move 8 pages of memory from DIALS to
+                        \ &7800-&7FFF
+
+                        \ --- End of replacement ------------------------------>
 
  LDA #&00               \ Set the following:
  STA ZP                 \
@@ -589,8 +602,8 @@ ENDMACRO
  LDA #HI(ASOFT)
  STA P+1
 
- JSR MVPG               \ Call MVPG to move and decrypt a page of memory from
-                        \ ASOFT to &6100-&61FF
+ JSR MVPG               \ Call MVPG to move a page of memory from ASOFT to
+                        \ &6100-&61FF
 
  LDA #&63               \ Set the following:
  STA ZP+1               \
@@ -599,8 +612,8 @@ ENDMACRO
  LDA #HI(ELITE)
  STA P+1
 
- JSR MVPG               \ Call MVPG to move and decrypt a page of memory from
-                        \ ELITE to &6300-&63FF
+ JSR MVPG               \ Call MVPG to move a page of memory from ELITE to
+                        \ &6300-&63FF
 
  LDA #&76               \ Set the following:
  STA ZP+1               \
@@ -609,11 +622,11 @@ ENDMACRO
  LDA #HI(CpASOFT)
  STA P+1
 
- JSR MVPG               \ Call MVPG to move and decrypt a page of memory from
-                        \ CpASOFT to &7600-&76FF
-
                         \ --- Mod: Original Acornsoft code removed: ----------->
 
+\ JSR MVPG              \ Call MVPG to move and decrypt a page of memory from
+\                       \ CpASOFT to &7600-&76FF
+\
 \ LDA #&00              \ Set the following:
 \ STA ZP                \
 \ LDA #&04              \   ZP(1 0) = &0400
@@ -644,7 +657,12 @@ ENDMACRO
 \ LDA &76               \ Set the drive number in the CATD routine to the
 \ STA CATBLOCK          \ contents of &76, which gets set in ELITE3
 
-                        \ --- End of removed code ----------------------------->
+                        \ --- And replaced by: -------------------------------->
+
+ JSR MVPG               \ Call MVPG to move a page of memory from CpASOFT to
+                        \ &7600-&76FF
+
+                        \ --- End of replacement ------------------------------>
 
  FNE 0                  \ Set up sound envelopes 0-3 using the FNE macro
  FNE 1
@@ -764,39 +782,70 @@ ENDMACRO
 
  LDA #143               \ Call OSBYTE 143 to issue a paged ROM service call of
  LDX #&21               \ type &21 with argument &C0, which is the "Indicate
- LDY #&C0               \ static workspace in 'hidden' RAM" service call that
- JSR OSBYTE             \ AJD
+ LDY #&C0               \ static workspace in 'hidden' RAM" service call. This
+ JSR OSBYTE             \ call returns the address of a safe place that we can
+                        \ use within the memory bank &C000-&DFFF, and returns
+                        \ the start location in (Y X)
 
- STX put0+1             \ Modify workspace save address AJD
- STX put1+1
+                        \ We now modify the savews routine so that when it's
+                        \ called, it copies the first three pages from the &C000
+                        \ workspace to this safe place, and then copies the MOS
+                        \ character set into the first three pages of &C000, so
+                        \ the character printing routines can use them
+
+                        \ We also modify the restorews routine in a similar way,
+                        \ so that when it's called, it copies the three pages
+                        \ from the safe place back into the first three pages
+                        \ of &C000, thus restoring the filing system workspace
+
+ STX put0+1             \ Modify the low byte of the workspace save address in
+ STX put1+1             \ the savews routine to that of (Y X)
  STX put2+1
 
- STX get0+1             \ Modify workspace restore address AJD
- STX get1+1
+ STX get0+1             \ Modify the low byte of the workspace restore address
+ STX get1+1             \ in the restorews routine to that of (Y X)
  STX get2+1
 
- STY put0+2             \ AJD
- STY get0+2
- INY
- STY put1+2
- STY get1+2
- INY
- STY put2+2
- STY get2+2
+ STY put0+2             \ Modify the high byte of the workspace save address of
+                        \ the first page in the savews routine to that of (Y X)
+
+ STY get0+2             \ Modify the high byte of the workspace restore address
+                        \ of the first page in the restorews routine to that of
+                        \ (Y X)
+
+ INY                    \ Increment Y so that (Y X) points to the second page,
+                        \ i.e. (Y+1 X)
+
+ STY put1+2             \ Modify the high byte of the workspace save address of
+                        \ the second page in the savews routine to (Y+1 X)
+
+ STY get1+2             \ Modify the high byte of the workspace restore address
+                        \ of the second page in the restorews routine to that of
+                        \ (Y+1 X)
+
+ INY                    \ Increment Y so that (Y X) points to the third page,
+                        \ i.e. (Y+2 X)
+
+ STY put2+2             \ Modify the high byte of the workspace save address of
+                        \ the third page in the savews routine to (Y+2 X)
+
+ STY get2+2             \ Modify the high byte of the workspace restore address
+                        \ of the third page in the restorews routine to that of
+                        \ (Y+2 X)
 
  LDA FILEV              \ Set old_FILEV(1 0) to the existing address for FILEV
- STA old_FILEV+1
- LDA FILEV+1
+ STA old_FILEV+1        \ (this modifies the JMP instruction in the do_FILEV
+ LDA FILEV+1            \ routine)
  STA old_FILEV+2
 
  LDA FSCV               \ Set old_FSCV(1 0) to the existing address for FSCV
- STA old_FSCV+1
- LDA FSCV+1
+ STA old_FSCV+1         \ (this modifies the JMP instruction in the do_FILEV
+ LDA FSCV+1             \ routine)
  STA old_FSCV+2
 
  LDA BYTEV              \ Set old_BYTEV(1 0) to the existing address for BYTEV
- STA old_BYTEV+1
- LDA BYTEV+1
+ STA old_BYTEV+1        \ (this modifies the JMP instruction in the old_BYTEV
+ LDA BYTEV+1            \ routine)
  STA old_BYTEV+2
 
  JSR set_vectors        \ Call set_vectors to update FILEV, FSCV and BYTEV to
@@ -836,8 +885,8 @@ ENDMACRO
  STA P+1
  LDX #4
 
- JSR MVBL               \ Call MVBL to move and decrypt 4 pages of memory from
-                        \ WORDS to &0400-&07FF
+ JSR MVBL               \ Call MVBL to move 4 pages of memory from WORDS to
+                        \ &0400-&07FF
 
  LDA #LO(S%+6)          \ Point BRKV to the third entry in the main docked
  STA WRCHV              \ code's S% workspace, which contains JMP CHPR
@@ -853,8 +902,8 @@ ENDMACRO
  LDA #HI(LOADcode)
  STA P+1
 
- JSR MVPG               \ Call MVPG to move and decrypt a page of memory from
-                        \ LOADcode to LOAD
+ JSR MVPG               \ Call MVPG to move a page of memory from LOADcode to
+                        \ LOAD
 
  LDY #35                \ We now want to copy the iff_index routine from
                         \ iff_index_code to iff_index, so set a counter in Y
@@ -1058,12 +1107,6 @@ ORG iff_index_code + P% - iff_index
 \    Summary: Encrypted LOAD routine, bundled up in the loader so it can be
 \             moved to &0B00 to be run
 \
-\ ------------------------------------------------------------------------------
-\
-\ This section is encrypted by EOR'ing with &18. The encryption is done by the
-\ elite-checksum.py script, and decryption is done in part 1 above, at the same
-\ time as it is moved to &0B00.
-\
 \ ******************************************************************************
 
 .LOADcode
@@ -1082,15 +1125,15 @@ ORG &0B00
 
 .LOAD
 
- LDX #LO(LTLI)          \ Set (Y X) to point to LTLI ("L.T.CODE")
- LDY #HI(LTLI)
-
- JSR OSCLI              \ Call OSCLI to run the OS command in LTLI, which loads
-                        \ the T.CODE binary (the main docked code) to its load
-                        \ address of &11E3
-
                         \ --- Mod: Original Acornsoft code removed: ----------->
 
+\ LDX #LO(LTLI)         \ Set (Y X) to point to LTLI ("L.T.CODE")
+\ LDY #HI(LTLI)
+\
+\ JSR OSCLI             \ Call OSCLI to run the OS command in LTLI, which loads
+\                       \ the T.CODE binary (the main docked code) to its load
+\                       \ address of &11E3
+\
 \ LDA #LO(S%+11)        \ Point BRKV to the fifth entry in the main docked
 \ STA BRKV              \ code's S% workspace, which contains JMP BRBR1
 \ LDA #HI(S%+11)
@@ -1147,7 +1190,16 @@ ORG &0B00
 \
 \ENDIF
 
-                        \ --- End of removed code ----------------------------->
+                        \ --- And replaced by: -------------------------------->
+
+ LDX #LO(LTLI)          \ Set (Y X) to point to LTLI ("L.1.D")
+ LDY #HI(LTLI)
+
+ JSR OSCLI              \ Call OSCLI to run the OS command in LTLI, which loads
+                        \ the 1.D binary (the main docked code) to its load
+                        \ address of &11E3
+
+                        \ --- End of replacement ------------------------------>
 
  JMP S%+3               \ Jump to the second entry in the main docked code's S%
                         \ workspace to start a new game
@@ -1910,7 +1962,7 @@ ORG LOADcode + P% - LOAD
 \       Name: MVPG
 \       Type: Subroutine
 \   Category: Utility routines
-\    Summary: Decrypt and move a page of memory
+\    Summary: Move a page of memory
 \
 \ ------------------------------------------------------------------------------
 \
@@ -1937,8 +1989,8 @@ ORG LOADcode + P% - LOAD
 
                         \ --- End of removed code ----------------------------->
 
- STA (ZP),Y             \ Store the decrypted result in the Y-th byte of the
-                        \ ZP(1 0) memory block
+ STA (ZP),Y             \ Store the result in the Y-th byte of the ZP(1 0)
+                        \ memory block
 
  DEY                    \ Decrement the byte counter
 
@@ -1952,7 +2004,7 @@ ORG LOADcode + P% - LOAD
 \       Name: MVBL
 \       Type: Subroutine
 \   Category: Utility routines
-\    Summary: Decrypt and move a multi-page block of memory
+\    Summary: Move a multi-page block of memory
 \
 \ ------------------------------------------------------------------------------
 \
@@ -2019,10 +2071,6 @@ ORG LOADcode + P% - LOAD
 \
 \ The loader bundles a number of binary files in with the loader code, and moves
 \ them to their correct memory locations in part 1 above.
-\
-\ This section is encrypted by EOR'ing with &A5. The encryption is done by the
-\ elite-checksum.py script, and decryption is done in part 1 above, at the same
-\ time as each block is moved to its correct location.
 \
 \ There are two files containing code:
 \
@@ -2692,10 +2740,6 @@ ORG TVT1code + P% - TVT1
 \ The loader bundles a number of binary files in with the loader code, and moves
 \ them to their correct memory locations in part 1 above.
 \
-\ This section is encrypted by EOR'ing with &A5. The encryption is done by the
-\ elite-checksum.py script, and decryption is done in part 1 above, at the same
-\ time as each block is moved to its correct location.
-\
 \ This part includes three files containing images, which are all moved into
 \ screen memory by the loader:
 \
@@ -2750,76 +2794,149 @@ ORG &DD00
 \       Name: do_FILEV
 \       Type: Subroutine
 \   Category: Loader
-\    Summary: AJD
+\    Summary: The custom handler for OSFILE calls in the BBC Master version
 \
 \ ******************************************************************************
 
                         \ --- Mod: Whole section added for Elite-A: ----------->
 
- \ trap FILEV
-
 .do_FILEV
 
- JSR restorews \ restore workspace
+ JSR restorews          \ Call restorews to restore the filing system workspace,
+                        \ so we can use the filing system
 
 .old_FILEV
 
- JSR &100 \ address modified by master set-up
+ JSR &100               \ This address is modified by the Master-specific code
+                        \ in part 1 of the loader (just after the cpmaster
+                        \ loop), so it calls the existing FILEV handler
+
+                        \ Fall through into savews to save the filing system
+                        \ workspace in a safe place and replace it with the MOS
+                        \ character set, so that character printing will work
+                        \ once again
+
+                        \ --- End of added section ---------------------------->
+
+\ ******************************************************************************
+\
+\       Name: savews
+\       Type: Subroutine
+\   Category: Loader
+\    Summary: Save the filing system workspace in a safe place and replace it
+\             with the MOS character set
+\
+\ ******************************************************************************
+
+                        \ --- Mod: Whole section added for Elite-A: ----------->
 
 .savews
 
- PHP \ save workspace, copy in characters
- PHA
- PHX
+ PHP                    \ Store the status register, A, X and Y on the stack, so
+ PHA                    \ we can retrieve them later to preserve them across
+ PHX                    \ calls to the subroutine
  PHY
- LDA #8 \ select ROM workspace at &C000
- TSB VIA+&34
- LDX #0
+
+ LDA #%00001000         \ Set bit 3 of the Access Control Register at SHEILA &34
+ TSB VIA+&34            \ to map the filing system RAM space into &C000-&DFFF
+                        \ (HAZEL), in place of the MOS VDU workspace (the TSB
+                        \ instruction applies the accumulator to the memory
+                        \ location using an OR)
+
+                        \ We now want to copy the first three pages from &C000
+                        \ to the safe place that we obtained in the loader, and
+                        \ whose location we poked directly into the put0, put1
+                        \ and put2 instructions below, back in part 1 of the
+                        \ loader
+
+ LDX #0                 \ Set a byte counter in X so we can copy an entire page
+                        \ of bytes, starting from 0
 
 .putws
 
- LDA &C000,X \ save absolute workspace
+ LDA &C000,X            \ Fetch the X-th byte from the first page of the &C000
+                        \ workspace
 
 .put0
 
- STA &C000,X \ address modified by master set-up
- LDA &C100,X
+ STA &C000,X            \ This address is modified by the Master-specific code
+                        \ in part 1 of the loader (just after the cpmaster
+                        \ loop), so it points to the first page of the safe
+                        \ place where we can copy the filing system workspace
+
+ LDA &C100,X            \ Fetch the X-th byte from the second page of the &C000
+                        \ workspace (i.e. &C100)
 
 .put1
 
- STA &C100,X \ address modified by master set-up
- LDA &C200,X
+ STA &C100,X            \ This address is modified by the Master-specific code
+                        \ in part 1 of the loader (just after the cpmaster
+                        \ loop), so it points to the second page of the safe
+                        \ place where we can copy the filing system workspace
+
+ LDA &C200,X            \ Fetch the X-th byte from the third page of the &C000
+                        \ workspace (i.e. &C200)
 
 .put2
 
- STA &C200,X \ address modified by master set-up
- INX
- BNE putws
- LDA LATCH \ save ROM number
- PHA
- LDA #&80 \ select RAM from &8000-&8FFF
- STA LATCH
- STA VIA+&30
- LDX #0
+ STA &C200,X            \ This address is modified by the Master-specific code
+                        \ in part 1 of the loader (just after the cpmaster
+                        \ loop), so it points to the third page of the safe
+                        \ place where we can copy the filing system workspace
+
+ INX                    \ Increment the byte counter
+
+ BNE putws              \ Loop back until we have copied a whole page of bytes
+                        \ (three times)
+
+ LDA LATCH              \ Fetch the RAM copy of the currently selected paged ROM
+ PHA                    \ from LATCH and save it on the stack so we can restore
+                        \ it below
+
+ LDA #%10000000         \ Set the RAM copy of the currently selected paged ROM
+ STA LATCH              \ so it matches the paged ROM selection latch at SHEILA
+                        \ &30 that we are about to set
+
+ STA VIA+&30            \ Set bit 7 of the ROM Select latch at SHEILA &30, to
+                        \ map the MOS ROM to &8000-&8FFF in RAM (ANDY)
+
+                        \ We now want to copy the three pages of MOS character
+                        \ definitions from the MOS ROM to &C000, so the
+                        \ character printing routines can use them
+
+ LDX #0                 \ Set a byte counter in X so we can copy an entire page
+                        \ of bytes, starting from 0
 
 .copych
 
- LDA &8900,X \ copy character definitions
- STA &C000,X
- LDA &8A00,X
- STA &C100,X
- LDA &8B00,X
- STA &C200,X
- INX
- BNE copych
- PLA \ restore ROM selection
- STA LATCH
- STA VIA+&30
- PLY
- PLX
+ LDA &8900,X            \ Copy the X-th byte of the first page of MOS character
+ STA &C000,X            \ definitions at &8900 into the X-th byte of &C000
+
+ LDA &8A00,X            \ Copy the X-th byte of the second page of MOS character
+ STA &C100,X            \ definitions at &8A00 into the X-th byte of &C100
+
+ LDA &8B00,X            \ Copy the X-th byte of the third page of MOS character
+ STA &C200,X            \ definitions at &8B00 into the X-th byte of &C100
+
+ INX                    \ Increment the byte counter
+
+ BNE copych             \ Loop back until we have copied a whole page of bytes
+                        \ (three times)
+
+ PLA                    \ Restore the paged ROM number that we saved on the
+ STA LATCH              \ stack and store it in LATCH so it matches the paged
+                        \ ROM selection latch at SHEILA &30 that we are about
+                        \ to set
+
+ STA VIA+&30            \ Store the same value in SHEILA &30, to switch back to
+                        \ the ROM that was selected before we changed it above
+
+ PLY                    \ Restore the status register, A, X and Y from the
+ PLX                    \ stack, so they are preserved by the subroutine
  PLA
  PLP
- RTS
+
+ RTS                    \ Return from the subroutine
 
                         \ --- End of added section ---------------------------->
 
@@ -2828,54 +2945,104 @@ ORG &DD00
 \       Name: do_FSCV
 \       Type: Subroutine
 \   Category: Loader
-\    Summary: AJD
+\    Summary: The custom handler for filing system calls in the BBC Master
+\             version
 \
 \ ******************************************************************************
 
                         \ --- Mod: Whole section added for Elite-A: ----------->
 
- \ trap FSCV
-
 .do_FSCV
 
- JSR restorews \ restore workspace
+ JSR restorews          \ Call restorews to restore the filing system workspace,
+                        \ so we can use the filing system
 
 .old_FSCV
 
- JSR &100 \ address modified by master setup
- JMP savews \ save workspace, restore characters
+ JSR &100               \ This address is modified by the Master-specific code
+                        \ in part 1 of the loader (just after the cpmaster
+                        \ loop), so it calls the existing FSCV handler
+
+ JMP savews             \ Call savews to save the filing system workspace in a
+                        \ safe place and replace it with the MOS character set,
+                        \ so that character printing will work once again
+
+                        \ --- End of added section ---------------------------->
+
+\ ******************************************************************************
+\
+\       Name: restorews
+\       Type: Subroutine
+\   Category: Loader
+\    Summary: Restore the filing system workspace
+\
+\ ******************************************************************************
+
+                        \ --- Mod: Whole section added for Elite-A: ----------->
 
  \ restore ROM workspace
 
 .restorews
 
- PHA
- PHX
- LDX #0
+ PHA                    \ Store A and X on the stack, so we can retrieve them
+ PHX                    \ later to preserve them across calls to the subroutine
+
+                        \ We now want to copy the first three pages from the
+                        \ safe place back to &C00), reversing the copy that we
+                        \ did in savews. As with savews, the location of the
+                        \ safe place was poked directly into the get0, get1 and
+                        \ get2 instructions below, back in part 1 of the loader
+
+ LDX #0                 \ Set a byte counter in X so we can copy an entire page
+                        \ of bytes, starting from 0
 
 .getws
 
- \ restore absolute workspace
-
 .get0
 
- LDA &C000,X \ address modified by master set-up
- STA &C000,X
+ LDA &C000,X            \ This address is modified by the Master-specific code
+                        \ in part 1 of the loader (just after the cpmaster
+                        \ loop), so it points to the first page of the safe
+                        \ place where we copied the filing system workspace in
+                        \ the savews routine
+
+ STA &C000,X            \ Copy the X-th byte from the first page of the safe
+                        \ place to the X-th byte of the first page of the &C000
+                        \ block
 
 .get1
 
- LDA &C100,X \ address modified by master set-up
- STA &C100,X
+ LDA &C100,X            \ This address is modified by the Master-specific code
+                        \ in part 1 of the loader (just after the cpmaster
+                        \ loop), so it points to the second page of the safe
+                        \ place where we copied the filing system workspace in
+                        \ the savews routine
+
+ STA &C100,X            \ Copy the X-th byte from the second page of the safe
+                        \ place to the X-th byte of the second page of the &C000
+                        \ block (i.e. &C100)
 
 .get2
 
- LDA &C200,X \ address modified by master set-up
- STA &C200,X
- INX
- BNE getws
- PLX
- PLA
- RTS
+ LDA &C200,X            \ This address is modified by the Master-specific code
+                        \ in part 1 of the loader (just after the cpmaster
+                        \ loop), so it points to the third page of the safe
+                        \ place where we copied the filing system workspace in
+                        \ the savews routine
+
+ STA &C200,X            \ Copy the X-th byte from the third page of the safe
+                        \ place to the X-th byte of the third page of the &C000
+                        \ block (i.e. &C200)
+
+ INX                    \ Increment the byte counter
+
+ BNE getws              \ Loop back until we have copied a whole page of bytes
+                        \ (three times)
+
+ PLX                    \ Retore A and X from the stack, so they are preserved
+ PLA                    \ by the subroutine
+
+ RTS                    \ Return from the subroutine
 
                         \ --- End of added section ---------------------------->
 
@@ -2884,21 +3051,29 @@ ORG &DD00
 \       Name: do_BYTEV
 \       Type: Subroutine
 \   Category: Loader
-\    Summary: AJD
+\    Summary: The custom handler for OSBYTE calls in the BBC Master version
 \
 \ ******************************************************************************
 
                         \ --- Mod: Whole section added for Elite-A: ----------->
 
- \ trap BYTEV
-
 .do_BYTEV
 
- CMP #&8F \ ROM service request
- BNE old_BYTEV
- CPX #&F \ vector claim?
- BNE old_BYTEV
- JSR old_BYTEV
+ CMP #143               \ If this is not OSBYTE 143, the paged ROM service call,
+ BNE old_BYTEV          \ then jump to old_BYTEV to pass the call onto the
+                        \ default handler
+
+ CPX #&F                \ If the value of X is not &F ("vectors changed"), jump
+ BNE old_BYTEV          \ to old_BYTEV to pass the call onto the default
+                        \ handler
+
+ JSR old_BYTEV          \ This is OSBYTE 143 with X = &F (the "vectors changed"
+                        \ service call), so first of all call old_BYTEV so the
+                        \ service call can be processed by the default handler
+
+                        \ And then fall through into set_vectors to set the
+                        \ FILEV, FSCV and BYTEV vectors to point to our custom
+                        \ handlers
 
                         \ --- End of added section ---------------------------->
 
@@ -2907,7 +3082,8 @@ ORG &DD00
 \       Name: set_vectors
 \       Type: Subroutine
 \   Category: Loader
-\    Summary: AJD
+\    Summary: Set the FILEV, FSCV and BYTEV vectors to point to our custom
+\             handlers
 \
 \ ******************************************************************************
 
@@ -2915,23 +3091,31 @@ ORG &DD00
 
 .set_vectors
 
- SEI
- PHA
- LDA #LO(do_FILEV) \ reset FILEV
- STA FILEV
+ SEI                    \ Disable interrupts while we update the vectors
+
+ PHA                    \ Store A on the stack so we can retrieve it below
+
+ LDA #LO(do_FILEV)      \ Set the FILEV to point to our custom handler in
+ STA FILEV              \ do_FILEV
  LDA #HI(do_FILEV)
  STA FILEV+1
- LDA #LO(do_FSCV) \ reset FSCV
- STA FSCV
+
+ LDA #LO(do_FSCV)       \ Set the FSCV to point to our custom handler in
+ STA FSCV               \ do_FSCV
  LDA #HI(do_FSCV)
  STA FSCV+1
- LDA #LO(do_BYTEV) \ replace BYTEV
- STA BYTEV
+
+ LDA #LO(do_BYTEV)      \ Set the BYTEV to point to our custom handler in
+ STA BYTEV              \ do_BYTEV
  LDA #HI(do_BYTEV)
  STA BYTEV+1
- PLA
- CLI
- RTS
+
+ PLA                    \ Restore A from the stack, so the subroutine doesn't
+                        \ change its value
+
+ CLI                    \ Enable interrupts again
+
+ RTS                    \ Return from the subroutine
 
                         \ --- End of added section ---------------------------->
 
@@ -2940,7 +3124,7 @@ ORG &DD00
 \       Name: old_BYTEV
 \       Type: Subroutine
 \   Category: Loader
-\    Summary: AJD
+\    Summary: Call the default OSBYTE handler
 \
 \ ******************************************************************************
 
@@ -2948,7 +3132,10 @@ ORG &DD00
 
 .old_BYTEV
 
- JMP &100 \ address modified by master set_up
+ JMP &100               \ This address is modified by the Master-specific code
+                        \ in part 1 of the loader (just after the cpmaster
+                        \ loop), so it calls the existing BYTEV handler and
+                        \ returns from the subroutine using a tail call
 
                         \ --- End of added section ---------------------------->
 
