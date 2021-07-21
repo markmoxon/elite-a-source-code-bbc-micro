@@ -58,37 +58,37 @@ ORG CODE%
 
 .XX21
 
- EQUW SHIP_MISSILE      \ MSL  =  1 = Missile
- EQUW SHIP_CORIOLIS     \ SST  =  2 = Coriolis space station
- EQUW SHIP_ESCAPE_POD   \ ESC  =  3 = Escape pod
- EQUW 0
- EQUW SHIP_CANISTER     \ OIL  =  5 = Cargo canister
- EQUW 0
- EQUW 0
- EQUW 0
- EQUW 0
- EQUW SHIP_TRANSPORTER  \        10 = Transporter
- EQUW SHIP_PYTHON       \        11 = Python
- EQUW SHIP_RATTLER      \        12 = Rattler
- EQUW SHIP_CHAMELEON    \        13 = Chameleon
- EQUW 0
- EQUW 0
- EQUW SHIP_VIPER        \ COPS = 16 = Viper
- EQUW 0
- EQUW 0
- EQUW 0
- EQUW 0
- EQUW 0
- EQUW SHIP_RATTLER      \        22 = Rattler
- EQUW SHIP_CHAMELEON    \        23 = Chameleon
- EQUW SHIP_PYTHON       \        24 = Python
- EQUW 0
- EQUW 0
- EQUW SHIP_PYTHON       \        27 = Python
- EQUW SHIP_RATTLER      \        28 = Rattler
- EQUW SHIP_THARGOID     \ THG  = 29 = Thargoid
- EQUW SHIP_THARGON      \ TGL  = 30 = Thargon
- EQUW 0
+ EQUW SHIP_MISSILE      \ MSL  =  1 = Missile                            Missile
+ EQUW SHIP_CORIOLIS     \ SST  =  2 = Coriolis space station             Station
+ EQUW SHIP_ESCAPE_POD   \ ESC  =  3 = Escape pod                      Escape pod
+ EQUW 0                 \                                                  Cargo
+ EQUW SHIP_CANISTER     \ OIL  =  5 = Cargo canister                       Cargo
+ EQUW 0                 \                                                 Mining
+ EQUW 0                 \                                                 Mining
+ EQUW 0                 \                                                 Mining
+ EQUW 0                 \                                                Shuttle
+ EQUW SHIP_TRANSPORTER  \        10 = Transporter                    Transporter
+ EQUW SHIP_PYTHON       \        11 = Python                              Trader
+ EQUW SHIP_RATTLER      \        12 = Rattler                             Trader
+ EQUW SHIP_CHAMELEON    \        13 = Chameleon                           Trader
+ EQUW 0                 \                                             Large ship
+ EQUW 0                 \                                             Small ship
+ EQUW SHIP_VIPER        \ COPS = 16 = Viper                                  Cop
+ EQUW 0                 \                                                 Pirate
+ EQUW 0                 \                                                 Pirate
+ EQUW 0                 \                                                 Pirate
+ EQUW 0                 \                                                 Pirate
+ EQUW 0                 \                                                 Pirate
+ EQUW SHIP_RATTLER      \        22 = Rattler                             Pirate
+ EQUW SHIP_CHAMELEON    \        23 = Chameleon                           Pirate
+ EQUW SHIP_PYTHON       \        24 = Python                              Pirate
+ EQUW 0                 \                                          Bounty hunter
+ EQUW 0                 \                                          Bounty hunter
+ EQUW SHIP_PYTHON       \        27 = Python                       Bounty hunter
+ EQUW SHIP_RATTLER      \        28 = Rattler                      Bounty hunter
+ EQUW SHIP_THARGOID     \ THG  = 29 = Thargoid                          Thargoid
+ EQUW SHIP_THARGON      \ TGL  = 30 = Thargon                           Thargoid
+ EQUW 0                 \                                            Constrictor
 
 \ ******************************************************************************
 \

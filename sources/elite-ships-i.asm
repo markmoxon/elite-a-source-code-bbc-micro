@@ -58,37 +58,37 @@ ORG CODE%
 
 .XX21
 
- EQUW SHIP_MISSILE      \ MSL  =  1 = Missile
- EQUW SHIP_CORIOLIS     \ SST  =  2 = Coriolis space station
- EQUW SHIP_ESCAPE_POD   \ ESC  =  3 = Escape pod
- EQUW 0
- EQUW SHIP_CANISTER     \ OIL  =  5 = Cargo canister
- EQUW 0
- EQUW 0
- EQUW 0
- EQUW 0
- EQUW 0
- EQUW SHIP_GHAVIAL      \        11 = Ghavial
- EQUW SHIP_OPHIDIAN     \        12 = Ophidian
- EQUW SHIP_COBRA_MK_1   \        13 = Cobra Mk I
- EQUW SHIP_ANACONDA     \ ANA  = 14 = Anaconda
- EQUW SHIP_WORM         \        15 = Worm
- EQUW SHIP_VIPER        \ COPS = 16 = Viper
- EQUW SHIP_KRAIT        \        17 = Krait
- EQUW SHIP_COBRA_MK_1   \        18 = Cobra Mk I
- EQUW 0
- EQUW 0
- EQUW SHIP_OPHIDIAN     \        21 = Ophidian
- EQUW SHIP_WORM         \        22 = Worm
- EQUW 0
- EQUW SHIP_ASP_MK_2     \        24 = Asp Mk II
- EQUW 0
- EQUW 0
- EQUW SHIP_ASP_MK_2     \        27 = Asp Mk II
- EQUW SHIP_KRAIT        \        28 = Krait
- EQUW 0
- EQUW 0
- EQUW 0
+ EQUW SHIP_MISSILE      \ MSL  =  1 = Missile                            Missile
+ EQUW SHIP_CORIOLIS     \ SST  =  2 = Coriolis space station             Station
+ EQUW SHIP_ESCAPE_POD   \ ESC  =  3 = Escape pod                      Escape pod
+ EQUW 0                 \                                                  Cargo
+ EQUW SHIP_CANISTER     \ OIL  =  5 = Cargo canister                       Cargo
+ EQUW 0                 \                                                 Mining
+ EQUW 0                 \                                                 Mining
+ EQUW 0                 \                                                 Mining
+ EQUW 0                 \                                                Shuttle
+ EQUW 0                 \                                            Transporter
+ EQUW SHIP_GHAVIAL      \        11 = Ghavial                             Trader
+ EQUW SHIP_OPHIDIAN     \        12 = Ophidian                            Trader
+ EQUW SHIP_COBRA_MK_1   \        13 = Cobra Mk I                          Trader
+ EQUW SHIP_ANACONDA     \        14 = Anaconda                        Large ship
+ EQUW SHIP_WORM         \        15 = Worm                            Small ship
+ EQUW SHIP_VIPER        \ COPS = 16 = Viper                                  Cop
+ EQUW SHIP_KRAIT        \        17 = Krait                               Pirate
+ EQUW SHIP_COBRA_MK_1   \        18 = Cobra Mk I                          Pirate
+ EQUW 0                 \                                                 Pirate
+ EQUW 0                 \                                                 Pirate
+ EQUW SHIP_OPHIDIAN     \        21 = Ophidian                            Pirate
+ EQUW SHIP_WORM         \        22 = Worm                                Pirate
+ EQUW 0                 \                                                 Pirate
+ EQUW SHIP_ASP_MK_2     \        24 = Asp Mk II                           Pirate
+ EQUW 0                 \                                          Bounty hunter
+ EQUW 0                 \                                          Bounty hunter
+ EQUW SHIP_ASP_MK_2     \        27 = Asp Mk II                    Bounty hunter
+ EQUW SHIP_KRAIT        \        28 = Krait                        Bounty hunter
+ EQUW 0                 \                                               Thargoid
+ EQUW 0                 \                                               Thargoid
+ EQUW 0                 \                                            Constrictor
 
 \ ******************************************************************************
 \

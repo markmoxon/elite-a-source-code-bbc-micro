@@ -58,37 +58,37 @@ ORG CODE%
 
 .XX21
 
- EQUW SHIP_MISSILE      \ MSL  =  1 = Missile
- EQUW SHIP_DODO         \         2 = Dodecahedron ("Dodo") space station
- EQUW SHIP_ESCAPE_POD   \ ESC  =  3 = Escape pod
- EQUW SHIP_PLATE        \ PLT  =  4 = Alloy plate
- EQUW SHIP_CANISTER     \ OIL  =  5 = Cargo canister
- EQUW SHIP_BOULDER      \         6 = Boulder
- EQUW SHIP_ASTEROID     \ AST  =  7 = Asteroid
- EQUW SHIP_SPLINTER     \ SPL  =  8 = Splinter
- EQUW 0
- EQUW 0
- EQUW SHIP_BOA          \        11 = Boa
- EQUW SHIP_OPHIDIAN     \        12 = Ophidian
- EQUW 0
- EQUW 0
- EQUW 0
- EQUW SHIP_VIPER        \ COPS = 16 = Viper
- EQUW SHIP_SIDEWINDER   \ SH3  = 17 = Sidewinder
- EQUW SHIP_GECKO        \        18 = Gecko
- EQUW 0
- EQUW SHIP_BUSHMASTER   \        20 = Bushmaster
- EQUW SHIP_OPHIDIAN     \        21 = Ophidian
- EQUW 0
- EQUW 0
- EQUW 0
- EQUW 0
- EQUW SHIP_BUSHMASTER   \        26 = Bushmaster
- EQUW SHIP_GECKO        \        27 = Gecko
- EQUW SHIP_SIDEWINDER   \        28 = Sidewinder
- EQUW 0
- EQUW 0
- EQUW 0
+ EQUW SHIP_MISSILE      \ MSL  =  1 = Missile                            Missile
+ EQUW SHIP_DODO         \         2 = Dodo space station                 Station
+ EQUW SHIP_ESCAPE_POD   \ ESC  =  3 = Escape pod                      Escape pod
+ EQUW SHIP_PLATE        \ PLT  =  4 = Alloy plate                          Cargo
+ EQUW SHIP_CANISTER     \ OIL  =  5 = Cargo canister                       Cargo
+ EQUW SHIP_BOULDER      \         6 = Boulder                             Mining
+ EQUW SHIP_ASTEROID     \ AST  =  7 = Asteroid                            Mining
+ EQUW SHIP_SPLINTER     \ SPL  =  8 = Splinter                            Mining
+ EQUW 0                 \                                                Shuttle
+ EQUW 0                 \                                            Transporter
+ EQUW SHIP_BOA          \        11 = Boa                                 Trader
+ EQUW SHIP_OPHIDIAN     \        12 = Ophidian                            Trader
+ EQUW 0                 \                                                 Trader
+ EQUW 0                 \                                             Large ship
+ EQUW 0                 \                                             Small ship
+ EQUW SHIP_VIPER        \ COPS = 16 = Viper                                  Cop
+ EQUW SHIP_SIDEWINDER   \        17 = Sidewinder                          Pirate
+ EQUW SHIP_GECKO        \        18 = Gecko                               Pirate
+ EQUW 0                 \                                                 Pirate
+ EQUW SHIP_BUSHMASTER   \        20 = Bushmaster                          Pirate
+ EQUW SHIP_OPHIDIAN     \        21 = Ophidian                            Pirate
+ EQUW 0                 \                                                 Pirate
+ EQUW 0                 \                                                 Pirate
+ EQUW 0                 \                                                 Pirate
+ EQUW 0                 \                                          Bounty hunter
+ EQUW SHIP_BUSHMASTER   \        26 = Bushmaster                   Bounty hunter
+ EQUW SHIP_GECKO        \        27 = Gecko                        Bounty hunter
+ EQUW SHIP_SIDEWINDER   \        28 = Sidewinder                   Bounty hunter
+ EQUW 0                 \                                               Thargoid
+ EQUW 0                 \                                               Thargoid
+ EQUW 0                 \                                            Constrictor
 
 \ ******************************************************************************
 \

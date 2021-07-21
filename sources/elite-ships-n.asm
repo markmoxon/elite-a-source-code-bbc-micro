@@ -58,37 +58,37 @@ ORG CODE%
 
 .XX21
 
- EQUW SHIP_MISSILE      \ MSL  =  1 = Missile
- EQUW SHIP_DODO         \         2 = Dodecahedron ("Dodo") space station
- EQUW SHIP_ESCAPE_POD   \ ESC  =  3 = Escape pod
- EQUW 0
- EQUW SHIP_CANISTER     \ OIL  =  5 = Cargo canister
- EQUW 0
- EQUW 0
- EQUW 0
- EQUW 0
- EQUW 0
- EQUW SHIP_COBRA_MK_3   \ CYL  = 11 = Cobra Mk III
- EQUW SHIP_RATTLER      \        12 = Rattler
- EQUW SHIP_PYTHON       \        13 = Python
- EQUW 0
- EQUW 0
- EQUW SHIP_VIPER        \ COPS = 16 = Viper
- EQUW SHIP_GECKO        \        17 = Gecko
- EQUW SHIP_KRAIT        \        18 = Krait
- EQUW 0
- EQUW 0
- EQUW SHIP_COBRA_MK_3   \        21 = Cobra Mk III
- EQUW SHIP_RATTLER      \        22 = Rattler
- EQUW SHIP_PYTHON       \        23 = Python
- EQUW SHIP_ASP_MK_2     \        24 = Asp Mk II
- EQUW SHIP_COBRA_MK_3   \        25 = Cobra Mk III
- EQUW 0
- EQUW SHIP_GECKO        \        27 = Gecko
- EQUW SHIP_RATTLER      \        28 = Rattler
- EQUW 0
- EQUW 0
- EQUW 0
+ EQUW SHIP_MISSILE      \ MSL  =  1 = Missile                            Missile
+ EQUW SHIP_DODO         \         2 = Dodo space station                 Station
+ EQUW SHIP_ESCAPE_POD   \ ESC  =  3 = Escape pod                      Escape pod
+ EQUW 0                 \                                                  Cargo
+ EQUW SHIP_CANISTER     \ OIL  =  5 = Cargo canister                       Cargo
+ EQUW 0                 \                                                 Mining
+ EQUW 0                 \                                                 Mining
+ EQUW 0                 \                                                 Mining
+ EQUW 0                 \                                                Shuttle
+ EQUW 0                 \                                            Transporter
+ EQUW SHIP_COBRA_MK_3   \        11 = Cobra Mk III                        Trader
+ EQUW SHIP_RATTLER      \        12 = Rattler                             Trader
+ EQUW SHIP_PYTHON       \        13 = Python                              Trader
+ EQUW 0                 \                                             Large ship
+ EQUW 0                 \                                             Small ship
+ EQUW SHIP_VIPER        \ COPS = 16 = Viper                                  Cop
+ EQUW SHIP_GECKO        \        17 = Gecko                               Pirate
+ EQUW SHIP_KRAIT        \        18 = Krait                               Pirate
+ EQUW 0                 \                                                 Pirate
+ EQUW 0                 \                                                 Pirate
+ EQUW SHIP_COBRA_MK_3   \        21 = Cobra Mk III                        Pirate
+ EQUW SHIP_RATTLER      \        22 = Rattler                             Pirate
+ EQUW SHIP_PYTHON       \        23 = Python                              Pirate
+ EQUW SHIP_ASP_MK_2     \        24 = Asp Mk II                           Pirate
+ EQUW SHIP_COBRA_MK_3   \        25 = Cobra Mk III                 Bounty hunter
+ EQUW 0                 \                                          Bounty hunter
+ EQUW SHIP_GECKO        \        27 = Gecko                        Bounty hunter
+ EQUW SHIP_RATTLER      \        28 = Rattler                      Bounty hunter
+ EQUW 0                 \                                               Thargoid
+ EQUW 0                 \                                               Thargoid
+ EQUW 0                 \                                            Constrictor
 
 \ ******************************************************************************
 \

@@ -58,37 +58,37 @@ ORG CODE%
 
 .XX21
 
- EQUW SHIP_MISSILE      \ MSL  =  1 = Missile
- EQUW SHIP_DODO         \         2 = Dodecahedron ("Dodo") space station
- EQUW SHIP_ESCAPE_POD   \ ESC  =  3 = Escape pod
- EQUW SHIP_PLATE        \ PLT  =  4 = Alloy plate
- EQUW SHIP_CANISTER     \ OIL  =  5 = Cargo canister
- EQUW SHIP_BOULDER      \         6 = Boulder
- EQUW 0
- EQUW 0
- EQUW 0
- EQUW 0
- EQUW SHIP_COBRA_MK_3   \ CYL  = 11 = Cobra Mk III
- EQUW SHIP_BOA          \        12 = Boa
- EQUW SHIP_COBRA_MK_1   \        13 = Cobra Mk I
- EQUW 0
- EQUW 0
- EQUW SHIP_VIPER        \ COPS = 16 = Viper
- EQUW SHIP_COBRA_MK_1   \        17 = Cobra Mk I
- EQUW SHIP_SIDEWINDER   \        18 = Sidewinder
- EQUW SHIP_ADDER        \        19 = Adder
- EQUW 0
- EQUW SHIP_COBRA_MK_3   \        21 = Cobra Mk III
- EQUW 0
- EQUW 0
- EQUW 0
- EQUW SHIP_COBRA_MK_3   \        25 = Cobra Mk III
- EQUW 0
- EQUW SHIP_COBRA_MK_1   \        27 = Cobra Mk I
- EQUW SHIP_SIDEWINDER   \        28 = Sidewinder
- EQUW 0
- EQUW 0
- EQUW 0
+ EQUW SHIP_MISSILE      \ MSL  =  1 = Missile                            Missile
+ EQUW SHIP_DODO         \         2 = Dodo space station                 Station
+ EQUW SHIP_ESCAPE_POD   \ ESC  =  3 = Escape pod                      Escape pod
+ EQUW SHIP_PLATE        \ PLT  =  4 = Alloy plate                          Cargo
+ EQUW SHIP_CANISTER     \ OIL  =  5 = Cargo canister                       Cargo
+ EQUW SHIP_BOULDER      \         6 = Boulder                             Mining
+ EQUW 0                 \                                                 Mining
+ EQUW 0                 \                                                 Mining
+ EQUW 0                 \                                                Shuttle
+ EQUW 0                 \                                            Transporter
+ EQUW SHIP_COBRA_MK_3   \        11 = Cobra Mk III                        Trader
+ EQUW SHIP_BOA          \        12 = Boa                                 Trader
+ EQUW SHIP_COBRA_MK_1   \        13 = Cobra Mk I                          Trader
+ EQUW 0                 \                                             Large ship
+ EQUW 0                 \                                             Small ship
+ EQUW SHIP_VIPER        \ COPS = 16 = Viper                                  Cop
+ EQUW SHIP_COBRA_MK_1   \        17 = Cobra Mk I                          Pirate
+ EQUW SHIP_SIDEWINDER   \        18 = Sidewinder                          Pirate
+ EQUW SHIP_ADDER        \        19 = Adder                               Pirate
+ EQUW 0                 \                                                 Pirate
+ EQUW SHIP_COBRA_MK_3   \        21 = Cobra Mk III                        Pirate
+ EQUW 0                 \                                                 Pirate
+ EQUW 0                 \                                                 Pirate
+ EQUW 0                 \                                                 Pirate
+ EQUW SHIP_COBRA_MK_3   \        25 = Cobra Mk III                 Bounty hunter
+ EQUW 0                 \                                          Bounty hunter
+ EQUW SHIP_COBRA_MK_1   \        27 = Cobra Mk I                   Bounty hunter
+ EQUW SHIP_SIDEWINDER   \        28 = Sidewinder                   Bounty hunter
+ EQUW 0                 \                                               Thargoid
+ EQUW 0                 \                                               Thargoid
+ EQUW 0                 \                                            Constrictor
 
 \ ******************************************************************************
 \

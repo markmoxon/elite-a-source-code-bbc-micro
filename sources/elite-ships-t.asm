@@ -58,37 +58,37 @@ ORG CODE%
 
 .XX21
 
- EQUW SHIP_MISSILE      \ MSL  =  1 = Missile
- EQUW SHIP_DODO         \         2 = Dodecahedron ("Dodo") space station
- EQUW SHIP_ESCAPE_POD   \ ESC  =  3 = Escape pod
- EQUW SHIP_PLATE        \ PLT  =  4 = Alloy plate
- EQUW SHIP_CANISTER     \ OIL  =  5 = Cargo canister
- EQUW 0
- EQUW 0
- EQUW 0
- EQUW SHIP_SHUTTLE_MK_2 \ SHU  =  9 = Shuttle Mk II
- EQUW 0
- EQUW SHIP_COBRA_MK_3   \ CYL  = 11 = Cobra Mk III
- EQUW 0
- EQUW SHIP_IGUANA       \        13 = Iguana
- EQUW 0
- EQUW 0
- EQUW SHIP_VIPER        \ COPS = 16 = Viper
- EQUW SHIP_KRAIT        \        17 = Krait
- EQUW 0
- EQUW 0
- EQUW SHIP_IGUANA       \        20 = Iguana
- EQUW SHIP_COBRA_MK_3   \        21 = Cobra Mk III
- EQUW 0
- EQUW 0
- EQUW SHIP_ASP_MK_2     \        24 = Asp Mk II
- EQUW SHIP_COBRA_MK_3   \        25 = Cobra Mk III
- EQUW SHIP_IGUANA       \        26 = Iguana
- EQUW SHIP_ASP_MK_2     \        27 = Asp Mk II
- EQUW SHIP_KRAIT        \        28 = Krait
- EQUW 0
- EQUW 0
- EQUW 0
+ EQUW SHIP_MISSILE      \ MSL  =  1 = Missile                            Missile
+ EQUW SHIP_DODO         \         2 = Dodo space station                 Station
+ EQUW SHIP_ESCAPE_POD   \ ESC  =  3 = Escape pod                      Escape pod
+ EQUW SHIP_PLATE        \ PLT  =  4 = Alloy plate                          Cargo
+ EQUW SHIP_CANISTER     \ OIL  =  5 = Cargo canister                       Cargo
+ EQUW 0                 \                                                 Mining
+ EQUW 0                 \                                                 Mining
+ EQUW 0                 \                                                 Mining
+ EQUW SHIP_SHUTTLE_MK_2 \ SHU  =  9 = Shuttle Mk II                      Shuttle
+ EQUW 0                 \                                            Transporter
+ EQUW SHIP_COBRA_MK_3   \        11 = Cobra Mk III                        Trader
+ EQUW 0                 \                                                 Trader
+ EQUW SHIP_IGUANA       \        13 = Iguana                              Trader
+ EQUW 0                 \                                             Large ship
+ EQUW 0                 \                                             Small ship
+ EQUW SHIP_VIPER        \ COPS = 16 = Viper                                  Cop
+ EQUW SHIP_KRAIT        \        17 = Krait                               Pirate
+ EQUW 0                 \                                                 Pirate
+ EQUW 0                 \                                                 Pirate
+ EQUW SHIP_IGUANA       \        20 = Iguana                              Pirate
+ EQUW SHIP_COBRA_MK_3   \        21 = Cobra Mk III                        Pirate
+ EQUW 0                 \                                                 Pirate
+ EQUW 0                 \                                                 Pirate
+ EQUW SHIP_ASP_MK_2     \        24 = Asp Mk II                           Pirate
+ EQUW SHIP_COBRA_MK_3   \        25 = Cobra Mk III                 Bounty hunter
+ EQUW SHIP_IGUANA       \        26 = Iguana                       Bounty hunter
+ EQUW SHIP_ASP_MK_2     \        27 = Asp Mk II                    Bounty hunter
+ EQUW SHIP_KRAIT        \        28 = Krait                        Bounty hunter
+ EQUW 0                 \                                               Thargoid
+ EQUW 0                 \                                               Thargoid
+ EQUW 0                 \                                            Constrictor
 
 \ ******************************************************************************
 \

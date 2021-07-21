@@ -58,37 +58,37 @@ ORG CODE%
 
 .XX21
 
- EQUW SHIP_MISSILE      \ MSL  =  1 = Missile
- EQUW SHIP_DODO         \         2 = Dodecahedron ("Dodo") space station
- EQUW SHIP_ESCAPE_POD   \ ESC  =  3 = Escape pod
- EQUW SHIP_PLATE        \ PLT  =  4 = Alloy plate
- EQUW SHIP_CANISTER     \ OIL  =  5 = Cargo canister
- EQUW 0
- EQUW 0
- EQUW 0
- EQUW 0
- EQUW 0
- EQUW 0
- EQUW SHIP_MORAY        \        12 = Moray
- EQUW SHIP_FER_DE_LANCE \        13 = Fer-de-lance
- EQUW 0
- EQUW 0
- EQUW SHIP_VIPER        \ COPS = 16 = Viper
- EQUW SHIP_MAMBA        \        17 = Mamba
- EQUW SHIP_SIDEWINDER   \        18 = Sidewinder
- EQUW SHIP_GECKO        \        19 = Gecko
- EQUW SHIP_BUSHMASTER   \        20 = Bushmaster
- EQUW 0
- EQUW SHIP_MORAY        \        22 = Moray
- EQUW SHIP_WORM         \ WRM  = 23 = Worm
- EQUW SHIP_FER_DE_LANCE \        24 = Fer-de-lance
- EQUW SHIP_FER_DE_LANCE \        25 = Fer-de-lance
- EQUW SHIP_BUSHMASTER   \        26 = Bushmaster
- EQUW SHIP_MORAY        \        27 = Moray
- EQUW SHIP_MAMBA        \        28 = Mamba
- EQUW 0
- EQUW 0
- EQUW 0
+ EQUW SHIP_MISSILE      \ MSL  =  1 = Missile                            Missile
+ EQUW SHIP_DODO         \         2 = Dodo space station                 Station
+ EQUW SHIP_ESCAPE_POD   \ ESC  =  3 = Escape pod                      Escape pod
+ EQUW SHIP_PLATE        \ PLT  =  4 = Alloy plate                          Cargo
+ EQUW SHIP_CANISTER     \ OIL  =  5 = Cargo canister                       Cargo
+ EQUW 0                 \                                                 Mining
+ EQUW 0                 \                                                 Mining
+ EQUW 0                 \                                                 Mining
+ EQUW 0                 \                                                Shuttle
+ EQUW 0                 \                                            Transporter
+ EQUW 0                 \                                                 Trader
+ EQUW SHIP_MORAY        \        12 = Moray                               Trader
+ EQUW SHIP_FER_DE_LANCE \        13 = Fer-de-lance                        Trader
+ EQUW 0                 \                                             Large ship
+ EQUW 0                 \                                             Small ship
+ EQUW SHIP_VIPER        \ COPS = 16 = Viper                                  Cop
+ EQUW SHIP_MAMBA        \        17 = Mamba                               Pirate
+ EQUW SHIP_SIDEWINDER   \        18 = Sidewinder                          Pirate
+ EQUW SHIP_GECKO        \        19 = Gecko                               Pirate
+ EQUW SHIP_BUSHMASTER   \        20 = Bushmaster                          Pirate
+ EQUW 0                 \                                                 Pirate
+ EQUW SHIP_MORAY        \        22 = Moray                               Pirate
+ EQUW SHIP_WORM         \        23 = Worm                                Pirate
+ EQUW SHIP_FER_DE_LANCE \        24 = Fer-de-lance                        Pirate
+ EQUW SHIP_FER_DE_LANCE \        25 = Fer-de-lance                 Bounty hunter
+ EQUW SHIP_BUSHMASTER   \        26 = Bushmaster                   Bounty hunter
+ EQUW SHIP_MORAY        \        27 = Moray                        Bounty hunter
+ EQUW SHIP_MAMBA        \        28 = Mamba                        Bounty hunter
+ EQUW 0                 \                                               Thargoid
+ EQUW 0                 \                                               Thargoid
+ EQUW 0                 \                                            Constrictor
 
 \ ******************************************************************************
 \

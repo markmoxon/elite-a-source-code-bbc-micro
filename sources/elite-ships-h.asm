@@ -58,37 +58,37 @@ ORG CODE%
 
 .XX21
 
- EQUW SHIP_MISSILE      \ MSL  =  1 = Missile
- EQUW SHIP_DODO         \         2 = Dodecahedron ("Dodo") space station
- EQUW SHIP_ESCAPE_POD   \ ESC  =  3 = Escape pod
- EQUW SHIP_PLATE        \ PLT  =  4 = Alloy plate
- EQUW SHIP_CANISTER     \ OIL  =  5 = Cargo canister
- EQUW 0
- EQUW 0
- EQUW 0
- EQUW 0
- EQUW 0
- EQUW SHIP_GHAVIAL      \        11 = Ghavial
- EQUW SHIP_RATTLER      \        12 = Rattler
- EQUW SHIP_COBRA_MK_1   \        13 = Cobra Mk I
- EQUW SHIP_ANACONDA     \ ANA  = 14 = Anaconda
- EQUW SHIP_WORM         \        15 = Worm
- EQUW SHIP_VIPER        \ COPS = 16 = Viper
- EQUW SHIP_COBRA_MK_1   \        17 = Cobra Mk I
- EQUW 0
- EQUW SHIP_ADDER        \        19 = Adder
- EQUW 0
- EQUW 0
- EQUW SHIP_WORM         \        22 = Worm
- EQUW SHIP_RATTLER      \        23 = Rattler
- EQUW 0
- EQUW 0
- EQUW 0
- EQUW SHIP_COBRA_MK_1   \        27 = Cobra Mk I
- EQUW SHIP_RATTLER      \        28 = Rattler
- EQUW 0
- EQUW 0
- EQUW 0
+ EQUW SHIP_MISSILE      \ MSL  =  1 = Missile                            Missile
+ EQUW SHIP_DODO         \         2 = Dodo space station                 Station
+ EQUW SHIP_ESCAPE_POD   \ ESC  =  3 = Escape pod                      Escape pod
+ EQUW SHIP_PLATE        \ PLT  =  4 = Alloy plate                          Cargo
+ EQUW SHIP_CANISTER     \ OIL  =  5 = Cargo canister                       Cargo
+ EQUW 0                 \                                                 Mining
+ EQUW 0                 \                                                 Mining
+ EQUW 0                 \                                                 Mining
+ EQUW 0                 \                                                Shuttle
+ EQUW 0                 \                                            Transporter
+ EQUW SHIP_GHAVIAL      \        11 = Ghavial                             Trader
+ EQUW SHIP_RATTLER      \        12 = Rattler                             Trader
+ EQUW SHIP_COBRA_MK_1   \        13 = Cobra Mk I                          Trader
+ EQUW SHIP_ANACONDA     \        14 = Anaconda                        Large ship
+ EQUW SHIP_WORM         \        15 = Worm                            Small ship
+ EQUW SHIP_VIPER        \ COPS = 16 = Viper                                  Cop
+ EQUW SHIP_COBRA_MK_1   \        17 = Cobra Mk I                          Pirate
+ EQUW 0                 \                                                 Pirate
+ EQUW SHIP_ADDER        \        19 = Adder                               Pirate
+ EQUW 0                 \                                                 Pirate
+ EQUW 0                 \                                                 Pirate
+ EQUW SHIP_WORM         \        22 = Worm                                Pirate
+ EQUW SHIP_RATTLER      \        23 = Rattler                             Pirate
+ EQUW 0                 \                                                 Pirate
+ EQUW 0                 \                                          Bounty hunter
+ EQUW 0                 \                                          Bounty hunter
+ EQUW SHIP_COBRA_MK_1   \        27 = Cobra Mk I                   Bounty hunter
+ EQUW SHIP_RATTLER      \        28 = Rattler                      Bounty hunter
+ EQUW 0                 \                                               Thargoid
+ EQUW 0                 \                                               Thargoid
+ EQUW 0                 \                                            Constrictor
 
 \ ******************************************************************************
 \

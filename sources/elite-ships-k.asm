@@ -58,37 +58,37 @@ ORG CODE%
 
 .XX21
 
- EQUW SHIP_MISSILE      \ MSL  =  1 = Missile
- EQUW SHIP_CORIOLIS     \ SST  =  2 = Coriolis space station
- EQUW SHIP_ESCAPE_POD   \ ESC  =  3 = Escape pod
- EQUW 0
- EQUW SHIP_CANISTER     \ OIL  =  5 = Cargo canister
- EQUW SHIP_BOULDER      \         6 = Boulder
- EQUW SHIP_ASTEROID     \ AST  =  7 = Asteroid
- EQUW SHIP_SPLINTER     \ SPL  =  8 = Splinter
- EQUW 0
- EQUW 0
- EQUW SHIP_BOA          \        11 = Boa
- EQUW SHIP_OPHIDIAN     \        12 = Ophidian
- EQUW SHIP_FER_DE_LANCE \        13 = Fer-de-lance
- EQUW 0
- EQUW 0
- EQUW SHIP_VIPER        \ COPS = 16 = Viper
- EQUW SHIP_GECKO        \        17 = Gecko
- EQUW SHIP_KRAIT        \        18 = Krait
- EQUW 0
- EQUW 0
- EQUW SHIP_OPHIDIAN     \        21 = Ophidian
- EQUW 0
- EQUW 0
- EQUW SHIP_FER_DE_LANCE \        24 = Fer-de-lance
- EQUW SHIP_FER_DE_LANCE \        25 = Fer-de-lance
- EQUW 0
- EQUW SHIP_GECKO        \        27 = Gecko
- EQUW SHIP_OPHIDIAN     \        28 = Ophidian
- EQUW 0
- EQUW 0
- EQUW 0
+ EQUW SHIP_MISSILE      \ MSL  =  1 = Missile                            Missile
+ EQUW SHIP_CORIOLIS     \ SST  =  2 = Coriolis space station             Station
+ EQUW SHIP_ESCAPE_POD   \ ESC  =  3 = Escape pod                      Escape pod
+ EQUW 0                 \                                                  Cargo
+ EQUW SHIP_CANISTER     \ OIL  =  5 = Cargo canister                       Cargo
+ EQUW SHIP_BOULDER      \         6 = Boulder                             Mining
+ EQUW SHIP_ASTEROID     \ AST  =  7 = Asteroid                            Mining
+ EQUW SHIP_SPLINTER     \ SPL  =  8 = Splinter                            Mining
+ EQUW 0                 \                                                Shuttle
+ EQUW 0                 \                                            Transporter
+ EQUW SHIP_BOA          \        11 = Boa                                 Trader
+ EQUW SHIP_OPHIDIAN     \        12 = Ophidian                            Trader
+ EQUW SHIP_FER_DE_LANCE \        13 = Fer-de-lance                        Trader
+ EQUW 0                 \                                             Large ship
+ EQUW 0                 \                                             Small ship
+ EQUW SHIP_VIPER        \ COPS = 16 = Viper                                  Cop
+ EQUW SHIP_GECKO        \        17 = Gecko                               Pirate
+ EQUW SHIP_KRAIT        \        18 = Krait                               Pirate
+ EQUW 0                 \                                                 Pirate
+ EQUW 0                 \                                                 Pirate
+ EQUW SHIP_OPHIDIAN     \        21 = Ophidian                            Pirate
+ EQUW 0                 \                                                 Pirate
+ EQUW 0                 \                                                 Pirate
+ EQUW SHIP_FER_DE_LANCE \        24 = Fer-de-lance                        Pirate
+ EQUW SHIP_FER_DE_LANCE \        25 = Fer-de-lance                 Bounty hunter
+ EQUW 0                 \                                          Bounty hunter
+ EQUW SHIP_GECKO        \        27 = Gecko                        Bounty hunter
+ EQUW SHIP_OPHIDIAN     \        28 = Ophidian                     Bounty hunter
+ EQUW 0                 \                                               Thargoid
+ EQUW 0                 \                                               Thargoid
+ EQUW 0                 \                                            Constrictor
 
 \ ******************************************************************************
 \

@@ -58,37 +58,37 @@ ORG CODE%
 
 .XX21
 
- EQUW SHIP_MISSILE      \ MSL  =  1 = Missile
- EQUW SHIP_CORIOLIS     \ SST  =  2 = Coriolis space station
- EQUW SHIP_ESCAPE_POD   \ ESC  =  3 = Escape pod
- EQUW 0
- EQUW SHIP_CANISTER     \ OIL  =  5 = Cargo canister
- EQUW SHIP_BOULDER      \         6 = Boulder
- EQUW SHIP_ASTEROID     \ AST  =  7 = Asteroid
- EQUW SHIP_SPLINTER     \ SPL  =  8 = Splinter
- EQUW SHIP_SHUTTLE_MK_2 \ SHU  =  9 = Shuttle Mk II
- EQUW 0
- EQUW SHIP_PYTHON       \        11 = Python
- EQUW SHIP_MORAY        \        12 = Moray
- EQUW SHIP_ADDER        \        13 = Adder
- EQUW 0
- EQUW 0
- EQUW SHIP_VIPER        \ COPS = 16 = Viper
- EQUW SHIP_COBRA_MK_1   \        17 = Cobra Mk I
- EQUW 0
- EQUW SHIP_ADDER        \        19 = Adder
- EQUW 0
- EQUW 0
- EQUW SHIP_MORAY        \        22 = Moray
- EQUW SHIP_PYTHON       \        23 = Python
- EQUW 0
- EQUW 0
- EQUW 0
- EQUW SHIP_MORAY        \        27 = Moray
- EQUW SHIP_ADDER        \        28 = Adder
- EQUW 0
- EQUW 0
- EQUW 0
+ EQUW SHIP_MISSILE      \ MSL  =  1 = Missile                            Missile
+ EQUW SHIP_CORIOLIS     \ SST  =  2 = Coriolis space station             Station
+ EQUW SHIP_ESCAPE_POD   \ ESC  =  3 = Escape pod                      Escape pod
+ EQUW 0                 \                                                  Cargo
+ EQUW SHIP_CANISTER     \ OIL  =  5 = Cargo canister                       Cargo
+ EQUW SHIP_BOULDER      \         6 = Boulder                             Mining
+ EQUW SHIP_ASTEROID     \ AST  =  7 = Asteroid                            Mining
+ EQUW SHIP_SPLINTER     \ SPL  =  8 = Splinter                            Mining
+ EQUW SHIP_SHUTTLE_MK_2 \ SHU  =  9 = Shuttle Mk II                      Shuttle
+ EQUW 0                 \                                            Transporter
+ EQUW SHIP_PYTHON       \        11 = Python                              Trader
+ EQUW SHIP_MORAY        \        12 = Moray                               Trader
+ EQUW SHIP_ADDER        \        13 = Adder                               Trader
+ EQUW 0                 \                                             Large ship
+ EQUW 0                 \                                             Small ship
+ EQUW SHIP_VIPER        \ COPS = 16 = Viper                                  Cop
+ EQUW SHIP_COBRA_MK_1   \        17 = Cobra Mk I                          Pirate
+ EQUW 0                 \                                                 Pirate
+ EQUW SHIP_ADDER        \        19 = Adder                               Pirate
+ EQUW 0                 \                                                 Pirate
+ EQUW 0                 \                                                 Pirate
+ EQUW SHIP_MORAY        \        22 = Moray                               Pirate
+ EQUW SHIP_PYTHON       \        23 = Python                              Pirate
+ EQUW 0                 \                                                 Pirate
+ EQUW 0                 \                                          Bounty hunter
+ EQUW 0                 \                                          Bounty hunter
+ EQUW SHIP_MORAY        \        27 = Moray                        Bounty hunter
+ EQUW SHIP_ADDER        \        28 = Adder                        Bounty hunter
+ EQUW 0                 \                                               Thargoid
+ EQUW 0                 \                                               Thargoid
+ EQUW 0                 \                                            Constrictor
 
 \ ******************************************************************************
 \

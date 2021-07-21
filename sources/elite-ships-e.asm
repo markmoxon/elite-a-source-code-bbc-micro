@@ -58,37 +58,37 @@ ORG CODE%
 
 .XX21
 
- EQUW SHIP_MISSILE      \ MSL  =  1 = Missile
- EQUW SHIP_CORIOLIS     \ SST  =  2 = Coriolis space station
- EQUW SHIP_ESCAPE_POD   \ ESC  =  3 = Escape pod
- EQUW SHIP_PLATE        \ PLT  =  4 = Alloy plate
- EQUW SHIP_CANISTER     \ OIL  =  5 = Cargo canister
- EQUW 0
- EQUW SHIP_ASTEROID     \ AST  =  7 = Asteroid
- EQUW SHIP_SPLINTER     \ SPL  =  8 = Splinter
- EQUW 0
- EQUW 0
- EQUW SHIP_PYTHON       \        11 = Python
- EQUW SHIP_RATTLER      \        12 = Rattler
- EQUW SHIP_IGUANA       \        13 = Iguana
- EQUW 0
- EQUW 0
- EQUW SHIP_VIPER        \ COPS = 16 = Viper
- EQUW SHIP_GECKO        \        17 = Gecko
- EQUW 0
- EQUW SHIP_ADDER        \        19 = Adder
- EQUW SHIP_IGUANA       \        20 = Iguana
- EQUW 0
- EQUW SHIP_PYTHON       \        22 = Python
- EQUW SHIP_RATTLER      \        23 = Rattler
- EQUW 0
- EQUW 0
- EQUW SHIP_IGUANA       \        26 = Iguana
- EQUW SHIP_PYTHON       \        27 = Python
- EQUW SHIP_GECKO        \        28 = Gecko
- EQUW 0
- EQUW 0
- EQUW 0
+ EQUW SHIP_MISSILE      \ MSL  =  1 = Missile                            Missile
+ EQUW SHIP_CORIOLIS     \ SST  =  2 = Coriolis space station             Station
+ EQUW SHIP_ESCAPE_POD   \ ESC  =  3 = Escape pod                      Escape pod
+ EQUW SHIP_PLATE        \ PLT  =  4 = Alloy plate                          Cargo
+ EQUW SHIP_CANISTER     \ OIL  =  5 = Cargo canister                       Cargo
+ EQUW 0                 \                                                 Mining
+ EQUW SHIP_ASTEROID     \ AST  =  7 = Asteroid                            Mining
+ EQUW SHIP_SPLINTER     \ SPL  =  8 = Splinter                            Mining
+ EQUW 0                 \                                                Shuttle
+ EQUW 0                 \                                            Transporter
+ EQUW SHIP_PYTHON       \        11 = Python                              Trader
+ EQUW SHIP_RATTLER      \        12 = Rattler                             Trader
+ EQUW SHIP_IGUANA       \        13 = Iguana                              Trader
+ EQUW 0                 \                                             Large ship
+ EQUW 0                 \                                             Small ship
+ EQUW SHIP_VIPER        \ COPS = 16 = Viper                                  Cop
+ EQUW SHIP_GECKO        \        17 = Gecko                               Pirate
+ EQUW 0                 \                                                 Pirate
+ EQUW SHIP_ADDER        \        19 = Adder                               Pirate
+ EQUW SHIP_IGUANA       \        20 = Iguana                              Pirate
+ EQUW 0                 \                                                 Pirate
+ EQUW SHIP_PYTHON       \        22 = Python                              Pirate
+ EQUW SHIP_RATTLER      \        23 = Rattler                             Pirate
+ EQUW 0                 \                                                 Pirate
+ EQUW 0                 \                                          Bounty hunter
+ EQUW SHIP_IGUANA       \        26 = Iguana                       Bounty hunter
+ EQUW SHIP_PYTHON       \        27 = Python                       Bounty hunter
+ EQUW SHIP_GECKO        \        28 = Gecko                        Bounty hunter
+ EQUW 0                 \                                               Thargoid
+ EQUW 0                 \                                               Thargoid
+ EQUW 0                 \                                            Constrictor
 
 \ ******************************************************************************
 \

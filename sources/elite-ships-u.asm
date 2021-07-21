@@ -58,37 +58,37 @@ ORG CODE%
 
 .XX21
 
- EQUW SHIP_MISSILE      \ MSL  =  1 = Missile
- EQUW SHIP_CORIOLIS     \ SST  =  2 = Coriolis space station
- EQUW SHIP_ESCAPE_POD   \ ESC  =  3 = Escape pod
- EQUW SHIP_PLATE        \ PLT  =  4 = Alloy plate
- EQUW SHIP_CANISTER     \ OIL  =  5 = Cargo canister
- EQUW SHIP_BOULDER      \         6 = Boulder
- EQUW SHIP_ASTEROID     \ AST  =  7 = Asteroid
- EQUW SHIP_SPLINTER     \ SPL  =  8 = Splinter
- EQUW 0
- EQUW 0
- EQUW SHIP_PYTHON       \        11 = Python
- EQUW SHIP_CHAMELEON    \        12 = Chameleon
- EQUW SHIP_GHAVIAL      \        13 = Ghavial
- EQUW 0
- EQUW 0
- EQUW SHIP_VIPER        \ COPS = 16 = Viper
- EQUW SHIP_KRAIT        \        17 = Krait
- EQUW SHIP_COBRA_MK_1   \        18 = Cobra Mk I
- EQUW 0
- EQUW 0
- EQUW 0
- EQUW SHIP_CHAMELEON    \        22 = Chameleon
- EQUW SHIP_PYTHON       \        23 = Python
- EQUW 0
- EQUW 0
- EQUW 0
- EQUW SHIP_PYTHON       \        27 = Python
- EQUW SHIP_KRAIT        \        28 = Krait
- EQUW 0
- EQUW 0
- EQUW 0
+ EQUW SHIP_MISSILE      \ MSL  =  1 = Missile                            Missile
+ EQUW SHIP_CORIOLIS     \ SST  =  2 = Coriolis space station             Station
+ EQUW SHIP_ESCAPE_POD   \ ESC  =  3 = Escape pod                      Escape pod
+ EQUW SHIP_PLATE        \ PLT  =  4 = Alloy plate                          Cargo
+ EQUW SHIP_CANISTER     \ OIL  =  5 = Cargo canister                       Cargo
+ EQUW SHIP_BOULDER      \         6 = Boulder                             Mining
+ EQUW SHIP_ASTEROID     \ AST  =  7 = Asteroid                            Mining
+ EQUW SHIP_SPLINTER     \ SPL  =  8 = Splinter                            Mining
+ EQUW 0                 \                                                Shuttle
+ EQUW 0                 \                                            Transporter
+ EQUW SHIP_PYTHON       \        11 = Python                              Trader
+ EQUW SHIP_CHAMELEON    \        12 = Chameleon                           Trader
+ EQUW SHIP_GHAVIAL      \        13 = Ghavial                             Trader
+ EQUW 0                 \                                             Large ship
+ EQUW 0                 \                                             Small ship
+ EQUW SHIP_VIPER        \ COPS = 16 = Viper                                  Cop
+ EQUW SHIP_KRAIT        \        17 = Krait                               Pirate
+ EQUW SHIP_COBRA_MK_1   \        18 = Cobra Mk I                          Pirate
+ EQUW 0                 \                                                 Pirate
+ EQUW 0                 \                                                 Pirate
+ EQUW 0                 \                                                 Pirate
+ EQUW SHIP_CHAMELEON    \        22 = Chameleon                           Pirate
+ EQUW SHIP_PYTHON       \        23 = Python                              Pirate
+ EQUW 0                 \                                                 Pirate
+ EQUW 0                 \                                          Bounty hunter
+ EQUW 0                 \                                          Bounty hunter
+ EQUW SHIP_PYTHON       \        27 = Python                       Bounty hunter
+ EQUW SHIP_KRAIT        \        28 = Krait                        Bounty hunter
+ EQUW 0                 \                                               Thargoid
+ EQUW 0                 \                                               Thargoid
+ EQUW 0                 \                                            Constrictor
 
 \ ******************************************************************************
 \

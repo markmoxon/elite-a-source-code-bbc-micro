@@ -58,37 +58,37 @@ ORG CODE%
 
 .XX21
 
- EQUW SHIP_MISSILE      \ MSL  =  1 = Missile
- EQUW SHIP_CORIOLIS     \ SST  =  2 = Coriolis space station
- EQUW SHIP_ESCAPE_POD   \ ESC  =  3 = Escape pod
- EQUW 0
- EQUW SHIP_CANISTER     \ OIL  =  5 = Cargo canister
- EQUW 0
- EQUW 0
- EQUW 0
- EQUW 0
- EQUW SHIP_TRANSPORTER  \        10 = Transporter
- EQUW 0
- EQUW 0
- EQUW SHIP_FER_DE_LANCE \        13 = Fer-de-lance
- EQUW SHIP_DRAGON       \        14 = Dragon
- EQUW SHIP_SIDEWINDER   \        15 = Sidewinder
- EQUW SHIP_VIPER        \ COPS = 16 = Viper
- EQUW SHIP_SIDEWINDER   \        17 = Sidewinder
- EQUW SHIP_KRAIT        \        18 = Krait
- EQUW SHIP_MAMBA        \        19 = Mamba
- EQUW 0
- EQUW 0
- EQUW 0
- EQUW 0
- EQUW SHIP_FER_DE_LANCE \        24 = Fer-de-lance
- EQUW SHIP_FER_DE_LANCE \        25 = Fer-de-lance
- EQUW 0
- EQUW 0
- EQUW SHIP_SIDEWINDER   \        28 = Sidewinder
- EQUW 0
- EQUW 0
- EQUW 0
+ EQUW SHIP_MISSILE      \ MSL  =  1 = Missile                            Missile
+ EQUW SHIP_CORIOLIS     \ SST  =  2 = Coriolis space station             Station
+ EQUW SHIP_ESCAPE_POD   \ ESC  =  3 = Escape pod                      Escape pod
+ EQUW 0                 \                                                  Cargo
+ EQUW SHIP_CANISTER     \ OIL  =  5 = Cargo canister                       Cargo
+ EQUW 0                 \                                                 Mining
+ EQUW 0                 \                                                 Mining
+ EQUW 0                 \                                                 Mining
+ EQUW 0                 \                                                Shuttle
+ EQUW SHIP_TRANSPORTER  \        10 = Transporter                    Transporter
+ EQUW 0                 \                                                 Trader
+ EQUW 0                 \                                                 Trader
+ EQUW SHIP_FER_DE_LANCE \        13 = Fer-de-lance                        Trader
+ EQUW SHIP_DRAGON       \        14 = Dragon                          Large ship
+ EQUW SHIP_SIDEWINDER   \        15 = Sidewinder                      Small ship
+ EQUW SHIP_VIPER        \ COPS = 16 = Viper                                  Cop
+ EQUW SHIP_SIDEWINDER   \        17 = Sidewinder                          Pirate
+ EQUW SHIP_KRAIT        \        18 = Krait                               Pirate
+ EQUW SHIP_MAMBA        \        19 = Mamba                               Pirate
+ EQUW 0                 \                                                 Pirate
+ EQUW 0                 \                                                 Pirate
+ EQUW 0                 \                                                 Pirate
+ EQUW 0                 \                                                 Pirate
+ EQUW SHIP_FER_DE_LANCE \        24 = Fer-de-lance                        Pirate
+ EQUW SHIP_FER_DE_LANCE \        25 = Fer-de-lance                 Bounty hunter
+ EQUW 0                 \                                          Bounty hunter
+ EQUW 0                 \                                          Bounty hunter
+ EQUW SHIP_SIDEWINDER   \        28 = Sidewinder                   Bounty hunter
+ EQUW 0                 \                                               Thargoid
+ EQUW 0                 \                                               Thargoid
+ EQUW 0                 \                                            Constrictor
 
 \ ******************************************************************************
 \
