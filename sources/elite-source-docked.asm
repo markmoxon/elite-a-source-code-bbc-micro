@@ -19586,6 +19586,11 @@ LOAD_E% = LOAD% + P% - CODE%
 \ reappear, as the dashboard's screen memory doesn't get touched by this
 \ process.
 \
+\ Arguments:
+\
+\   X                   The number of text rows to display on the screen (24
+\                       will hide the dashboard, 31 will make it reappear)
+\
 \ Returns:
 \
 \   A                   A is set to 6
@@ -20155,7 +20160,7 @@ LOAD_E% = LOAD% + P% - CODE%
 \       Name: SPBLB (Removed)
 \       Type: Subroutine
 \   Category: Dashboard
-\    Summary: Draw (or erase) the space station indicator ("S") on the dashboard
+\    Summary: Light up the space station indicator ("S") on the dashboard
 \
 \ ------------------------------------------------------------------------------
 \

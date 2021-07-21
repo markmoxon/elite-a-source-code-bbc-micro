@@ -132,7 +132,7 @@ LL = 30                 \ The length of lines (in characters) of justified text
 
 LS% = &0CFF             \ The start of the descending ship line heap
 
-tube_r1s = &FEF8        \ AJD
+tube_r1s = &FEF8        \ The Tube's memory-mapped FIFO registers
 tube_r1d = &FEF9
 tube_r2s = &FEFA
 tube_r2d = &FEFB
@@ -6508,15 +6508,31 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
 .RR3
 
- LDA #&8E               \ AJD
- JSR tube_write
- LDA XC
- JSR tube_write
- LDA YC
- JSR tube_write
- TYA
- JSR tube_write
- INC XC
+ LDA #&8E               \ Send command &8E to the I/O processor:
+ JSR tube_write         \
+                        \   write_xyc(x, y, char)
+                        \
+                        \ which will draw the text character in char at column x
+                        \ and row y
+
+ LDA XC                 \ Send the first parameter to the I/O processor:
+ JSR tube_write         \
+                        \   * x = XC
+
+ LDA YC                 \ Send the second parameter to the I/O processor:
+ JSR tube_write         \
+                        \   * y = YC
+
+ TYA                    \ Send the third parameter to the I/O processor:
+ JSR tube_write         \
+                        \   * char = the character in Y
+
+ INC XC                 \ Once we print the character, we want to move the text
+                        \ cursor to the right, so we do this by incrementing
+                        \ XC. Note that this doesn't have anything to do
+                        \ with the actual printing below, we're just updating
+                        \ the cursor so it's in the right position following
+                        \ the print
 
 .RR4
 
@@ -6955,11 +6971,19 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
                         \ If we call DIL, we leave A alone, so A is 0-15
 
- PHA                    \ AJD
- LDA #&86
- JSR tube_write
- PLA
- JSR tube_write
+ PHA                    \ Store A on the stack
+
+ LDA #&86               \ Send command &86 to the I/O processor:
+ JSR tube_write         \
+                        \   draw_bar(value, colour, screen_low, screen_high)
+                        \
+                        \ which will update the bar-based dashboard indicator at
+                        \ the specified screen address to a given value and
+                        \ colour
+
+ PLA                    \ Send the first parameter to the I/O processor:
+ JSR tube_write         \
+                        \   * value = A
 
  LDX #&FF               \ Set R = &FF, to use as a mask for drawing each row of
  STX R                  \ each character block of the bar, starting with a full
@@ -6981,12 +7005,23 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
 .DL31
 
- JSR tube_write         \ AJD
- LDA SC
- JSR tube_write
- LDA SC+1
- JSR tube_write
- INC SC+1
+ JSR tube_write         \ Send the second parameter to the I/O processor:
+                        \ 
+                        \   * colour = A
+
+ LDA SC                 \ Send the third parameter to the I/O processor:
+ JSR tube_write         \
+                        \   * scl = SC
+
+ LDA SC+1               \ Send the fourth parameter to the I/O processor:
+ JSR tube_write         \
+                        \   * sch = SC+1
+
+ INC SC+1               \ Increment the high byte of SC to point to the next
+                        \ character row on-screen (as each row takes up exactly
+                        \ one page of 256 bytes) - so this sets up SC to point
+                        \ to the next indicator, i.e. the one below the one we
+                        \ just drew
 
 .DL9
 
@@ -9060,9 +9095,13 @@ LOAD_C% = LOAD% +P% - CODE%
  STA de                 \ Clear de, the flag that appends " DESTROYED" to the
                         \ end of the next text token, so that it doesn't
 
- JSR write_0346         \ AJD
- LDA #&83
- JSR tube_write
+ JSR write_0346         \ Tell the I/O processor to set its copy of LASCT to 0
+
+ LDA #&83               \ Send command &83 to the I/O processor:
+ JSR tube_write         \
+                        \   clr_scrn()
+                        \
+                        \ to clear the top part of the screen
 
  LDX QQ22+1             \ Fetch into X the number that's shown on-screen during
                         \ the hyperspace countdown
@@ -37850,8 +37889,11 @@ LOAD_J% = LOAD% + P% - CODE%
  ROR DELT4
  STA DELT4+1
 
- JSR read_0346          \ AJD
- BNE MA3
+ JSR read_0346          \ Get the value of the I/O processor's copy of LASCT
+
+ BNE MA3                \ If LASCT is zero, keep going, otherwise the laser is
+                        \ a pulse laser that is between pulses, so jump down to
+                        \ MA3 to skip the following
 
  LDA KY7                \ If "A" is being pressed, keep going, otherwise jump
  BEQ MA3                \ down to MA3 to skip the following
@@ -37896,10 +37938,10 @@ LOAD_J% = LOAD% + P% - CODE%
 
 .ma1
 
- JSR write_0346         \ Call write_0346 to set LASCT in the I/O processor to 0
-                        \ for beam lasers, and to the laser power (15) for pulse
-                        \ lasers. See MS23 below for more on laser pulsing and
-                        \ LASCT
+ JSR write_0346         \ Tell the I/O processor to set its copy of LASCT to A,
+                        \ which will be 0 for beam lasers, or the laser power
+                        \ (15) for pulse lasers. See MS23 below for more on
+                        \ laser pulsing and LASCT
 
 \ ******************************************************************************
 \
@@ -39112,9 +39154,15 @@ LOAD_J% = LOAD% + P% - CODE%
  LDA LAS2               \ If the current view has no laser, jump to MA16 to skip
  BEQ MA16               \ the following
 
- JSR read_0346          \ AJD
- CMP #8
- BCS MA16
+ JSR read_0346          \ Get the value of the I/O processor's copy of LASCT
+
+ CMP #8                 \ If LASCT >= 8, jump to MA16 to skip the following, so
+ BCS MA16               \ for a pulse laser with a LASCT between 8 and 10, the
+                        \ the laser stays on, but for a LASCT of 7 or less it
+                        \ gets turned off and stays off until LASCT reaches zero
+                        \ and the next pulse can start (if the fire button is
+                        \ still being pressed)
+
                         \
                         \ For pulse lasers, LASCT gets set to 10 in ma1 above,
                         \ and it decrements every vertical sync (50 times a
@@ -45423,34 +45471,58 @@ LOAD_L% = LOAD% + P% - CODE%
 \       Name: write_0346
 \       Type: Subroutine
 \   Category: Tube
-\    Summary: AJD
+\    Summary: Send a new value of LASCT to the I/O processor
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   A                   The new value of LASCT
 \
 \ ******************************************************************************
 
 .write_0346
 
- PHA
- LDA #&97
- JSR tube_write
- PLA
- JMP tube_write
+ PHA                    \ Store the new value of LASCT on the stack
+
+ LDA #&97               \ Send command &97 to the I/O processor:
+ JSR tube_write         \
+                        \   write_0346(value)
+                        \
+                        \ which will set the I/O processor's copy of LASCT to
+                        \ the given value
+
+ PLA                    \ Send the parameter to the I/O processor:
+ JMP tube_write         \
+                        \   * value = the new value of LASCT that we stored on
+                        \             the stack
+                        \
+                        \ and return from the subroutine using a tail call
 
 \ ******************************************************************************
 \
 \       Name: read_0346
 \       Type: Subroutine
 \   Category: Tube
-\    Summary: AJD
+\    Summary: Get the value of the I/O processor's copy of LASCT
 \
 \ ******************************************************************************
 
 .read_0346
 
- LDA #&98
- JSR tube_write
- JSR tube_read
- STA LASCT
- RTS
+ LDA #&98               \ Send command &98 to the I/O processor:
+ JSR tube_write         \
+                        \   =read_0346()
+                        \
+                        \ which will ask the I/O processor to send the value of
+                        \ its copy of LASCT
+
+ JSR tube_read          \ Get the value that the I/O processor sends into A
+
+ STA LASCT              \ Update LASCT to the value received from the I/O
+                        \ processor
+
+ RTS                    \ Return from the subroutine
 
 \ ******************************************************************************
 \
@@ -50168,8 +50240,12 @@ LOAD_M% = LOAD% + P% - CODE%
  ORA #%01010000         \ Set bits 4 and 6 of A to bump it up to between 112 and
  STA INWK+6             \ 127, and store in byte #6 (z_lo)
 
- TYA                    \ AJD
- JSR write_0346
+ TYA                    \ Tell the I/O processor to set its copy of LASCT to
+ JSR write_0346         \ 255, to act as a counter in the D2 loop below, so this
+                        \ setting determines how long the death animation lasts
+                        \ (it's 5.1 seconds, as LASCT is decremented every
+                        \ vertical sync, or 50 times a second, and
+                        \ 255 / 50 = 5.1)
 
  TXA                    \ Set A to the random number in X and keep bits 0-3 and
  AND #%10001111         \ the bit 7 to get a number between -15 and +15, and
@@ -50223,8 +50299,11 @@ LOAD_M% = LOAD% + P% - CODE%
                         \ which will display our exploding canister scene and
                         \ move everything about
 
- JSR read_0346          \ AJD
- BNE D2
+ JSR read_0346          \ Get the value of the I/O processor's copy of LASCT
+
+ BNE D2                 \ Loop back to D2 to run the main flight loop until
+                        \ LASCT reaches zero (which will take 5.1 seconds, as
+                        \ explained above)
 
  LDX #31                \ Set the screen to show all 31 text rows, which shows
  JSR DET1               \ the dashboard
@@ -53095,21 +53174,40 @@ LOAD_M% = LOAD% + P% - CODE%
                         \
                         \ and we can get on with drawing the dot and stick
 
- TAX                    \ AJD
- LDA #&91
- JSR tube_write
- LDA X1
- JSR tube_write
- LDA Y1
- JSR tube_write
- LDA COL
- JSR tube_write
- LDA Y2
- JSR tube_write
- TXA
- JSR tube_write
- LDX #0
- RTS
+ TAX                    \ Copy the stick height in A into X
+
+ LDA #&91               \ Send command &91 to the I/O processor:
+ JSR tube_write         \
+                        \   draw_tail(x, y, base_colour, alt_colour, height)
+                        \
+                        \ which will draw a ship on the 3D scanner with a dot
+                        \ and stick of the specified height and colour, possibly
+                        \ with stripes
+
+ LDA X1                 \ Send the first parameter to the I/O processor:
+ JSR tube_write         \
+                        \   * x1 = X1
+
+ LDA Y1                 \ Send the second parameter to the I/O processor:
+ JSR tube_write         \
+                        \   * y1 = Y1
+
+ LDA COL                \ Send the third parameter to the I/O processor:
+ JSR tube_write         \
+                        \   * base_colour = COL
+
+ LDA Y2                 \ Send the fourth parameter to the I/O processor:
+ JSR tube_write         \
+                        \   * alt_colour = Y2
+
+ TXA                    \ Send the fifth parameter to the I/O processor:
+ JSR tube_write         \
+                        \   * height = the stick height that we stored in X
+
+ LDX #0                 \ Set X = 0 to ensure we return the same value as the
+                        \ SCAN routine in the non-Tube version
+
+ RTS                    \ Return from the subroutine
 
 \ ******************************************************************************
 \

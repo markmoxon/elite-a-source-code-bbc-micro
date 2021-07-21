@@ -63,7 +63,7 @@ VIA = &FE00             \ Memory-mapped space for accessing internal hardware,
                         \ such as the video ULA, 6845 CRTC and 6522 VIAs (also
                         \ known as SHEILA)
 
-tube_r1s = &FEE0        \ AJD
+tube_r1s = &FEE0        \ The Tube's memory-mapped FIFO registers
 tube_r1d = &FEE1
 tube_r2s = &FEE2
 tube_r2d = &FEE3
@@ -332,13 +332,34 @@ ORG CODE%
 
 .tube_table
 
- EQUW LL30, HLOIN, PIXEL, clr_scrn
- EQUW CLYNS, sync_in, DILX, DIL2
- EQUW MSBAR, scan_fire, write_fe4e, scan_xin
- EQUW scan_10in, get_key, CHPR, write_pod
- EQUW draw_blob, draw_tail, SPBLB, ECBLB
- EQUW UNWISE, DET1, scan_y, write_0346
- EQUW read_0346, return, HANGER, HA2
+ EQUW LL30
+ EQUW HLOIN
+ EQUW PIXEL
+ EQUW clr_scrn
+ EQUW CLYNS
+ EQUW sync_in
+ EQUW DILX
+ EQUW DIL2
+ EQUW MSBAR
+ EQUW scan_fire
+ EQUW write_fe4e
+ EQUW scan_xin
+ EQUW scan_10in
+ EQUW get_key
+ EQUW CHPR
+ EQUW write_pod
+ EQUW draw_blob
+ EQUW draw_tail
+ EQUW SPBLB
+ EQUW ECBLB
+ EQUW UNWISE
+ EQUW DET1
+ EQUW scan_y
+ EQUW write_0346
+ EQUW read_0346
+ EQUW return
+ EQUW HANGER
+ EQUW HA2
 
 \ ******************************************************************************
 \
@@ -1935,14 +1956,17 @@ ORG CODE%
 
 .DILX
 
- JSR tube_get           \ AJD
- STA bar_1
- JSR tube_get
- STA bar_2
- JSR tube_get
- STA SC
- JSR tube_get
- STA SC+1
+ JSR tube_get           \ Get the parameters from the parasite for the command:
+ STA bar_1              \
+ JSR tube_get           \   draw_bar(value, colour, screen_low, screen_high)
+ STA bar_2              \
+ JSR tube_get           \ and store them as follows:
+ STA SC                 \
+ JSR tube_get           \   * bar_1 = the value to display in the indicator
+ STA SC+1               \
+                        \   * bar_2 = the mode 5 colour of the indicator
+                        \
+                        \   * SC(1 0) = the screen address to update
 
  LDX #&FF               \ Set bar_3 = &FF, to use as a mask for drawing each row
  STX bar_3              \ of each character block of the bar, starting with a
@@ -2475,7 +2499,7 @@ ORG CODE%
  JSR tube_get
  STA Y1
  JSR tube_get
- STA X2
+ STA COL
 
 \ ******************************************************************************
 \
@@ -2689,7 +2713,7 @@ ORG CODE%
 \       Name: SPBLB
 \       Type: Subroutine
 \   Category: Dashboard
-\    Summary: Draw (or erase) the space station indicator ("S") on the dashboard
+\    Summary: Light up the space station indicator ("S") on the dashboard
 \
 \ ------------------------------------------------------------------------------
 \
@@ -2871,9 +2895,14 @@ ORG CODE%
 \ reappear, as the dashboard's screen memory doesn't get touched by this
 \ process.
 \
+\ Arguments:
+\
+\   A                   The number of text rows to display on the screen (24
+\                       will hide the dashboard, 31 will make it reappear)
+\
 \ Returns:
 \
-\   A                   A is set to 6
+\   X                   X is set to 6
 \
 \ ******************************************************************************
 
@@ -3167,29 +3196,31 @@ ORG CODE%
 \       Name: write_0346
 \       Type: Subroutine
 \   Category: Tube
-\    Summary: AJD
+\    Summary: Receive a new value of LASCT from the parasite
 \
 \ ******************************************************************************
 
 .write_0346
 
- JSR tube_get
- STA LASCT
- RTS
+ JSR tube_get           \ Get the new value for LASCT from the parasite
+
+ STA LASCT              \ Update the value in LASCT
+
+ RTS                    \ Return from the subroutine
 
 \ ******************************************************************************
 \
 \       Name: read_0346
 \       Type: Subroutine
 \   Category: Tube
-\    Summary: AJD
+\    Summary: Send the current value of LASCT to the parasite
 \
 \ ******************************************************************************
 
 .read_0346
 
- LDA LASCT
- JMP tube_put
+ LDA LASCT              \ Send the value of LASCT to the parasite and return
+ JMP tube_put           \ from the subroutine using a tail call
 
 \ ******************************************************************************
 \

@@ -21665,7 +21665,7 @@ LOAD_E% = LOAD% + P% - CODE%
 \       Name: SPBLB
 \       Type: Subroutine
 \   Category: Dashboard
-\    Summary: Draw (or erase) the space station indicator ("S") on the dashboard
+\    Summary: Light up the space station indicator ("S") on the dashboard
 \
 \ ------------------------------------------------------------------------------
 \
