@@ -4262,23 +4262,49 @@ LOAD_B% = LOAD% + P% - CODE%
 \       Name: LL30
 \       Type: Subroutine
 \   Category: Drawing lines
-\    Summary: AJD
+\    Summary: Draw a one-segment line by sending a draw_line command to the I/O
+\             processor
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   X1                  The screen x-coordinate of the start of the line
+\
+\   Y1                  The screen y-coordinate of the start of the line
+\
+\   X2                  The screen x-coordinate of the end of the line
+\
+\   Y2                  The screen y-coordinate of the end of the line
 \
 \ ******************************************************************************
 
 .LOIN
 .LL30
 
- LDA #&80
- JSR tube_write
- LDA X1
- JSR tube_write
- LDA Y1
- JSR tube_write
- LDA X2
- JSR tube_write
- LDA Y2
- JMP tube_write
+ LDA #&80               \ Send command &80 to the I/O processor:
+ JSR tube_write         \
+                        \   draw_line(x1, y1, x2, y2)
+                        \
+                        \ which will draw a line from (x1, y1) to (x2, y2)
+
+ LDA X1                 \ Send the first parameter to the I/O processor:
+ JSR tube_write         \
+                        \   * x1 = X1
+
+ LDA Y1                 \ Send the second parameter to the I/O processor:
+ JSR tube_write         \
+                        \   * y1 = Y1
+
+ LDA X2                 \ Send the first parameter to the I/O processor:
+ JSR tube_write         \
+                        \   * x2 = X2
+
+ LDA Y2                 \ Send the first parameter to the I/O processor:
+ JMP tube_write         \
+                        \   * y2 = Y2
+                        \
+                        \ and return from the subroutine using a tail call
 
 \ ******************************************************************************
 \
@@ -4448,41 +4474,92 @@ LOAD_B% = LOAD% + P% - CODE%
 \       Name: HLOIN
 \       Type: Subroutine
 \   Category: Drawing lines
-\    Summary: AJD
+\    Summary: Draw a horizontal line by sending a draw_hline command to the I/O
+\             processor
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   X1                  The screen x-coordinate of the start of the line
+\
+\   X2                  The screen x-coordinate of the end of the line
+\
+\   Y1                  The screen y-coordinate of the line
 \
 \ ******************************************************************************
 
 .HLOIN
 
- LDA #&81
- JSR tube_write
- LDA X1
- JSR tube_write
- LDA Y1
- JSR tube_write
- LDA X2
- JMP tube_write
+ LDA #&81               \ Send command &81 to the I/O processor:
+ JSR tube_write         \
+                        \   draw_hline(x1, y1, x2)
+                        \
+                        \ which will draw a horizontal line from (x1, y1) to
+                        \ (x2, y1)
+
+ LDA X1                 \ Send the first parameter to the I/O processor:
+ JSR tube_write         \
+                        \   * x1 = X1
+
+ LDA Y1                 \ Send the second parameter to the I/O processor:
+ JSR tube_write         \
+                        \   * y1 = Y1
+
+ LDA X2                 \ Send the first parameter to the I/O processor:
+ JMP tube_write         \
+                        \   * x2 = X2
+                        \
+                        \ and return from the subroutine using a tail call
 
 \ ******************************************************************************
 \
 \       Name: PIXEL
 \       Type: Subroutine
 \   Category: Drawing pixels
-\    Summary: AJD
+\    Summary: Draw a 1-pixel dot, 2-pixel dash or 4-pixel square by sending a
+\             draw_pixel command to the I/O processor
+\
+\ ------------------------------------------------------------------------------
+\
+\ Draw a point at screen coordinate (X, A) with the point size determined by the
+\ distance in ZZ. This applies to the top part of the screen (the monochrome
+\ mode 4 portion).
+\
+\ Arguments:
+\
+\   X                   The screen x-coordinate of the point to draw
+\
+\   A                   The screen y-coordinate of the point to draw
+\
+\   ZZ                  The distance of the point (further away = smaller point)
 \
 \ ******************************************************************************
 
 .PIXEL
 
- PHA
- LDA #&82
- JSR tube_write
- TXA
- JSR tube_write
- PLA
- JSR tube_write
- LDA ZZ
- JMP tube_write
+ PHA                    \ Store the y-coordinate on the stack
+
+ LDA #&82               \ Send command &82 to the I/O processor:
+ JSR tube_write         \
+                        \   draw_pixel(x, y, distance)
+                        \
+                        \ which will draw a pixel at (x, y) with the size
+                        \ determined by the distance
+
+ TXA                    \ Send the first parameter to the I/O processor:
+ JSR tube_write         \
+                        \   * x = X
+
+ PLA                    \ Send the second parameter to the I/O processor:
+ JSR tube_write         \
+                        \   * y = A
+
+ LDA ZZ                 \ Send the third parameter to the I/O processor:
+ JMP tube_write         \
+                        \   * distance = ZZ
+                        \
+                        \ and return from the subroutine using a tail call
 
 \ ******************************************************************************
 \
@@ -6971,7 +7048,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
                         \ If we call DIL, we leave A alone, so A is 0-15
 
- PHA                    \ Store A on the stack
+ PHA                    \ Store the indicator value on the stack
 
  LDA #&86               \ Send command &86 to the I/O processor:
  JSR tube_write         \
@@ -7011,7 +7088,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 
  LDA SC                 \ Send the third parameter to the I/O processor:
  JSR tube_write         \
-                        \   * scl = SC
+                        \   * screen_low = SC
 
  LDA SC+1               \ Send the fourth parameter to the I/O processor:
  JSR tube_write         \
@@ -7032,23 +7109,53 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 \       Name: DIL2
 \       Type: Subroutine
 \   Category: Dashboard
-\    Summary: AJD
+\    Summary: Update the roll or pitch indicator on the dashboard by sending a
+\             draw_angle command to the I/O processor
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   A                   The offset of the vertical bar to show in the indicator,
+\                       from 0 at the far left, to 8 in the middle, and 15 at
+\                       the far right
+\
+\ Returns:
+\
+\   C flag              The C flag is set
 \
 \ ******************************************************************************
 
 .DIL2
 
- PHA
- LDA #&87
- JSR tube_write
- PLA
- JSR tube_write
- LDA SC
- JSR tube_write
- LDA SC+1
- JSR tube_write
- INC SC+1
- RTS
+ PHA                    \ Store the new value of the indicator on the stack
+
+ LDA #&87               \ Send command &87 to the I/O processor:
+ JSR tube_write         \
+                        \   draw_angle(value, screen_low, screen_high)
+                        \
+                        \ which will update the roll or pitch dashboard
+                        \ indicator to the specified value
+
+ PLA                    \ Send the first parameter to the I/O processor:
+ JSR tube_write         \
+                        \   * value = A
+
+ LDA SC                 \ Send the second parameter to the I/O processor:
+ JSR tube_write         \
+                        \   * screen_low = SC
+
+ LDA SC+1               \ Send the third parameter to the I/O processor:
+ JSR tube_write         \
+                        \   * screen_high = SC+1
+
+ INC SC+1               \ Increment the high byte of SC to point to the next
+                        \ character row on-screen (as each row takes up exactly
+                        \ one page of 256 bytes) - so this sets up SC to point
+                        \ to the next indicator, i.e. the one below the one we
+                        \ just drew
+
+ RTS                    \ Return from the subroutine
 
 \ ******************************************************************************
 \
@@ -7322,10 +7429,6 @@ LOAD_C% = LOAD% +P% - CODE%
 \ around on the ground so they can face in any dirction, and larger ships are
 \ drawn higher up off the ground than smaller ships.
 \
-\ The ships are drawn by the HAS1 routine, which uses the normal ship-drawing
-\ routine in LL9, and then the hanger background is drawn by sending an OSWORD
-\ 248 command to the I/O processor.
-\
 \ ******************************************************************************
 
 .HALL
@@ -7479,7 +7582,7 @@ LOAD_C% = LOAD% +P% - CODE%
 
 .HANGER
 
- LDX #&02
+ LDX #2
 
 .HAL1
 
@@ -7488,12 +7591,23 @@ LOAD_C% = LOAD% +P% - CODE%
  LDX XSAV
  STX Q
  JSR DVID4
- LDA #&9A
- JSR tube_write
- LDA P
- JSR tube_write
- LDA YSAV
- JSR tube_write
+
+ LDA #&9A               \ Send command &9A to the I/O processor:
+ JSR tube_write         \
+                        \   picture_h(line_count, multiple_ships)
+                        \
+                        \ which will draw the specified number of horizontal
+                        \ lines as the hanger floor, drawing lines between
+                        \ multiple ships if required
+
+ LDA P                  \ Send the first parameter to the I/O processor:
+ JSR tube_write         \
+                        \   * line_count = P
+
+ LDA YSAV               \ Send the second parameter to the I/O processor:
+ JSR tube_write         \
+                        \   * multiple_ships = YSAV
+
  LDX XSAV
  INX
  CPX #&0D
@@ -7503,10 +7617,18 @@ LOAD_C% = LOAD% +P% - CODE%
 .HAL6
 
  STA XSAV
- LDA #&9B
- JSR tube_write
- LDA XSAV
- JSR tube_write
+
+ LDA #&9B               \ Send command &9B to the I/O processor:
+ JSR tube_write         \
+                        \   picture_v(line_count)
+                        \
+                        \ which will draw the specified number of vertical
+                        \ lines as the back wall of the hanger
+
+ LDA XSAV               \ Send the parameter to the I/O processor:
+ JSR tube_write         \
+                        \   * line_count = XSAV
+
  LDA XSAV
  CLC
  ADC #&10
@@ -7680,14 +7802,20 @@ LOAD_C% = LOAD% +P% - CODE%
 \       Name: UNWISE
 \       Type: Subroutine
 \   Category: Ship hanger
-\    Summary: AJD
+\    Summary: Switch the main line-drawing routine between EOR and OR logic by
+\             sending a draw_mode command to the I/O processor
 \
 \ ******************************************************************************
 
 .UNWISE
 
- LDA #&94
- JMP tube_write
+ LDA #&94               \ Send command &94 to the I/O processor:
+ JMP tube_write         \
+                        \   draw_mode()
+                        \
+                        \ which will toggle the line drawing mode between EOR
+                        \ and OR, and return from the subroutine using a tail
+                        \ call
 
 \ ******************************************************************************
 \
@@ -9234,37 +9362,66 @@ LOAD_C% = LOAD% +P% - CODE%
 \       Name: CLYNS
 \       Type: Subroutine
 \   Category: Utility routines
-\    Summary: AJD
+\    Summary: Clear the bottom three text rows of the mode 4 screen by sending a
+\             clr_line command to the I/O processor
+\
+\ ------------------------------------------------------------------------------
+\
+\ Returns:
+\
+\   A                   A is set to 0
+\
+\   Y                   Y is set to 0
 \
 \ ******************************************************************************
 
 .CLYNS
 
- LDA #&FF
- STA DTW2
- LDA #&14
- STA YC
- JSR TT67
- LDY #&01 \INY
+ LDA #%11111111         \ Set DTW2 = %11111111 to denote that we are not
+ STA DTW2               \ currently printing a word
+
+ LDA #20                \ Move the text cursor to row 20, near the bottom of
+ STA YC                 \ the screen
+
+ JSR TT67               \ Print a newline, which will move the text cursor down
+                        \ a line (to row 21) and back to column 1
+
+ LDY #1                 \ Move the text cursor to column 1
  STY XC
- DEY
- LDA #&84
- JMP tube_write
+
+ DEY                    \ Set Y = 0, so the subroutine returns with this value
+
+ LDA #&84               \ Send command &84 to the I/O processor:
+ JMP tube_write         \
+                        \   clr_line()
+                        \
+                        \ which will clear the bottom three text rows of the top
+                        \ part of the screen and return from the subroutine
+                        \ using a tail call
 
 \ ******************************************************************************
 \
 \       Name: WSCAN
 \       Type: Subroutine
 \   Category: Screen mode
-\    Summary: AJD
+\    Summary: Wait for the vertical sync by sending a sync_in command to the I/O
+\             processor
 \
 \ ******************************************************************************
 
 .WSCAN
 
- LDA #&85
- JSR tube_write
- JMP tube_read
+ LDA #&85               \ Send command &86 to the I/O processor:
+ JSR tube_write         \
+                        \   =sync_in()
+                        \
+                        \ which will wait until the vertical sync before
+                        \ returning control to the parasite
+
+ JMP tube_read          \ Set A to the response from the I/O processor, which
+                        \ will be sent when the vertical sync occurs (it doesn't
+                        \ matter what the value is), and return from the
+                        \ subroutine using a tail call
 
 \ ******************************************************************************
 \
@@ -12630,19 +12787,30 @@ LOAD_D% = LOAD% + P% - CODE%
 \       Name: update_pod
 \       Type: Subroutine
 \   Category: Dashboard
-\    Summary: Update the dashboard colours to reflect whether we have an escape
-\             pod
+\    Summary: Ensure the correct palette is shown for the dashboard/hyperspace 
+\             tunnel, by sending a write_pod command to the I/O processor
 \
 \ ******************************************************************************
 
 .update_pod
 
- LDA #&8F               \ AJD
- JSR tube_write
- LDA ESCP
- JSR tube_write
- LDA HFX
- JMP tube_write
+ LDA #&8F               \ Send command &8F to the I/O processor:
+ JSR tube_write         \
+                        \   write_pod(escp, hfx)
+                        \
+                        \ which will update the values of ESCP and HFX in the
+                        \ I/O processor, so the palette gets set correctly for
+                        \ the dashboard (ESCP) and hyperspace tunnel (HFX)
+
+ LDA ESCP               \ Send the first parameter to the I/O processor:
+ JSR tube_write         \
+                        \   * escp = ESCP
+
+ LDA HFX                \ Send the second parameter to the I/O processor:
+ JMP tube_write         \
+                        \   * hfx = HFX
+                        \
+                        \ and return from the subroutine using a tail call
 
 \ ******************************************************************************
 \
@@ -14557,20 +14725,56 @@ LOAD_E% = LOAD% + P% - CODE%
 \       Name: MSBAR
 \       Type: Subroutine
 \   Category: Dashboard
-\    Summary: AJD
+\    Summary: Draw a specific indicator in the dashboard's missile bar by
+\             sending a put_missle command to the I/O processor
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   X                   The number of the missile indicator to update (counting
+\                       from right to left and starting at 0 rather than 1, so
+\                       indicator NOMSL - 1 is the leftmost indicator)
+\
+\   Y                   The colour of the missile indicator:
+\
+\                         * &00 = black (no missile)
+\
+\                         * &0E = red (armed and locked)
+\
+\                         * &E0 = yellow/white (armed)
+\
+\                         * &EE = green/cyan (disarmed)
+\
+\ Returns:
+\
+\   X                   X is preserved
+\
+\   Y                   Y is set to 0
 \
 \ ******************************************************************************
 
 .MSBAR
 
- LDA #&88
- JSR tube_write
- TXA
- JSR tube_write
- TYA
- JSR tube_write
- LDY #&00
- RTS
+ LDA #&88               \ Send command &86 to the I/O processor:
+ JSR tube_write         \
+                        \   put_missle(number, colour)
+                        \
+                        \ which will update missile indicator with the specified
+                        \ number, changing it to the specified colour
+
+ TXA                    \ Send the first parameter to the I/O processor:
+ JSR tube_write         \
+                        \   * number = X
+
+ TYA                    \ Send the second parameter to the I/O processor:
+ JSR tube_write         \
+                        \   * colour = Y
+
+ LDY #0                 \ Set Y = 0 to ensure we return the same value as the
+                        \ SCAN routine in the non-Tube version
+
+ RTS                    \ Return from the subroutine
 
 \ ******************************************************************************
 \
@@ -16722,7 +16926,9 @@ ENDIF
  DEC MCNT               \ Decrement the main loop counter
 
  JSR scan_fire          \ Call scan_fire to check whether the joystick's fire
-                        \ button is being pressed
+                        \ button is being pressed, which clears bit 4 in A if
+                        \ the fire button is being pressed, and sets it if it
+                        \ is not being pressed
 
  BEQ TL2                \ If the joystick fire button is pressed, jump to TL2
 
@@ -16948,13 +17154,22 @@ ENDIF
 
 .MT26
 
- LDA #&8A               \ AJD
- JSR tube_write
+ LDA #&8A               \ Send command &8A to the I/O processor:
+ JSR tube_write         \
+                        \   =write_fe4e(value)
+                        \
+                        \ which sets the 6522 System VIA interrupt enable
+                        \ register IER (SHEILA &4E) to the specified value and
+                        \ returns the value in A when done
 
- LDA #&81
- JSR tube_write
+ LDA #%10000001         \ Send the parameter to the I/O processor:
+ JSR tube_write         \
+                        \   * value = %10000001
+                        \
+                        \ to clear bit 1 of IER (i.e. enable the CA2 interrupt,
+                        \ which comes from the keyboard)
 
- JSR tube_read
+ JSR tube_read          \ Set A to the response from the I/O processor
 
  JSR FLKB               \ Call FLKB to flush the keyboard buffer
 
@@ -16971,13 +17186,23 @@ ENDIF
  LDY #0                 \ ESCAPE was pressed, so set Y = 0 (as the OSWORD call
                         \ returns the length of the entered string in Y)
 
- LDA #&8A               \ AJD
- JSR tube_write
+ LDA #&8A               \ Send command &8A to the I/O processor:
+ JSR tube_write         \
+                        \   =write_fe4e(value)
+                        \
+                        \ which sets the 6522 System VIA interrupt enable
+                        \ register IER (SHEILA &4E) to the specified value and
+                        \ returns the value in A when done
 
- LDA #1
- JSR tube_write
+ LDA #%00000001         \ Send the parameter to the I/O processor:
+ JSR tube_write         \
+                        \   * value = %00000001
+                        \
+                        \ to set bit 1 of IER (i.e. disable the CA2 interrupt,
+                        \ which comes from the keyboard)
 
- JSR tube_read
+ JSR tube_read          \ Set A to the response from the I/O processor, so we
+                        \ know the register has been set
 
  JMP FEED               \ Jump to FEED to print a newline, returning from the
                         \ subroutine using a tail call
@@ -17200,14 +17425,26 @@ ENDIF
  JSR DETOK              \ prints the boxed-out title "DRIVE {drive number}
                         \ CATALOGUE"
 
- LDA #&8E               \ AJD
- JSR tube_write
- LDA XC
- JSR tube_write
- LDA YC
- JSR tube_write
- LDA #0
- JSR tube_write
+ LDA #&8E               \ Send command &8E to the I/O processor:
+ JSR tube_write         \
+                        \   write_xyc(x, y, char)
+                        \
+                        \ which will draw the text character in char at column x
+                        \ and row y
+
+ LDA XC                 \ Send the first parameter to the I/O processor:
+ JSR tube_write         \
+                        \   * x = XC
+
+ LDA YC                 \ Send the second parameter to the I/O processor:
+ JSR tube_write         \
+                        \   * y = YC
+
+ LDA #0                 \ Send the third parameter to the I/O processor:
+ JSR tube_write         \
+                        \   * char = 0
+                        \
+                        \ AJD
 
  STA XC                 \ Move the text cursor to column 1
 
@@ -17926,32 +18163,60 @@ ENDIF
 \       Name: scan_fire
 \       Type: Subroutine
 \   Category: Keyboard
-\    Summary: AJD
+\    Summary: Check whether the joystick's fire button is being pressed by
+\             sending a scan_fire command to the I/O processor
 \
 \ ******************************************************************************
 
 .scan_fire
 
- LDA #&89
- JSR tube_write
- JMP tube_read
+ LDA #&89               \ Send command &89 to the I/O processor:
+ JSR tube_write         \
+                        \   =scan_fire()
+                        \
+                        \ which will check whether the fire button is being
+                        \ pressed and return the result in bit 4 of the returned
+                        \ value
+
+ JMP tube_read          \ Set A to the response from the I/O processor, which
+                        \ will have bit 4 clear if the fire button is being
+                        \ pressed, or set if it isn't, and return from the
+                        \ subroutine using a tail call
 
 \ ******************************************************************************
 \
 \       Name: RDKEY
 \       Type: Subroutine
 \   Category: Keyboard
-\    Summary: AJD
+\    Summary: Scan the keyboard for key presses by sending a scan_10in command
+\             to the I/O processor
+\
+\ ------------------------------------------------------------------------------
+\
+\ Returns:
+\
+\   X                   If a key is being pressed, X contains the internal key
+\                       number, otherwise it contains 0
+\
+\   A                   Contains the same as X
 \
 \ ******************************************************************************
 
 .RDKEY
 
- LDA #&8C
- JSR tube_write
- JSR tube_read
- TAX
- RTS
+ LDA #&8C               \ Send command &8C to the I/O processor:
+ JSR tube_write         \
+                        \   =scan_10in()
+                        \
+                        \ which will scan the keyboard
+
+ JSR tube_read          \ Set A to the response from the I/O processor, which
+                        \ will either be the internal key number of the key being
+                        \ pressed, or 0 if no key is being pressed
+
+ TAX                    \ Copy the response into X
+
+ RTS                    \ Return from the subroutine
 
 \ ******************************************************************************
 \
@@ -18135,19 +18400,44 @@ ENDIF
 \       Name: DKS4
 \       Type: Subroutine
 \   Category: Keyboard
-\    Summary: AJD
+\    Summary: Scan for a particular key press by sending a scan_xin command to
+\             the I/O processor
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   X                   The internal number of the key to check
+\
+\ Returns:
+\
+\   A                   If the key is being pressed, A contains the original
+\                       key number in X but with bit 7 set (i.e. key number +
+\                       128). If the key is not being pressed, A contains the
+\                       unchanged key number
 \
 \ ******************************************************************************
 
 .DKS4
 
- LDA #&8B
- JSR tube_write
- TXA
- JSR tube_write
- JSR tube_read
- TAX
- RTS
+ LDA #&8B               \ Send command &8B to the I/O processor:
+ JSR tube_write         \
+                        \   =scan_xin(key_number)
+                        \
+                        \ which will scan the keyboard for the specified
+                        \ internal key number
+
+ TXA                    \ Send the parameter to the I/O processor:
+ JSR tube_write         \
+                        \   * key_number = X
+
+ JSR tube_read          \ Set A to the response from the I/O processor, which
+                        \ will contain the key number with bit 7 set if the key
+                        \ is being pressed, or bit 7 clear if it isn't
+
+ TAX                    \ Copy the response into X
+
+ RTS                    \ Return from the subroutine
 
 \ ******************************************************************************
 \
@@ -18418,7 +18708,25 @@ ENDIF
 \       Name: TT217
 \       Type: Subroutine
 \   Category: Keyboard
-\    Summary: AJD
+\    Summary: Scan the keyboard until a key is pressed by sending a get_key
+\             command to the I/O processor
+\
+\ ------------------------------------------------------------------------------
+\
+\ Scan the keyboard until a key is pressed, and return the key's ASCII code.
+\ If, on entry, a key is already being held down, then wait until that key is
+\ released first (so this routine detects the first key down event following
+\ the subroutine call).
+\
+\ Returns:
+\
+\   X                   The ASCII code of the key that was pressed
+\
+\   A                   Contains the same as X
+\
+\ Other entry points:
+\
+\   out                 Contains an RTS
 \
 \ ******************************************************************************
 
@@ -18426,14 +18734,22 @@ ENDIF
 
 .t
 
- LDA #&8D
- JSR tube_write
- JSR tube_read
- TAX
+ LDA #&8D               \ Send command &8D to the I/O processor:
+ JSR tube_write         \
+                        \   =get_key()
+                        \
+                        \ which waits for any current key presses to be released
+                        \ (if any), and then waits for a key to be pressed
+                        \ before returning the result as an ASCII value
+
+ JSR tube_read          \ Set A to the response from the I/O processor, which
+                        \ will contain the ASCII value of the key press
+
+ TAX                    \ Copy the response into X
 
 .out
 
- RTS
+ RTS                    \ Return from the subroutine
 
 \ ******************************************************************************
 \
@@ -23774,7 +24090,8 @@ LOAD_G% = LOAD% + P% - CODE%
  STA QQ26               \ Set QQ26 to the random byte that's used in the market
                         \ calculations
 
- JSR GVL                \ AJD
+ JSR GVL                \ Calculate the availability for each market item in the
+                        \ new system
 
 .stay_quit
 
@@ -37400,7 +37717,8 @@ ENDMACRO
  STA XX21-2,Y
  LDA ship_list+1,X
  STA XX21-1,Y
- RTS
+
+ RTS                    \ Return from the subroutine
 
  \printer:
  \ TXA
@@ -45471,7 +45789,8 @@ LOAD_L% = LOAD% + P% - CODE%
 \       Name: write_0346
 \       Type: Subroutine
 \   Category: Tube
-\    Summary: Send a new value of LASCT to the I/O processor
+\    Summary: Update the value of LASCT by sending a write_0346 command to the
+\             I/O processor
 \
 \ ------------------------------------------------------------------------------
 \
@@ -45504,7 +45823,8 @@ LOAD_L% = LOAD% + P% - CODE%
 \       Name: read_0346
 \       Type: Subroutine
 \   Category: Tube
-\    Summary: Get the value of the I/O processor's copy of LASCT
+\    Summary: Get the value of LASCT by sending a read_0346 command to the I/O
+\             processor
 \
 \ ******************************************************************************
 
@@ -45517,7 +45837,9 @@ LOAD_L% = LOAD% + P% - CODE%
                         \ which will ask the I/O processor to send the value of
                         \ its copy of LASCT
 
- JSR tube_read          \ Get the value that the I/O processor sends into A
+ JSR tube_read          \ Set A to the response from the I/O processor, which
+                        \ will be the value of LASCT that's stored in the I/O
+                        \ processor
 
  STA LASCT              \ Update LASCT to the value received from the I/O
                         \ processor
@@ -46138,16 +46460,32 @@ LOAD_L% = LOAD% + P% - CODE%
 \       Name: DET1
 \       Type: Subroutine
 \   Category: Screen mode
-\    Summary: AJD
+\    Summary: Show or hide the dashboard (for when we die) by sending a
+\             write_crtc command to the I/O processor
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   X                   The number of text rows to display on the screen (24
+\                       will hide the dashboard, 31 will make it reappear)
 \
 \ ******************************************************************************
 
 .DET1
 
- LDA #&95
- JSR tube_write
- TXA
- JMP tube_write
+ LDA #&95               \ Send command &95 to the I/O processor:
+ JSR tube_write         \
+                        \   write_crtc(rows)
+                        \
+                        \ which will update the screen to show the specified
+                        \ number of text rows
+
+ TXA                    \ Send the parameter to the I/O processor:
+ JMP tube_write         \
+                        \   * rows = X
+                        \
+                        \ and return from the subroutine using a tail call
 
 \ ******************************************************************************
 \
@@ -46462,20 +46800,43 @@ LOAD_L% = LOAD% + P% - CODE%
 \       Name: CPIX2
 \       Type: Subroutine
 \   Category: Drawing pixels
-\    Summary: AJD
+\    Summary: Draw a single-height dot on the dashboard by sending a draw_blob
+\             command to the I/O processor
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   X1                  The screen pixel x-coordinate of the dash
+\
+\   Y1                  The screen pixel y-coordinate of the dash
+\
+\   COL                 The colour of the dash as a mode 5 character row byte
 \
 \ ******************************************************************************
 
 .CPIX2
 
- LDA #&90
- JSR tube_write
- LDA X1
- JSR tube_write
- LDA Y1
- JSR tube_write
- LDA COL
- JMP tube_write
+ LDA #&90               \ Send command &90 to the I/O processor:
+ JSR tube_write         \
+                        \   draw_blob(x, y, colour)
+                        \
+                        \ which will draw a dot of the specified colour and
+                        \ position on the dashboard 
+
+ LDA X1                 \ Send the first parameter to the I/O processor:
+ JSR tube_write         \
+                        \   * x = X1
+
+ LDA Y1                 \ Send the second parameter to the I/O processor:
+ JSR tube_write         \
+                        \   * y = Y1
+
+ LDA COL                \ Send the third parameter to the I/O processor:
+ JMP tube_write         \
+                        \   * colour = COL
+                        \
+                        \ and return from the subroutine using a tail call
 
 \ ******************************************************************************
 \
@@ -47226,28 +47587,40 @@ NEXT
 \       Name: ECBLB
 \       Type: Subroutine
 \   Category: Dashboard
-\    Summary: AJD
+\    Summary: Light up the E.C.M. indicator bulb ("E") on the dashboard by
+\             sending a draw_E command to the I/O processor
 \
 \ ******************************************************************************
 
 .ECBLB
 
- LDA #&93
- JMP tube_write
+ LDA #&93               \ Send command &93 to the I/O processor:
+ JMP tube_write         \
+                        \   draw_E()
+                        \
+                        \ which will toggle the E.C.M. indicator bulb ("E") on
+                        \ the dashboard and return from the subroutine using a
+                        \ tail call
 
 \ ******************************************************************************
 \
 \       Name: SPBLB
 \       Type: Subroutine
 \   Category: Dashboard
-\    Summary: AJD
+\    Summary: Light up the space station indicator ("S") on the dashboard by
+\             sending a draw_S command to the I/O processor
 \
 \ ******************************************************************************
 
 .SPBLB
 
- LDA #&92
- JMP tube_write
+ LDA #&92               \ Send command &92 to the I/O processor:
+ JMP tube_write         \
+                        \   draw_S()
+                        \
+                        \ which will toggle the space station indicator ("S") on
+                        \ the dashboard and return from the subroutine using a
+                        \ tail call
 
 \ ******************************************************************************
 \
@@ -49221,14 +49594,18 @@ LOAD_M% = LOAD% + P% - CODE%
 \       Name: DORND2
 \       Type: Subroutine
 \   Category: Utility routines
-\    Summary: AJD
+\    Summary: Generate random numbers with RAND+2 restricted so that bit 0 is
+\             always 0
 \
 \ ******************************************************************************
 
 .DORND2
 
- CLC
- JMP DORND
+ CLC                    \ This ensures that bit 0 of r2 is 0 in the DORND
+                        \ routine
+
+ JMP DORND              \ Jump to DORND to generate random numbers in A and X,
+                        \ returning from the subroutine using a tail call
 
 \ ******************************************************************************
 \
@@ -50999,25 +51376,56 @@ LOAD_M% = LOAD% + P% - CODE%
 \       Name: DKS1
 \       Type: Subroutine
 \   Category: Keyboard
-\    Summary: AJD
+\    Summary: Scan the keyboard or joystick for a flight key by sending a scan_y
+\             command to the I/O processor
 \
+\ ------------------------------------------------------------------------------
+\
+\ Scan the keyboard for the flight key given in register Y, where Y is the
+\ offset into the KYTB table above (so we can scan for Space by setting Y to
+\ 2, for example). If the key is pressed, set the corresponding byte in the
+\ key logger at KL to a negative value (i.e. with bit 7 set).
+\
+\ Arguments:
+\
+\   Y                   The offset into the KYTB table above of the key that we
+\                       want to scan on the keyboard
+
 \ ******************************************************************************
 
 .DKS1
 
- LDA #&96
- JSR tube_write
- TYA
- JSR tube_write
- LDA BSTK
- JSR tube_write
- JSR tube_read
- BPL b_quit
- STA KL,Y
+ LDA #&96               \ Send command &96 to the I/O processor:
+ JSR tube_write         \
+                        \   =scan_y(key_offset, delta14b)
+                        \
+                        \ which will update the roll or pitch dashboard
+                        \ indicator to the specified value
+
+ TYA                    \ Send the first parameter to the I/O processor:
+ JSR tube_write         \
+                        \   * key_offset = Y
+
+ LDA BSTK               \ Send the second parameter to the I/O processor:
+ JSR tube_write         \
+                        \   * delta14b = BTSK
+
+ JSR tube_read          \ Set A to the response from the I/O processor, which
+                        \ will be the key number, but with bit 7 clear if the
+                        \ key is not being pressed, or bit 7 set if it is being
+                        \ pressed
+
+ BPL b_quit             \ If the response is positive (i.e. bit 7 is clear) then
+                        \ the key is not being pressed, so skip the following
+                        \ instruction
+
+ STA KL,Y               \ The response is negative, so store this in the Y-th
+                        \ byte of the key logger at KL to indicate that the key
+                        \ is being pressed
 
 .b_quit
 
- RTS
+ RTS                    \ Return from the subroutine
 
 \ ******************************************************************************
 \
@@ -51049,10 +51457,14 @@ LOAD_M% = LOAD% + P% - CODE%
  JSR DKS1               \ KY2 will be &FF if Space (speed up) is being pressed
 
  JSR scan_fire          \ Call scan_fire to check whether the joystick's fire
-                        \ button is being pressed
+                        \ button is being pressed, which clears bit 4 in A if
+                        \ the fire button is being pressed, and sets it if it
+                        \ is not being pressed
 
- EOR #%00010000         \ AJD
- STA &0307
+ EOR #%00010000         \ Flip bit 4 so that it's set if the fire button has
+ STA KY7                \ been pressed, and store the result in the keyboard
+                        \ logger at location KY7, which is also where the A key
+                        \ (fire lasers) key is logged
 
  LDX #1                 \ Call DKS2 to fetch the value of ADC channel 1 (the
  JSR DKS2               \ joystick X value) into (A X), and OR A with 1. This

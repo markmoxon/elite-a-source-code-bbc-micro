@@ -42,7 +42,7 @@ _SOURCE_DISC            = (_RELEASE = 2)
 X = 128                 \ The centre x-coordinate of the 256 x 192 space view
 Y = 96                  \ The centre y-coordinate of the 256 x 192 space view
 
-tube_brk = &0016        \ Tube BRK vector AJD
+tube_brk = &0016        \ The location of the Tube host code's break handler
 
 BRKV = &0202            \ The break vector that we intercept to enable us to
                         \ handle and display system errors
@@ -1696,7 +1696,7 @@ ORG CODE%
 \       Name: clr_scrn
 \       Type: Subroutine
 \   Category: Utility routines
-\    Summary: AJD
+\    Summary: Clear the top part of the screen (the space view)
 \
 \ ******************************************************************************
 
@@ -1879,14 +1879,17 @@ ORG CODE%
 \       Name: sync_in
 \       Type: Subroutine
 \   Category: Screen mode
-\    Summary: Wait for the vertical sync
+\    Summary: Wait for the vertical sync and tell the parasite when it occurs
 \
 \ ******************************************************************************
 
 .sync_in
 
- JSR WSCAN              \ AJD
- JMP tube_put
+ JSR WSCAN              \ Call WSCAN to wait for the vertical sync
+
+ JMP tube_put           \ Send A back to the parasite (so it can wait until the
+                        \ vertical sync occurs) and return from the subroutine
+                        \ using a tail call
 
 \ ******************************************************************************
 \
@@ -2239,7 +2242,8 @@ ORG CODE%
 \       Name: scan_fire
 \       Type: Subroutine
 \   Category: Keyboard
-\    Summary: Check whether the joystick's fire button is being pressed
+\    Summary: Check whether the joystick's fire button is being pressed and send
+\             the result back to the parasite
 \
 \ ******************************************************************************
 
@@ -2256,22 +2260,30 @@ ORG CODE%
                         \ button is pressed, otherwise it is set, so AND'ing
                         \ the value of IRB with %10000 extracts this bit
 
- JMP tube_put           \ AJD
+ JMP tube_put           \ Send A back to the parasite and return from the
+                        \ subroutine using a tail call
 
 \ ******************************************************************************
 \
 \       Name: write_fe4e
 \       Type: Subroutine
 \   Category: Keyboard
-\    Summary: AJD
+\    Summary: Receive a new value from the parasite for the System VIA interrupt
+\             enable register
 \
 \ ******************************************************************************
 
 .write_fe4e
 
- JSR tube_get
- STA &FE4E
- JMP tube_put
+ JSR tube_get           \ Get the new value for the interrupt register from the
+                        \ parasite
+
+ STA VIA+&4E            \ Set 6522 System VIA interrupt enable register IER
+                        \ (SHEILA &4E) to the new value
+
+ JMP tube_put           \ Send A back to the parasite (so it can wait until we
+                        \ have set the register) and return from the subroutine
+                        \ using a tail call
 
 \ ******************************************************************************
 \
@@ -2447,24 +2459,48 @@ ORG CODE%
 \       Name: get_key
 \       Type: Subroutine
 \   Category: Keyboard
-\    Summary: AJD
+\    Summary: Scan the keyboard until a key is pressed and send the key's ASCII
+\             code to the parasite
+\
+\ ------------------------------------------------------------------------------
+\
+\ Scan the keyboard until a key is pressed, and return the key's ASCII code.
+\ If, on entry, a key is already being held down, then wait until that key is
+\ released first (so this routine detects the first key down event following
+\ the subroutine call).
 \
 \ ******************************************************************************
 
 .get_key
 
+ JSR WSCAN              \ Call WSCAN twice to wait for two vertical syncs
  JSR WSCAN
- JSR WSCAN
- JSR RDKEY
- BNE get_key
+
+ JSR RDKEY              \ Scan the keyboard for a key press and return the
+                        \ internal key number in X (or 0 for no key press)
+
+ BNE get_key            \ If a key was already being held down when we entered
+                        \ this routine, keep looping back up to get_key, until
+                        \ the key is released
 
 .press
 
- JSR RDKEY
- BEQ press
- TAY
- LDA (key_tube),Y
- JMP tube_put
+ JSR RDKEY              \ Any pre-existing key press is now gone, so we can
+                        \ start scanning the keyboard again, returning the
+                        \ internal key number in X (or 0 for no key press)
+
+ BEQ press              \ Keep looping up to press until a key is pressed
+
+ TAY                    \ Copy A to Y, so Y contains the internal key number
+                        \ of the key pressed
+
+ LDA (key_tube),Y       \ The address in key_tube points to the MOS key
+                        \ translation table in the I/O processor, which is used
+                        \ to translate internal key numbers to ASCII, so this
+                        \ fetches the key's ASCII code into A
+
+ JMP tube_put           \ Send A back to the parasite and return from the
+                        \ subroutine using a tail call
 
 \ ******************************************************************************
 \
@@ -2895,20 +2931,11 @@ ORG CODE%
 \ reappear, as the dashboard's screen memory doesn't get touched by this
 \ process.
 \
-\ Arguments:
-\
-\   A                   The number of text rows to display on the screen (24
-\                       will hide the dashboard, 31 will make it reappear)
-\
-\ Returns:
-\
-\   X                   X is set to 6
-\
 \ ******************************************************************************
 
 .DET1
 
- JSR tube_get           \ AJD
+ JSR tube_get           \ Get the number of rows from the parasite into A
 
  LDX #6                 \ Set X to 6 so we can update 6845 register R6 below
 
@@ -3196,7 +3223,7 @@ ORG CODE%
 \       Name: write_0346
 \       Type: Subroutine
 \   Category: Tube
-\    Summary: Receive a new value of LASCT from the parasite
+\    Summary: Receive a new value from the parasite for LASCT
 \
 \ ******************************************************************************
 
@@ -3219,8 +3246,10 @@ ORG CODE%
 
 .read_0346
 
- LDA LASCT              \ Send the value of LASCT to the parasite and return
- JMP tube_put           \ from the subroutine using a tail call
+ LDA LASCT              \ Fetch the current value of LASCT into A
+
+ JMP tube_put           \ Send A back to the parasite and return from the
+                        \ subroutine using a tail call
 
 \ ******************************************************************************
 \
