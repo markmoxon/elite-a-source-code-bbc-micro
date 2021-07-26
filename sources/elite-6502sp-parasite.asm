@@ -54632,7 +54632,7 @@ ENDMACRO
  EQUB 0 + (11 << 4)     \ Max. canisters on demise = 0
                         \ Market item when scooped = 11 + 1 = 12 (Minerals)
  EQUW 16 * 16           \ Targetable area          = 16 * 16
- EQUB LO(SHIP_THARGON_VERTICES - SHIP_SPLINTER)      \ Edges data = Thargon? AJD
+ EQUB &5A               \ This value is incorrect (see above)
  EQUB &44               \ Faces data offset (low)  = &0044
  EQUB 25                \ Max. edge count          = (25 - 1) / 4 = 6
  EQUB 0                 \ Gun vertex               = 0
@@ -54644,7 +54644,7 @@ ENDMACRO
  EQUB 8                 \ Visibility distance      = 8
  EQUB 16                \ Max. energy              = 16
  EQUB 10                \ Max. speed               = 10
- EQUB HI(SHIP_THARGON_VERTICES - SHIP_SPLINTER)      \ Edges data = Thargon? AJD
+ EQUB &FE               \ This value is incorrect (see above)
  EQUB &00               \ Faces data offset (high) = &0044
  EQUB 5                 \ Normals are scaled by    = 2^5 = 32
  EQUB %00000000         \ Laser power              = 0

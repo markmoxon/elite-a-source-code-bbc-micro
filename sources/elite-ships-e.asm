@@ -1382,8 +1382,18 @@ ENDMACRO
 \
 \ ------------------------------------------------------------------------------
 \
-\ The ship blueprint for the splinter reuses the edges data from the escape pod,
-\ so the edges data offset is negative.
+\ The ship blueprint for the splinter is supposed to reuse the edges data from
+\ the escape pod, but there is a bug in Elite-A that breaks splinters. The edges
+\ data offset is negative, as it should be, but the offset value is incorrect
+\ and doesn't even point to edge data - in the Tube version, it points into the
+\ middle of the Thargoid's vertex data, while in the disc version it points to a
+\ different place depending on the structure of the individual blueprint file.
+\ In all cases the offset is wrong, so splinters in Elite-A appear as a random
+\ mess of lines. The correct value of the offset should be:
+\
+\   SHIP_ESCAPE_POD_EDGES - SHIP_SPLINTER
+\
+\ split into the high byte and low byte, as it is in the disc version.
 \
 \ ******************************************************************************
 
@@ -1399,7 +1409,7 @@ ENDMACRO
 
                         \ --- And replaced by: -------------------------------->
 
- EQUB &5A                                            \ AJD
+ EQUB &5A               \ This value is incorrect (see above)
 
                         \ --- End of replacement ------------------------------>
 
@@ -1441,7 +1451,7 @@ ENDMACRO
 
                         \ --- And replaced by: -------------------------------->
 
- EQUB &FE                                            \ AJD
+ EQUB &FE               \ This value is incorrect (see above)
 
                         \ --- End of replacement ------------------------------>
 
