@@ -28,8 +28,8 @@ endif
 build:
 	echo _VERSION=6 > sources/elite-header.h.asm
 	echo _RELEASE=$(rel-elite-a) >> sources/elite-header.h.asm
-	echo _REMOVE_CHECKSUMS=FALSE >> sources/elite-header.h.asm
-	echo _MATCH_EXTRACTED_BINARIES=TRUE >> sources/elite-header.h.asm
+	echo _REMOVE_CHECKSUMS=TRUE >> sources/elite-header.h.asm
+	echo _MATCH_EXTRACTED_BINARIES=FALSE >> sources/elite-header.h.asm
 	$(BEEBASM) -i sources/elite-text-tokens.asm -v > output/compile.txt
 	$(BEEBASM) -i sources/elite-missile.asm -v >> output/compile.txt
 	$(BEEBASM) -i sources/elite-source-docked.asm -v >> output/compile.txt
