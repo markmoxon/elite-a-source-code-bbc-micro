@@ -72,7 +72,7 @@ tube_r3d = &FEE5
 tube_r4s = &FEE6
 tube_r4d = &FEE7
 
-rawrch = &FFBC          \ AJD
+rawrch = &FFBC          \ The address of the MOS's VDU character output routine
 
 OSBYTE = &FFF4          \ The address for the OSBYTE routine
 OSCLI = &FFF7           \ The address for the OSCLI routine
@@ -226,25 +226,37 @@ ORG CODE%
 \       Name: tube_elite
 \       Type: Subroutine
 \   Category: Tube
-\    Summary: AJD
+\    Summary: Set the vectors to receive Tube communications, run the parasite
+\             code, and terminate the I/O processor's loading process
 \
 \ ******************************************************************************
 
 .tube_elite
 
- LDX #&FF
- TXS
- LDA #LO(tube_wrch)
- STA WRCHV
- LDA #HI(tube_wrch)
- STA WRCHV+&01
- LDA #LO(tube_brk)
- STA BRKV
+ LDX #&FF               \ Set the stack pointer to &01FF, which is the standard
+ TXS                    \ location for the 6502 stack, so this instruction
+                        \ effectively resets the stack
+
+ LDA #LO(tube_wrch)     \ Set WRCHV to point to the tube_wrch routine, so when
+ STA WRCHV              \ bytes are sent to the I/O processor from the parasite,
+ LDA #HI(tube_wrch)     \ the tube_wrch routine is called to handle them
+ STA WRCHV+1
+
+ LDA #LO(tube_brk)      \ Set BRKV to point to the tube_brk routine (i.e. to the
+ STA BRKV               \ Tube host code's break handler)
  LDA #HI(tube_brk)
- STA BRKV+&01
- LDX #LO(tube_run)
+ STA BRKV+1
+
+ LDX #LO(tube_run)      \ Set (Y X) to point to tube_run ("R.2.T")
  LDY #HI(tube_run)
- JMP OSCLI
+
+ JMP OSCLI              \ Call OSCLI to run the OS command in tube_run, which
+                        \ *RUNs the parasite code in the 2.T file before
+                        \ returning from the subroutine using a tail call
+
+                        \ This terminates the I/O processor code, leaving the
+                        \ BBC Micro to sit idle until a command arrives from the
+                        \ parasite and calls tube_wrch via WRCHV
 
 \ ******************************************************************************
 \
@@ -264,34 +276,97 @@ ORG CODE%
 \       Name: tube_get
 \       Type: Subroutine
 \   Category: Tube
-\    Summary: AJD
+\    Summary: As the I/O processor, fetch a byte that's been sent over the Tube
+\             from the parasite
+\
+\ ------------------------------------------------------------------------------
+\
+\ Tube communication in Elite-A uses the following protocol:
+\
+\ Parasite -> I/O processor
+\
+\   * Uses Tube register R1 to transmit the data across FIFO 1
+\   * The parasite calls tube_write to send a byte to the I/O processor
+\   * The I/O processor calls tube_get to receive that byte from the parasite
+\
+\ I/O processor -> Parasite
+\
+\   * Uses Tube register R2 to transmit the data across FIFO 2
+\   * The I/O processor calls tube_put to send a byte to the parasite
+\   * The parasite calls tube_read to receive that byte from the I/O processor
+\
+\ This routine is called by the I/O processor to receive a byte from the
+\ parasite.
+\
+\ The code is identical to Acorn's MOS routine that runs on the parasite to
+\ implement OSWRCH across the Tube.
 \
 \ ******************************************************************************
 
 .tube_get
 
- BIT tube_r1s
- NOP
- BPL tube_get
- LDA tube_r1d
- RTS
+ BIT tube_r1s           \ Check whether FIFO 1 has received a byte from the
+                        \ parasite (which it will have sent by calling its own
+                        \ tube_write routine)
+
+ NOP                    \ Pause while the register is checked
+
+ BPL tube_get           \ If FIFO 1 has received a byte then the N flag will be
+                        \ set, so this loops back to tube_get until the N flag
+                        \ is set, at which point FIFO 1 contains the byte
+                        \ transmitted from the parasite
+
+ LDA tube_r1d           \ Fetch the transmitted byte by reading Tube register R1
+                        \ into A
+
+ RTS                    \ Return from the subroutine
 
 \ ******************************************************************************
 \
 \       Name: tube_put
 \       Type: Subroutine
 \   Category: Tube
-\    Summary: AJD
+\    Summary: As the I/O processor, send a byte across the Tube to the parasite
+\
+\ ------------------------------------------------------------------------------
+\
+\ Tube communication in Elite-A uses the following protocol:
+\
+\ Parasite -> I/O processor
+\
+\   * Uses Tube register R1 to transmit the data across FIFO 1
+\   * The parasite calls tube_write to send a byte to the I/O processor
+\   * The I/O processor calls tube_get to receive that byte from the parasite
+\
+\ I/O processor -> Parasite
+\
+\   * Uses Tube register R2 to transmit the data across FIFO 2
+\   * The I/O processor calls tube_put to send a byte to the parasite
+\   * The parasite calls tube_read to receive that byte from the I/O processor
+\
+\ This routine is called by the I/O processor to send a byte to the parasite.
+\
+\ The code is identical to Acorn's MOS routine that runs on the parasite to
+\ implement OSWRCH across the Tube (except this uses R2 instead of R1).
 \
 \ ******************************************************************************
 
 .tube_put
 
- BIT tube_r2s
- NOP
- BVC tube_put
- STA tube_r2d
- RTS
+ BIT tube_r2s           \ Check whether FIFO 2 is available for use, so we can
+                        \ use it to transmit a byte to the parasite
+
+ NOP                    \ Pause while the register is checked
+
+ BVC tube_put           \ If FIFO 2 is available for use then the V flag will be
+                        \ set, so this loops back to tube_put until FIFO 2 is
+                        \ available for us to use
+
+ STA tube_r2d           \ FIFO 2 is available for use, so store the value we
+                        \ want to transmit in Tube register R2, so it gets sent
+                        \ to the parasite
+
+ RTS                    \ Return from the subroutine
 
 \ ******************************************************************************
 \
@@ -366,20 +441,34 @@ ORG CODE%
 \       Name: CHPR
 \       Type: Subroutine
 \   Category: Text
-\    Summary: AJD
+\    Summary: Implement the write_xyc command (write a character to the screen)
+\
+\ ------------------------------------------------------------------------------
+\
+\ This routine is run when the parasite sends a write_xyc command. It writes a
+\ text character to the screen at specified position, or (if the character is
+\ null) it just moves the text cursor.
 \
 \ ******************************************************************************
 
 .CHPR
 
- JSR tube_get
- STA XC
- JSR tube_get
- STA YC
- JSR tube_get
- CMP #&20
+ JSR tube_get           \ Get the parameters from the parasite for the command:
+ STA XC                 \
+ JSR tube_get           \   write_xyc(x, y, char)
+ STA YC                 \
+ JSR tube_get           \ and store them as follows:
+                        \
+                        \   * XC = text column (x-coordinate)
+                        \
+                        \   * YC = text row (y-coordinate)
+                        \
+                        \   * A = the character to print
+
+ CMP #32                \ AJD
  BNE tube_wrch
- LDA #&09
+
+ LDA #9
 
 .tube_wrch
 
@@ -391,7 +480,7 @@ ORG CODE%
  BEQ wrch_quit
  CMP #&7F
  BEQ wrch_del
- CMP #&20
+ CMP #32
  BEQ wrch_spc
  BCS wrch_char
  CMP #&0A
@@ -577,24 +666,15 @@ ORG CODE%
 \       Name: LOIN (Part 1 of 7)
 \       Type: Subroutine
 \   Category: Drawing lines
-\    Summary: Draw a line: Calculate the line gradient in the form of deltas
+\    Summary: Implement the draw_line command (draw a line)
 \  Deep dive: Bresenham's line algorithm
 \
 \ ------------------------------------------------------------------------------
 \
-\ This routine draws a line from (X1, Y1) to (X2, Y2). It has multiple stages.
+\ This routine is run when the parasite sends a draw_line command. It draws a
+\ line from (X1, Y1) to (X2, Y2). It has multiple stages.
+\
 \ This stage calculates the line deltas.
-\
-\ Arguments:
-\
-\   X1                  The screen x-coordinate of the start of the line
-\
-\   Y1                  The screen y-coordinate of the start of the line
-\
-\   X2                  The screen x-coordinate of the end of the line
-\
-\   Y2                  The screen y-coordinate of the end of the line
-\
 \ Returns:
 \
 \   Y                   Y is preserved
@@ -618,14 +698,19 @@ ORG CODE%
                         \ routines to start with, and then chose one of them for
                         \ the final game
 
- JSR tube_get           \ AJD
- STA X1
- JSR tube_get
- STA Y1
- JSR tube_get
- STA X2
- JSR tube_get
- STA Y2
+ JSR tube_get           \ Get the parameters from the parasite for the command:
+ STA X1                 \
+ JSR tube_get           \   draw_line(x1, y1, x2, y2)
+ STA Y1                 \
+ JSR tube_get           \ and store them as follows:
+ STA X2                 \
+ JSR tube_get           \   * X1 = the start point's x-coordinate
+ STA Y2                 \
+                        \   * Y1 = the start point's y-coordinate
+                        \
+                        \   * X2 = the end point's x-coordinate
+                        \
+                        \   * Y2 = the end point's y-coordinate
 
 .LOIN
 
@@ -1309,9 +1394,12 @@ ORG CODE%
 \       Name: HLOIN
 \       Type: Subroutine
 \   Category: Drawing lines
-\    Summary: Draw a horizontal line from (X1, Y1) to (X2, Y1)
+\    Summary: Implement the draw_hline command (draw a horizontal line
 \
 \ ------------------------------------------------------------------------------
+\
+\ This routine is run when the parasite sends a draw_hline command. It draws a
+\ horizontal line.
 \
 \ We do not draw a pixel at the end point (X2, X1).
 \
@@ -1326,12 +1414,17 @@ ORG CODE%
 
 .HLOIN
 
- JSR tube_get           \ AJD
- STA X1
- JSR tube_get
- STA Y1
- JSR tube_get
- STA X2
+ JSR tube_get           \ Get the parameters from the parasite for the command:
+ STA X1                 \
+ JSR tube_get           \   draw_hline(x1, y1, x2)
+ STA Y1                 \
+ JSR tube_get           \ and store them as follows:
+ STA X2                 \
+                        \   * X1 = the start point's x-coordinate
+                        \
+                        \   * Y1 = the horizontal line's y-coordinate
+                        \
+                        \   * X2 = the end point's x-coordinate
 
  LDX X1                 \ Set X = X1
 
@@ -1606,14 +1699,13 @@ ORG CODE%
 \       Name: PIXEL
 \       Type: Subroutine
 \   Category: Drawing pixels
-\    Summary: Draw a 1-pixel dot, 2-pixel dash or 4-pixel square
-\  Deep dive: Drawing monochrome pixels in mode 4
+\    Summary: Implement the draw_pixel command (draw space view pixels)
+\  Deep dive: Drawing colour pixels in mode 4
 \
 \ ------------------------------------------------------------------------------
 \
-\ Draw a point at screen coordinate (X, A) with the point size determined by the
-\ distance in ZZ. This applies to the top part of the screen (the monochrome
-\ mode 4 portion).
+\ This routine is run when the parasite sends a draw_pixel command. It draws a
+\ dot in the space view.
 \
 \ Arguments:
 \
@@ -1631,13 +1723,19 @@ ORG CODE%
 
 .PIXEL
 
- JSR tube_get           \ AJD
- TAX
- JSR tube_get
- TAY
- JSR tube_get
- STA ZZ
- TYA
+ JSR tube_get           \ Get the parameters from the parasite for the command:
+ TAX                    \
+ JSR tube_get           \   draw_pixel(x, y, distance)
+ TAY                    \
+ JSR tube_get           \ and store them as follows:
+ STA ZZ                 \
+                        \   * X = the pixel's x-coordinate
+                        \
+                        \   * Y = the pixel's y-coordinate
+                        \
+                        \   * ZZ = the pixel's distance
+
+ TYA                    \ Copy the pixel's y-coordinate from Y into A
 
  LSR A                  \ Set SCH = &60 + A >> 3
  LSR A
@@ -1879,7 +1977,14 @@ ORG CODE%
 \       Name: sync_in
 \       Type: Subroutine
 \   Category: Screen mode
-\    Summary: Wait for the vertical sync and tell the parasite when it occurs
+\    Summary: Implement the sync_in command (wait for the vertical sync)
+\
+\ ------------------------------------------------------------------------------
+\
+\ This routine is run when the parasite sends a sync_in command. It waits for
+\ the next vertical sync and returns a value to the parasite so it can wait
+\ until the sync occurs. The value returned to the parasite isn't important, as
+\ it's just about the timing of the response.
 \
 \ ******************************************************************************
 
@@ -1887,9 +1992,8 @@ ORG CODE%
 
  JSR WSCAN              \ Call WSCAN to wait for the vertical sync
 
- JMP tube_put           \ Send A back to the parasite (so it can wait until the
-                        \ vertical sync occurs) and return from the subroutine
-                        \ using a tail call
+ JMP tube_put           \ Send A back to the parasite and return from the
+                        \ subroutine using a tail call
 
 \ ******************************************************************************
 \
@@ -1924,36 +2028,18 @@ ORG CODE%
 \       Name: DILX
 \       Type: Subroutine
 \   Category: Dashboard
-\    Summary: Update a bar-based indicator on the dashboard
+\    Summary: Implement the draw_bar command (update a bar-based indicator on
+\             the dashboard
 \  Deep dive: The dashboard indicators
 \
 \ ------------------------------------------------------------------------------
 \
+\ This routine is run when the parasite sends a draw_bar command. It updates a
+\ bar-based indicator on the dashboard.
+\
 \ The range of values shown on the indicator depends on which entry point is
 \ called. For the default entry point of DILX, the range is 0-255 (as the value
 \ passed in A is one byte). The other entry points are shown below.
-\
-\ Arguments:
-\
-\   A                   The value to be shown on the indicator (so the larger
-\                       the value, the longer the bar)
-\
-\   T1                  The threshold at which we change the indicator's colour
-\                       from the low value colour to the high value colour. The
-\                       threshold is in pixels, so it should have a value from
-\                       0-16, as each bar indicator is 16 pixels wide
-\
-\   K                   The colour to use when A is a high value, as a 4-pixel
-\                       mode 5 character row byte
-\
-\   K+1                 The colour to use when A is a low value, as a 4-pixel
-\                       mode 5 character row byte
-\
-\   SC(1 0)             The screen address of the first character block in the
-\                       indicator
-\
-\   DILX+2              The range of the indicator is 0-64 (for the fuel
-\                       indicator)
 \
 \ ******************************************************************************
 
@@ -1969,7 +2055,7 @@ ORG CODE%
  STA SC+1               \
                         \   * bar_2 = the mode 5 colour of the indicator
                         \
-                        \   * SC(1 0) = the screen address to update
+                        \   * SC(1 0) = the screen address of the indicator
 
  LDX #&FF               \ Set bar_3 = &FF, to use as a mask for drawing each row
  STX bar_3              \ of each character block of the bar, starting with a
@@ -2087,10 +2173,14 @@ ORG CODE%
 \       Name: DIL2
 \       Type: Subroutine
 \   Category: Dashboard
-\    Summary: Update the roll or pitch indicator on the dashboard
+\    Summary: Implement the draw_angle command (update the roll or pitch
+\             indicator on the dashboard)
 \  Deep dive: The dashboard indicators
 \
 \ ------------------------------------------------------------------------------
+\
+\ This routine is run when the parasite sends a draw_angle command. It updates
+\ the roll or pitch indicator on the dashboard.
 \
 \ The indicator can show a vertical bar in 16 positions, with a value of 8
 \ showing the bar in the middle of the indicator.
@@ -2113,12 +2203,15 @@ ORG CODE%
 
 .DIL2
 
- JSR tube_get           \ AJD
- STA angle_1
- JSR tube_get
- STA SC
- JSR tube_get
- STA SC+1
+ JSR tube_get           \ Get the parameters from the parasite for the command:
+ STA angle_1            \
+ JSR tube_get           \   draw_angle(value, screen_low, screen_high)
+ STA SC                 \
+ JSR tube_get           \ and store them as follows:
+ STA SC+1               \
+                        \   * angle_1 = the value to display in the indicator
+                        \
+                        \   * SC(1 0) = the screen address of the indicator
 
  LDY #1                 \ We want to start drawing the vertical indicator bar on
                         \ the second line in the indicator's character block, so
@@ -2211,39 +2304,98 @@ ORG CODE%
 \       Name: MSBAR
 \       Type: Subroutine
 \   Category: Dashboard
-\    Summary: AJD
+\    Summary: Implement the put_missle command (update a missile indicator on
+\             the dashboard)
+\
+\ ------------------------------------------------------------------------------
+\
+\ This routine is run when the parasite sends a put_missle command. It updates
+\ a specified missile indicator on the dashboard to the specified colour.
 \
 \ ******************************************************************************
 
 .MSBAR
 
- JSR tube_get           \ Like MSBAR
- ASL A
+ JSR tube_get           \ Get the first parameter from the parasite for the
+                        \ command:
+                        \
+                        \   put_missle(number, colour)
+                        \
+                        \ and store it as follows:
+                        \
+                        \   * A = missile number
+
+ ASL A                  \ Set missle_1 = A * 8
  ASL A
  ASL A
  STA missle_1
- LDA #&31-8
- SBC missle_1
- STA SC
- LDA #&7E
- STA SC+&01
- JSR tube_get
- LDY #&05
 
-.l_33ba
+ LDA #41                \ Set SC = 41 - missle_1
+ SBC missle_1           \        = 40 + 1 - (A * 8)
+ STA SC                 \        = 48 + 1 - ((A + 1) * 8)
+                        \
+                        \ This is the same calculation as in the disc version's
+                        \ MSBAR routine, but because the missile number in the
+                        \ Elite-A version is in the range 0-3 rather than 1-3,
+                        \ we subtract from 41 instead of 49 to get the screen
+                        \ address
 
- STA (SC),Y
- DEY
- BNE l_33ba
- RTS
+                        \ So the low byte of SC(1 0) contains the row address
+                        \ for the rightmost missile indicator, made up as
+                        \ follows:
+                        \
+                        \   * 48 (character block 7, as byte #7 * 8 = 48), the
+                        \     character block of the rightmost missile
+                        \
+                        \   * 1 (so we start drawing on the second row of the
+                        \     character block)
+                        \
+                        \   * Move right one character (8 bytes) for each count
+                        \     of A, so when A = 0 we are drawing the rightmost
+                        \     missile, for A = 1 we hop to the left by one
+                        \     character, and so on
+
+ LDA #&7E               \ Set the high byte of SC(1 0) to &7E, the character row
+ STA SC+1               \ that contains the missile indicators (i.e. the bottom
+                        \ row of the screen)
+
+ JSR tube_get           \ Get the second parameter from the parasite for the
+                        \ command:
+                        \
+                        \   put_missle(number, colour)
+                        \
+                        \ and store it as follows:
+                        \
+                        \   * A = new colour for this indicator
+
+ LDY #5                 \ We now want to draw this line five times to do the
+                        \ left two pixels of the indicator, so set a counter in
+                        \ Y
+
+.MBL1
+
+ STA (SC),Y             \ Draw the 3-pixel row, and as we do not use EOR logic,
+                        \ this will overwrite anything that is already there
+                        \ (so drawing a black missile will delete what's there)
+
+ DEY                    \ Decrement the counter for the next row
+
+ BNE MBL1               \ Loop back to MBL1 if have more rows to draw
+
+ RTS                    \ Return from the subroutine
 
 \ ******************************************************************************
 \
 \       Name: scan_fire
 \       Type: Subroutine
 \   Category: Keyboard
-\    Summary: Check whether the joystick's fire button is being pressed and send
-\             the result back to the parasite
+\    Summary: Implement the scan_fire command (scan the joystick's fire button)
+\
+\ ------------------------------------------------------------------------------
+\
+\ This routine is run when the parasite sends a scan_fire command. It checks the
+\ joystick's fire button and returns a value to the parasite with bit 4 clear if
+\ the joystick's fire button is being pressed, or bit 4 set if it isn't.
 \
 \ ******************************************************************************
 
@@ -2268,38 +2420,68 @@ ORG CODE%
 \       Name: write_fe4e
 \       Type: Subroutine
 \   Category: Keyboard
-\    Summary: Receive a new value from the parasite for the System VIA interrupt
-\             enable register
+\    Summary: Implement the write_fe4e command (update the System VIA interrupt
+\             enable register)
+\
+\ ------------------------------------------------------------------------------
+\
+\ This routine is run when the parasite sends a write_fe4e command. It updates
+\ the System VIA interrupt enable register in the I/O processor to the value
+\ sent by the parasite, and returns that value back to the parasite once the
+\ register has been set, so the parasite can know when the register has been
+\ updated.
 \
 \ ******************************************************************************
 
 .write_fe4e
 
- JSR tube_get           \ Get the new value for the interrupt register from the
-                        \ parasite
+ JSR tube_get           \ Get the parameter from the parasite for the command:
+                        \
+                        \   =write_fe4e(value)
+                        \
+                        \ and store it as follows:
+                        \
+                        \   * A = new value for the interrupt register
 
  STA VIA+&4E            \ Set 6522 System VIA interrupt enable register IER
                         \ (SHEILA &4E) to the new value
 
- JMP tube_put           \ Send A back to the parasite (so it can wait until we
-                        \ have set the register) and return from the subroutine
-                        \ using a tail call
+ JMP tube_put           \ Send A back to the parasite and return from the
+                        \ subroutine using a tail call
 
 \ ******************************************************************************
 \
 \       Name: scan_xin
 \       Type: Subroutine
 \   Category: Keyboard
-\    Summary: AJD
+\    Summary: Implement the scan_xin command (scan the keyboard for a specific
+\             key press)
+\
+\ ------------------------------------------------------------------------------
+\
+\ This routine is run when the parasite sends a scan_xin command. It scans the
+\ keyboard to see if the specified key is being pressed and returns the result
+\ to the parasite as follows. If the key is being pressed, the result contains
+\ the original key number in but with bit 7 set (i.e. key number +128). If the
+\ key is not being pressed, the result contains the unchanged key number.
 \
 \ ******************************************************************************
 
 .scan_xin
 
- JSR tube_get
- TAX
- JSR DKS4
- JMP tube_put
+ JSR tube_get           \ Get the parameter from the parasite for the command:
+ TAX                    \
+                        \ =scan_xin(key_number)
+                        \
+                        \ and store it as follows:
+                        \
+                        \   * X = the internal key number to scan for
+
+ JSR DKS4               \ Scan the keyboard to see if the key in X is currently
+                        \ being pressed, returning the result in A and X
+
+ JMP tube_put           \ Send A back to the parasite and return from the
+                        \ subroutine using a tail call
 
 \ ******************************************************************************
 \
@@ -2375,14 +2557,23 @@ ORG CODE%
 \       Name: scan_10in
 \       Type: Subroutine
 \   Category: Keyboard
-\    Summary: AJD
+\    Summary: Implement the scan_10in command (scan the keyboard)
+\
+\ ------------------------------------------------------------------------------
+\
+\ This routine is run when the parasite sends a scan_10in command. It scans the
+\ keyboard for a key press and returns the internal key number of the key being
+\ to the parasite (or it returns 0 if no keys are being pressed).
 \
 \ ******************************************************************************
 
 .scan_10in
 
- JSR RDKEY
- JMP tube_put
+ JSR RDKEY              \ Scan the keyboard for a key press and return the
+                        \ internal key number in X (or 0 for no key press)
+
+ JMP tube_put           \ Send A back to the parasite and return from the
+                        \ subroutine using a tail call
 
 \ ******************************************************************************
 \
@@ -2447,7 +2638,7 @@ ORG CODE%
 
 .scan_p
 
- LDA #&37
+ LDA #&37               \ AJD
 
 .scan_test
 
@@ -2459,15 +2650,16 @@ ORG CODE%
 \       Name: get_key
 \       Type: Subroutine
 \   Category: Keyboard
-\    Summary: Scan the keyboard until a key is pressed and send the key's ASCII
-\             code to the parasite
+\    Summary: Implement the get_key command (wait for a key press)
 \
 \ ------------------------------------------------------------------------------
 \
-\ Scan the keyboard until a key is pressed, and return the key's ASCII code.
-\ If, on entry, a key is already being held down, then wait until that key is
-\ released first (so this routine detects the first key down event following
-\ the subroutine call).
+\ This routine is run when the parasite sends a get_key command. It waits until
+\ a key is pressed, and returns the key's ASCII code to the parasite.
+\
+\ If, on entry, a key is already being held down, then it waits until that key
+\ is released first, so this routine detects the first key down event following
+\ the receipt of the get_key command.
 \
 \ ******************************************************************************
 
@@ -2507,42 +2699,70 @@ ORG CODE%
 \       Name: write_pod
 \       Type: Subroutine
 \   Category: Dashboard
-\    Summary: AJD
+\    Summary: Implement the write_pod command (show the correct palette for the
+\             dashboard and hyperspace tunnel)
+\
+\ ------------------------------------------------------------------------------
+\
+\ This routine is run when the parasite sends a write_pod command. It sets the
+\ I/O processor's ESCP and HFX flags to ensure that the correct palette is
+\ shown for the dashboard and hyperspace tunnel (ESCP affects the dashboard and
+\ HFX affects the hyperspace tunnel).
 \
 \ ******************************************************************************
 
 .write_pod
 
- JSR tube_get
- STA ESCP
- JSR tube_get
- STA HFX
- RTS
+ JSR tube_get           \ Get the parameters from the parasite for the command:
+ STA ESCP               \
+ JSR tube_get           \   write_pod(escp, hfx)
+ STA HFX                \
+                        \ and store them as follows:
+                        \
+                        \   * ESCP = the new value of ESCP
+                        \
+                        \   * HFX = the new value of HFX
+
+ RTS                    \ Return from the subroutine
 
 \ ******************************************************************************
 \
 \       Name: draw_blob
 \       Type: Subroutine
 \   Category: Drawing pixels
-\    Summary: AJD
+\    Summary: Implement the draw_blob command (draw a single-height dash on the
+\             dashboard)
+\
+\ ------------------------------------------------------------------------------
+\
+\ This routine is run when the parasite sends a draw_blob command. It draws a
+\ single-height dash on the dashboard.
 \
 \ ******************************************************************************
 
 .draw_blob
 
- JSR tube_get
- STA X1
- JSR tube_get
- STA Y1
- JSR tube_get
- STA COL
+ JSR tube_get           \ Get the parameters from the parasite for the command:
+ STA X1                 \
+ JSR tube_get           \   draw_blob(x, y, colour)
+ STA Y1                 \
+ JSR tube_get           \ and store them as follows:
+ STA COL                \
+                        \   * X1 = the dash's x-coordinate
+                        \
+                        \   * Y1 = the dash's y-coordinate
+                        \
+                        \   * COL = the dash's colour
+
+                        \ Fall through into CPIX2 to draw a single-height dash
+                        \ at the above coordinates and in the specified colour
 
 \ ******************************************************************************
 \
 \       Name: CPIX2
 \       Type: Subroutine
 \   Category: Drawing pixels
-\    Summary: Draw a single-height dot on the dashboard
+\    Summary: Draw a single-height dash on the dashboard
 \  Deep dive: Drawing colour pixels in mode 5
 \
 \ ------------------------------------------------------------------------------
@@ -2641,26 +2861,38 @@ ORG CODE%
 \       Name: draw_tail
 \       Type: Subroutine
 \   Category: Dashboard
-\    Summary: AJD
+\    Summary: Implement the draw_tail command (draw a ship on the 3D scanner)
+\
+\ ------------------------------------------------------------------------------
+\
+\ This routine is run when the parasite sends a draw_tail command. It draws a
+\ ship on the 3D scanner, as a dot and (if applicable) a tail, using the base
+\ and alternating colours specified (so it can draw a striped tail for when an
+\ I.F.F. system is fitted).
 \
 \ ******************************************************************************
 
 .draw_tail
 
- JSR tube_get
- STA X1
- JSR tube_get
- STA Y1
- JSR tube_get
- STA X2
- JSR tube_get
- STA Y2
- JSR tube_get
- STA P
+ JSR tube_get           \ Get the parameters from the parasite for the command:
+ STA X1                 \
+ JSR tube_get           \   draw_tail(x, y, base_colour, alt_colour, height)
+ STA Y1                 \
+ JSR tube_get           \ and store them as follows:
+ STA COL                \
+ JSR tube_get           \   * X1 = ship's screen x-coordinate on the scanner
+ STA Y2                 \
+ JSR tube_get           \   * Y1 = ship's screen y-coordinate on the scanner
+ STA P                  \
+                        \   * COL = base colour
+                        \
+                        \   * Y2 = alternating (EOR) colour
+                        \
+                        \   * P = stick height
 
 .SC48
 
- JSR CPIX2              \ Like SC48 in SCAN
+ JSR CPIX2              \ Like SC48 in SCAN AJD
  DEC Y1
  JSR CPIX2
 
@@ -2800,19 +3032,32 @@ ORG CODE%
                         \ &7D as the bulbs are both in the character row from
                         \ &7D00 to &7DFF
 
- STA SC+1               \ AJD
- STX font
+ STA SC+1               \ Set the high byte of SC(1 0) to &7D, so SC now points
+                        \ to the screen address of the bulb we want to draw
+
+ STX font               \ Set font(1 0) = (Y X)
  STY font+1
- LDY #&07
+
+ LDY #7                 \ We now want to draw the bulb by copying the bulb
+                        \ character definition from font(1 0) into the screen
+                        \ address at SC(1 0), so set a counter in Y to work
+                        \ through the eight bytes (one per row) in the bulb
 
 .ECBLBor
 
- LDA (font),Y
- EOR (SC),Y
- STA (SC),Y
- DEY
- BPL ECBLBor
- RTS
+ LDA (font),Y           \ Fetch the Y-th row of the bulb character definition
+                        \ from font(1 0)
+
+ EOR (SC),Y             \ Draw the row on-screen using EOR logic, so if the bulb
+ STA (SC),Y             \ is already on-screen this will remove it, otherwise it
+                        \ will light the bulb up
+
+ DEY                    \ Decrement the row counter
+
+ BPL ECBLBor            \ Loop back to ECBLBor until we have drawn all 8 rows of
+                        \ the bulb
+
+ RTS                    \ Return from the subroutine
 
 \ ******************************************************************************
 \
@@ -3054,7 +3299,7 @@ ORG CODE%
 \       Name: b_14
 \       Type: Subroutine
 \   Category: Keyboard
-\    Summary: Check Delta 14b joystick buttons
+\    Summary: Scan the Delta 14b joystick buttons
 \
 \ ------------------------------------------------------------------------------
 \
@@ -3196,42 +3441,91 @@ ORG CODE%
 \       Name: scan_y
 \       Type: Subroutine
 \   Category: Keyboard
-\    Summary: AJD
+\    Summary: Implement the scan_y command (scan for a specific flight key or
+\             Delta 14b button press)
+\
+\ ------------------------------------------------------------------------------
+\
+\ This routine is run when the parasite sends a scan_y command. If the game is
+\ configured to use the keyboard or standard joystick, then it scans the
+\ keyboard for a specified flight key (given as an offset into the KYTB table),
+\ or if the game is configured to use the Delta 14b joystick, it scans the
+\ Delta 14b keyboard for the relevant button press. It returns 0 to the parasite
+\ if the key is not being pressed, or &FF if it is.
 \
 \ ******************************************************************************
 
 .scan_y
 
- JSR tube_get
- TAY
- JSR tube_get
- BMI b_14
- LDX KYTB-1,Y
- JSR DKS4
- BPL b_quit
+ JSR tube_get           \ Get the parameters from the parasite for the command:
+ TAY                    \
+ JSR tube_get           \   =scan_y(key_offset, delta14b)
+                        \
+                        \ and store them as follows:
+                        \
+                        \   * Y = the KYTB offset of the key to scan for (1 for
+                        \         the first key, 2 for the second etc.)
+                        \
+                        \   * A = the configuration byte for the Delta 14b
+                        \         joystick
+
+ BMI b_14               \ If bit 7 of A is set, then the configuration byte for
+                        \ the Delta 14b joystick in BTSK must be &FF and the
+                        \ Delta 14b stick is configured for use, so jump to b_14
+                        \ to scan the Delta 14b joystick buttons
+
+                        \ If we get here then we know A = 0, as BTSK is either
+                        \ 0 or &FF, and we just confirmed that it's not the
+                        \ latter
+
+ LDX KYTB-1,Y           \ Set X to the relevant internal key number from the
+                        \ KYTB table (we add Y to KYTB-1 rather than KYTB as Y
+                        \ is 1 for the first key in KYTB, 2 for the second key
+                        \ and so on)
+
+ JSR DKS4               \ Scan the keyboard to see if the key in X is currently
+                        \ being pressed, returning the result in A and X
+
+ BPL b_quit             \ If the key is being pressed then bit 7 will be set, so
+                        \ this jumps to b_quit if the key is not being pressed,
+                        \ in which case A = 0 will be returned to the parasite
 
 .b_pressed
 
- LDA #&FF
+ LDA #&FF               \ The key is being pressed, so set A to &FF so we can
+                        \ return it to the parasite
 
 .b_quit
 
- JMP tube_put
+ JMP tube_put           \ Send A back to the parasite and return from the
+                        \ subroutine using a tail call
 
 \ ******************************************************************************
 \
 \       Name: write_0346
 \       Type: Subroutine
 \   Category: Tube
-\    Summary: Receive a new value from the parasite for LASCT
+\    Summary: Implement the write_0346 command (update LASCT)
+\
+\ ------------------------------------------------------------------------------
+\
+\ This routine is run when the parasite sends a write_0346 command. It updates
+\ the I/O processor's value of LASCT to the value sent by the parasite.
 \
 \ ******************************************************************************
 
 .write_0346
 
- JSR tube_get           \ Get the new value for LASCT from the parasite
+ JSR tube_get           \ Get the parameter from the parasite for the command:
+                        \
+                        \   write_0346(value)
+                        \
+                        \ and store it as follows:
+                        \
+                        \   * A = the new value of LASCT
 
- STA LASCT              \ Update the value in LASCT
+ STA LASCT              \ Update the value in LASCT to the value we just
+                        \ received from the parasite
 
  RTS                    \ Return from the subroutine
 
@@ -3240,7 +3534,12 @@ ORG CODE%
 \       Name: read_0346
 \       Type: Subroutine
 \   Category: Tube
-\    Summary: Send the current value of LASCT to the parasite
+\    Summary: Implement the read_0346 command (read LASCT)
+\
+\ ------------------------------------------------------------------------------
+\
+\ This routine is run when the parasite sends a read_0346 command. It sends the
+\ I/O processor's value of LASCT back to the parasite.
 \
 \ ******************************************************************************
 
@@ -3256,17 +3555,31 @@ ORG CODE%
 \       Name: HANGER
 \       Type: Subroutine
 \   Category: Ship hanger
-\    Summary: AJD
+\    Summary: Implement the picture_h command (draw horizontal lines for the
+\             ship hanger floor)
+\
+\ ------------------------------------------------------------------------------
+\
+\ This routine is run when the parasite sends a picture_h command. It draws a
+\ specified number of horizontal lines for the ship hanger's floor, making sure
+\ it draws between the ships when there are multiple ships in the hanger.
 \
 \ ******************************************************************************
 
 .HANGER
 
- JSR tube_get
- STA picture_1
- JSR tube_get
- STA picture_2
- LDA picture_1
+ JSR tube_get           \ Get the parameters from the parasite for the command:
+ STA picture_1          \
+ JSR tube_get           \   picture_h(line_count, multiple_ships)
+ STA picture_2          \
+                        \ and store them as follows:
+                        \
+                        \   * picture_1 = the number of horizontal lines to draw
+                        \
+                        \   * picture_2 = 0 if there is only one ship, non-zero
+                        \                 otherwise
+
+ LDA picture_1          \ AJD
  CLC
  ADC #&60
  LSR A
@@ -3293,10 +3606,32 @@ ORG CODE%
 
  RTS
 
+\ ******************************************************************************
+\
+\       Name: HA2
+\       Type: Subroutine
+\   Category: Ship hanger
+\    Summary: Implement the picture_v command (draw vertical lines for the ship
+\             hanger background)
+\
+\ ------------------------------------------------------------------------------
+\
+\ This routine is run when the parasite sends a picture_v command. It draws the
+\ specified number of vertical lines for the ship hanger's background.
+\
+\ ******************************************************************************
+
 .HA2
 
- JSR tube_get
- AND #&F8
+ JSR tube_get           \ Get the parameter from the parasite for the command:
+                        \
+                        \   picture_v(line_count)
+                        \
+                        \ and store it as follows:
+                        \
+                        \   * A = the number of vertical lines to draw
+
+ AND #&F8               \ AJD
  STA SC
  LDX #&60
  STX SC+&01
@@ -3554,8 +3889,9 @@ ORG CODE%
  BPL print_view
  LDA #3
  JMP print_safe
- \JSR print_safe
- \JMP tube_put
+
+\JSR print_safe         \ These instructions are commented out in the original
+\JMP tube_put           \ source
 
 .print_tone
 
@@ -3584,7 +3920,10 @@ ORG CODE%
  PHA
  TSX
  LDA &103,X
- JSR rawrch
+
+ JSR rawrch             \ Print the character by calling the VDU character
+                        \ output routine in the MOS
+
  PLA
  TAX
  PLA

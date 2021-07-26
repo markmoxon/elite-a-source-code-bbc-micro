@@ -19557,8 +19557,8 @@ LOAD_H% = LOAD% + P% - CODE%
  BEQ l_395a             \ If no key is being pressed, loop back to l_395a to
                         \ keep rotating the ship
 
- JMP BAY                \ Jump to BAY to go to the docking bay (i.e. show the
-                        \ Encyclopedia screen)
+ JMP BAY                \ Otherwise a key was pressed, so jump to BAY to go to
+                        \ the docking bay (i.e. show the Encyclopedia screen)
 
                         \ --- End of added section ---------------------------->
 

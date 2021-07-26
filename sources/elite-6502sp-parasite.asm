@@ -51,7 +51,7 @@ NOSH = 12               \ The maximum number of ships in our local bubble of
 
 NTY = 31                \ The number of different ship types
 
-ship_total = 38         \ AJD
+ship_total = 38         \ The number of different ship blueprints in Elite-A
 
 MSL = 1                 \ Ship type for a missile
 SST = 2                 \ Ship type for a Coriolis space station
@@ -2373,34 +2373,97 @@ ENDIF
 \       Name: tube_write
 \       Type: Subroutine
 \   Category: Tube
-\    Summary: AJD
+\    Summary: As the parasite, send a byte across the Tube to the I/O processor
+\
+\ ------------------------------------------------------------------------------
+\
+\ Tube communication in Elite-A uses the following protocol:
+\
+\ Parasite -> I/O processor
+\
+\   * Uses Tube register R1 to transmit the data across FIFO 1
+\   * The parasite calls tube_write to send a byte to the I/O processor
+\   * The I/O processor calls tube_get to receive that byte from the parasite
+\
+\ I/O processor -> Parasite
+\
+\   * Uses Tube register R2 to transmit the data across FIFO 2
+\   * The I/O processor calls tube_put to send a byte to the parasite
+\   * The parasite calls tube_read to receive that byte from the I/O processor
+\
+\ This routine is called by the parasite to send a byte to the I/O processor.
+\
+\ The code is identical to Acorn's MOS routine that runs on the parasite to
+\ implement OSWRCH across the Tube.
 \
 \ ******************************************************************************
 
 .tube_write
 
- BIT tube_r1s
- NOP
- BVC tube_write
- STA tube_r1d
- RTS
+ BIT tube_r1s           \ Check whether FIFO 1 is available for use, so we can
+                        \ use it to transmit a byte to the I/O processor
+
+ NOP                    \ Pause while the register is checked
+
+ BVC tube_write         \ If FIFO 1 is available for use then the V flag will be
+                        \ set, so this loops back to tube_write until FIFO 1 is
+                        \ available for us to use
+
+ STA tube_r1d           \ FIFO 1 is available for use, so store the value we
+                        \ want to transmit in Tube register R1, so it gets sent
+                        \ to the I/O processor
+
+ RTS                    \ Return from the subroutine
 
 \ ******************************************************************************
 \
 \       Name: tube_read
 \       Type: Subroutine
 \   Category: Tube
-\    Summary: AJD
+\    Summary: As the parasite, fetch a byte that's been sent over the Tube from
+\             the I/O processor
+\
+\ ------------------------------------------------------------------------------
+\
+\ Tube communication in Elite-A uses the following protocol:
+\
+\ Parasite -> I/O processor
+\
+\   * Uses Tube register R1 to transmit the data across FIFO 1
+\   * The parasite calls tube_write to send a byte to the I/O processor
+\   * The I/O processor calls tube_get to receive that byte from the parasite
+\
+\ I/O processor -> Parasite
+\
+\   * Uses Tube register R2 to transmit the data across FIFO 2
+\   * The I/O processor calls tube_put to send a byte to the parasite
+\   * The parasite calls tube_read to receive that byte from the I/O processor
+\
+\ This routine is called by the parasite to receive a byte from the I/O
+\ processor.
+\
+\ The code is identical to Acorn's MOS routine that runs on the parasite to
+\ implement OSWRCH across the Tube (except this uses R2 instead of R1).
 \
 \ ******************************************************************************
 
 .tube_read
 
- BIT tube_r2s
- NOP
- BPL tube_read
- LDA tube_r2d
- RTS
+ BIT tube_r2s           \ Check whether FIFO 2 has received a byte from the I/O
+                        \ processor (which it will have sent by calling its own
+                        \ tube_put routine)
+
+ NOP                    \ Pause while the register is checked
+
+ BPL tube_read          \ If FIFO 2 has received a byte then the N flag will be
+                        \ set, so this loops back to tube_read until the N flag
+                        \ is set, at which point FIFO 2 contains the byte
+                        \ transmitted from the I/O processor
+
+ LDA tube_r2d           \ Fetch the transmitted byte by reading Tube register R2
+                        \ into A
+
+ RTS                    \ Return from the subroutine
 
 \ ******************************************************************************
 \
@@ -16588,6 +16651,7 @@ LOAD_F% = LOAD% + P% - CODE%
 \
 \ ------------------------------------------------------------------------------
 \
+\ BRKV is set to point to BR1 by the loading process.
 \
 \ ******************************************************************************
 
@@ -17430,7 +17494,10 @@ ENDIF
                         \   write_xyc(x, y, char)
                         \
                         \ which will draw the text character in char at column x
-                        \ and row y
+                        \ and row y, though in this case we're sending a null
+                        \ character (char = 0), so this doesn't print anything
+                        \ but just moves the text cursor in the I/O processor
+                        \ to column XC and row YC
 
  LDA XC                 \ Send the first parameter to the I/O processor:
  JSR tube_write         \
@@ -17443,8 +17510,6 @@ ENDIF
  LDA #0                 \ Send the third parameter to the I/O processor:
  JSR tube_write         \
                         \   * char = 0
-                        \
-                        \ AJD
 
  STA XC                 \ Move the text cursor to column 1
 
@@ -34727,14 +34792,17 @@ LOAD_I% = LOAD% + P% - CODE%
 
  DEC MCNT               \ Decrement the main loop counter
 
- JSR check_keys         \ AJD
- CPX #0
+ JSR check_keys         \ Call check_keys to wait until a key is pressed,
+                        \ quitting the game if the game if COPY (pause) and
+                        \ ESCAPE are pressed
 
- BEQ l_395a             \ If no key is being pressed, loop back to l_395a to
-                        \ keep rotating the ship
+ CPX #0                 \ If check_keys returns with X = 0, then we paused the
+ BEQ l_395a             \ game with COPY and then unpaused it with DELETE, in
+                        \ which case loop back to l_395a to keep rotating the
+                        \ ship
 
- JMP BAY                \ Jump to BAY to go to the docking bay (i.e. show the
-                        \ Encyclopedia screen)
+ JMP BAY                \ Otherwise a key was pressed, so jump to BAY to go to
+                        \ the docking bay (i.e. show the Encyclopedia screen)
 
 \ ******************************************************************************
 \
@@ -34878,9 +34946,16 @@ LOAD_I% = LOAD% + P% - CODE%
 
 .l_restart
 
- JSR check_keys         \ AJD
- TXA
- BEQ l_restart
+ JSR check_keys         \ Call check_keys to wait until a key is pressed,
+                        \ quitting the game if the game if COPY (pause) and
+                        \ ESCAPE are pressed
+
+ TXA                    \ Copy the number of the key pressed into A
+
+ BEQ l_restart          \ If check_keys returned with X = 0, then we paused the
+                        \ game with COPY and then unpaused it with DELETE, in
+                        \ which case loop back to l_restart to keep checking for
+                        \ key presses
 
  JMP BAY                \ Jump to BAY to go to the docking bay (i.e. show the
                         \ Encyclopedia screen)
@@ -34890,43 +34965,67 @@ LOAD_I% = LOAD% + P% - CODE%
 \       Name: check_keys
 \       Type: Subroutine
 \   Category: Keyboard
-\    Summary: AJD
+\    Summary: Wait until a key is pressed, quitting the game if the game is
+\             paused and ESCAPE is pressed
+\
+\ ------------------------------------------------------------------------------
+\
+\ Returns:
+\
+\   X                   The key that was pressed, or 0 if we paused the game
+\                       (COPY) and unpaused it again (DELETE)
 \
 \ ******************************************************************************
 
 .check_keys
 
- JSR WSCAN
- JSR RDKEY
- CPX #&69
- BNE not_freeze
+ JSR WSCAN              \ Call WSCAN to wait for the vertical sync
+
+ JSR RDKEY              \ Scan the keyboard for a key press and return the
+                        \ internal key number in X (or 0 for no key press)
+
+ CPX #&69               \ If COPY is not being pressed, jump to not_freeze to
+ BNE not_freeze         \ return the key pressed in X
 
 .freeze_loop
 
- JSR WSCAN
- JSR RDKEY
- CPX #&70
- BNE dont_quit
- JMP DEATH2_FLIGHT
+ JSR WSCAN              \ Call WSCAN to wait for the vertical sync
+
+ JSR RDKEY              \ Scan the keyboard for a key press and return the
+                        \ internal key number in X (or 0 for no key press)
+
+ CPX #&70               \ If ESCAPE is not being pressed, jump to dont_quit to
+ BNE dont_quit          \ skip the next
+
+ JMP DEATH2_FLIGHT      \ ESCAPE is being pressed, so jump to DEATH2_FLIGHT to
+                        \ end the game
 
 .dont_quit
 
- \CPX #&37
- \BNE dont_dump
- \JSR printer
- \dont_dump
- CPX #&59
- BNE freeze_loop
+\CPX #&37               \ These instructions are commented out in the original
+\BNE dont_dump          \ source
+\JSR printer
+\dont_dump
+
+ CPX #&59               \ If DELETE is not being pressed, we are still paused,
+ BNE freeze_loop        \ so loop back up to keep listening for configuration
+                        \ keys, otherwise fall through into the rest of the
+                        \ key detection code, which waits for the key to be
+                        \ released before unpausing the game
 
 .l_release
 
- JSR RDKEY
- BNE l_release
- LDX #0 \ no key was pressed
+ JSR RDKEY              \ Scan the keyboard for a key press and return the
+                        \ internal key number in X (or 0 for no key press)
+
+ BNE l_release          \ If a key is being pressed, loop back to l_release
+                        \ until it is released
+
+ LDX #0                 \ Set X = 0 to indicate no key is being pressed
 
 .not_freeze
 
- RTS
+ RTS                    \ Return from the subroutine
 
 \ ******************************************************************************
 \
@@ -45434,7 +45533,8 @@ LOAD_L% = LOAD% + P% - CODE%
                         \ Fall through into jmp to set the system to the
                         \ current system and return from the subroutine there
 
- JMP jmp                \ AJD
+ JMP jmp                \ Set the current system to the selected system and
+                        \ return from the subroutine using a tail call
 
 \ ******************************************************************************
 \
@@ -46724,43 +46824,43 @@ LOAD_L% = LOAD% + P% - CODE%
 \       Name: DOT
 \       Type: Subroutine
 \   Category: Dashboard
-\    Summary: Draw a dot on the compass
+\    Summary: Draw a dash on the compass
 \
 \ ------------------------------------------------------------------------------
 \
 \ Arguments:
 \
-\   COMX                The screen pixel x-coordinate of the dot
+\   COMX                The screen pixel x-coordinate of the dash
 \
-\   COMY                The screen pixel y-coordinate of the dot
+\   COMY                The screen pixel y-coordinate of the dash
 \
-\   COMC                The colour and thickness of the dot:
+\   COMC                The colour and thickness of the dash:
 \
-\                         * &F0 = a double-height dot in yellow/white, for when
+\                         * &F0 = a double-height dash in yellow/white, for when
 \                           the object in the compass is in front of us
 \
-\                         * &FF = a single-height dot in green/cyan, for when
+\                         * &FF = a single-height dash in green/cyan, for when
 \                           the object in the compass is behind us
 \
 \ ******************************************************************************
 
 .DOT
 
- LDA COMY               \ Set Y1 = COMY, the y-coordinate of the dot
+ LDA COMY               \ Set Y1 = COMY, the y-coordinate of the dash
  STA Y1
 
- LDA COMX               \ Set X1 = COMX, the x-coordinate of the dot
+ LDA COMX               \ Set X1 = COMX, the x-coordinate of the dash
  STA X1
 
- LDA COMC               \ Set COL = COMC, the mode 5 colour byte for the dot
+ LDA COMC               \ Set COL = COMC, the mode 5 colour byte for the dash
  STA COL
 
- CMP #&F0               \ If COL is &F0 then the dot is in front of us and we
- BNE CPIX2              \ want to draw a double-height dot, so if it isn't &F0
-                        \ jump to CPIX2 to draw a single-height dot
+ CMP #&F0               \ If COL is &F0 then the planet/station is in front of
+ BNE CPIX2              \ us and we want to draw a double-height dash, so if it
+                        \ isn't &F0 jump to CPIX2 to draw a single-height dash
 
                         \ Otherwise fall through into CPIX4 to draw a double-
-                        \ height dot
+                        \ height dash
 
 \ ******************************************************************************
 \
@@ -46800,7 +46900,7 @@ LOAD_L% = LOAD% + P% - CODE%
 \       Name: CPIX2
 \       Type: Subroutine
 \   Category: Drawing pixels
-\    Summary: Draw a single-height dot on the dashboard by sending a draw_blob
+\    Summary: Draw a single-height dash on the dashboard by sending a draw_blob
 \             command to the I/O processor
 \
 \ ------------------------------------------------------------------------------
@@ -46821,7 +46921,7 @@ LOAD_L% = LOAD% + P% - CODE%
  JSR tube_write         \
                         \   draw_blob(x, y, colour)
                         \
-                        \ which will draw a dot of the specified colour and
+                        \ which will draw a dash of the specified colour and
                         \ position on the dashboard 
 
  LDA X1                 \ Send the first parameter to the I/O processor:
@@ -50754,7 +50854,9 @@ LOAD_M% = LOAD% + P% - CODE%
 .mix_match
 
  JSR DORND
- CMP #ship_total \ # POSSIBLE SHIPS
+
+ CMP #ship_total        \ The number of different ship blueprints in Elite-A
+
  BCS mix_match
  ASL A
  ASL A
@@ -54335,9 +54437,6 @@ ENDMACRO
  VERTEX   -9,   38,   12,     4,      0,    5,     5,         31    \ Vertex 4
  VERTEX    9,    0,   -8,     5,      1,    6,     6,         31    \ Vertex 5
  VERTEX    9,  -10,  -15,     2,      1,    6,     6,         31    \ Vertex 6
-
-.SHIP_THARGON_VERTICES
-
  VERTEX    9,   -6,  -26,     3,      2,    6,     6,         31    \ Vertex 7
  VERTEX    9,    6,  -26,     4,      3,    6,     6,         31    \ Vertex 8
  VERTEX    9,   10,  -15,     5,      4,    6,     6,         31    \ Vertex 9
@@ -54513,8 +54612,18 @@ ENDMACRO
 \
 \ ------------------------------------------------------------------------------
 \
-\ The ship blueprint for the splinter reuses the edges data from the escape pod,
-\ so the edges data offset is negative.
+\ The ship blueprint for the splinter is supposed to reuse the edges data from
+\ the escape pod, but there is a bug in Elite-A that breaks splinters. The edges
+\ data offset is negative, as it should be, but the offset value is incorrect
+\ and doesn't even point to edge data - in the Tube version, it points into the
+\ middle of the Thargoid's vertex data, while in the disc version it points to a
+\ different place depending on the structure of the individual blueprint file.
+\ In all cases the offset is wrong, so splinters in Elite-A appear as a random
+\ mess of lines. The correct value of the offset should be:
+\
+\   SHIP_ESCAPE_POD_EDGES - SHIP_SPLINTER
+\
+\ split into the high byte and low byte, as it is in the disc version.
 \
 \ ******************************************************************************
 

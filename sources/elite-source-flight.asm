@@ -20671,43 +20671,43 @@ LOAD_E% = LOAD% + P% - CODE%
 \       Name: DOT
 \       Type: Subroutine
 \   Category: Dashboard
-\    Summary: Draw a dot on the compass
+\    Summary: Draw a dash on the compass
 \
 \ ------------------------------------------------------------------------------
 \
 \ Arguments:
 \
-\   COMX                The screen pixel x-coordinate of the dot
+\   COMX                The screen pixel x-coordinate of the dash
 \
-\   COMY                The screen pixel y-coordinate of the dot
+\   COMY                The screen pixel y-coordinate of the dash
 \
-\   COMC                The colour and thickness of the dot:
+\   COMC                The colour and thickness of the dash:
 \
-\                         * &F0 = a double-height dot in yellow/white, for when
+\                         * &F0 = a double-height dash in yellow/white, for when
 \                           the object in the compass is in front of us
 \
-\                         * &FF = a single-height dot in green/cyan, for when
+\                         * &FF = a single-height dash in green/cyan, for when
 \                           the object in the compass is behind us
 \
 \ ******************************************************************************
 
 .DOT
 
- LDA COMY               \ Set Y1 = COMY, the y-coordinate of the dot
+ LDA COMY               \ Set Y1 = COMY, the y-coordinate of the dash
  STA Y1
 
- LDA COMX               \ Set X1 = COMX, the x-coordinate of the dot
+ LDA COMX               \ Set X1 = COMX, the x-coordinate of the dash
  STA X1
 
- LDA COMC               \ Set COL = COMC, the mode 5 colour byte for the dot
+ LDA COMC               \ Set COL = COMC, the mode 5 colour byte for the dash
  STA COL
 
- CMP #&F0               \ If COL is &F0 then the dot is in front of us and we
- BNE CPIX2              \ want to draw a double-height dot, so if it isn't &F0
-                        \ jump to CPIX2 to draw a single-height dot
+ CMP #&F0               \ If COL is &F0 then the planet/station is in front of
+ BNE CPIX2              \ us and we want to draw a double-height dash, so if it
+                        \ isn't &F0 jump to CPIX2 to draw a single-height dash
 
                         \ Otherwise fall through into CPIX4 to draw a double-
-                        \ height dot
+                        \ height dash
 
 \ ******************************************************************************
 \
@@ -20747,7 +20747,7 @@ LOAD_E% = LOAD% + P% - CODE%
 \       Name: CPIX2
 \       Type: Subroutine
 \   Category: Drawing pixels
-\    Summary: Draw a single-height dot on the dashboard
+\    Summary: Draw a single-height dash on the dashboard
 \  Deep dive: Drawing colour pixels in mode 5
 \
 \ ------------------------------------------------------------------------------
@@ -21866,7 +21866,8 @@ LOAD_E% = LOAD% + P% - CODE%
 
  LDA #41                \ Set SC = 41 - T
  SBC T                  \        = 40 + 1 - (X * 8)
- STA SC                 \
+ STA SC                 \        = 48 + 1 - ((X + 1) * 8)
+                        \
                         \ This is the same calculation as in the disc version's
                         \ MSBAR routine, but because the missile number in the
                         \ Elite-A version is in the range 0-3 rather than 1-3,
@@ -28284,7 +28285,7 @@ LOAD_F% = LOAD% + P% - CODE%
 \       Name: b_14
 \       Type: Subroutine
 \   Category: Keyboard
-\    Summary: Check Delta 14b joystick buttons
+\    Summary: Scan the Delta 14b joystick buttons
 \
 \ ------------------------------------------------------------------------------
 \
