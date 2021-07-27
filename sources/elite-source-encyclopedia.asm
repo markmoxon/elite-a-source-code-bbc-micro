@@ -2189,7 +2189,7 @@ BRKV = P% - 2           \ The address of the destination address in the above
 \       Name: LTLI
 \       Type: Variable
 \   Category: Loader
-\    Summary: The OS command string for loading the docked code file 1.D
+\    Summary: The OS command string for loading the docked code in file 1.D
 \
 \ ******************************************************************************
 
@@ -2197,12 +2197,12 @@ BRKV = P% - 2           \ The address of the destination address in the above
 
                         \ --- Mod: Original Acornsoft code removed: ----------->
 
-\ EQUS "L.T.CODE"
+\ EQUS "L.T.CODE"       \ This is short for "*LOAD T.CODE"
 \ EQUB 13
 
                         \ --- And replaced by: -------------------------------->
 
- EQUS "L.1.D"
+ EQUS "L.1.D"           \ This is short for "*LOAD 1.D"
  EQUB 13
 
                         \ --- End of replacement ------------------------------>
@@ -13258,7 +13258,7 @@ LOAD_F% = LOAD% + P% - CODE%
  LDA #0                 \ Set the delay in DLY to 0, so any new in-flight
  STA DLY                \ messages will be shown instantly
 
- JMP me3                \ Jump back into the main spawning loop at TT100
+ JMP me3                \ Jump back into the main spawning loop at me3
 
 \ ******************************************************************************
 \
@@ -19980,7 +19980,7 @@ LOAD_H% = LOAD% + P% - CODE%
 
 .ship_load
 
- EQUS "L.S.0"
+ EQUS "L.S.0"           \ This is short for "*LOAD S.0"
  EQUB 13
 
                         \ --- End of added section ---------------------------->

@@ -132,14 +132,14 @@ LL = 30                 \ The length of lines (in characters) of justified text
 
 LS% = &0CFF             \ The start of the descending ship line heap
 
-tube_r1s = &FEF8        \ The Tube's memory-mapped FIFO registers
-tube_r1d = &FEF9
-tube_r2s = &FEFA
-tube_r2d = &FEFB
-tube_r3s = &FEFC
-tube_r3d = &FEFD
-tube_r4s = &FEFE
-tube_r4d = &FEFF
+tube_r1s = &FEF8        \ The Tube's memory-mapped FIFO 1 status register
+tube_r1d = &FEF9        \ The Tube's memory-mapped FIFO 1 data register
+tube_r2s = &FEFA        \ The Tube's memory-mapped FIFO 2 status register
+tube_r2d = &FEFB        \ The Tube's memory-mapped FIFO 2 data register
+tube_r3s = &FEFC        \ The Tube's memory-mapped FIFO 3 data register
+tube_r3d = &FEFD        \ The Tube's memory-mapped FIFO 3 status register
+tube_r4s = &FEFE        \ The Tube's memory-mapped FIFO 4 data register
+tube_r4d = &FEFF        \ The Tube's memory-mapped FIFO 4 status register
 
 \ ******************************************************************************
 \
@@ -2381,13 +2381,13 @@ ENDIF
 \
 \ Parasite -> I/O processor
 \
-\   * Uses Tube register R1 to transmit the data across FIFO 1
+\   * Uses the FIFO 1 status and data registers to transmit the data
 \   * The parasite calls tube_write to send a byte to the I/O processor
 \   * The I/O processor calls tube_get to receive that byte from the parasite
 \
 \ I/O processor -> Parasite
 \
-\   * Uses Tube register R2 to transmit the data across FIFO 2
+\   * Uses the FIFO 2 status and data registers to transmit the data
 \   * The I/O processor calls tube_put to send a byte to the parasite
 \   * The parasite calls tube_read to receive that byte from the I/O processor
 \
@@ -2401,17 +2401,18 @@ ENDIF
 .tube_write
 
  BIT tube_r1s           \ Check whether FIFO 1 is available for use, so we can
-                        \ use it to transmit a byte to the I/O processor
+                        \ use it to transmit a byte to the I/O processor. We do
+                        \ this by checking bit 6 of the FIFO 1 status register
 
  NOP                    \ Pause while the register is checked
 
- BVC tube_write         \ If FIFO 1 is available for use then the V flag will be
-                        \ set, so this loops back to tube_write until FIFO 1 is
-                        \ available for us to use
+ BVC tube_write         \ If FIFO 1 is available for use then bit 6 of the
+                        \ status register will be set, so this loops back to
+                        \ tube_write until FIFO 1 is available for us to use
 
  STA tube_r1d           \ FIFO 1 is available for use, so store the value we
-                        \ want to transmit in Tube register R1, so it gets sent
-                        \ to the I/O processor
+                        \ want to transmit in the FIFO 1 data register, so it
+                        \ gets sent to the I/O processor
 
  RTS                    \ Return from the subroutine
 
@@ -2429,13 +2430,13 @@ ENDIF
 \
 \ Parasite -> I/O processor
 \
-\   * Uses Tube register R1 to transmit the data across FIFO 1
+\   * Uses the FIFO 1 status and data registers to transmit the data
 \   * The parasite calls tube_write to send a byte to the I/O processor
 \   * The I/O processor calls tube_get to receive that byte from the parasite
 \
 \ I/O processor -> Parasite
 \
-\   * Uses Tube register R2 to transmit the data across FIFO 2
+\   * Uses the FIFO 2 status and data registers to transmit the data
 \   * The I/O processor calls tube_put to send a byte to the parasite
 \   * The parasite calls tube_read to receive that byte from the I/O processor
 \
@@ -2443,7 +2444,7 @@ ENDIF
 \ processor.
 \
 \ The code is identical to Acorn's MOS routine that runs on the parasite to
-\ implement OSWRCH across the Tube (except this uses R2 instead of R1).
+\ implement OSWRCH across the Tube (except this uses FIFO 2 instead of FIFO 1).
 \
 \ ******************************************************************************
 
@@ -2451,17 +2452,18 @@ ENDIF
 
  BIT tube_r2s           \ Check whether FIFO 2 has received a byte from the I/O
                         \ processor (which it will have sent by calling its own
-                        \ tube_put routine)
+                        \ tube_put routine). We do this by checking bit 7 of the
+                        \ FIFO 2 status register
 
  NOP                    \ Pause while the register is checked
 
- BPL tube_read          \ If FIFO 2 has received a byte then the N flag will be
-                        \ set, so this loops back to tube_read until the N flag
-                        \ is set, at which point FIFO 2 contains the byte
-                        \ transmitted from the I/O processor
+ BPL tube_read          \ If FIFO 2 has received a byte then bit 7 of the status
+                        \ register will be set, so this loops back to tube_read
+                        \ until FIFO 2 contains the byte transmitted from the
+                        \ I/O processor
 
- LDA tube_r2d           \ Fetch the transmitted byte by reading Tube register R2
-                        \ into A
+ LDA tube_r2d           \ Fetch the transmitted byte by reading the FIFO 2 data
+                        \ register into A
 
  RTS                    \ Return from the subroutine
 
@@ -7639,21 +7641,44 @@ LOAD_C% = LOAD% +P% - CODE%
 \       Name: HANGER
 \       Type: Subroutine
 \   Category: Ship hanger
-\    Summary: AJD
+\    Summary: Display the ship hanger by sending picture_h and picture_v
+\             commands to the I/O processor
 \
 \ ******************************************************************************
 
 .HANGER
 
- LDX #2
+                        \ We start by drawing the floor
+
+ LDX #2                 \ We start with a loop using a counter in T that goes
+                        \ from 2 to 12, one for each of the 11 horizontal lines
+                        \ in the floor, so set the initial value in X
 
 .HAL1
 
- STX XSAV
- LDA #&82
- LDX XSAV
- STX Q
- JSR DVID4
+ STX XSAV               \ Store the loop counter in XSAV
+
+ LDA #130               \ Set A = 130
+
+ LDX XSAV               \ Retrieve the loop counter from XSAV
+
+ STX Q                  \ Set Q = T
+
+ JSR DVID4              \ Calculate the following:
+                        \
+                        \   (P R) = 256 * A / Q
+                        \         = 256 * 130 / T
+                        \
+                        \ so P = 130 / T, and as the counter T goes from 2 to
+                        \ 12, P goes 65, 43, 32 ... 13, 11, 10, with the
+                        \ difference between two consecutive numbers getting
+                        \ smaller as P gets smaller
+                        \
+                        \ We can use this value as a y-coordinate to draw a set
+                        \ of horizontal lines, spaced out near the bottom of the
+                        \ screen (high value of P, high y-coordinate, lower down
+                        \ the screen) and bunching up towards the horizon (low
+                        \ value of P, low y-coordinate, higher up the screen)
 
  LDA #&9A               \ Send command &9A to the I/O processor:
  JSR tube_write         \
@@ -7671,15 +7696,23 @@ LOAD_C% = LOAD% +P% - CODE%
  JSR tube_write         \
                         \   * multiple_ships = YSAV
 
- LDX XSAV
+ LDX XSAV               \ Fetch the loop counter from XSAV and increment it
  INX
- CPX #&0D
- BCC HAL1
- LDA #&10
+
+ CPX #13                \ If the loop counter is less than 13 (i.e. T = 2 to 12)
+ BCC HAL1               \ then loop back to HAL1 to draw the next line
+
+                        \ The floor is done, so now we move on to the back wall
+
+ LDA #16                \ We want to draw 15 vertical lines, one every 16 pixels
+                        \ across the screen, with the first at x-coordinate 16,
+                        \ so set this in A to act as the x-coordinate of each
+                        \ line as we work our way through them from left to
+                        \ right, incrementing by 16 for each new line
 
 .HAL6
 
- STA XSAV
+ STA XSAV               \ Store this value in XSAV, so we can retrieve it later
 
  LDA #&9B               \ Send command &9B to the I/O processor:
  JSR tube_write         \
@@ -7692,11 +7725,14 @@ LOAD_C% = LOAD% +P% - CODE%
  JSR tube_write         \
                         \   * line_count = XSAV
 
- LDA XSAV
- CLC
- ADC #&10
- BNE HAL6
- RTS
+ LDA XSAV               \ Fetch the x-coordinate of the line we just drew from
+ CLC                    \ XSAV into A, and add 16 so that A contains the
+ ADC #16                \ x-coordinate of the next line to draw
+
+ BNE HAL6               \ Loop back to HAL6 until we have run through the loop
+                        \ 60 times, by which point we are most definitely done
+
+ RTS                    \ Return from the subroutine
 
 \ ******************************************************************************
 \
@@ -15835,6 +15871,11 @@ LOAD_E% = LOAD% + P% - CODE%
 \                       being pressed or joystick movement, as an integer (see
 \                       above)
 \
+\ Other entry points:
+\
+\   chk_dirn            Do not scan the keyboard, instead just set the movement
+\                       variables based on the current state of the key logger
+\
 \ ******************************************************************************
 
 .TT17
@@ -16333,7 +16374,7 @@ LOAD_F% = LOAD% + P% - CODE%
  LDA #0                 \ Set the delay in DLY to 0, so any new in-flight
  STA DLY                \ messages will be shown instantly
 
- JMP me3                \ Jump back into the main spawning loop at TT100
+ JMP me3                \ Jump back into the main spawning loop at me3
 
 \ ******************************************************************************
 \
@@ -16523,37 +16564,52 @@ LOAD_F% = LOAD% + P% - CODE%
 \       Name: INBAY
 \       Type: Subroutine
 \   Category: Loader
-\    Summary: AJD
+\    Summary: Restart the game upon death
 \
 \ ******************************************************************************
 
 .INBAY
 
- \dead entry
- LDA #0
- STA save_lock
- STA dockedp
- JSR BRKBK
- JSR RES2
- JMP BR1
+ LDA #0                 \ Set save_lock to 0 to indicate there are no unsaved
+ STA save_lock          \ changes in the commander file
+
+ STA dockedp            \ Set dockedp to 0 to indicate that we are docked
+
+ JSR BRKBK              \ Call BRKBK to set BRKV to point to the BRBR routine
+
+ JSR RES2               \ Reset a number of flight variables and workspaces
+
+ JMP BR1                \ Jump to BR1 to restart the game
 
 \ ******************************************************************************
 \
 \       Name: boot_in
 \       Type: Subroutine
 \   Category: Loader
-\    Summary: AJD
+\    Summary: The entry point for the game
+\
+\ ------------------------------------------------------------------------------
+\
+\ This routine is at the execution address for the parasite code (&2E93), so
+\ it is called when the parasite code in file 2.T is loaded and run.
 \
 \ ******************************************************************************
 
 .boot_in
 
- LDA #0
- STA save_lock
- STA SSPR
- STA ECMA
- STA dockedp
- JMP BEGIN
+ LDA #0                 \ Set save_lock to 0 to indicate there are no unsaved
+ STA save_lock          \ changes in the commander file
+
+ STA SSPR               \ Set the "space station present" flag to 0, as we are
+                        \ no longer in the space station's safe zone
+
+ STA ECMA               \ Set ECMA to 0 to indicate that no E.C.M. is currently
+                        \ running
+
+ STA dockedp            \ Set dockedp to 0 to indicate that we are docked
+
+ JMP BEGIN              \ Jump to BEGIN to initialise the configuration
+                        \ variables and start the game
 
 \ ******************************************************************************
 \
@@ -16588,22 +16644,6 @@ LOAD_F% = LOAD% + P% - CODE%
 
  BNE BR1                \ If the brkd counter is non-zero, jump to BR1 to
                         \ restart the game
-
-\ ******************************************************************************
-\
-\       Name: DEATH2
-\       Type: Subroutine
-\   Category: Start and end
-\    Summary: Reset most of the game and restart from the title screen
-\
-\ ------------------------------------------------------------------------------
-\
-\ This routine is called following death, and when the game is quit by pressing
-\ ESCAPE when paused.
-\
-\ ******************************************************************************
-
-.DEATH2
 
  JSR RES2               \ Reset a number of flight variables and workspaces
                         \ and fall through into the entry code for the game
@@ -34997,8 +35037,8 @@ LOAD_I% = LOAD% + P% - CODE%
  CPX #&70               \ If ESCAPE is not being pressed, jump to dont_quit to
  BNE dont_quit          \ skip the next
 
- JMP DEATH2_FLIGHT      \ ESCAPE is being pressed, so jump to DEATH2_FLIGHT to
-                        \ end the game
+ JMP DEATH2             \ ESCAPE is being pressed, so jump to DEATH2 to wnd the
+                        \ game
 
 .dont_quit
 
@@ -37797,8 +37837,7 @@ ENDMACRO
 
 .install_ship
 
- \ install ship X in position Y with flags A
- TXA
+ TXA                    \ install ship X in position Y with flags A
  ASL A
  PHA
  ASL A
@@ -37819,43 +37858,53 @@ ENDMACRO
 
  RTS                    \ Return from the subroutine
 
- \printer:
- \ TXA
- \ PHA
- \ LDA #&9C
- \ JSR tube_write
- \ JSR tube_read
- \ PLA
- \ TAX
- \ RTS
+\.printer
+\TXA
+\PHA
+\LDA #&9C
+\JSR tube_write
+\JSR tube_read
+\PLA
+\TAX
+\RTS
 
 \ ******************************************************************************
 \
-\       Name: DOENTRY_FLIGHT
+\       Name: DOENTRYS
 \       Type: Subroutine
 \   Category: Loader
-\    Summary: AJD
+\    Summary: Dock at the space station, show the ship hanger and work out any
+\             mission progression
 \
 \ ******************************************************************************
 
-.DOENTRY_FLIGHT
+.DOENTRYS
 
- JSR RES2
- JMP DOENTRY
+ JSR RES2               \ Reset a number of flight variables and workspaces
+
+ JMP DOENTRY            \ Jump to DOENTRY to dock at the space station
 
 \ ******************************************************************************
 \
-\       Name: DEATH2_FLIGHT
+\       Name: DEATH2
 \       Type: Subroutine
 \   Category: Start and end
-\    Summary: AJD
+\    Summary: Reset most of the game and restart from the title screen
+\
+\ ------------------------------------------------------------------------------
+\
+\ This routine is called following death, and when the game is quit by pressing
+\ ESCAPE when paused.
 \
 \ ******************************************************************************
 
-.DEATH2_FLIGHT
+.DEATH2
 
- JSR RES2
- JMP INBAY
+ JSR RES2               \ Reset a number of flight variables and workspaces
+                        \ and fall through into the entry code for the game
+                        \ to restart from the title screen
+
+ JMP INBAY              \ Jump to INBAY to restart the game following death
 
 \ ******************************************************************************
 \
@@ -38191,7 +38240,7 @@ LOAD_J% = LOAD% + P% - CODE%
 
  LDY #&E0               \ Change the leftmost missile indicator to yellow/white
  DEX                    \ on the missile bar (this call changes the leftmost
- JSR MSBAR_FLIGHT       \ indicator because we set X to the number of missiles
+ JSR MSBARS             \ indicator because we set X to the number of missiles
                         \ in NOMSL above, and the indicators are numbered from
                         \ right to left, starting at 0, so X - 1 is the number
                         \ of the leftmost indicator)
@@ -38481,7 +38530,8 @@ LOAD_J% = LOAD% + P% - CODE%
 
 .MA21
 
- JSR MVEIT_FLIGHT       \ Call MVEIT to move the ship we are processing in space
+ JSR MVEIT_FLIGHT       \ Call MVEIT_FLIGHT to move the ship we are processing in
+                        \ space
 
                         \ Now that we are done processing this ship, we need to
                         \ copy the ship data back from INWK to the correct place
@@ -38736,7 +38786,7 @@ LOAD_J% = LOAD% + P% - CODE%
 
  JSR HFS2               \ Call HFS2 to draw the launch tunnel rings
 
- JMP DOENTRY_FLIGHT     \ Go to the docking bay (i.e. show the ship hanger)
+ JMP DOENTRYS           \ Go to the docking bay (i.e. show the ship hanger)
 
 .MA62
 
@@ -43478,15 +43528,17 @@ LOAD_K% = LOAD% + P% - CODE%
 \       Name: HFS2
 \       Type: Subroutine
 \   Category: Drawing circles
-\    Summary: AJD
+\    Summary: Clear the screen and draw the launch or hyperspace tunnel
 \
 \ ******************************************************************************
 
 .HFS2
 
- STA STP
- JSR TTX66
- JMP HFS1
+ STA STP                \ Store the step size in A
+
+ JSR TTX66              \ Clear the screen and draw a white border
+
+ JMP HFS1               \ Jump to HFS1 to draw the launch or hyperspace tunnel
 
 \ ******************************************************************************
 \
@@ -46481,8 +46533,9 @@ LOAD_L% = LOAD% + P% - CODE%
 
 .NWSTARS
 
- LDA QQ11               \ If this is not a space view, jump to WPSHPS_FLIGHT to
- BNE WPSHPS_FLIGHT      \ skip the initialisation of the SX, SY and SZ tables
+ LDA QQ11               \ If this is not a space view, jump to WPSHPS via
+ BNE WPSHPSS            \ WPSHPSS to skip the initialisation of the SX, SY and
+                        \ SZ tables
 
 \ ******************************************************************************
 \
@@ -46544,16 +46597,22 @@ LOAD_L% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
 \
-\       Name: WPSHPS_FLIGHT
+\       Name: WPSHPSS
 \       Type: Subroutine
 \   Category: Dashboard
-\    Summary: AJD
+\    Summary: Clear the scanner, reset the ball line and sun line heaps
+\
+\ ------------------------------------------------------------------------------
+\
+\ This routine is a duplicate of WPSHPS that is close enough to the NWSTARS
+\ routine for it to be called by a branch instruction.
 \
 \ ******************************************************************************
 
-.WPSHPS_FLIGHT
+.WPSHPSS
 
- JMP WPSHPS
+ JMP WPSHPS             \ Jump to WPSHPS to clear the scanner and reset the ball
+                        \ line and sun line heaps
 
 \ ******************************************************************************
 \
@@ -47645,13 +47704,13 @@ NEXT
 
  STX MSTG               \ Store the target of our missile lock in MSTG
 
- LDX NOMSL              \ Call MSBAR (via MSBAR_FLIGHT) to update the leftmost
+ LDX NOMSL              \ Call MSBAR (via MSBARS) to update the leftmost
  DEX                    \ indicator in the dashboard's missile bar, by calling
- JSR MSBAR_FLIGHT       \ with X = NOMSL - 1 (as the missile indicators are
+ JSR MSBARS             \ with X = NOMSL - 1 (as the missile indicators are
                         \ numbered 0-3 in Elite-A rather than the 1-4 in the
                         \ disc version)
                         \
-                        \ MSBAR_FLIGHT returns with Y = 0
+                        \ MSBARS returns with Y = 0
 
  STY MSAR               \ Set MSAR = 0 to indicate that the leftmost missile
                         \ is no longer seeking a target lock
@@ -47724,22 +47783,51 @@ NEXT
 
 \ ******************************************************************************
 \
-\       Name: MSBAR_FLIGHT
+\       Name: MSBARS
 \       Type: Subroutine
 \   Category: Dashboard
-\    Summary: AJD
+\    Summary: Draw a specific indicator in the dashboard's missile bar
+\
+\ ------------------------------------------------------------------------------
+\
+\ This routine wraps the standard MSBAR routine and ensures that X is never
+\ greater than 3. This enables ships to support large numbers of missiles, while
+\ still only having four indicators on the dashboard.
+\
+\ Arguments:
+\
+\   X                   The number of the missile indicator to update (counting
+\                       from right to left and starting at 0 rather than 1, so
+\                       indicator NOMSL - 1 is the leftmost indicator)
+\
+\   Y                   The colour of the missile indicator:
+\
+\                         * &00 = black (no missile)
+\
+\                         * &0E = red (armed and locked)
+\
+\                         * &E0 = yellow/white (armed)
+\
+\                         * &EE = green/cyan (disarmed)
+\
+\ Returns:
+\
+\   X                   X is preserved
+\
+\   Y                   Y is set to 0
 \
 \ ******************************************************************************
 
-.MSBAR_FLIGHT
+.MSBARS
 
- CPX #4
- BCC n_mok
- LDX #3
+ CPX #4                 \ If X < 4 then jump to n_mok to skip the following
+ BCC n_mok              \ instruction
+
+ LDX #3                 \ Set X = 3 so X is never bigger than 3
 
 .n_mok
 
- JMP MSBAR
+ JMP MSBAR              \ Jump to MSBAR to draw the missile indicator
 
 \ ******************************************************************************
 \
@@ -48945,9 +49033,9 @@ NEXT
  AND #%01111111
  ORA K+2
 
- BNE PL21_FLIGHT        \ If A is non-zero then the two high bytes of K(3 2 1 0)
-                        \ are non-zero, so jump to PL21_FLIGHT to set the C flag
-                        \ and return from the subroutine
+ BNE PL21S              \ If A is non-zero then the two high bytes of K(3 2 1 0)
+                        \ are non-zero, so jump to PL21S to set the C flag and
+                        \ return from the subroutine
 
                         \ We can now just consider K(1 0), as we know the top
                         \ two bytes of K(3 2 1 0) are both 0
@@ -48986,17 +49074,27 @@ NEXT
 
 \ ******************************************************************************
 \
-\       Name: PL21_FLIGHT
+\       Name: PL21S
 \       Type: Subroutine
 \   Category: Drawing planets
-\    Summary: AJD
+\    Summary: Return from a planet/sun-drawing routine with a failure flag
+\
+\ ------------------------------------------------------------------------------
+\
+\ This routine is a duplicate of PL21 that is close enough to the PLS6 routine
+\ for it to be called by a branch instruction.
+\
+\ Set the C flag and return from the subroutine. This is used to return from a
+\ planet- or sun-drawing routine with the C flag indicating an overflow in the
+\ calculation.
 \
 \ ******************************************************************************
 
-.PL21_FLIGHT
+.PL21S
 
- SEC
- RTS
+ SEC                    \ Set the C flag to indicate an overflow
+
+ RTS                    \ Return from the subroutine
 
 \ ******************************************************************************
 \
@@ -49718,10 +49816,8 @@ LOAD_M% = LOAD% + P% - CODE%
 \
 \ ------------------------------------------------------------------------------
 \
-\ This is part of the main game loop. This is where the core loop of the game
-\ lives, and it's in two parts. The shorter loop (just parts 5 and 6) is
-\ iterated when we are docked, while the entire loop from part 1 to 6 iterates
-\ if we are in space.
+\ This is part of the main game loop. This is the loop for when we are in
+\ flight, while the main game loop for when we are docked is at TT100.
 \
 \ This section covers the following:
 \
@@ -49781,45 +49877,83 @@ LOAD_M% = LOAD% + P% - CODE%
 \       Name: Main game loop for flight (Part 2 of 6)
 \       Type: Subroutine
 \   Category: Main loop
-\    Summary: AJD
+\    Summary: Update the main loop counters
 \
 \ ******************************************************************************
 
-.d_3fc0
+.TT100_FLIGHT
 
- JSR M%                 \ Like main game loop 2
- DEC DLY
- BEQ d_3f54
- BPL d_3fcd
- INC DLY
+ JSR M%                 \ Call M% to iterate through the main flight loop
 
-.d_3fcd
+ DEC DLY                \ Decrement the delay counter in DLY, so any in-flight
+                        \ messages get removed once the counter reaches zero
 
- DEC MCNT
- BEQ d_3fd4
+ BEQ me2_flight         \ If DLY is now 0, jump to me2_flight to remove any
+                        \ in-flight message from the space view, and once done,
+                        \ return to me3_flight below, skipping the following
+                        \ two instructions
 
-.d_3fd1
+ BPL me3_flight         \ If DLY is positive, jump to me3_flight to skip the
+                        \ next instruction
 
- JMP MLOOP_FLIGHT
+ INC DLY                \ If we get here, DLY is negative, so we have gone too
+                        \ and need to increment DLY back to 0
 
-.d_3f54
+.me3_flight
 
- LDA MCH
- JSR MESS
- LDA #&00
- STA DLY
- JMP d_3fcd
+ DEC MCNT               \ Decrement the main loop counter in MCNT
+
+ BEQ d_3fd4             \ If the counter has reached zero, which it will do
+                        \ every 256 main loops, skip the next JMP instruction
+                        \ (or to put it another way, if the counter hasn't
+                        \ reached zero, jump down to MLOOP, skipping all the
+                        \ following checks)
+
+.ytq_flight
+
+ JMP MLOOP_FLIGHT       \ Jump down to MLOOP_FLIGHT to do some end-of-loop
+                        \ tidying and restart the main loop
+
+                        \ We only get here once every 256 iterations of the
+                        \ main loop. If we aren't in witchspace and don't
+                        \ already have 3 or more asteroids in our local bubble,
+                        \ then this section has a 13% chance of spawning
+                        \ something benign (the other 87% of the time we jump
+                        \ down to consider spawning cops, pirates and bounty
+                        \ hunters)
+                        \
+                        \ If we are in that 13%, then 50% of the time this will
+                        \ be a Cobra Mk III trader, and the other 50% of the
+                        \ time it will either be an asteroid (98.5% chance) or,
+                        \ very rarely, a cargo canister (1.5% chance)
+
+.me2_flight
+
+ LDA MCH                \ Fetch the token number of the current message into A
+
+ JSR MESS               \ Call MESS to print the token, which will remove it
+                        \ from the screen as printing uses EOR logic
+
+ LDA #0                 \ Set the delay in DLY to 0, so any new in-flight
+ STA DLY                \ messages will be shown instantly
+
+ JMP me3_flight         \ Jump back into the main spawning loop at me3_flight
 
 .d_3fd4
 
- LDA MJ
- BNE d_3fd1
- JSR DORND
- CMP #&33 \ trader fraction
- BCS MTT1
- LDA JUNK
- CMP #&03
- BCS MTT1
+ LDA MJ                 \ If we are in witchspace following a mis-jump, skip the
+ BNE ytq_flight         \ following by jumping down to MLOOP_FLIGHT (via
+                        \ ytq_flight above)
+
+ JSR DORND              \ Set A and X to random numbers
+
+ CMP #51                \ If A >= 51 (80% chance), jump down to MTT1 to skip
+ BCS MTT1               \ the spawning of an asteroid or cargo canister and
+                        \ potentially spawn something else
+
+ LDA JUNK               \ If we already have 3 or more bits of junk in the local
+ CMP #3                 \ bubble, jump down to MTT1 to skip the following and
+ BCS MTT1               \ potentially spawn something else
 
  JSR rand_posn          \ Call rand_posn to set up the INWK workspace for a ship
                         \ in a random ship position
@@ -49827,28 +49961,53 @@ LOAD_M% = LOAD% + P% - CODE%
  BVS MTT4               \ If V flag is set (50% chance), jump up to MTT4 to
                         \ spawn a trader
 
- ORA #&6F
- STA INWK+29
- LDA SSPR
- BNE MLOOPS
- TXA
- BCS d_401e
- AND #&0F
- STA INWK+27
- BCC d_4022
+ ORA #%01101111         \ Take the random number in A and set bits 0-3 and 5-6,
+ STA INWK+29            \ so the result has a 50% chance of being positive or
+                        \ negative, and a 50% chance of bits 0-6 being 127.
+                        \ Storing this number in the roll counter therefore
+                        \ gives our new ship a fast roll speed with a 50%
+                        \ chance of having no damping, plus a 50% chance of
+                        \ rolling clockwise or anti-clockwise
 
-.d_401e
+ LDA SSPR               \ If we are inside the space station safe zone, jump
+ BNE MLOOPS             \ down to MLOOPS to skip the following and potentially
+                        \ spawn something else
 
- ORA #&7F
- STA INWK+30
+ TXA                    \ Set A to the random X we set above, which we haven't
+ BCS MTT2               \ used yet, and if the C flag is set (50% chance) jump
+                        \ down to MTT2 to skip the following
 
-.d_4022
+ AND #15                \ Set the ship speed to our random number, reduced to
+ STA INWK+27            \ the range 0 to 15
 
- JSR DORND
- CMP #&0A
- AND #&01
- ADC #&05
- BNE horde_plain
+ BCC MTT3               \ Jump down to MTT3, skipping the following (this BCC
+                        \ is effectively a JMP as we know the C flag is clear,
+                        \ having passed through the BCS above)
+
+.MTT2
+
+ ORA #%01111111         \ Set bits 0-6 of A to 127, leaving bit 7 as random, so
+ STA INWK+30            \ storing this number in the pitch counter means we have
+                        \ full pitch with no damping, with a 50% chance of
+                        \ pitching up or down
+
+.MTT3
+
+ JSR DORND              \ Set A and X to random numbers
+
+ CMP #10                \ If random A >= 10 (96% of the time), set the C flag
+
+ AND #1                 \ Reduce A to a random number that's 0 or 1
+
+ ADC #OIL               \ Set A = #OIL + A + C, so there's a tiny chance of us
+                        \ spawning a cargo canister (#OIL) and an even chance of
+                        \ us spawning either a boulder (#OIL + 1) or an asteroid
+                        \ (#OIL + 2)
+
+ BNE horde_plain        \ Jump to horde_plain to spawn a whole pack of cargo
+                        \ canisters, boulders or asteroids, according to the
+                        \ value of A (the BNE is effectivey a JMP, as A will
+                        \ never be zero)
 
 \ ******************************************************************************
 \
@@ -50202,59 +50361,82 @@ LOAD_M% = LOAD% + P% - CODE%
 \       Name: Main game loop for flight (Part 5 of 6)
 \       Type: Subroutine
 \   Category: Main loop
-\    Summary: AJD
+\    Summary: Cool down lasers, make calls to update the dashboard
 \
 \ ******************************************************************************
 
 .MLOOP_FLIGHT
 
- LDX #&FF               \ Like main game loop 5
- TXS
- LDX GNTMP
- BEQ d_40e6
+ LDX #&FF               \ Set the stack pointer to &01FF, which is the standard
+ TXS                    \ location for the 6502 stack, so this instruction
+                        \ effectively resets the stack
+
+ LDX GNTMP              \ If the laser temperature in GNTMP is non-zero,
+ BEQ EE20               \ decrement it (i.e. cool it down a bit)
  DEC GNTMP
 
-.d_40e6
+.EE20
 
- JSR DIALS
- JSR COMPAS
- LDA QQ11
- BEQ d_40f8
- \ AND PATG
- \ LSR A
- \ BCS d_40f8
- LDY #&02
- JSR DELAY
- \ JSR WSCAN
+ JSR DIALS              \ Call DIALS to update the dashboard
 
-.d_40f8
+ JSR COMPAS             \ Call COMPAS to update the compass
 
- JSR DOKEY_FLIGHT
- JSR chk_dirn
+ LDA QQ11               \ If this is a space view, skip the following two
+ BEQ P%+7               \ instructions (i.e. jump to JSR TT17 below)
+
+\AND PATG               \ These instructions are commented out in the original
+\LSR A                  \ source
+\BCS d_40f8
+
+ LDY #2                 \ Wait for 2/50 of a second (0.04 seconds), to slow the
+ JSR DELAY              \ main loop down a bit
+
+\JSR WSCAN              \ This instruction is commented out in the original
+                        \ source
+
+ JSR DOKEY_FLIGHT       \ Scan the keyboard for flight controls and pause keys,
+                        \ (or the equivalent on joystick) and update the key
+                        \ logger, setting KL to the key pressed
+
+ JSR chk_dirn           \ Call chk_dirn to set the movement variables based on
+                        \ the current state of the key logger
 
 \ ******************************************************************************
 \
 \       Name: Main game loop for flight (Part 6 of 6)
 \       Type: Subroutine
 \   Category: Main loop
-\    Summary: AJD
+\    Summary: Process non-flight key presses (red function keys, docked keys)
 \
 \ ******************************************************************************
 
 .FRCE_FLIGHT
 
- PHA                \ Like main game loop 6
- LDA QQ22+1
- BNE d_locked
- PLA
- JSR TT102
- JMP d_3fc0
+ PHA                    \ Store the key to "press" in A on the stack
+
+ LDA QQ22+1             \ Fetch QQ22+1, which contains the number that's shown
+                        \ on-screen during hyperspace countdown
+
+ BNE d_locked           \ If the hyperspace countdown is non-zero, jump to
+                        \ d_locked so the key does not get "pressed"
+
+ PLA                    \ Retrieve the key to "press" from the stack into A so
+                        \ we can now process it
+
+ JSR TT102              \ Call TT102 to process the key pressed in A
+
+ JMP TT100_FLIGHT       \ Otherwise jump to TT100_FLIGHT to restart the main
+                        \ loop from the start
 
 .d_locked
 
- PLA
- JSR d_416c
- JMP d_3fc0
+ PLA                    \ Retrieve the key to "press" from the stack into A
+
+ JSR TT107              \ Call TT107 to progress the countdown of the hyperspace
+                        \ counter
+
+ JMP TT100_FLIGHT       \ Jump to TT100_FLIGHT to restart the main loop from
+                        \ the start
 
 \ ******************************************************************************
 \
@@ -50449,43 +50631,48 @@ LOAD_M% = LOAD% + P% - CODE%
  BIT dockedp            \ If bit 7 of dockedp is set, then we are not docked, so
  BMI flying             \ jump to flying
 
- CMP #&20
- BNE fvw
- JSR CTRL
- BMI jump_stay
- JMP RSHIPS
+ CMP #f0                \ If red key f0 was not pressed, jump to fvw to check
+ BNE fvw                \ for the next key
+
+ JSR CTRL               \ Red key f0 was pressed, so check whether CTRL was
+ BMI jump_stay          \ also pressed, and if so, jump to jump_stay to skip the
+                        \ following instruction
+
+ JMP RSHIPS             \ Red key f0 was pressed on its own, so jump to RSHIPS
+                        \ to launch our ship, returning from the subroutine
+                        \ using a tail call
 
 .jump_stay
 
- JMP stay_here
+ JMP stay_here          \ CTRL-f0 was pressed, so jump to stay_here to pay the
+                        \ docking fee and refresh prices
 
 .fvw
 
- CMP #&73
- BNE not_equip
- JMP EQSHP
+ CMP #f3                \ If red key f3 was pressed, jump to EQSHP to show the
+ BNE P%+5               \ Equip Ship screen, returning from the subroutine using
+ JMP EQSHP              \ a tail call
 
-.not_equip
+ CMP #f1                \ If red key f1 was pressed, jump to TT219 to show the
+ BNE P%+5               \ Buy Cargo screen, returning from the subroutine using
+ JMP TT219              \ a tail call
 
- CMP #&71
- BNE not_buy
- JMP TT219
+ CMP #&47               \ If "@" was not pressed, skip to nosave
+ BNE nosave
 
-.not_buy
+ JSR SVE                \ "@" was pressed, so call SVE to show the disc access
+                        \ menu
 
- CMP #&47
- BNE not_disk
- JSR SVE
- BCC not_loaded
- JMP QU5
+ BCC P%+5               \ If the C flag was set by SVE, then we loaded a new
+ JMP QU5                \ commander file, so jump to QU5 to restart the game
+                        \ with the newly loaded commander
 
-.not_loaded
+ JMP BAY                \ Otherwise the C flag was clear, so jump to BAY to go
+                        \ to the docking bay (i.e. show the Status Mode screen)
 
- JMP BAY
+.nosave
 
-.not_disk
-
- CMP #&72
+ CMP #&72               \ AJD
  BNE not_sell
  JMP TT208
 
@@ -50521,7 +50708,7 @@ LOAD_M% = LOAD% + P% - CODE%
  BNE NWDAV5
  JMP hyp
 
-.d_416c
+.TT107
 
  LDA QQ22+1
  BEQ d_418a
@@ -50785,7 +50972,7 @@ LOAD_M% = LOAD% + P% - CODE%
  LDX #31                \ Set the screen to show all 31 text rows, which shows
  JSR DET1               \ the dashboard
 
- JMP DEATH2_FLIGHT      \ Jump to DEATH2_FLIGHT to reset and restart the game
+ JMP DEATH2             \ Jump to DEATH2 to reset and restart the game
 
 \ ******************************************************************************
 \
@@ -51499,7 +51686,7 @@ LOAD_M% = LOAD% + P% - CODE%
 
  LDA #&96               \ Send command &96 to the I/O processor:
  JSR tube_write         \
-                        \   =scan_y(key_offset, delta14b)
+                        \   =scan_y(key_offset, delta_14b)
                         \
                         \ which will update the roll or pitch dashboard
                         \ indicator to the specified value
@@ -51763,7 +51950,7 @@ LOAD_M% = LOAD% + P% - CODE%
 \       Name: DK4_FLIGHT
 \       Type: Subroutine
 \   Category: Keyboard
-\    Summary: AJD
+\    Summary: AJD (flight version)
 \
 \ ******************************************************************************
 
@@ -51801,14 +51988,15 @@ LOAD_M% = LOAD% + P% - CODE%
 
  CPX #&70
  BNE d_4586
- JMP DEATH2_FLIGHT
+ JMP DEATH2
 
 .d_4586
 
- \ CPX #&37
- \ BNE dont_dump
- \ JSR printer
- \dont_dump
+\CPX #&37
+\BNE dont_dump
+\JSR printer
+\.dont_dump
+
  CPX #&59
  BNE d_455f
 
@@ -52060,43 +52248,68 @@ LOAD_M% = LOAD% + P% - CODE%
 \       Name: LL9_FLIGHT
 \       Type: Subroutine
 \   Category: Drawing ships
-\    Summary: AJD
+\    Summary: Draw a ship (flight version)
 \
 \ ******************************************************************************
 
-.d_4889
+.LL25
 
- JMP PLANET
+ JMP PLANET             \ Jump to the PLANET routine, returning from the
+                        \ subroutine using a tail call
 
 .LL9_FLIGHT
 
- LDA TYPE
- BMI d_4889
- JMP LL9
+ LDA TYPE               \ If the ship type is negative then this indicates a
+ BMI LL25               \ planet or sun, so jump to PLANET via LL25 above
+
+ JMP LL9                \ Jump to LL9 to draw the ship
 
 \ ******************************************************************************
 \
-\       Name: MVEIT_FLIGHT
+\       Name: MVEIT_FLIGHT (Part 1 of 6)
 \       Type: Subroutine
 \   Category: Moving
-\    Summary: AJD
+\    Summary: Move current ship (flight version)
 \
 \ ******************************************************************************
 
 .MVEIT_FLIGHT
 
- LDA INWK+31
- AND #&A0
- BNE MV30
- LDA MCNT
- EOR XSAV
- AND #&0F
- BNE P%+5
- JSR TIDY
+ LDA INWK+31            \ If bit 5 or 7 of ship byte #31 is set, jump to MV30
+ AND #%10100000         \ as the ship is either exploding or has been killed, so
+ BNE MV30               \ we don't need to tidy its orientation vectors or apply
+                        \ tactics
+
+ LDA MCNT               \ Fetch the main loop counter
+
+ EOR XSAV               \ Fetch the slot number of the ship we are moving, EOR
+ AND #15                \ with the loop counter and apply mod 15 to the result.
+ BNE P%+5               \ The result will be zero when "counter mod 15" matches
+                        \ the slot number, so this makes sure we call TIDY 12
+                        \ times every 16 main loop iterations, like this:
+                        \
+                        \   Iteration 0, tidy the ship in slot 0
+                        \   Iteration 1, tidy the ship in slot 1
+                        \   Iteration 2, tidy the ship in slot 2
+                        \     ...
+                        \   Iteration 11, tidy the ship in slot 11
+                        \   Iteration 12, do nothing
+                        \   Iteration 13, do nothing
+                        \   Iteration 14, do nothing
+                        \   Iteration 15, do nothing
+                        \   Iteration 16, tidy the ship in slot 0
+                        \     ...
+                        \
+                        \ and so on
+
+ JSR TIDY               \ Call TIDY to tidy up the orientation vectors, to
+                        \ prevent the ship from getting elongated and out of
+                        \ shape due to the imprecise nature of trigonometry
+                        \ in assembly language
 
 \ ******************************************************************************
 \
-\       Name: MVEIT (Part 2 of 9)
+\       Name: MVEIT_FLIGHT (Part 2 of 6)
 \       Type: Subroutine
 \   Category: Moving
 \    Summary: Move current ship: Call tactics routine, remove ship from scanner
@@ -52166,7 +52379,7 @@ LOAD_M% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
 \
-\       Name: MVEIT (Part 3 of 9)
+\       Name: MVEIT_FLIGHT (Part 3 of 6)
 \       Type: Subroutine
 \   Category: Moving
 \    Summary: Move current ship: Move ship forward according to its speed
@@ -52243,7 +52456,7 @@ LOAD_M% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
 \
-\       Name: MVEIT (Part 4 of 9)
+\       Name: MVEIT_FLIGHT (Part 4 of 6)
 \       Type: Subroutine
 \   Category: Moving
 \    Summary: Move current ship: Apply acceleration to ship's speed as a one-off
@@ -52283,7 +52496,7 @@ LOAD_M% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
 \
-\       Name: MVEIT (Part 5 of 9)
+\       Name: MVEIT_FLIGHT (Part 5 of 6)
 \       Type: Subroutine
 \   Category: Moving
 \    Summary: Move current ship: Rotate ship's location by our pitch and roll
@@ -52492,7 +52705,7 @@ LOAD_M% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
 \
-\       Name: MVEIT (Part 6 of 9)
+\       Name: MVEIT_FLIGHT (Part 6 of 6)
 \       Type: Subroutine
 \   Category: Moving
 \    Summary: Move current ship: Move the ship in space according to our speed
@@ -53253,7 +53466,7 @@ LOAD_M% = LOAD% + P% - CODE%
  JSR FLIP               \ Swap the x- and y-coordinates of all the stardust
                         \ particles
 
- JSR WPSHPS_FLIGHT      \ Wipe all the ships from the scanner
+ JSR WPSHPSS            \ Wipe all the ships from the scanner
 
                         \ And fall through into SIGHT to draw the laser
                         \ crosshairs
@@ -57236,11 +57449,6 @@ ENDMACRO
  EQUW SHIP_IGUANA
  EQUW SHIP_SHUTTLE_MK_2
  EQUW SHIP_CHAMELEON
-
- EQUW 0
-
-.ship_data
-
  EQUW 0
 
 \ ******************************************************************************
@@ -57251,6 +57459,10 @@ ENDMACRO
 \    Summary: Ship blueprints lookup table for flight in Elite-A
 \
 \ ******************************************************************************
+
+.ship_data
+
+ EQUW 0
 
 .XX21
 

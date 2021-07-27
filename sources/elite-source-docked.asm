@@ -17211,7 +17211,7 @@ LOAD_D% = LOAD% + P% - CODE%
 \       Name: RDLI
 \       Type: Variable
 \   Category: Loader
-\    Summary: The OS command string for loading the flight code file 1.F
+\    Summary: The OS command string for running the flight code in file 1.F
 \
 \ ******************************************************************************
 
@@ -17219,12 +17219,12 @@ LOAD_D% = LOAD% + P% - CODE%
 
                         \ --- Mod: Original Acornsoft code removed: ----------->
 
-\ EQUS "R.D.CODE"
+\ EQUS "R.D.CODE"       \ This is short for "*RUN D.CODE"
 \ EQUB 13
 
                         \ --- And replaced by: -------------------------------->
 
- EQUS "R.1.F"
+ EQUS "R.1.F"           \ This is short for "*RUN 1.F"
  EQUB 13
 
                         \ --- End of replacement ------------------------------>
@@ -22020,7 +22020,7 @@ LOAD_F% = LOAD% + P% - CODE%
  LDA #0                 \ Set the delay in DLY to 0, so any new in-flight
  STA DLY                \ messages will be shown instantly
 
- JMP me3                \ Jump back into the main spawning loop at TT100
+ JMP me3                \ Jump back into the main spawning loop at me3
 
 \ ******************************************************************************
 \

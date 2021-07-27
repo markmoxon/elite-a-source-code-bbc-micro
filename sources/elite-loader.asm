@@ -967,7 +967,8 @@ ENDMACRO
 .tube_run
 
  EQUS "R.2.H"           \ The OS command for running the Tube version's I/O
- EQUB 13                \ processor code in 2.H
+ EQUB 13                \ processor code in file 2.H (this command is short for
+                        \ "*RUN 2.H")
 
 \.tube_400              \ These instructions are commented out in the original
 \EQUD &0400             \ source
@@ -1208,7 +1209,7 @@ ORG &0B00
 
                         \ --- Mod: Original Acornsoft code removed: ----------->
 
-\ EQUS "L.T.CODE"
+\ EQUS "L.T.CODE"       \ This is short for "*LOAD T.CODE"
 \ EQUB 13
 \
 \ EQUB &44, &6F, &65    \ These bytes appear to be unused
@@ -1226,7 +1227,7 @@ ORG &0B00
 
                         \ --- And replaced by: -------------------------------->
 
- EQUS "L.1.D"
+ EQUS "L.1.D"           \ This is short for "*LOAD 1.D"
  EQUB 13
 
                         \ --- End of replacement ------------------------------>
@@ -2979,8 +2980,6 @@ ORG &DD00
 \ ******************************************************************************
 
                         \ --- Mod: Whole section added for Elite-A: ----------->
-
- \ restore ROM workspace
 
 .restorews
 

@@ -63,14 +63,14 @@ VIA = &FE00             \ Memory-mapped space for accessing internal hardware,
                         \ such as the video ULA, 6845 CRTC and 6522 VIAs (also
                         \ known as SHEILA)
 
-tube_r1s = &FEE0        \ The Tube's memory-mapped FIFO registers
-tube_r1d = &FEE1
-tube_r2s = &FEE2
-tube_r2d = &FEE3
-tube_r3s = &FEE4
-tube_r3d = &FEE5
-tube_r4s = &FEE6
-tube_r4d = &FEE7
+tube_r1s = &FEE0        \ The Tube's memory-mapped FIFO 1 status register
+tube_r1d = &FEE1        \ The Tube's memory-mapped FIFO 1 data register
+tube_r2s = &FEE2        \ The Tube's memory-mapped FIFO 2 status register
+tube_r2d = &FEE3        \ The Tube's memory-mapped FIFO 2 data register
+tube_r3s = &FEE4        \ The Tube's memory-mapped FIFO 3 status register
+tube_r3d = &FEE5        \ The Tube's memory-mapped FIFO 3 data register
+tube_r4s = &FEE6        \ The Tube's memory-mapped FIFO 4 status register
+tube_r4d = &FEE7        \ The Tube's memory-mapped FIFO 4 data register
 
 rawrch = &FFBC          \ The address of the MOS's VDU character output routine
 
@@ -143,20 +143,20 @@ ORG &0090
                         \ line-drawing routines
 
 .bar_3
-.save_a
+.K3
 .COL
 .X2
 
  SKIP 1                 \ Temporary storage, typically used for x-coordinates in
                         \ line-drawing routines
 
-.save_x
+.XSAV2
 .Y2
 
  SKIP 1                 \ Temporary storage, typically used for y-coordinates in
                         \ line-drawing routines
 
-.save_y
+.YSAV2
 .P
 
  SKIP 1                 \ Temporary storage, used in a number of places
@@ -263,13 +263,15 @@ ORG CODE%
 \       Name: tube_run
 \       Type: Variable
 \   Category: Tube
-\    Summary: AJD
+\    Summary: The OS command string for running the Tube version's parasite code
+\             in file 2.T
 \
 \ ******************************************************************************
 
 .tube_run
 
- EQUS "R.2.T", &0D
+ EQUS "R.2.T"           \ This is short for "*RUN 2.T"
+ EQUB 13
 
 \ ******************************************************************************
 \
@@ -285,13 +287,13 @@ ORG CODE%
 \
 \ Parasite -> I/O processor
 \
-\   * Uses Tube register R1 to transmit the data across FIFO 1
+\   * Uses the FIFO 1 status and data registers to transmit the data
 \   * The parasite calls tube_write to send a byte to the I/O processor
 \   * The I/O processor calls tube_get to receive that byte from the parasite
 \
 \ I/O processor -> Parasite
 \
-\   * Uses Tube register R2 to transmit the data across FIFO 2
+\   * Uses the FIFO 2 status and data registers to transmit the data
 \   * The I/O processor calls tube_put to send a byte to the parasite
 \   * The parasite calls tube_read to receive that byte from the I/O processor
 \
@@ -307,17 +309,18 @@ ORG CODE%
 
  BIT tube_r1s           \ Check whether FIFO 1 has received a byte from the
                         \ parasite (which it will have sent by calling its own
-                        \ tube_write routine)
+                        \ tube_write routine). We do this by checking bit 7 of the
+                        \ FIFO 1 status register
 
  NOP                    \ Pause while the register is checked
 
- BPL tube_get           \ If FIFO 1 has received a byte then the N flag will be
-                        \ set, so this loops back to tube_get until the N flag
-                        \ is set, at which point FIFO 1 contains the byte
-                        \ transmitted from the parasite
+ BPL tube_get           \ If FIFO 1 has received a byte then bit 7 of the status
+                        \ register will be set, so this loops back to tube_get
+                        \ until FIFO 1 contains the byte transmitted from the
+                        \ parasite
 
- LDA tube_r1d           \ Fetch the transmitted byte by reading Tube register R1
-                        \ into A
+ LDA tube_r1d           \ Fetch the transmitted byte by reading the FIFO 1 data
+                        \ register into A
 
  RTS                    \ Return from the subroutine
 
@@ -334,37 +337,38 @@ ORG CODE%
 \
 \ Parasite -> I/O processor
 \
-\   * Uses Tube register R1 to transmit the data across FIFO 1
+\   * Uses the FIFO 1 status and data registers to transmit the data
 \   * The parasite calls tube_write to send a byte to the I/O processor
 \   * The I/O processor calls tube_get to receive that byte from the parasite
 \
 \ I/O processor -> Parasite
 \
-\   * Uses Tube register R2 to transmit the data across FIFO 2
+\   * Uses the FIFO 2 status and data registers to transmit the data
 \   * The I/O processor calls tube_put to send a byte to the parasite
 \   * The parasite calls tube_read to receive that byte from the I/O processor
 \
 \ This routine is called by the I/O processor to send a byte to the parasite.
 \
 \ The code is identical to Acorn's MOS routine that runs on the parasite to
-\ implement OSWRCH across the Tube (except this uses R2 instead of R1).
+\ implement OSWRCH across the Tube (except this uses FIFO 2 instead of FIFO 1).
 \
 \ ******************************************************************************
 
 .tube_put
 
  BIT tube_r2s           \ Check whether FIFO 2 is available for use, so we can
-                        \ use it to transmit a byte to the parasite
+                        \ use it to transmit a byte to the I/O processor. We do
+                        \ this by checking bit 6 of the FIFO 2 status register
 
  NOP                    \ Pause while the register is checked
 
- BVC tube_put           \ If FIFO 2 is available for use then the V flag will be
-                        \ set, so this loops back to tube_put until FIFO 2 is
-                        \ available for us to use
+ BVC tube_put           \ If FIFO 2 is available for use then bit 6 of the
+                        \ status register will be set, so this loops back to
+                        \ tube_put until FIFO 2 is available for us to use
 
  STA tube_r2d           \ FIFO 2 is available for use, so store the value we
-                        \ want to transmit in Tube register R2, so it gets sent
-                        \ to the parasite
+                        \ want to transmit in the FIFO 2 data register, so it
+                        \ gets sent to the parasite
 
  RTS                    \ Return from the subroutine
 
@@ -373,68 +377,117 @@ ORG CODE%
 \       Name: tube_func
 \       Type: Subroutine
 \   Category: Tube
-\    Summary: AJD
+\    Summary: Call the corresponding routine for a Tube command
+\
+\ ------------------------------------------------------------------------------
+\
+\ This routine calls the routine given in the tube_table lookup table for the
+\ Tube command specified in A.
+\
+\ Arguments:
+\
+\   A                   The command number (&80-&FF)
 \
 \ ******************************************************************************
 
 .tube_func
 
- CMP #&9D  \ OUT
- BCS return  \ OUT
- ASL A
- TAY
- LDA tube_table,Y
- STA tube_jump+&01
- LDA tube_table+&01,Y
- STA tube_jump+&02
+ CMP #&9D               \ If A >= &9D then there isn't a corresponding command,
+ BCS return             \ so jump to return to return from the subroutine
+
+ ASL A                  \ Set Y = A * 2, so we can use it as an index into the
+ TAY                    \ lookup table, which has two bytes per entry
+                        \
+                        \ Note that this also shifts bit 7 off the end, so the
+                        \ result is actually ((A - 128) * 2), which means if A
+                        \ starts out at &80, then Y = 0, if A is &81, Y = 2,
+                        \ and so on
+
+ LDA tube_table,Y       \ Copy the Y-th address from tube_table over the &FFFF
+ STA tube_jump+1        \ address of the JMP instruction below, so this modifies
+ LDA tube_table+1,Y     \ the instruction so that it jumps to the coresponding
+ STA tube_jump+2        \ address from the lookup table
 
 .tube_jump
 
- JMP &FFFF
+ JMP &FFFF              \ Jump to the routine whose address we just copied from
+                        \ the tube_table, which will be the routine that
+                        \ corresponds to this Tube command, and return from the
+                        \ subroutine using a tail call
 
 .return
 
- RTS
+ RTS                    \ Return from the subroutine
 
 \ ******************************************************************************
 \
 \       Name: tube_table
 \       Type: Variable
 \   Category: Tube
-\    Summary: AJD
+\    Summary: Lookup table for Tube commands sent from the parasite to the I/O
+\             processor
+\
+\ ------------------------------------------------------------------------------
+\
+\ This table lists all the commands that can be sent from the parasite to the
+\ I/O processor.
+\
+\ The hexadecimal number is the number of that command, and is the first byte to
+\ be sent over the Tube. The parameters shown in brackets are sent next, in the
+\ order shown, and if the command returns a result (denoted by a leading = sign
+\ in the command name), then this is then sent back to the parasite.
+\
+\ Consider the following command, which scans the keyboard or Delta 14b keypad
+\ for a specific flight key:
+\
+\   =scan_y(key_offset, delta_14b)
+\
+\ To run this command, the parasite would first send a value of &96 to the I/O
+\ processor (using the tube_write routine), then it would send the key_offset
+\ and delta_14b parameters (in that order), and finally it would wait for the
+\ result to be returned by calling the tube_read routine.
+\
+\ Meanwhile, at the other end, the receipt of the &96 value would trigger a call
+\ to the routine in WRCHV, which is the tube_wrch routine. This routine sees
+\ that the received value is greater than 127, so it calls the tube_func
+\ routine, which then looks up the corresponding routine from this table
+\ (routine scan_y in this case) and calls it to implement the command. The
+\ scan_y routine then fetches the parameter values using the tube_get routine,
+\ performs the keyboard or keypad scan according to the command's parameters,
+\ and finally sends the result back to the parasite using the tube_put routine.
 \
 \ ******************************************************************************
 
 .tube_table
 
- EQUW LL30
- EQUW HLOIN
- EQUW PIXEL
- EQUW clr_scrn
- EQUW CLYNS
- EQUW sync_in
- EQUW DILX
- EQUW DIL2
- EQUW MSBAR
- EQUW scan_fire
- EQUW write_fe4e
- EQUW scan_xin
- EQUW scan_10in
- EQUW get_key
- EQUW CHPR
- EQUW write_pod
- EQUW draw_blob
- EQUW draw_tail
- EQUW SPBLB
- EQUW ECBLB
- EQUW UNWISE
- EQUW DET1
- EQUW scan_y
- EQUW write_0346
- EQUW read_0346
- EQUW return
- EQUW HANGER
- EQUW HA2
+ EQUW LL30              \ &80   draw_line(x1, y1, x2, y2)
+ EQUW HLOIN             \ &81   draw_hline(x1, y1, x2)
+ EQUW PIXEL             \ &82   draw_pixel(x, y, distance)
+ EQUW clr_scrn          \ &83   clr_scrn()
+ EQUW CLYNS             \ &84   clr_line()
+ EQUW sync_in           \ &85   =sync_in()
+ EQUW DILX              \ &86   draw_bar(value, colour, screen_low, screen_high)
+ EQUW DIL2              \ &87   draw_angle(value, screen_low, screen_high)
+ EQUW MSBAR             \ &88   put_missle(number, colour)
+ EQUW scan_fire         \ &89   =scan_fire()
+ EQUW write_fe4e        \ &8A   =write_fe4e(value)
+ EQUW scan_xin          \ &8B   =scan_xin(key_number)
+ EQUW scan_10in         \ &8C   =scan_10in()
+ EQUW get_key           \ &8D   =get_key()
+ EQUW CHPR              \ &8E   write_xyc(x, y, char)
+ EQUW write_pod         \ &8F   write_pod(escp, hfx)
+ EQUW draw_blob         \ &90   draw_blob(x, y, colour)
+ EQUW draw_tail         \ &91   draw_tail(x, y, base_colour, alt_colour, height)
+ EQUW SPBLB             \ &92   draw_S()
+ EQUW ECBLB             \ &93   draw_E()
+ EQUW UNWISE            \ &94   draw_mode()
+ EQUW DET1              \ &95   write_crtc(rows)
+ EQUW scan_y            \ &96   =scan_y(key_offset, delta_14b)
+ EQUW write_0346        \ &97   write_0346(value)
+ EQUW read_0346         \ &98   =read_0346()
+ EQUW return            \ &99   return()
+ EQUW HANGER            \ &9A   picture_h(line_count, multiple_ships)
+ EQUW HA2               \ &9B   picture_v(line_count)
 
 \ ******************************************************************************
 \
@@ -446,8 +499,8 @@ ORG CODE%
 \ ------------------------------------------------------------------------------
 \
 \ This routine is run when the parasite sends a write_xyc command. It writes a
-\ text character to the screen at specified position, or (if the character is
-\ null) it just moves the text cursor.
+\ text character to the screen at specified position. If the character is null
+\ (i.e. A = 0) then it just moves the text cursor and doesn't print anything.
 \
 \ ******************************************************************************
 
@@ -465,119 +518,356 @@ ORG CODE%
                         \
                         \   * A = the character to print
 
- CMP #32                \ AJD
- BNE tube_wrch
+ CMP #' '               \ If we are not printing a space character, jump to
+ BNE tube_wrch          \ tube_wrch to print the character, returning from the
+                        \ subroutine using a tail call
 
- LDA #9
+ LDA #9                 \ We are printing a space, so set A to 9 and fall
+                        \ through into tube_wrch to print the character
+
+\ ******************************************************************************
+\
+\       Name: tube_wrch
+\       Type: Subroutine
+\   Category: Text
+\    Summary: Write characters to the screen and process Tube commands from the
+\             parasite
+\
+\ ------------------------------------------------------------------------------
+\
+\ This routine prints characters to the screen.
+\
+\ It also processes Tube commands from the parasite, because those commands are
+\ sent over the Tube via FIFO 1, and Acorn's Tube host code considers arrivals
+\ on FIFO 1 to be OSWRCH commands executed on the parasite, and calls the WRCHV
+\ handler to implement the call. We already set WRCHV to point here in the
+\ tube_elite routine, so when the I/O processor receives a byte from the
+\ parasite over FIFO 1, the Tube host code calls this routine.
+\
+\ Arguments:
+\
+\   A                   The character to be printed. Can be one of the
+\                       following:
+\
+\                         * 0 (do not print anything)
+\
+\                         * 9 (space)
+\
+\                         * 10 (line feed)
+\
+\                         * 13 (carriage return)
+\
+\                         * 32 (space, but do not print anything if it's on
+\                           column 17, so the disc catalogue will fit on-screen)
+\
+\                         * 33-126 (ASCII capital letters, numbers and
+\                           punctuation)
+\
+\                         * 127 (delete the character to the left of the text
+\                           cursor and move the cursor to the left)
+\
+\                         * 128-255 (Tube command &80-&FF)
+\
+\ ******************************************************************************
 
 .tube_wrch
 
- STA save_a             \ Like CHPR
- STX save_x
- STY save_y
- TAY
- BMI tube_func
- BEQ wrch_quit
- CMP #&7F
- BEQ wrch_del
- CMP #32
- BEQ wrch_spc
- BCS wrch_char
- CMP #&0A
- BEQ wrch_nl
- CMP #&0D
- BEQ wrch_cr
- CMP #&09
- BNE wrch_quit
+ STA K3                 \ Store the A, X and Y registers, so we can restore
+ STX XSAV2              \ them at the end (so they don't get changed by this
+ STY YSAV2              \ routine)
+
+ TAY                    \ Copy the character to be printed from A into Y
+
+ BMI tube_func          \ If bit 7 of the character is set (i.e. A >= 128) then
+                        \ this is a Tube command rather than a printable
+                        \ character, so jump to tube_func to process it
+
+ BEQ wrch_quit          \ If A = 0 then there is no character to print, so jump
+                        \ to wrch_quit to return from the subroutine
+
+ CMP #127               \ If A = 127 then this is a delete character, so jump
+ BEQ wrch_del           \ to wrch_del to erase the character to the left of the
+                        \ cursor
+
+ CMP #32                \ If A = 32 then this is a space character, so jump to
+ BEQ wrch_spc           \ wrch_spc to move the text cursor to the right
+
+ BCS wrch_char          \ If this is an ASCII character (A > 32), jump to
+                        \ wrch_char to print the character on-screen
+
+ CMP #10                \ If A = 10 then this is a line feed, so jump to wrch_nl
+ BEQ wrch_nl            \ to move the text cursor down a line
+
+ CMP #13                \ If A = 13 then this is a carriage return, so jump to
+ BEQ wrch_cr            \ wrch_cr to move the text cursor to the start of the
+                        \ line
+
+ CMP #9                 \ If A <> 9 then this isn't a character we can print,
+ BNE wrch_quit          \ so jump to wrch_quit to return from the subroutine
+
+                        \ If we get here then A = 9, which is a space character
 
 .wrch_tab
 
- INC XC
+ INC XC                 \ Move the text cursor to the right by 1 column
 
 .wrch_quit
 
- LDY save_y
- LDX save_x
- LDA save_a
- RTS
+ LDY YSAV2              \ Restore the values of the A, X and Y registers that we
+ LDX XSAV2              \ saved above
+ LDA K3
+
+ RTS                    \ Return from the subroutine
 
 .wrch_char
 
- JSR wrch_font
- INC XC
- LDY #&07
+                        \ If we get here then we want to print the character in
+                        \ A onto the screen
+
+ JSR wrch_font          \ Call wrch_font to set the following:
+                        \
+                        \   * font(1 0) points to the character definition of
+                        \     the character to print in A
+                        \
+                        \   * SC(1 0) points to the screen address where we
+                        \     should print the character
+
+                        \ Now to actually print the character
+
+ INC XC                 \ Once we print the character, we want to move the text
+                        \ cursor to the right, so we do this by incrementing
+                        \ XC. Note that this doesn't have anything to do
+                        \ with the actual printing below, we're just updating
+                        \ the cursor so it's in the right position following
+                        \ the print
+
+ LDY #7                 \ We want to print the 8 bytes of character data to the
+                        \ screen (one byte per row), so set up a counter in Y
+                        \ to count these bytes
 
 .wrch_or
 
- LDA (font),Y
- EOR (SC),Y \ORA (SC),Y
- STA (SC),Y
- DEY
- BPL wrch_or
- BMI wrch_quit
+ LDA (font),Y           \ The character definition is at font(1 0), so load the
+                        \ Y-th byte from font(1 0), which will contain the
+                        \ bitmap for the Y-th row of the character
+
+ EOR (SC),Y             \ If we EOR this value with the existing screen
+                        \ contents, then it's reversible (so reprinting the
+                        \ same character in the same place will revert the
+                        \ screen to what it looked like before we printed
+                        \ anything); this means that printing a white pixel on
+                        \ onto a white background results in a black pixel, but
+                        \ that's a small price to pay for easily erasable text
+
+ STA (SC),Y             \ Store the Y-th byte at the screen address for this
+                        \ character location
+
+ DEY                    \ Decrement the loop counter
+
+ BPL wrch_or            \ Loop back for the next byte to print to the screen
+
+ BMI wrch_quit          \ Jump to wrch_quit to return from the subroutine (the
+                        \ BMI is effectively a JMP as we just passed through a
+                        \ BPL instruction)
 
 .wrch_del
 
- DEC XC
- LDA #&20
- JSR wrch_font
- LDY #&07
+                        \ If we get here then we want to delete the character to
+                        \ the left of the text cursor, which we can do by
+                        \ printing a space over the top of it
+
+ DEC XC                 \ We want to delete the character to the left of the
+                        \ text cursor and move the cursor back one, so let's
+                        \ do that by decrementing YC. Note that this doesn't
+                        \ have anything to do with the actual deletion below,
+                        \ we're just updating the cursor so it's in the right
+                        \ position following the deletion
+
+ LDA #' '               \ Call wrch_font to set the following:
+ JSR wrch_font          \
+                        \   * font(1 0) points to the character definition of
+                        \     the space character
+                        \
+                        \   * SC(1 0) points to the screen address where we
+                        \     should print the space
+
+ LDY #7                 \ We want to print the 8 bytes of character data to the
+                        \ screen (one byte per row), so set up a counter in Y
+                        \ to count these bytes
 
 .wrch_sta
 
- LDA (font),Y
- STA (SC),Y
- DEY
- BPL wrch_sta
- BMI wrch_quit
+ LDA (font),Y           \ The character definition is at font(1 0), so load the
+                        \ Y-th byte from font(1 0), which will contain the
+                        \ bitmap for the Y-th row of the space character
+
+ STA (SC),Y             \ Store the Y-th byte at the screen address for this
+                        \ character location
+
+ DEY                    \ Decrement the loop counter
+
+ BPL wrch_sta           \ Loop back for the next byte to print to the screen
+
+ BMI wrch_quit          \ Jump to wrch_quit to return from the subroutine (the
+                        \ BMI is effectively a JMP as we just passed through a
+                        \ BPL instruction)
 
 .wrch_nl
 
- INC YC
- JMP wrch_quit
+                        \ If we get here then we want to print a line feed
+
+ INC YC                 \ Print a line feed, simply by incrementing the row
+                        \ number (y-coordinate) of the text cursor, which is
+                        \ stored in YC
+
+ JMP wrch_quit          \ Jump to wrch_quit to return from the subroutine
 
 .wrch_cr
 
- LDA #&01
- STA XC
- JMP wrch_quit
+                        \ If we get here then we want to print a carriage return
+
+ LDA #1                 \ Print a carriage return by returning the text cursor
+ STA XC                 \ to the start of the line, i.e. column 1
+
+ JMP wrch_quit          \ Jump to wrch_quit to return from the subroutine
 
 .wrch_spc
 
- LDA XC
- CMP #&20
- BEQ wrch_quit
- CMP #&11
- BEQ wrch_quit
- BNE wrch_tab
+                        \ If we get here then we want to print a space, but not
+                        \ if we are in column 17 (this is so the disc catalogue
+                        \ will fit on-screen, and performs the same duty as the
+                        \ CATF flag in the disc version)
+
+ LDA XC                 \ If the text cursor is in column 32, then we are
+ CMP #32                \ already at the right edge of the screen and can't
+ BEQ wrch_quit          \ print a space, so jump to wrch_quit to return from
+                        \ the subroutine
+
+ CMP #17                \ If the text cursor is in column 17, then we want to
+ BEQ wrch_quit          \ omit this space, so jump to wrch_quit to return from
+                        \ the subroutine
+
+ BNE wrch_tab           \ Otherwise jump to wrch_tab to move the cursor right by
+                        \ one character (the BNE is effectively a JMP as we just
+                        \ passed through a BEQ)
+
+\ ******************************************************************************
+\
+\       Name: wrch_font
+\       Type: Subroutine
+\   Category: Text
+\    Summary: Set the font and screen address for printing characters on-screen
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   A                   The character to be printed (ASCII)
+\
+\ Returns:
+\
+\   font(1 0)           The address of the MOS character definition of the
+\                       character to be printed
+\
+\   SC(1 0)             The screen address where we should print the character
+\                       (i.e. the screen address of the text cursor)
+\
+\ ******************************************************************************
 
 .wrch_font
 
- LDX #&BF
- ASL A
- ASL A
+ LDX #&BF               \ Set X to point to the first font page in ROM minus 1,
+                        \ which is &C0 - 1, or &BF
+
+ ASL A                  \ If bit 6 of the character is clear (A is 32-63)
+ ASL A                  \ then skip the following instruction
  BCC font_c0
- LDX #&C1
+
+ LDX #&C1               \ A is 64-126, so set X to point to page &C1
 
 .font_c0
 
- ASL A
- BCC font_cl
- INX
+ ASL A                  \ If bit 5 of the character is clear (A is 64-95)
+ BCC font_cl            \ then skip the following instruction
+
+ INX                    \ Increment X
+                        \
+                        \ By this point, we started with X = &BF, and then
+                        \ we did the following:
+                        \
+                        \   If A = 32-63:   skip    then INX  so X = &C0
+                        \   If A = 64-95:   X = &C1 then skip so X = &C1
+                        \   If A = 96-126:  X = &C1 then INX  so X = &C2
+                        \
+                        \ In other words, X points to the relevant page. But
+                        \ what about the value of A? That gets shifted to the
+                        \ left three times during the above code, which
+                        \ multiplies the number by 8 but also drops bits 7, 6
+                        \ and 5 in the process. Look at the above binary
+                        \ figures and you can see that if we cleared bits 5-7,
+                        \ then that would change 32-53 to 0-31... but it would
+                        \ do exactly the same to 64-95 and 96-125. And because
+                        \ we also multiply this figure by 8, A now points to
+                        \ the start of the character's definition within its
+                        \ page (because there are 8 bytes per character
+                        \ definition)
+                        \
+                        \ Or, to put it another way, X contains the high byte
+                        \ (the page) of the address of the definition that we
+                        \ want, while A contains the low byte (the offset into
+                        \ the page) of the address
 
 .font_cl
 
- STA font
- STX font+1
- LDA XC
- ASL A
- ASL A
- ASL A
- STA SC
- LDA YC
- ORA #&60
- STA SC+&01
- RTS
+ STA font               \ Store the address of this character's definition in
+ STX font+1             \ font(1 0)
+
+ LDA XC                 \ Fetch XC, the x-coordinate (column) of the text cursor
+                        \ into A
+
+ ASL A                  \ Multiply A by 8, and store in SC. As each character is
+ ASL A                  \ 8 pixels wide, and the special screen mode Elite uses
+ ASL A                  \ for the top part of the screen is 256 pixels across
+ STA SC                 \ with one bit per pixel, this value is not only the
+                        \ screen address offset of the text cursor from the left
+                        \ side of the screen, it's also the least significant
+                        \ byte of the screen address where we want to print this
+                        \ character, as each row of on-screen pixels corresponds
+                        \ to one page. To put this more explicitly, the screen
+                        \ starts at &6000, so the text rows are stored in screen
+                        \ memory like this:
+                        \
+                        \   Row 1: &6000 - &60FF    YC = 1, XC = 0 to 31
+                        \   Row 2: &6100 - &61FF    YC = 2, XC = 0 to 31
+                        \   Row 3: &6200 - &62FF    YC = 3, XC = 0 to 31
+                        \
+                        \ and so on
+
+ LDA YC                 \ Fetch YC, the y-coordinate (row) of the text cursor
+
+ ORA #&60               \ We already stored the least significant byte
+                        \ of this screen address in SC above (see the STA SC
+                        \ instruction above), so all we need is the most
+                        \ significant byte. As mentioned above, in Elite's
+                        \ square mode 4 screen, each row of text on-screen
+                        \ takes up exactly one page, so the first row is page
+                        \ &60xx, the second row is page &61xx, so we can get
+                        \ the page for character (XC, YC) by OR'ing with &60.
+                        \ To see this in action, consider that our two values
+                        \ are, in binary:
+                        \
+                        \   YC is between:  %00000000
+                        \             and:  %00010111
+                        \          &60 is:  %01100000
+                        \
+                        \ so YC OR &60 effectively adds &60 to YC, giving us
+                        \ the page number that we want
+
+ STA SC+1               \ Store the page number of the destination screen
+                        \ location in SC+1, so SC now points to the full screen
+                        \ location where this character should go
+
+ RTS                    \ Return from the subroutine
 
 \ ******************************************************************************
 \
@@ -2892,68 +3182,156 @@ ORG CODE%
 
 .SC48
 
- JSR CPIX2              \ Like SC48 in SCAN AJD
- DEC Y1
- JSR CPIX2
+ JSR CPIX2              \ Call CPIX2 to draw a single-height dash at (X1, Y1)
 
- LDA CTWOS+1,X
- AND COL \ iff
- STA COL
+ DEC Y1                 \ Decrement the y-coordinate in Y1 so the next call to
+                        \ CPIX2 draws another dash on the line above, resulting
+                        \ in a double-height dash
 
- LDA CTWOS+1,X
- AND Y2 \ COL2?
- STA Y2
- LDX P
- BEQ RTS
- BMI d_55db
+ JSR CPIX2              \ Call CPIX2 to draw a single-height dash at (X1, Y1)
+
+                        \ These calls also leave the following variables set up
+                        \ for the dot's top-right pixel, the last pixel to be
+                        \ drawn by the second call to CPIX2:
+                        \
+                        \   SC(1 0) = screen address of the pixel's character
+                        \             block
+                        \
+                        \   Y = number of the character row containing the pixel
+                        \
+                        \   X = the pixel's number (0-3) in that row
+                        \
+                        \ We can use there as the starting point for drawing the
+                        \ stick, if there is one
+
+ LDA CTWOS+1,X          \ Load the same mode 5 1-pixel byte that we just used
+ AND COL                \ for the top-right pixel, mask it with the base colour
+ STA COL                \ in COL, and store the result in COL, so we can use it
+                        \ as the character row byte for the base colour stripes
+                        \ in the stick
+
+ LDA CTWOS+1,X          \ Load the same mode 5 1-pixel byte that we just used
+ AND Y2                 \ for the top-right pixel, mask it with the EOR colour
+ STA Y2                 \ in Y2, and store the result in Y2, so we can use it
+                        \ as the character row byte for the alternate colour
+                        \ stripes in the stick
+
+ LDX P                  \ Fetch the stick height from P into X
+
+ BEQ RTS                \ If the stick height is zero, then there is no stick to
+                        \ draw, so return from the subroutine (as RTS contains
+                        \ an RTS)
+
+ BMI RTS+1              \ If the stick height in A is negative, jump down to
+                        \ RTS+1
 
 .VLL1
 
- DEY
- BPL VL1
- LDY #&07
- DEC SC+&01
+                        \ If we get here then the stick length is positive (so
+                        \ the dot is below the ellipse and the stick is above
+                        \ the dot, and we need to draw the stick upwards from
+                        \ the dot)
+
+ DEY                    \ We want to draw the stick upwards, so decrement the
+                        \ pixel row in Y
+
+ BPL VL1                \ If Y is still positive then it correctly points at the
+                        \ line above, so jump to VL1 to skip the following
+
+ LDY #7                 \ We just decremented Y up through the top of the
+                        \ character block, so we need to move it to the last row
+                        \ in the character above, so set Y to 7, the number of
+                        \ the last row
+
+ DEC SC+1               \ Decrement the high byte of the screen address to move
+                        \ to the character block above
 
 .VL1
 
- LDA COL
- EOR Y2 \ iff drawpix_4
- STA COL
- EOR (SC),Y
- STA (SC),Y
- DEX
- BNE VLL1
+ LDA COL                \ Set A to the character row byte for the stick, which
+                        \ we stored in COL above, and which has the same pixel
+                        \ pattern as the bottom-right pixel of the dot (so the
+                        \ stick comes out of the right side of the dot)
+
+ EOR Y2                 \ Apply the alternating colour in Y2 to the stick
+
+ STA COL                \ Update the value in COL so the alternating colour is
+                        \ applied every other row (as doing an EOR twice
+                        \ reverses it)
+
+ EOR (SC),Y             \ Draw the stick on row Y of the character block using
+ STA (SC),Y             \ EOR logic
+
+ DEX                    \ Decrement the (positive) stick height in X
+
+ BNE VLL1               \ If we still have more stick to draw, jump up to VLL1
+                        \ to draw the next pixel
 
 .RTS
 
- RTS
+ RTS                    \ Return from the subroutine
 
-.d_55db
+                        \ If we get here then the stick length is negative (so
+                        \ the dot is above the ellipse and the stick is below
+                        \ the dot, and we need to draw the stick downwards from
+                        \ the dot)
 
- INY
- CPY #&08
- BNE VLL2
- LDY #&00
- INC SC+&01
+ INY                    \ We want to draw the stick downwards, so we first
+                        \ increment the row counter so that it's pointing to the
+                        \ bottom-right pixel in the dot (as opposed to the top-
+                        \ right pixel that the call to CPIX4 finished on)
+
+ CPY #8                 \ If the row number in Y is less than 8, then it
+ BNE P%+6               \ correctly points at the next line down, so jump to
+                        \ VLL2 to skip the following
+
+ LDY #0                 \ We just incremented Y down through the bottom of the
+                        \ character block, so we need to move it to the first
+                        \ row in the character below, so set Y to 0, the number
+                        \ of the first row
+
+ INC SC+1               \ Increment the high byte of the screen address to move
+                        \ to the character block above
 
 .VLL2
 
- INY
- CPY #&08
- BNE VL2
- LDY #&00
- INC SC+&01
+ INY                    \ We want to draw the stick itself, heading downwards,
+                        \ so increment the pixel row in Y
+
+ CPY #8                 \ If the row number in Y is less than 8, then it
+ BNE VL2                \ correctly points at the next line down, so jump to
+                        \ VL2 to skip the following
+
+ LDY #0                 \ We just incremented Y down through the bottom of the
+                        \ character block, so we need to move it to the first
+                        \ row in the character below, so set Y to 0, the number
+                        \ of the first row
+
+ INC SC+1               \ Increment the high byte of the screen address to move
+                        \ to the character block above
 
 .VL2
 
- LDA COL
- EOR Y2 \ iff drawpix_4
- STA COL
- EOR (SC),Y
- STA (SC),Y
- INX
- BNE VLL2
- RTS
+ LDA COL                \ Set A to the character row byte for the stick, which
+                        \ we stored in COL above, and which has the same pixel
+                        \ pattern as the bottom-right pixel of the dot (so the
+                        \ stick comes out of the right side of the dot)
+
+ EOR Y2                 \ Apply the alternating colour in Y2 to the stick
+
+ STA COL                \ Update the value in COL so the alternating colour is
+                        \ applied every other row (as doing an EOR twice
+                        \ reverses it)
+
+ EOR (SC),Y             \ Draw the stick on row Y of the character block using
+ STA (SC),Y             \ EOR logic
+
+ INX                    \ Increment the (negative) stick height in X
+
+ BNE VLL2               \ If we still have more stick to draw, jump up to VLL2
+                        \ to draw the next pixel
+
+ RTS                    \ Return from the subroutine
 
 \ ******************************************************************************
 \
@@ -3459,7 +3837,7 @@ ORG CODE%
 
  JSR tube_get           \ Get the parameters from the parasite for the command:
  TAY                    \
- JSR tube_get           \   =scan_y(key_offset, delta14b)
+ JSR tube_get           \   =scan_y(key_offset, delta_14b)
                         \
                         \ and store them as follows:
                         \
@@ -3579,32 +3957,76 @@ ORG CODE%
                         \   * picture_2 = 0 if there is only one ship, non-zero
                         \                 otherwise
 
- LDA picture_1          \ AJD
- CLC
- ADC #&60
+ LDA picture_1          \ Set Y = #Y + picture_1
+ CLC                    \
+ ADC #Y                 \ where #Y is the y-coordinate of the centre of the
+                        \ screen, so Y is now the horizontal pixel row of the
+                        \ line we want to draw to display the hanger floor
+
+ LSR A                  \ Set A = A >> 3
  LSR A
  LSR A
- LSR A
- ORA #&60
- STA SC+&01
- LDA picture_1
- AND #&07
- STA SC
- LDY #&00
- JSR HAS2
- LDA #&04
- LDY #&F8
- JSR HAS3
- LDY picture_2
- BEQ l_2045
- JSR HAS2
- LDY #&80
- LDA #&40
- JSR HAS3
+
+ ORA #&60               \ Each character row in Elite's screen mode takes up one
+                        \ page in memory (256 bytes), so we now OR with &60 to
+                        \ get the page containing the line
+
+ STA SC+1               \ Store the screen page in the high byte of SC(1 0)
+
+ LDA picture_1          \ Set the low byte of SC(1 0) to the y-coordinate mod 7,
+ AND #7                 \ which determines the pixel row in the character block
+ STA SC                 \ we need to draw in (as each character row is 8 pixels
+                        \ high), so SC(1 0) now points to the address of the
+                        \ start of the horizontal line we want to draw
+
+ LDY #0                 \ Set Y = 0 so the call to HAS2 starts drawing the line
+                        \ in the first byte of the screen row, at the left edge
+                        \ of the screen
+
+ JSR HAS2               \ Draw a horizontal line from the left edge of the
+                        \ screen, going right until we bump into something
+                        \ already on-screen, at which point stop drawing
+
+ LDA #%00000100         \ Now to draw the same line but from the right edge of
+                        \ the screen, so set a pixel mask in A to check the
+                        \ sixth pixel of the last byte, so we skip the 2-pixel
+                        \ scren border at the right edge of the screen
+
+ LDY #248               \ Set Y = 248 so the call to HAS3 starts drawing the
+                        \ line in the last byte of the screen row, at the right
+                        \ edge of the screen
+
+ JSR HAS3               \ Draw a horizontal line from the right edge of the
+                        \ screen, going left until we bump into something
+                        \ already on-screen, at which point stop drawing
+
+ LDY picture_2          \ Fetch the value of picture_2, which is 0 if there is
+                        \ only one ship
+
+ BEQ l_2045             \ If picture_2 is zero, jump to l_2045 to return from
+                        \ the subroutine as there is only one ship in the
+                        \ hanger, so we are done
+
+ JSR HAS2               \ Call HAS2 to a line to the right, starting with the
+                        \ third pixel of the pixel row at screen address SC(1 0)
+
+ LDY #128               \ We now draw the line from the centre of the screen
+                        \ to the left. SC(1 0) points to the start address of
+                        \ the screen row, so we set Y to 128 so the call to
+                        \ HAS3 starts drawing from halfway along the row (i.e.
+                        \ from the centre of the screen)
+
+ LDA #%01000000         \ We want to start drawing from the second pixel, to
+                        \ avoid the border, so we set a pixel mask accordingly
+
+ JSR HAS3               \ Call HAS3, which draws a line from the halfway point
+                        \ across the left half of the screen, going left until
+                        \ we bump into something already on-screen, at which
+                        \ point it stops drawing
 
 .l_2045
 
- RTS
+ RTS                    \ Return from the subroutine
 
 \ ******************************************************************************
 \
@@ -3631,31 +4053,57 @@ ORG CODE%
                         \
                         \   * A = the number of vertical lines to draw
 
- AND #&F8               \ AJD
- STA SC
- LDX #&60
- STX SC+&01
- LDX #&80
- LDY #&01
+ AND #%11111000         \ Each character block contains 8 pixel rows, so to get
+                        \ the address of the first byte in the character block
+                        \ that we need to draw into, as an offset from the start
+                        \ of the row, we clear bits 0-2
+
+ STA SC                 \ Set the low byte of SC(1 0) to this value
+
+ LDX #&60               \ Set the high byte of SC(1 0) to &60, the high byte of
+ STX SC+1               \ the start of screen, so SC(1 0) now points to the
+                        \ address where the line starts
+
+ LDX #%10000000         \ Set a mask in X to the first pixel the 8-pixel byte
+
+ LDY #1                 \ We are going to start drawing the line from the second
+                        \ pixel from the top (to avoid drawing on the 1-pixel
+                        \ border), so set Y to 1 to point to the second row in
+                        \ the first character block
 
 .HAL7
 
- TXA
- AND (SC),Y
- BNE HA6
- TXA
- ORA (SC),Y
- STA (SC),Y
- INY
- CPY #&08
- BNE HAL7
- INC SC+&01
- LDY #&00
- BEQ HAL7
+ TXA                    \ Copy the pixel mask to A
+
+ AND (SC),Y             \ If the pixel we want to draw is non-zero (using A as a
+ BNE HA6                \ mask), then this means it already contains something,
+                        \ so jump to HA6 to stop drawing this line
+
+ TXA                    \ Copy the pixel mask to A again
+
+ ORA (SC),Y             \ OR the byte with the current contents of screen
+                        \ memory, so the pixel we want is set
+
+ STA (SC),Y             \ Store the updated pixel in screen memory
+
+ INY                    \ Increment Y to point to the next row in the character
+                        \ block, i.e. the next pixel down
+
+ CPY #8                 \ Loop back to HAL7 to draw this next pixel until we
+ BNE HAL7               \ have drawn all 8 in the character block
+
+ INC SC+1               \ Point SC(1 0) to the next page in memory, i.e. the
+                        \ next character row
+
+ LDY #0                 \ Set Y = 0 to point to the first row in this character
+                        \ block
+
+ BEQ HAL7               \ Loop back up to HAL7 to keep drawing the line (this
+                        \ BEQ is effectively a JMP as Y is always zero)
 
 .HA6
 
- RTS
+ RTS                    \ Return from the subroutine
 
 \ ******************************************************************************
 \
