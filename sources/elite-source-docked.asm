@@ -2492,8 +2492,8 @@ BRKV = P% - 2           \ The address of the destination address in the above
 
  LDA QQ1                \ Set A = the current system's galactic y-coordinate
 
- CMP #72
- BNE EN4                \ If A <> 72 then jump to EN4
+ CMP #72                \ If A <> 72 then jump to EN4
+ BNE EN4
 
  JMP DEBRIEF2           \ If we get here, mission 1 is complete and no longer in
                         \ progress, mission 2 has started and we have picked up
@@ -23056,8 +23056,9 @@ ENDIF
                         \ to 96, which is the distance at which the rotating
                         \ ship starts out before coming towards us
 
- LDX #127
- STX INWK+29            \ Set roll counter = 127, so don't dampen the roll
+ LDX #127               \ Set roll counter = 127, so don't dampen the roll
+ STX INWK+29
+
  STX INWK+30            \ Set pitch counter = 127, so don't dampen the pitch
 
                         \ --- Mod: Original Acornsoft code removed: ----------->
@@ -23651,12 +23652,12 @@ ENDIF
 
                         \ --- Mod: Original Acornsoft code removed: ----------->
 
-\ EQUS "DE.:0.E.1234567"
+\ EQUS "DE.:0.E.1234567"\ Short for "*DELETE :0.E.1234567"
 \ EQUB 13
 
                         \ --- And replaced by: -------------------------------->
 
- EQUS "DEL.:0.E.1234567"
+ EQUS "DEL.:0.E.1234567"    \ Short for "*DELETE :0.E.1234567"
  EQUB 13
 
                         \ --- End of replacement ------------------------------>
@@ -37546,7 +37547,7 @@ ENDMACRO
  FACE        0,        0,     -160,         31    \ Face 8
  FACE        0,      -27,        0,         31    \ Face 9
 
- SKIP 171
+ SKIP 171               \ These bytes appear to be unused
 
 \ ******************************************************************************
 \

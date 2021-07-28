@@ -2609,8 +2609,8 @@ ENDIF
 
  LDA QQ1                \ Set A = the current system's galactic y-coordinate
 
- CMP #72
- BNE EN4                \ If A <> 72 then jump to EN4
+ CMP #72                \ If A <> 72 then jump to EN4
+ BNE EN4
 
  JMP DEBRIEF2           \ If we get here, mission 1 is complete and no longer in
                         \ progress, mission 2 has started and we have picked up
@@ -6470,7 +6470,8 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 \       Name: CHPR
 \       Type: Subroutine
 \   Category: Text
-\    Summary: Print a character at the text cursor by poking into screen memory
+\    Summary: Print a character at the text cursor by sending a write_xyc
+\             command to the I/O processor
 \  Deep dive: Drawing text
 \
 \ ------------------------------------------------------------------------------
@@ -7059,7 +7060,8 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 \       Name: DILX
 \       Type: Subroutine
 \   Category: Dashboard
-\    Summary: Update a bar-based indicator on the dashboard
+\    Summary: Update a bar-based indicator on the dashboard by sending a
+\             draw_bar command to the I/O processor
 \  Deep dive: The dashboard indicators
 \
 \ ------------------------------------------------------------------------------
@@ -9294,7 +9296,8 @@ LOAD_C% = LOAD% +P% - CODE%
 \       Name: TTX66
 \       Type: Subroutine
 \   Category: Utility routines
-\    Summary: Clear the top part of the screen and draw a white border
+\    Summary: Clear the top part of the screen and draw a white border by
+\             sending a clr_scrn command to the I/O processor
 \
 \ ------------------------------------------------------------------------------
 \
@@ -16697,13 +16700,13 @@ LOAD_F% = LOAD% + P% - CODE%
 
 .BR1
 
- LDX #10                \ AJD
- LDY #11
- JSR install_ship
+ LDX #10                \ Install ship number 10 (Cobra Mk III) into blueprint
+ LDY #CYL               \ position #CYL (11) so it can be shown on the first
+ JSR install_ship       \ title screen
 
- LDX #19
- LDY #19
- JSR install_ship
+ LDX #19                \ Install ship number 19 (Krait) into blueprint position
+ LDY #KRA               \ #KRA (19) so it can be shown on the second title
+ JSR install_ship       \ screen
 
  LDX #&FF               \ Set the stack pointer to &01FF, which is the standard
  TXS                    \ location for the 6502 stack, so this instruction
@@ -16906,8 +16909,9 @@ ENDIF
                         \ to 96, which is the distance at which the rotating
                         \ ship starts out before coming towards us
 
- LDX #127
- STX INWK+29            \ Set roll counter = 127, so don't dampen the roll
+ LDX #127               \ Set roll counter = 127, so don't dampen the roll
+ STX INWK+29
+
  STX INWK+30            \ Set pitch counter = 127, so don't dampen the pitch
 
  INX                    \ Set QQ17 to 128 (so bit 7 is set) to switch to
@@ -17482,7 +17486,7 @@ ENDIF
 
 .DELI
 
- EQUS "DEL.:0.E.1234567"
+ EQUS "DEL.:0.E.1234567"    \ Short for "*DELETE :0.E.1234567"
  EQUB 13
 
 \ ******************************************************************************
@@ -18316,8 +18320,8 @@ ENDIF
                         \ which will scan the keyboard
 
  JSR tube_read          \ Set A to the response from the I/O processor, which
-                        \ will either be the internal key number of the key being
-                        \ pressed, or 0 if no key is being pressed
+                        \ will either be the internal key number of the key
+                        \ being pressed, or 0 if no key is being pressed
 
  TAX                    \ Copy the response into X
 
@@ -34757,11 +34761,12 @@ LOAD_I% = LOAD% + P% - CODE%
 
  JSR MT1                \ Switch to ALL CAPS when printing extended tokens
 
- LDX TYPE
- LDA ship_posn,X        \ AJD
- TAX
- LDY #0
- JSR install_ship
+ LDX TYPE               \ Set X to the number of this ship type within the
+ LDA ship_posn,X        \ ship_list table, so we can pass it to the install_ship
+ TAX                    \ routine
+
+ LDY #0                 \ Install this ship into blueprint position 0 so we can
+ JSR install_ship       \ show it on the ship card
 
  LDX TYPE               \ Set A to the cards's title x-coordinate (fetched from
  LDA ship_centre,X      \ the ship_centre table)
@@ -34798,10 +34803,14 @@ LOAD_I% = LOAD% + P% - CODE%
  LDA TYPE               \ Call write_card to display the ship card for the ship
  JSR write_card         \ type in TYPE
 
- LDA #0                 \ AJD
- JSR NWSHP
+ LDA #0                 \ Add a new ship of type 0 to the local bubble (or, in
+ JSR NWSHP              \ this case, the encyclopedia ship card), which will
+                        \ spawn the correct shop for this ship card, as we
+                        \ installed the correct blueprint into position 0 with
+                        \ the call to install_ship above
 
- JSR l_release
+ JSR l_release          \ Call l_release so if a key is currently being pressed,
+                        \ we wait until it is released before continuing
 
 .l_395a
 
@@ -35015,6 +35024,11 @@ LOAD_I% = LOAD% + P% - CODE%
 \   X                   The key that was pressed, or 0 if we paused the game
 \                       (COPY) and unpaused it again (DELETE)
 \
+\ Other entry points:
+\
+\   l_release           If a key is currently being pressed, wait until it is
+\                       released
+\
 \ ******************************************************************************
 
 .check_keys
@@ -35045,7 +35059,7 @@ LOAD_I% = LOAD% + P% - CODE%
 \CPX #&37               \ These instructions are commented out in the original
 \BNE dont_dump          \ source
 \JSR printer
-\dont_dump
+\.dont_dump
 
  CPX #&59               \ If DELETE is not being pressed, we are still paused,
  BNE freeze_loop        \ so loop back up to keep listening for configuration
@@ -35313,8 +35327,7 @@ LOAD_I% = LOAD% + P% - CODE%
 \       Name: ship_posn
 \       Type: Variable
 \   Category: Encyclopedia
-\    Summary: Table containing the number of this ship blueprint within the ship
-\             blueprints file that we load for each ship card
+\    Summary: Table containing the number of this ship in the ship_list table
 \
 \ ******************************************************************************
 
@@ -37831,35 +37844,94 @@ ENDMACRO
 \       Name: install_ship
 \       Type: Subroutine
 \   Category: Universe
-\    Summary: AJD
+\    Summary: Install a ship blueprint into the ship blueprints lookup table
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   X                   The type of the ship to install, with the number being
+\                       taken from the full list of available blueprints in the
+\                       ship_list table, so that's:
+\
+\                         * 0 = Dodo station
+\                         * 1 = Coriolis station
+\                         * 2 = Escape pod
+\
+\                           ...
+\
+\                         * 35 = Iguana
+\                         * 36 = Shuttle Mk II
+\                         * 37 = Chameleon
+\
+\   Y                   The position in which to install the ship blueprint in
+\                       the ship blueprints lookup table at ship_data, so
+\                       that's:
+\
+\                         * 0 = Our current ship
+\                         * 1 = Missile
+\                         * 2 = Space station
+\
+\                           ...
+\
+\                         * 29 = Thargoid
+\                         * 30 = Thargon
+\                         * 31 = Constrictor
 \
 \ ******************************************************************************
 
 .install_ship
 
- TXA                    \ install ship X in position Y with flags A
- ASL A
- PHA
- ASL A
- TAX
- LDA ship_flags,Y
- AND #&7F
- ORA ship_bytes+1,X
- STA ship_flags,Y
- TYA
- ASL A
+ TXA                    \ Store X * 2 on the stack so we can use it below as an
+ ASL A                  \ index into the ship_list table, which has 2 bytes per
+ PHA                    \ entry
+
+ ASL A                  \ Set X = X * 4, so we can use it as an index into the
+ TAX                    \ ship_bytes table, which has 4 bytes per entry
+ 
+ LDA ship_flags,Y       \ Fetch the ship_flags byte for this ship position, i.e.
+                        \ the Y-th entry in the ship_flags table, where the NEWB
+                        \ flags live, so this sets A to the default NEWB flags
+                        \ for the ship position that we are filling
+
+ AND #%01111111         \ Set bit 7 of the NEWB flags to that of the second byte
+ ORA ship_bytes+1,X     \ in this ship type's entry in the ship_bytes table, so
+                        \ this determines whether this ship type has an escape
+                        \ pod fitted as standard (if the second ship_byte is
+                        \ %10000000) or not (if the second ship_byte is
+                        \ %00000000)
+
+ STA ship_flags,Y       \ Update the Y-th entry in the ship_flags table with the
+                        \ updated bit 7, so when we spawn a ship from this
+                        \ blueprint position, it correctly spawns with or
+                        \ without an escape pod, depending on the ship type
+
+ TYA                    \ Set Y = Y * 2, so we can use it as an index into the
+ ASL A                  \ ship_data table, which has 2 bytes per entry
  TAY
- PLA
- TAX
- LDA ship_list,X
- STA XX21-2,Y
- LDA ship_list+1,X
- STA XX21-1,Y
+
+ PLA                    \ Retrieve the value of X * 2 that we stored above, so
+ TAX                    \ we can use it as an index into the ship_list table,
+                        \ which has 2 bytes per entry
+
+ LDA ship_list,X        \ Set the address at position Y in the ship_data table
+ STA ship_data,Y        \ to the blueprint address for ship number X in the
+ LDA ship_list+1,X      \ ship_list table (i.e. install ship number X into
+ STA ship_data+1,Y      \ position Y)
 
  RTS                    \ Return from the subroutine
 
-\.printer
-\TXA
+\ ******************************************************************************
+\
+\       Name: printer
+\       Type: Subroutine
+\   Category: Text
+\    Summary: This routine is commented out in the original source
+\
+\ ******************************************************************************
+
+\.printer               \ These instructions are commented out in the original
+\TXA                    \ source
 \PHA
 \LDA #&9C
 \JSR tube_write
@@ -38530,8 +38602,8 @@ LOAD_J% = LOAD% + P% - CODE%
 
 .MA21
 
- JSR MVEIT_FLIGHT       \ Call MVEIT_FLIGHT to move the ship we are processing in
-                        \ space
+ JSR MVEIT_FLIGHT       \ Call MVEIT_FLIGHT to move the ship we are processing
+                        \ in space
 
                         \ Now that we are done processing this ship, we need to
                         \ copy the ship data back from INWK to the correct place
@@ -45643,33 +45715,60 @@ LOAD_L% = LOAD% + P% - CODE%
 \       Name: hyp1_FLIGHT
 \       Type: Subroutine
 \   Category: Universe
-\    Summary: AJD
+\    Summary: Process a jump to the system closest to (QQ9, QQ10) (flight
+\             version)
 \
 \ ******************************************************************************
 
 .hyp1_FLIGHT
 
- JSR jmp                \ duplicate of hyp1
- LDX #&05
+ JSR jmp                \ Set the current system to the selected system
 
-.d_31b0
+ LDX #5                 \ We now want to copy the seeds for the selected system
+                        \ in QQ15 into QQ2, where we store the seeds for the
+                        \ current system, so set up a counter in X for copying
+                        \ 6 bytes (for three 16-bit seeds)
 
- LDA QQ15,X
- STA QQ2,X
- DEX
- BPL d_31b0
- INX
- STX EV
- LDA QQ3
- STA QQ28
- LDA QQ5
- STA tek
- LDA QQ4
- STA gov
+.TT112_FLIGHT
 
- JSR DORND
- STA QQ26
- JMP GVL
+ LDA QQ15,X             \ Copy the X-th byte in QQ15 to the X-th byte in QQ2, to
+ STA QQ2,X              \ update the selected system to the new one. Note that
+                        \ this approach has a minor bug associated with it: if
+                        \ your hyperspace counter hits 0 just as you're docking,
+                        \ then you will magically appear in the station in your
+                        \ hyperspace destination, without having to go to the
+                        \ effort of actually flying there. This bug was fixed in
+                        \ later versions by saving the destination seeds in a
+                        \ separate location called safehouse, and using those
+                        \ instead... but that isn't the case in this version
+
+ DEX                    \ Decrement the counter
+
+ BPL TT112_FLIGHT       \ Loop back to TT112_FLIGHT if we still have more bytes
+                        \ to copy
+
+ INX                    \ Set X = 0 (as we ended the above loop with X = &FF)
+
+ STX EV                 \ Set EV, the extra vessels spawning counter, to 0, as
+                        \ we are entering a new system with no extra vessels
+                        \ spawned
+
+ LDA QQ3                \ Set the current system's economy in QQ28 to the
+ STA QQ28               \ selected system's economy from QQ3
+
+ LDA QQ5                \ Set the current system's tech level in tek to the
+ STA tek                \ selected system's economy from QQ5
+
+ LDA QQ4                \ Set the current system's government in gov to the
+ STA gov                \ selected system's government from QQ4
+
+ JSR DORND              \ Set A and X to random numbers
+
+ STA QQ26               \ Set QQ26 to the random byte that's used in the market
+                        \ calculations
+
+ JMP GVL                \ Jump to GVL to calculate the availability of market
+                        \ items, returning from the subroutine using a tail call
 
 \ ******************************************************************************
 \
@@ -45721,8 +45820,10 @@ LOAD_L% = LOAD% + P% - CODE%
 
 .MJP
 
- LDA #3                 \ Call SHIPinA to load ship blueprints file D, which is
- JSR SHIPinA            \ one of the two files that contain Thargoids
+ LDA #3                 \ Call SHIPinA populate the ship blueprints table but
+ JSR SHIPinA            \ without setting the compass to show the planet (the
+                        \ LDA here has no effect and is left over from the disc
+                        \ version)
 
  LDA #3                 \ Clear the top part of the screen, draw a white border,
  JSR TT66               \ and set the current view type in QQ11 to 3
@@ -45814,7 +45915,8 @@ LOAD_L% = LOAD% + P% - CODE%
                         \ and set up data blocks and slots for the planet and
                         \ sun
 
- JSR LSHIPS             \ Call LSHIPS to load a new ship blueprints file
+ JSR LSHIPS             \ Call LSHIPS to populate the ship blueprints table
+                        \ with a random selection of ships
 
  LDA QQ11               \ If the current view in QQ11 is not a space view (0) or
  AND #%00111111         \ one of the charts (64 or 128), return from the
@@ -50169,9 +50271,9 @@ LOAD_M% = LOAD% + P% - CODE%
                         \ will now use to determine the type of ship
 
  ADC #25                \ Add A to 25 (we know the C flag is clear as we passed
-                        \ through the BCS above), so A is now a ship slot in the
-                        \ range 25-28, which is where the bounty hunter ships
-                        \ live in the ship files
+                        \ through the BCS above), so A is now a ship blueprint
+                        \ position in the range 25-28, which is where the bounty
+                        \ hunter ships live in the ship files
 
  TAY                    \ Copy the new ship type to Y
 
@@ -50206,7 +50308,7 @@ LOAD_M% = LOAD% + P% - CODE%
 
 .NOCON
 
- TYA
+ TYA                    \ Set A to the new ship type in Y
 
  EQUB &2C               \ Skip the next instruction by turning it into
                         \ &2C &A9 &1F, or BIT &1FA9, which does nothing apart
@@ -50231,8 +50333,8 @@ LOAD_M% = LOAD% + P% - CODE%
 .mt1
 
  LDA #17                \ Fall through into hordes to spawn a pack of ships from
- LDX #7                 \ ship slots 17 to 24,, which is where the pirate ships
-                        \ live in the ship files
+ LDX #7                 \ ship blueprint positions 17 to 24, which is where the
+                        \ pirate ships live in the ship blueprint files
 
 .hordes
 
@@ -50672,77 +50774,128 @@ LOAD_M% = LOAD% + P% - CODE%
 
 .nosave
 
- CMP #&72               \ AJD
- BNE not_sell
- JMP TT208
+ CMP #f2                \ If red key f2 was pressed, jump to TT208 to show the
+ BNE not_sell           \ Sell Cargo screen, returning from the subroutine using
+ JMP TT208              \ a tail call
 
 .not_sell
 
- CMP #&54
- BNE NWDAV5
- JSR CLYNS
- LDA #&0F
- STA XC
- LDA #&CD
- JMP DETOK
+ CMP #&54               \ If "H" was not pressed, jump to NWDAV5 to skip the
+ BNE NWDAV5             \ following
+
+ JSR CLYNS              \ "H" was pressed, so clear the bottom three text rows
+                        \ of the upper screen, and move the text cursor to
+                        \ column 1 on row 21, i.e. the start of the top row of
+                        \ the three bottom rows
+
+ LDA #15                \ Move the text cursor to column 15 (the middle of the
+ STA XC                 \ screen)
+
+ LDA #205               \ Print extended token 205 ("DOCKED") and return from
+ JMP DETOK              \ the subroutine using a tail call
 
 .flying
 
- CMP #&20
- BNE d_4135
- JMP TT110
+ CMP #&20               \ If "D" was pressed, jump to TT110 to print the
+ BNE P%+5               \ distance to a system (if we are in one of the chart
+ JMP TT110              \ screens)
 
-.d_4135
-
- CMP #&71
- BCC d_4143
- CMP #&74
+ CMP #f1                \ If the key pressed is < red key f1 or > red key f3,
+ BCC d_4143             \ jump to d_4143 (so only do the following if the key
+ CMP #f3+1              \ pressed is f1, f2 or f3)
  BCS d_4143
- AND #&03
- TAX
- JMP LOOK1
+
+ AND #3                 \ If we get here then we are either in space, or we are
+ TAX                    \ docked and none of f1-f3 were pressed, so we can now
+ JMP LOOK1              \ process f1-f3 with their in-flight functions, i.e.
+                        \ switching space views
+                        \
+                        \ A will contain &71, &72 or &73 (for f1, f2 or f3), so
+                        \ set X to the last digit (1, 2 or 3) and jump to LOOK1
+                        \ to switch to view X (rear, left or right), returning
+                        \ from the subroutine using a tail call
 
 .d_4143
 
- CMP #&54
- BNE NWDAV5
- JMP hyp
+ CMP #&54               \ If "H" was not pressed, jump to NWDAV5 to skip the
+ BNE NWDAV5             \ following
+
+ JMP hyp                \ Jump to hyp to do a hyperspace jump (if we are in
+                        \ space), returning from the subroutine using a tail
+                        \ call
 
 .TT107
 
- LDA QQ22+1
- BEQ d_418a
- DEC QQ22
- BNE d_418a
- LDX QQ22+1
- DEX
- JSR ee3
- LDA #&05
+ LDA QQ22+1             \ If the on-screen hyperspace counter is zero, return
+ BEQ d_418a             \ from the subroutine (as d_418a contains an RTS), as we
+                        \ are not currently counting down to a hyperspace jump
+
+ DEC QQ22               \ Decrement the internal hyperspace counter
+
+ BNE d_418a             \ If the internal hyperspace counter is still non-zero,
+                        \ then we are still counting down, so return from the
+                        \ subroutine (as d_418a contains an RTS)
+
+                        \ If we get here then the internal hyperspace counter
+                        \ has just reached zero and it wasn't zero before, so
+                        \ we need to reduce the on-screen counter and update
+                        \ the screen. We do this by first printing the next
+                        \ number in the countdown sequence, and then printing
+                        \ the old number, which will erase the old number
+                        \ and display the new one because printing uses EOR
+                        \ logic
+
+ LDX QQ22+1             \ Set X = the on-screen hyperspace counter - 1
+ DEX                    \ (i.e. the next number in the sequence)
+
+ JSR ee3                \ Print the 8-bit number in X at text location (0, 1)
+
+ LDA #5                 \ Reset the internal hyperspace counter to 5
  STA QQ22
- LDX QQ22+1
- JSR ee3
- DEC QQ22+1
- BNE d_418a
- JMP TT18
+
+ LDX QQ22+1             \ Set X = the on-screen hyperspace counter (i.e. the
+                        \ current number in the sequence, which is already
+                        \ shown on-screen)
+
+ JSR ee3                \ Print the 8-bit number in X at text location (0, 1),
+                        \ i.e. print the hyperspace countdown in the top-left
+                        \ corner
+
+ DEC QQ22+1             \ Decrement the on-screen hyperspace countdown
+
+ BNE d_418a             \ If the countdown is not yet at zero, return from the
+                        \ subroutine (as d_418a contains an RTS)
+
+ JMP TT18               \ Otherwise the countdown has finished, so jump to TT18
+                        \ to do a hyperspace jump, returning from the subroutine
+                        \ using a tail call
 
 .BAD
 
- LDA QQ20+&03
- CLC
- ADC QQ20+&06
- ASL A
- ADC QQ20+&0A
+ LDA QQ20+3             \ Set A to the number of tonnes of slaves in the hold
+
+ CLC                    \ Clear the C flag so we can do addition without the
+                        \ C flag affecting the result
+
+ ADC QQ20+6             \ Add the number of tonnes of narcotics in the hold
+
+ ASL A                  \ Double the result and add the number of tonnes of
+ ADC QQ20+10            \ firearms in the hold
 
 .d_418a
 
- RTS
+ RTS                    \ Return from the subroutine
 
 .NWDAV5
 
- LDA QQ11
- AND #&C0
- BEQ d_418a
- JMP TT16
+ LDA QQ11               \ If the current view is a chart (QQ11 = 64 or 128),
+ AND #%11000000         \ keep going, otherwise return from the subroutine (as
+ BEQ d_418a             \ d_418a contains an RTS)
+
+ JMP TT16               \ Jump to TT16 to move the crosshairs by the amount in X
+                        \ and Y, which were passed to this subroutine as
+                        \ arguments, and return from the subroutine using a tail
+                        \ call
 
 \ ******************************************************************************
 \
@@ -50986,7 +51139,8 @@ LOAD_M% = LOAD% + P% - CODE%
 
 .RSHIPS
 
- JSR LSHIPS             \ Call LSHIPS to load a new ship blueprints file
+ JSR LSHIPS             \ Call LSHIPS to populate the ship blueprints table
+                        \ with a random selection of ships
 
  JSR RESET              \ Call RESET to reset most variables
 
@@ -51009,140 +51163,317 @@ LOAD_M% = LOAD% + P% - CODE%
 \
 \       Name: LSHIPS
 \       Type: Subroutine
-\   Category: Loader
-\    Summary: AJD
+\   Category: Universe
+\    Summary: Populate the ship blueprints table at XX21 with a random selection
+\             of ships and set the compass to point to the planet
+\
+\ ------------------------------------------------------------------------------
+\
+\ Other entry points:
+\
+\   SHIPinA             Populate the ship blueprints table but without setting
+\                       the compass to show the planet
 \
 \ ******************************************************************************
 
 .LSHIPS
 
- LDA #0
+ LDA #0                 \ Set finder to 0, so the compass shows the planet
  STA finder
 
 .SHIPinA
 
- LDX #&00
- LDA tek
- CMP #&0A
- BCS mix_station
- INX
+ LDX #0                 \ The first task is to fill blueprint position 2, which
+                        \ contains the space station blueprint, so set X = 0,
+                        \ which is the ship_list ship type for a Dodo space
+                        \ station
+
+ LDA tek                \ If the current system's tech level is 10 or more, then
+ CMP #10                \ skip the following instruction, as we already have the
+ BCS mix_station        \ correct space station type in X
+
+ INX                    \ Increment X to 1, the ship_list ship type for a
+                        \ Coriolis space station
 
 .mix_station
 
- LDY #&02
- JSR install_ship
- LDY #9
+ LDY #2                 \ Install a ship of type X (Dodo or Coriolis station)
+ JSR install_ship       \ into blueprint position 2
+
+ LDY #9                 \ The next blueprint position we need to fill is number
+                        \ 9, for the shuttle, so set Y to point to this position
+                        \ so we can use it as a counter, starting at position 9
+                        \ and working our way up to position 28 (as positions 29
+                        \ to 31 are already filled)
 
 .mix_retry
 
- LDA #0
- STA X1
+ LDA #0                 \ Set X1 = 0 to act as a failure counter, so we can
+ STA X1                 \ have 256 failed attempts to fill each blueprint
+                        \ position before giving up and leaving it blank
 
 .mix_match
 
- JSR DORND
+ JSR DORND              \ Set A and X to random numbers
 
- CMP #ship_total        \ The number of different ship blueprints in Elite-A
+ CMP #ship_total        \ If A >= #ship_total then it is too big to be a
+ BCS mix_match          \ ship_list ship type, so loop back to choose another
+                        \ random number until it is a valid ship type
 
- BCS mix_match
- ASL A
- ASL A
- STA Y1
- TYA
- AND #&07
- TAX
- LDA mix_bits,X
- LDX Y1
- CPY #16
- BCC mix_byte2
- CPY #24
- BCC mix_byte3
- INX \24-28
+ ASL A                  \ Set Y1 = A * 4, so we can use it a random index into
+ ASL A                  \ the ship_bits table, which has four bytes in each
+ STA Y1                 \ entry
+
+                        \ Y1 now contains the ship_list ship type of the ship we
+                        \ are going to try installing into position Y, just
+                        \ multiplied by 4 so it can be used as a four-byte index
+                        \
+                        \ We now want to check the ship_bits table to see if the
+                        \ ship type in Y1 is allowed in ship blueprint position
+                        \ Y. The table contains a 32-bit number for each ship
+                        \ type, with the corresponding bits set for allowed
+                        \ positions, so if a ship type were allowed in positions
+                        \ 11 and 17, for example, only bits 11 and 17 would be
+                        \ set in the ship_bits table entry for that type
+                        \
+                        \ To do this, we work out which of the four bytes in the
+                        \ 32-bit number contains the bit we want to match, and
+                        \ then create a byte that has the correct bit set for
+                        \ that particular byte, so we can AND them together to
+                        \ see if there is a match
+                        \
+                        \ For example, say we are trying to populate position 17
+                        \ (so Y = 17), and we want to know whether our ship of
+                        \ type Y1 is allowed in this position. We know what we
+                        \ need to look at the 32-bit number in row Y1 of the
+                        \ ship_bits table, and we also know that bit 17 appears
+                        \ in the third byte of a 32-bit number (i.e. byte #2),
+                        \ so we can set an index in X:
+                        \
+                        \   X = Y1 + 2
+                        \
+                        \ and we can use this as an index into the ship_bits
+                        \ table to fetch the relevant byte from the 32-bit  
+                        \ number we want to match, which is at this location:
+                        \
+                        \   ship_bits + X
+                        \
+                        \ Given this byte, we need to check the relevant bit. We
+                        \ know that bit 17 of a 32-bit number corresponds to the
+                        \ second bit of the third byte, so if we create a byte
+                        \ with that bit set:
+                        \
+                        \   A = %00000010
+                        \
+                        \ then we can AND the two together, and if we get a
+                        \ non-zero result, we know that bit 17 in the 32-bit
+                        \ number is set:
+                        \
+                        \   result = ?(ship_bits + X) AND A
+                        \
+                        \ where ?(addr) is the contents of address addr
+                        \
+                        \ This is what we now do, starting with the byte in A,
+                        \ which we can grab from the lookup table at mix_bits,
+                        \ then calculating X, before extracting the relevant
+                        \ byte from the ship_bits table and performing the AND
+
+ TYA                    \ Set X = Y mod 8, so as Y works through the positions
+ AND #7                 \ from 0 to 31, making its way from bit 0 to bit 31 of
+ TAX                    \ the 32-bit number, X represents the position of the
+                        \ current bit within each of the four bytes that make up
+                        \ the 32-bit number
+
+ LDA mix_bits,X         \ Set A to the X-th byte from mix_bits, which contains a
+                        \ table of bytes with the relevant bit sit for each
+                        \ value of X (so the value at mix_bits + X has bit X
+                        \ set). This gives us our value of A in the above
+                        \ explanation, so if we were looking to populate
+                        \ blueprint position 17, A would now be %00000010
+
+ LDX Y1                 \ Set X to the ship type we are going to try to install
+
+                        \ We now want to add to X to point to the correct byte
+                        \ within the 32-bit number, depending on the blueprint
+                        \ position in Y that we are trying to fill:
+                        \
+                        \   * If Y is in the range  0 to  7, X = X + 0
+                        \   * If Y is in the range  8 to 15, X = X + 1
+                        \   * If Y is in the range 16 to 23, X = X + 2
+                        \   * If Y is in the range 24 to 28, X = X + 3
+                        \
+                        \ note that because we are starting at position 9, we
+                        \ can ignore the first case. In our above example, we
+                        \ are filling positon 17, so we would add 2 to X
+
+ CPY #16                \ If the blueprint position we are trying to fill is
+ BCC mix_byte2          \ less than 16, jump to mix_byte2 so we increment X once
+
+ CPY #24                \ If the blueprint position we are trying to fill is
+ BCC mix_byte3          \ less than 24, jump to mix_byte3 so we increment X
+                        \ twice
+
+ INX                    \ Increment X as Y is in the range 24 to 28
 
 .mix_byte3
 
- INX \16-23
+ INX                    \ Increment X as Y is in the range 16 to 28
 
 .mix_byte2
 
- INX \8-15
- AND ship_bits,X
- BEQ mix_fail
+ INX                    \ Increment X as Y is in the range 9 to 28
+
+                        \ We now have the correct values of A and X, as per the
+                        \ above calculation, so it's time to do the AND logic:
+                        \
+                        \   result = ?(ship_bits + X) AND A
+                        \
+                        \ which we can do easily in assembly language:
+                        \
+                        \   AND ship_bits,X
+                        \
+                        \ followed by a BEQ to check whether the result is zero
+
+ AND ship_bits,X        \ If the X-th byte of ship_bits does not have the same
+ BEQ mix_fail           \ bit set as our moving bit counter in A, jump to
+                        \ mix_fail to have another go at filling this blueprint
+                        \ position, as the ship in Y1 is not allowed in
+                        \ blueprint position Y
 
 .mix_try
 
- JSR DORND
- LDX Y1
- CMP ship_bytes,X
- BCC mix_ok
+                        \ If we get here then the ship in Y1 is allowed in
+                        \ blueprint position Y, so now we decide whether or not
+                        \ to go ahead, depending on the probability figure for
+                        \ this ship type, which we fetch from the first entry in
+                        \ the ship_bytes table for this ship type
+
+ JSR DORND              \ Set A and X to random numbers
+
+ LDX Y1                 \ Set X to the ship type we are going to try to install
+
+ CMP ship_bytes,X       \ If A < the X-th entry in ship_bytes, i.e. it is less
+ BCC mix_ok             \ than the first byte in the ship_bytes entry for this
+                        \ ship type, jump to mix_ok to install this ship into
+                        \ the blueprint position. So, for example, if this ship
+                        \ type has a value of 100 as the first byte in its entry
+                        \ in the ship_bytes table, which is the case for the
+                        \ Mamba and Sidewinder, then we only add it to this
+                        \ blueprint position if A < 100, or a 39% chance. The
+                        \ much rarer Dragon, meanwhile, has a ship_bytes entry
+                        \ of 3, so the calculation is A < 3, or a 1.2% chance
 
 .mix_fail
 
- DEC X1
- BNE mix_match
- LDX #ship_total*4
+                        \ If we get here then either this ship isn't allowed in
+                        \ this position, or it failed the probability test
+                        \ above, so we decrement the failure counter and loop
+                        \ back for another go (up to a maximum number of 256
+                        \ attempts for each position)
+
+ DEC X1                 \ Decrement the failure counter in X1
+
+ BNE mix_match          \ If we haven't run out of failure attempts, jump back
+                        \ to mix_match to have another go at filling this
+                        \ blueprint position
+
+ LDX #ship_total*4      \ Otherwise we have run out of attempts, so set X to
+                        \ point to the last entry in the table, which contains
+                        \ data for an empty position, so this blueprint position
+                        \ will be empty
 
 .mix_ok
 
- STY X2
- CPX #52  \ ANACONDA?
- BEQ mix_anaconda
- CPX #116 \ DRAGON?
- BEQ mix_dragon
- TXA
- LSR A
- LSR A
+ STY X2                 \ Store Y, the blueprint position we are trying to fill,
+                        \ in X2 so we can retrieve it later
+
+ CPX #13*4              \ If X is the four-byte index for ship number 13, then
+ BEQ mix_anaconda       \ we just decided to add an Anaconda, so jump to
+                        \ mix_anaconda to install it as the "large ship", along
+                        \ with a Worm as the "small ship"
+
+ CPX #29*4              \ If X is the four-byte index for ship number 29, then
+ BEQ mix_dragon         \ we just decided to add a Dragon, so jump to mix_dragon
+                        \ to install it as the "large ship", along with a
+                        \ Sidewinder as the "small ship"
+
+ TXA                    \ Set X = X / 4, so X is now the type of the ship we
+ LSR A                  \ want to add, rather than an index into a four-byte
+ LSR A                  \ table
  TAX
 
 .mix_install
 
- JSR install_ship
- LDY X2
+ JSR install_ship       \ Install a ship of type X into blueprint position Y
+
+ LDY X2                 \ Set Y to the blueprint position we are trying to fill,
+                        \ which we stored in X2 above
 
 .mix_next
 
- INY
- CPY #15
- BNE mix_skip
- INY
- INY
+ INY                    \ Increment Y to point to the next blueprint position to
+                        \ fill
+
+ CPY #15                \ If the next position is not number 15 (the "small
+ BNE mix_skip           \ ship") then jump to mix_skip to skip the following two
+                        \ instructions
+
+ INY                    \ The next position is 15, so increment Y twice so we
+ INY                    \ skip over positions 15 (the "small ship") and 16 (the
+                        \ cop), as the first one is only filled if we have an
+                        \ Anaconda or Dragon as the "large ship" (see above),
+                        \ and the second one is already filled with a Viper
 
 .mix_skip
 
- CPY #29
- BNE mix_retry
- RTS
+ CPY #29                \ If the next blueprint position we are trying to fill
+ BNE mix_retry          \ is not 29, then loop back to mix_retry to fill the
+                        \ next position
+
+ RTS                    \ Otherwise we just filled the last position, number 28,
+                        \ so return from the subroutine as we are done
 
 .mix_anaconda
 
- LDX #13
- LDY #14
+ LDX #13                \ Install ship number 13 (Anaconda) into blueprint
+ LDY #14                \ position 14 (the "large ship")
  JSR install_ship
- LDX #14
- LDY #15
- JMP mix_install
+
+ LDX #14                \ Install ship number 14 (Worm) into blueprint position
+ LDY #15                \ 15 (the "small ship"), so the Anaconda can spawn
+ JMP mix_install        \ Worms, and rejoin the mix loop via mix_install
 
 .mix_dragon
 
- LDX #29
- LDY #14
+ LDX #29                \ Install ship number 29 (Dragon) into blueprint
+ LDY #14                \ position 14 (the "large ship")
  JSR install_ship
- LDX #17
- LDY #15
- JMP mix_install
+
+ LDX #17                \ Install ship number 14 (Sidewinder) into blueprint
+ LDY #15                \ position 15 (the "small ship"), so the Dragon can
+ JMP mix_install        \ spawn Sidewinders, and rejoin the mix loop via
+                        \ mix_install
 
 \ ******************************************************************************
 \
 \       Name: mix_bits
 \       Type: Variable
 \   Category: Loader
-\    Summary: AJD
+\    Summary: Lookup table for locating a specific bit in the 32-bit word for a
+\             given ship blueprint position
 \
 \ ******************************************************************************
 
 .mix_bits
 
- EQUB &01, &02, &04, &08, &10, &20, &40, &80
+ EQUB %00000001         \ Positions 0,  8, 16, 24
+ EQUB %00000010         \ Positions 1,  9, 17, 25
+ EQUB %00000100         \ Positions 2, 10, 18, 26
+ EQUB %00001000         \ Positions 3, 11, 19, 27
+ EQUB %00010000         \ Positions 4, 12, 20, 28
+ EQUB %00100000         \ Positions 5, 13, 21, 29
+ EQUB %01000000         \ Positions 6, 14, 22, 30
+ EQUB %10000000         \ Positions 7, 15, 23, 31
 
 \ ******************************************************************************
 \
@@ -51816,206 +52147,337 @@ LOAD_M% = LOAD% + P% - CODE%
 \       Name: DOKEY_FLIGHT
 \       Type: Subroutine
 \   Category: Keyboard
-\    Summary: AJD
+\    Summary: Scan for the seven primary flight controls (flight version)
 \
 \ ******************************************************************************
 
 .DOKEY_FLIGHT
 
- JSR U%                 \ Copy of DOKEY
- LDA QQ22+1
- BEQ d_open
- JMP DK4_FLIGHT
+ JSR U%                 \ Call U% to clear the key logger
 
-.d_open
+ LDA QQ22+1             \ Fetch QQ22+1, which contains the number that's shown
+                        \ on-screen during hyperspace countdown
 
- LDA JSTK
- BNE DKJ1
- LDY #&07
+ BEQ l_open             \ If the hyperspace countdown is non-zero, jump to
+ JMP DK4_FLIGHT         \ DK4_FLIGHT to skip scanning for primary flight keys,
+                        \ and move on to scanning for pause, configuration and
+                        \ secondary flight keys
 
-.d_44bc
+.l_open
 
- JSR DKS1
- DEY
- BNE d_44bc
- LDA auto
- BEQ d_4526
+ LDA JSTK               \ If JSTK is non-zero, then we are configured to use
+ BNE DKJ1               \ the joystick rather than keyboard, so jump to DKJ1
+                        \ to read the joystick flight controls, before jumping
+                        \ to DK4 to scan for pause, configuration and secondary
+                        \ flight keys
+
+ LDY #7                 \ We're going to work our way through the primary flight
+                        \ control keys (pitch, roll, speed and laser), so set a
+                        \ counter in Y so we can loop through all 7
+
+.DKL2
+
+ JSR DKS1               \ Call DKS1 to see if the KYTB key at offset Y is being
+                        \ pressed, and set the key logger accordingly
+
+ DEY                    \ Decrement the loop counter
+
+ BNE DKL2               \ Loop back for the next key, working our way from A at
+                        \ KYTB+7 down to ? at KYTB+1
+
+ LDA auto               \ If auto is 0, then the docking computer is not
+ BEQ DK15               \ currently activated, so jump to DK15 to skip the
+                        \ docking computer manoeuvring code below
 
 .auton
 
- JSR ZINF
- LDA #&60
+ JSR ZINF               \ Call ZINF to reset the INWK ship workspace
+
+ LDA #96                \ Set nosev_z_hi = 96
  STA INWK+14
- ORA #&80
+
+ ORA #%10000000         \ Set sidev_x_hi = -96
  STA INWK+22
- STA TYPE
- LDA DELTA \ ? Too Fast
+
+ STA TYPE               \ Set the ship type to -96, so the negative value will
+                        \ let us check in the DOCKIT routine whether this is our
+                        \ ship that is activating its docking computer, rather
+                        \ than an NPC ship docking
+
+ LDA DELTA              \ Set the ship speed to DELTA (our speed)
  STA INWK+27
- JSR DOCKIT
- LDA INWK+27
- CMP #&16
- BCC d_44e3
- LDA #&16
 
-.d_44e3
+ JSR DOCKIT             \ Call DOCKIT to calculate the docking computer's moves
+                        \ and update INWK with the results
 
- STA DELTA
- LDA #&FF
- LDX #&00
- LDY INWK+28
- BEQ d_44f3
- BMI d_44f0
- INX
+                        \ We now "press" the relevant flight keys, depending on
+                        \ the results from DOCKIT, starting with the pitch keys
 
-.d_44f0
+ LDA INWK+27            \ Fetch the updated ship speed from byte #27 into A
 
- STA KY1,X
+ CMP #22                \ If A < 22, skip the next instruction
+ BCC P%+4
 
-.d_44f3
+ LDA #22                \ Set A = 22, so the maximum speed during docking is 22
 
- LDA #&80
- LDX #&00
- ASL INWK+29
- BEQ d_450f
- BCC d_44fe
- INX
+ STA DELTA              \ Update DELTA to the new value in A
 
-.d_44fe
+ LDA #&FF               \ Set A = &FF, which we can insert into the key logger
+                        \ to "fake" the docking computer working the keyboard
 
- BIT INWK+29
- BPL d_4509
- LDA #&40
- STA JSTX
- LDA #&00
+ LDX #0                 \ Set X = 0, so we "press" KY1 below ("?", slow down)
 
-.d_4509
+ LDY INWK+28            \ If the updated acceleration in byte #28 is zero, skip
+ BEQ DK11               \ to DK11
 
- STA KY3,X
- LDA JSTX
+ BMI P%+3               \ If the updated acceleration is negative, skip the
+                        \ following instruction
 
-.d_450f
+ INX                    \ The updated acceleration is positive, so increment X
+                        \ to 1, so we "press" KY2 below (Space, speed up)
 
- STA JSTX
- LDA #&80
- LDX #&00
- ASL INWK+30
- BEQ d_4523
- BCS d_451d
- INX
+ STA KY1,X              \ Store &FF in either KY1 or KY2 to "press" the relevant
+                        \ key, depending on whether the updated acceleration is
+                        \ negative (in which case we "press" KY1, "?", to slow
+                        \ down) or positive (in which case we "press" KY2,
+                        \ Space, to speed up)
 
-.d_451d
+.DK11
 
- STA KY5,X
- LDA JSTY
+                        \ We now "press" the relevant roll keys, depending on
+                        \ the results from DOCKIT
 
-.d_4523
+ LDA #128               \ Set A = 128, which indicates no change in roll when
+                        \ stored in JSTX (i.e. the centre of the roll indicator)
 
- STA JSTY
+ LDX #0                 \ Set X = 0, so we "press" KY3 below ("<", increase
+                        \ roll)
 
-.d_4526
+ ASL INWK+29            \ Shift ship byte #29 left, which shifts bit 7 of the
+                        \ updated roll counter (i.e. the roll direction) into
+                        \ the C flag
 
- LDX JSTX
- LDA #&07
- LDY KY3
- BEQ d_4533
+ BEQ DK12               \ If the remains of byte #29 is zero, then the updated
+                        \ roll counter is zero, so jump to DK12 set JSTX to 128,
+                        \ to indicate there's no change in the roll
+
+ BCC P%+3               \ If the C flag is clear, skip the following instruction
+
+ INX                    \ The C flag is set, i.e. the direction of the updated
+                        \ roll counter is negative, so increment X to 1 so we
+                        \ "press" KY4 below (">", decrease roll)
+
+ BIT INWK+29            \ We shifted the updated roll counter to the left above,
+ BPL DK14               \ so this tests bit 6 of the original value, and if it
+                        \ is is clear (i.e. the magnitude is less than 64), jump
+                        \ to DK14 to "press" the key and leave JSTX unchanged
+
+ LDA #64                \ The magnitude of the updated roll is 64 or more, so
+ STA JSTX               \ set JSTX to 64 (so the roll decreases at half the
+                        \ maximum rate)
+
+ LDA #0                 \ And set A = 0 so we do not "press" any keys (so if the
+                        \ docking computer needs to make a serious roll, it does
+                        \ so by setting JSTX directly rather than by "pressing"
+                        \ a key)
+
+.DK14
+
+ STA KY3,X              \ Store A in either KY3 or KY4, depending on whether
+                        \ the updated roll rate is increasing (KY3) or
+                        \ decreasing (KY4)
+
+ LDA JSTX               \ Fetch A from JSTX so the next instruction has no
+                        \ effect
+
+.DK12
+
+ STA JSTX               \ Store A in JSTX to update the current roll rate
+
+                        \ We now "press" the relevant pitch keys, depending on
+                        \ the results from DOCKIT
+
+ LDA #128               \ Set A = 128, which indicates no change in pitch when
+                        \ stored in JSTX (i.e. the centre of the pitch
+                        \ indicator)
+
+ LDX #0                 \ Set X = 0, so we "press" KY5 below ("X", decrease
+                        \ pitch)
+
+ ASL INWK+30            \ Shift ship byte #30 left, which shifts bit 7 of the
+                        \ updated pitch counter (i.e. the pitch direction) into
+                        \ the C flag
+
+ BEQ DK13               \ If the remains of byte #30 is zero, then the updated
+                        \ pitch counter is zero, so jump to DK13 set JSTY to
+                        \ 128, to indicate there's no change in the pitch
+
+ BCS P%+3               \ If the C flag is set, skip the following instruction
+
+ INX                    \ The C flag is clear, i.e. the direction of the updated
+                        \ pitch counter is positive, so increment X to 1 so we
+                        \ "press" KY6 below ("S", increase pitch)
+
+ STA KY5,X              \ Store 128 in either KY5 or KY6 to "press" the relevant
+                        \ key, depending on whether the pitch direction is
+                        \ negative (in which case we "press" KY5, "X", to
+                        \ decrease the pitch) or positive (in which case we
+                        \ "press" KY6, "S", to increase the pitch)
+
+ LDA JSTY               \ Fetch A from JSTY so the next instruction has no
+                        \ effect
+
+.DK13
+
+ STA JSTY               \ Store A in JSTY to update the current pitch rate
+
+.DK15
+
+ LDX JSTX               \ Set X = JSTX, the current roll rate (as shown in the
+                        \ RL indicator on the dashboard)
+
+ LDA #7                 \ Set A to 7, which is the amount we want to alter the
+                        \ roll rate by if the roll keys are being pressed
+
+ LDY KL+3               \ If the "<" key is being pressed, then call the BUMP2
+ BEQ P%+5               \ routine to increase the roll rate in X by A
  JSR BUMP2
 
-.d_4533
+ LDY KL+4               \ If the ">" key is being pressed, then call the REDU2
+ BEQ P%+5               \ routine to decrease the roll rate in X by A, taking
+ JSR REDU2              \ the keyboard auto re-centre setting into account
 
- LDY KY4
- BEQ d_453b
- JSR REDU2
+ STX JSTX               \ Store the updated roll rate in JSTX
 
-.d_453b
+ ASL A                  \ Double the value of A, to 14
 
- STX JSTX
- ASL A
- LDX JSTY
- LDY KY5
- BEQ d_454a
- JSR REDU2
+ LDX JSTY               \ Set X = JSTY, the current pitch rate (as shown in the
+                        \ DC indicator on the dashboard)
 
-.d_454a
+ LDY KL+5               \ If the "X" key is being pressed, then call the REDU2
+ BEQ P%+5               \ routine to decrease the pitch rate in X by A, taking
+ JSR REDU2              \ the keyboard auto re-centre setting into account
 
- LDY KY6
- BEQ d_4552
+ LDY KL+6               \ If the "S" key is being pressed, then call the BUMP2
+ BEQ P%+5               \ routine to increase the pitch rate in X by A
  JSR BUMP2
 
-.d_4552
+ STX JSTY               \ Store the updated roll rate in JSTY
 
- STX JSTY
+                        \ Fall through into DK4_FLIGHT to scan for other keys
 
 \ ******************************************************************************
 \
 \       Name: DK4_FLIGHT
 \       Type: Subroutine
 \   Category: Keyboard
-\    Summary: AJD (flight version)
+\    Summary: Scan for pause, configuration and secondary flight keys (flight
+\             version)
 \
 \ ******************************************************************************
 
 .DK4_FLIGHT
 
- JSR RDKEY              \ Copy of DK4
- STX KL
- CPX #&69
- BNE d_459c
+ JSR RDKEY              \ Scan the keyboard for a key press and return the
+                        \ internal key number in X (or 0 for no key press)
 
-.d_455f
+ STX KL                 \ Store X in KL, byte #0 of the key logger
 
- JSR WSCAN
- JSR RDKEY
- CPX #&51
- BNE d_456e
- LDA #&00
- STA DNOIZ
+ CPX #&69               \ If COPY is not being pressed, jump to DK2_FLIGHT
+ BNE DK2_FLIGHT         \ below, otherwise let's process the configuration
+                        \ keys
 
-.d_456e
+.FREEZE_FLIGHT
 
- LDY #&40
+                        \ COPY is being pressed, so we enter a loop that
+                        \ listens for configuration keys, and we keep looping
+                        \ until we detect a DELETE key press. This effectively
+                        \ pauses the game when COPY is pressed, and unpauses
+                        \ it when DELETE is pressed
 
-.d_4570
+ JSR WSCAN              \ Call WSCAN to wait for the vertical sync, so the whole
+                        \ screen gets drawn
 
- JSR DKS3
- INY
- CPY #&48
- BNE d_4570
- CPX #&10
- BNE d_457f
- STX DNOIZ
+ JSR RDKEY              \ Scan the keyboard for a key press and return the
+                        \ internal key number in X (or 0 for no key press)
 
-.d_457f
+ CPX #&51               \ If "S" is not being pressed, skip to DK6_FLIGHT
+ BNE DK6_FLIGHT
 
- CPX #&70
- BNE d_4586
- JMP DEATH2
+ LDA #0                 \ "S" is being pressed, so set DNOIZ to 0 to turn the
+ STA DNOIZ              \ sound on
 
-.d_4586
+.DK6_FLIGHT
 
-\CPX #&37
-\BNE dont_dump
+ LDY #&40               \ We now want to loop through the keys that toggle
+                        \ various settings. These have internal key numbers
+                        \ between &40 (CAPS LOCK) and &46 ("K"), so we set up
+                        \ the first key number in Y to act as a loop counter.
+                        \ See subroutine DKS3 for more details on this
+
+.DKL4_FLIGHT
+
+ JSR DKS3               \ Call DKS3 to scan for the key given in Y, and toggle
+                        \ the relevant setting if it is pressed
+
+ INY                    \ Increment Y to point to the next toggle key
+
+ CPY #&48               \ The last toggle key is &47 (@), so check whether we
+                        \ have just done that one
+
+ BNE DKL4_FLIGHT        \ If not, loop back to check for the next toggle key
+
+ CPX #&10               \ If "Q" is not being pressed, skip to DK7_FLIGHT
+ BNE DK7_FLIGHT
+
+ STX DNOIZ              \ "Q" is being pressed, so set DNOIZ to X, which is
+                        \ non-zero (&10), so this will turn the sound off
+
+.DK7_FLIGHT
+
+ CPX #&70               \ If ESCAPE is not being pressed, skip over the next
+ BNE P%+5               \ instruction
+
+ JMP DEATH2             \ ESCAPE is being pressed, so jump to DEATH2 to end
+                        \ the game
+
+\CPX #&37               \ These instructions are commented out in the original
+\BNE dont_dump          \ source
 \JSR printer
 \.dont_dump
 
- CPX #&59
- BNE d_455f
+ CPX #&59               \ If DELETE is not being pressed, we are still paused,
+ BNE FREEZE_FLIGHT      \ so loop back up to keep listening for configuration
+                        \ keys, otherwise fall through into the rest of the
+                        \ key detection code, which unpauses the game
 
-.d_459c
+.DK2_FLIGHT
 
- LDA QQ11
- BNE DK5
- LDY #&10
+ LDA QQ11               \ If the current view is non-zero (i.e. not a space
+ BNE DK5                \ view), return from the subroutine (as DK5 contains
+                        \ an RTS)
 
-.d_45a4
+ LDY #16                \ This is a space view, so now we want to check for all
+                        \ the secondary flight keys. The internal key numbers
+                        \ are in the keyboard table KYTB from KYTB+8 to
+                        \ KYTB+16, and their key logger locations are from KL+8
+                        \ to KL+16. So set a decreasing counter in Y for the
+                        \ index, starting at 16, so we can loop through them
 
- JSR DKS1
- DEY
- CPY #&07
- BNE d_45a4
+.DKL1_FLIGHT
+
+ JSR DKS1               \ Call DKS1 to see if the KYTB key at offset Y is being
+                        \ pressed, and set the key logger accordingly
+
+ DEY                    \ Decrement the loop counter
+
+ CPY #7                 \ Have we just done the last key?
+
+ BNE DKL1_FLIGHT        \ If not, loop back to process the next key
 
 .DK5
 
- RTS
+ RTS                    \ Return from the subroutine
 
 \ ******************************************************************************
 \
@@ -53640,7 +54102,8 @@ LOAD_M% = LOAD% + P% - CODE%
 \       Name: SCAN
 \       Type: Subroutine
 \   Category: Dashboard
-\    Summary: Display the current ship on the scanner
+\    Summary: Display the current ship on the scanner by sending a draw_tail
+\             command to the I/O processor
 \  Deep dive: The 3D scanner
 \
 \ ------------------------------------------------------------------------------
@@ -57405,51 +57868,53 @@ ENDMACRO
 \       Name: ship_list
 \       Type: Variable
 \   Category: Drawing ships
-\    Summary: AJD
+\    Summary: A list of all available ship types in Elite-A, for populating
+\             the ship blueprints table
 \
 \ ******************************************************************************
 
 .ship_list
 
- EQUW SHIP_DODO
- EQUW SHIP_CORIOLIS
- EQUW SHIP_ESCAPE_POD
- EQUW SHIP_PLATE
- EQUW SHIP_CANISTER
- EQUW SHIP_BOULDER
- EQUW SHIP_ASTEROID
- EQUW SHIP_SPLINTER
- EQUW SHIP_SHUTTLE
- EQUW SHIP_TRANSPORTER
- EQUW SHIP_COBRA_MK_3
- EQUW SHIP_PYTHON
- EQUW SHIP_BOA
- EQUW SHIP_ANACONDA
- EQUW SHIP_WORM
- EQUW SHIP_MISSILE
- EQUW SHIP_VIPER
- EQUW SHIP_SIDEWINDER
- EQUW SHIP_MAMBA
- EQUW SHIP_KRAIT
- EQUW SHIP_ADDER
- EQUW SHIP_GECKO
- EQUW SHIP_COBRA_MK_1
- EQUW SHIP_ASP_MK_2
- EQUW SHIP_FER_DE_LANCE
- EQUW SHIP_MORAY
- EQUW SHIP_THARGOID
- EQUW SHIP_THARGON
- EQUW SHIP_CONSTRICTOR
- EQUW SHIP_DRAGON
- EQUW SHIP_MONITOR
- EQUW SHIP_OPHIDIAN
- EQUW SHIP_GHAVIAL
- EQUW SHIP_BUSHMASTER
- EQUW SHIP_RATTLER
- EQUW SHIP_IGUANA
- EQUW SHIP_SHUTTLE_MK_2
- EQUW SHIP_CHAMELEON
- EQUW 0
+ EQUW SHIP_DODO         \  0 = Dodo station
+ EQUW SHIP_CORIOLIS     \  1 = Coriolis station
+ EQUW SHIP_ESCAPE_POD   \  2 = Escape pod
+ EQUW SHIP_PLATE        \  3 = Alloy plate
+ EQUW SHIP_CANISTER     \  4 = Cargo canister
+ EQUW SHIP_BOULDER      \  5 = Boulder
+ EQUW SHIP_ASTEROID     \  6 = Asteroid
+ EQUW SHIP_SPLINTER     \  7 = Splinter
+ EQUW SHIP_SHUTTLE      \  8 = Shuttle
+ EQUW SHIP_TRANSPORTER  \  9 = Transporter
+ EQUW SHIP_COBRA_MK_3   \ 10 = Cobra Mk III
+ EQUW SHIP_PYTHON       \ 11 = Python
+ EQUW SHIP_BOA          \ 12 = Boa
+ EQUW SHIP_ANACONDA     \ 13 = Anaconda
+ EQUW SHIP_WORM         \ 14 = Worm
+ EQUW SHIP_MISSILE      \ 15 = Missile
+ EQUW SHIP_VIPER        \ 16 = Viper
+ EQUW SHIP_SIDEWINDER   \ 17 = Sidewinder
+ EQUW SHIP_MAMBA        \ 18 = Mamba
+ EQUW SHIP_KRAIT        \ 19 = Krait
+ EQUW SHIP_ADDER        \ 20 = Adder
+ EQUW SHIP_GECKO        \ 21 = Gecko
+ EQUW SHIP_COBRA_MK_1   \ 22 = Cobra Mk I
+ EQUW SHIP_ASP_MK_2     \ 23 = Asp Mk II
+ EQUW SHIP_FER_DE_LANCE \ 24 = Fer-de-Lance
+ EQUW SHIP_MORAY        \ 25 = Moray
+ EQUW SHIP_THARGOID     \ 26 = Thargoid
+ EQUW SHIP_THARGON      \ 27 = Thargon
+ EQUW SHIP_CONSTRICTOR  \ 28 = Constrictor
+ EQUW SHIP_DRAGON       \ 29 = Dragon
+ EQUW SHIP_MONITOR      \ 30 = Monitor
+ EQUW SHIP_OPHIDIAN     \ 31 = Ophidian
+ EQUW SHIP_GHAVIAL      \ 32 = Ghavial
+ EQUW SHIP_BUSHMASTER   \ 33 = Bushmaster
+ EQUW SHIP_RATTLER      \ 34 = Rattler
+ EQUW SHIP_IGUANA       \ 35 = Iguana
+ EQUW SHIP_SHUTTLE_MK_2 \ 36 = Shuttle Mk II
+ EQUW SHIP_CHAMELEON    \ 37 = Chameleon
+
+ EQUW 0                 \ 38 = No ship
 
 \ ******************************************************************************
 \
@@ -57458,45 +57923,53 @@ ENDMACRO
 \   Category: Drawing ships
 \    Summary: Ship blueprints lookup table for flight in Elite-A
 \
+\ ------------------------------------------------------------------------------
+\
+\ Other entry points:
+\
+\   ship_data           The extended ship blueprints table for Elite-A, which
+\                       includes an extra entry at the start for our current
+\                       ship
+\
 \ ******************************************************************************
 
 .ship_data
 
- EQUW 0
+ EQUW 0                 \         0 = Our current ship
 
 .XX21
 
- EQUW SHIP_MISSILE      \ MSL  =  1 = Missile
- EQUW 0
- EQUW SHIP_ESCAPE_POD   \ ESC  =  3 = Escape pod
- EQUW SHIP_PLATE        \ PLT  =  4 = Alloy plate
- EQUW SHIP_CANISTER     \ OIL  =  5 = Cargo canister
- EQUW SHIP_BOULDER      \         6 = Boulder
- EQUW SHIP_ASTEROID     \ AST  =  7 = Asteroid
- EQUW SHIP_SPLINTER     \ SPL  =  8 = Splinter
- EQUW 0
- EQUW SHIP_TRANSPORTER  \        10 = Transporter
- EQUW 0
- EQUW 0
- EQUW 0
- EQUW 0
- EQUW 0
- EQUW SHIP_VIPER        \ COPS = 16 = Viper
- EQUW 0
- EQUW 0
- EQUW 0
- EQUW 0
- EQUW 0
- EQUW 0
- EQUW 0
- EQUW 0
- EQUW 0
- EQUW 0
- EQUW 0
- EQUW 0
- EQUW SHIP_THARGOID     \ THG  = 29 = Thargoid
- EQUW SHIP_THARGON      \ TGL  = 30 = Thargon
- EQUW SHIP_CONSTRICTOR  \ CON  = 31 = Constrictor
+ EQUW SHIP_MISSILE      \ MSL  =  1 = Missile                            Missile
+ EQUW 0                 \                                                Station
+ EQUW SHIP_ESCAPE_POD   \ ESC  =  3 = Escape pod                      Escape pod
+ EQUW SHIP_PLATE        \ PLT  =  4 = Alloy plate                          Cargo
+ EQUW SHIP_CANISTER     \ OIL  =  5 = Cargo canister                       Cargo
+ EQUW SHIP_BOULDER      \         6 = Boulder                             Mining
+ EQUW SHIP_ASTEROID     \ AST  =  7 = Asteroid                            Mining
+ EQUW SHIP_SPLINTER     \ SPL  =  8 = Splinter                            Mining
+ EQUW 0                 \                                                Shuttle
+ EQUW SHIP_TRANSPORTER  \        10 = Transporter                    Transporter
+ EQUW 0                 \                                                 Trader
+ EQUW 0                 \                                                 Trader
+ EQUW 0                 \                                                 Trader
+ EQUW 0                 \                                             Large ship
+ EQUW 0                 \                                             Small ship
+ EQUW SHIP_VIPER        \ COPS = 16 = Viper                                  Cop
+ EQUW 0                 \                                                 Pirate
+ EQUW 0                 \                                                 Pirate
+ EQUW 0                 \                                                 Pirate
+ EQUW 0                 \                                                 Pirate
+ EQUW 0                 \                                                 Pirate
+ EQUW 0                 \                                                 Pirate
+ EQUW 0                 \                                                 Pirate
+ EQUW 0                 \                                                 Pirate
+ EQUW 0                 \                                          Bounty hunter
+ EQUW 0                 \                                          Bounty hunter
+ EQUW 0                 \                                          Bounty hunter
+ EQUW 0                 \                                          Bounty hunter
+ EQUW SHIP_THARGOID     \ THG  = 29 = Thargoid                          Thargoid
+ EQUW SHIP_THARGON      \ TGL  = 30 = Thargon                           Thargoid
+ EQUW SHIP_CONSTRICTOR  \ CON  = 31 = Constrictor                    Constrictor
 
 \ ******************************************************************************
 \
@@ -57530,11 +58003,16 @@ ENDMACRO
 \ See the deep dive on "Advanced tactics with the NEWB flags" for details of
 \ how this works.
 \
+\ Other entry points:
+\
+\   ship_flags          The extended NEWB flags table for Elite-A, which
+\                       includes an extra entry at the start for our current
+\                       ship
 \ ******************************************************************************
 
 .ship_flags
 
- EQUB 0
+ EQUB %00000000         \ Our current ship
 
 .E%
 
@@ -57575,104 +58053,133 @@ ENDMACRO
 \       Name: ship_bits
 \       Type: Variable
 \   Category: Drawing ships
-\    Summary: AJD
+\    Summary: Table of allowed ship blueprint positions for each ship type
 \
 \ ******************************************************************************
 
 .ship_bits
 
- EQUD %00000000000000000000000000000100
- EQUD %00000000000000000000000000000100
- EQUD %00000000000000000000000000001000
- EQUD %00000000000000000000000000010000
- EQUD %00000000000000000000000000100000
- EQUD %00000000000000000000000001000000
- EQUD %00000000000000000000000010000000
- EQUD %00000000000000000000000100000000
- EQUD %00000000000000000000001000000000
- EQUD %00000000000000000000010000000000
- EQUD %00011111111000000011100000000000
- EQUD %00011001110000000011100000000000
- EQUD %00000000000000000011100000000000
- EQUD %00000000000000000100000000000000
- EQUD %00000001110000001000000000000000
- EQUD %00000000000000000000000000000010
- EQUD %00000000000000010000000000000000
- EQUD %00010001111111101000000000000000
- EQUD %00010001111111100000000000000000
- EQUD %00010001111111100000000000000000
- EQUD %00011001111110000011000000000000
- EQUD %00011001111111100000000000000000
- EQUD %00011001111111100010000000000000
- EQUD %00011001000000000000000000000000
- EQUD %00011111000000000010000000000000
- EQUD %00011001110000000011000000000000
- EQUD %00100000000000000000000000000000
- EQUD %01000000000000000000000000000000
- EQUD %10000000000000000000000000000000
- EQUD %00000000000000000100000000000000
- EQUD %00010001000000000011100000000000
- EQUD %00010001111000000011000000000000
- EQUD %00010000000000000011100000000000
- EQUD %00011101111100000000000000000000
- EQUD %00010001110000000011000000000000
- EQUD %00011101111100000010000000000000
- EQUD %00000000000000000000011000000000
- EQUD %00010001110000000011000000000000
+\       Blueprint position in ship_data
+\       1 = allowed, 0 = not allowed
+\
+\       30        20        10        0         
+\       |         |         |         |
+\       v         v         v         v
+\      10987654321098765432109876543210
 
- EQUD %00011111111111100111111000000000
+ EQUD %00000000000000000000000000000100         \  0 = Dodo station
+ EQUD %00000000000000000000000000000100         \  1 = Coriolis station
+ EQUD %00000000000000000000000000001000         \  2 = Escape pod
+ EQUD %00000000000000000000000000010000         \  3 = Alloy plate
+ EQUD %00000000000000000000000000100000         \  4 = Cargo canister
+ EQUD %00000000000000000000000001000000         \  5 = Boulder
+ EQUD %00000000000000000000000010000000         \  6 = Asteroid
+ EQUD %00000000000000000000000100000000         \  7 = Splinter
+ EQUD %00000000000000000000001000000000         \  8 = Shuttle
+ EQUD %00000000000000000000010000000000         \  9 = Transporter
+ EQUD %00011111111000000011100000000000         \ 10 = Cobra Mk III
+ EQUD %00011001110000000011100000000000         \ 11 = Python
+ EQUD %00000000000000000011100000000000         \ 12 = Boa
+ EQUD %00000000000000000100000000000000         \ 13 = Anaconda
+ EQUD %00000001110000001000000000000000         \ 14 = Worm
+ EQUD %00000000000000000000000000000010         \ 15 = Missile
+ EQUD %00000000000000010000000000000000         \ 16 = Viper
+ EQUD %00010001111111101000000000000000         \ 17 = Sidewinder
+ EQUD %00010001111111100000000000000000         \ 18 = Mamba
+ EQUD %00010001111111100000000000000000         \ 19 = Krait
+ EQUD %00011001111110000011000000000000         \ 20 = Adder
+ EQUD %00011001111111100000000000000000         \ 21 = Gecko
+ EQUD %00011001111111100010000000000000         \ 22 = Cobra Mk I
+ EQUD %00011001000000000000000000000000         \ 23 = Asp Mk II
+ EQUD %00011111000000000010000000000000         \ 24 = Fer-de-Lance
+ EQUD %00011001110000000011000000000000         \ 25 = Moray
+ EQUD %00100000000000000000000000000000         \ 26 = Thargoid
+ EQUD %01000000000000000000000000000000         \ 27 = Thargon
+ EQUD %10000000000000000000000000000000         \ 28 = Constrictor
+ EQUD %00000000000000000100000000000000         \ 29 = Dragon
+ EQUD %00010001000000000011100000000000         \ 30 = Monitor
+ EQUD %00010001111000000011000000000000         \ 31 = Ophidian
+ EQUD %00010000000000000011100000000000         \ 32 = Ghavial
+ EQUD %00011101111100000000000000000000         \ 33 = Bushmaster
+ EQUD %00010001110000000011000000000000         \ 34 = Rattler
+ EQUD %00011101111100000010000000000000         \ 35 = Iguana
+ EQUD %00000000000000000000011000000000         \ 36 = Shuttle Mk II
+ EQUD %00010001110000000011000000000000         \ 37 = Chameleon
+
+ EQUD %00011111111111100111111000000000         \ 38 = No ship
 
 \ ******************************************************************************
 \
 \       Name: ship_bytes
 \       Type: Variable
 \   Category: Drawing ships
-\    Summary: AJD
+\    Summary: Table of data used when adding each ship type to the positions in
+\             the blueprints table
+\
+\ ------------------------------------------------------------------------------
+\
+\ This table contains ship data that's used when populating the ship blueprint
+\ positions in LSHIPS, and installing a ship into a blueprint position in
+\ install_ship.
+\
+\ Each ship type has four associated bytes, but only the first two are used:
+\
+\   * Byte #0 is used in LSHIPS when populating the ship blueprint positions. It
+\     is the probability (out of 256) of installing this ship into one of the
+\     positions in which it is allowed. So, if the figure is 100 (as it is for
+\     the Mamba and Sidewinder), then the chance of us adding this ship to a
+\     blueprint position is 100/256, or a 39% chance, while the much rarer
+\     Dragon has a value of 3, so its probability of being added is 3/256, or a
+\     1.2% chance
+\
+\   * Byte #1 determines whether this ship type comes with an escape pod fitted
+\     as standard: if bit 7 is set it does have an escape pod, otherwise it
+\     doesn't
 \
 \ ******************************************************************************
 
 .ship_bytes
 
- EQUB 000, &00, 0, 2
- EQUB 000, &00, 0, 2
- EQUB 000, &00, 0, 2
- EQUB 000, &00, 0, 2
- EQUB 000, &00, 0, 2
- EQUB 000, &00, 0, 2
- EQUB 000, &00, 0, 2
- EQUB 000, &00, 0, 2
- EQUB 050, &00, 0, 0
- EQUB 050, &00, 0, 0
- EQUB 070, &80, 0, 2
- EQUB 065, &80, 0, 2
- EQUB 060, &80, 0, 2
- EQUB 010, &80, 0, 0
- EQUB 015, &00, 0, 0
- EQUB 000, &00, 0, 0
- EQUB 000, &80, 0, 2
- EQUB 090, &00, 0, 2
- EQUB 100, &80, 0, 2
- EQUB 100, &80, 0, 2
- EQUB 085, &80, 0, 2
- EQUB 080, &80, 0, 2
- EQUB 080, &80, 0, 2
- EQUB 010, &80, 0, 0
- EQUB 060, &80, 0, 1
- EQUB 060, &80, 0, 1
- EQUB 000, &00, 0, 2
- EQUB 000, &00, 0, 2
- EQUB 000, &00, 0, 2
- EQUB 003, &00, 0, 0
- EQUB 030, &80, 0, 0
- EQUB 075, &80, 0, 2
- EQUB 050, &80, 0, 1
- EQUB 075, &80, 0, 2
- EQUB 055, &80, 0, 1
- EQUB 060, &80, 0, 1
- EQUB 050, &00, 0, 0
- EQUB 045, &80, 0, 1
+ EQUB   0, %00000000, 0, 2      \  0 = Dodo station
+ EQUB   0, %00000000, 0, 2      \  1 = Coriolis station
+ EQUB   0, %00000000, 0, 2      \  2 = Escape pod
+ EQUB   0, %00000000, 0, 2      \  3 = Alloy plate
+ EQUB   0, %00000000, 0, 2      \  4 = Cargo canister
+ EQUB   0, %00000000, 0, 2      \  5 = Boulder
+ EQUB   0, %00000000, 0, 2      \  6 = Asteroid
+ EQUB   0, %00000000, 0, 2      \  7 = Splinter
+ EQUB  50, %00000000, 0, 0      \  8 = Shuttle
+ EQUB  50, %00000000, 0, 0      \  9 = Transporter
+ EQUB  70, %10000000, 0, 2      \ 10 = Cobra Mk III
+ EQUB  65, %10000000, 0, 2      \ 11 = Python
+ EQUB  60, %10000000, 0, 2      \ 12 = Boa
+ EQUB  10, %10000000, 0, 0      \ 13 = Anaconda
+ EQUB  15, %00000000, 0, 0      \ 14 = Worm
+ EQUB   0, %00000000, 0, 0      \ 15 = Missile
+ EQUB   0, %10000000, 0, 2      \ 16 = Viper
+ EQUB  90, %00000000, 0, 2      \ 17 = Sidewinder
+ EQUB 100, %10000000, 0, 2      \ 18 = Mamba
+ EQUB 100, %10000000, 0, 2      \ 19 = Krait
+ EQUB  85, %10000000, 0, 2      \ 20 = Adder
+ EQUB  80, %10000000, 0, 2      \ 21 = Gecko
+ EQUB  80, %10000000, 0, 2      \ 22 = Cobra Mk I
+ EQUB  10, %10000000, 0, 0      \ 23 = Asp Mk II
+ EQUB  60, %10000000, 0, 1      \ 24 = Fer-de-Lance
+ EQUB  60, %10000000, 0, 1      \ 25 = Moray
+ EQUB   0, %00000000, 0, 2      \ 26 = Thargoid
+ EQUB   0, %00000000, 0, 2      \ 27 = Thargon
+ EQUB   0, %00000000, 0, 2      \ 28 = Constrictor
+ EQUB   3, %00000000, 0, 0      \ 29 = Dragon
+ EQUB  30, %10000000, 0, 0      \ 30 = Monitor
+ EQUB  75, %10000000, 0, 2      \ 31 = Ophidian
+ EQUB  50, %10000000, 0, 1      \ 32 = Ghavial
+ EQUB  75, %10000000, 0, 2      \ 33 = Bushmaster
+ EQUB  55, %10000000, 0, 1      \ 34 = Rattler
+ EQUB  60, %10000000, 0, 1      \ 35 = Iguana
+ EQUB  50, %00000000, 0, 0      \ 36 = Shuttle Mk II
+ EQUB  45, %10000000, 0, 1      \ 37 = Chameleon
 
- EQUB 255, &00, 0, 0
+ EQUB 255, %00000000, 0, 0      \ 38 = No ship
 
 \ ******************************************************************************
 \

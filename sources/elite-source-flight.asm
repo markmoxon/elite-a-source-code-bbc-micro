@@ -25959,9 +25959,9 @@ LOAD_F% = LOAD% + P% - CODE%
                         \ --- And replaced by: -------------------------------->
 
  ADC #25                \ Add A to 25 (we know the C flag is clear as we passed
-                        \ through the BCS above), so A is now a ship slot in the
-                        \ range 25-28, which is where the bounty hunter ships
-                        \ live in the ship files
+                        \ through the BCS above), so A is now a ship blueprint
+                        \ position in the range 25-28, which is where the bounty
+                        \ hunter ships live in the ship files
 
                         \ --- End of replacement ------------------------------>
 
@@ -25998,7 +25998,7 @@ LOAD_F% = LOAD% + P% - CODE%
 
 .NOCON
 
- TYA
+ TYA                    \ Set A to the new ship type in Y
 
  EQUB &2C               \ Skip the next instruction by turning it into
                         \ &2C &A9 &1F, or BIT &1FA9, which does nothing apart
@@ -26061,8 +26061,8 @@ LOAD_F% = LOAD% + P% - CODE%
                         \ --- And replaced by: -------------------------------->
 
  LDA #17                \ Fall through into hordes to spawn a pack of ships from
- LDX #7                 \ ship slots 17 to 24,, which is where the pirate ships
-                        \ live in the ship files
+ LDX #7                 \ ship blueprint positions 17 to 24, which is where the
+                        \ pirate ships live in the ship blueprint files
 
 .hordes
 
