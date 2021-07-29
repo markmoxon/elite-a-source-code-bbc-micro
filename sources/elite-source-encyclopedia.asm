@@ -26993,7 +26993,7 @@ ENDMACRO
 \CTOK 82                \ It would show the hull as "3{all caps}/1L{sentence
 \EQUB 0                 \ case}"
 
- EQUB 10                \ 10: Drive motors:   "VOLTAIRE WhipLAsh{cr}
+ EQUB 10                \ 10: Drive motors:   "VOLTAIRE WHIPLASH{cr}
  CTOK 60                \                      {all caps}HT{sentence case}
  EQUS " Whip"           \                      PULSEDRIVE"
  ETWO 'L', 'A'          \

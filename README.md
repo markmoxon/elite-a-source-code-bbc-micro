@@ -2,6 +2,8 @@
 
 [BBC Micro (cassette)](https://github.com/markmoxon/cassette-elite-beebasm) | [BBC Micro (disc)](https://github.com/markmoxon/disc-elite-beebasm) | [6502 Second Processor](https://github.com/markmoxon/6502sp-elite-beebasm) | [BBC Master](https://github.com/markmoxon/master-elite-beebasm) | [Acorn Electron](https://github.com/markmoxon/electron-elite-beebasm) | **Elite-A**
 
+![Iguana ship details in the Elite-A encyclopedia](https://www.bbcelite.com/images/elite-a/encyclopedia-iguana.png)
+
 This repository contains the original source code for Angus Duggan's Elite-A on the BBC Micro, with every single line documented and (for the most part) explained.
 
 It is a companion to the [bbcelite.com website](https://www.bbcelite.com).
@@ -39,7 +41,7 @@ See the [introduction](#introduction) for more information.
 
 ## Introduction
 
-This repository contains the original source code for Angus Duggan's Elite-A on the BBC Micro with a disc drive.
+This repository contains the original source code for Angus Duggan's Elite-A on the BBC Micro.
 
 You can build the fully functioning game from this source. [Two releases](#building-different-releases-of-elite) are currently supported: the officially released version from Angus's site, and the version produced by the original source discs (which was never released).
 
