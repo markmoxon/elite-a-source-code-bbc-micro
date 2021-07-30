@@ -23723,9 +23723,15 @@ ENDIF
 
                         \ --- And replaced by: -------------------------------->
 
- LDA #1                 \ Set byte #6 of the commander name at NAME+5 to 1
- STA NAME+5             \ (I am not sure why we do this, but it is reversed
-                        \ below, after the disc is catalogued)
+ LDA #1                 \ Set &0355 to 1. This location in the MOS VDU workspace
+ STA &0355              \ contains the current screen mode, but I'm not entirely
+                        \ sure why we need to set it to 1 (the disc catalogue
+                        \ seems to work fine if we omit the STA instruction)
+                        \
+                        \ The sixth character of the commander name at NAME+5 is
+                        \ stored at address &0355, and the overwrite is reversed
+                        \ below, after the disc has been catalogued, to avoid
+                        \ corrupting the current commander name
 
  STA CATF               \ Set the CATF flag to 1, so that the TT26 routine will
                         \ print out the disc catalogue correctly
