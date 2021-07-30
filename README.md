@@ -43,7 +43,7 @@ See the [introduction](#introduction) for more information.
 
 This repository contains the original source code for Angus Duggan's Elite-A on the BBC Micro.
 
-You can build the fully functioning game from this source. [Two releases](#building-different-releases-of-elite) are currently supported: the officially released version from Angus's site, and the version produced by the original source discs (which was never released).
+You can build the fully functioning game from this source. [Two releases](#building-different-releases-of-elite-a) are currently supported: the officially released version from Angus's site, and the version produced by the original source discs (which was never released).
 
 Elite-A is legendary amongst BBC Elite fans, and remains a deeply impressive project that has achieved almost mythical status in the Acorn retro scene (and deservedly so). Ian Bell, co-author of the original Elite, has this to say on his website:
 
