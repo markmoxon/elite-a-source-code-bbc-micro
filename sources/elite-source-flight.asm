@@ -2226,7 +2226,7 @@ LOAD_A% = LOAD%
 
 \ ******************************************************************************
 \
-\       Name: scramble (Removed)
+\       Name: scramble, Removed
 \       Type: Subroutine
 \   Category: Loader
 \    Summary: Decrypt the main flight code between &1300 and &55FF and jump into
@@ -3052,7 +3052,7 @@ LOAD_A% = LOAD%
 
 \ ******************************************************************************
 \
-\       Name: Main flight loop (Part 5 of 16) (Removed)
+\       Name: Main flight loop (Part 5 of 16), Removed
 \       Type: Subroutine
 \   Category: Main loop
 \    Summary: For each nearby ship: If an energy bomb has been set off,
@@ -5461,7 +5461,7 @@ NEXT
 
 \ ******************************************************************************
 \
-\       Name: FLKB (Removed)
+\       Name: FLKB, Removed
 \       Type: Subroutine
 \   Category: Keyboard
 \    Summary: Flush the keyboard buffer
@@ -5892,7 +5892,7 @@ NEXT
 
 \ ******************************************************************************
 \
-\       Name: PX3 (Removed)
+\       Name: PX3, Removed
 \       Type: Subroutine
 \   Category: Drawing pixels
 \    Summary: Plot a single pixel at (X, Y) within a character block
@@ -13467,7 +13467,7 @@ LOAD_C% = LOAD% +P% - CODE%
 
 \ ******************************************************************************
 \
-\       Name: MUT3 (Removed)
+\       Name: MUT3, Removed
 \       Type: Subroutine
 \   Category: Maths (Arithmetic)
 \    Summary: Unused routine that does the same as MUT2
@@ -14741,7 +14741,7 @@ LOAD_C% = LOAD% +P% - CODE%
 
 \ ******************************************************************************
 \
-\       Name: Unused block (Removed)
+\       Name: Unused block, Removed
 \       Type: Variable
 \   Category: Utility routines
 \    Summary: These bytes appear to be unused (the same block appears in both
@@ -14792,7 +14792,7 @@ LOAD_D% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
 \
-\       Name: tnpr1 (Removed)
+\       Name: tnpr1, Removed
 \       Type: Subroutine
 \   Category: Market
 \    Summary: Work out if we have space for one tonne of cargo
@@ -17422,7 +17422,7 @@ LOAD_D% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
 \
-\       Name: TTX110 (Removed)
+\       Name: TTX110, Removed
 \       Type: Subroutine
 \   Category: Flight
 \    Summary: Set the current system to the nearest system and return to hyp
@@ -18422,7 +18422,7 @@ LOAD_D% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
 \
-\       Name: GCASH (Removed)
+\       Name: GCASH, Removed
 \       Type: Subroutine
 \   Category: Maths (Arithmetic)
 \    Summary: Calculate (Y X) = P * Q * 4
@@ -20476,7 +20476,7 @@ LOAD_E% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
 \
-\       Name: SPS2 (Moved)
+\       Name: SPS2, Moved
 \       Type: Subroutine
 \   Category: Maths (Arithmetic)
 \    Summary: Calculate (Y X) = A / 10
@@ -20541,7 +20541,7 @@ LOAD_E% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
 \
-\       Name: SPS4 (Removed)
+\       Name: SPS4, Removed
 \       Type: Subroutine
 \   Category: Maths (Geometry)
 \    Summary: Calculate the vector to the space station
@@ -20578,7 +20578,7 @@ LOAD_E% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
 \
-\       Name: SP1 (Removed)
+\       Name: SP1, Removed
 \       Type: Subroutine
 \   Category: Dashboard
 \    Summary: Draw the space station on the compass
@@ -26661,7 +26661,7 @@ LOAD_F% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
 \
-\       Name: BAD (Removed)
+\       Name: BAD, Removed
 \       Type: Subroutine
 \   Category: Status
 \    Summary: Calculate how bad we have been
@@ -29291,7 +29291,7 @@ LOAD_F% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
 \
-\       Name: ou2 (Removed)
+\       Name: ou2, Removed
 \       Type: Subroutine
 \   Category: Text
 \    Summary: Display "E.C.M.SYSTEM DESTROYED" as an in-flight message
@@ -29313,7 +29313,7 @@ LOAD_F% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
 \
-\       Name: ou3 (Removed)
+\       Name: ou3, Removed
 \       Type: Subroutine
 \   Category: Text
 \    Summary: Display "FUEL SCOOPS DESTROYED" as an in-flight message

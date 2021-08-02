@@ -2268,7 +2268,7 @@ BRKV = P% - 2           \ The address of the destination address in the above
 
 \ ******************************************************************************
 \
-\       Name: scramble (Removed)
+\       Name: scramble, Removed
 \       Type: Subroutine
 \   Category: Loader
 \    Summary: Decrypt the main docked code between &1300 and &5FFF and
@@ -2710,7 +2710,7 @@ BRKV = P% - 2           \ The address of the destination address in the above
 
 \ ******************************************************************************
 \
-\       Name: DETOK3 (Moved)
+\       Name: DETOK3, Moved
 \       Type: Subroutine
 \   Category: Text
 \    Summary: Print an extended recursive token from the RUTOK token table
@@ -3912,7 +3912,7 @@ BRKV = P% - 2           \ The address of the destination address in the above
 
 \ ******************************************************************************
 \
-\       Name: MVT1 (Removed)
+\       Name: MVT1, Removed
 \       Type: Subroutine
 \   Category: Moving
 \    Summary: Calculate (x_sign x_hi x_lo) = (x_sign x_hi x_lo) + (A R)
@@ -4070,7 +4070,7 @@ BRKV = P% - 2           \ The address of the destination address in the above
 
 \ ******************************************************************************
 \
-\       Name: MVT3 (Removed)
+\       Name: MVT3, Removed
 \       Type: Subroutine
 \   Category: Moving
 \    Summary: Calculate K(3 2 1) = (x_sign x_hi x_lo) + K(3 2 1)
@@ -4502,7 +4502,7 @@ BRKV = P% - 2           \ The address of the destination address in the above
 
 \ ******************************************************************************
 \
-\       Name: MVT6 (Removed)
+\       Name: MVT6, Removed
 \       Type: Subroutine
 \   Category: Moving
 \    Summary: Calculate (A P+2 P+1) = (x_sign x_hi x_lo) + (A P+2 P+1)
@@ -5931,7 +5931,7 @@ LOAD_B% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
 \
-\       Name: PIX1 (Removed)
+\       Name: PIX1, Removed
 \       Type: Subroutine
 \   Category: Maths (Arithmetic)
 \    Summary: Calculate (YY+1 SYL+Y) = (A P) + (S R) and draw stardust particle
@@ -5978,7 +5978,7 @@ LOAD_B% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
 \
-\       Name: PIXEL2 (Removed)
+\       Name: PIXEL2, Removed
 \       Type: Subroutine
 \   Category: Drawing pixels
 \    Summary: Draw a stardust particle relative to the screen centre
@@ -6341,7 +6341,7 @@ LOAD_B% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
 \
-\       Name: FLIP (Removed)
+\       Name: FLIP, Removed
 \       Type: Subroutine
 \   Category: Stardust
 \    Summary: Reflect the stardust particles in the screen diagonal
@@ -6941,7 +6941,7 @@ LOAD_B% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
 \
-\       Name: plf2 (Removed)
+\       Name: plf2, Removed
 \       Type: Subroutine
 \   Category: Text
 \    Summary: Print text followed by a newline and indent of 6 characters
@@ -10255,7 +10255,7 @@ LOAD_C% = LOAD% +P% - CODE%
 
 \ ******************************************************************************
 \
-\       Name: LL164 (Removed)
+\       Name: LL164, Removed
 \       Type: Subroutine
 \   Category: Drawing circles
 \    Summary: Make the hyperspace sound and draw the hyperspace tunnel
@@ -10294,7 +10294,7 @@ LOAD_C% = LOAD% +P% - CODE%
 
 \ ******************************************************************************
 \
-\       Name: LAUN (Removed)
+\       Name: LAUN, Removed
 \       Type: Subroutine
 \   Category: Drawing circles
 \    Summary: Make the launch sound and draw the launch tunnel
@@ -10424,7 +10424,7 @@ LOAD_C% = LOAD% +P% - CODE%
 
 \ ******************************************************************************
 \
-\       Name: Unused block (Removed)
+\       Name: Unused block, Removed
 \       Type: Variable
 \   Category: Utility routines
 \    Summary: These bytes appear to be unused (the same block appears in both
@@ -10450,7 +10450,7 @@ LOAD_C% = LOAD% +P% - CODE%
 
 \ ******************************************************************************
 \
-\       Name: MU5 (Removed)
+\       Name: MU5, Removed
 \       Type: Subroutine
 \   Category: Maths (Arithmetic)
 \    Summary: Set K(3 2 1 0) = (A A A A) and clear the C flGag
@@ -10485,7 +10485,7 @@ LOAD_C% = LOAD% +P% - CODE%
 
 \ ******************************************************************************
 \
-\       Name: MLS2 (Removed)
+\       Name: MLS2, Removed
 \       Type: Subroutine
 \   Category: Maths (Arithmetic)
 \    Summary: Calculate (S R) = XX(1 0) and (A P) = A * ALP1
@@ -10588,7 +10588,7 @@ LOAD_C% = LOAD% +P% - CODE%
 
 \ ******************************************************************************
 \
-\       Name: MLU1 (Removed)
+\       Name: MLU1, Removed
 \       Type: Subroutine
 \   Category: Maths (Arithmetic)
 \    Summary: Calculate Y1 = y_hi and (A P) = |y_hi| * Q for Y-th stardust
@@ -10619,7 +10619,7 @@ LOAD_C% = LOAD% +P% - CODE%
 
 \ ******************************************************************************
 \
-\       Name: MLU2 (Removed)
+\       Name: MLU2, Removed
 \       Type: Subroutine
 \   Category: Maths (Arithmetic)
 \    Summary: Calculate (A P) = |A| * Q
@@ -10738,7 +10738,7 @@ LOAD_C% = LOAD% +P% - CODE%
 
 \ ******************************************************************************
 \
-\       Name: MU6 (Removed)
+\       Name: MU6, Removed
 \       Type: Subroutine
 \   Category: Maths (Arithmetic)
 \    Summary: Set P(1 0) = (A A)
@@ -10878,7 +10878,7 @@ LOAD_C% = LOAD% +P% - CODE%
 
 \ ******************************************************************************
 \
-\       Name: Unused duplicate of MULTU (Removed)
+\       Name: Unused duplicate of MULTU, Removed
 \       Type: Subroutine
 \   Category: Maths (Arithmetic)
 \    Summary: Unused duplicate of the MULTU routine
@@ -10920,7 +10920,7 @@ LOAD_C% = LOAD% +P% - CODE%
 
 \ ******************************************************************************
 \
-\       Name: MLTU2 (Removed)
+\       Name: MLTU2, Removed
 \       Type: Subroutine
 \   Category: Maths (Arithmetic)
 \    Summary: Calculate (A P+1 P) = (A ~P) * Q
@@ -11015,7 +11015,7 @@ LOAD_C% = LOAD% +P% - CODE%
 
 \ ******************************************************************************
 \
-\       Name: MUT3 (Removed)
+\       Name: MUT3, Removed
 \       Type: Subroutine
 \   Category: Maths (Arithmetic)
 \    Summary: Unused routine that does the same as MUT2
@@ -11043,7 +11043,7 @@ LOAD_C% = LOAD% +P% - CODE%
 
 \ ******************************************************************************
 \
-\       Name: MUT2 (Removed)
+\       Name: MUT2, Removed
 \       Type: Subroutine
 \   Category: Maths (Arithmetic)
 \    Summary: Calculate (S R) = XX(1 0) and (A P) = Q * A
@@ -11073,7 +11073,7 @@ LOAD_C% = LOAD% +P% - CODE%
 
 \ ******************************************************************************
 \
-\       Name: MUT1 (Removed)
+\       Name: MUT1, Removed
 \       Type: Subroutine
 \   Category: Maths (Arithmetic)
 \    Summary: Calculate R = XX and (A P) = Q * A
@@ -11217,7 +11217,7 @@ LOAD_C% = LOAD% +P% - CODE%
 
 \ ******************************************************************************
 \
-\       Name: TAS3 (Removed)
+\       Name: TAS3, Removed
 \       Type: Subroutine
 \   Category: Maths (Geometry)
 \    Summary: Calculate the dot product of XX15 and an orientation vector
@@ -11508,7 +11508,7 @@ LOAD_C% = LOAD% +P% - CODE%
 
 \ ******************************************************************************
 \
-\       Name: DV42 (Removed)
+\       Name: DV42, Removed
 \       Type: Subroutine
 \   Category: Maths (Arithmetic)
 \    Summary: Calculate (P R) = 256 * DELTA / z_hi
@@ -11557,7 +11557,7 @@ LOAD_C% = LOAD% +P% - CODE%
 
 \ ******************************************************************************
 \
-\       Name: DV41 (Removed)
+\       Name: DV41, Removed
 \       Type: Subroutine
 \   Category: Maths (Arithmetic)
 \    Summary: Calculate (P R) = 256 * DELTA / A
@@ -11669,7 +11669,7 @@ LOAD_C% = LOAD% +P% - CODE%
 
 \ ******************************************************************************
 \
-\       Name: DVID3B2 (Removed)
+\       Name: DVID3B2, Removed
 \       Type: Subroutine
 \   Category: Maths (Arithmetic)
 \    Summary: Calculate K(3 2 1 0) = (A P+1 P) / (z_sign z_hi z_lo)
@@ -11908,7 +11908,7 @@ LOAD_C% = LOAD% +P% - CODE%
 
 \ ******************************************************************************
 \
-\       Name: cntr (Removed)
+\       Name: cntr, Removed
 \       Type: Subroutine
 \   Category: Dashboard
 \    Summary: Apply damping to the pitch or roll dashboard indicator
@@ -11962,7 +11962,7 @@ LOAD_C% = LOAD% +P% - CODE%
 
 \ ******************************************************************************
 \
-\       Name: BUMP2 (Removed)
+\       Name: BUMP2, Removed
 \       Type: Subroutine
 \   Category: Dashboard
 \    Summary: Bump up the value of the pitch or roll dashboard indicator
@@ -12029,7 +12029,7 @@ LOAD_C% = LOAD% +P% - CODE%
 
 \ ******************************************************************************
 \
-\       Name: REDU2 (Removed)
+\       Name: REDU2, Removed
 \       Type: Subroutine
 \   Category: Dashboard
 \    Summary: Reduce the value of the pitch or roll dashboard indicator
@@ -12697,7 +12697,7 @@ LOAD_C% = LOAD% +P% - CODE%
 
 \ ******************************************************************************
 \
-\       Name: SIGHT (Removed)
+\       Name: SIGHT, Removed
 \       Type: Subroutine
 \   Category: Flight
 \    Summary: Draw the laser crosshairs
@@ -13035,7 +13035,7 @@ LOAD_C% = LOAD% +P% - CODE%
 
 \ ******************************************************************************
 \
-\       Name: CPIX4 (Removed)
+\       Name: CPIX4, Removed
 \       Type: Subroutine
 \   Category: Drawing pixels
 \    Summary: Draw a double-height dot on the dashboard
@@ -13072,7 +13072,7 @@ LOAD_C% = LOAD% +P% - CODE%
 
 \ ******************************************************************************
 \
-\       Name: CPIX2 (Removed)
+\       Name: CPIX2, Removed
 \       Type: Subroutine
 \   Category: Drawing pixels
 \    Summary: Draw a single-height dash on the dashboard
@@ -15206,7 +15206,7 @@ LOAD_D% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
 \
-\       Name: TT214 (Removed)
+\       Name: TT214, Removed
 \       Type: Subroutine
 \   Category: Inventory
 \    Summary: Ask a question with a "Y/N?" prompt and return the response
@@ -16102,7 +16102,7 @@ LOAD_D% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
 \
-\       Name: hyp (Removed)
+\       Name: hyp, Removed
 \       Type: Subroutine
 \   Category: Flight
 \    Summary: Start the hyperspace process
@@ -16208,7 +16208,7 @@ LOAD_D% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
 \
-\       Name: wW (Removed)
+\       Name: wW, Removed
 \       Type: Subroutine
 \   Category: Flight
 \    Summary: Start a hyperspace countdown
@@ -16246,7 +16246,7 @@ LOAD_D% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
 \
-\       Name: TTX110 (Removed)
+\       Name: TTX110, Removed
 \       Type: Subroutine
 \   Category: Flight
 \    Summary: Set the current system to the nearest system and return to hyp
@@ -16270,7 +16270,7 @@ LOAD_D% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
 \
-\       Name: Ghy (Removed)
+\       Name: Ghy, Removed
 \       Type: Subroutine
 \   Category: Flight
 \    Summary: Perform a galactic hyperspace jump
@@ -16456,7 +16456,7 @@ LOAD_D% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
 \
-\       Name: TT147 (Removed)
+\       Name: TT147, Removed
 \       Type: Subroutine
 \   Category: Text
 \    Summary: Print an error when a system is out of hyperspace range
@@ -18304,7 +18304,7 @@ LOAD_D% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
 \
-\       Name: refund (Removed)
+\       Name: refund, Removed
 \       Type: Subroutine
 \   Category: Equipment
 \    Summary: Install a new laser, processing a refund if applicable
@@ -19426,7 +19426,7 @@ LOAD_E% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
 \
-\       Name: DOEXP (Removed)
+\       Name: DOEXP, Removed
 \       Type: Subroutine
 \   Category: Drawing ships
 \    Summary: Draw an exploding ship
@@ -19568,7 +19568,7 @@ LOAD_E% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
 \
-\       Name: DET1 (Removed)
+\       Name: DET1, Removed
 \       Type: Subroutine
 \   Category: Screen mode
 \    Summary: Show or hide the dashboard (for when we die)
@@ -19613,7 +19613,7 @@ LOAD_E% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
 \
-\       Name: SHD (Removed)
+\       Name: SHD, Removed
 \       Type: Subroutine
 \   Category: Flight
 \    Summary: Charge a shield and drain some energy from the energy banks
@@ -19651,7 +19651,7 @@ LOAD_E% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
 \
-\       Name: DENGY (Removed)
+\       Name: DENGY, Removed
 \       Type: Subroutine
 \   Category: Flight
 \    Summary: Drain some energy from the energy banks
@@ -19687,7 +19687,7 @@ LOAD_E% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
 \
-\       Name: SPS3 (Removed)
+\       Name: SPS3, Removed
 \       Type: Subroutine
 \   Category: Maths (Geometry)
 \    Summary: Copy a space coordinate from the K% block into K3
@@ -20045,7 +20045,7 @@ LOAD_E% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
 \
-\       Name: NwS1 (Removed)
+\       Name: NwS1, Removed
 \       Type: Subroutine
 \   Category: Universe
 \    Summary: Flip the sign and double an INWK byte
@@ -20082,7 +20082,7 @@ LOAD_E% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
 \
-\       Name: ABORT (Removed)
+\       Name: ABORT, Removed
 \       Type: Subroutine
 \   Category: Dashboard
 \    Summary: Disarm missiles and update the dashboard indicators
@@ -20109,7 +20109,7 @@ LOAD_E% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
 \
-\       Name: ABORT2 (Removed)
+\       Name: ABORT2, Removed
 \       Type: Subroutine
 \   Category: Dashboard
 \    Summary: Set/unset the lock target for a missile and update the dashboard
@@ -20153,7 +20153,7 @@ LOAD_E% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
 \
-\       Name: SPBLB (Removed)
+\       Name: SPBLB, Removed
 \       Type: Subroutine
 \   Category: Dashboard
 \    Summary: Light up the space station indicator ("S") on the dashboard
@@ -20184,7 +20184,7 @@ LOAD_E% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
 \
-\       Name: BULB (Removed)
+\       Name: BULB, Removed
 \       Type: Subroutine
 \   Category: Dashboard
 \    Summary: Draw an indicator bulb on the dashboard
@@ -20224,7 +20224,7 @@ LOAD_E% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
 \
-\       Name: SPBT (Removed)
+\       Name: SPBT, Removed
 \       Type: Variable
 \   Category: Dashboard
 \    Summary: The bitmap definition for the space station indicator bulb
@@ -20906,7 +20906,7 @@ LOAD_E% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
 \
-\       Name: CIRCLE (Removed)
+\       Name: CIRCLE, Removed
 \       Type: Subroutine
 \   Category: Drawing circles
 \    Summary: Draw a circle for the planet
@@ -21097,7 +21097,7 @@ LOAD_E% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
 \
-\       Name: WP1 (Removed)
+\       Name: WP1, Removed
 \       Type: Subroutine
 \   Category: Drawing planets
 \    Summary: Reset the ball line heap
@@ -21120,7 +21120,7 @@ LOAD_E% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
 \
-\       Name: WPLS (Removed)
+\       Name: WPLS, Removed
 \       Type: Subroutine
 \   Category: Drawing suns
 \    Summary: Remove the sun from the screen
@@ -22024,7 +22024,7 @@ LOAD_F% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
 \
-\       Name: Ze (Removed)
+\       Name: Ze, Removed
 \       Type: Subroutine
 \   Category: Universe
 \    Summary: Initialise the INWK workspace to a hostile ship
@@ -22610,7 +22610,7 @@ LOAD_F% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
 \
-\       Name: BAD (Removed)
+\       Name: BAD, Removed
 \       Type: Subroutine
 \   Category: Status
 \    Summary: Calculate how bad we have been
@@ -23857,7 +23857,7 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: stack (Removed)
+\       Name: stack, Removed
 \       Type: Variable
 \   Category: Save and load
 \    Summary: Temporary storage for the stack pointer when switching the BRKV
@@ -24505,7 +24505,7 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: Unused routine (Removed)
+\       Name: Unused routine, Removed
 \       Type: Subroutine
 \   Category: Utility routines
 \    Summary: This code appears to be unused
@@ -24521,7 +24521,7 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: SPS1 (Removed)
+\       Name: SPS1, Removed
 \       Type: Subroutine
 \   Category: Maths (Geometry)
 \    Summary: Calculate the vector to the planet, sun or station and store it in
@@ -24562,7 +24562,7 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: TAS2 (Removed)
+\       Name: TAS2, Removed
 \       Type: Subroutine
 \   Category: Maths (Geometry)
 \    Summary: Normalise the three-coordinate vector in K3
@@ -24866,7 +24866,7 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: EXNO3 (Removed)
+\       Name: EXNO3, Removed
 \       Type: Subroutine
 \   Category: Sound
 \    Summary: Make an explosion sound
@@ -24923,7 +24923,7 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: EXNO2 (Removed)
+\       Name: EXNO2, Removed
 \       Type: Subroutine
 \   Category: Sound
 \    Summary: Process us making a kill
@@ -24964,7 +24964,7 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: EXNO (Removed)
+\       Name: EXNO, Removed
 \       Type: Subroutine
 \   Category: Sound
 \    Summary: Make the sound of a laser strike or ship explosion
@@ -25366,7 +25366,7 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: DKJ1 (Removed)
+\       Name: DKJ1, Removed
 \       Type: Subroutine
 \   Category: Keyboard
 \    Summary: Read joystick and flight controls
