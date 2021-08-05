@@ -2340,7 +2340,7 @@ ORG &1100
 \   Category: Save and load
 \    Summary: The drive and directory number used when saving or loading a
 \             commander file
-\  Deep dive: Commander save files.
+\  Deep dive: Commander save files
 \
 \ ------------------------------------------------------------------------------
 \
@@ -2391,7 +2391,7 @@ ORG &1100
 \ EQUS "JAMESON"        \ The current commander name, which defaults to JAMESON
 \ EQUB 13               \
 \                       \ The commander name can be up to 7 characters (the DFS
-\                       \ limit for file names), and is terminated by a carriage
+\                       \ limit for filenames), and is terminated by a carriage
 \                       \ return
 
                         \ --- And replaced by: -------------------------------->
@@ -2399,7 +2399,7 @@ ORG &1100
  EQUS "NEWCOME"         \ The current commander name, which defaults to NEWCOME
  EQUB 13                \
                         \ The commander name can be up to 7 characters (the DFS
-                        \ limit for file names), and is terminated by a carriage
+                        \ limit for filenames), and is terminated by a carriage
                         \ return
 
                         \ --- End of replacement ------------------------------>

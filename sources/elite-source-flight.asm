@@ -1173,7 +1173,7 @@ ORG &0300
  SKIP 8                 \ The current commander name
                         \
                         \ The commander name can be up to 7 characters (the DFS
-                        \ limit for file names), and is terminated by a carriage
+                        \ limit for filenames), and is terminated by a carriage
                         \ return
 
 .TP
@@ -2041,19 +2041,20 @@ ORG &0E00
 
 .LSO
 
- SKIP 1                 \ This space has three uses:
-                        \
-.BUF                    \   * The ship line heap for the space station (see
-                        \     NWSPS for details)
- SKIP 191               \
-                        \   * The sun line heap (see SUN for details)
-                        \
-                        \   * The line buffer used by DASC to print justified
-                        \     text (BUF = LSO + 1)
+ SKIP 1                 \ The ship line heap for the space station (see NWSPS)
+                        \ and the sun line heap (see SUN)
                         \
                         \ The spaces can be shared as our local bubble of
                         \ universe can support either the sun or a space
                         \ station, but not both
+
+.BUF
+
+ SKIP 191               \ The line buffer used by DASC to print justified text
+                        \
+                        \ This buffer shares space with the LSO buffer, which
+                        \ works because neither the sun or space station are
+                        \ shown at the same time as printing justified text
 
 .LSX2
 
@@ -4757,8 +4758,6 @@ NEXT
 \   LL30                LL30 is a synonym for LOIN and draws a line from
 \                       (X1, Y1) to (X2, Y2)
 \
-\   HL6                 Contains an RTS
-\
 \ ******************************************************************************
 
 .LL30
@@ -5390,6 +5389,10 @@ NEXT
 \   * X1 >= X2 and Y1 >= Y2
 \
 \   * Draw from (X1, Y1) at bottom left to (X2, Y2) at top right
+\
+\ Other entry points:
+\
+\   HL6                 Contains an RTS
 \
 \ ******************************************************************************
 
@@ -11910,11 +11913,6 @@ LOAD_C% = LOAD% +P% - CODE%
 \ This is called when an enemy ship has run out of both energy and luck, so it's
 \ time to bail.
 \
-\ Other entry points:
-\
-\   SFS1-2              Add a missile to the local bubble that has AI enabled,
-\                       is hostile, but has no E.C.M.
-\
 \ ******************************************************************************
 
 .SESCP
@@ -11963,6 +11961,11 @@ LOAD_C% = LOAD% +P% - CODE%
 \   INWK                The whole INWK workspace is preserved
 \
 \   X                   X is preserved
+\
+\ Other entry points:
+\
+\   SFS1-2              Add a missile to the local bubble that has AI enabled,
+\                       is hostile, but has no E.C.M.
 \
 \ ******************************************************************************
 
@@ -18553,10 +18556,6 @@ LOAD_E% = LOAD% + P% - CODE%
 \ Print control code 3 (the selected system name, i.e. the one in the crosshairs
 \ in the Short-range Chart).
 \
-\ Other entry points:
-\
-\   cmn-1               Contains an RTS
-\
 \ ******************************************************************************
 
 .cpl
@@ -18639,7 +18638,7 @@ LOAD_E% = LOAD% + P% - CODE%
 \
 \ Other entry points:
 \
-\   ypl-1               Contains an RTS
+\   cmn-1               Contains an RTS
 \
 \ ******************************************************************************
 
@@ -18673,6 +18672,10 @@ LOAD_E% = LOAD% + P% - CODE%
 \ ------------------------------------------------------------------------------
 \
 \ Print control code 2 (the current system name).
+\
+\ Other entry points:
+\
+\   ypl-1               Contains an RTS
 \
 \ ******************************************************************************
 
@@ -21669,10 +21672,6 @@ LOAD_E% = LOAD% + P% - CODE%
 \
 \ ------------------------------------------------------------------------------
 \
-\ Other entry points:
-\
-\   BULB-2              Set the Y screen address
-\
 \ ******************************************************************************
 
 .SPBLB
@@ -21705,6 +21704,10 @@ LOAD_E% = LOAD% + P% - CODE%
 \   (Y X)               The address of the character definition of the bulb to
 \                       be drawn (i.e. ECBT for the E.C.M. bulb, or SPBT for the
 \                       space station bulb)
+\
+\ Other entry points:
+\
+\   BULB-2              Set the Y screen address
 \
 \ ******************************************************************************
 
@@ -22733,10 +22736,6 @@ LOAD_E% = LOAD% + P% - CODE%
 \   SUNX(1 0)           The x-coordinate of the vertical centre axis of the old
 \                       sun (the one currently on-screen)
 \
-\ Other entry points:
-\
-\   RTS2                Contains an RTS
-\
 \ ******************************************************************************
 
  JMP WPLS               \ Jump to WPLS to remove the old sun from the screen. We
@@ -23224,6 +23223,10 @@ LOAD_E% = LOAD% + P% - CODE%
 \
 \ This part erases any remaining traces of the old sun, now that we have drawn
 \ all the way to the top of the new sun.
+\
+\ Other entry points:
+\
+\   RTS2                Contains an RTS
 \
 \ ******************************************************************************
 
@@ -26373,12 +26376,12 @@ LOAD_F% = LOAD% + P% - CODE%
 \
 \ Other entry points:
 \
+\   BAD                 Work out how bad we are from the amount of contraband in
+\                       our hold
+\
 \   T95                 Print the distance to the selected system
 \
 \   TT107               Progress the countdown of the hyperspace counter
-\
-\   BAD                 Work out how bad we are from the amount of contraband in
-\                       our hold
 \
 \ ******************************************************************************
 
@@ -27915,11 +27918,6 @@ LOAD_F% = LOAD% + P% - CODE%
 \ message of encouragement if the kill total is a multiple of 256, and then
 \ make a nearby explosion sound.
 \
-\ Other entry points:
-\
-\   EXNO-2              Set X = 7 and fall through into EXNO to make the sound
-\                       of a ship exploding
-\
 \ ******************************************************************************
 
 .EXNO2
@@ -27967,6 +27965,9 @@ LOAD_F% = LOAD% + P% - CODE%
 \                                strike)
 \
 \ Other entry points:
+\
+\   EXNO-2              Set X = 7 and fall through into EXNO to make the sound
+\                       of a ship exploding
 \
 \   n_sound10           Make the first part of the death sound, or the second
 \                       part of the explosion sound
@@ -28542,10 +28543,6 @@ LOAD_F% = LOAD% + P% - CODE%
 \
 \   X                   Contains the same as A
 \
-\ Other entry points:
-\
-\   DKS2-1              Contains an RTS
-\
 \ ******************************************************************************
 
 .DKS4
@@ -28612,6 +28609,10 @@ LOAD_F% = LOAD% + P% - CODE%
 \   (A X)               The 16-bit value read from channel X, with the value
 \                       inverted if the game has been configured to reverse the
 \                       joystick
+\
+\ Other entry points:
+\
+\   DKS2-1              Contains an RTS
 \
 \ ******************************************************************************
 
@@ -35210,10 +35211,6 @@ LOAD_H% = LOAD% + P% - CODE%
 \
 \ This routine flips the relevant geometric axes in INWK depending on which
 \ view we are looking through (front, rear, left, right).
-\
-\ Other entry points:
-\
-\   LO2                 Contains an RTS
 \
 \ ******************************************************************************
 

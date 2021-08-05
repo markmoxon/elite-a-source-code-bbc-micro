@@ -974,8 +974,6 @@ ORG CODE%
 \   LL30                LL30 is a synonym for LOIN and draws a line from
 \                       (X1, Y1) to (X2, Y2)
 \
-\   HL6                 Contains an RTS
-\
 \ ******************************************************************************
 
 .LL30
@@ -1612,6 +1610,10 @@ ORG CODE%
 \   * X1 >= X2 and Y1 >= Y2
 \
 \   * Draw from (X1, Y1) at bottom left to (X2, Y2) at top right
+\
+\ Other entry points:
+\
+\   HL6                 Contains an RTS
 \
 \ ******************************************************************************
 
@@ -2798,10 +2800,6 @@ ORG CODE%
 \
 \   X                   Contains the same as A
 \
-\ Other entry points:
-\
-\   DKS2-1              Contains an RTS
-\
 \ ******************************************************************************
 
 .DKS4
@@ -3377,9 +3375,6 @@ ORG CODE%
 \
 \ ------------------------------------------------------------------------------
 \
-\ Other entry points:
-\
-\   BULB-2              Set the Y screen address
 \
 \ ******************************************************************************
 
@@ -3413,6 +3408,10 @@ ORG CODE%
 \   (Y X)               The address of the character definition of the bulb to
 \                       be drawn (i.e. ECBT for the E.C.M. bulb, or SPBT for the
 \                       space station bulb)
+\
+\ Other entry points:
+\
+\   BULB-2              Set the Y screen address
 \
 \ ******************************************************************************
 
