@@ -28654,7 +28654,7 @@ LOAD_F% = LOAD% + P% - CODE%
 \   * Y toggles reverse joystick Y channel (&44)
 \   * J toggles reverse both joystick channels (&45)
 \   * K toggles keyboard and joystick (&46)
-\   * @ toggles keyboard and Delta 14B joystick (&47)
+\   * @ toggles keyboard and Delta 14b joystick (&47)
 \
 \ The numbers in brackets are the internal key numbers (see p.142 of the
 \ Advanced User Guide for a list of internal key numbers). We pass the key that
