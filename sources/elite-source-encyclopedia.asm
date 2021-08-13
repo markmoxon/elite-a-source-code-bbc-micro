@@ -1281,7 +1281,7 @@ ORG &0300
                         \ Elite-A doesn't sell the large cargo bay as you can
                         \ buy different ships with different capacities, so we
                         \ reuse the CRGO variable to determine whether an I.F.F.
-                        \ is fitted
+                        \ system is fitted
 
 .QQ20
 
@@ -1324,13 +1324,23 @@ ORG &0300
                         \ Elite-A replaces the energy bomb with the hyperspace
                         \ unit, reusing the BOMB variable to determine whether
                         \ one is fitted
+
 .ENGY
 
  SKIP 1                 \ Energy unit
                         \
                         \   * 0 = not fitted
                         \
-                        \   * 1 = fitted
+                        \   * Non-zero = fitted
+                        \
+                        \ The actual value determines the refresh rate of our
+                        \ energy banks, as they refresh by ENGY+1 each time (so
+                        \ our ship's energy level goes up by 2 each time if we
+                        \ have an energy unit fitted, otherwise it goes up by 1)
+
+                        \
+                        \ In Elite-A, the value of ENGY depends on the ship type
+                        \ so some ships recharge faster than others
 
 .DKCMP
 
@@ -1364,10 +1374,10 @@ ORG &0300
 
 .cmdr_cour
 
- SKIP 2                 \ The mission timer for the current special cargo
+ SKIP 2                 \ The mission reward for the current special cargo
                         \ delivery destination
                         \
-                        \ While doing a special cargo delivery, this timer is
+                        \ While doing a special cargo delivery, the reward is
                         \ halved on every visit to a station (and again if we
                         \ choose to pay a docking fee), and if it runs down to
                         \ zero, the mission is lost
@@ -1908,7 +1918,7 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
                         \ the fuel tank)
                         \
                         \ The range is stored as the number of light years
-                        \ multiplied by 10, so QQ14 = 1 represents 0.1 light
+                        \ multiplied by 10, so a value of 1 represents 0.1 light
                         \ years, while 70 represents 7.0 light years
                         \
                         \ When we buy a new ship, this is set to the relevant
@@ -2302,7 +2312,7 @@ BRKV = P% - 2           \ The address of the destination address in the above
 \       Type: Subroutine
 \   Category: Text
 \    Summary: Print an extended recursive token from the msg_3 token table
-\  Deep dive: Extended text tokens
+\  Deep dive: The Encyclopedia Galactica
 \
 \ ------------------------------------------------------------------------------
 \
@@ -8098,7 +8108,7 @@ LOAD_C% = LOAD% +P% - CODE%
 
  CPX #&78               \ Loop back to BOL1 until we have cleared page &7700,
  BNE BOL1               \ the last character row in the space view part of the
-                        \ screen (the space view)
+                        \ screen (the top part)
 
  LDY #1                 \ Move the text cursor to row 1
  STY YC
@@ -8222,8 +8232,10 @@ LOAD_C% = LOAD% +P% - CODE%
 \
 \ ------------------------------------------------------------------------------
 \
-\ Clear some space at the bottom of the screen and move the text cursor to
-\ column 1, row 21. Specifically, this zeroes the following screen locations:
+\ This routine clears some space at the bottom of the screen and moves the text
+\ cursor to column 1, row 21. 
+\
+\ Specifically, it zeroes the following screen locations:
 \
 \   &7507 to &75F0
 \   &7607 to &76F0
@@ -19286,6 +19298,7 @@ LOAD_H% = LOAD% + P% - CODE%
 \       Type: Subroutine
 \   Category: Encyclopedia
 \    Summary: Show the Encyclopedia screen
+\  Deep dive: The Encyclopedia Galactica
 \
 \ ------------------------------------------------------------------------------
 \
@@ -19361,6 +19374,7 @@ LOAD_H% = LOAD% + P% - CODE%
 \   Category: Encyclopedia
 \    Summary: Show the Ships A-G or Ships K-W menu and display the chosen ship
 \             card
+\  Deep dive: The Encyclopedia Galactica
 \
 \ ------------------------------------------------------------------------------
 \
@@ -19566,6 +19580,7 @@ LOAD_H% = LOAD% + P% - CODE%
 \       Type: Subroutine
 \   Category: Encyclopedia
 \    Summary: Show the Controls menu and display the chosen page
+\  Deep dive: The Encyclopedia Galactica
 \
 \ ******************************************************************************
 
@@ -19573,7 +19588,7 @@ LOAD_H% = LOAD% + P% - CODE%
 
 .controls
 
- LDX #3                 \ Call menu with X = 4 to show menu 4, the Controls
+ LDX #3                 \ Call menu with X = 3 to show menu 3, the Controls
  JSR menu               \ menu, and return the choice in A, so A is now:
                         \
                         \   * 1 = Flight
@@ -19726,6 +19741,7 @@ LOAD_H% = LOAD% + P% - CODE%
 \       Type: Subroutine
 \   Category: Encyclopedia
 \    Summary: Display a ship card in the encyclopedia
+\  Deep dive: The Encyclopedia Galactica
 \
 \ ------------------------------------------------------------------------------
 \
@@ -19971,6 +19987,7 @@ LOAD_H% = LOAD% + P% - CODE%
 \       Type: Variable
 \   Category: Encyclopedia
 \    Summary: The OS command string for loading a ship blueprints file
+\  Deep dive: The Encyclopedia Galactica
 \
 \ ******************************************************************************
 
@@ -19990,6 +20007,7 @@ LOAD_H% = LOAD% + P% - CODE%
 \   Category: Encyclopedia
 \    Summary: Table containing the letter of the relevant ship blueprints file
 \             that we load for each ship card
+\  Deep dive: The Encyclopedia Galactica
 \
 \ ******************************************************************************
 
@@ -20035,6 +20053,7 @@ LOAD_H% = LOAD% + P% - CODE%
 \   Category: Encyclopedia
 \    Summary: Table containing the number of this ship blueprint within the ship
 \             blueprints file that we load for each ship card
+\  Deep dive: The Encyclopedia Galactica
 \
 \ ******************************************************************************
 
@@ -20080,6 +20099,7 @@ LOAD_H% = LOAD% + P% - CODE%
 \   Category: Encyclopedia
 \    Summary: Table containing the closest distance to show the ship for each
 \             ship card
+\  Deep dive: The Encyclopedia Galactica
 \
 \ ******************************************************************************
 
@@ -20124,6 +20144,7 @@ LOAD_H% = LOAD% + P% - CODE%
 \       Type: Subroutine
 \   Category: Encyclopedia
 \    Summary: Display a menu and ask for a choice
+\  Deep dive: The Encyclopedia Galactica
 \
 \ ------------------------------------------------------------------------------
 \
@@ -20254,6 +20275,7 @@ LOAD_H% = LOAD% + P% - CODE%
 \       Type: Variable
 \   Category: Encyclopedia
 \    Summary: Table containing text token numbers for each menu's title
+\  Deep dive: The Encyclopedia Galactica
 \
 \ ------------------------------------------------------------------------------
 \
@@ -20301,6 +20323,7 @@ LOAD_H% = LOAD% + P% - CODE%
 \       Type: Variable
 \   Category: Encyclopedia
 \    Summary: Table containing column positions for each menu's title
+\  Deep dive: The Encyclopedia Galactica
 \
 \ ------------------------------------------------------------------------------
 \
@@ -20338,6 +20361,7 @@ LOAD_H% = LOAD% + P% - CODE%
 \       Type: Variable
 \   Category: Encyclopedia
 \    Summary: Table containing token numbers for the first item in each menu
+\  Deep dive: The Encyclopedia Galactica
 \
 \ ------------------------------------------------------------------------------
 \
@@ -20386,6 +20410,7 @@ LOAD_H% = LOAD% + P% - CODE%
 \       Type: Variable
 \   Category: Encyclopedia
 \    Summary: Table containing the number of entries in each menu
+\  Deep dive: The Encyclopedia Galactica
 \
 \ ------------------------------------------------------------------------------
 \
@@ -20423,6 +20448,7 @@ LOAD_H% = LOAD% + P% - CODE%
 \       Type: Variable
 \   Category: Encyclopedia
 \    Summary: Table containing token numbers for each menu's query prompt
+\  Deep dive: The Encyclopedia Galactica
 \
 \ ------------------------------------------------------------------------------
 \
@@ -22423,6 +22449,7 @@ ENDMACRO
 \   Category: Text
 \    Summary: The second extended token table for recursive tokens 0-255
 \             (write_msg3)
+\  Deep dive: The Encyclopedia Galactica
 \
 \ ******************************************************************************
 
@@ -26388,6 +26415,7 @@ ENDMACRO
 \       Type: Variable
 \   Category: Encyclopedia
 \    Summary: Table containing column positions for each ship card's title
+\  Deep dive: The Encyclopedia Galactica
 \
 \ ******************************************************************************
 
@@ -26432,6 +26460,7 @@ ENDMACRO
 \       Type: Variable
 \   Category: Encyclopedia
 \    Summary: Layout pattern for the encyclopedia's ship cards
+\  Deep dive: The Encyclopedia Galactica
 \
 \ ------------------------------------------------------------------------------
 \
@@ -26439,7 +26468,7 @@ ENDMACRO
 \ which consists of one or more text labels, plus the corresponding ship data.
 \ The card pattern table defines these sections and how they are laid out on
 \ screen - in other words, this table contains a set of patterns, one for each
-\ section, that define how to lay out that section on-screen,
+\ section, that define how to lay out that section on-screen.
 \
 \ Each line in the table below defines a screen position and something to print
 \ there. The first two numbers are the text column and row, and the third number
@@ -26516,6 +26545,7 @@ ENDMACRO
 \       Type: Variable
 \   Category: Encyclopedia
 \    Summary: Lookup table for the encyclopedia's ship cards
+\  Deep dive: The Encyclopedia Galactica
 \
 \ ------------------------------------------------------------------------------
 \
@@ -26606,6 +26636,7 @@ ENDMACRO
 \       Type: Variable
 \   Category: Encyclopedia
 \    Summary: Ship card data for the encyclopedia entry for the Adder
+\  Deep dive: The Encyclopedia Galactica
 \
 \ ******************************************************************************
 
@@ -26681,6 +26712,7 @@ ENDMACRO
 \       Type: Variable
 \   Category: Encyclopedia
 \    Summary: Ship card data for the encyclopedia entry for the Anaconda
+\  Deep dive: The Encyclopedia Galactica
 \
 \ ******************************************************************************
 
@@ -26768,6 +26800,7 @@ ENDMACRO
 \       Type: Variable
 \   Category: Encyclopedia
 \    Summary: Ship card data for the encyclopedia entry for the Asp Mk II
+\  Deep dive: The Encyclopedia Galactica
 \
 \ ******************************************************************************
 
@@ -26853,6 +26886,7 @@ ENDMACRO
 \       Type: Variable
 \   Category: Encyclopedia
 \    Summary: Ship card data for the encyclopedia entry for the Boa
+\  Deep dive: The Encyclopedia Galactica
 \
 \ ******************************************************************************
 
@@ -26937,6 +26971,7 @@ ENDMACRO
 \       Type: Variable
 \   Category: Encyclopedia
 \    Summary: Ship card data for the encyclopedia entry for the Bushmaster
+\  Deep dive: The Encyclopedia Galactica
 \
 \ ******************************************************************************
 
@@ -27015,6 +27050,7 @@ ENDMACRO
 \       Type: Variable
 \   Category: Encyclopedia
 \    Summary: Ship card data for the encyclopedia entry for the Chameleon
+\  Deep dive: The Encyclopedia Galactica
 \
 \ ******************************************************************************
 
@@ -27105,6 +27141,7 @@ ENDMACRO
 \       Type: Variable
 \   Category: Encyclopedia
 \    Summary: Ship card data for the encyclopedia entry for the Cobra Mk I
+\  Deep dive: The Encyclopedia Galactica
 \
 \ ******************************************************************************
 
@@ -27184,6 +27221,7 @@ ENDMACRO
 \       Type: Variable
 \   Category: Encyclopedia
 \    Summary: Ship card data for the encyclopedia entry for the Cobra Mk III
+\  Deep dive: The Encyclopedia Galactica
 \
 \ ******************************************************************************
 
@@ -27268,6 +27306,7 @@ ENDMACRO
 \       Type: Variable
 \   Category: Encyclopedia
 \    Summary: Ship card data for the encyclopedia entry for the Coriolis station
+\  Deep dive: The Encyclopedia Galactica
 \
 \ ******************************************************************************
 
@@ -27300,6 +27339,7 @@ ENDMACRO
 \       Type: Variable
 \   Category: Encyclopedia
 \    Summary: Ship card data for the encyclopedia entry for the Dodo station
+\  Deep dive: The Encyclopedia Galactica
 \
 \ ******************************************************************************
 
@@ -27332,6 +27372,7 @@ ENDMACRO
 \       Type: Variable
 \   Category: Encyclopedia
 \    Summary: Ship card data for the encyclopedia entry for the escape pod
+\  Deep dive: The Encyclopedia Galactica
 \
 \ ******************************************************************************
 
@@ -27369,6 +27410,7 @@ ENDMACRO
 \       Type: Variable
 \   Category: Encyclopedia
 \    Summary: Ship card data for the encyclopedia entry for the Fer-de-Lance
+\  Deep dive: The Encyclopedia Galactica
 \
 \ ******************************************************************************
 
@@ -27455,6 +27497,7 @@ ENDMACRO
 \       Type: Variable
 \   Category: Encyclopedia
 \    Summary: Ship card data for the encyclopedia entry for the Gecko
+\  Deep dive: The Encyclopedia Galactica
 \
 \ ******************************************************************************
 
@@ -27545,6 +27588,7 @@ ENDMACRO
 \       Type: Variable
 \   Category: Encyclopedia
 \    Summary: Ship card data for the encyclopedia entry for the Ghavial
+\  Deep dive: The Encyclopedia Galactica
 \
 \ ******************************************************************************
 
@@ -27631,6 +27675,7 @@ ENDMACRO
 \       Type: Variable
 \   Category: Encyclopedia
 \    Summary: Ship card data for the encyclopedia entry for the Iguana
+\  Deep dive: The Encyclopedia Galactica
 \
 \ ******************************************************************************
 
@@ -27716,6 +27761,7 @@ ENDMACRO
 \       Type: Variable
 \   Category: Encyclopedia
 \    Summary: Ship card data for the encyclopedia entry for the Krait
+\  Deep dive: The Encyclopedia Galactica
 \
 \ ******************************************************************************
 
@@ -27789,6 +27835,7 @@ ENDMACRO
 \       Type: Variable
 \   Category: Encyclopedia
 \    Summary: Ship card data for the encyclopedia entry for the Mamba
+\  Deep dive: The Encyclopedia Galactica
 \
 \ ******************************************************************************
 
@@ -27869,6 +27916,7 @@ ENDMACRO
 \       Type: Variable
 \   Category: Encyclopedia
 \    Summary: Ship card data for the encyclopedia entry for the Monitor
+\  Deep dive: The Encyclopedia Galactica
 \
 \ ******************************************************************************
 
@@ -27947,6 +27995,7 @@ ENDMACRO
 \       Type: Variable
 \   Category: Encyclopedia
 \    Summary: Ship card data for the encyclopedia entry for the Moray
+\  Deep dive: The Encyclopedia Galactica
 \
 \ ******************************************************************************
 
@@ -28033,6 +28082,7 @@ ENDMACRO
 \       Type: Variable
 \   Category: Encyclopedia
 \    Summary: Ship card data for the encyclopedia entry for the Ophidian
+\  Deep dive: The Encyclopedia Galactica
 \
 \ ******************************************************************************
 
@@ -28113,6 +28163,7 @@ ENDMACRO
 \       Type: Variable
 \   Category: Encyclopedia
 \    Summary: Ship card data for the encyclopedia entry for the Python
+\  Deep dive: The Encyclopedia Galactica
 \
 \ ******************************************************************************
 
@@ -28192,6 +28243,7 @@ ENDMACRO
 \       Type: Variable
 \   Category: Encyclopedia
 \    Summary: Ship card data for the encyclopedia entry for the Shuttle
+\  Deep dive: The Encyclopedia Galactica
 \
 \ ******************************************************************************
 
@@ -28253,6 +28305,7 @@ ENDMACRO
 \       Type: Variable
 \   Category: Encyclopedia
 \    Summary: Ship card data for the encyclopedia entry for the Sidewinder
+\  Deep dive: The Encyclopedia Galactica
 \
 \ ******************************************************************************
 
@@ -28323,6 +28376,7 @@ ENDMACRO
 \       Type: Variable
 \   Category: Encyclopedia
 \    Summary: Ship card data for the encyclopedia entry for the Thargoid
+\  Deep dive: The Encyclopedia Galactica
 \
 \ ******************************************************************************
 
@@ -28384,6 +28438,7 @@ ENDMACRO
 \       Type: Variable
 \   Category: Encyclopedia
 \    Summary: Ship card data for the encyclopedia entry for the Thargon
+\  Deep dive: The Encyclopedia Galactica
 \
 \ ******************************************************************************
 
@@ -28436,6 +28491,7 @@ ENDMACRO
 \       Type: Variable
 \   Category: Encyclopedia
 \    Summary: Ship card data for the encyclopedia entry for the Transporter
+\  Deep dive: The Encyclopedia Galactica
 \
 \ ******************************************************************************
 
@@ -28487,6 +28543,7 @@ ENDMACRO
 \       Type: Variable
 \   Category: Encyclopedia
 \    Summary: Ship card data for the encyclopedia entry for the Viper
+\  Deep dive: The Encyclopedia Galactica
 \
 \ ******************************************************************************
 
@@ -28565,6 +28622,7 @@ ENDMACRO
 \       Type: Variable
 \   Category: Encyclopedia
 \    Summary: Ship card data for the encyclopedia entry for the Worm
+\  Deep dive: The Encyclopedia Galactica
 \
 \ ******************************************************************************
 

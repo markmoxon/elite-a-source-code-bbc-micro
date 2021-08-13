@@ -1320,7 +1320,7 @@ ORG &0300
                         \ Elite-A doesn't sell the large cargo bay as you can
                         \ buy different ships with different capacities, so we
                         \ reuse the CRGO variable to determine whether an I.F.F.
-                        \ is fitted
+                        \ system is fitted
 
 .QQ20
 
@@ -1363,13 +1363,23 @@ ORG &0300
                         \ Elite-A replaces the energy bomb with the hyperspace
                         \ unit, reusing the BOMB variable to determine whether
                         \ one is fitted
+
 .ENGY
 
  SKIP 1                 \ Energy unit
                         \
                         \   * 0 = not fitted
                         \
-                        \   * 1 = fitted
+                        \   * Non-zero = fitted
+                        \
+                        \ The actual value determines the refresh rate of our
+                        \ energy banks, as they refresh by ENGY+1 each time (so
+                        \ our ship's energy level goes up by 2 each time if we
+                        \ have an energy unit fitted, otherwise it goes up by 1)
+
+                        \
+                        \ In Elite-A, the value of ENGY depends on the ship type
+                        \ so some ships recharge faster than others
 
 .DKCMP
 
@@ -1403,10 +1413,10 @@ ORG &0300
 
 .cmdr_cour
 
- SKIP 2                 \ The mission timer for the current special cargo
+ SKIP 2                 \ The mission reward for the current special cargo
                         \ delivery destination
                         \
-                        \ While doing a special cargo delivery, this timer is
+                        \ While doing a special cargo delivery, the reward is
                         \ halved on every visit to a station (and again if we
                         \ choose to pay a docking fee), and if it runs down to
                         \ zero, the mission is lost
@@ -1947,7 +1957,7 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
                         \ the fuel tank)
                         \
                         \ The range is stored as the number of light years
-                        \ multiplied by 10, so QQ14 = 1 represents 0.1 light
+                        \ multiplied by 10, so a value of 1 represents 0.1 light
                         \ years, while 70 represents 7.0 light years
                         \
                         \ When we buy a new ship, this is set to the relevant
@@ -10203,7 +10213,10 @@ LOAD_C% = LOAD% +P% - CODE%
 \
 \ ------------------------------------------------------------------------------
 \
-\ This routine modifies the instructions in the main line-drawing routine at
+\ This routine toggles the main line-drawing routine between EOR and OR logic,
+\ for use when drawing the ship hanger.
+\
+\ It does this by modifying the instructions in the main line-drawing routine at
 \ LOIN/LL30, flipping the drawing logic between the default EOR logic (which
 \ merges with whatever is already on screen, allowing us to erase anything we
 \ draw for animation purposes) and OR logic (which overwrites the screen,
@@ -12819,7 +12832,7 @@ LOAD_C% = LOAD% +P% - CODE%
 
  CPX #&78               \ Loop back to BOL1 until we have cleared page &7700,
  BNE BOL1               \ the last character row in the space view part of the
-                        \ screen (the space view)
+                        \ screen (the top part)
 
  LDY #1                 \ Move the text cursor to row 1
  STY YC
@@ -12943,8 +12956,10 @@ LOAD_C% = LOAD% +P% - CODE%
 \
 \ ------------------------------------------------------------------------------
 \
-\ Clear some space at the bottom of the screen and move the text cursor to
-\ column 1, row 21. Specifically, this zeroes the following screen locations:
+\ This routine clears some space at the bottom of the screen and moves the text
+\ cursor to column 1, row 21. 
+\
+\ Specifically, it zeroes the following screen locations:
 \
 \   &7507 to &75F0
 \   &7607 to &76F0
@@ -17237,7 +17252,8 @@ LOAD_D% = LOAD% + P% - CODE%
 \       Name: EQSHP
 \       Type: Subroutine
 \   Category: Equipment
-\    Summary: Show the Equip Ship screen (red key f3)
+\    Summary: Show the Equip Ship screen (red key f3) or Buy Ship screen
+\             (CTRL-f3)
 \
 \ ------------------------------------------------------------------------------
 \
@@ -17599,8 +17615,8 @@ LOAD_D% = LOAD% + P% - CODE%
  CMP #2                 \ If A is not 2 (i.e. the item we've just bought is not
  BNE et2                \ an I.F.F. system), skip to et2
 
- LDX CRGO               \ If we already have an I.F.F. fitted (i.e. CRGO is
- BNE pres               \ non-zero), jump to pres to show the error "I.F.F.
+ LDX CRGO               \ If we already have an I.F.F. system fitted (i.e. CRGO
+ BNE pres               \ is non-zero), jump to pres to show the error "I.F.F.
                         \ System Present", beep and exit to the docking bay
                         \ (i.e. show the Status Mode screen)
 
@@ -19578,12 +19594,13 @@ LOAD_E% = LOAD% + P% - CODE%
 \
 \ ------------------------------------------------------------------------------
 \
-\ Set the screen to show the number of text rows given in X. This is used when
-\ we are killed, as reducing the number of rows from the usual 31 to 24 has the
-\ effect of hiding the dashboard, leaving a monochrome image of ship debris and
-\ explosion clouds. Increasing the rows back up to 31 makes the dashboard
-\ reappear, as the dashboard's screen memory doesn't get touched by this
-\ process.
+\ This routine sets the screen to show the number of text rows given in X.
+\
+\ It is used when we are killed, as reducing the number of rows from the usual
+\ 31 to 24 has the effect of hiding the dashboard, leaving a monochrome image
+\ of ship debris and explosion clouds. Increasing the rows back up to 31 makes
+\ the dashboard reappear, as the dashboard's screen memory doesn't get touched
+\ by this process.
 \
 \ Arguments:
 \
@@ -20160,8 +20177,6 @@ LOAD_E% = LOAD% + P% - CODE%
 \       Type: Subroutine
 \   Category: Dashboard
 \    Summary: Light up the space station indicator ("S") on the dashboard
-\
-\ ------------------------------------------------------------------------------
 \
 \ ******************************************************************************
 
@@ -30072,6 +30087,7 @@ LOAD_G% = LOAD% + P% - CODE%
 \       Type: Subroutine
 \   Category: Buying ships
 \    Summary: Show the Buy Ship screen (CTRL-f3)
+\  Deep dive: Buying and flying ships in Elite-A
 \
 \ ------------------------------------------------------------------------------
 \
@@ -30319,6 +30335,7 @@ LOAD_G% = LOAD% + P% - CODE%
 \       Type: Subroutine
 \   Category: Buying ships
 \    Summary: Load the name and flight characteristics for the current ship type
+\  Deep dive: Buying and flying ships in Elite-A
 \
 \ ******************************************************************************
 
@@ -30458,6 +30475,7 @@ LOAD_G% = LOAD% + P% - CODE%
 \       Type: Subroutine
 \   Category: Text
 \    Summary: Print the type of a given ship
+\  Deep dive: Buying and flying ships in Elite-A
 \
 \ ------------------------------------------------------------------------------
 \
@@ -30510,6 +30528,7 @@ LOAD_G% = LOAD% + P% - CODE%
 \       Type: Subroutine
 \   Category: Buying ships
 \    Summary: Set K(0 1 2 3) to the price of a given ship
+\  Deep dive: Buying and flying ships in Elite-A
 \
 \ ------------------------------------------------------------------------------
 \
@@ -30561,6 +30580,7 @@ LOAD_G% = LOAD% + P% - CODE%
 \       Type: Subroutine
 \   Category: Missions
 \    Summary: Show the Special Cargo screen (CTRL-f1)
+\  Deep dive: Special cargo missions
 \
 \ ******************************************************************************
 
@@ -30569,7 +30589,7 @@ LOAD_G% = LOAD% + P% - CODE%
 .cour_buy
 
  LDA cmdr_cour          \ If there is no special cargo delivery mission in
- ORA cmdr_cour+1        \ progress, then the mission timer in cmdr_cour(1 0)
+ ORA cmdr_cour+1        \ progress, then the mission reward in cmdr_cour(1 0)
  BEQ cour_start         \ will be zero, so jump to cour_start to skip the next
                         \ instruction
 
@@ -30662,23 +30682,25 @@ LOAD_G% = LOAD% + P% - CODE%
 
 .cour_loop
 
- LDA INWK+3             \ If INWK+3 < QQ25 then jump to cour_count to add
- CMP QQ25               \ another destination to the menu, as we have not yet
- BCC cour_count         \ shown QQ25 delivery missions in the menu
+ LDA INWK+3             \ If INWK+3 < QQ25 then call cour_count to add another
+ CMP QQ25               \ destination to the menu, as we have not yet shown QQ25
+ BCC cour_count         \ delivery missions in the menu (cour_count ends with a
+                        \ jump back to cour_loop)
 
 .cour_menu
 
                         \ If we get here then we have either got QQ25 items in
                         \ the menu, or we have worked our way through the whole
-                        \ galaxy, so in either case we want to display the menu
-                        \ of destinations
+                        \ galaxy, so in either case we have finished displaying
+                        \ the menu of destinations, and we want to process the
+                        \ choice
 
  JSR CLYNS              \ Clear the bottom three text rows of the upper screen,
                         \ and move the text cursor to column 1 on row 21, i.e.
                         \ the start of the top row of the three bottom rows
 
- LDA #206               \ Print recursive token 206 (" CR") followed by a
- JSR prq                \ question mark
+ LDA #206               \ Print recursive token 46 (" CARGO{sentence case}")
+ JSR prq                \ followed by a question mark
 
  JSR gnum               \ Call gnum to get a number from the keyboard, which
                         \ will be the menu item number of the mission we want to
@@ -30725,7 +30747,7 @@ LOAD_G% = LOAD% + P% - CODE%
 
                         \ We have now taken on the delivery mission, so we need
                         \ to set variables that govern the mission progress,
-                        \ i.e. the destination and the mission timer
+                        \ i.e. the destination and the mission reward
 
  LDX INWK               \ Set X to the number of the chosen mission which we
                         \ stored in INWK above
@@ -30743,7 +30765,7 @@ LOAD_G% = LOAD% + P% - CODE%
  ADC FIST               \ our legal status in FIST, so taking on dodgy delivery
  STA FIST               \ missions adversely affects our legal status
 
- LDA &0C30,X            \ Set the mission timer in cmdr_cour(1 0) to the value
+ LDA &0C30,X            \ Set the mission reward in cmdr_cour(1 0) to the value
  STA cmdr_cour+1        \ we set in (&0C30+X &0C40+X) when setting up the menu
  LDA &0C40,X
  STA cmdr_cour
@@ -30752,6 +30774,20 @@ LOAD_G% = LOAD% + P% - CODE%
 
  JMP jmp_start3         \ Jump to jmp_start3 to make a beep and show the cargo
                         \ bay
+
+                        \ --- End of added section ---------------------------->
+
+\ ******************************************************************************
+\
+\       Name: cour_count
+\       Type: Subroutine
+\   Category: Missions
+\    Summary: Generate a single special cargo mission and display its menu item
+\  Deep dive: Special cargo missions
+\
+\ ******************************************************************************
+
+                        \ --- Mod: Whole section added for Elite-A: ----------->
 
 .cour_count
 
@@ -30817,12 +30853,12 @@ LOAD_G% = LOAD% + P% - CODE%
                         \   * &0C00+X = x-coordinate of the delivery destination
                         \   * &0C10+X = y-coordinate of the delivery destination
                         \   * &0C20+X = legal status of the delivery mission
-                        \   * &0C30+X = high byte of the mission timer
-                        \   * &0C40+X = low byte of the mission timer
+                        \   * &0C30+X = high byte of the mission reward
+                        \   * &0C40+X = low byte of the mission reward
                         \               low byte of the mission cost
                         \   * &0C50+X = high byte of the mission cost
                         \
-                        \ In other words, when we take on a mission, the timer
+                        \ In other words, when we take on a mission, the reward
                         \ in cmdr_cour(1 0) is set to (&0C30+X &0C40+X), we pay
                         \ the mission cost of (&0C50+X &0C40+X), and our legal
                         \ status goes up by the amount in &0C20+X
@@ -30851,7 +30887,7 @@ LOAD_G% = LOAD% + P% - CODE%
 
                         \ We need to calculate the distance from the current
                         \ system to the delivery destination, as the mission
-                        \ timer is based on the distance of the delivery (as
+                        \ reward is based on the distance of the delivery (as
                         \ well as the legality of the mission)
                         \
                         \ We do this using Pythagoras, so let's denote the
@@ -30899,21 +30935,21 @@ LOAD_G% = LOAD% + P% - CODE%
                         \ A now contains the difference between the two
                         \ systems' y-coordinates, with the sign removed, and
                         \ halved. We halve the value because the galaxy in
-                        \ in Elite is rectangular rather than square, and is
+                        \ Elite is rectangular rather than square, and is
                         \ twice as wide (x-axis) as it is high (y-axis), so to
                         \ get a distance that matches the shape of the
                         \ long-range galaxy chart, we need to halve the
                         \ distance between the vertical y-coordinates
 
  JSR SQUA2              \ Set (A P) = A * A
-                        \           = (|destination_x - current_x| / 2) ^ 2
+                        \           = (|destination_y - current_y| / 2) ^ 2
 
                         \ We now want to add the two so we can then apply
                         \ Pythagoras, so first we do this:
                         \
                         \   (R Q) = K(1 0) + (A P))
-                        \         = (destination_x - current_x) ^ 2
-                        \           + (|destination_x - current_x| / 2) ^ 2
+                        \         =    |destination_x - current_x| ^ 2
+                        \           + (|destination_y - current_y| / 2) ^ 2
                         \
                         \ and then the distance will be the square root:
                         \
@@ -30961,9 +30997,7 @@ LOAD_G% = LOAD% + P% - CODE%
                         \ higher premium paid for more illegal missions
 
  STA &0C30,X            \ Set the X-th byte of &0C30 to A, which we use as the
-                        \ high byte of the mission timer (which is also the
-                        \ potential reward for completing this mission, though
-                        \ it does halve every time we dock)
+                        \ high byte of the mission reward
 
  STA INWK+4             \ Set INWK(5 4) = (A A) / 8
  LSR A                  \
@@ -30978,8 +31012,8 @@ LOAD_G% = LOAD% + P% - CODE%
                         \ the high byte of the mission cost
 
  LDA INWK+4             \ Store INWK+4 in the X-th byte of &0C40, so it contains
- STA &0C40,X            \ the low byte of the mission cost (and the same value
-                        \ is used as the low byte of the mission timer)
+ STA &0C40,X            \ the low byte of the mission cost (and the low byte of
+                        \ the mission reward, as they share the same value)
 
  LDA #1                 \ Move the text cursor to column 1
  STA XC
@@ -31015,12 +31049,12 @@ LOAD_G% = LOAD% + P% - CODE%
                         \ decimal point
 
  LDA #25                \ Move the text cursor to column 25, so we can print the
- STA XC                 \ mission price
+ STA XC                 \ mission cost
 
  LDA #6                 \ Set A = 6, for the call to TT11 below, so we pad out
                         \ the number to 6 digits
 
- JSR TT11               \ Call TT11 to print the mission timer in (Y X), padded
+ JSR TT11               \ Call TT11 to print the mission cost in (Y X), padded
                         \ to six digits and with a decimal point
 
  INC INWK+3             \ We have just printed a menu item, so increment the
@@ -31043,6 +31077,7 @@ LOAD_G% = LOAD% + P% - CODE%
 \       Type: Subroutine
 \   Category: Missions
 \    Summary: Update the current special cargo delivery mission on docking
+\  Deep dive: Special cargo missions
 \
 \ ******************************************************************************
 
@@ -31051,7 +31086,7 @@ LOAD_G% = LOAD% + P% - CODE%
 .cour_dock
 
  LDA cmdr_cour          \ If there is no special cargo delivery mission in
- ORA cmdr_cour+1        \ progress, then the mission timer in cmdr_cour(1 0)
+ ORA cmdr_cour+1        \ progress, then the mission reward in cmdr_cour(1 0)
  BEQ cour_quit          \ will be zero, so jump to cour_quit to return from the
                         \ subroutine
 
@@ -31060,14 +31095,14 @@ LOAD_G% = LOAD% + P% - CODE%
  CMP cmdr_courx         \ If A does not match the x-coordinate of the cargo
  BNE cour_half          \ mission's destination in cmdr_courx then we aren't at
                         \ the destination station, so jump to cour_half to
-                        \ advance the mission timer
+                        \ halve the mission reward
 
  LDA QQ1                \ Set A = the current system's galactic y-coordinate
 
  CMP cmdr_coury         \ If A does not match the y-coordinate of the cargo
  BNE cour_half          \ mission's destination in cmdr_coury then we aren't at
                         \ the destination station, so jump to cour_half to
-                        \ advance the mission timer
+                        \ halve the mission reward
 
  LDA #2                 \ We have arrived at the destination for the special
  JSR TT66               \ cargo mission, so clear the top part of the screen,
@@ -31083,9 +31118,8 @@ LOAD_G% = LOAD% + P% - CODE%
  LDA #113               \ Print extended token 113 ("CARGO VALUE:")
  JSR DETOK
 
- LDX cmdr_cour          \ Set (Y X) to the value of the mission timer in
- LDY cmdr_cour+1        \ cmdr_cour(1 0), which is going to be our reward for
-                        \ completing the delivery mission
+ LDX cmdr_cour          \ Set (Y X) to the mission reward in cmdr_cour(1 0)
+ LDY cmdr_cour+1
 
  SEC                    \ Set the C flag so the call to TT11 includes a decimal
                         \ point
@@ -31093,18 +31127,18 @@ LOAD_G% = LOAD% + P% - CODE%
  LDA #6                 \ Set A = 6, for the call to TT11 below, so we pad out
                         \ the number to 6 digits
 
- JSR TT11               \ Call TT11 to print the mission timer in (Y X), padded
+ JSR TT11               \ Call TT11 to print the mission reward in (Y X), padded
                         \ to six digits and with a decimal point
 
  LDA #226               \ Print recursive text token 66 (" CR")
  JSR TT27
 
- LDX cmdr_cour          \ Set (Y X) to the value of the mission timer in
- LDY cmdr_cour+1        \ cmdr_cour(1 0)
+ LDX cmdr_cour          \ Set (Y X) to the mission reward in cmdr_cour(1 0)
+ LDY cmdr_cour+1
 
  JSR MCASH              \ Call MCASH to add (Y X) to the cash pot
 
- LDA #0                 \ Reset the mission timer by doing cmdr_cour(1 0) = 0
+ LDA #0                 \ Reset the mission reward by doing cmdr_cour(1 0) = 0
  STA cmdr_cour
  STA cmdr_cour+1
 
@@ -31113,8 +31147,8 @@ LOAD_G% = LOAD% + P% - CODE%
 
 .cour_half
 
- LSR cmdr_cour+1        \ Halve the value of the mission timer in cmdr_cour(1 0)
- ROR cmdr_cour
+ LSR cmdr_cour+1        \ Halve the value of the mission reward in
+ ROR cmdr_cour          \ cmdr_cour(1 0)
 
 .cour_quit
 
@@ -31272,6 +31306,7 @@ LOAD_G% = LOAD% + P% - CODE%
 \       Type: Variable
 \   Category: Buying ships
 \    Summary: Table of offsets for each ship type
+\  Deep dive: Buying and flying ships in Elite-A
 \
 \ ------------------------------------------------------------------------------
 \
@@ -31309,6 +31344,7 @@ NEXT
 \       Type: Variable
 \   Category: Buying ships
 \    Summary: Ship names and prices for the different ship types we can buy
+\  Deep dive: Buying and flying ships in Elite-A
 \
 \ ******************************************************************************
 
@@ -31434,6 +31470,7 @@ ENDIF
 \       Type: Variable
 \   Category: Buying ships
 \    Summary: The flight characteristics for each of the different ship types
+\  Deep dive: Buying and flying ships in Elite-A
 \
 \ ******************************************************************************
 

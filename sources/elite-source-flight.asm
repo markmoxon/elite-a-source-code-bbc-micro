@@ -1306,7 +1306,7 @@ ORG &0300
                         \ Elite-A doesn't sell the large cargo bay as you can
                         \ buy different ships with different capacities, so we
                         \ reuse the CRGO variable to determine whether an I.F.F.
-                        \ is fitted
+                        \ system is fitted
 
 .QQ20
 
@@ -1349,13 +1349,23 @@ ORG &0300
                         \ Elite-A replaces the energy bomb with the hyperspace
                         \ unit, reusing the BOMB variable to determine whether
                         \ one is fitted
+
 .ENGY
 
  SKIP 1                 \ Energy unit
                         \
                         \   * 0 = not fitted
                         \
-                        \   * 1 = fitted
+                        \   * Non-zero = fitted
+                        \
+                        \ The actual value determines the refresh rate of our
+                        \ energy banks, as they refresh by ENGY+1 each time (so
+                        \ our ship's energy level goes up by 2 each time if we
+                        \ have an energy unit fitted, otherwise it goes up by 1)
+
+                        \
+                        \ In Elite-A, the value of ENGY depends on the ship type
+                        \ so some ships recharge faster than others
 
 .DKCMP
 
@@ -1389,10 +1399,10 @@ ORG &0300
 
 .cmdr_cour
 
- SKIP 2                 \ The mission timer for the current special cargo
+ SKIP 2                 \ The mission reward for the current special cargo
                         \ delivery destination
                         \
-                        \ While doing a special cargo delivery, this timer is
+                        \ While doing a special cargo delivery, the reward is
                         \ halved on every visit to a station (and again if we
                         \ choose to pay a docking fee), and if it runs down to
                         \ zero, the mission is lost
@@ -1933,7 +1943,7 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
                         \ the fuel tank)
                         \
                         \ The range is stored as the number of light years
-                        \ multiplied by 10, so QQ14 = 1 represents 0.1 light
+                        \ multiplied by 10, so a value of 1 represents 0.1 light
                         \ years, while 70 represents 7.0 light years
                         \
                         \ When we buy a new ship, this is set to the relevant
@@ -20267,12 +20277,13 @@ LOAD_E% = LOAD% + P% - CODE%
 \
 \ ------------------------------------------------------------------------------
 \
-\ Set the screen to show the number of text rows given in X. This is used when
-\ we are killed, as reducing the number of rows from the usual 31 to 24 has the
-\ effect of hiding the dashboard, leaving a monochrome image of ship debris and
-\ explosion clouds. Increasing the rows back up to 31 makes the dashboard
-\ reappear, as the dashboard's screen memory doesn't get touched by this
-\ process.
+\ This routine sets the screen to show the number of text rows given in X.
+\
+\ It is used when we are killed, as reducing the number of rows from the usual
+\ 31 to 24 has the effect of hiding the dashboard, leaving a monochrome image
+\ of ship debris and explosion clouds. Increasing the rows back up to 31 makes
+\ the dashboard reappear, as the dashboard's screen memory doesn't get touched
+\ by this process.
 \
 \ Arguments:
 \
@@ -21669,8 +21680,6 @@ LOAD_E% = LOAD% + P% - CODE%
 \       Type: Subroutine
 \   Category: Dashboard
 \    Summary: Light up the space station indicator ("S") on the dashboard
-\
-\ ------------------------------------------------------------------------------
 \
 \ ******************************************************************************
 
@@ -26985,6 +26994,7 @@ LOAD_F% = LOAD% + P% - CODE%
 \   Category: Loader
 \    Summary: Load a new ship blueprints file
 \  Deep dive: Ship blueprints in the disc version
+\             Ship blueprints in Elite-A
 \
 \ ******************************************************************************
 
@@ -27045,14 +27055,17 @@ LOAD_F% = LOAD% + P% - CODE%
                         \   * Bit 3    = random
                         \   * Bits 4-7 = 0
                         \
+                        \ and we know the C flag is clear, as we cleared the top
+                        \ bits of A before doing the left rotations above
+                        \
                         \ So A is in the range 0-15. This corresponds to the
                         \ range of ship blueprint files in the original disc
                         \ version, which are D.MOA to D.MOP, but we're not done
                         \ yet, as Elite-A has 23 ship blueprint files
 
  ADC GCNT               \ Add the galaxy number in GCNT to A, which moves A into
-                        \ the range 0-22, which corresponds to the appropriate
-                        \ Elite-A ship file (where 0 is file S.A and 23 is file
+                        \ the range 0-22, to correspond with the appropriate
+                        \ Elite-A ship file (where 0 is file S.A and 22 is file
                         \ S.W)
 
                         \ --- End of replacement ------------------------------>
@@ -27081,11 +27094,11 @@ LOAD_F% = LOAD% + P% - CODE%
 
 .SHIPinA
 
- CLC                    \ Convert A from 0-15 to 'A' to 'P'
- ADC #'A'
-
                         \ --- Mod: Original Acornsoft code removed: ----------->
 
+\ CLC                   \ Convert A from 0-15 to 'A' to 'P'
+\ ADC #'A'
+\
 \ STA SHIPI+6           \ Store the letter of the ship blueprints file we want
 \                       \ in the seventh byte of the command string at SHIPI, so
 \                       \ it overwrites the "0" in "D.MO0" with the file letter
@@ -27094,6 +27107,9 @@ LOAD_F% = LOAD% + P% - CODE%
 \ JSR CATD              \ Call CATD to reload the disc catalogue
 
                         \ --- And replaced by: -------------------------------->
+
+ CLC                    \ Convert A from 0-22 to 'A' to 'W'
+ ADC #'A'
 
  STA SHIPI+4            \ Store the letter of the ship blueprints file we want
                         \ in the fifth byte of the command string at SHIPI, so
@@ -28229,6 +28245,7 @@ LOAD_F% = LOAD% + P% - CODE%
 \       Type: Variable
 \   Category: Keyboard
 \    Summary: Lookup table for Delta 14b joystick buttons
+\  Deep dive: Delta 14b joystick support
 \
 \ ------------------------------------------------------------------------------
 \
@@ -28249,12 +28266,12 @@ LOAD_F% = LOAD% + P% - CODE%
 \ This results in the following mapping (as the top two fire buttons are treated
 \ the same as the top button in the middle row):
 \
-\   Fire laser                               Fire laser
+\   Fire laser                                    Fire laser
 \
-\   Slow down              Fire laser        Speed up
-\   Unarm Missile          Fire Missile      Target missile
-\   Hyperspace Unit        E.C.M.            Escape pod
-\   Docking computer on	   In-system jump    Docking computer off
+\   Slow down              Fire laser             Speed up
+\   Unarm Missile          Fire Missile           Target missile
+\   Hyperspace Unit        E.C.M.                 Escape pod
+\   Docking computer on    In-system jump         Docking computer off
 \
 \ ******************************************************************************
 
@@ -28287,6 +28304,7 @@ LOAD_F% = LOAD% + P% - CODE%
 \       Type: Subroutine
 \   Category: Keyboard
 \    Summary: Scan the Delta 14b joystick buttons
+\  Deep dive: Delta 14b joystick support
 \
 \ ------------------------------------------------------------------------------
 \
@@ -28296,12 +28314,12 @@ LOAD_F% = LOAD% + P% - CODE%
 \ The keys on the Delta 14b are laid out as follows (the top two fire buttons
 \ are treated the same as the top button in the middle row):
 \
-\   Fire laser                               Fire laser
+\   Fire laser                                    Fire laser
 \
-\   Slow down              Fire laser        Speed up
-\   Unarm Missile          Fire Missile      Target missile
-\   Hyperspace Unit        E.C.M.            Escape pod
-\   Docking computer on	   In-system jump    Docking computer off
+\   Slow down              Fire laser             Speed up
+\   Unarm Missile          Fire Missile           Target missile
+\   Hyperspace Unit        E.C.M.                 Escape pod
+\   Docking computer on    In-system jump         Docking computer off
 \
 \ Arguments:
 \
@@ -28331,7 +28349,7 @@ LOAD_F% = LOAD% + P% - CODE%
  EOR b_table-1,Y        \ We now EOR the value in A with the Y-th entry in
  BEQ b_quit             \ b_table, and jump to b_quit to return from the
                         \ subroutine if the table entry is 128 (&80) - in other
-                        \ words, we quite if Y is the offset for the roll and
+                        \ words, we quit if Y is the offset for the roll and
                         \ pitch controls
 
                         \ If we get here, then the offset in Y points to a
@@ -28368,7 +28386,7 @@ LOAD_F% = LOAD% + P% - CODE%
                         \   %0011 = read buttons in right column  (bit 6 clear)
 
  AND #%00001111         \ We now read the 6522 User VIA to fetch PB0 to PB3 from
- AND VIA+&60            \ the user port (PB0 = bit 0 to PB3 = bit 4), which
+ AND VIA+&60            \ the user port (PB0 = bit 0 to PB3 = bit 3), which
                         \ tells us whether any buttons in the specified column
                         \ are being pressed, and if they are, in which row. The
                         \ values read are as follows:
@@ -29470,9 +29488,9 @@ LOAD_F% = LOAD% + P% - CODE%
  LDA CRGO,X             \ If we do not have any of item CRGO+X, return from the
  BEQ DK5                \ subroutine (as DK5 contains an RTS). X is in the range
                         \ 0-23, so this not only checks for cargo, but also for
-                        \ the I.F.F., E.C.M., fuel scoops, hyperspace unit,
-                        \ energy unit, docking computer and galactic hyperdrive,
-                        \ all of which can be destroyed
+                        \ the I.F.F. system, E.C.M. system, fuel scoops,
+                        \ hyperspace unit, energy unit, docking computer and
+                        \ galactic hyperdrive, all of which can be destroyed
 
                         \ --- End of replacement ------------------------------>
 
@@ -35525,7 +35543,7 @@ LOAD_H% = LOAD% + P% - CODE%
 
  CPX #&78               \ Loop back to BOL1 until we have cleared page &7700,
  BNE BOL1               \ the last character row in the space view part of the
-                        \ screen (the space view)
+                        \ screen (the top part)
 
  LDX QQ22+1             \ Fetch into X the number that's shown on-screen during
                         \ the hyperspace countdown
@@ -35662,8 +35680,10 @@ LOAD_H% = LOAD% + P% - CODE%
 \
 \ ------------------------------------------------------------------------------
 \
-\ Clear some space at the bottom of the screen and move the text cursor to
-\ column 1, row 21. Specifically, this zeroes the following screen locations:
+\ This routine clears some space at the bottom of the screen and moves the text
+\ cursor to column 1, row 21. 
+\
+\ Specifically, it zeroes the following screen locations:
 \
 \   &7507 to &75F0
 \   &7607 to &76F0
@@ -35755,6 +35775,7 @@ LOAD_H% = LOAD% + P% - CODE%
 \   Category: Dashboard
 \    Summary: The EOR value for different types of ship in the the I.F.F. system
 \             for creating striped sticks in the scanner
+\  Deep dive: The I.F.F. system
 \
 \ ------------------------------------------------------------------------------
 \
@@ -35836,6 +35857,7 @@ LOAD_H% = LOAD% + P% - CODE%
 \       Type: Variable
 \   Category: Dashboard
 \    Summary: Base colours for different types of ship in the the I.F.F. system
+\  Deep dive: The I.F.F. system
 \
 \ ------------------------------------------------------------------------------
 \
@@ -35888,6 +35910,7 @@ LOAD_H% = LOAD% + P% - CODE%
 \   Category: Dashboard
 \    Summary: Display the current ship on the scanner
 \  Deep dive: The 3D scanner
+\             The I.F.F. system
 \
 \ ------------------------------------------------------------------------------
 \

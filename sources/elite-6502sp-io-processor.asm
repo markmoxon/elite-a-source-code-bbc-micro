@@ -280,6 +280,7 @@ ORG CODE%
 \   Category: Tube
 \    Summary: As the I/O processor, fetch a byte that's been sent over the Tube
 \             from the parasite
+\  Deep dive: Tube communication in Elite-A
 \
 \ ------------------------------------------------------------------------------
 \
@@ -330,6 +331,7 @@ ORG CODE%
 \       Type: Subroutine
 \   Category: Tube
 \    Summary: As the I/O processor, send a byte across the Tube to the parasite
+\  Deep dive: Tube communication in Elite-A
 \
 \ ------------------------------------------------------------------------------
 \
@@ -378,6 +380,7 @@ ORG CODE%
 \       Type: Subroutine
 \   Category: Tube
 \    Summary: Call the corresponding routine for a Tube command
+\  Deep dive: Tube communication in Elite-A
 \
 \ ------------------------------------------------------------------------------
 \
@@ -426,6 +429,7 @@ ORG CODE%
 \   Category: Tube
 \    Summary: Lookup table for Tube commands sent from the parasite to the I/O
 \             processor
+\  Deep dive: Tube communication in Elite-A
 \
 \ ------------------------------------------------------------------------------
 \
@@ -532,6 +536,7 @@ ORG CODE%
 \   Category: Text
 \    Summary: Write characters to the screen and process Tube commands from the
 \             parasite
+\  Deep dive: Tube communication in Elite-A
 \
 \ ------------------------------------------------------------------------------
 \
@@ -965,6 +970,7 @@ ORG CODE%
 \ line from (X1, Y1) to (X2, Y2). It has multiple stages.
 \
 \ This stage calculates the line deltas.
+\
 \ Returns:
 \
 \   Y                   Y is preserved
@@ -2088,6 +2094,11 @@ ORG CODE%
 \   Category: Utility routines
 \    Summary: Clear the top part of the screen (the space view)
 \
+\ ------------------------------------------------------------------------------
+\
+\ This routine is run when the parasite sends a clr_scrn command. It clears the
+\ top part of the screen (the mode 4 space view).
+\
 \ ******************************************************************************
 
 .clr_scrn
@@ -2105,7 +2116,7 @@ ORG CODE%
 
  CPX #&78               \ Loop back to BOL1 until we have cleared page &7700,
  BNE BOL1               \ the last character row in the space view part of the
-                        \ screen (the space view)
+                        \ screen (the top part)
 
  RTS                    \ Return from the subroutine
 
@@ -2183,8 +2194,11 @@ ORG CODE%
 \
 \ ------------------------------------------------------------------------------
 \
-\ Clear some space at the bottom of the screen and move the text cursor to
-\ column 1, row 21. Specifically, this zeroes the following screen locations:
+\ This routine is run when the parasite sends a clr_line command. It clears some
+\ space at the bottom of the screen and moves the text cursor to column 1, row
+\ 21.
+\
+\ Specifically, it zeroes the following screen locations:
 \
 \   &7507 to &75F0
 \   &7607 to &76F0
@@ -3352,6 +3366,11 @@ ORG CODE%
 \   Category: Dashboard
 \    Summary: Light up the E.C.M. indicator bulb ("E") on the dashboard
 \
+\ ------------------------------------------------------------------------------
+\
+\ This routine is run when the parasite sends a draw_E command. It lights up the
+\ E.C.M. indicator bulb ("E") on the dashboard.
+\
 \ ******************************************************************************
 
 .ECBLB
@@ -3375,6 +3394,8 @@ ORG CODE%
 \
 \ ------------------------------------------------------------------------------
 \
+\ This routine is run when the parasite sends a draw_S command. It lights up the
+\ space station indicator ("S") on the dashboard.
 \
 \ ******************************************************************************
 
@@ -3516,7 +3537,11 @@ ORG CODE%
 \
 \ ------------------------------------------------------------------------------
 \
-\ This routine modifies the instructions in the main line-drawing routine at
+\ This routine is run when the parasite sends a draw_mode command. It toggles
+\ the main line-drawing routine between EOR and OR logic, for use when drawing
+\ the ship hanger.
+\
+\ It does this by modifying the instructions in the main line-drawing routine at
 \ LOIN/LL30, flipping the drawing logic between the default EOR logic (which
 \ merges with whatever is already on screen, allowing us to erase anything we
 \ draw for animation purposes) and OR logic (which overwrites the screen,
@@ -3560,12 +3585,15 @@ ORG CODE%
 \
 \ ------------------------------------------------------------------------------
 \
-\ Set the screen to show the number of text rows given in X. This is used when
-\ we are killed, as reducing the number of rows from the usual 31 to 24 has the
-\ effect of hiding the dashboard, leaving a monochrome image of ship debris and
-\ explosion clouds. Increasing the rows back up to 31 makes the dashboard
-\ reappear, as the dashboard's screen memory doesn't get touched by this
-\ process.
+\ This routine is run when the parasite sends a write_crtc command. It updates
+\ the number of text rows shown on the screen, which has the effect of hiding or
+\ showing the dashboard.
+\
+\ It is used when we are killed, as reducing the number of rows from the usual
+\ 31 to 24 has the effect of hiding the dashboard, leaving a monochrome image
+\ of ship debris and explosion clouds. Increasing the rows back up to 31 makes
+\ the dashboard reappear, as the dashboard's screen memory doesn't get touched
+\ by this process.
 \
 \ ******************************************************************************
 
@@ -3637,6 +3665,7 @@ ORG CODE%
 \       Type: Variable
 \   Category: Keyboard
 \    Summary: Lookup table for Delta 14b joystick buttons
+\  Deep dive: Delta 14b joystick support
 \
 \ ------------------------------------------------------------------------------
 \
@@ -3657,12 +3686,12 @@ ORG CODE%
 \ This results in the following mapping (as the top two fire buttons are treated
 \ the same as the top button in the middle row):
 \
-\   Fire laser                               Fire laser
+\   Fire laser                                    Fire laser
 \
-\   Slow down              Fire laser        Speed up
-\   Unarm Missile          Fire Missile      Target missile
-\   Hyperspace Unit        E.C.M.            Escape pod
-\   Docking computer on	   In-system jump    Docking computer off
+\   Slow down              Fire laser             Speed up
+\   Unarm Missile          Fire Missile           Target missile
+\   Hyperspace Unit        E.C.M.                 Escape pod
+\   Docking computer on    In-system jump         Docking computer off
 \
 \ ******************************************************************************
 
@@ -3691,6 +3720,7 @@ ORG CODE%
 \       Type: Subroutine
 \   Category: Keyboard
 \    Summary: Scan the Delta 14b joystick buttons
+\  Deep dive: Delta 14b joystick support
 \
 \ ------------------------------------------------------------------------------
 \
@@ -3700,12 +3730,12 @@ ORG CODE%
 \ The keys on the Delta 14b are laid out as follows (the top two fire buttons
 \ are treated the same as the top button in the middle row):
 \
-\   Fire laser                               Fire laser
+\   Fire laser                                    Fire laser
 \
-\   Slow down              Fire laser        Speed up
-\   Unarm Missile          Fire Missile      Target missile
-\   Hyperspace Unit        E.C.M.            Escape pod
-\   Docking computer on	   In-system jump    Docking computer off
+\   Slow down              Fire laser             Speed up
+\   Unarm Missile          Fire Missile           Target missile
+\   Hyperspace Unit        E.C.M.                 Escape pod
+\   Docking computer on    In-system jump         Docking computer off
 \
 \ Arguments:
 \
@@ -3733,7 +3763,7 @@ ORG CODE%
  EOR b_table-1,Y        \ We now EOR the value in A with the Y-th entry in
  BEQ b_quit             \ b_table, and jump to b_quit to return from the
                         \ subroutine if the table entry is 128 (&80) - in other
-                        \ words, we quite if Y is the offset for the roll and
+                        \ words, we quit if Y is the offset for the roll and
                         \ pitch controls
 
                         \ If we get here, then the offset in Y points to a
@@ -3770,7 +3800,7 @@ ORG CODE%
                         \   %0011 = read buttons in right column  (bit 6 clear)
 
  AND #%00001111         \ We now read the 6522 User VIA to fetch PB0 to PB3 from
- AND VIA+&60            \ the user port (PB0 = bit 0 to PB3 = bit 4), which
+ AND VIA+&60            \ the user port (PB0 = bit 0 to PB3 = bit 3), which
                         \ tells us whether any buttons in the specified column
                         \ are being pressed, and if they are, in which row. The
                         \ values read are as follows:
