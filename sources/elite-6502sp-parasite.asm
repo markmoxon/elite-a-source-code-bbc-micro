@@ -45712,7 +45712,7 @@ LOAD_L% = LOAD% + P% - CODE%
 
 .zZ
 
- LDA #&60               \ Set (QQ9, QQ10) to (96, 96), which is where we always
+ LDA #96                \ Set (QQ9, QQ10) to (96, 96), which is where we always
  STA QQ9                \ arrive in a new galaxy (the selected system will be
  STA QQ10               \ set to the nearest actual system later on)
 
