@@ -34,6 +34,8 @@ _RELEASED               = (_RELEASE = 1)
 _SOURCE_DISC            = (_RELEASE = 2)
 _BUG_FIX                = (_RELEASE = 3)
 
+GUARD &6000             \ Guard against assembling over screen memory
+
 \ ******************************************************************************
 \
 \ Configuration variables
