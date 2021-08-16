@@ -32,6 +32,7 @@ INCLUDE "sources/elite-header.h.asm"
 
 _RELEASED               = (_RELEASE = 1)
 _SOURCE_DISC            = (_RELEASE = 2)
+_BUG_FIX                = (_RELEASE = 3)
 
 \ ******************************************************************************
 \
@@ -31352,7 +31353,7 @@ NEXT
 
 .new_ships
 
-IF _SOURCE_DISC
+IF _SOURCE_DISC OR _BUG_FIX
 
  EQUS "ADDER    "       \ #0 = Adder         = 27,000.0 Cr
 

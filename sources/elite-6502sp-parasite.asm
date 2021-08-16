@@ -32,6 +32,7 @@ INCLUDE "sources/elite-header.h.asm"
 
 _RELEASED               = (_RELEASE = 1)
 _SOURCE_DISC            = (_RELEASE = 2)
+_BUG_FIX                = (_RELEASE = 3)
 
 \ ******************************************************************************
 \
@@ -24379,7 +24380,7 @@ NEXT
 
 .new_ships
 
-IF _SOURCE_DISC
+IF _SOURCE_DISC OR _BUG_FIX
 
  EQUS "ADDER    "       \ #0 = Adder         = 27,000.0 Cr
 
@@ -36020,10 +36021,21 @@ ENDMACRO
  CTOK 63                \ Encoded as:         "6[63]"
  EQUB 0
 
+IF _RELEASED OR _SOURCE_DISC
+
  EQUB 7                 \ 7: Cargo space:     "4{all caps}TC{sentence case}"
  EQUS "4"               \
  CTOK 62                \ Encoded as:         "4[62]"
  EQUB 0
+
+ELIF _BUG_FIX
+
+ EQUB 7                 \ 7: Cargo space:     "8{all caps}TC{sentence case}"
+ EQUS "8"               \
+ CTOK 62                \ Encoded as:         "8[62]"
+ EQUB 0
+
+ENDIF
 
  EQUB 8                 \ 8: Armaments:       "INGRAM 1928 AZ BEAM LASER{cr}
  CTOK 56                \                      GERET STARSEEKER MISSILES"
@@ -55383,7 +55395,17 @@ ENDMACRO
  EQUB 0 + (11 << 4)     \ Max. canisters on demise = 0
                         \ Market item when scooped = 11 + 1 = 12 (Minerals)
  EQUW 16 * 16           \ Targetable area          = 16 * 16
+
+IF _RELEASED OR _SOURCE_DISC
+
  EQUB &5A               \ This value is incorrect (see above)
+
+ELIF _BUG_FIX
+
+ EQUB LO(SHIP_ESCAPE_POD_EDGES - SHIP_SPLINTER)      \ Edges data = escape pod
+
+ENDIF
+
  EQUB &44               \ Faces data offset (low)  = &0044
  EQUB 25                \ Max. edge count          = (25 - 1) / 4 = 6
  EQUB 0                 \ Gun vertex               = 0
@@ -55395,7 +55417,17 @@ ENDMACRO
  EQUB 8                 \ Visibility distance      = 8
  EQUB 16                \ Max. energy              = 16
  EQUB 10                \ Max. speed               = 10
+
+IF _RELEASED OR _SOURCE_DISC
+
  EQUB &FE               \ This value is incorrect (see above)
+
+ELIF _BUG_FIX
+
+ EQUB HI(SHIP_ESCAPE_POD_EDGES - SHIP_SPLINTER)      \ Edges data = escape pod
+
+ENDIF
+
  EQUB &00               \ Faces data offset (high) = &0044
  EQUB 5                 \ Normals are scaled by    = 2^5 = 32
  EQUB %00000000         \ Laser power              = 0

@@ -31,8 +31,9 @@ See the [introduction](#introduction) for more information.
 
 * [Building different releases of Elite-A](#building-different-releases-of-elite-a)
 
-  * [Building the released version](#building-the-sng45-release)
-  * [Building the patched release](#building-the-source-disc-release)
+  * [Building the released version](#building-the-released-version)
+  * [Building the source disc release](#building-the-source-disc-release)
+  * [Building the bug fix release](#building-the-bug-fix-release)
   * [Differences between the releases](#differences-between-the-releases)
 
 * [Notes on the original source files](#notes-on-the-original-source-files)
@@ -43,7 +44,7 @@ See the [introduction](#introduction) for more information.
 
 This repository contains the original source code for Angus Duggan's Elite-A on the BBC Micro.
 
-You can build the fully functioning game from this source. [Two releases](#building-different-releases-of-elite-a) are currently supported: the officially released version from Angus's site, and the version produced by the original source discs (which was never released).
+You can build the fully functioning game from this source. [Three releases](#building-different-releases-of-elite-a) are currently supported: the officially released version from Angus's site, and the version produced by the original source discs (which was never released).
 
 Elite-A is legendary amongst BBC Elite fans, and remains a deeply impressive project that has achieved almost mythical status in the Acorn retro scene (and deservedly so). Ian Bell, co-author of the original Elite, has this to say on his website:
 
@@ -249,7 +250,11 @@ This repository contains the source code for two different releases of Elite-A:
 
 * The version produced by the source disc (which was never released)
 
-By default the build process builds the released version, but you can build the other release as follows.
+By default the build process builds the released version, but you can build a specified release using the `release=` build parameter.
+
+### Building the released version
+
+You can add `release=released` to produce the `elite-a-released.ssd` file that contains the released version, though that's the default value so it isn't necessary.
 
 ### Building the source disc release
 
@@ -267,13 +272,29 @@ make build verify release=source-disc
 
 This will produce a file called `elite-a-from-source-disc.ssd` that contains the source disc release.
 
-### Building the released version
+### Building the bug fix release
 
-You can add `release=released` to produce the `elite-a-released.ssd` file that contains the released version, though that's the default value so it isn't necessary.
+You can build the source disc release by appending `release=bug-fix` to the `make` command, like this on Windows:
+
+```
+make.bat build verify release=bug-fix
+```
+
+or this on a Mac or Linux:
+
+```
+make build verify release=bug-fix
+```
+
+This will produce a file called `elite-a-bug-fix.ssd` that contains the bug fix release.
 
 ### Differences between the releases
 
-You can see the differences between the releases by searching the source code for `_RELEASED` (for features in the released version) or `_SOURCE_DISC` (for features in the source disc release). The only difference in the source disc release is that the latter has considerably lower ship prices.
+You can see the differences between the releases by searching the source code for `_RELEASED` (for features in the released version), `_BUG_FIX` (for features in the buf fix version) or `_SOURCE_DISC` (for features in the source disc release).
+
+The only difference in the source disc release is that the latter has considerably lower ship prices.
+
+There is a bug in the original version of Elite-A that prevents splinters from displaying properly, which makes mining all but impossible. The bug fix release fixes that bug, as well as an incorrect cargo capacity in the Adder ship card in the encyclopedia.
 
 See the [accompanying website](https://www.bbcelite.com/elite-a/releases.html) for a comprehensive list of differences between the releases.
 

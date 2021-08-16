@@ -32,6 +32,7 @@ INCLUDE "sources/elite-header.h.asm"
 
 _RELEASED               = (_RELEASE = 1)
 _SOURCE_DISC            = (_RELEASE = 2)
+_BUG_FIX                = (_RELEASE = 3)
 
 \ ******************************************************************************
 \
@@ -26674,10 +26675,21 @@ ENDMACRO
  CTOK 63                \ Encoded as:         "6[63]"
  EQUB 0
 
+IF _RELEASED OR _SOURCE_DISC
+
  EQUB 7                 \ 7: Cargo space:     "4{all caps}TC{sentence case}"
  EQUS "4"               \
  CTOK 62                \ Encoded as:         "4[62]"
  EQUB 0
+
+ELIF _BUG_FIX
+
+ EQUB 7                 \ 7: Cargo space:     "8{all caps}TC{sentence case}"
+ EQUS "8"               \
+ CTOK 62                \ Encoded as:         "8[62]"
+ EQUB 0
+
+ENDIF
 
  EQUB 8                 \ 8: Armaments:       "INGRAM 1928 AZ BEAM LASER{cr}
  CTOK 56                \                      GERET STARSEEKER MISSILES"

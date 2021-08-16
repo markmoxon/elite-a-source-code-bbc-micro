@@ -32,6 +32,7 @@ INCLUDE "sources/elite-header.h.asm"
 
 _RELEASED               = (_RELEASE = 1)
 _SOURCE_DISC            = (_RELEASE = 2)
+_BUG_FIX                = (_RELEASE = 3)
 
 \ ******************************************************************************
 \
@@ -909,7 +910,15 @@ ENDMACRO
 
                         \ --- And replaced by: -------------------------------->
 
+IF _RELEASED OR _SOURCE_DISC
+
  EQUB &5A               \ This value is incorrect (see above)
+
+ELIF _BUG_FIX
+
+ EQUB LO(SHIP_ESCAPE_POD_EDGES - SHIP_SPLINTER)      \ Edges data = escape pod
+
+ENDIF
 
                         \ --- End of replacement ------------------------------>
 
@@ -951,7 +960,15 @@ ENDMACRO
 
                         \ --- And replaced by: -------------------------------->
 
+IF _RELEASED OR _SOURCE_DISC
+
  EQUB &FE               \ This value is incorrect (see above)
+
+ELIF _BUG_FIX
+
+ EQUB HI(SHIP_ESCAPE_POD_EDGES - SHIP_SPLINTER)      \ Edges data = escape pod
+
+ENDIF
 
                         \ --- End of replacement ------------------------------>
 

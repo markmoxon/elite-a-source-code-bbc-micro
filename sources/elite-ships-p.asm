@@ -32,6 +32,7 @@ INCLUDE "sources/elite-header.h.asm"
 
 _RELEASED               = (_RELEASE = 1)
 _SOURCE_DISC            = (_RELEASE = 2)
+_BUG_FIX                = (_RELEASE = 3)
 
 \ ******************************************************************************
 \
