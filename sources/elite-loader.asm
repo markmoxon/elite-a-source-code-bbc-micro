@@ -1152,7 +1152,7 @@ ORG &0B00
 \ SEC                   \ Set the C flag so the checksum we calculate in A
 \                       \ starts with an initial value of 18 (17 plus carry)
 \
-\ LDY #&00              \ Set Y = 0 to act as a byte pointer
+\ LDY #0                \ Set Y = 0 to act as a byte pointer
 \
 \ STY ZP                \ Set the low byte of ZP(1 0) to 0, so ZP(1 0) always
 \                       \ points to the start of a page
