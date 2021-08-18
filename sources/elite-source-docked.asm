@@ -34,7 +34,7 @@ _RELEASED               = (_RELEASE = 1)
 _SOURCE_DISC            = (_RELEASE = 2)
 _BUG_FIX                = (_RELEASE = 3)
 
-GUARD &6000
+GUARD &6000             \ Guard against assembling over screen memory
 
 \ ******************************************************************************
 \
@@ -50,11 +50,12 @@ NOSH = 12               \ The maximum number of ships in our local bubble of
 
 NTY = 31                \ The number of different ship types
 
-SST = 2                 \ Ship type for a Coriolis space station
-CYL = 11                \ Ship type for a Cobra Mk III
-COPS = 16               \ Ship type for a Viper
-KRA = 19                \ Ship type for a Krait
-CON = 31                \ Ship type for a Constrictor
+SST = 2                 \ Ship blueprint position for the space station
+COPS = 16               \ Ship blueprint position for the cop
+CON = 31                \ Ship blueprint position for the Constrictor
+
+CYL = 11                \ Ship blueprint position for the title's Cobra Mk III
+KRA = 19                \ Ship blueprint position for the title's Krait
 
 NI% = 37                \ The number of bytes in each ship's data block (as
                         \ stored in INWK and K%)
@@ -10480,10 +10481,6 @@ LOAD_C% = LOAD% +P% - CODE%
 \ which case A = 0, so this routine effectively does this:
 \
 \   K(3 2 1 0) = 0
-\
-\ Other entry points:
-\
-\   n_store             Set K(3 2 1) = (A A A) and clear the C flag
 \
 \ ******************************************************************************
 
@@ -36423,10 +36420,10 @@ ENDMACRO
 
 \ ******************************************************************************
 \
-\       Name: Unused block 2
+\       Name: Checksum
 \       Type: Variable
-\   Category: Utility routines
-\    Summary: These bytes appear to be unused
+\   Category: Copy protection
+\    Summary: Copy protection is disabled in Elite-A, so this block is unused
 \
 \ ******************************************************************************
 
@@ -36446,7 +36443,10 @@ ENDMACRO
 \ EQUB &00, &00
 \ EQUB &06, &56
 \ EQUB &52, &49
-\ EQUB &45, &E6
+\ EQUB &45
+\
+\ EQUB &E6              \ This checksum is at location &55FF, and is checked in
+\                       \ the LOAD routine in elite-loader3.asm
 \
 \ELIF _IB_DISC
 \
@@ -36462,7 +36462,10 @@ ENDMACRO
 \ EQUB &52, &49
 \ EQUB &53, &00
 \ EQUB &8E, &13
-\ EQUB &34, &B3
+\ EQUB &34
+\
+\ EQUB &B3              \ This checksum is at location &55FF, and is checked in
+\                       \ the LOAD routine in elite-loader3.asm
 \
 \ENDIF
 

@@ -34,6 +34,8 @@ _RELEASED               = (_RELEASE = 1)
 _SOURCE_DISC            = (_RELEASE = 2)
 _BUG_FIX                = (_RELEASE = 3)
 
+GUARD &F800             \ Guard against assembling over MOS memory
+
 \ ******************************************************************************
 \
 \ Configuration variables
@@ -54,20 +56,21 @@ NTY = 31                \ The number of different ship types
 
 ship_total = 38         \ The number of different ship blueprints in Elite-A
 
-MSL = 1                 \ Ship type for a missile
-SST = 2                 \ Ship type for a Coriolis space station
-ESC = 3                 \ Ship type for an escape pod
-PLT = 4                 \ Ship type for an alloy plate
-OIL = 5                 \ Ship type for a cargo canister
-AST = 7                 \ Ship type for an asteroid
-SPL = 8                 \ Ship type for a splinter
-SHU = 9                 \ Ship type for a Shuttle
-CYL = 11                \ Ship type for a Cobra Mk III
-COPS = 16               \ Ship type for a Viper
-KRA = 19                \ Ship type for a Krait
-THG = 29                \ Ship type for a Thargoid
-TGL = 30                \ Ship type for a Thargon
-CON = 31                \ Ship type for a Constrictor
+MSL = 1                 \ Ship blueprint position for the missile
+SST = 2                 \ Ship blueprint position for the space station
+ESC = 3                 \ Ship blueprint position for the escape pod
+PLT = 4                 \ Ship blueprint position for the alloy plate
+OIL = 5                 \ Ship blueprint position for the cargo canister
+AST = 7                 \ Ship blueprint position for the asteroid
+SPL = 8                 \ Ship blueprint position for the splinter
+SHU = 9                 \ Ship blueprint position for the shuttle
+COPS = 16               \ Ship blueprint position for the cop
+THG = 29                \ Ship blueprint position for the Thargoid
+TGL = 30                \ Ship blueprint position for the Thargon
+CON = 31                \ Ship blueprint position for the Constrictor
+
+CYL = 11                \ Ship blueprint position for the title's Cobra Mk III
+KRA = 19                \ Ship blueprint position for the title's Krait
 
 JL = ESC                \ Junk is defined as starting from the escape pod
 

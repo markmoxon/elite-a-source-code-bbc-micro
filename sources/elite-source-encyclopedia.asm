@@ -34,7 +34,7 @@ _RELEASED               = (_RELEASE = 1)
 _SOURCE_DISC            = (_RELEASE = 2)
 _BUG_FIX                = (_RELEASE = 3)
 
-GUARD &6000
+GUARD &6000             \ Guard against assembling over screen memory
 
 \ ******************************************************************************
 \
@@ -50,7 +50,7 @@ NOSH = 12               \ The maximum number of ships in our local bubble of
 
 NTY = 31                \ The number of different ship types
 
-SST = 2                 \ Ship type for a Coriolis space station
+SST = 2                 \ Ship blueprint position for the space station
 
 NI% = 37                \ The number of bytes in each ship's data block (as
                         \ stored in INWK and K%)
