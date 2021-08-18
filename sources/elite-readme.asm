@@ -48,17 +48,17 @@ _BUG_FIX                = (_RELEASE = 3)
 IF _RELEASED
  EQUS "*| Release: From Angus Duggan's site"
  EQUB 13
- EQUS "*| Code no: Not an Acornsoft game"
+ EQUS "*|          The original release"
  EQUB 13
 ELIF _SOURCE_DISC
  EQUS "*| Release: Angus Duggan's source disc"
  EQUB 13
- EQUS "*| Code no: Not an Acornsoft game"
+ EQUS "*|          Not officially released"
  EQUB 13
 ELIF _BUG_FIX
  EQUS "*| Release: Bug fixes (mining bug)"
  EQUB 13
- EQUS "*| Code no: Not an Acornsoft game"
+ EQUS "*|          Not officially released"
  EQUB 13
 ENDIF
  EQUS "*|"
