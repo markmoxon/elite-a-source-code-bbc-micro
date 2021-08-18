@@ -66,8 +66,9 @@ build:
 	$(BEEBASM) -i sources/elite-ships-u.asm -v >> output/compile.txt
 	$(BEEBASM) -i sources/elite-ships-v.asm -v >> output/compile.txt
 	$(BEEBASM) -i sources/elite-ships-w.asm -v >> output/compile.txt
+	$(BEEBASM) -i sources/elite-readme.asm -v >> output/compile.txt
 	$(PYTHON) sources/elite-checksum.py -u -rel$(rel-elite-a)
-	$(BEEBASM) -i sources/elite-disc.asm -do elite-a$(suffix-elite-a).ssd -opt 3
+	$(BEEBASM) -i sources/elite-disc.asm -do elite-a$(suffix-elite-a).ssd -opt 3 -title "E L I T E"
 
 .PHONY:encrypt
 encrypt:
@@ -106,8 +107,9 @@ encrypt:
 	$(BEEBASM) -i sources/elite-ships-u.asm -v >> output/compile.txt
 	$(BEEBASM) -i sources/elite-ships-v.asm -v >> output/compile.txt
 	$(BEEBASM) -i sources/elite-ships-w.asm -v >> output/compile.txt
+	$(BEEBASM) -i sources/elite-readme.asm -v >> output/compile.txt
 	$(PYTHON) sources/elite-checksum.py -rel$(rel-elite-a)
-	$(BEEBASM) -i sources/elite-disc.asm -do elite-a$(suffix-elite-a).ssd -opt 3
+	$(BEEBASM) -i sources/elite-disc.asm -do elite-a$(suffix-elite-a).ssd -opt 3 -title "E L I T E"
 
 .PHONY:verify
 verify:
