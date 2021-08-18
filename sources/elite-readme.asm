@@ -28,14 +28,8 @@
 \
 \ ******************************************************************************
 
-INCLUDE "versions/elite-a/sources/elite-header.h.asm"
+INCLUDE "sources/elite-header.h.asm"
 
-_CASSETTE_VERSION       = (_VERSION = 1)
-_DISC_VERSION           = (_VERSION = 2)
-_6502SP_VERSION         = (_VERSION = 3)
-_MASTER_VERSION         = (_VERSION = 4)
-_ELECTRON_VERSION       = (_VERSION = 5)
-_ELITE_A_VERSION        = (_VERSION = 6)
 _RELEASED               = (_RELEASE = 1)
 _SOURCE_DISC            = (_RELEASE = 2)
 _BUG_FIX                = (_RELEASE = 3)
@@ -79,5 +73,5 @@ ENDIF
  EQUS "*ELITE"
  EQUB 13
 
-SAVE "versions/elite-a/output/!BOOT.txt", readme, P%
+SAVE "output/!BOOT.txt", readme, P%
 
