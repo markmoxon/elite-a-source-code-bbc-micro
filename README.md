@@ -252,11 +252,13 @@ During compilation, details of every step are output in a file called `compile.t
 
 ## Building different releases of Elite-A
 
-This repository contains the source code for two different releases of Elite-A:
+This repository contains the source code for three different releases of Elite-A:
 
 * The released version from Angus Duggan's site
 
 * The version produced by the source disc (which was never released)
+
+* A version that fixes two bugs in the original (splinters and Adder stats)
 
 By default the build process builds the released version, but you can build a specified release using the `release=` build parameter.
 
