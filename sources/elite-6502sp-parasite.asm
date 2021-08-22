@@ -19433,7 +19433,7 @@ LOAD_G% = LOAD% + P% - CODE%
  JSR Shpt               \ Call Shpt to draws a horizontal 4-pixel dash for the 
                         \ first row of the dot (i.e. a four-pixel dash)
 
- LDA #Y                 \ Set A = y-coordinate of dot + 1 (so this is the second
+ LDA K4                 \ Set A = y-coordinate of dot + 1 (so this is the second
  CLC                    \ row of the two-pixel-high dot)
  ADC #1
 
@@ -19466,7 +19466,7 @@ LOAD_G% = LOAD% + P% - CODE%
  STA Y1                 \ Store A in both y-coordinates, as this is a horizontal
  STA Y2                 \ dash at y-coordinate A
 
- LDA #X                 \ Set A = x-coordinate of the middle of the screen
+ LDA K3                 \ Set A = screen x-coordinate of the ship dot
 
  STA X1                 \ Store the x-coordinate of the ship dot in X1, as this
                         \ is where the dash starts
