@@ -20,6 +20,8 @@ See the [introduction](#introduction) for more information.
 
 * [Browsing the source in an IDE](#browsing-the-source-in-an-ide)
 
+* [Folder structure](#folder-structure)
+
 * [Flicker-free Elite](#flicker-free-elite)
 
 * [Building Elite-A from the source](#building-elite-a-from-the-source)
@@ -86,13 +88,13 @@ My hope is that the educational and non-profit intentions of this repository wil
 
 If you want to browse the source in an IDE, you might find the following useful.
 
-* The most interesting files are in the [sources](sources) folder:
+* The most interesting files are in the [main-sources](1-source-files/main-sources) folder:
 
-  * The main game's source code is in the [elite-source-flight.asm](sources/elite-source-flight.asm), [elite-source-docked.asm](sources/elite-source-docked.asm) and [elite-source-encyclopedia.asm](sources/elite-source-encyclopedia.asm) files (for when we're in-flight, docked or viewing the encyclopedia) - this is the motherlode and probably contains all the stuff you're interested in.
+  * The main game's source code is in the [elite-source-flight.asm](1-source-files/main-sources/elite-source-flight.asm), [elite-source-docked.asm](1-source-files/main-sources/elite-source-docked.asm) and [elite-source-encyclopedia.asm](1-source-files/main-sources/elite-source-encyclopedia.asm) files (for when we're in-flight, docked or viewing the encyclopedia) - this is the motherlode and probably contains all the stuff you're interested in.
 
-  * The 6502 Second Processor version's source code is in the [elite-6502sp-parasite.asm](sources/elite-6502sp-parasite.asm) file (for the parasite, i.e. the Second Processor) and [elite-6502sp-io-processor.asm](sources/elite-6502sp-io-processor.asm) (for the I/O processor, i.e. the BBC Micro).
+  * The 6502 Second Processor version's source code is in the [elite-6502sp-parasite.asm](1-source-files/main-sources/elite-6502sp-parasite.asm) file (for the parasite, i.e. the Second Processor) and [elite-6502sp-io-processor.asm](1-source-files/main-sources/elite-6502sp-io-processor.asm) (for the I/O processor, i.e. the BBC Micro).
 
-  * The game's loader is in the [elite-loader.asm](sources/elite-loader.asm) file - this is mainly concerned with setup and checking for Tube and BBC Master hardware.
+  * The game's loader is in the [elite-loader.asm](1-source-files/main-sources/elite-loader.asm) file - this is mainly concerned with setup and checking for Tube and BBC Master hardware.
 
 * The source files for Elite-A are unique amongst the annotated versions in this project, in that they contain inline diffs. Angus created Elite-A by taking the original disc version of Elite and modifying the code to include all his new features. The annotated source files in this repository contain both the original disc code and all of Angus's modifications, so you can look through the source to see exactly what Angus changed in order to create Elite-A. Any code that he removed from the disc version is commented out in the source files, so when they are assembled they produce the Elite-A binaries, while still containing details of Angus's modifications. You can find all the diffs by searching the sources for `Mod:`. (Note that this feature does not apply to the two 6502 Second Processor version source files, which just contain the Elite-A code.)
 
@@ -104,11 +106,25 @@ If you want to browse the source in an IDE, you might find the following useful.
 
 * If you know the name of a routine, you can find it by searching for `Name: <name>`, as in `Name: SCAN` (for the 3D scanner routine) or `Name: LL9` (for the ship-drawing routine).
 
-* The entry point for the [main game code](sources/elite-source-docked.asm) is routine `TT170`, which you can find by searching for `Name: TT170`. If you want to follow the program flow all the way from the title screen around the main game loop, then you can find a number of [deep dives on program flow](https://www.bbcelite.com/deep_dives/) on the accompanying website.
+* The entry point for the [main game code](1-source-files/main-sources/elite-source-docked.asm) is routine `TT170`, which you can find by searching for `Name: TT170`. If you want to follow the program flow all the way from the title screen around the main game loop, then you can find a number of [deep dives on program flow](https://www.bbcelite.com/deep_dives/) on the accompanying website.
 
 * The source code is designed to be read at an 80-column width and with a monospaced font, just like in the good old days.
 
 I hope you enjoy exploring the inner-workings of Elite-A as much as I have.
+
+## Folder structure
+
+There are five main folders in this repository, which reflect the order of the build process.
+
+* [1-source-files](1-source-files) contains all the different source files, such as the main assembler source files, image binaries, fonts, boot files and so on
+
+* [2-build-files](2-build-files) contains build-related scripts, such as the checksum, encryption and crc32 verification scripts
+
+* [3-assembled-output](3-assembled-output) contains the output from the assembly process, when the source files are assembled and the results processed by the build files
+
+* [4-reference-binaries](4-reference-binaries) contains the correct binaries for each release, so we can verify that our assembled output matches the reference
+
+* [5-compiled-game-discs](5-compiled-game-discs) contains the final output of the build process: an SSD disc image that contains the compiled game and which can be run on real hardware or in an emulator
 
 ## Flicker-free Elite
 
@@ -157,7 +173,7 @@ make.bat build
 make.bat encrypt
 ```
 
-will produce a file called `elite-a-released.ssd` containing the released version of Elite-A, which you can then load into an emulator, or into a real BBC Micro using a device like a Gotek.
+will produce a file called `elite-a-released.ssd` in the `5-compiled-game-discs` folder that contains the released version of Elite-A, which you can then load into an emulator, or into a real BBC Micro using a device like a Gotek.
 
 ### Mac and Linux
 
@@ -173,11 +189,11 @@ make build
 make encrypt
 ```
 
-will produce a file called `elite-a-released.ssd` containing the released version of Elite-A, which you can then load into an emulator, or into a real BBC Micro using a device like a Gotek.
+will produce a file called `elite-a-released.ssd` in the `5-compiled-game-discs` folder that contains the released version of Elite-A, which you can then load into an emulator, or into a real BBC Micro using a device like a Gotek.
 
 ### Verifying the output
 
-The build process also supports a verification target that prints out checksums of all the generated files, along with the checksums of the files extracted from the original sources.
+The build process also supports a verification target that prints out checksums of all the generated files, along with the checksums of the files from the original sources.
 
 You can run this verification step on its own, or you can run it once a build has finished. To run it on its own, use the following command on Windows:
 
@@ -203,12 +219,12 @@ or this on Mac/Linux:
 make encrypt verify
 ```
 
-The Python script `crc32.py` does the actual verification, and shows the checksums and file sizes of both sets of files, alongside each other, and with a Match column that flags any discrepancies.
+The Python script `crc32.py` in the `2-build-files` folder does the actual verification, and shows the checksums and file sizes of both sets of files, alongside each other, and with a Match column that flags any discrepancies.
 
-The binaries in the `extracted` folder were taken straight from Angus Duggan's original source discs, while those in the `output` folder are produced by the build process. For example, if you don't make any changes to the code and build the project with `make build verify`, then this is the output of the verification process:
+The binaries in the `4-reference-binaries` folder were taken straight from Angus Duggan's original source discs, while those in the `3-assembled-output` folder are produced by the build process. For example, if you don't make any changes to the code and build the project with `make build verify`, then this is the output of the verification process:
 
 ```
-[--extracted--]  [---output----]
+[--originals--]  [---output----]
 Checksum   Size  Checksum   Size  Match  Filename
 -----------------------------------------------------------
 26ae1732  19997  26ae1732  19997   Yes   1.D.bin
@@ -244,11 +260,11 @@ fab17499   2560  fab17499   2560   Yes   S.U.bin
 b7b3c692   1024  b7b3c692   1024   Yes   WORDS.bin
 ```
 
-All the compiled binaries match the extracts, so we know we are producing the same final game as the release version.
+All the compiled binaries match the originals, so we know we are producing the same final game as the release version.
 
 ### Log files
 
-During compilation, details of every step are output in a file called `compile.txt` in the `output` folder. If you have problems, it might come in handy, and it's a great reference if you need to know the addresses of labels and variables for debugging (or just snooping around).
+During compilation, details of every step are output in a file called `compile.txt` in the `3-assembled-output` folder. If you have problems, it might come in handy, and it's a great reference if you need to know the addresses of labels and variables for debugging (or just snooping around).
 
 ## Building different releases of Elite-A
 
@@ -280,7 +296,7 @@ or this on a Mac or Linux:
 make build verify release=source-disc
 ```
 
-This will produce a file called `elite-a-from-source-disc.ssd` that contains the source disc release.
+This will produce a file called `elite-a-from-source-disc.ssd` in the `5-compiled-game-discs` folder that contains the source disc release.
 
 ### Building the bug fix release
 
@@ -296,7 +312,7 @@ or this on a Mac or Linux:
 make build verify release=bug-fix
 ```
 
-This will produce a file called `elite-a-bug-fix.ssd` that contains the bug fix release.
+This will produce a file called `elite-a-bug-fix.ssd` in the `5-compiled-game-discs` folder that contains the bug fix release.
 
 ### Differences between the releases
 
@@ -312,7 +328,7 @@ See the [accompanying website](https://www.bbcelite.com/elite-a/releases.html) f
 
 ### Converting the original build process to BeebAsm
 
-See [the original source files](sources/original_sources) for details about how Angus's original sources have been converted to assemble in BeebAsm, so Elite-A can be built on modern computers.
+See [the original source files](1-source-files/original-sources) for details about how Angus's original sources have been converted to assemble in BeebAsm, so Elite-A can be built on modern computers.
 
 ---
 
