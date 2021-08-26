@@ -4644,7 +4644,9 @@ BRKV = P% - 2           \ The address of the destination address in the above
 .UNIV
 
 FOR I%, 0, NOSH
-  EQUW K% + I% * NI%    \ Address of block no. I%, of size NI%, in workspace K%
+
+ EQUW K% + I% * NI%     \ Address of block no. I%, of size NI%, in workspace K%
+
 NEXT
 
 \ ******************************************************************************
@@ -31331,7 +31333,9 @@ LOAD_G% = LOAD% + P% - CODE%
 .new_offsets
 
 FOR I%, 0, 14
-  EQUB I% * 13          \ Offset of the 13-byte details block for ship I%
+
+ EQUB I% * 13           \ Offset of the 13-byte details block for ship I%
+
 NEXT
 
                         \ --- End of added section ---------------------------->

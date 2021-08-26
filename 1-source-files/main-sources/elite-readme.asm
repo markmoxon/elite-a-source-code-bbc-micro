@@ -50,22 +50,30 @@ _BUG_FIX                = (_RELEASE = 3)
  EQUB 13
  EQUS "*| Version: BBC Micro/Tube/BBC Master"
  EQUB 13
+
 IF _RELEASED
+
  EQUS "*| Release: From Angus Duggan's site"
  EQUB 13
  EQUS "*|          The original release"
  EQUB 13
+
 ELIF _SOURCE_DISC
+
  EQUS "*| Release: Angus Duggan's source disc"
  EQUB 13
  EQUS "*|          Not officially released"
  EQUB 13
+
 ELIF _BUG_FIX
+
  EQUS "*| Release: Bug fixes (mining bug)"
  EQUB 13
  EQUS "*|          Not officially released"
  EQUB 13
+
 ENDIF
+
  EQUS "*|"
  EQUB 13
  EQUS "*| See www.bbcelite.com for details"
