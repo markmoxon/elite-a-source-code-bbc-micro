@@ -83,33 +83,6 @@ JH = SHU+2              \ Junk is defined as ending before the Cobra Mk III
 NI% = 37                \ The number of bytes in each ship's data block (as
                         \ stored in INWK and K%)
 
-OSBYTE = &FFF4          \ The address for the OSBYTE routine
-OSWORD = &FFF1          \ The address for the OSWORD routine
-OSFILE = &FFDD          \ The address for the OSFILE routine
-OSWRCH = &FFEE          \ The address for the OSWRCH routine
-OSCLI = &FFF7           \ The address for the OSCLI routine
-
-VIA = &FE00             \ Memory-mapped space for accessing internal hardware,
-                        \ such as the video ULA, 6845 CRTC and 6522 VIAs (also
-                        \ known as SHEILA)
-
-BRKV = &0202            \ The address of the break vector
-
-save_lock = &0233       \ This flag indicates whether we should be asking for
-                        \ confirmation before saving or loading a commander
-                        \ file:
-                        \
-                        \   * 0 = last file operation was a save, or we just
-                        \         started a new game, so there are no unsaved
-                        \         changes (so ask for confirmation on saving)
-                        \
-                        \   * &FF = last file operation was a load, or we have
-                        \           just docked and have unsaved changes (so ask
-                        \           for confirmation on loading)
-                        \
-                        \ It shares a location with the IND2V+1 vector, which we
-                        \ do not use, so we can reuse the location
-
 X = 128                 \ The centre x-coordinate of the 256 x 192 space view
 Y = 96                  \ The centre y-coordinate of the 256 x 192 space view
 
@@ -134,7 +107,28 @@ VE = 0                  \ The obfuscation byte used to hide the extended tokens
 LL = 30                 \ The length of lines (in characters) of justified text
                         \ in the extended tokens system
 
+BRKV = &0202            \ The address of the break vector
+
+save_lock = &0233       \ This flag indicates whether we should be asking for
+                        \ confirmation before saving or loading a commander
+                        \ file:
+                        \
+                        \   * 0 = last file operation was a save, or we just
+                        \         started a new game, so there are no unsaved
+                        \         changes (so ask for confirmation on saving)
+                        \
+                        \   * &FF = last file operation was a load, or we have
+                        \           just docked and have unsaved changes (so ask
+                        \           for confirmation on loading)
+                        \
+                        \ It shares a location with the IND2V+1 vector, which we
+                        \ do not use, so we can reuse the location
+
 LS% = &0CFF             \ The start of the descending ship line heap
+
+VIA = &FE00             \ Memory-mapped space for accessing internal hardware,
+                        \ such as the video ULA, 6845 CRTC and 6522 VIAs (also
+                        \ known as SHEILA)
 
 tube_r1s = &FEF8        \ The Tube's memory-mapped FIFO 1 status register
 tube_r1d = &FEF9        \ The Tube's memory-mapped FIFO 1 data register
@@ -144,6 +138,12 @@ tube_r3s = &FEFC        \ The Tube's memory-mapped FIFO 3 data register
 tube_r3d = &FEFD        \ The Tube's memory-mapped FIFO 3 status register
 tube_r4s = &FEFE        \ The Tube's memory-mapped FIFO 4 data register
 tube_r4d = &FEFF        \ The Tube's memory-mapped FIFO 4 status register
+
+OSBYTE = &FFF4          \ The address for the OSBYTE routine
+OSWORD = &FFF1          \ The address for the OSWORD routine
+OSFILE = &FFDD          \ The address for the OSFILE routine
+OSWRCH = &FFEE          \ The address for the OSWRCH routine
+OSCLI = &FFF7           \ The address for the OSCLI routine
 
 \ ******************************************************************************
 \
@@ -49973,7 +49973,7 @@ LOAD_M% = LOAD% + P% - CODE%
                         \ in a random ship position, and set T1 to a random
                         \ number
 
- CMP #245               \ Set the C flag if X >= 245 (4% chance)
+ CMP #245               \ Set the C flag if A >= 245 (4% chance)
 
  ROL A                  \ Set bit 0 of A to the C flag (i.e. there's a 4%
                         \ chance of this ship having E.C.M.)

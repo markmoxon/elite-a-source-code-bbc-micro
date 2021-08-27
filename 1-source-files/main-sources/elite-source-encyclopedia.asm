@@ -98,8 +98,8 @@ VIA = &FE00             \ Memory-mapped space for accessing internal hardware,
                         \ such as the video ULA, 6845 CRTC and 6522 VIAs (also
                         \ known as SHEILA)
 
-OSBYTE = &FFF4          \ The address for the OSBYTE routine
 OSWORD = &FFF1          \ The address for the OSWORD routine
+OSBYTE = &FFF4          \ The address for the OSBYTE routine
 OSCLI = &FFF7           \ The address for the OSCLI routine
 
 \ ******************************************************************************
