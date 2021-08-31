@@ -23793,7 +23793,7 @@ ENDIF
 \
 \ Other entry points:
 \
-\   DELT-1              \ Contains an RTS
+\   DELT-1              Contains an RTS
 \
 \ ******************************************************************************
 
@@ -23875,7 +23875,7 @@ ENDIF
 \   Category: Save and load
 \    Summary: Temporary storage for the stack pointer when switching the BRKV
 \             handler between BRBR and MEBRK
-
+\
 \ ******************************************************************************
 
                         \ --- Mod: Original Acornsoft code removed: ----------->
