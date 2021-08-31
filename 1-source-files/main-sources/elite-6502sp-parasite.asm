@@ -34658,13 +34658,6 @@ LOAD_I% = LOAD% + P% - CODE%
 \    Summary: Show the Encyclopedia screen
 \  Deep dive: The Encyclopedia Galactica
 \
-\ ------------------------------------------------------------------------------
-\
-\ Other entry points:
-\
-\   jmp_start3          Make a short, high beep, delay for one second, and go to
-\                       the docking bay (i.e. show the Encyclopedia screen)
-\
 \ ******************************************************************************
 
 .encyclopedia
