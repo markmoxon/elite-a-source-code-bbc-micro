@@ -224,6 +224,7 @@ The Python script `crc32.py` in the `2-build-files` folder does the actual verif
 The binaries in the `4-reference-binaries` folder were taken straight from Angus Duggan's original source discs, while those in the `3-assembled-output` folder are produced by the build process. For example, if you don't make any changes to the code and build the project with `make build verify`, then this is the output of the verification process:
 
 ```
+Results for release: released
 [--originals--]  [---output----]
 Checksum   Size  Checksum   Size  Match  Filename
 -----------------------------------------------------------
@@ -282,6 +283,8 @@ By default the build process builds the released version, but you can build a sp
 
 You can add `release=released` to produce the `elite-a-released.ssd` file that contains the released version, though that's the default value so it isn't necessary.
 
+The verification checksums for this version are shown above.
+
 ### Building the source disc release
 
 You can build the source disc release by appending `release=source-disc` to the `make` command, like this on Windows:
@@ -298,6 +301,46 @@ make build verify release=source-disc
 
 This will produce a file called `elite-a-from-source-disc.ssd` in the `5-compiled-game-discs` folder that contains the source disc release.
 
+The verification checksums for this version are as follows:
+
+```
+Results for release: source-disc
+[--originals--]  [---output----]
+Checksum   Size  Checksum   Size  Match  Filename
+-----------------------------------------------------------
+d1ca0224  19997  d1ca0224  19997   Yes   1.D.bin
+b1447e60  16778  b1447e60  16778   Yes   1.E.bin
+14ee8b20  17432  14ee8b20  17432   Yes   1.F.bin
+3d638042   1956  3d638042   1956   Yes   2.H.bin
+81d6d436  43141  81d6d436  43141   Yes   2.T.bin
+171ccea5   5363  171ccea5   5363   Yes   ELITE.bin
+4f2febe4    256  4f2febe4    256   Yes   MISSILE.bin
+678c1c7f   2560  678c1c7f   2560   Yes   S.A.bin
+cae56eda   2560  cae56eda   2560   Yes   S.B.bin
+7b56fbb5   2560  7b56fbb5   2560   Yes   S.C.bin
+55e86dde   2560  55e86dde   2560   Yes   S.D.bin
+be2665dd   2560  be2665dd   2560   Yes   S.E.bin
+c0917c15   2560  c0917c15   2560   Yes   S.F.bin
+80f4145e   2560  80f4145e   2560   Yes   S.G.bin
+0d9fe4e8   2560  0d9fe4e8   2560   Yes   S.H.bin
+31ea0782   2560  31ea0782   2560   Yes   S.I.bin
+f444274e   2560  f444274e   2560   Yes   S.J.bin
+b9672969   2560  b9672969   2560   Yes   S.K.bin
+05f74f36   2560  05f74f36   2560   Yes   S.L.bin
+39856010   2560  39856010   2560   Yes   S.M.bin
+132980ad   2560  132980ad   2560   Yes   S.N.bin
+26525e5c   2560  26525e5c   2560   Yes   S.O.bin
+76097753   2560  76097753   2560   Yes   S.P.bin
+6bd215b4   2560  6bd215b4   2560   Yes   S.Q.bin
+bcd49589   2560  bcd49589   2560   Yes   S.R.bin
+8b44b8b6   2560  8b44b8b6   2560   Yes   S.S.bin
+155e6a6b   2560  155e6a6b   2560   Yes   S.T.bin
+fab17499   2560  fab17499   2560   Yes   S.U.bin
+8504604f   2560  8504604f   2560   Yes   S.V.bin
+40f96e61   2560  40f96e61   2560   Yes   S.W.bin
+b7b3c692   1024  b7b3c692   1024   Yes   WORDS.bin
+```
+
 ### Building the bug fix release
 
 You can build the source disc release by appending `release=bug-fix` to the `make` command, like this on Windows:
@@ -313,6 +356,46 @@ make build verify release=bug-fix
 ```
 
 This will produce a file called `elite-a-bug-fix.ssd` in the `5-compiled-game-discs` folder that contains the bug fix release.
+
+The verification checksums for this version are as follows:
+
+```
+Results for release: bug-fix
+[--originals--]  [---output----]
+Checksum   Size  Checksum   Size  Match  Filename
+-----------------------------------------------------------
+0ce6de36  19945  0ce6de36  19945   Yes   1.D.bin
+fdf8073b  16778  fdf8073b  16778   Yes   1.E.bin
+14ee8b20  17432  14ee8b20  17432   Yes   1.F.bin
+3d638042   1956  3d638042   1956   Yes   2.H.bin
+1336cda8  43089  1336cda8  43089   Yes   2.T.bin
+171ccea5   5363  171ccea5   5363   Yes   ELITE.bin
+4f2febe4    256  4f2febe4    256   Yes   MISSILE.bin
+678c1c7f   2560  678c1c7f   2560   Yes   S.A.bin
+cae56eda   2560  cae56eda   2560   Yes   S.B.bin
+7b56fbb5   2560  7b56fbb5   2560   Yes   S.C.bin
+55e86dde   2560  55e86dde   2560   Yes   S.D.bin
+a119f0d9   2560  a119f0d9   2560   Yes   S.E.bin
+c0917c15   2560  c0917c15   2560   Yes   S.F.bin
+d3224bc1   2560  d3224bc1   2560   Yes   S.G.bin
+0d9fe4e8   2560  0d9fe4e8   2560   Yes   S.H.bin
+31ea0782   2560  31ea0782   2560   Yes   S.I.bin
+f444274e   2560  f444274e   2560   Yes   S.J.bin
+ad98f535   2560  ad98f535   2560   Yes   S.K.bin
+05f74f36   2560  05f74f36   2560   Yes   S.L.bin
+39856010   2560  39856010   2560   Yes   S.M.bin
+132980ad   2560  132980ad   2560   Yes   S.N.bin
+a258d111   2560  a258d111   2560   Yes   S.O.bin
+76097753   2560  76097753   2560   Yes   S.P.bin
+6bd215b4   2560  6bd215b4   2560   Yes   S.Q.bin
+2aefc58b   2560  2aefc58b   2560   Yes   S.R.bin
+8b44b8b6   2560  8b44b8b6   2560   Yes   S.S.bin
+155e6a6b   2560  155e6a6b   2560   Yes   S.T.bin
+22336ce1   2560  22336ce1   2560   Yes   S.U.bin
+8504604f   2560  8504604f   2560   Yes   S.V.bin
+40f96e61   2560  40f96e61   2560   Yes   S.W.bin
+b7b3c692   1024  b7b3c692   1024   Yes   WORDS.bin
+```
 
 ### Differences between the releases
 
