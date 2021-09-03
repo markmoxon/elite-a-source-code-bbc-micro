@@ -16400,6 +16400,7 @@ LOAD_F% = LOAD% + P% - CODE%
 \    Summary: Update the main loop counters
 \  Deep dive: Program flow of the main game loop
 \             Ship data blocks
+\             Fixing ship positions
 \
 \ ------------------------------------------------------------------------------
 \
@@ -16529,6 +16530,7 @@ LOAD_F% = LOAD% + P% - CODE%
 \   Category: Utility routines
 \    Summary: Generate random numbers
 \  Deep dive: Generating random numbers
+\             Fixing ship positions
 \
 \ ------------------------------------------------------------------------------
 \
@@ -16537,22 +16539,27 @@ LOAD_F% = LOAD% + P% - CODE%
 \
 \ The C and V flags are also set randomly.
 \
+\ If we want to generate a repeatable sequence of random numbers, when
+\ generating explosion clouds, for example, then we call DORND2 to ensure that
+\ the value of the C flag on entry doesn't affect the outcome, as otherwise we
+\ might not get the same sequence of numbers if the C flag changes.
+\
 \ ******************************************************************************
 
 .DORND
 
- LDA RAND               \ r2´ = ((r0 << 1) mod 256) + C
- ROL A                  \ r0´ = r2´ + r2 + bit 7 of r0
- TAX
- ADC RAND+2             \ C = C flag from r0´ calculation
- STA RAND
- STX RAND+2
+ LDA RAND               \ Calculate the next two values f2 and f3 in the feeder
+ ROL A                  \ sequence:
+ TAX                    \
+ ADC RAND+2             \   * f2 = (f1 << 1) mod 256 + C flag on entry
+ STA RAND               \   * f3 = f0 + f2 + (1 if bit 7 of f1 is set)
+ STX RAND+2             \   * C flag is set according to the f3 calculation
 
- LDA RAND+1             \ A = r1´ = r1 + r3 + C
- TAX                    \ X = r3´ = r1
- ADC RAND+3
- STA RAND+1
- STX RAND+3
+ LDA RAND+1             \ Calculate the next value m2 in the main sequence:
+ TAX                    \
+ ADC RAND+3             \   * A = m2 = m0 + m1 + C flag from feeder calculation
+ STA RAND+1             \   * X = m1
+ STX RAND+3             \   * C and V flags set according to the m2 calculation
 
  RTS                    \ Return from the subroutine
 
@@ -46195,6 +46202,7 @@ LOAD_L% = LOAD% + P% - CODE%
 \   Category: Drawing ships
 \    Summary: Draw an exploding ship
 \  Deep dive: Drawing explosion clouds
+\             Generating random numbers
 \
 \ ******************************************************************************
 
@@ -46449,8 +46457,8 @@ LOAD_L% = LOAD% + P% - CODE%
 
 .EXL4
 
- JSR DORND2             \ Set ZZ to a random number (also restricts the
- STA ZZ                 \ value of RAND+2 so that bit 0 is always 0)
+ JSR DORND2             \ Set ZZ to a random number, making sure the C flag
+ STA ZZ                 \ doesn't affect the outcome
 
  LDA K3+1               \ Set (A R) = (y_hi y_lo)
  STA R                  \           = y
@@ -46516,8 +46524,8 @@ LOAD_L% = LOAD% + P% - CODE%
 
 .EX11
 
- JSR DORND2             \ Set A and X to random numbers (also restricts the
-                        \ value of RAND+2 so that bit 0 is always 0)
+ JSR DORND2             \ Set A and X to random numbers, making sure the C flag
+                        \ doesn't affect the outcome
 
  JMP EX4                \ We just skipped a particle, so jump up to EX4 to do
                         \ the next one
@@ -46532,8 +46540,8 @@ LOAD_L% = LOAD% + P% - CODE%
 
  STA S                  \ Store A in S so we can use it later
 
- JSR DORND2             \ Set A and X to random numbers (also restricts the
-                        \ value of RAND+2 so that bit 0 is always 0)
+ JSR DORND2             \ Set A and X to random numbers, making sure the C flag
+                        \ doesn't affect the outcome
 
  ROL A                  \ Set A = A * 2
 
@@ -49942,6 +49950,7 @@ LOAD_M% = LOAD% + P% - CODE%
 \       Type: Subroutine
 \   Category: Universe
 \    Summary: Initialise the INWK workspace to a hostile ship
+\  Deep dive: Fixing ship positions
 \
 \ ------------------------------------------------------------------------------
 \
@@ -49984,15 +49993,16 @@ LOAD_M% = LOAD% + P% - CODE%
 \       Name: DORND2
 \       Type: Subroutine
 \   Category: Utility routines
-\    Summary: Generate random numbers with RAND+2 restricted so that bit 0 is
-\             always 0
+\    Summary: Generate random numbers, making sure the C flag doesn't affect the
+\             outcome
+\  Deep dive: Generating random numbers
 \
 \ ******************************************************************************
 
 .DORND2
 
- CLC                    \ This ensures that bit 0 of r2 is 0 in the DORND
-                        \ routine
+ CLC                    \ Clear the C flag so the value of the C flag on entry
+                        \ doesn't affect the outcome
 
  JMP DORND              \ Jump to DORND to generate random numbers in A and X,
                         \ returning from the subroutine using a tail call

@@ -1582,6 +1582,7 @@ ORG LOADcode + P% - LOAD
 \   Category: Utility routines
 \    Summary: Generate random numbers
 \  Deep dive: Generating random numbers
+\             Fixing ship positions
 \
 \ ------------------------------------------------------------------------------
 \
