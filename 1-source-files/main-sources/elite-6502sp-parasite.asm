@@ -45871,12 +45871,19 @@ LOAD_L% = LOAD% + P% - CODE%
 \       Type: Subroutine
 \   Category: Universe
 \    Summary: Spawn a Thargoid ship and a Thargon companion
+\  Deep dive: Fixing ship positions
 \
 \ ******************************************************************************
 
 .GTHG
 
  JSR Ze                 \ Call Ze to initialise INWK
+                        \
+                        \ Note that because Ze uses the value of X returned by
+                        \ DORND, and X contains the value of A returned by the
+                        \ previous call to DORND, this does not set the new ship
+                        \ to a totally random location. See the deep dive on
+                        \ "Fixing ship positions" for details
 
  LDA #%11111111         \ Set the AI flag in byte #32 so that the ship has AI,
  STA INWK+32            \ is extremely and aggressively hostile, and has E.C.M.
@@ -49967,6 +49974,11 @@ LOAD_M% = LOAD% + P% - CODE%
 \
 \ This routine also sets A, X, T1 and the C flag to random values.
 \
+\ Note that because this routine uses the value of X returned by DORND, and X
+\ contains the value of A returned by the previous call to DORND, this routine
+\ does not necessarily set the new ship to a totally random location. See the
+\ deep dive on "Fixing ship positions" for details.
+\
 \ ******************************************************************************
 
 .Ze
@@ -50219,6 +50231,7 @@ LOAD_M% = LOAD% + P% - CODE%
 \    Summary: Potentially spawn a cop, particularly if we've been bad
 \  Deep dive: Program flow of the main game loop
 \             Ship data blocks
+\             Fixing ship positions
 \
 \ ------------------------------------------------------------------------------
 \
@@ -50259,6 +50272,12 @@ LOAD_M% = LOAD% + P% - CODE%
 
  JSR Ze                 \ Call Ze to initialise INWK to a potentially hostile
                         \ ship, and set A and X to random values
+                        \
+                        \ Note that because Ze uses the value of X returned by
+                        \ DORND, and X contains the value of A returned by the
+                        \ previous call to DORND, this does not set the new ship
+                        \ to a totally random location. See the deep dive on
+                        \ "Fixing ship positions" for details
 
  CMP T                  \ If the random value in A >= our badness level, which
  BCS P%+8               \ will be the case unless we have been really, really
@@ -50290,6 +50309,7 @@ LOAD_M% = LOAD% + P% - CODE%
 \             pirates
 \  Deep dive: Program flow of the main game loop
 \             Ship data blocks
+\             Fixing ship positions
 \
 \ ------------------------------------------------------------------------------
 \
