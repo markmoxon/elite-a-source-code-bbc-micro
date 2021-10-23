@@ -2574,9 +2574,9 @@ LOAD_A% = LOAD%
 \ LDA BSTK              \ If BSTK = 0 then the Bitstik is not configured, so
 \ BEQ BS2               \ jump to BS2 to skip the following
 \
-\ LDX #3                \ Call OSBYTE 128 to fetch the 16-bit value from ADC
-\ LDA #128              \ channel 3 (the Bitstik rotation value), returning the
-\ JSR OSBYTE            \ value in (Y X)
+\ LDX #3                \ Call OSBYTE with A = 128 to fetch the 16-bit value
+\ LDA #128              \ from ADC channel 3 (the Bitstik rotation value),
+\ JSR OSBYTE            \ returning the value in (Y X)
 \
 \ TYA                   \ Copy Y to A, so the result is now in (A X)
 \
@@ -28692,9 +28692,9 @@ LOAD_F% = LOAD% + P% - CODE%
 
 .DKS2
 
- LDA #128               \ Call OSBYTE 128 to fetch the 16-bit value from ADC
- JSR OSBYTE             \ channel X, returning (Y X), i.e. the high byte in Y
-                        \ and the low byte in X
+ LDA #128               \ Call OSBYTE with A = 128 to fetch the 16-bit value
+ JSR OSBYTE             \ from ADC channel X, returning (Y X), i.e. the high
+                        \ byte in Y and the low byte in X
 
  TYA                    \ Copy Y to A, so the result is now in (A X)
 
