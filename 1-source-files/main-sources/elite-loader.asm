@@ -55,7 +55,7 @@ BRKV = &0202            \ The break vector that we intercept to enable us to
                         \ handle and display system errors
 
 IRQ1V = &0204           \ The IRQ1V vector that we intercept to implement the
-                        \ split-sceen mode
+                        \ split-screen mode
 
 WRCHV = &020E           \ The WRCHV vector that we intercept with our custom
                         \ text printing routine
