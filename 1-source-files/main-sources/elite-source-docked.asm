@@ -5007,15 +5007,16 @@ LOAD_B% = LOAD% + P% - CODE%
 \
 \   * X1 < X2 and Y1-1 > Y2
 \
-\   * Draw from (X1, Y1) at bottom left to (X2, Y2) at top right
+\   * Draw from (X1, Y1) at bottom left to (X2, Y2) at top right, omitting the
+\     first pixel
 \
 \ ******************************************************************************
 
  LDA SWAP               \ If SWAP > 0 then we swapped the coordinates above, so
  BNE LI6                \ jump down to LI6 to skip plotting the first pixel
                         \
-                        \ This appears to be a bug that omits the first pixel
-                        \ of this type of shallow line, rather than the last
+                        \ This appears to be a bug that omits the last pixel
+                        \ of this type of shallow line, rather than the first
                         \ pixel, which makes the treatment of this kind of line
                         \ different to the other kinds of slope (they all have a
                         \ BEQ instruction at this point, rather than a BNE)
@@ -5106,7 +5107,8 @@ LOAD_B% = LOAD% + P% - CODE%
 \
 \   * X1 < X2 and Y1-1 <= Y2
 \
-\   * Draw from (X1, Y1) at top left to (X2, Y2) at bottom right
+\   * Draw from (X1, Y1) at top left to (X2, Y2) at bottom right, omitting the
+\     first pixel
 \
 \ ******************************************************************************
 
@@ -5339,7 +5341,8 @@ LOAD_B% = LOAD% + P% - CODE%
 \
 \   * X1 < X2 and Y1 >= Y2
 \
-\   * Draw from (X1, Y1) at top left to (X2, Y2) at bottom right
+\   * Draw from (X1, Y1) at top left to (X2, Y2) at bottom right, omitting the
+\     first pixel
 \
 \ ******************************************************************************
 
@@ -5425,7 +5428,8 @@ LOAD_B% = LOAD% + P% - CODE%
 \
 \   * X1 >= X2 and Y1 >= Y2
 \
-\   * Draw from (X1, Y1) at bottom left to (X2, Y2) at top right
+\   * Draw from (X1, Y1) at bottom left to (X2, Y2) at top right, omitting the
+\     first pixel
 \
 \ Other entry points:
 \
@@ -5436,7 +5440,7 @@ LOAD_B% = LOAD% + P% - CODE%
 .LFT
 
  LDA SWAP               \ If SWAP = 0 then we didn't swap the coordinates above,
- BEQ LI18               \ jump down to LI18 to skip plotting the first pixel
+ BEQ LI18               \ so jump down to LI18 to skip plotting the first pixel
 
  DEX                    \ Decrement the counter in X because we're about to plot
                         \ the first pixel
@@ -5671,7 +5675,7 @@ LOAD_B% = LOAD% + P% - CODE%
 \
 \ ------------------------------------------------------------------------------
 \
-\ We do not draw a pixel at the end point (X2, X1).
+\ We do not draw a pixel at the right end of the line.
 \
 \ To understand how this routine works, you might find it helpful to read the
 \ deep dive on "Drawing monochrome pixels in mode 4".
