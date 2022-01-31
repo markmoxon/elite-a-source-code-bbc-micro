@@ -3691,7 +3691,7 @@ ORG CODE%
 \ ------------------------------------------------------------------------------
 \
 \ In the following table, which maps buttons on the Delta 14b to the flight
-\ controls, the top nibble of the value gives the column:
+\ controls, the high nibble of the value gives the column:
 \
 \   &6 = %110 = left column
 \   &5 = %101 = middle column
@@ -3849,7 +3849,7 @@ ORG CODE%
                         \
                         \ For example, take the b_table entry for the escape pod
                         \ button, in the right column and third row. The value
-                        \ in b_table is &34. The top nibble contains the column,
+                        \ in b_table is &34. The high nibble denotes the column,
                         \ which is &3 = %011, which means in the STA VIA+&60
                         \ above, we write %1011 in the first pass (when A = 128)
                         \ to set the right column for the side socket joystick,
