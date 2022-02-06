@@ -33,12 +33,12 @@ See the [introduction](#introduction) for more information.
   * [Verifying the output](#verifying-the-output)
   * [Log files](#log-files)
 
-* [Building different releases of Elite-A](#building-different-releases-of-elite-a)
+* [Building different variants of Elite-A](#building-different-variants-of-elite-a)
 
   * [Building the released version](#building-the-released-version)
-  * [Building the source disc release](#building-the-source-disc-release)
-  * [Building the bug fix release](#building-the-bug-fix-release)
-  * [Differences between the releases](#differences-between-the-releases)
+  * [Building the source disc variant](#building-the-source-disc-variant)
+  * [Building the bug fix variant](#building-the-bug-fix-variant)
+  * [Differences between the variants](#differences-between-the-variants)
 
 * [Notes on the original source files](#notes-on-the-original-source-files)
 
@@ -48,7 +48,7 @@ See the [introduction](#introduction) for more information.
 
 This repository contains the original source code for Angus Duggan's Elite-A on the BBC Micro.
 
-You can build the fully functioning game from this source. [Three releases](#building-different-releases-of-elite-a) are currently supported: the officially released version from Angus's site, and the version produced by the original source discs (which was never released).
+You can build the fully functioning game from this source. [Three variants](#building-different-variants-of-elite-a) are currently supported: the officially released version from Angus's site, the variant produced by the original source discs (which was never released), and a variant that fixes various bugs.
 
 It is a companion to the [bbcelite.com website](https://www.bbcelite.com), which contains all the code from this repository, but laid out in a much more human-friendly fashion. The links at the top of this page will take you to repositories for the other versions of Elite that are covered by this project.
 
@@ -124,7 +124,7 @@ There are five main folders in this repository, which reflect the order of the b
 
 * [3-assembled-output](3-assembled-output) contains the output from the assembly process, when the source files are assembled and the results processed by the build files.
 
-* [4-reference-binaries](4-reference-binaries) contains the correct binaries for each release, so we can verify that our assembled output matches the reference.
+* [4-reference-binaries](4-reference-binaries) contains the correct binaries for each variant, so we can verify that our assembled output matches the reference.
 
 * [5-compiled-game-discs](5-compiled-game-discs) contains the final output of the build process: an SSD disc image that contains the compiled game and which can be run on real hardware or in an emulator.
 
@@ -155,7 +155,7 @@ There are two main build targets available. They are:
 * `build` - A version with a maxed-out commander flying a Fer-de-Lance
 * `encrypt` - A version that exactly matches the released version of the game
 
-Unlike the official versions of Elite, Elite-A is not encrypted, so there is no difference in encryption between the two targets. I have used the same target names for consistency, but the only difference is in the commander file.
+Unlike the Acornsoft versions of Elite, Elite-A is not encrypted, so there is no difference in encryption between the two targets. I have used the same target names for consistency, but the only difference is in the commander file.
 
 Builds are supported for both Windows and Mac/Linux systems. In all cases the build process is defined in the `Makefile` provided.
 
@@ -226,7 +226,7 @@ The Python script `crc32.py` in the `2-build-files` folder does the actual verif
 The binaries in the `4-reference-binaries` folder were taken straight from Angus Duggan's original source discs, while those in the `3-assembled-output` folder are produced by the build process. For example, if you don't make any changes to the code and build the project with `make build verify`, then this is the output of the verification process:
 
 ```
-Results for release: released
+Results for variant: released
 [--originals--]  [---output----]
 Checksum   Size  Checksum   Size  Match  Filename
 -----------------------------------------------------------
@@ -263,50 +263,50 @@ fab17499   2560  fab17499   2560   Yes   S.U.bin
 b7b3c692   1024  b7b3c692   1024   Yes   WORDS.bin
 ```
 
-All the compiled binaries match the originals, so we know we are producing the same final game as the release version.
+All the compiled binaries match the originals, so we know we are producing the same final game as the released version.
 
 ### Log files
 
 During compilation, details of every step are output in a file called `compile.txt` in the `3-assembled-output` folder. If you have problems, it might come in handy, and it's a great reference if you need to know the addresses of labels and variables for debugging (or just snooping around).
 
-## Building different releases of Elite-A
+## Building different variants of Elite-A
 
-This repository contains the source code for three different releases of Elite-A:
+This repository contains the source code for three different variants of Elite-A:
 
 * The released version from Angus Duggan's site
 
-* The version produced by the source disc (which was never released)
+* The variant produced by the source disc (which was never released)
 
-* A version that fixes two bugs in the original (splinters and Adder stats)
+* A variant that fixes two bugs in the original (splinters and Adder stats)
 
-By default the build process builds the released version, but you can build a specified release using the `release=` build parameter.
+By default the build process builds the released version, but you can build a specified variant using the `variant=` build parameter.
 
 ### Building the released version
 
-You can add `release=released` to produce the `elite-a-released.ssd` file that contains the released version, though that's the default value so it isn't necessary.
+You can add `variant=released` to produce the `elite-a-released.ssd` file that contains the released version, though that's the default value so it isn't necessary.
 
 The verification checksums for this version are shown above.
 
-### Building the source disc release
+### Building the source disc variant
 
-You can build the source disc release by appending `release=source-disc` to the `make` command, like this on Windows:
+You can build the source disc variant by appending `variant=source-disc` to the `make` command, like this on Windows:
 
 ```
-make.bat build verify release=source-disc
+make.bat build verify variant=source-disc
 ```
 
 or this on a Mac or Linux:
 
 ```
-make build verify release=source-disc
+make build verify variant=source-disc
 ```
 
-This will produce a file called `elite-a-from-source-disc.ssd` in the `5-compiled-game-discs` folder that contains the source disc release.
+This will produce a file called `elite-a-from-source-disc.ssd` in the `5-compiled-game-discs` folder that contains the source disc variant.
 
 The verification checksums for this version are as follows:
 
 ```
-Results for release: source-disc
+Results for variant: source-disc
 [--originals--]  [---output----]
 Checksum   Size  Checksum   Size  Match  Filename
 -----------------------------------------------------------
@@ -343,26 +343,26 @@ fab17499   2560  fab17499   2560   Yes   S.U.bin
 b7b3c692   1024  b7b3c692   1024   Yes   WORDS.bin
 ```
 
-### Building the bug fix release
+### Building the bug fix variant
 
-You can build the source disc release by appending `release=bug-fix` to the `make` command, like this on Windows:
+You can build the source disc variant by appending `variant=bug-fix` to the `make` command, like this on Windows:
 
 ```
-make.bat build verify release=bug-fix
+make.bat build verify variant=bug-fix
 ```
 
 or this on a Mac or Linux:
 
 ```
-make build verify release=bug-fix
+make build verify variant=bug-fix
 ```
 
-This will produce a file called `elite-a-bug-fix.ssd` in the `5-compiled-game-discs` folder that contains the bug fix release.
+This will produce a file called `elite-a-bug-fix.ssd` in the `5-compiled-game-discs` folder that contains the bug fix variant.
 
 The verification checksums for this version are as follows:
 
 ```
-Results for release: bug-fix
+Results for variant: bug-fix
 [--originals--]  [---output----]
 Checksum   Size  Checksum   Size  Match  Filename
 -----------------------------------------------------------
@@ -399,15 +399,15 @@ a258d111   2560  a258d111   2560   Yes   S.O.bin
 b7b3c692   1024  b7b3c692   1024   Yes   WORDS.bin
 ```
 
-### Differences between the releases
+### Differences between the variants
 
-You can see the differences between the releases by searching the source code for `_RELEASED` (for features in the released version), `_BUG_FIX` (for features in the buf fix version) or `_SOURCE_DISC` (for features in the source disc release).
+You can see the differences between the variants by searching the source code for `_RELEASED` (for features in the released version), `_BUG_FIX` (for features in the buf fix version) or `_SOURCE_DISC` (for features in the source disc variant).
 
-The only difference in the source disc release is that the latter has considerably lower ship prices.
+The only difference in the source disc variant is that the latter has considerably lower ship prices.
 
-There is a bug in the original version of Elite-A that prevents splinters from displaying properly, which makes mining all but impossible. The bug fix release fixes that bug, as well as an incorrect cargo capacity in the Adder ship card in the encyclopedia.
+There is a bug in the original version of Elite-A that prevents splinters from displaying properly, which makes mining all but impossible. The bug fix variant fixes that bug, as well as an incorrect cargo capacity in the Adder ship card in the encyclopedia.
 
-See the [accompanying website](https://www.bbcelite.com/elite-a/releases.html) for a comprehensive list of differences between the releases.
+See the [accompanying website](https://www.bbcelite.com/elite-a/releases.html) for a comprehensive list of differences between the variants.
 
 ## Notes on the original source files
 

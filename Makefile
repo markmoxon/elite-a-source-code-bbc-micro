@@ -1,7 +1,7 @@
 BEEBASM?=beebasm
 PYTHON?=python
 
-# You can set the release that gets built by adding 'release=<rel>' to
+# You can set the variant that gets built by adding 'variant=<rel>' to
 # the make command, where <rel> is one of:
 #
 #   released
@@ -10,21 +10,21 @@ PYTHON?=python
 #
 # So, for example:
 #
-#   make encrypt verify release=patched
+#   make encrypt verify variant=patched
 #
-# will build the patched version. If you omit the release parameter,
+# will build the patched version. If you omit the variant parameter,
 # it will build the released version.
 
-ifeq ($(release), source-disc)
-  rel-elite-a=2
+ifeq ($(variant), source-disc)
+  variant-elite-a=2
   folder-elite-a=/source-disc
   suffix-elite-a=-from-source-disc
-else ifeq ($(release), bug-fix)
-  rel-elite-a=3
+else ifeq ($(variant), bug-fix)
+  variant-elite-a=3
   folder-elite-a=/bug-fix
   suffix-elite-a=-bug-fix
 else
-  rel-elite-a=1
+  variant-elite-a=1
   folder-elite-a=/released
   suffix-elite-a=-released
 endif
@@ -32,7 +32,7 @@ endif
 .PHONY:build
 build:
 	echo _VERSION=6 > 1-source-files/main-sources/elite-header.h.asm
-	echo _RELEASE=$(rel-elite-a) >> 1-source-files/main-sources/elite-header.h.asm
+	echo _VARIANT=$(variant-elite-a) >> 1-source-files/main-sources/elite-header.h.asm
 	echo _REMOVE_CHECKSUMS=TRUE >> 1-source-files/main-sources/elite-header.h.asm
 	echo _MATCH_ORIGINAL_BINARIES=FALSE >> 1-source-files/main-sources/elite-header.h.asm
 	$(BEEBASM) -i 1-source-files/main-sources/elite-text-tokens.asm -v > 3-assembled-output/compile.txt
@@ -67,13 +67,13 @@ build:
 	$(BEEBASM) -i 1-source-files/main-sources/elite-ships-v.asm -v >> 3-assembled-output/compile.txt
 	$(BEEBASM) -i 1-source-files/main-sources/elite-ships-w.asm -v >> 3-assembled-output/compile.txt
 	$(BEEBASM) -i 1-source-files/main-sources/elite-readme.asm -v >> 3-assembled-output/compile.txt
-	$(PYTHON) 2-build-files/elite-checksum.py -u -rel$(rel-elite-a)
+	$(PYTHON) 2-build-files/elite-checksum.py -u -rel$(variant-elite-a)
 	$(BEEBASM) -i 1-source-files/main-sources/elite-disc.asm -do 5-compiled-game-discs/elite-a$(suffix-elite-a).ssd -opt 3 -title "E L I T E"
 
 .PHONY:encrypt
 encrypt:
 	echo _VERSION=6 > 1-source-files/main-sources/elite-header.h.asm
-	echo _RELEASE=$(rel-elite-a) >> 1-source-files/main-sources/elite-header.h.asm
+	echo _VARIANT=$(variant-elite-a) >> 1-source-files/main-sources/elite-header.h.asm
 	echo _REMOVE_CHECKSUMS=FALSE >> 1-source-files/main-sources/elite-header.h.asm
 	echo _MATCH_ORIGINAL_BINARIES=TRUE >> 1-source-files/main-sources/elite-header.h.asm
 	$(BEEBASM) -i 1-source-files/main-sources/elite-text-tokens.asm -v > 3-assembled-output/compile.txt
@@ -108,7 +108,7 @@ encrypt:
 	$(BEEBASM) -i 1-source-files/main-sources/elite-ships-v.asm -v >> 3-assembled-output/compile.txt
 	$(BEEBASM) -i 1-source-files/main-sources/elite-ships-w.asm -v >> 3-assembled-output/compile.txt
 	$(BEEBASM) -i 1-source-files/main-sources/elite-readme.asm -v >> 3-assembled-output/compile.txt
-	$(PYTHON) 2-build-files/elite-checksum.py -rel$(rel-elite-a)
+	$(PYTHON) 2-build-files/elite-checksum.py -rel$(variant-elite-a)
 	$(BEEBASM) -i 1-source-files/main-sources/elite-disc.asm -do 5-compiled-game-discs/elite-a$(suffix-elite-a).ssd -opt 3 -title "E L I T E"
 
 .PHONY:verify

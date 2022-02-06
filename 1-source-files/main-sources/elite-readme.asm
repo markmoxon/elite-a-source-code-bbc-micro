@@ -30,9 +30,9 @@
 
 INCLUDE "1-source-files/main-sources/elite-header.h.asm"
 
-_RELEASED               = (_RELEASE = 1)
-_SOURCE_DISC            = (_RELEASE = 2)
-_BUG_FIX                = (_RELEASE = 3)
+_RELEASED               = (_VARIANT = 1)
+_SOURCE_DISC            = (_VARIANT = 2)
+_BUG_FIX                = (_VARIANT = 3)
 
 .readme
 
@@ -53,23 +53,19 @@ _BUG_FIX                = (_RELEASE = 3)
 
 IF _RELEASED
 
- EQUS "*| Release: From Angus Duggan's site"
+ EQUS "*| Variant: From Angus Duggan's site"
  EQUB 13
- EQUS "*|          The original release"
+ EQUS "*| Release: The official release"
  EQUB 13
 
 ELIF _SOURCE_DISC
 
- EQUS "*| Release: Angus Duggan's source disc"
- EQUB 13
- EQUS "*|          Not officially released"
+ EQUS "*| Variant: Angus Duggan's source disc"
  EQUB 13
 
 ELIF _BUG_FIX
 
- EQUS "*| Release: Bug fixes (mining bug)"
- EQUB 13
- EQUS "*|          Not officially released"
+ EQUS "*| Variant: Bug fixes (mining bug)"
  EQUB 13
 
 ENDIF
