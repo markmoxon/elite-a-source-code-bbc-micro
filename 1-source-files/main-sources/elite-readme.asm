@@ -55,7 +55,7 @@ IF _RELEASED
 
  EQUS "*| Variant: From Angus Duggan's site"
  EQUB 13
- EQUS "*| Release: The official release"
+ EQUS "*| Product: The official release"
  EQUB 13
 
 ELIF _SOURCE_DISC
