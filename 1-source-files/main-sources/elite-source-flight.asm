@@ -30,9 +30,9 @@
 
 INCLUDE "1-source-files/main-sources/elite-header.h.asm"
 
-_RELEASED               = (_RELEASE = 1)
-_SOURCE_DISC            = (_RELEASE = 2)
-_BUG_FIX                = (_RELEASE = 3)
+_RELEASED               = (_VARIANT = 1)
+_SOURCE_DISC            = (_VARIANT = 2)
+_BUG_FIX                = (_VARIANT = 3)
 
 GUARD &6000             \ Guard against assembling over screen memory
 
@@ -73,14 +73,6 @@ JH = SHU+2              \ Junk is defined as ending before the Cobra Mk III
 
 NI% = 37                \ The number of bytes in each ship's data block (as
                         \ stored in INWK and K%)
-
-OSBYTE = &FFF4          \ The address for the OSBYTE routine
-OSWORD = &FFF1          \ The address for the OSWORD routine
-OSCLI = &FFF7           \ The address for the OSCLI routine
-
-VIA = &FE00             \ Memory-mapped space for accessing internal hardware,
-                        \ such as the video ULA, 6845 CRTC and 6522 VIAs (also
-                        \ known as SHEILA)
 
 X = 128                 \ The centre x-coordinate of the 256 x 192 space view
 Y = 96                  \ The centre y-coordinate of the 256 x 192 space view
@@ -126,6 +118,14 @@ XX21 = &5600            \ The address of the ship blueprints lookup table, where
 
 E% = &563E              \ The address of the default NEWB ship bytes within the
                         \ loaded ship blueprints file
+
+VIA = &FE00             \ Memory-mapped space for accessing internal hardware,
+                        \ such as the video ULA, 6845 CRTC and 6522 VIAs (also
+                        \ known as SHEILA)
+
+OSWORD = &FFF1          \ The address for the OSWORD routine
+OSBYTE = &FFF4          \ The address for the OSBYTE routine
+OSCLI = &FFF7           \ The address for the OSCLI routine
 
 \ ******************************************************************************
 \
@@ -2574,9 +2574,9 @@ LOAD_A% = LOAD%
 \ LDA BSTK              \ If BSTK = 0 then the Bitstik is not configured, so
 \ BEQ BS2               \ jump to BS2 to skip the following
 \
-\ LDX #3                \ Call OSBYTE 128 to fetch the 16-bit value from ADC
-\ LDA #128              \ channel 3 (the Bitstik rotation value), returning the
-\ JSR OSBYTE            \ value in (Y X)
+\ LDX #3                \ Call OSBYTE with A = 128 to fetch the 16-bit value
+\ LDA #128              \ from ADC channel 3 (the Bitstik rotation value),
+\ JSR OSBYTE            \ returning the value in (Y X)
 \
 \ TYA                   \ Copy Y to A, so the result is now in (A X)
 \
@@ -4654,7 +4654,9 @@ LOAD_B% = LOAD% + P% - CODE%
 .UNIV
 
 FOR I%, 0, NOSH
-  EQUW K% + I% * NI%    \ Address of block no. I%, of size NI%, in workspace K%
+
+ EQUW K% + I% * NI%     \ Address of block no. I%, of size NI%, in workspace K%
+
 NEXT
 
 \ ******************************************************************************
@@ -4997,12 +4999,27 @@ NEXT
 \
 \   * X1 < X2 and Y1-1 > Y2
 \
-\   * Draw from (X1, Y1) at bottom left to (X2, Y2) at top right
+\   * Draw from (X1, Y1) at bottom left to (X2, Y2) at top right, omitting the
+\     first pixel
 \
 \ ******************************************************************************
 
  LDA SWAP               \ If SWAP > 0 then we swapped the coordinates above, so
  BNE LI6                \ jump down to LI6 to skip plotting the first pixel
+                        \
+                        \ This appears to be a bug that omits the last pixel
+                        \ of this type of shallow line, rather than the first
+                        \ pixel, which makes the treatment of this kind of line
+                        \ different to the other kinds of slope (they all have a
+                        \ BEQ instruction at this point, rather than a BNE)
+                        \
+                        \ The result is a rather messy line join when a shallow
+                        \ line that goes right and up or left and down joins a
+                        \ line with any of the other three types of slope
+                        \
+                        \ This bug was fixed in the advanced versions of ELite,
+                        \ where the BNE is replaced by a BEQ to bring it in line
+                        \ with the other three slopes
 
  DEX                    \ Decrement the counter in X because we're about to plot
                         \ the first pixel
@@ -5082,7 +5099,8 @@ NEXT
 \
 \   * X1 < X2 and Y1-1 <= Y2
 \
-\   * Draw from (X1, Y1) at top left to (X2, Y2) at bottom right
+\   * Draw from (X1, Y1) at top left to (X2, Y2) at bottom right, omitting the
+\     first pixel
 \
 \ ******************************************************************************
 
@@ -5315,7 +5333,8 @@ NEXT
 \
 \   * X1 < X2 and Y1 >= Y2
 \
-\   * Draw from (X1, Y1) at top left to (X2, Y2) at bottom right
+\   * Draw from (X1, Y1) at top left to (X2, Y2) at bottom right, omitting the
+\     first pixel
 \
 \ ******************************************************************************
 
@@ -5352,7 +5371,7 @@ NEXT
 
 .LI16
 
- LDA S                  \ Set S = S + Q to update the slope error
+ LDA S                  \ Set S = S + P to update the slope error
  ADC P
  STA S
 
@@ -5401,7 +5420,8 @@ NEXT
 \
 \   * X1 >= X2 and Y1 >= Y2
 \
-\   * Draw from (X1, Y1) at bottom left to (X2, Y2) at top right
+\   * Draw from (X1, Y1) at bottom left to (X2, Y2) at top right, omitting the
+\     first pixel
 \
 \ Other entry points:
 \
@@ -5412,7 +5432,7 @@ NEXT
 .LFT
 
  LDA SWAP               \ If SWAP = 0 then we didn't swap the coordinates above,
- BEQ LI18               \ jump down to LI18 to skip plotting the first pixel
+ BEQ LI18               \ so jump down to LI18 to skip plotting the first pixel
 
  DEX                    \ Decrement the counter in X because we're about to plot
                         \ the first pixel
@@ -5651,7 +5671,7 @@ NEXT
 \
 \ ------------------------------------------------------------------------------
 \
-\ We do not draw a pixel at the end point (X2, X1).
+\ We do not draw a pixel at the right end of the line.
 \
 \ To understand how this routine works, you might find it helpful to read the
 \ deep dive on "Drawing monochrome pixels in mode 4".
@@ -17264,6 +17284,16 @@ LOAD_D% = LOAD% + P% - CODE%
  JSR TT111              \ Call TT111 to set the current system to the nearest
                         \ system to (QQ9, QQ10), and put the seeds of the
                         \ nearest system into QQ15 to QQ15+5
+                        \
+                        \ This call fixes a bug in the cassette version, where
+                        \ the galactic hyperdrive will take us to coordinates
+                        \ (96, 96) in the new galaxy, even if there isn't
+                        \ actually a system there, so if we jump when we are
+                        \ low on fuel, it is possible to get stuck in the
+                        \ middle of nowhere when changing galaxy
+                        \
+                        \ This call sets the current system correctly, so we
+                        \ always arrive at the nearest system to (96, 96)
 
  LDX #0                 \ Set the distance to the selected system in QQ8(1 0)
  STX QQ8                \ to 0
@@ -18047,12 +18077,19 @@ LOAD_D% = LOAD% + P% - CODE%
 \       Type: Subroutine
 \   Category: Universe
 \    Summary: Spawn a Thargoid ship and a Thargon companion
+\  Deep dive: Fixing ship positions
 \
 \ ******************************************************************************
 
 .GTHG
 
  JSR Ze                 \ Call Ze to initialise INWK
+                        \
+                        \ Note that because Ze uses the value of X returned by
+                        \ DORND, and X contains the value of A returned by the
+                        \ previous call to DORND, this does not set the new ship
+                        \ to a totally random location. See the deep dive on
+                        \ "Fixing ship positions" for details
 
  LDA #%11111111         \ Set the AI flag in byte #32 so that the ship has AI,
  STA INWK+32            \ is extremely and aggressively hostile, and has E.C.M.
@@ -19549,6 +19586,7 @@ LOAD_E% = LOAD% + P% - CODE%
 \   Category: Drawing ships
 \    Summary: Draw an exploding ship
 \  Deep dive: Drawing explosion clouds
+\             Generating random numbers
 \
 \ ******************************************************************************
 
@@ -19802,8 +19840,8 @@ LOAD_E% = LOAD% + P% - CODE%
 
 .EXL4
 
- JSR DORND2             \ Set ZZ to a random number (also restricts the
- STA ZZ                 \ value of RAND+2 so that bit 0 is always 0)
+ JSR DORND2             \ Set ZZ to a random number, making sure the C flag
+ STA ZZ                 \ doesn't affect the outcome
 
  LDA K3+1               \ Set (A R) = (y_hi y_lo)
  STA R                  \           = y
@@ -19869,8 +19907,8 @@ LOAD_E% = LOAD% + P% - CODE%
 
 .EX11
 
- JSR DORND2             \ Set A and X to random numbers (also restricts the
-                        \ value of RAND+2 so that bit 0 is always 0)
+ JSR DORND2             \ Set A and X to random numbers, making sure the C flag
+                        \ doesn't affect the outcome
 
  JMP EX4                \ We just skipped a particle, so jump up to EX4 to do
                         \ the next one
@@ -19885,8 +19923,8 @@ LOAD_E% = LOAD% + P% - CODE%
 
  STA S                  \ Store A in S so we can use it later
 
- JSR DORND2             \ Set A and X to random numbers (also restricts the
-                        \ value of RAND+2 so that bit 0 is always 0)
+ JSR DORND2             \ Set A and X to random numbers, making sure the C flag
+                        \ doesn't affect the outcome
 
  ROL A                  \ Set A = A * 2
 
@@ -25334,6 +25372,7 @@ LOAD_F% = LOAD% + P% - CODE%
 \       Type: Subroutine
 \   Category: Universe
 \    Summary: Initialise the INWK workspace to a hostile ship
+\  Deep dive: Fixing ship positions
 \
 \ ------------------------------------------------------------------------------
 \
@@ -25349,6 +25388,11 @@ LOAD_F% = LOAD% + P% - CODE%
 \   * Set the ship to hostile, with AI enabled
 \
 \ This routine also sets A, X, T1 and the C flag to random values.
+\
+\ Note that because this routine uses the value of X returned by DORND, and X
+\ contains the value of A returned by the previous call to DORND, this routine
+\ does not necessarily set the new ship to a totally random location. See the
+\ deep dive on "Fixing ship positions" for details.
 \
 \ ******************************************************************************
 
@@ -25384,7 +25428,7 @@ LOAD_F% = LOAD% + P% - CODE%
 
                         \ --- End of replacement ------------------------------>
 
- CMP #245               \ Set the C flag if X >= 245 (4% chance)
+ CMP #245               \ Set the C flag if A >= 245 (4% chance)
 
  ROL A                  \ Set bit 0 of A to the C flag (i.e. there's a 4%
                         \ chance of this ship having E.C.M.)
@@ -25404,6 +25448,7 @@ LOAD_F% = LOAD% + P% - CODE%
 \   Category: Utility routines
 \    Summary: Generate random numbers
 \  Deep dive: Generating random numbers
+\             Fixing ship positions
 \
 \ ------------------------------------------------------------------------------
 \
@@ -25412,30 +25457,36 @@ LOAD_F% = LOAD% + P% - CODE%
 \
 \ The C and V flags are also set randomly.
 \
+\ If we want to generate a repeatable sequence of random numbers, when
+\ generating explosion clouds, for example, then we call DORND2 to ensure that
+\ the value of the C flag on entry doesn't affect the outcome, as otherwise we
+\ might not get the same sequence of numbers if the C flag changes.
+\
 \ Other entry points:
 \
-\   DORND2              Restricts the value of RAND+2 so that bit 0 is always 0
+\   DORND2              Make sure the C flag doesn't affect the outcome
 \
 \ ******************************************************************************
 
 .DORND2
 
- CLC                    \ This ensures that bit 0 of r2 is 0
+ CLC                    \ Clear the C flag so the value of the C flag on entry
+                        \ doesn't affect the outcome
 
 .DORND
 
- LDA RAND               \ r2´ = ((r0 << 1) mod 256) + C
- ROL A                  \ r0´ = r2´ + r2 + bit 7 of r0
- TAX
- ADC RAND+2             \ C = C flag from r0´ calculation
- STA RAND
- STX RAND+2
+ LDA RAND               \ Calculate the next two values f2 and f3 in the feeder
+ ROL A                  \ sequence:
+ TAX                    \
+ ADC RAND+2             \   * f2 = (f1 << 1) mod 256 + C flag on entry
+ STA RAND               \   * f3 = f0 + f2 + (1 if bit 7 of f1 is set)
+ STX RAND+2             \   * C flag is set according to the f3 calculation
 
- LDA RAND+1             \ A = r1´ = r1 + r3 + C
- TAX                    \ X = r3´ = r1
- ADC RAND+3
- STA RAND+1
- STX RAND+3
+ LDA RAND+1             \ Calculate the next value m2 in the main sequence:
+ TAX                    \
+ ADC RAND+3             \   * A = m2 = m0 + m1 + C flag from feeder calculation
+ STA RAND+1             \   * X = m1
+ STX RAND+3             \   * C and V flags set according to the m2 calculation
 
  RTS                    \ Return from the subroutine
 
@@ -25547,6 +25598,7 @@ LOAD_F% = LOAD% + P% - CODE%
 \             asteroid, or a cargo canister
 \  Deep dive: Program flow of the main game loop
 \             Ship data blocks
+\             Fixing ship positions
 \
 \ ------------------------------------------------------------------------------
 \
@@ -25647,6 +25699,12 @@ LOAD_F% = LOAD% + P% - CODE%
 \ STA INWK              \ Set x_lo = random
 \
 \ STX INWK+3            \ Set y_lo = random
+\                       \
+\                       \ Note that because we use the value of X returned by
+\                       \ DORND, and X contains the value of A returned by the
+\                       \ previous call to DORND, this does not set the new ship
+\                       \ to a totally random location. See the deep dive on
+\                       \ "Fixing ship positions" for details
 \
 \ AND #%10000000        \ Set x_sign = bit 7 of x_lo
 \ STA INWK+2
@@ -25655,8 +25713,9 @@ LOAD_F% = LOAD% + P% - CODE%
 \ AND #%10000000
 \ STA INWK+5
 \
-\ ROL INWK+1            \ Set bit 2 of x_hi to the C flag, which is random, so
-\ ROL INWK+1            \ this randomly moves us slightly off-centre
+\ ROL INWK+1            \ Set bit 1 of x_hi to the C flag, which is random, so
+\ ROL INWK+1            \ this randomly moves us off-centre by 512 (as if x_hi
+\                       \ is %00000010, then (x_hi x_lo) is 512 + x_lo)
 \
 \ JSR DORND             \ Set A, X and V flag to random numbers
 \
@@ -25779,6 +25838,7 @@ LOAD_F% = LOAD% + P% - CODE%
 \    Summary: Potentially spawn a cop, particularly if we've been bad
 \  Deep dive: Program flow of the main game loop
 \             Ship data blocks
+\             Fixing ship positions
 \
 \ ------------------------------------------------------------------------------
 \
@@ -25819,6 +25879,12 @@ LOAD_F% = LOAD% + P% - CODE%
 
  JSR Ze                 \ Call Ze to initialise INWK to a potentially hostile
                         \ ship, and set A and X to random values
+                        \
+                        \ Note that because Ze uses the value of X returned by
+                        \ DORND, and X contains the value of A returned by the
+                        \ previous call to DORND, this does not set the new ship
+                        \ to a totally random location. See the deep dive on
+                        \ "Fixing ship positions" for details
 
                         \ --- Mod: Original Acornsoft code removed: ----------->
 
@@ -25866,6 +25932,7 @@ LOAD_F% = LOAD% + P% - CODE%
 \             pirates
 \  Deep dive: Program flow of the main game loop
 \             Ship data blocks
+\             Fixing ship positions
 \
 \ ------------------------------------------------------------------------------
 \
@@ -25940,6 +26007,12 @@ LOAD_F% = LOAD% + P% - CODE%
 \
 \ JSR Ze                \ Call Ze to initialise INWK to a potentially hostile
 \                       \ ship, and set A and X to random values
+\                       \
+\                       \ Note that because Ze uses the value of X returned by
+\                       \ DORND, and X contains the value of A returned by the
+\                       \ previous call to DORND, this does not set the new ship
+\                       \ to a totally random location. See the deep dive on
+\                       \ "Fixing ship positions" for details
 \
 \ CMP #100              \ If the random number in A >= 100 (61% chance), jump
 \ BCS mt1               \ to mt1 to spawn pirates, otherwise keep going to
@@ -28251,7 +28324,7 @@ LOAD_F% = LOAD% + P% - CODE%
 \ ------------------------------------------------------------------------------
 \
 \ In the following table, which maps buttons on the Delta 14b to the flight
-\ controls, the top nibble of the value gives the column:
+\ controls, the high nibble of the value gives the column:
 \
 \   &6 = %110 = left column
 \   &5 = %101 = middle column
@@ -28415,7 +28488,7 @@ LOAD_F% = LOAD% + P% - CODE%
                         \
                         \ For example, take the b_table entry for the escape pod
                         \ button, in the right column and third row. The value
-                        \ in b_table is &34. The top nibble contains the column,
+                        \ in b_table is &34. The high nibble denotes the column,
                         \ which is &3 = %011, which means in the STA VIA+&60
                         \ above, we write %1011 in the first pass (when A = 128)
                         \ to set the right column for the side socket joystick,
@@ -28637,9 +28710,9 @@ LOAD_F% = LOAD% + P% - CODE%
 
 .DKS2
 
- LDA #128               \ Call OSBYTE 128 to fetch the 16-bit value from ADC
- JSR OSBYTE             \ channel X, returning (Y X), i.e. the high byte in Y
-                        \ and the low byte in X
+ LDA #128               \ Call OSBYTE with A = 128 to fetch the 16-bit value
+ JSR OSBYTE             \ from ADC channel X, returning (Y X), i.e. the high
+                        \ byte in Y and the low byte in X
 
  TYA                    \ Copy Y to A, so the result is now in (A X)
 

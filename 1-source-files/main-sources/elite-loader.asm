@@ -30,9 +30,9 @@
 
 INCLUDE "1-source-files/main-sources/elite-header.h.asm"
 
-_RELEASED               = (_RELEASE = 1)
-_SOURCE_DISC            = (_RELEASE = 2)
-_BUG_FIX                = (_RELEASE = 3)
+_RELEASED               = (_VARIANT = 1)
+_SOURCE_DISC            = (_VARIANT = 2)
+_BUG_FIX                = (_VARIANT = 3)
 
 GUARD &6000             \ Guard against assembling over screen memory
 
@@ -55,7 +55,7 @@ BRKV = &0202            \ The break vector that we intercept to enable us to
                         \ handle and display system errors
 
 IRQ1V = &0204           \ The IRQ1V vector that we intercept to implement the
-                        \ split-sceen mode
+                        \ split-screen mode
 
 WRCHV = &020E           \ The WRCHV vector that we intercept with our custom
                         \ text printing routine
@@ -1216,18 +1216,7 @@ ORG &0B00
 \ EQUS "L.T.CODE"       \ This is short for "*LOAD T.CODE"
 \ EQUB 13
 \
-\ EQUB &44, &6F, &65    \ These bytes appear to be unused
-\ EQUB &73, &20, &79
-\ EQUB &6F, &75, &72
-\ EQUB &20, &6D, &6F
-\ EQUB &74, &68, &65
-\ EQUB &72, &20, &6B
-\ EQUB &6E, &6F, &77
-\ EQUB &20, &79, &6F
-\ EQUB &75, &20, &64
-\ EQUB &6F, &20, &74
-\ EQUB &68, &69, &73
-\ EQUB &3F
+\ EQUS "Does your mother know you do this?"
 
                         \ --- And replaced by: -------------------------------->
 
@@ -1582,6 +1571,7 @@ ORG LOADcode + P% - LOAD
 \   Category: Utility routines
 \    Summary: Generate random numbers
 \  Deep dive: Generating random numbers
+\             Fixing ship positions
 \
 \ ------------------------------------------------------------------------------
 \

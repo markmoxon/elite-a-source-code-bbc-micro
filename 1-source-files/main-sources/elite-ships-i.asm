@@ -30,9 +30,9 @@
 
 INCLUDE "1-source-files/main-sources/elite-header.h.asm"
 
-_RELEASED               = (_RELEASE = 1)
-_SOURCE_DISC            = (_RELEASE = 2)
-_BUG_FIX                = (_RELEASE = 3)
+_RELEASED               = (_VARIANT = 1)
+_SOURCE_DISC            = (_VARIANT = 2)
+_BUG_FIX                = (_VARIANT = 3)
 
 GUARD &6000             \ Guard against assembling over screen memory
 
@@ -322,8 +322,8 @@ ENDMACRO
 
  EQUB 0                 \ Max. canisters on demise = 0
  EQUW 160 * 160         \ Targetable area          = 160 * 160
- EQUB &74               \ Edges data offset (low)  = &0074
- EQUB &E4               \ Faces data offset (low)  = &00E4
+ EQUB LO(SHIP_CORIOLIS_EDGES - SHIP_CORIOLIS)      \ Edges data offset (low)
+ EQUB LO(SHIP_CORIOLIS_FACES - SHIP_CORIOLIS)      \ Faces data offset (low)
  EQUB 85                \ Max. edge count          = (85 - 1) / 4 = 21
  EQUB 0                 \ Gun vertex               = 0
  EQUB 54                \ Explosion count          = 12, as (4 * n) + 6 = 54
@@ -334,8 +334,8 @@ ENDMACRO
  EQUB 120               \ Visibility distance      = 120
  EQUB 240               \ Max. energy              = 240
  EQUB 0                 \ Max. speed               = 0
- EQUB &00               \ Edges data offset (high) = &0074
- EQUB &00               \ Faces data offset (high) = &00E4
+ EQUB HI(SHIP_CORIOLIS_EDGES - SHIP_CORIOLIS)      \ Edges data offset (high)
+ EQUB HI(SHIP_CORIOLIS_FACES - SHIP_CORIOLIS)      \ Faces data offset (high)
  EQUB 0                 \ Normals are scaled by    = 2^0 = 1
  EQUB %00000110         \ Laser power              = 0
                         \ Missiles                 = 6
@@ -357,6 +357,8 @@ ENDMACRO
  VERTEX   10,   30,  160,     0,      0,    0,     0,         30    \ Vertex 13
  VERTEX  -10,   30,  160,     0,      0,    0,     0,         30    \ Vertex 14
  VERTEX  -10,  -30,  160,     0,      0,    0,     0,         30    \ Vertex 15
+
+.SHIP_CORIOLIS_EDGES
 
 \EDGE vertex1, vertex2, face1, face2, visibility
  EDGE       0,       3,     0,     1,         31    \ Edge 0
@@ -387,6 +389,8 @@ ENDMACRO
  EDGE      13,      14,     0,     0,         30    \ Edge 25
  EDGE      14,      15,     0,     0,         30    \ Edge 26
  EDGE      15,      12,     0,     0,         30    \ Edge 27
+
+.SHIP_CORIOLIS_FACES
 
 \FACE normal_x, normal_y, normal_z, visibility
  FACE        0,        0,      160,         31    \ Face 0
@@ -419,8 +423,8 @@ ENDMACRO
  EQUB 0 + (2 << 4)      \ Max. canisters on demise = 0
                         \ Market item when scooped = 2 + 1 = 3 (slaves)
  EQUW 16 * 16           \ Targetable area          = 16 * 16
- EQUB &2C               \ Edges data offset (low)  = &002C
- EQUB &44               \ Faces data offset (low)  = &0044
+ EQUB LO(SHIP_ESCAPE_POD_EDGES - SHIP_ESCAPE_POD)  \ Edges data offset (low)
+ EQUB LO(SHIP_ESCAPE_POD_FACES - SHIP_ESCAPE_POD)  \ Faces data offset (low)
  EQUB 25                \ Max. edge count          = (25 - 1) / 4 = 6
  EQUB 0                 \ Gun vertex               = 0
  EQUB 22                \ Explosion count          = 4, as (4 * n) + 6 = 22
@@ -441,8 +445,8 @@ ENDMACRO
                         \ --- End of replacement ------------------------------>
 
  EQUB 8                 \ Max. speed               = 8
- EQUB &00               \ Edges data offset (high) = &002C
- EQUB &00               \ Faces data offset (high) = &0044
+ EQUB HI(SHIP_ESCAPE_POD_EDGES - SHIP_ESCAPE_POD)  \ Edges data offset (high)
+ EQUB HI(SHIP_ESCAPE_POD_FACES - SHIP_ESCAPE_POD)  \ Faces data offset (high)
  EQUB 4                 \ Normals are scaled by    =  2^4 = 16
  EQUB %00000000         \ Laser power              = 0
                         \ Missiles                 = 0
@@ -462,6 +466,8 @@ ENDMACRO
  EDGE       3,       0,     2,     1,         31    \ Edge 3
  EDGE       0,       2,     3,     1,         31    \ Edge 4
  EDGE       3,       1,     2,     0,         31    \ Edge 5
+
+.SHIP_ESCAPE_POD_FACES
 
 \FACE normal_x, normal_y, normal_z, visibility
  FACE       52,        0,     -122,         31    \ Face 0
@@ -483,8 +489,8 @@ ENDMACRO
 
  EQUB 0                 \ Max. canisters on demise = 0
  EQUW 20 * 20           \ Targetable area          = 20 * 20
- EQUB &50               \ Edges data offset (low)  = &0050
- EQUB &8C               \ Faces data offset (low)  = &008C
+ EQUB LO(SHIP_CANISTER_EDGES - SHIP_CANISTER)      \ Edges data offset (low)
+ EQUB LO(SHIP_CANISTER_FACES - SHIP_CANISTER)      \ Faces data offset (low)
  EQUB 49                \ Max. edge count          = (49 - 1) / 4 = 12
  EQUB 0                 \ Gun vertex               = 0
  EQUB 18                \ Explosion count          = 3, as (4 * n) + 6 = 18
@@ -515,8 +521,8 @@ ENDMACRO
                         \ --- End of replacement ------------------------------>
 
  EQUB 15                \ Max. speed               = 15
- EQUB &00               \ Edges data offset (high) = &0050
- EQUB &00               \ Faces data offset (high) = &008C
+ EQUB HI(SHIP_CANISTER_EDGES - SHIP_CANISTER)      \ Edges data offset (high)
+ EQUB HI(SHIP_CANISTER_FACES - SHIP_CANISTER)      \ Faces data offset (high)
  EQUB 2                 \ Normals are scaled by    = 2^2 = 4
  EQUB %00000000         \ Laser power              = 0
                         \ Missiles                 = 0
@@ -552,6 +558,8 @@ ENDMACRO
  EDGE       8,       9,     4,     6,         31    \ Edge 13
  EDGE       9,       5,     5,     6,         31    \ Edge 14
 
+.SHIP_CANISTER_FACES
+
 \FACE normal_x, normal_y, normal_z, visibility
  FACE       96,        0,        0,         31    \ Face 0
  FACE        0,       41,       30,         31    \ Face 1
@@ -575,8 +583,8 @@ ENDMACRO
 
  EQUB 0                 \ Max. canisters on demise = 0
  EQUW 75 * 75           \ Targetable area          = 75 * 75
- EQUB &6E               \ Edges data offset (low)  = &006E
- EQUB &BE               \ Faces data offset (low)  = &00BE
+ EQUB LO(SHIP_VIPER_EDGES - SHIP_VIPER)            \ Edges data offset (low)
+ EQUB LO(SHIP_VIPER_FACES - SHIP_VIPER)            \ Faces data offset (low)
  EQUB 77                \ Max. edge count          = (77 - 1) / 4 = 19
  EQUB 0                 \ Gun vertex               = 0
  EQUB 42                \ Explosion count          = 9, as (4 * n) + 6 = 42
@@ -597,8 +605,8 @@ ENDMACRO
                         \ --- End of replacement ------------------------------>
 
  EQUB 32                \ Max. speed               = 32
- EQUB &00               \ Edges data offset (high) = &006E
- EQUB &00               \ Faces data offset (high) = &00BE
+ EQUB HI(SHIP_VIPER_EDGES - SHIP_VIPER)            \ Edges data offset (high)
+ EQUB HI(SHIP_VIPER_FACES - SHIP_VIPER)            \ Faces data offset (high)
  EQUB 1                 \ Normals are scaled by    = 2^1 = 2
 
                         \ --- Mod: Original Acornsoft code removed: ----------->
@@ -630,6 +638,8 @@ ENDMACRO
  VERTEX   -8,   -8,  -24,     6,      6,    6,     6,         18    \ Vertex 13
  VERTEX    8,   -8,  -24,     6,      6,    6,     6,         18    \ Vertex 14
 
+.SHIP_VIPER_EDGES
+
 \EDGE vertex1, vertex2, face1, face2, visibility
  EDGE       0,       3,     2,     4,         31    \ Edge 0
  EDGE       0,       1,     1,     2,         30    \ Edge 1
@@ -651,6 +661,8 @@ ENDMACRO
  EDGE      10,      14,     6,     6,         18    \ Edge 17
  EDGE      11,      14,     6,     6,         16    \ Edge 18
  EDGE      12,      13,     6,     6,         16    \ Edge 19
+
+.SHIP_VIPER_FACES
 
 \FACE normal_x, normal_y, normal_z, visibility
  FACE        0,       32,        0,         31    \ Face 0
@@ -675,8 +687,8 @@ ENDMACRO
 
  EQUB 1                 \ Max. canisters on demise = 1
  EQUW 60 * 60           \ Targetable area          = 60 * 60
- EQUB &7A               \ Edges data offset (low)  = &007A
- EQUB &CE               \ Faces data offset (low)  = &00CE
+ EQUB LO(SHIP_KRAIT_EDGES - SHIP_KRAIT)            \ Edges data offset (low)
+ EQUB LO(SHIP_KRAIT_FACES - SHIP_KRAIT)            \ Faces data offset (low)
  EQUB 85                \ Max. edge count          = (85 - 1) / 4 = 21
  EQUB 0                 \ Gun vertex               = 0
  EQUB 18                \ Explosion count          = 3, as (4 * n) + 6 = 18
@@ -697,8 +709,8 @@ ENDMACRO
                         \ --- End of replacement ------------------------------>
 
  EQUB 30                \ Max. speed               = 30
- EQUB &00               \ Edges data offset (high) = &007A
- EQUB &00               \ Faces data offset (high) = &00CE
+ EQUB HI(SHIP_KRAIT_EDGES - SHIP_KRAIT)            \ Edges data offset (high)
+ EQUB HI(SHIP_KRAIT_FACES - SHIP_KRAIT)            \ Faces data offset (high)
  EQUB 1                 \ Normals are scaled by    = 2^1 = 2
 
                         \ --- Mod: Original Acornsoft code removed: ----------->
@@ -732,6 +744,8 @@ ENDMACRO
  VERTEX  -18,  -11,  -39,     5,      5,    5,     5,          8    \ Vertex 15
  VERTEX  -36,    0,  -30,     5,      5,    5,     5,          8    \ Vertex 16
 
+.SHIP_KRAIT_EDGES
+
 \EDGE vertex1, vertex2, face1, face2, visibility
  EDGE       0,       1,     3,     0,         31    \ Edge 0
  EDGE       0,       2,     2,     1,         31    \ Edge 1
@@ -755,6 +769,8 @@ ENDMACRO
  EDGE      15,      16,     5,     5,          8    \ Edge 19
  EDGE      16,      14,     5,     5,          8    \ Edge 20
 
+.SHIP_KRAIT_FACES
+
 \FACE normal_x, normal_y, normal_z, visibility
  FACE        3,       24,        3,         31    \ Face 0
  FACE        3,      -24,        3,         31    \ Face 1
@@ -777,8 +793,8 @@ ENDMACRO
 
  EQUB 0                 \ Max. canisters on demise = 0
  EQUW 60 * 60           \ Targetable area          = 60 * 60
- EQUB &86               \ Edges data offset (low)  = &0086
- EQUB &F6               \ Faces data offset (low)  = &00F6
+ EQUB LO(SHIP_ASP_MK_2_EDGES - SHIP_ASP_MK_2)      \ Edges data offset (low)
+ EQUB LO(SHIP_ASP_MK_2_FACES - SHIP_ASP_MK_2)      \ Faces data offset (low)
  EQUB 101               \ Max. edge count          = (101 - 1) / 4 = 25
  EQUB 32                \ Gun vertex               = 32
  EQUB 26                \ Explosion count          = 5, as (4 * n) + 6 = 26
@@ -809,8 +825,8 @@ ENDMACRO
                         \ --- End of replacement ------------------------------>
 
  EQUB 40                \ Max. speed               = 40
- EQUB &00               \ Edges data offset (high) = &0086
- EQUB &00               \ Faces data offset (high) = &00F6
+ EQUB HI(SHIP_ASP_MK_2_EDGES - SHIP_ASP_MK_2)      \ Edges data offset (high)
+ EQUB HI(SHIP_ASP_MK_2_FACES - SHIP_ASP_MK_2)      \ Faces data offset (high)
  EQUB 1                 \ Normals are scaled by    = 2^1 = 2
 
                         \ --- Mod: Original Acornsoft code removed: ----------->
@@ -846,6 +862,8 @@ ENDMACRO
  VERTEX    0,   -7,   73,     4,      0,    4,     0,         10    \ Vertex 17
  VERTEX    0,   -7,   83,     4,      0,    4,     0,         10    \ Vertex 18
 
+.SHIP_ASP_MK_2_EDGES
+
 \EDGE vertex1, vertex2, face1, face2, visibility
  EDGE       0,       1,     2,     1,         22    \ Edge 0
  EDGE       0,       4,     1,     0,         22    \ Edge 1
@@ -876,6 +894,8 @@ ENDMACRO
  EDGE      16,      13,    11,    11,          8    \ Edge 26
  EDGE      18,      17,     4,     0,         10    \ Edge 27
 
+.SHIP_ASP_MK_2_FACES
+
 \FACE normal_x, normal_y, normal_z, visibility
  FACE        0,      -35,        5,         31    \ Face 0
  FACE        8,      -38,       -7,         31    \ Face 1
@@ -904,8 +924,8 @@ ENDMACRO
 
  EQUB 3                 \ Max. canisters on demise = 3
  EQUW 99 * 99           \ Targetable area          = 99 * 99
- EQUB &56               \ Edges data offset (low)  = &0056
- EQUB &9E               \ Faces data offset (low)  = &009E
+ EQUB LO(SHIP_COBRA_MK_1_EDGES - SHIP_COBRA_MK_1)  \ Edges data offset (low)
+ EQUB LO(SHIP_COBRA_MK_1_FACES - SHIP_COBRA_MK_1)  \ Faces data offset (low)
  EQUB 69                \ Max. edge count          = (69 - 1) / 4 = 17
  EQUB 40                \ Gun vertex               = 40
  EQUB 26                \ Explosion count          = 5, as (4 * n) + 6 = 26
@@ -926,8 +946,8 @@ ENDMACRO
                         \ --- End of replacement ------------------------------>
 
  EQUB 26                \ Max. speed               = 26
- EQUB &00               \ Edges data offset (high) = &0056
- EQUB &00               \ Faces data offset (high) = &009E
+ EQUB HI(SHIP_COBRA_MK_1_EDGES - SHIP_COBRA_MK_1)  \ Edges data offset (high)
+ EQUB HI(SHIP_COBRA_MK_1_FACES - SHIP_COBRA_MK_1)  \ Faces data offset (high)
  EQUB 2                 \ Normals are scaled by    = 2^2 = 4
 
                         \ --- Mod: Original Acornsoft code removed: ----------->
@@ -955,6 +975,8 @@ ENDMACRO
  VERTEX    0,   -1,   50,     1,      0,    1,     1,          2    \ Vertex 9
  VERTEX    0,   -1,   60,     1,      0,    1,     1,         31    \ Vertex 10
 
+.SHIP_COBRA_MK_1_EDGES
+
 \EDGE vertex1, vertex2, face1, face2, visibility
  EDGE       1,       0,     1,     0,         31    \ Edge 0
  EDGE       0,       2,     3,     2,         31    \ Edge 1
@@ -974,6 +996,8 @@ ENDMACRO
  EDGE       0,       6,     3,     1,         20    \ Edge 15
  EDGE       1,       7,     5,     1,         20    \ Edge 16
  EDGE      10,       9,     1,     0,          2    \ Edge 17
+
+.SHIP_COBRA_MK_1_FACES
 
 \FACE normal_x, normal_y, normal_z, visibility
  FACE        0,       41,       10,         31    \ Face 0
@@ -1001,8 +1025,8 @@ ENDMACRO
 
  EQUB 7                 \ Max. canisters on demise = 7
  EQUW 100 * 100         \ Targetable area          = 100 * 100
- EQUB &6E               \ Edges data offset (low)  = &006E
- EQUB &D2               \ Faces data offset (low)  = &00D2
+ EQUB LO(SHIP_ANACONDA_EDGES - SHIP_ANACONDA)      \ Edges data offset (low)
+ EQUB LO(SHIP_ANACONDA_FACES - SHIP_ANACONDA)      \ Faces data offset (low)
  EQUB 89                \ Max. edge count          = (89 - 1) / 4 = 22
  EQUB 48                \ Gun vertex               = 48
  EQUB 46                \ Explosion count          = 10, as (4 * n) + 6 = 46
@@ -1023,8 +1047,8 @@ ENDMACRO
  EQUB 50                \ Visibility distance      = 50
  EQUB 252               \ Max. energy              = 252
  EQUB 14                \ Max. speed               = 14
- EQUB &00               \ Edges data offset (high) = &006E
- EQUB &00               \ Faces data offset (high) = &00D2
+ EQUB HI(SHIP_ANACONDA_EDGES - SHIP_ANACONDA)      \ Edges data offset (high)
+ EQUB HI(SHIP_ANACONDA_FACES - SHIP_ANACONDA)      \ Faces data offset (high)
  EQUB 1                 \ Normals are scaled by    = 2^1 = 2
 
                         \ --- Mod: Original Acornsoft code removed: ----------->
@@ -1056,6 +1080,8 @@ ENDMACRO
  VERTEX   69,   -1,   32,     9,      4,   10,    10,         31    \ Vertex 13
  VERTEX   43,   53,  -23,    15,     15,   15,    15,         31    \ Vertex 14
 
+.SHIP_ANACONDA_EDGES
+
 \EDGE vertex1, vertex2, face1, face2, visibility
  EDGE       0,       1,     1,     0,         30    \ Edge 0
  EDGE       1,       2,     2,     0,         30    \ Edge 1
@@ -1082,6 +1108,8 @@ ENDMACRO
  EDGE      11,      12,     8,     7,         31    \ Edge 22
  EDGE      12,      13,    10,     9,         31    \ Edge 23
  EDGE      12,      14,    11,    10,         31    \ Edge 24
+
+.SHIP_ANACONDA_FACES
 
 \FACE normal_x, normal_y, normal_z, visibility
  FACE        0,      -51,      -49,         30    \ Face 0
@@ -1111,8 +1139,8 @@ ENDMACRO
 
  EQUB 0                 \ Max. canisters on demise = 0
  EQUW 99 * 99           \ Targetable area          = 99 * 99
- EQUB &50               \ Edges data offset (low)  = &0050
- EQUB &90               \ Faces data offset (low)  = &0090
+ EQUB LO(SHIP_WORM_EDGES - SHIP_WORM)              \ Edges data offset (low)
+ EQUB LO(SHIP_WORM_FACES - SHIP_WORM)              \ Faces data offset (low)
  EQUB 73                \ Max. edge count          = (73 - 1) / 4 = 18
  EQUB 0                 \ Gun vertex               = 0
  EQUB 18                \ Explosion count          = 3, as (4 * n) + 6 = 18
@@ -1133,8 +1161,8 @@ ENDMACRO
                         \ --- End of replacement ------------------------------>
 
  EQUB 23                \ Max. speed               = 23
- EQUB &00               \ Edges data offset (high) = &0050
- EQUB &00               \ Faces data offset (high) = &0090
+ EQUB HI(SHIP_WORM_EDGES - SHIP_WORM)              \ Edges data offset (high)
+ EQUB HI(SHIP_WORM_FACES - SHIP_WORM)              \ Faces data offset (high)
  EQUB 3                 \ Normals are scaled by    = 2^3 = 8
 
                         \ --- Mod: Original Acornsoft code removed: ----------->
@@ -1161,6 +1189,8 @@ ENDMACRO
  VERTEX    8,   14,  -25,     4,      1,    6,     6,         31    \ Vertex 8
  VERTEX   -8,   14,  -25,     5,      1,    6,     6,         31    \ Vertex 9
 
+.SHIP_WORM_EDGES
+
 \EDGE vertex1, vertex2, face1, face2, visibility
  EDGE       0,       1,     7,     0,         31    \ Edge 0
  EDGE       1,       5,     7,     3,         31    \ Edge 1
@@ -1178,6 +1208,8 @@ ENDMACRO
  EDGE       9,       7,     6,     5,         31    \ Edge 13
  EDGE       2,       3,     1,     0,         31    \ Edge 14
  EDGE       8,       9,     6,     1,         31    \ Edge 15
+
+.SHIP_WORM_FACES
 
 \FACE normal_x, normal_y, normal_z, visibility
  FACE        0,       88,       70,         31    \ Face 0
@@ -1205,8 +1237,8 @@ ENDMACRO
 
  EQUB 3                 \ Max. canisters on demise = 3
  EQUW 9728              \ Targetable area          = 98.63 * 98.63
- EQUB &5C               \ Edges data offset (low)  = &005C
- EQUB &B4               \ Faces data offset (low)  = &00B4
+ EQUB LO(SHIP_GHAVIAL_EDGES - SHIP_GHAVIAL)        \ Edges data offset (low)
+ EQUB LO(SHIP_GHAVIAL_FACES - SHIP_GHAVIAL)        \ Faces data offset (low)
  EQUB 97                \ Max. edge count          = (97 - 1) / 4 = 24
  EQUB 0                 \ Gun vertex               = 0
  EQUB 34                \ Explosion count          = 7, as (4 * n) + 6 = 34
@@ -1217,8 +1249,8 @@ ENDMACRO
  EQUB 10                \ Visibility distance      = 10
  EQUB 114               \ Max. energy              = 114
  EQUB 16                \ Max. speed               = 16
- EQUB &00               \ Edges data offset (high) = &005C
- EQUB &00               \ Faces data offset (high) = &00B4
+ EQUB HI(SHIP_GHAVIAL_EDGES - SHIP_GHAVIAL)        \ Edges data offset (high)
+ EQUB HI(SHIP_GHAVIAL_FACES - SHIP_GHAVIAL)        \ Faces data offset (high)
  EQUB 0                 \ Normals are scaled by    = 2^0 = 1
  EQUB %00100111         \ Laser power              = 4
                         \ Missiles                 = 7
@@ -1236,6 +1268,8 @@ ENDMACRO
  VERTEX   10,   24,    0,     0,     0,     0,     0,          9     \ Vertex 9
  VERTEX  -10,   24,    0,     0,     0,     0,     0,          9     \ Vertex 10
  VERTEX    0,   22,   10,     0,     0,     0,     0,          9     \ Vertex 11
+
+.SHIP_GHAVIAL_EDGES
 
 \EDGE vertex1, vertex2, face1, face2, visibility
  EDGE       0,       2,     1,     0,         31    \ Edge 0
@@ -1260,6 +1294,8 @@ ENDMACRO
  EDGE       9,      10,     0,     0,          9    \ Edge 19
  EDGE      10,      11,     0,     0,          9    \ Edge 20
  EDGE      11,       9,     0,     0,          9    \ Edge 21
+
+.SHIP_GHAVIAL_FACES
 
 \FACE normal_x, normal_y, normal_z, visibility
  FACE        0,       62,       14,         31    \ Face 0
@@ -1293,8 +1329,8 @@ ENDMACRO
 
  EQUB 2                 \ Max. canisters on demise = 2
  EQUW 3720              \ Targetable area          = 60.99 * 60.99
- EQUB &8C               \ Edges data offset (low)  = &008C
- EQUB &04               \ Faces data offset (low)  = &0104
+ EQUB LO(SHIP_OPHIDIAN_EDGES - SHIP_OPHIDIAN)      \ Edges data offset (low)
+ EQUB LO(SHIP_OPHIDIAN_FACES - SHIP_OPHIDIAN)      \ Faces data offset (low)
  EQUB 113               \ Max. edge count          = (113 - 1) / 4 = 28
  EQUB 0                 \ Gun vertex               = 0
  EQUB 60                \ Explosion count          = 13, as (4 * n) + 6 = 60
@@ -1305,8 +1341,8 @@ ENDMACRO
  EQUB 20                \ Visibility distance      = 20
  EQUB 64                \ Max. energy              = 64
  EQUB 34                \ Max. speed               = 34
- EQUB &00               \ Edges data offset (high) = &008C
- EQUB &01               \ Faces data offset (high) = &0104
+ EQUB HI(SHIP_OPHIDIAN_EDGES - SHIP_OPHIDIAN)      \ Edges data offset (high)
+ EQUB HI(SHIP_OPHIDIAN_FACES - SHIP_OPHIDIAN)      \ Faces data offset (high)
  EQUB 1                 \ Normals are scaled by    = 2^1 = 2
  EQUB %00011010         \ Laser power              = 3
                         \ Missiles                 = 2
@@ -1332,6 +1368,8 @@ ENDMACRO
  VERTEX   10,   -2,  -50,    11,    11,    11,    11,         16     \ Vertex 17
  VERTEX  -10,   -2,  -50,    11,    11,    11,    11,         16     \ Vertex 18
  VERTEX  -10,    4,  -50,    11,    11,    11,    11,         16     \ Vertex 19
+
+.SHIP_OPHIDIAN_EDGES
 
 \EDGE vertex1, vertex2, face1, face2, visibility
  EDGE       0,       1,     6,     0,         31    \ Edge 0
@@ -1364,6 +1402,8 @@ ENDMACRO
  EDGE      11,      12,     9,     3,         16    \ Edge 27
  EDGE      10,       9,    10,     4,         16    \ Edge 28
  EDGE       9,       8,    10,     4,         16    \ Edge 29
+
+.SHIP_OPHIDIAN_FACES
 
 \FACE normal_x, normal_y, normal_z, visibility
  FACE        0,       37,       12,         31    \ Face 0

@@ -6,6 +6,8 @@ This folder contains support scripts for building Elite-A.
 
 * [elite-checksum.py](elite-checksum.py) adds checksums to the assembled output
 
+It also contains the `make.exe` executable for Windows, plus the required DLL files.
+
 ---
 
 Right on, Commanders!

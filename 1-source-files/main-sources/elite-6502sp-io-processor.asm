@@ -30,9 +30,9 @@
 
 INCLUDE "1-source-files/main-sources/elite-header.h.asm"
 
-_RELEASED               = (_RELEASE = 1)
-_SOURCE_DISC            = (_RELEASE = 2)
-_BUG_FIX                = (_RELEASE = 3)
+_RELEASED               = (_VARIANT = 1)
+_SOURCE_DISC            = (_VARIANT = 2)
+_BUG_FIX                = (_VARIANT = 3)
 
 GUARD &6000             \ Guard against assembling over screen memory
 
@@ -1220,12 +1220,27 @@ ORG CODE%
 \
 \   * X1 < X2 and Y1-1 > Y2
 \
-\   * Draw from (X1, Y1) at bottom left to (X2, Y2) at top right
+\   * Draw from (X1, Y1) at bottom left to (X2, Y2) at top right, omitting the
+\     first pixel
 \
 \ ******************************************************************************
 
  LDA SWAP               \ If SWAP > 0 then we swapped the coordinates above, so
  BNE LI6                \ jump down to LI6 to skip plotting the first pixel
+                        \
+                        \ This appears to be a bug that omits the last pixel
+                        \ of this type of shallow line, rather than the first
+                        \ pixel, which makes the treatment of this kind of line
+                        \ different to the other kinds of slope (they all have a
+                        \ BEQ instruction at this point, rather than a BNE)
+                        \
+                        \ The result is a rather messy line join when a shallow
+                        \ line that goes right and up or left and down joins a
+                        \ line with any of the other three types of slope
+                        \
+                        \ This bug was fixed in the advanced versions of ELite,
+                        \ where the BNE is replaced by a BEQ to bring it in line
+                        \ with the other three slopes
 
  DEX                    \ Decrement the counter in X because we're about to plot
                         \ the first pixel
@@ -1303,7 +1318,8 @@ ORG CODE%
 \
 \   * X1 < X2 and Y1-1 <= Y2
 \
-\   * Draw from (X1, Y1) at top left to (X2, Y2) at bottom right
+\   * Draw from (X1, Y1) at top left to (X2, Y2) at bottom right, omitting the
+\     first pixel
 \
 \ ******************************************************************************
 
@@ -1534,7 +1550,8 @@ ORG CODE%
 \
 \   * X1 < X2 and Y1 >= Y2
 \
-\   * Draw from (X1, Y1) at top left to (X2, Y2) at bottom right
+\   * Draw from (X1, Y1) at top left to (X2, Y2) at bottom right, omitting the
+\     first pixel
 \
 \ ******************************************************************************
 
@@ -1571,7 +1588,7 @@ ORG CODE%
 
 .LI16
 
- LDA S                  \ Set S = S + Q to update the slope error
+ LDA S                  \ Set S = S + P to update the slope error
  ADC P
  STA S
 
@@ -1618,7 +1635,8 @@ ORG CODE%
 \
 \   * X1 >= X2 and Y1 >= Y2
 \
-\   * Draw from (X1, Y1) at bottom left to (X2, Y2) at top right
+\   * Draw from (X1, Y1) at bottom left to (X2, Y2) at top right, omitting the
+\     first pixel
 \
 \ Other entry points:
 \
@@ -1629,7 +1647,7 @@ ORG CODE%
 .LFT
 
  LDA SWAP               \ If SWAP = 0 then we didn't swap the coordinates above,
- BEQ LI18               \ jump down to LI18 to skip plotting the first pixel
+ BEQ LI18               \ so jump down to LI18 to skip plotting the first pixel
 
  DEX                    \ Decrement the counter in X because we're about to plot
                         \ the first pixel
@@ -1702,7 +1720,7 @@ ORG CODE%
 \ This routine is run when the parasite sends a draw_hline command. It draws a
 \ horizontal line.
 \
-\ We do not draw a pixel at the end point (X2, X1).
+\ We do not draw a pixel at the right end of the line.
 \
 \ To understand how this routine works, you might find it helpful to read the
 \ deep dive on "Drawing monochrome pixels in mode 4".
@@ -3673,7 +3691,7 @@ ORG CODE%
 \ ------------------------------------------------------------------------------
 \
 \ In the following table, which maps buttons on the Delta 14b to the flight
-\ controls, the top nibble of the value gives the column:
+\ controls, the high nibble of the value gives the column:
 \
 \   &6 = %110 = left column
 \   &5 = %101 = middle column
@@ -3831,7 +3849,7 @@ ORG CODE%
                         \
                         \ For example, take the b_table entry for the escape pod
                         \ button, in the right column and third row. The value
-                        \ in b_table is &34. The top nibble contains the column,
+                        \ in b_table is &34. The high nibble denotes the column,
                         \ which is &3 = %011, which means in the STA VIA+&60
                         \ above, we write %1011 in the first pass (when A = 128)
                         \ to set the right column for the side socket joystick,

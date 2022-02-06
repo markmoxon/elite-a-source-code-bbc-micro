@@ -40,9 +40,9 @@
 
 INCLUDE "1-source-files/main-sources/elite-header.h.asm"
 
-_RELEASED               = (_RELEASE = 1)
-_SOURCE_DISC            = (_RELEASE = 2)
-_BUG_FIX                = (_RELEASE = 3)
+_RELEASED               = (_VARIANT = 1)
+_SOURCE_DISC            = (_VARIANT = 2)
+_BUG_FIX                = (_VARIANT = 3)
 
 GUARD &6000             \ Guard against assembling over screen memory
 
@@ -1513,12 +1513,15 @@ ENDMACRO
 .SNE
 
 FOR I%, 0, 31
-  N = ABS(SIN((I% / 64) * 2 * PI))
-  IF N >= 1
-    EQUB 255
-  ELSE
-    EQUB INT(256 * N + 0.5)
-  ENDIF
+
+ N = ABS(SIN((I% / 64) * 2 * PI))
+
+ IF N >= 1
+  EQUB 255
+ ELSE
+  EQUB INT(256 * N + 0.5)
+ ENDIF
+
 NEXT
 
 \ ******************************************************************************
@@ -1557,7 +1560,9 @@ NEXT
 .ACT
 
 FOR I%, 0, 31
-  EQUB INT((128 / PI) * ATN(I% / 32) + 0.5)
+
+ EQUB INT((128 / PI) * ATN(I% / 32) + 0.5)
+
 NEXT
 
 \ ******************************************************************************
