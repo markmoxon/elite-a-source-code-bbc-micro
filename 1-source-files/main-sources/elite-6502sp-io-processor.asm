@@ -2019,7 +2019,7 @@ ORG CODE%
 \       Type: Subroutine
 \   Category: Drawing pixels
 \    Summary: Implement the draw_pixel command (draw space view pixels)
-\  Deep dive: Drawing colour pixels in mode 4
+\  Deep dive: Drawing monochrome pixels in mode 4
 \
 \ ------------------------------------------------------------------------------
 \
