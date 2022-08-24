@@ -713,7 +713,7 @@ ENDMACRO
                         \ --- And replaced by: -------------------------------->
 
  LDA #%11110000         \ Set the Data Direction Register (DDR) of port B of the
- STA VIA+&62            \ user port so we can read the buttons on the Delta 14b
+ STA VIA+&62            \ user port so we can read the buttons on the Delta 14B
                         \ joystick, using PB4 to PB7 as output (so we can write
                         \ to the button columns to select the column we are
                         \ interested in) and PB0 to PB3 as input (so we can read
@@ -1183,7 +1183,7 @@ ORG &0B00
 \
 \ CMP &55FF             \ Compare the checksum with the value in &55FF, which is
 \                       \ in the docked file we just loaded, in the byte before
-\                       \ the ship hanger blueprints at XX21
+\                       \ the ship hangar blueprints at XX21
 \
 \IF _REMOVE_CHECKSUMS
 \

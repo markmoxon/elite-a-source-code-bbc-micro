@@ -1779,14 +1779,14 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
 
 .BSTK
 
- SKIP 1                 \ Delta 14b joystick configuration setting
+ SKIP 1                 \ Delta 14B joystick configuration setting
                         \
                         \   * 127 = keyboard
                         \
-                        \   * 128 = Delta 14b joystick
+                        \   * 128 = Delta 14B joystick
                         \
                         \ Elite-A doesn't support the Bitstik, but instead it
-                        \ supports the multi-button Volmace Delta 14b joystick,
+                        \ supports the multi-button Volmace Delta 14B joystick,
                         \ reusing the BSTK variable to determine whether it is
                         \ configured
 
@@ -2244,7 +2244,7 @@ BRKV = P% - 2           \ The address of the destination address in the above
 
                         \ Fall through into escape to set KL+1 to the non-zero
                         \ value in A before running the docking code (which will
-                        \ not show the docking tunnel and ship hanger, as KL+1
+                        \ not show the docking tunnel and ship hangar, as KL+1
                         \ is now non-zero)
 
                         \ --- End of added section ---------------------------->
@@ -2263,7 +2263,7 @@ BRKV = P% - 2           \ The address of the destination address in the above
 .escape
 
  LDA #0                 \ Set the value of KL+1 to 0, so when the main docked
- STA KL+1               \ loads, we show the docking tunnel and ship hanger
+ STA KL+1               \ loads, we show the docking tunnel and ship hangar
 
  JMP INBAY              \ Jump to INBAY to load the main docked code
 
@@ -13940,7 +13940,7 @@ LOAD_F% = LOAD% + P% - CODE%
                         \ --- And replaced by: -------------------------------->
 
  JMP escape             \ Jump to escape to load the main docked code so that it
-                        \ shows the docking tunnel and ship hanger
+                        \ shows the docking tunnel and ship hangar
 
                         \ --- End of replacement ------------------------------>
 
@@ -14702,7 +14702,7 @@ LOAD_F% = LOAD% + P% - CODE%
 \   * Y toggles reverse joystick Y channel (&44)
 \   * J toggles reverse both joystick channels (&45)
 \   * K toggles keyboard and joystick (&46)
-\   * @ toggles keyboard and Delta 14b joystick (&47)
+\   * @ toggles keyboard and Delta 14B joystick (&47)
 \
 \ The numbers in brackets are the internal key numbers (see p.142 of the
 \ Advanced User Guide for a list of internal key numbers). We pass the key that
