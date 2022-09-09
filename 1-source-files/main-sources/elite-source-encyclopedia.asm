@@ -1779,14 +1779,14 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
 
 .BSTK
 
- SKIP 1                 \ Delta 14b joystick configuration setting
+ SKIP 1                 \ Delta 14B joystick configuration setting
                         \
                         \   * 127 = keyboard
                         \
-                        \   * 128 = Delta 14b joystick
+                        \   * 128 = Delta 14B joystick
                         \
                         \ Elite-A doesn't support the Bitstik, but instead it
-                        \ supports the multi-button Volmace Delta 14b joystick,
+                        \ supports the multi-button Volmace Delta 14B joystick,
                         \ reusing the BSTK variable to determine whether it is
                         \ configured
 
@@ -2244,7 +2244,7 @@ BRKV = P% - 2           \ The address of the destination address in the above
 
                         \ Fall through into escape to set KL+1 to the non-zero
                         \ value in A before running the docking code (which will
-                        \ not show the docking tunnel and ship hanger, as KL+1
+                        \ not show the docking tunnel and ship hangar, as KL+1
                         \ is now non-zero)
 
                         \ --- End of added section ---------------------------->
@@ -2263,7 +2263,7 @@ BRKV = P% - 2           \ The address of the destination address in the above
 .escape
 
  LDA #0                 \ Set the value of KL+1 to 0, so when the main docked
- STA KL+1               \ loads, we show the docking tunnel and ship hanger
+ STA KL+1               \ loads, we show the docking tunnel and ship hangar
 
  JMP INBAY              \ Jump to INBAY to load the main docked code
 
@@ -8689,9 +8689,9 @@ LOAD_D% = LOAD% + P% - CODE%
  CMP #%00000010
  BEQ TT70
 
- LDA QQ3                \ The LSR A above shifted bit 0 of QQ3 into the C flag,
- BCC TT71               \ so this jumps to TT71 if bit 0 of QQ3 is 0, in other
-                        \ words if QQ3 = %000, %001 or %010 (0, 1 or 2)
+ LDA QQ3                \ If (QQ3 + 1) >> 1 < %10, i.e. if QQ3 = %000, %001 or
+ BCC TT71               \ %010 (0, 1 or 2), then jump to TT71 with A set to the
+                        \ original value of QQ3
 
  SBC #5                 \ Here QQ3 = %101, %110 or %111 (5, 6 or 7), so subtract
  CLC                    \ 5 to bring it down to 0, 1 or 2 (the C flag is already
@@ -8727,8 +8727,8 @@ LOAD_D% = LOAD% + P% - CODE%
  LDA #162               \ Print recursive token 2 ("GOVERNMENT") followed by
  JSR TT68               \ a colon
 
- LDA QQ4                \ The system economy is determined by the value in QQ4,
-                        \ so fetch it into A
+ LDA QQ4                \ The system's government is determined by the value in
+                        \ QQ4, so fetch it into A
 
  CLC                    \ Print recursive token 17 + A, followed by a paragraph
  ADC #177               \ break and Sentence Case, so:
@@ -13096,11 +13096,12 @@ LOAD_F% = LOAD% + P% - CODE%
 \
 \   channel/flush, amplitude (or envelope number if 1-4), pitch, duration
 \
-\ For the channel/flush parameter, the first byte is the channel while the
-\ second is the flush control (where a flush control of 0 queues the sound,
-\ while a flush control of 1 makes the sound instantly). When written in
-\ hexadecimal, the first figure gives the flush control, while the second is
-\ the channel (so &13 indicates flush control = 1 and channel = 3).
+\ For the channel/flush parameter, the top nibble of the low byte is the flush
+\ control (where a flush control of 0 queues the sound, and a flush control of
+\ 1 makes the sound instantly), while the bottom nibble of the low byte is the
+\ channel number . When written in hexadecimal, the first figure gives the flush
+\ control, while the second is the channel (so &13 indicates flush control = 1
+\ and channel = 3).
 \
 \ So when we call NOISE with A = 40 to make a long, low beep, then this is
 \ effectively what the NOISE routine does:
@@ -13939,7 +13940,7 @@ LOAD_F% = LOAD% + P% - CODE%
                         \ --- And replaced by: -------------------------------->
 
  JMP escape             \ Jump to escape to load the main docked code so that it
-                        \ shows the docking tunnel and ship hanger
+                        \ shows the docking tunnel and ship hangar
 
                         \ --- End of replacement ------------------------------>
 
@@ -14701,7 +14702,7 @@ LOAD_F% = LOAD% + P% - CODE%
 \   * Y toggles reverse joystick Y channel (&44)
 \   * J toggles reverse both joystick channels (&45)
 \   * K toggles keyboard and joystick (&46)
-\   * @ toggles keyboard and Delta 14b joystick (&47)
+\   * @ toggles keyboard and Delta 14B joystick (&47)
 \
 \ The numbers in brackets are the internal key numbers (see p.142 of the
 \ Advanced User Guide for a list of internal key numbers). We pass the key that

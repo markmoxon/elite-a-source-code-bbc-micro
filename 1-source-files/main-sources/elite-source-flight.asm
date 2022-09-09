@@ -1804,14 +1804,14 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
 
 .BSTK
 
- SKIP 1                 \ Delta 14b joystick configuration setting
+ SKIP 1                 \ Delta 14B joystick configuration setting
                         \
                         \   * 127 = keyboard
                         \
-                        \   * 128 = Delta 14b joystick
+                        \   * 128 = Delta 14B joystick
                         \
                         \ Elite-A doesn't support the Bitstik, but instead it
-                        \ supports the multi-button Volmace Delta 14b joystick,
+                        \ supports the multi-button Volmace Delta 14B joystick,
                         \ reusing the BSTK variable to determine whether it is
                         \ configured
 
@@ -3453,7 +3453,7 @@ LOAD_A% = LOAD%
 
  JSR HFS2               \ Call HFS2 to draw the launch tunnel rings
 
- JMP DOENTRY            \ Go to the docking bay (i.e. show the ship hanger)
+ JMP DOENTRY            \ Go to the docking bay (i.e. show the ship hangar)
 
 .MA62
 
@@ -9666,7 +9666,7 @@ NEXT
 
                         \ --- End of replacement ------------------------------>
 
- JMP GOIN               \ Go to the docking bay (i.e. show the ship hanger
+ JMP GOIN               \ Go to the docking bay (i.e. show the ship hangar
                         \ screen) and return from the subroutine with a tail
                         \ call
 
@@ -15290,9 +15290,9 @@ LOAD_D% = LOAD% + P% - CODE%
  CMP #%00000010
  BEQ TT70
 
- LDA QQ3                \ The LSR A above shifted bit 0 of QQ3 into the C flag,
- BCC TT71               \ so this jumps to TT71 if bit 0 of QQ3 is 0, in other
-                        \ words if QQ3 = %000, %001 or %010 (0, 1 or 2)
+ LDA QQ3                \ If (QQ3 + 1) >> 1 < %10, i.e. if QQ3 = %000, %001 or
+ BCC TT71               \ %010 (0, 1 or 2), then jump to TT71 with A set to the
+                        \ original value of QQ3
 
  SBC #5                 \ Here QQ3 = %101, %110 or %111 (5, 6 or 7), so subtract
  CLC                    \ 5 to bring it down to 0, 1 or 2 (the C flag is already
@@ -15328,8 +15328,8 @@ LOAD_D% = LOAD% + P% - CODE%
  LDA #162               \ Print recursive token 2 ("GOVERNMENT") followed by
  JSR TT68               \ a colon
 
- LDA QQ4                \ The system economy is determined by the value in QQ4,
-                        \ so fetch it into A
+ LDA QQ4                \ The system's government is determined by the value in
+                        \ QQ4, so fetch it into A
 
  CLC                    \ Print recursive token 17 + A, followed by a paragraph
  ADC #177               \ break and Sentence Case, so:
@@ -24890,11 +24890,12 @@ LOAD_F% = LOAD% + P% - CODE%
 \
 \   channel/flush, amplitude (or envelope number if 1-4), pitch, duration
 \
-\ For the channel/flush parameter, the first byte is the channel while the
-\ second is the flush control (where a flush control of 0 queues the sound,
-\ while a flush control of 1 makes the sound instantly). When written in
-\ hexadecimal, the first figure gives the flush control, while the second is
-\ the channel (so &13 indicates flush control = 1 and channel = 3).
+\ For the channel/flush parameter, the top nibble of the low byte is the flush
+\ control (where a flush control of 0 queues the sound, and a flush control of
+\ 1 makes the sound instantly), while the bottom nibble of the low byte is the
+\ channel number . When written in hexadecimal, the first figure gives the flush
+\ control, while the second is the channel (so &13 indicates flush control = 1
+\ and channel = 3).
 \
 \ So when we call NOISE with A = 40 to make a long, low beep, then this is
 \ effectively what the NOISE routine does:
@@ -28318,12 +28319,12 @@ LOAD_F% = LOAD% + P% - CODE%
 \       Name: b_table
 \       Type: Variable
 \   Category: Keyboard
-\    Summary: Lookup table for Delta 14b joystick buttons
-\  Deep dive: Delta 14b joystick support
+\    Summary: Lookup table for Delta 14B joystick buttons
+\  Deep dive: Delta 14B joystick support
 \
 \ ------------------------------------------------------------------------------
 \
-\ In the following table, which maps buttons on the Delta 14b to the flight
+\ In the following table, which maps buttons on the Delta 14B to the flight
 \ controls, the high nibble of the value gives the column:
 \
 \   &6 = %110 = left column
@@ -28377,15 +28378,15 @@ LOAD_F% = LOAD% + P% - CODE%
 \       Name: b_14
 \       Type: Subroutine
 \   Category: Keyboard
-\    Summary: Scan the Delta 14b joystick buttons
-\  Deep dive: Delta 14b joystick support
+\    Summary: Scan the Delta 14B joystick buttons
+\  Deep dive: Delta 14B joystick support
 \
 \ ------------------------------------------------------------------------------
 \
-\ Scan the Delta 14b for the flight key given in register Y, where Y is the
+\ Scan the Delta 14B for the flight key given in register Y, where Y is the
 \ offset into the KYTB table above (so this is the same approach as in DKS1).
 \
-\ The keys on the Delta 14b are laid out as follows (the top two fire buttons
+\ The keys on the Delta 14B are laid out as follows (the top two fire buttons
 \ are treated the same as the top button in the middle row):
 \
 \   Fire laser                                    Fire laser
@@ -28398,7 +28399,7 @@ LOAD_F% = LOAD% + P% - CODE%
 \ Arguments:
 \
 \   Y                   The offset into the KYTB table of the key that we want
-\                       to scan on the Delta 14b
+\                       to scan on the Delta 14B
 \
 \ ******************************************************************************
 
@@ -28408,14 +28409,14 @@ LOAD_F% = LOAD% + P% - CODE%
 
  LDA #0                 \ Set A = 0 for the second pass through the following,
                         \ so we can check the joystick plugged into the rear
-                        \ socket of the Delta 14b adaptor
+                        \ socket of the Delta 14B adaptor
 
 .b_14
 
                         \ This is the entry point for the routine, which is
                         \ called with A = 128 (the value of BTSK when the Delta
                         \ 14b is enabled), and if the key we are checking has a
-                        \ corresponding button on the Delta 14b, it is run a
+                        \ corresponding button on the Delta 14B, it is run a
                         \ second time with A = 0
 
  TAX                    \ Store A in X so we can restore it below
@@ -28427,7 +28428,7 @@ LOAD_F% = LOAD% + P% - CODE%
                         \ pitch controls
 
                         \ If we get here, then the offset in Y points to a
-                        \ control with a corresponding button on the Delta 14b,
+                        \ control with a corresponding button on the Delta 14B,
                         \ and we pass through the following twice, once with a
                         \ starting value of A = 128, and again with a starting
                         \ value of A = 0
@@ -28435,15 +28436,15 @@ LOAD_F% = LOAD% + P% - CODE%
                         \ On the first pass, the EOR will set A to the value
                         \ from b_table but with bit 7 set, which means we scan
                         \ the joystick plugged into the side socket of the
-                        \ Delta 14b adaptor
+                        \ Delta 14B adaptor
                         \
                         \ On the second pass, the EOR will set A to the value
                         \ from b_table (i.e. with bit 7 clear), which means we
                         \ scan the joystick plugged into the rear socket of the
-                        \ Delta 14b adaptor
+                        \ Delta 14B adaptor
 
  STA VIA+&60            \ Set 6522 User VIA output register ORB (SHEILA &60) to
-                        \ the value in A, which tells the Delta 14b adaptor box
+                        \ the value in A, which tells the Delta 14B adaptor box
                         \ that we want to read the buttons specified in PB4 to
                         \ PB7 (i.e. bits 4-7), as follows:
                         \
@@ -28548,8 +28549,8 @@ LOAD_F% = LOAD% + P% - CODE%
 
                         \ --- Mod: Code added for Elite-A: -------------------->
 
- LDA BSTK               \ If BTSK is negative, then the Delta 14b joystick is
- BMI b_14               \ configured, so jump to b_14 to check the Delta 14b
+ LDA BSTK               \ If BTSK is negative, then the Delta 14B joystick is
+ BMI b_14               \ configured, so jump to b_14 to check the Delta 14B
                         \ joystick buttons
 
                         \ --- End of added code ------------------------------->
@@ -28746,7 +28747,7 @@ LOAD_F% = LOAD% + P% - CODE%
 \   * Y toggles reverse joystick Y channel (&44)
 \   * J toggles reverse both joystick channels (&45)
 \   * K toggles keyboard and joystick (&46)
-\   * @ toggles keyboard and Delta 14b joystick (&47)
+\   * @ toggles keyboard and Delta 14B joystick (&47)
 \
 \ The numbers in brackets are the internal key numbers (see p.142 of the
 \ Advanced User Guide for a list of internal key numbers). We pass the key that
@@ -28832,7 +28833,7 @@ LOAD_F% = LOAD% + P% - CODE%
                         \ --- Mod: Code added for Elite-A: -------------------->
 
  LDA #&51               \ Set 6522 User VIA output register ORB (SHEILA &60) to
- STA VIA+&60            \ the Delta 14b joystick button in the middle column
+ STA VIA+&60            \ the Delta 14B joystick button in the middle column
                         \ (upper nibble &5) and top row (lower nibble &1), which
                         \ corresponds to the fire button
 

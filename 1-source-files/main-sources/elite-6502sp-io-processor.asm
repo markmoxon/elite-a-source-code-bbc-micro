@@ -444,7 +444,7 @@ ORG CODE%
 \ order shown, and if the command returns a result (denoted by a leading = sign
 \ in the command name), then this is then sent back to the parasite.
 \
-\ Consider the following command, which scans the keyboard or Delta 14b keypad
+\ Consider the following command, which scans the keyboard or Delta 14B keypad
 \ for a specific flight key:
 \
 \   =scan_y(key_offset, delta_14b)
@@ -2019,7 +2019,7 @@ ORG CODE%
 \       Type: Subroutine
 \   Category: Drawing pixels
 \    Summary: Implement the draw_pixel command (draw space view pixels)
-\  Deep dive: Drawing colour pixels in mode 4
+\  Deep dive: Drawing monochrome pixels in mode 4
 \
 \ ------------------------------------------------------------------------------
 \
@@ -2729,7 +2729,7 @@ ORG CODE%
 .scan_fire
 
  LDA #&51               \ Set 6522 User VIA output register ORB (SHEILA &60) to
- STA VIA+&60            \ the Delta 14b joystick button in the middle column
+ STA VIA+&60            \ the Delta 14B joystick button in the middle column
                         \ (upper nibble &5) and top row (lower nibble &1), which
                         \ corresponds to the fire button
 
@@ -3553,21 +3553,21 @@ ORG CODE%
 \
 \       Name: UNWISE
 \       Type: Subroutine
-\   Category: Ship hanger
+\   Category: Ship hangar
 \    Summary: Switch the main line-drawing routine between EOR and OR logic
 \
 \ ------------------------------------------------------------------------------
 \
 \ This routine is run when the parasite sends a draw_mode command. It toggles
 \ the main line-drawing routine between EOR and OR logic, for use when drawing
-\ the ship hanger.
+\ the ship hangar.
 \
 \ It does this by modifying the instructions in the main line-drawing routine at
 \ LOIN/LL30, flipping the drawing logic between the default EOR logic (which
 \ merges with whatever is already on screen, allowing us to erase anything we
 \ draw for animation purposes) and OR logic (which overwrites the screen,
 \ ignoring anything that's already there). We want to use OR logic for drawing
-\ the ship hanger, as it looks better and we don't need to animate it).
+\ the ship hangar, as it looks better and we don't need to animate it).
 \
 \ The routine name, UNWISE, sums up this approach - if anything goes wrong, the
 \ results would be messy.
@@ -3685,12 +3685,12 @@ ORG CODE%
 \       Name: b_table
 \       Type: Variable
 \   Category: Keyboard
-\    Summary: Lookup table for Delta 14b joystick buttons
-\  Deep dive: Delta 14b joystick support
+\    Summary: Lookup table for Delta 14B joystick buttons
+\  Deep dive: Delta 14B joystick support
 \
 \ ------------------------------------------------------------------------------
 \
-\ In the following table, which maps buttons on the Delta 14b to the flight
+\ In the following table, which maps buttons on the Delta 14B to the flight
 \ controls, the high nibble of the value gives the column:
 \
 \   &6 = %110 = left column
@@ -3740,15 +3740,15 @@ ORG CODE%
 \       Name: b_14
 \       Type: Subroutine
 \   Category: Keyboard
-\    Summary: Scan the Delta 14b joystick buttons
-\  Deep dive: Delta 14b joystick support
+\    Summary: Scan the Delta 14B joystick buttons
+\  Deep dive: Delta 14B joystick support
 \
 \ ------------------------------------------------------------------------------
 \
-\ Scan the Delta 14b for the flight key given in register Y, where Y is the
+\ Scan the Delta 14B for the flight key given in register Y, where Y is the
 \ offset into the KYTB table above (so this is the same approach as in DKS1).
 \
-\ The keys on the Delta 14b are laid out as follows (the top two fire buttons
+\ The keys on the Delta 14B are laid out as follows (the top two fire buttons
 \ are treated the same as the top button in the middle row):
 \
 \   Fire laser                                    Fire laser
@@ -3761,7 +3761,7 @@ ORG CODE%
 \ Arguments:
 \
 \   Y                   The offset into the KYTB table of the key that we want
-\                       to scan on the Delta 14b
+\                       to scan on the Delta 14B
 \
 \ ******************************************************************************
 
@@ -3769,14 +3769,14 @@ ORG CODE%
 
  LDA #0                 \ Set A = 0 for the second pass through the following,
                         \ so we can check the joystick plugged into the rear
-                        \ socket of the Delta 14b adaptor
+                        \ socket of the Delta 14B adaptor
 
 .b_14
 
                         \ This is the entry point for the routine, which is
                         \ called with A = 128 (the value of BTSK when the Delta
                         \ 14b is enabled), and if the key we are checking has a
-                        \ corresponding button on the Delta 14b, it is run a
+                        \ corresponding button on the Delta 14B, it is run a
                         \ second time with A = 0
 
  TAX                    \ Store A in X so we can restore it below
@@ -3788,7 +3788,7 @@ ORG CODE%
                         \ pitch controls
 
                         \ If we get here, then the offset in Y points to a
-                        \ control with a corresponding button on the Delta 14b,
+                        \ control with a corresponding button on the Delta 14B,
                         \ and we pass through the following twice, once with a
                         \ starting value of A = 128, and again with a starting
                         \ value of A = 0
@@ -3796,15 +3796,15 @@ ORG CODE%
                         \ On the first pass, the EOR will set A to the value
                         \ from b_table but with bit 7 set, which means we scan
                         \ the joystick plugged into the side socket of the
-                        \ Delta 14b adaptor
+                        \ Delta 14B adaptor
                         \
                         \ On the second pass, the EOR will set A to the value
                         \ from b_table (i.e. with bit 7 clear), which means we
                         \ scan the joystick plugged into the rear socket of the
-                        \ Delta 14b adaptor
+                        \ Delta 14B adaptor
 
  STA VIA+&60            \ Set 6522 User VIA output register ORB (SHEILA &60) to
-                        \ the value in A, which tells the Delta 14b adaptor box
+                        \ the value in A, which tells the Delta 14B adaptor box
                         \ that we want to read the buttons specified in PB4 to
                         \ PB7 (i.e. bits 4-7), as follows:
                         \
@@ -3884,15 +3884,15 @@ ORG CODE%
 \       Type: Subroutine
 \   Category: Keyboard
 \    Summary: Implement the scan_y command (scan for a specific flight key or
-\             Delta 14b button press)
+\             Delta 14B button press)
 \
 \ ------------------------------------------------------------------------------
 \
 \ This routine is run when the parasite sends a scan_y command. If the game is
 \ configured to use the keyboard or standard joystick, then it scans the
 \ keyboard for a specified flight key (given as an offset into the KYTB table),
-\ or if the game is configured to use the Delta 14b joystick, it scans the
-\ Delta 14b keyboard for the relevant button press. It returns 0 to the parasite
+\ or if the game is configured to use the Delta 14B joystick, it scans the
+\ Delta 14B keyboard for the relevant button press. It returns 0 to the parasite
 \ if the key is not being pressed, or &FF if it is.
 \
 \ ******************************************************************************
@@ -3908,13 +3908,13 @@ ORG CODE%
                         \   * Y = the KYTB offset of the key to scan for (1 for
                         \         the first key, 2 for the second etc.)
                         \
-                        \   * A = the configuration byte for the Delta 14b
+                        \   * A = the configuration byte for the Delta 14B
                         \         joystick
 
  BMI b_14               \ If bit 7 of A is set, then the configuration byte for
-                        \ the Delta 14b joystick in BTSK must be &FF and the
-                        \ Delta 14b stick is configured for use, so jump to b_14
-                        \ to scan the Delta 14b joystick buttons
+                        \ the Delta 14B joystick in BTSK must be &FF and the
+                        \ Delta 14B stick is configured for use, so jump to b_14
+                        \ to scan the Delta 14B joystick buttons
 
                         \ If we get here then we know A = 0, as BTSK is either
                         \ 0 or &FF, and we just confirmed that it's not the
@@ -3996,15 +3996,15 @@ ORG CODE%
 \
 \       Name: HANGER
 \       Type: Subroutine
-\   Category: Ship hanger
+\   Category: Ship hangar
 \    Summary: Implement the picture_h command (draw horizontal lines for the
-\             ship hanger floor)
+\             ship hangar floor)
 \
 \ ------------------------------------------------------------------------------
 \
 \ This routine is run when the parasite sends a picture_h command. It draws a
-\ specified number of horizontal lines for the ship hanger's floor, making sure
-\ it draws between the ships when there are multiple ships in the hanger.
+\ specified number of horizontal lines for the ship hangar's floor, making sure
+\ it draws between the ships when there are multiple ships in the hangar.
 \
 \ ******************************************************************************
 
@@ -4025,7 +4025,7 @@ ORG CODE%
  CLC                    \
  ADC #Y                 \ where #Y is the y-coordinate of the centre of the
                         \ screen, so Y is now the horizontal pixel row of the
-                        \ line we want to draw to display the hanger floor
+                        \ line we want to draw to display the hangar floor
 
  LSR A                  \ Set A = A >> 3
  LSR A
@@ -4069,7 +4069,7 @@ ORG CODE%
 
  BEQ l_2045             \ If picture_2 is zero, jump to l_2045 to return from
                         \ the subroutine as there is only one ship in the
-                        \ hanger, so we are done
+                        \ hangar, so we are done
 
  JSR HAS2               \ Call HAS2 to a line to the right, starting with the
                         \ third pixel of the pixel row at screen address SC(1 0)
@@ -4096,14 +4096,14 @@ ORG CODE%
 \
 \       Name: HA2
 \       Type: Subroutine
-\   Category: Ship hanger
+\   Category: Ship hangar
 \    Summary: Implement the picture_v command (draw vertical lines for the ship
-\             hanger background)
+\             hangar background)
 \
 \ ------------------------------------------------------------------------------
 \
 \ This routine is run when the parasite sends a picture_v command. It draws the
-\ specified number of vertical lines for the ship hanger's background.
+\ specified number of vertical lines for the ship hangar's background.
 \
 \ ******************************************************************************
 
@@ -4173,8 +4173,8 @@ ORG CODE%
 \
 \       Name: HAS2
 \       Type: Subroutine
-\   Category: Ship hanger
-\    Summary: Draw a hanger background line from left to right
+\   Category: Ship hangar
+\    Summary: Draw a hangar background line from left to right
 \
 \ ------------------------------------------------------------------------------
 \
@@ -4247,8 +4247,8 @@ ORG CODE%
 \
 \       Name: HAS3
 \       Type: Subroutine
-\   Category: Ship hanger
-\    Summary: Draw a hanger background line from right to left
+\   Category: Ship hangar
+\    Summary: Draw a hangar background line from right to left
 \
 \ ------------------------------------------------------------------------------
 \

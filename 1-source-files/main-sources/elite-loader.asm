@@ -561,9 +561,11 @@ ENDMACRO
 \                       \ handler to support the split-screen mode
 \
 \ LDA VIA+&44           \ Read the 6522 System VIA T1C-L timer 1 low-order
-\ STA &0001             \ counter (SHEILA &44), which increments 1000 times a
-\                       \ second so this will be pretty random, and store it in
-\                       \ &0001 among the random number seeds at &0000
+\ STA &0001             \ counter (SHEILA &44), which decrements one million
+\                       \ times a second and will therefore be pretty random,
+\                       \ and store it in location &0001, which is among the
+\                       \ main game code's random seeds (so this seeds the
+\                       \ random number generator for the main game)
 \
 \ LDA #%00111001        \ Set 6522 System VIA interrupt enable register IER
 \ STA VIA+&4E           \ (SHEILA &4E) bits 0 and 3-5 (i.e. disable the Timer1,
@@ -711,7 +713,7 @@ ENDMACRO
                         \ --- And replaced by: -------------------------------->
 
  LDA #%11110000         \ Set the Data Direction Register (DDR) of port B of the
- STA VIA+&62            \ user port so we can read the buttons on the Delta 14b
+ STA VIA+&62            \ user port so we can read the buttons on the Delta 14B
                         \ joystick, using PB4 to PB7 as output (so we can write
                         \ to the button columns to select the column we are
                         \ interested in) and PB0 to PB3 as input (so we can read
@@ -1181,7 +1183,7 @@ ORG &0B00
 \
 \ CMP &55FF             \ Compare the checksum with the value in &55FF, which is
 \                       \ in the docked file we just loaded, in the byte before
-\                       \ the ship hanger blueprints at XX21
+\                       \ the ship hangar blueprints at XX21
 \
 \IF _REMOVE_CHECKSUMS
 \
@@ -1246,9 +1248,11 @@ ORG LOADcode + P% - LOAD
                         \ loading screen's Saturn
 
  LDA VIA+&44            \ Read the 6522 System VIA T1C-L timer 1 low-order
- STA RAND+1             \ counter (SHEILA &44), which increments 1000 times a
-                        \ second so this will be pretty random, and store it in
-                        \ RAND+1 among the hard-coded random seeds in RAND
+ STA RAND+1             \ counter (SHEILA &44), which decrements one million
+                        \ times a second and will therefore be pretty random,
+                        \ and store it in location RAND+1, which is among the
+                        \ main game code's random seeds in RAND (so this seeds
+                        \ the random number generator)
 
  JSR DORND              \ Set A and X to random numbers, say A = r1
 

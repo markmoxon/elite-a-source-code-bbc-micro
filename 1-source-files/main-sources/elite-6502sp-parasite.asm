@@ -1808,14 +1808,14 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
 
 .BSTK
 
- SKIP 1                 \ Delta 14b joystick configuration setting
+ SKIP 1                 \ Delta 14B joystick configuration setting
                         \
                         \   * 127 = keyboard
                         \
-                        \   * 128 = Delta 14b joystick
+                        \   * 128 = Delta 14B joystick
                         \
                         \ Elite-A doesn't support the Bitstik, but instead it
-                        \ supports the multi-button Volmace Delta 14b joystick,
+                        \ supports the multi-button Volmace Delta 14B joystick,
                         \ reusing the BSTK variable to determine whether it is
                         \ configured
 
@@ -2487,7 +2487,7 @@ ENDIF
 \       Name: DOENTRY
 \       Type: Subroutine
 \   Category: Flight
-\    Summary: Dock at the space station, show the ship hanger and work out any
+\    Summary: Dock at the space station, show the ship hangar and work out any
 \             mission progression
 \
 \ ******************************************************************************
@@ -2505,7 +2505,7 @@ ENDIF
 
  JSR HFS1               \ Show the space station docking tunnel
 
- JSR HALL               \ Show the ship hanger
+ JSR HALL               \ Show the ship hangar
 
  LDY #44                \ Wait for 44/50 of a second (0.88 seconds)
  JSR DELAY
@@ -7389,12 +7389,12 @@ LOAD_C% = LOAD% +P% - CODE%
 \
 \       Name: HATB
 \       Type: Variable
-\   Category: Ship hanger
-\    Summary: Ship hanger group table
+\   Category: Ship hangar
+\    Summary: Ship hangar group table
 \
 \ ------------------------------------------------------------------------------
 \
-\ This table contains groups of ships to show in the ship hanger. A group of
+\ This table contains groups of ships to show in the ship hangar. A group of
 \ ships is shown half the time (the other half shows a solo ship), and each of
 \ the four groups is equally likely.
 \
@@ -7412,7 +7412,7 @@ LOAD_C% = LOAD% +P% - CODE%
 \ Ths ship's y-coordinate is calculated in the has1 routine from the size of
 \ its targetable area. Ships of type 0 are not shown.
 \
-\ Note that ship numbers are for the ship hanger blueprints at XX21 in the
+\ Note that ship numbers are for the ship hangar blueprints at XX21 in the
 \ docked code, rather than the full set of ships in the flight code. They are:
 \
 \   1 = Cargo canister
@@ -7428,15 +7428,15 @@ LOAD_C% = LOAD% +P% - CODE%
 
 .HATB
 
-                        \ Hanger group for X = 0
+                        \ Hangar group for X = 0
                         \
                         \ Shuttle (left) and Transporter (right)
 
- EQUB 2                 \ Ship type in the hanger = 2 = Shuttle
+ EQUB 2                 \ Ship type in the hangar = 2 = Shuttle
  EQUB %01010100         \ x_hi = %01010100 = 84, z_hi   = 1     -> x = -84
  EQUB %00111011         \ z_lo = %00111011 = 59, x_sign = 1        z = +315
 
- EQUB 3                 \ Ship type in the hanger = 3 = Transporter
+ EQUB 3                 \ Ship type in the hangar = 3 = Transporter
  EQUB %10000010         \ x_hi = %10000010 = 130, z_hi   = 1    -> x = +130
  EQUB %10110000         \ z_lo = %10110000 = 176, x_sign = 0       z = +432
 
@@ -7444,32 +7444,32 @@ LOAD_C% = LOAD% +P% - CODE%
  EQUB 0
  EQUB 0
 
-                        \ Hanger group for X = 9
+                        \ Hangar group for X = 9
                         \
                         \ Three cargo canisters (left, far right and forward,
                         \ right)
 
- EQUB 1                 \ Ship type in the hanger = 1 = Cargo canister
+ EQUB 1                 \ Ship type in the hangar = 1 = Cargo canister
  EQUB %01010000         \ x_hi = %01010000 = 80, z_hi   = 1     -> x = -80
  EQUB %00010001         \ z_lo = %00010001 = 17, x_sign = 1        z = +273
 
- EQUB 1                 \ Ship type in the hanger = 1 = Cargo canister
+ EQUB 1                 \ Ship type in the hangar = 1 = Cargo canister
  EQUB %11010001         \ x_hi = %11010001 = 209, z_hi = 2      -> x = +209
  EQUB %00101000         \ z_lo = %00101000 =  40, x_sign = 0       z = +552
 
- EQUB 1                 \ Ship type in the hanger = 1 = Cargo canister
+ EQUB 1                 \ Ship type in the hangar = 1 = Cargo canister
  EQUB %01000000         \ x_hi = %01000000 = 64, z_hi   = 1     -> x = +64
  EQUB %00000110         \ z_lo = %00000110 = 6,  x_sign = 0        z = +262
 
-                        \ Hanger group for X = 18
+                        \ Hangar group for X = 18
                         \
                         \ Transporter (right) and Cobra Mk III (left)
 
- EQUB 3                 \ Ship type in the hanger = 3 = Transporter
+ EQUB 3                 \ Ship type in the hangar = 3 = Transporter
  EQUB %01100000         \ x_hi = %01100000 =  96, z_hi   = 1    -> x = +96
  EQUB %10010000         \ z_lo = %10010000 = 144, x_sign = 0       z = +400
 
- EQUB 4                 \ Ship type in the hanger = 4 = Cobra Mk III
+ EQUB 4                 \ Ship type in the hangar = 4 = Cobra Mk III
  EQUB %00010000         \ x_hi = %00010000 =  16, z_hi   = 1    -> x = -16
  EQUB %11010001         \ z_lo = %11010001 = 209, x_sign = 1       z = +465
 
@@ -7477,15 +7477,15 @@ LOAD_C% = LOAD% +P% - CODE%
  EQUB 0
  EQUB 0
 
-                        \ Hanger group for X = 27
+                        \ Hangar group for X = 27
                         \
                         \ Viper (right and forward) and Krait (left)
 
- EQUB 6                 \ Ship type in the hanger = 6 = Viper
+ EQUB 6                 \ Ship type in the hangar = 6 = Viper
  EQUB %01010001         \ x_hi = %01010001 =  81, z_hi  = 2     -> x = +81
  EQUB %11111000         \ z_lo = %11111000 = 248, x_sign = 0       z = +760
 
- EQUB 7                 \ Ship type in the hanger = 7 = Krait
+ EQUB 7                 \ Ship type in the hangar = 7 = Krait
  EQUB %01100000         \ x_hi = %01100000 = 96,  z_hi   = 1    -> x = -96
  EQUB %01110101         \ z_lo = %01110101 = 117, x_sign = 1       z = +373
 
@@ -7497,12 +7497,12 @@ LOAD_C% = LOAD% +P% - CODE%
 \
 \       Name: HALL
 \       Type: Subroutine
-\   Category: Ship hanger
-\    Summary: Draw the ships in the ship hanger, then draw the hanger
+\   Category: Ship hangar
+\    Summary: Draw the ships in the ship hangar, then draw the hangar
 \
 \ ------------------------------------------------------------------------------
 \
-\ Half the time this will draw one of the four pre-defined ship hanger groups in
+\ Half the time this will draw one of the four pre-defined ship hangar groups in
 \ HATB, and half the time this will draw a solitary Sidewinder, Mamba, Krait or
 \ Adder on a random position. In all cases, the ships will be randomly spun
 \ around on the ground so they can face in any dirction, and larger ships are
@@ -7588,7 +7588,7 @@ LOAD_C% = LOAD% +P% - CODE%
  PHA                    \ call to HAS1 (as it contains the index of the next
                         \ byte in HATB
 
- JSR HAS1               \ Call HAS1 to draw this ship in the hanger
+ JSR HAS1               \ Call HAS1 to draw this ship in the hangar
 
  PLA                    \ Restore the value of X, so X points to the next byte
  TAX                    \ in HATB after the three bytes we copied into XX15
@@ -7600,9 +7600,9 @@ LOAD_C% = LOAD% +P% - CODE%
 
  LDY #128               \ Set Y = 128 to send as byte #2 of the parameter block
                         \ to the OSWORD 248 command below, to tell the I/O
-                        \ processor that there are multiple ships in the hanger
+                        \ processor that there are multiple ships in the hangar
 
- BNE HA9                \ Jump to HA9 to display the ship hanger (this BNE is
+ BNE HA9                \ Jump to HA9 to display the ship hangar (this BNE is
                         \ effectively a JMP as Y is never zero)
 
 .HA7
@@ -7618,12 +7618,12 @@ LOAD_C% = LOAD% +P% - CODE%
 
  JSR DORND              \ Set XX15+2 = random number 0-7
  AND #7                 \
- STA XX15+2             \ which is either 0 (no ships in the hanger) or one of
-                        \ the first 7 ship types in the ship hanger blueprints
+ STA XX15+2             \ which is either 0 (no ships in the hangar) or one of
+                        \ the first 7 ship types in the ship hangar blueprints
                         \ table, i.e. a cargo canister, Shuttle, Transporter,
                         \ Cobra Mk III, Python, Viper or Krait
 
- JSR HAS1               \ Call HAS1 to draw this ship in the hanger, with the
+ JSR HAS1               \ Call HAS1 to draw this ship in the hangar, with the
                         \ the following properties:
                         \
                         \   * Random x-coordinate from -63 to +63
@@ -7634,28 +7634,28 @@ LOAD_C% = LOAD% +P% - CODE%
                         \   * Random z-coordinate from +256 to +639
 
  LDY #0                 \ Set Y = 0 to use in the following instruction, to tell
-                        \ the hanger-drawing routine that there is just one ship
-                        \ in the hanger, so it knows not to draw between the
+                        \ the hangar-drawing routine that there is just one ship
+                        \ in the hangar, so it knows not to draw between the
                         \ ships
 
 .HA9
 
  STY YSAV               \ Store Y in YSAV to specify whether there are multiple
-                        \ ships in the hanger
+                        \ ships in the hangar
 
  JSR UNWISE             \ Call UNWISE to switch the main line-drawing routine
                         \ between EOR and OR logic (in this case, switching it
                         \ back to EOR logic so that we can erase anything we
                         \ draw on-screen)
 
-                        \ Fall through into HANGER to draw the hanger background
+                        \ Fall through into HANGER to draw the hangar background
 
 \ ******************************************************************************
 \
 \       Name: HANGER
 \       Type: Subroutine
-\   Category: Ship hanger
-\    Summary: Display the ship hanger by sending picture_h and picture_v
+\   Category: Ship hangar
+\    Summary: Display the ship hangar by sending picture_h and picture_v
 \             commands to the I/O processor
 \
 \ ******************************************************************************
@@ -7699,7 +7699,7 @@ LOAD_C% = LOAD% +P% - CODE%
                         \   picture_h(line_count, multiple_ships)
                         \
                         \ which will draw the specified number of horizontal
-                        \ lines as the hanger floor, drawing lines between
+                        \ lines as the hangar floor, drawing lines between
                         \ multiple ships if required
 
  LDA P                  \ Send the first parameter to the I/O processor:
@@ -7733,7 +7733,7 @@ LOAD_C% = LOAD% +P% - CODE%
                         \   picture_v(line_count)
                         \
                         \ which will draw the specified number of vertical
-                        \ lines as the back wall of the hanger
+                        \ lines as the back wall of the hangar
 
  LDA XSAV               \ Send the parameter to the I/O processor:
  JSR tube_write         \
@@ -7752,12 +7752,12 @@ LOAD_C% = LOAD% +P% - CODE%
 \
 \       Name: HAS1
 \       Type: Subroutine
-\   Category: Ship hanger
-\    Summary: Draw a ship in the ship hanger
+\   Category: Ship hangar
+\    Summary: Draw a ship in the ship hangar
 \
 \ ------------------------------------------------------------------------------
 \
-\ The ship's position within the hanger is determined by the arguments and the
+\ The ship's position within the hangar is determined by the arguments and the
 \ size of the ship's targetable area, as follows:
 \
 \   * The x-coordinate is (x_sign x_hi 0) from the arguments, so the ship can be
@@ -7847,14 +7847,14 @@ LOAD_C% = LOAD% +P% - CODE%
                         \ an RTS)
 
                         \ We now work our way through the ship blueprints table
-                        \ for the hanger, counting valid blueprints until we
+                        \ for the hangar, counting valid blueprints until we
                         \ have found the Y-th valid blueprint (we do this as the
-                        \ hanger blueprint table at XX21 is not fully populated,
+                        \ hangar blueprint table at XX21 is not fully populated,
                         \ so the Y-th ship is not necessarily at position Y)
 
  LDX #4                 \ We can start looking from ship blueprint 3, because we
                         \ don't show ship 1 (missile) or ship 2 (space station)
-                        \ in the hanger. Setting X to 4, which then gets
+                        \ in the hangar. Setting X to 4, which then gets
                         \ incremented to 6, will start us at XX21(5 4), which is
                         \ the address of ship blueprint 3 (escape pod)
 
@@ -7914,7 +7914,7 @@ LOAD_C% = LOAD% +P% - CODE%
 \
 \       Name: UNWISE
 \       Type: Subroutine
-\   Category: Ship hanger
+\   Category: Ship hangar
 \    Summary: Switch the main line-drawing routine between EOR and OR logic by
 \             sending a draw_mode command to the I/O processor
 \
@@ -9982,9 +9982,9 @@ LOAD_D% = LOAD% + P% - CODE%
  CMP #%00000010
  BEQ TT70
 
- LDA QQ3                \ The LSR A above shifted bit 0 of QQ3 into the C flag,
- BCC TT71               \ so this jumps to TT71 if bit 0 of QQ3 is 0, in other
-                        \ words if QQ3 = %000, %001 or %010 (0, 1 or 2)
+ LDA QQ3                \ If (QQ3 + 1) >> 1 < %10, i.e. if QQ3 = %000, %001 or
+ BCC TT71               \ %010 (0, 1 or 2), then jump to TT71 with A set to the
+                        \ original value of QQ3
 
  SBC #5                 \ Here QQ3 = %101, %110 or %111 (5, 6 or 7), so subtract
  CLC                    \ 5 to bring it down to 0, 1 or 2 (the C flag is already
@@ -10020,8 +10020,8 @@ LOAD_D% = LOAD% + P% - CODE%
  LDA #162               \ Print recursive token 2 ("GOVERNMENT") followed by
  JSR TT68               \ a colon
 
- LDA QQ4                \ The system economy is determined by the value in QQ4,
-                        \ so fetch it into A
+ LDA QQ4                \ The system's government is determined by the value in
+                        \ QQ4, so fetch it into A
 
  CLC                    \ Print recursive token 17 + A, followed by a paragraph
  ADC #177               \ break and Sentence Case, so:
@@ -16073,11 +16073,12 @@ LOAD_F% = LOAD% + P% - CODE%
 \
 \   channel/flush, amplitude (or envelope number if 1-4), pitch, duration
 \
-\ For the channel/flush parameter, the first byte is the channel while the
-\ second is the flush control (where a flush control of 0 queues the sound,
-\ while a flush control of 1 makes the sound instantly). When written in
-\ hexadecimal, the first figure gives the flush control, while the second is
-\ the channel (so &13 indicates flush control = 1 and channel = 3).
+\ For the channel/flush parameter, the top nibble of the low byte is the flush
+\ control (where a flush control of 0 queues the sound, and a flush control of
+\ 1 makes the sound instantly), while the bottom nibble of the low byte is the
+\ channel number . When written in hexadecimal, the first figure gives the flush
+\ control, while the second is the channel (so &13 indicates flush control = 1
+\ and channel = 3).
 \
 \ So when we call NOISE with A = 40 to make a long, low beep, then this is
 \ effectively what the NOISE routine does:
@@ -16700,7 +16701,7 @@ LOAD_F% = LOAD% + P% - CODE%
  BPL BEL1               \ Loop back to BEL1 to zero the next byte, until we have
                         \ zeroed them all
 
- LDA #127               \ Set BSTK = 127 (positive) to disable the Delta 14b
+ LDA #127               \ Set BSTK = 127 (positive) to disable the Delta 14B
  STA BSTK               \ joystick
 
                         \ Fall through into TT170 to start the game
@@ -18639,7 +18640,7 @@ ENDIF
 \   * Y toggles reverse joystick Y channel (&44)
 \   * J toggles reverse both joystick channels (&45)
 \   * K toggles keyboard and joystick (&46)
-\   * @ toggles keyboard and Delta 14b joystick (&47)
+\   * @ toggles keyboard and Delta 14B joystick (&47)
 \
 \ The numbers in brackets are the internal key numbers (see p.142 of the
 \ Advanced User Guide for a list of internal key numbers). We pass the key that
@@ -38092,7 +38093,7 @@ ENDIF
 \       Name: DOENTRYS
 \       Type: Subroutine
 \   Category: Loader
-\    Summary: Dock at the space station, show the ship hanger and work out any
+\    Summary: Dock at the space station, show the ship hangar and work out any
 \             mission progression
 \
 \ ******************************************************************************
@@ -39005,7 +39006,7 @@ LOAD_J% = LOAD% + P% - CODE%
 
  JSR HFS2               \ Call HFS2 to draw the launch tunnel rings
 
- JMP DOENTRYS           \ Go to the docking bay (i.e. show the ship hanger)
+ JMP DOENTRYS           \ Go to the docking bay (i.e. show the ship hangar)
 
 .MA62
 
@@ -41270,7 +41271,7 @@ LOAD_J% = LOAD% + P% - CODE%
 
  JSR jmp                \ Set the current system to the selected system
 
- JMP GOIN               \ Go to the docking bay (i.e. show the ship hanger
+ JMP GOIN               \ Go to the docking bay (i.e. show the ship hangar
                         \ screen) and return from the subroutine with a tail
                         \ call
 
@@ -52191,7 +52192,7 @@ LOAD_M% = LOAD% + P% - CODE%
 \
 \   Y                   The offset into the KYTB table above of the key that we
 \                       want to scan on the keyboard
-
+\
 \ ******************************************************************************
 
 .DKS1
