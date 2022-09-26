@@ -47504,9 +47504,10 @@ NEXT
  INX                    \ Set pitch counter to 0 (no pitch, roll only)
  STX INWK+30
 
- STX FRIN+1             \ Set the sun/space station slot at FRIN+1 to 0, to
-                        \ indicate we should show the space station rather than
-                        \ the sun
+ STX FRIN+1             \ Set the second slot in the FRIN table to 0, so when we
+                        \ fall through into NWSHP below, the new station that
+                        \ gets created will go into slot FRIN+1, as this will be
+                        \ the first empty slot that the routine finds
 
  STX INWK+33            \ As part of the setup, we want to point INWK(34 33) to
                         \ LSO, the line heap for the space station. LSO is at
