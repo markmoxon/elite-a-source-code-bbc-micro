@@ -2645,7 +2645,7 @@ Code size is &400
 Execute at &2568 
 Reload at &2568 
 S.WORDS &400  &800  &2568  &2568 
-Saving file 'versions/elite-a/3-assembled-output/WORDS.bin'
+Saving file '3-assembled-output/WORDS.bin'
 .SHIP_MISSILE
      7F00   00
      7F01   40 06
@@ -3010,7 +3010,7 @@ Code size is &100
 Execute at &2468 
 Reload at &2468 
 S.MISSILE &7F00  &8000  &2468  &2468 
-Saving file 'versions/elite-a/3-assembled-output/MISSILE.bin'
+Saving file '3-assembled-output/MISSILE.bin'
 .ZP
      0000
 .RAND
@@ -24570,7 +24570,7 @@ Execute at &11E3
 Reload at &5600 
 S.S.T &1652  &6000  &11E3  &5600 
 S.1.D &11E3  &6000  &11E3  &11E3 
-Saving file 'versions/elite-a/3-assembled-output/1.D.bin'
+Saving file '3-assembled-output/1.D.bin'
 .ZP
      0000
 .RAND
@@ -34791,7 +34791,7 @@ S.D.ELTG &4757  &5085  &11E3  &4757
      55F8   F0 FC      BEQ &55F6
      55FA   60         RTS
 S.1.F &11E3  &55FB  &11E3  &11E3 
-Saving file 'versions/elite-a/3-assembled-output/1.F.bin'
+Saving file '3-assembled-output/1.F.bin'
 .ZP
      0000
 .RAND
@@ -57751,7 +57751,7 @@ End macro CTOK
      536B   00
      536C   00
 S.1.E &11E3  &536D  &11E3  &11E3 
-Saving file 'versions/elite-a/3-assembled-output/1.E.bin'
+Saving file '3-assembled-output/1.E.bin'
 .ZP
      0000
 .RAND
@@ -110364,7 +110364,7 @@ Execute at &9313
 Reload at &9313 
 S.2.SHIPS &9313  &B885  &9313  &9313 
 S.2.T &1000  &B885  &1000  &1000 
-Saving file 'versions/elite-a/3-assembled-output/2.T.bin'
+Saving file '3-assembled-output/2.T.bin'
 .DL
      008B
 .key_tube
@@ -111629,7 +111629,7 @@ Saving file 'versions/elite-a/3-assembled-output/2.T.bin'
      19A2   68         PLA
      19A3   60         RTS
 S.2.H &1200  &19A4  &1200  &1200 
-Saving file 'versions/elite-a/3-assembled-output/2.H.bin'
+Saving file '3-assembled-output/2.H.bin'
 .TRTB%
      0004
 .INF
@@ -112583,7 +112583,7 @@ End macro FNE
 .old_BYTEV
      DDA5   4C 00 01   JMP &0100
 S.ELITE &1900  &2DF3  &1900  &1900 
-Saving file 'versions/elite-a/3-assembled-output/ELITE.bin'
+Saving file '3-assembled-output/ELITE.bin'
 .XX21
      5600   00 7F
      5602   5D 56
@@ -116084,7 +116084,7 @@ Macro FACE:
 End macro FACE
      5FF9   08
 S.S.A &5600  &5FFA  &5600  &5600 
-Saving file 'versions/elite-a/3-assembled-output/S.A.bin'
+Saving file '3-assembled-output/S.A.bin'
 .XX21
      5600   00 7F
      5602   5D 56
@@ -119541,7 +119541,7 @@ Macro FACE:
 End macro FACE
      5FD3   09
 S.S.B &5600  &5FD4  &5600  &5600 
-Saving file 'versions/elite-a/3-assembled-output/S.B.bin'
+Saving file '3-assembled-output/S.B.bin'
 .XX21
      5600   00 7F
      5602   5D 56
@@ -123009,7 +123009,7 @@ Macro FACE:
 End macro FACE
      5FDD   07
 S.S.C &5600  &5FDE  &5600  &5600 
-Saving file 'versions/elite-a/3-assembled-output/S.C.bin'
+Saving file '3-assembled-output/S.C.bin'
 .XX21
      5600   00 7F
      5602   5D 56
@@ -126504,7 +126504,7 @@ Macro FACE:
 End macro FACE
      5FFD   08
 S.S.D &5600  &5FFE  &5600  &5600 
-Saving file 'versions/elite-a/3-assembled-output/S.D.bin'
+Saving file '3-assembled-output/S.D.bin'
 .XX21
      5600   00 7F
      5602   5D 56
@@ -129842,7 +129842,7 @@ Macro FACE:
 End macro FACE
      5F83   06
 S.S.E &5600  &5F84  &5600  &5600 
-Saving file 'versions/elite-a/3-assembled-output/S.E.bin'
+Saving file '3-assembled-output/S.E.bin'
 .XX21
      5600   00 7F
      5602   5D 56
@@ -133296,7 +133296,7 @@ Macro FACE:
 End macro FACE
      5FD7   06
 S.S.F &5600  &5FD8  &5600  &5600 
-Saving file 'versions/elite-a/3-assembled-output/S.F.bin'
+Saving file '3-assembled-output/S.F.bin'
 .XX21
      5600   00 7F
      5602   5D 56
@@ -136786,7 +136786,7 @@ Macro FACE:
 End macro FACE
      5FEF   08
 S.S.G &5600  &5FF0  &5600  &5600 
-Saving file 'versions/elite-a/3-assembled-output/S.G.bin'
+Saving file '3-assembled-output/S.G.bin'
 .XX21
      5600   00 7F
      5602   5D 56
@@ -140084,7 +140084,7 @@ Macro FACE:
 End macro FACE
      5F65   06
 S.S.H &5600  &5F66  &5600  &5600 
-Saving file 'versions/elite-a/3-assembled-output/S.H.bin'
+Saving file '3-assembled-output/S.H.bin'
 .XX21
      5600   00 7F
      5602   5D 56
@@ -143572,7 +143572,7 @@ Macro FACE:
 End macro FACE
      5FEB   07
 S.S.I &5600  &5FEC  &5600  &5600 
-Saving file 'versions/elite-a/3-assembled-output/S.I.bin'
+Saving file '3-assembled-output/S.I.bin'
 .XX21
      5600   00 7F
      5602   5D 56
@@ -147011,7 +147011,7 @@ Macro FACE:
 End macro FACE
      5FD7   06
 S.S.J &5600  &5FD8  &5600  &5600 
-Saving file 'versions/elite-a/3-assembled-output/S.J.bin'
+Saving file '3-assembled-output/S.J.bin'
 .XX21
      5600   00 7F
      5602   5D 56
@@ -150501,7 +150501,7 @@ Macro FACE:
 End macro FACE
      5FF1   07
 S.S.K &5600  &5FF2  &5600  &5600 
-Saving file 'versions/elite-a/3-assembled-output/S.K.bin'
+Saving file '3-assembled-output/S.K.bin'
 .XX21
      5600   00 7F
      5602   5D 56
@@ -153969,7 +153969,7 @@ Macro FACE:
 End macro FACE
      5FE1   06
 S.S.L &5600  &5FE2  &5600  &5600 
-Saving file 'versions/elite-a/3-assembled-output/S.L.bin'
+Saving file '3-assembled-output/S.L.bin'
 .XX21
      5600   00 7F
      5602   5D 56
@@ -157395,7 +157395,7 @@ Macro FACE:
 End macro FACE
      5FC5   06
 S.S.M &5600  &5FC6  &5600  &5600 
-Saving file 'versions/elite-a/3-assembled-output/S.M.bin'
+Saving file '3-assembled-output/S.M.bin'
 .XX21
      5600   00 7F
      5602   5D 56
@@ -160874,7 +160874,7 @@ Macro FACE:
 End macro FACE
      5FE3   05
 S.S.N &5600  &5FE4  &5600  &5600 
-Saving file 'versions/elite-a/3-assembled-output/S.N.bin'
+Saving file '3-assembled-output/S.N.bin'
 .XX21
      5600   00 7F
      5602   5D 56
@@ -164350,7 +164350,7 @@ Macro FACE:
 End macro FACE
      5FE1   03
 S.S.O &5600  &5FE2  &5600  &5600 
-Saving file 'versions/elite-a/3-assembled-output/S.O.bin'
+Saving file '3-assembled-output/S.O.bin'
 .XX21
      5600   00 7F
      5602   5D 56
@@ -167802,7 +167802,7 @@ Macro FACE:
 End macro FACE
      5FD3   08
 S.S.P &5600  &5FD4  &5600  &5600 
-Saving file 'versions/elite-a/3-assembled-output/S.P.bin'
+Saving file '3-assembled-output/S.P.bin'
 .XX21
      5600   00 7F
      5602   5D 56
@@ -171238,7 +171238,7 @@ Macro FACE:
 End macro FACE
      5FC5   08
 S.S.Q &5600  &5FC6  &5600  &5600 
-Saving file 'versions/elite-a/3-assembled-output/S.Q.bin'
+Saving file '3-assembled-output/S.Q.bin'
 .XX21
      5600   00 7F
      5602   5D 56
@@ -174703,7 +174703,7 @@ Macro FACE:
 End macro FACE
      5FE5   08
 S.S.R &5600  &5FE6  &5600  &5600 
-Saving file 'versions/elite-a/3-assembled-output/S.R.bin'
+Saving file '3-assembled-output/S.R.bin'
 .XX21
      5600   00 7F
      5602   5D 56
@@ -178022,7 +178022,7 @@ Macro FACE:
 End macro FACE
      5F7D   06
 S.S.S &5600  &5F7E  &5600  &5600 
-Saving file 'versions/elite-a/3-assembled-output/S.S.bin'
+Saving file '3-assembled-output/S.S.bin'
 .XX21
      5600   00 7F
      5602   5D 56
@@ -181335,7 +181335,7 @@ Macro FACE:
 End macro FACE
      5F73   06
 S.S.T &5600  &5F74  &5600  &5600 
-Saving file 'versions/elite-a/3-assembled-output/S.T.bin'
+Saving file '3-assembled-output/S.T.bin'
 .XX21
      5600   00 7F
      5602   5D 56
@@ -184818,7 +184818,7 @@ Macro FACE:
 End macro FACE
      5FED   08
 S.S.U &5600  &5FEE  &5600  &5600 
-Saving file 'versions/elite-a/3-assembled-output/S.U.bin'
+Saving file '3-assembled-output/S.U.bin'
 .XX21
      5600   00 7F
      5602   5D 56
@@ -188170,7 +188170,7 @@ Macro FACE:
 End macro FACE
      5F8D   06
 S.S.V &5600  &5F8E  &5600  &5600 
-Saving file 'versions/elite-a/3-assembled-output/S.V.bin'
+Saving file '3-assembled-output/S.V.bin'
 .XX21
      5600   00 7F
      5602   5D 56
@@ -191633,7 +191633,7 @@ Macro FACE:
 End macro FACE
      5FDD   05
 S.S.W &5600  &5FDE  &5600  &5600 
-Saving file 'versions/elite-a/3-assembled-output/S.W.bin'
+Saving file '3-assembled-output/S.W.bin'
 .readme
      0000   2A 44 49 ...
      0009   0D
@@ -191659,4 +191659,4 @@ Saving file 'versions/elite-a/3-assembled-output/S.W.bin'
      00EA   0D
      00EB   2A 7C 20 ...
      0111   0D
-Saving file 'versions/elite-a/3-assembled-output/!BOOT.txt'
+Saving file '3-assembled-output/!BOOT.txt'
