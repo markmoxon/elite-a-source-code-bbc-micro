@@ -911,7 +911,7 @@ ENDMACRO
  EQUB LO(SHIP_COBRA_MK_1_EDGES - SHIP_COBRA_MK_1)  \ Edges data offset (low)
  EQUB LO(SHIP_COBRA_MK_1_FACES - SHIP_COBRA_MK_1)  \ Faces data offset (low)
  EQUB 69                \ Max. edge count          = (69 - 1) / 4 = 17
- EQUB 40                \ Gun vertex               = 40
+ EQUB 40                \ Gun vertex               = 40 / 4 = 10
  EQUB 26                \ Explosion count          = 5, as (4 * n) + 6 = 26
  EQUB 66                \ Number of vertices       = 66 / 6 = 11
  EQUB 18                \ Number of edges          = 18

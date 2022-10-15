@@ -391,7 +391,7 @@ ORG &0000
                         \
                         \   * &FF = no target
                         \
-                        \   * 1-13 = the slot number of the ship that our
+                        \   * 1-12 = the slot number of the ship that our
                         \            missile is locked onto
 
 .XX1
@@ -2170,8 +2170,8 @@ LOAD_A% = LOAD%
 \ ------------------------------------------------------------------------------
 \
 \ The drive part of this string (the "0") is updated with the chosen drive in
-\ the QUS1 routine, but the directory part (the "E") is fixed. The variable is
-\ followed directly by the commander file at NA%, which starts with the
+\ the GTNMEW routine, but the directory part (the "E") is fixed. The variable
+\ is followed directly by the commander file at NA%, which starts with the
 \ commander name, so the full string at S1% is in the format ":0.E.JAMESON",
 \ which gives the full filename of the commander file.
 \
@@ -9143,7 +9143,7 @@ LOAD_C% = LOAD% +P% - CODE%
  BEQ PAL1               \ Keep looping up to PAL1 until a key is pressed
 
  LDA #0                 \ Set the ship's AI flag to 0 (no AI) so it doesn't get
- STA INWK+31            \ any ideas of its pwn
+ STA INWK+31            \ any ideas of its own
 
  LDA #1                 \ Clear the top part of the screen, draw a white border,
  JSR TT66               \ and set the current view type in QQ11 to 1
@@ -12455,6 +12455,8 @@ LOAD_D% = LOAD% + P% - CODE%
 \   Category: Text
 \    Summary: Print a space
 \
+\ ------------------------------------------------------------------------------
+\
 \ Other entry points:
 \
 \   TT162+2             Jump to TT27 to print the text token in A
@@ -14774,7 +14776,7 @@ LOAD_E% = LOAD% + P% - CODE%
  LDY #31                \ Clear bits 3, 4 and 6 in the ship's byte #31, which
  LDA (INF),Y            \ stops drawing the ship on-screen (bit 3), hides it
  AND #%10100111         \ from the scanner (bit 4) and stops any lasers firing
- STA (INF),Y            \ at it (bit 6)
+ STA (INF),Y            \ (bit 6)
 
 .WS1
 
@@ -21716,7 +21718,7 @@ LOAD_G% = LOAD% + P% - CODE%
  BEQ EE31
 
  LDA XX1+31             \ The ship is exploding, so set bit 3 of the ship's byte
- ORA #8                 \ #31 to denote that we are drawing something on-screen
+ ORA #%00001000         \ #31 to denote that we are drawing something on-screen
  STA XX1+31             \ for this ship
 
  JMP DOEXP              \ Jump to DOEXP to display the explosion cloud,
@@ -40093,7 +40095,8 @@ LOAD_J% = LOAD% + P% - CODE%
 \       Name: FLIP
 \       Type: Subroutine
 \   Category: Stardust
-\    Summary: Reflect the stardust particles in the screen diagonal
+\    Summary: Reflect the stardust particles in the screen diagonal and redraw
+\             the stardust field
 \
 \ ------------------------------------------------------------------------------
 \
@@ -43212,13 +43215,13 @@ LOAD_K% = LOAD% + P% - CODE%
  STA INWK+5             \ launched just below our line of sight
 
  LDA MSTG               \ Set A to the missile lock target, shifted left so the
- ASL A                  \ slot number is in bits 1-4
+ ASL A                  \ slot number is in bits 1-5
 
  ORA #%10000000         \ Set bit 7 and store the result in byte #32, the AI
  STA INWK+32            \ flag launched ship for the launched ship. For missiles
                         \ this enables AI (bit 7), makes it friendly towards us
                         \ (bit 6), sets the target to the value of MSTG (bits
-                        \ 1-4), and sets its lock status as launched (bit 0).
+                        \ 1-5), and sets its lock status as launched (bit 0).
                         \ It doesn't matter what it does for our abandoned
                         \ Cobra, as the AI flag gets overwritten once we return
                         \ from the subroutine back to the ESCAPE routine that
@@ -47554,9 +47557,10 @@ NEXT
  INX                    \ Set pitch counter to 0 (no pitch, roll only)
  STX INWK+30
 
- STX FRIN+1             \ Set the sun/space station slot at FRIN+1 to 0, to
-                        \ indicate we should show the space station rather than
-                        \ the sun
+ STX FRIN+1             \ Set the second slot in the FRIN table to 0, so when we
+                        \ fall through into NWSHP below, the new station that
+                        \ gets created will go into slot FRIN+1, as this will be
+                        \ the first empty slot that the routine finds
 
  STX INWK+33            \ As part of the setup, we want to point INWK(34 33) to
                         \ LSO, the line heap for the space station. LSO is at
@@ -54104,9 +54108,10 @@ LOAD_M% = LOAD% + P% - CODE%
                         \ view)
 
  JSR FLIP               \ Swap the x- and y-coordinates of all the stardust
-                        \ particles
+                        \ particles and redraw the stardust field
 
- JSR WPSHPSS            \ Wipe all the ships from the scanner
+ JSR WPSHPSS            \ Wipe all the ships from the scanner and mark them all
+                        \ as not being shown on-screen
 
                         \ And fall through into SIGHT to draw the laser
                         \ crosshairs
@@ -55692,7 +55697,7 @@ ENDIF
  EQUB LO(SHIP_TRANSPORTER_EDGES - SHIP_TRANSPORTER)   \ Edges data offset (low)
  EQUB LO(SHIP_TRANSPORTER_FACES - SHIP_TRANSPORTER)   \ Faces data offset (low)
  EQUB 145               \ Max. edge count          = (145 - 1) / 4 = 36
- EQUB 48                \ Gun vertex               = 48
+ EQUB 48                \ Gun vertex               = 48 / 4 = 12
  EQUB 26                \ Explosion count          = 5, as (4 * n) + 6 = 26
  EQUB 222               \ Number of vertices       = 222 / 6 = 37
  EQUB 46                \ Number of edges          = 46
@@ -56136,7 +56141,7 @@ ENDIF
  EQUB LO(SHIP_ANACONDA_EDGES - SHIP_ANACONDA)      \ Edges data offset (low)
  EQUB LO(SHIP_ANACONDA_FACES - SHIP_ANACONDA)      \ Faces data offset (low)
  EQUB 89                \ Max. edge count          = (89 - 1) / 4 = 22
- EQUB 48                \ Gun vertex               = 48
+ EQUB 48                \ Gun vertex               = 48 / 4 = 12
  EQUB 46                \ Explosion count          = 10, as (4 * n) + 6 = 46
  EQUB 90                \ Number of vertices       = 90 / 6 = 15
  EQUB 25                \ Number of edges          = 25
@@ -56926,7 +56931,7 @@ ENDIF
  EQUB LO(SHIP_COBRA_MK_1_EDGES - SHIP_COBRA_MK_1)  \ Edges data offset (low)
  EQUB LO(SHIP_COBRA_MK_1_FACES - SHIP_COBRA_MK_1)  \ Faces data offset (low)
  EQUB 69                \ Max. edge count          = (69 - 1) / 4 = 17
- EQUB 40                \ Gun vertex               = 40
+ EQUB 40                \ Gun vertex               = 40 / 4 = 10
  EQUB 26                \ Explosion count          = 5, as (4 * n) + 6 = 26
  EQUB 66                \ Number of vertices       = 66 / 6 = 11
  EQUB 18                \ Number of edges          = 18
@@ -57007,7 +57012,7 @@ ENDIF
  EQUB LO(SHIP_ASP_MK_2_EDGES - SHIP_ASP_MK_2)      \ Edges data offset (low)
  EQUB LO(SHIP_ASP_MK_2_FACES - SHIP_ASP_MK_2)      \ Faces data offset (low)
  EQUB 101               \ Max. edge count          = (101 - 1) / 4 = 25
- EQUB 32                \ Gun vertex               = 32
+ EQUB 32                \ Gun vertex               = 32 / 4 = 8
  EQUB 26                \ Explosion count          = 5, as (4 * n) + 6 = 26
  EQUB 114               \ Number of vertices       = 114 / 6 = 19
  EQUB 28                \ Number of edges          = 28

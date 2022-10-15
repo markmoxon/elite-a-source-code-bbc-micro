@@ -388,7 +388,7 @@ ORG &0000
                         \
                         \   * &FF = no target
                         \
-                        \   * 1-13 = the slot number of the ship that our
+                        \   * 1-12 = the slot number of the ship that our
                         \            missile is locked onto
 
 .XX1
@@ -6381,7 +6381,8 @@ LOAD_B% = LOAD% + P% - CODE%
 \       Name: FLIP, Removed
 \       Type: Subroutine
 \   Category: Stardust
-\    Summary: Reflect the stardust particles in the screen diagonal
+\    Summary: Reflect the stardust particles in the screen diagonal and redraw
+\             the stardust field
 \
 \ ------------------------------------------------------------------------------
 \
@@ -12595,7 +12596,7 @@ LOAD_C% = LOAD% +P% - CODE%
  BEQ PAL1               \ Keep looping up to PAL1 until a key is pressed
 
  LDA #0                 \ Set the ship's AI flag to 0 (no AI) so it doesn't get
- STA INWK+31            \ any ideas of its pwn
+ STA INWK+31            \ any ideas of its own
 
  LDA #1                 \ Clear the top part of the screen, draw a white border,
  JSR TT66               \ and set the current view type in QQ11 to 1
@@ -16723,6 +16724,8 @@ LOAD_D% = LOAD% + P% - CODE%
 \   Category: Text
 \    Summary: Print a space
 \
+\ ------------------------------------------------------------------------------
+\
 \ Other entry points:
 \
 \   TT162+2             Jump to TT27 to print the text token in A
@@ -19553,7 +19556,7 @@ LOAD_E% = LOAD% + P% - CODE%
  LDY #31                \ Clear bits 3, 4 and 6 in the ship's byte #31, which
  LDA (INF),Y            \ stops drawing the ship on-screen (bit 3), hides it
  AND #%10100111         \ from the scanner (bit 4) and stops any lasers firing
- STA (INF),Y            \ at it (bit 6)
+ STA (INF),Y            \ (bit 6)
 
 .WS1
 
@@ -20379,7 +20382,7 @@ LOAD_E% = LOAD% + P% - CODE%
                         \   * 1 (so we start drawing on the second row of the
                         \     character block)
                         \
-                        \   * Move right one character (8 bytes) for each count
+                        \   * Move left one character (8 bytes) for each count
                         \     of X, so when X = 0 we are drawing the rightmost
                         \     missile, for X = 1 we hop to the left by one
                         \     character, and so on
@@ -28676,7 +28679,7 @@ LOAD_G% = LOAD% + P% - CODE%
  BEQ EE31
 
  LDA XX1+31             \ The ship is exploding, so set bit 3 of the ship's byte
- ORA #8                 \ #31 to denote that we are drawing something on-screen
+ ORA #%00001000         \ #31 to denote that we are drawing something on-screen
  STA XX1+31             \ for this ship
 
                         \ --- Mod: Original Acornsoft code removed: ----------->
@@ -37028,7 +37031,7 @@ ENDMACRO
  EQUB LO(SHIP_TRANSPORTER_EDGES - SHIP_TRANSPORTER)   \ Edges data offset (low)
  EQUB LO(SHIP_TRANSPORTER_FACES - SHIP_TRANSPORTER)   \ Faces data offset (low)
  EQUB 145               \ Max. edge count          = (145 - 1) / 4 = 36
- EQUB 48                \ Gun vertex               = 48
+ EQUB 48                \ Gun vertex               = 48 / 4 = 12
  EQUB 26                \ Explosion count          = 5, as (4 * n) + 6 = 26
  EQUB 222               \ Number of vertices       = 222 / 6 = 37
  EQUB 46                \ Number of edges          = 46

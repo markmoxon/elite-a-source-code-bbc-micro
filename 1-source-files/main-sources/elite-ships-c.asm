@@ -1315,7 +1315,7 @@ ENDMACRO
  EQUB LO(SHIP_TRANSPORTER_EDGES - SHIP_TRANSPORTER)   \ Edges data offset (low)
  EQUB LO(SHIP_TRANSPORTER_FACES - SHIP_TRANSPORTER)   \ Faces data offset (low)
  EQUB 145               \ Max. edge count          = (145 - 1) / 4 = 36
- EQUB 48                \ Gun vertex               = 48
+ EQUB 48                \ Gun vertex               = 48 / 4 = 12
  EQUB 26                \ Explosion count          = 5, as (4 * n) + 6 = 26
  EQUB 222               \ Number of vertices       = 222 / 6 = 37
  EQUB 46                \ Number of edges          = 46
