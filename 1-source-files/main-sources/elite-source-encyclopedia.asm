@@ -348,7 +348,7 @@ ORG &0000
                         \
                         \   * &FF = no target
                         \
-                        \   * 1-13 = the slot number of the ship that our
+                        \   * 1-12 = the slot number of the ship that our
                         \            missile is locked onto
 
 .XX1
@@ -10282,6 +10282,8 @@ LOAD_D% = LOAD% + P% - CODE%
 \       Type: Subroutine
 \   Category: Text
 \    Summary: Print a space
+\
+\ ------------------------------------------------------------------------------
 \
 \ Other entry points:
 \
