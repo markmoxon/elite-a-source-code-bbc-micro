@@ -27894,7 +27894,7 @@ LOAD_F% = LOAD% + P% - CODE%
 
 .ECMOF
 
- LDA #0                 \ Set ECMA and ECMB to 0 to indicate that no E.C.M. is
+ LDA #0                 \ Set ECMA and ECMP to 0 to indicate that no E.C.M. is
  STA ECMA               \ currently running
  STA ECMP
 
