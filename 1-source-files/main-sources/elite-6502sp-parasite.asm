@@ -7711,7 +7711,7 @@ LOAD_C% = LOAD% +P% - CODE%
  LDX XSAV               \ Fetch the loop counter from XSAV and increment it
  INX
 
- CPX #13                \ If the loop counter is less than 13 (i.e. T = 2 to 12)
+ CPX #13                \ If the loop counter is less than 13 (i.e. 2 to 12)
  BCC HAL1               \ then loop back to HAL1 to draw the next line
 
                         \ The floor is done, so now we move on to the back wall
@@ -9146,7 +9146,7 @@ LOAD_C% = LOAD% +P% - CODE%
  LDA #1                 \ Clear the top part of the screen, draw a white border,
  JSR TT66               \ and set the current view type in QQ11 to 1
 
- JSR LL9                \ Draw the ship on screen to remove it
+ JSR LL9                \ Draw the ship on screen to redisplay it
 
                         \ Fall through into MT23 to move to row 10, switch to
                         \ white text, and switch to lower case when printing
@@ -16711,7 +16711,7 @@ LOAD_F% = LOAD% + P% - CODE%
 \       Name: BR1 (Part 1 of 2)
 \       Type: Subroutine
 \   Category: Start and end
-\    Summary: Start or restart the game
+\    Summary: Show the "Load New Commander (Y/N)?" screen and start the game
 \
 \ ------------------------------------------------------------------------------
 \
@@ -16763,7 +16763,8 @@ LOAD_F% = LOAD% + P% - CODE%
 \       Name: BR1 (Part 2 of 2)
 \       Type: Subroutine
 \   Category: Start and end
-\    Summary: Show the "Load New Commander (Y/N)?" screen and start the game
+\    Summary: Show the "Press Fire or Space, Commander" screen and start the
+\             game
 \
 \ ------------------------------------------------------------------------------
 \

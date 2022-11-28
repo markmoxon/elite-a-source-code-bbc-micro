@@ -9756,7 +9756,7 @@ LOAD_C% = LOAD% +P% - CODE%
 
                         \ We start by drawing the floor
 
- LDX #2                 \ We start with a loop using a counter in T that goes
+ LDX #2                 \ We start with a loop using a counter in XSAV that goes
                         \ from 2 to 12, one for each of the 11 horizontal lines
                         \ in the floor, so set the initial value in X
 
@@ -9768,14 +9768,14 @@ LOAD_C% = LOAD% +P% - CODE%
 
  LDX XSAV               \ Retrieve the loop counter from XSAV
 
- STX Q                  \ Set Q = T
+ STX Q                  \ Set Q to the value of the loop counter
 
  JSR DVID4              \ Calculate the following:
                         \
                         \   (P R) = 256 * A / Q
-                        \         = 256 * 130 / T
+                        \         = 256 * 130 / Q
                         \
-                        \ so P = 130 / T, and as the counter T goes from 2 to
+                        \ so P = 130 / Q, and as the counter Q goes from 2 to
                         \ 12, P goes 65, 43, 32 ... 13, 11, 10, with the
                         \ difference between two consecutive numbers getting
                         \ smaller as P gets smaller
@@ -9786,10 +9786,10 @@ LOAD_C% = LOAD% +P% - CODE%
                         \ the screen) and bunching up towards the horizon (low
                         \ value of P, low y-coordinate, higher up the screen)
 
- LDA P                  \ Set Y = #Y + P
+ LDA P                  \ Set A = #Y + P
  CLC                    \
  ADC #Y                 \ where #Y is the y-coordinate of the centre of the
-                        \ screen, so Y is now the horizontal pixel row of the
+                        \ screen, so A is now the horizontal pixel row of the
                         \ line we want to draw to display the hangar floor
 
  LSR A                  \ Set A = A >> 3
@@ -9839,8 +9839,12 @@ LOAD_C% = LOAD% +P% - CODE%
                         \ hangar, so we also need to draw the horizontal line in
                         \ the gap between the ships
 
- JSR HAS2               \ Call HAS2 to a line to the right, starting with the
-                        \ third pixel of the pixel row at screen address SC(1 0)
+ JSR HAS2               \ Call HAS2 to draw a line to the right, starting with
+                        \ the third pixel of the pixel row at screen address
+                        \ SC(1 0), so this draws a line from just after the
+                        \ halfway point across the right half of the screen,
+                        \ going right until we bump into something already
+                        \ on-screen, at which point it stops drawing
 
  LDY #128               \ We now draw the line from the centre of the screen
                         \ to the left. SC(1 0) points to the start address of
@@ -9864,7 +9868,7 @@ LOAD_C% = LOAD% +P% - CODE%
  LDX XSAV               \ Fetch the loop counter from XSAV and increment it
  INX
 
- CPX #13                \ If the loop counter is less than 13 (i.e. T = 2 to 12)
+ CPX #13                \ If the loop counter is less than 13 (i.e. 2 to 12)
  BCC HAL1               \ then loop back to HAL1 to draw the next line
 
                         \ The floor is done, so now we move on to the back wall
@@ -12599,7 +12603,7 @@ LOAD_C% = LOAD% +P% - CODE%
  LDA #1                 \ Clear the top part of the screen, draw a white border,
  JSR TT66               \ and set the current view type in QQ11 to 1
 
- JSR LL9                \ Draw the ship on screen to remove it
+ JSR LL9                \ Draw the ship on screen to redisplay it
 
                         \ Fall through into MT23 to move to row 10, switch to
                         \ white text, and switch to lower case when printing
@@ -22855,7 +22859,7 @@ LOAD_F% = LOAD% + P% - CODE%
 \       Name: BR1 (Part 1 of 2)
 \       Type: Subroutine
 \   Category: Start and end
-\    Summary: Start or restart the game
+\    Summary: Show the "Load New Commander (Y/N)?" screen and start the game
 \
 \ ------------------------------------------------------------------------------
 \
@@ -22895,7 +22899,8 @@ LOAD_F% = LOAD% + P% - CODE%
 \       Name: BR1 (Part 2 of 2)
 \       Type: Subroutine
 \   Category: Start and end
-\    Summary: Show the "Load New Commander (Y/N)?" screen and start the game
+\    Summary: Show the "Press Fire or Space, Commander" screen and start the
+\             game
 \
 \ ------------------------------------------------------------------------------
 \

@@ -13902,7 +13902,7 @@ LOAD_F% = LOAD% + P% - CODE%
 \       Name: BR1
 \       Type: Subroutine
 \   Category: Start and end
-\    Summary: Start or restart the game
+\    Summary: Show the "Load New Commander (Y/N)?" screen and start the game
 \
 \ ------------------------------------------------------------------------------
 \
