@@ -8749,7 +8749,7 @@ NEXT
  LDA YC                 \ Fetch YC, the y-coordinate (row) of the text cursor
 
  CMP #24                \ If the text cursor is on the screen (i.e. YC < 24, so
- BCC RR3                \ we are on rows 1-23), then jump to RR3 to print the
+ BCC RR3                \ we are on rows 0-23), then jump to RR3 to print the
                         \ character
 
  JSR TT66               \ Otherwise we are off the bottom of the screen, so
