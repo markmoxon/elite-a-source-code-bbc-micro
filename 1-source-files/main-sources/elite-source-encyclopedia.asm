@@ -14899,7 +14899,7 @@ LOAD_F% = LOAD% + P% - CODE%
 \ JMP BR1               \ ESCAPE is being pressed, so jump to BR1 to end the
 \                       \ game
 \
-\ CPX #&64              \ If "B" is not being pressed, skip to DK7
+\ CPX #&64              \ If "B" is not being pressed, skip to nobit
 \ BNE nobit
 \
 \ LDA BSTK              \ Toggle the value of BSTK between 0 and &FF
