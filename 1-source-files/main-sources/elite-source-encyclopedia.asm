@@ -14112,15 +14112,11 @@ LOAD_F% = LOAD% + P% - CODE%
 \       Name: ZERO
 \       Type: Subroutine
 \   Category: Utility routines
-\    Summary: Zero-fill pages &9, &A, &B, &C and &D
+\    Summary: Reset the local bubble of universe and ship status
 \
 \ ------------------------------------------------------------------------------
 \
 \ This resets the following workspaces to zero:
-\
-\   * The ship data blocks ascending from K% at &0900
-\
-\   * The ship line heap descending from WP at &0D40
 \
 \   * WP workspace variables from FRIN to de, which include the ship slots for
 \     the local bubble of universe, and various flight and ship status variables
