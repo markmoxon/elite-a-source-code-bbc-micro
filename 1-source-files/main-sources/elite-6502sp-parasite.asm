@@ -48637,13 +48637,17 @@ NEXT
 \       Name: PLS22
 \       Type: Subroutine
 \   Category: Drawing planets
-\    Summary: Draw a circle or half-circle
+\    Summary: Draw an ellipse or half-ellipse
 \  Deep dive: The sine, cosine and arctan tables
+\             Drawing meridians and equators
+\             Drawing craters
 \
 \ ------------------------------------------------------------------------------
 \
-\ Draw a circle or half-circle, used for the planet's equator and meridian, or
-\ crater.
+\ Draw an ellipse or half-ellipse, to be used for the planet's equator and
+\ meridian (in which case we draw half an ellipse), or crater (in which case we
+\ draw a full ellipse). The shape that is drawn is a circle that has been
+\ squashed, as if the circle has been tilted at an angle away from the viewer.
 \
 \ This routine is called from parts 2 and 3 of PL9, and does the following:
 \
@@ -48661,11 +48665,11 @@ NEXT
 \
 \   TGT                 The number of segments to draw:
 \
-\                         * 32 for a half circle (a meridian)
+\                         * 32 for a half ellipse (a meridian)
 \
-\                         * 64 for a half circle (a crater)
+\                         * 64 for a full ellipse (a crater)
 \
-\   CNT2                The starting segment for drawing the half-circle
+\   CNT2                The starting segment for drawing the half-ellipse
 \
 \ ******************************************************************************
 
