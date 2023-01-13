@@ -1,6 +1,14 @@
-# Original binaries for Elite-A
+# Image binaries for Elite-A
 
-This folder contains the image, boot and conversion tool binaries from the original sources for Elite-A.
+This folder contains the image binaries from the original game disc for the BBC Micro disc version of Elite on Ian Bell's personal website.
+
+* [P.(C)ASFT.bin](P.(C)ASFT.bin) is the "(c) ACORNSOFT 1984" image for the bottom of the title screen
+
+* [P.A-SOFT.bin](P.A-SOFT.bin) is the "ACORNSOFT" image for the very top of the title screen
+
+* [P.DIALS.bin](P.DIALS.bin) is the dashboard image
+
+* [P.ELITE.bin](P.ELITE.bin) is the "ELITE" image for the title screen
 
 ---
 

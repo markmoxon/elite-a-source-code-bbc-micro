@@ -28,7 +28,7 @@
 \
 \ ******************************************************************************
 
-INCLUDE "1-source-files/main-sources/elite-header.h.asm"
+INCLUDE "1-source-files/main-sources/elite-build-options.asm"
 
 _RELEASED               = (_VARIANT = 1)
 _SOURCE_DISC            = (_VARIANT = 2)
@@ -514,8 +514,8 @@ ORG &0000
                         \         Get commander name ("@", save/load commander)
                         \         In-system jump just arrived ("J")
                         \         Data on System screen (red key f6)
-                        \         Buy Cargo screen (red key f1)
-                        \         Mis-jump just arrived (witchspace)
+                        \   2   = Buy Cargo screen (red key f1)
+                        \   3   = Mis-jump just arrived (witchspace)
                         \   4   = Sell Cargo screen (red key f2)
                         \   6   = Death screen
                         \   8   = Status Mode screen (red key f8)
@@ -6712,8 +6712,6 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 \
 \ Other entry points:
 \
-\   RR3+1               Contains an RTS
-\
 \   RREN                Prints the character definition pointed to by P(2 1) at
 \                       the screen address pointed to by (A SC). Used by the
 \                       BULB routine
@@ -6971,7 +6969,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
                         \ the print
 
  CMP #24                \ If the text cursor is on the screen (i.e. YC < 24, so
- BCC RR3                \ we are on rows 1-23), then jump to RR3 to print the
+ BCC RR3                \ we are on rows 0-23), then jump to RR3 to print the
                         \ character
 
  PHA                    \ Store A on the stack so we can retrieve it below
@@ -11030,7 +11028,7 @@ LOAD_E% = LOAD% + P% - CODE%
 
  LDX QQ17               \ Fetch QQ17, which controls letter case, into X
 
- BEQ TT74               \ If QQ17 = 0, then ALL CAPS is set, so jump to TT27
+ BEQ TT74               \ If QQ17 = 0, then ALL CAPS is set, so jump to TT74
                         \ to print this character as is (i.e. as a capital)
 
  BMI TT41               \ If QQ17 has bit 7 set, then we are using Sentence
@@ -11990,7 +11988,7 @@ LOAD_E% = LOAD% + P% - CODE%
  STA LSX                \ be filled up
 
  JSR CHKON              \ Call CHKON to check whether any part of the new sun's
-                        \ circle appears on-screen, and of it does, set P(2 1)
+                        \ circle appears on-screen, and if it does, set P(2 1)
                         \ to the maximum y-coordinate of the new sun on-screen
 
  LDA #0                 \ Set A = 0
@@ -12379,7 +12377,7 @@ LOAD_E% = LOAD% + P% - CODE%
 .PLF11
 
                         \ If we get here then there is no old sun line on this
-                        \ line, so we can just draw the new sun's line. The new
+                        \ line, so we can just draw the new sun's line
 
  LDX K3                 \ Set YY(1 0) = K3(1 0), the x-coordinate of the centre
  STX YY                 \ of the new sun's line
@@ -12703,7 +12701,7 @@ LOAD_E% = LOAD% + P% - CODE%
 
  LDA #2                 \ The high byte is negative and non-zero, so we went
  STA X1                 \ past the left edge of the screen, so clip X1 to the
-                        \ y-coordinate of the left edge of the screen
+                        \ x-coordinate of the left edge of the screen
 
 .PL44
 
@@ -13904,7 +13902,7 @@ LOAD_F% = LOAD% + P% - CODE%
 \       Name: BR1
 \       Type: Subroutine
 \   Category: Start and end
-\    Summary: Start or restart the game
+\    Summary: Show the "Load New Commander (Y/N)?" screen and start the game
 \
 \ ------------------------------------------------------------------------------
 \
@@ -14114,15 +14112,11 @@ LOAD_F% = LOAD% + P% - CODE%
 \       Name: ZERO
 \       Type: Subroutine
 \   Category: Utility routines
-\    Summary: Zero-fill pages &9, &A, &B, &C and &D
+\    Summary: Reset the local bubble of universe and ship status
 \
 \ ------------------------------------------------------------------------------
 \
 \ This resets the following workspaces to zero:
-\
-\   * The ship data blocks ascending from K% at &0900
-\
-\   * The ship line heap descending from WP at &0D40
 \
 \   * WP workspace variables from FRIN to de, which include the ship slots for
 \     the local bubble of universe, and various flight and ship status variables
@@ -14397,7 +14391,7 @@ LOAD_F% = LOAD% + P% - CODE%
 
 .ECMOF
 
- LDA #0                 \ Set ECMA and ECMB to 0 to indicate that no E.C.M. is
+ LDA #0                 \ Set ECMA and ECMP to 0 to indicate that no E.C.M. is
  STA ECMA               \ currently running
  STA ECMP
 
@@ -14901,7 +14895,7 @@ LOAD_F% = LOAD% + P% - CODE%
 \ JMP BR1               \ ESCAPE is being pressed, so jump to BR1 to end the
 \                       \ game
 \
-\ CPX #&64              \ If "B" is not being pressed, skip to DK7
+\ CPX #&64              \ If "B" is not being pressed, skip to nobit
 \ BNE nobit
 \
 \ LDA BSTK              \ Toggle the value of BSTK between 0 and &FF

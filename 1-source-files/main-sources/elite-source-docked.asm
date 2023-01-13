@@ -28,7 +28,7 @@
 \
 \ ******************************************************************************
 
-INCLUDE "1-source-files/main-sources/elite-header.h.asm"
+INCLUDE "1-source-files/main-sources/elite-build-options.asm"
 
 _RELEASED               = (_VARIANT = 1)
 _SOURCE_DISC            = (_VARIANT = 2)
@@ -554,8 +554,8 @@ ORG &0000
                         \         Get commander name ("@", save/load commander)
                         \         In-system jump just arrived ("J")
                         \         Data on System screen (red key f6)
-                        \         Buy Cargo screen (red key f1)
-                        \         Mis-jump just arrived (witchspace)
+                        \   2   = Buy Cargo screen (red key f1)
+                        \   3   = Mis-jump just arrived (witchspace)
                         \   4   = Sell Cargo screen (red key f2)
                         \   6   = Death screen
                         \   8   = Status Mode screen (red key f8)
@@ -8227,8 +8227,6 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 \
 \ Other entry points:
 \
-\   RR3+1               Contains an RTS
-\
 \   RREN                Prints the character definition pointed to by P(2 1) at
 \                       the screen address pointed to by (A SC). Used by the
 \                       BULB routine
@@ -8486,7 +8484,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
                         \ the print
 
  CMP #24                \ If the text cursor is on the screen (i.e. YC < 24, so
- BCC RR3                \ we are on rows 1-23), then jump to RR3 to print the
+ BCC RR3                \ we are on rows 0-23), then jump to RR3 to print the
                         \ character
 
  PHA                    \ Store A on the stack so we can retrieve it below
@@ -9758,7 +9756,7 @@ LOAD_C% = LOAD% +P% - CODE%
 
                         \ We start by drawing the floor
 
- LDX #2                 \ We start with a loop using a counter in T that goes
+ LDX #2                 \ We start with a loop using a counter in XSAV that goes
                         \ from 2 to 12, one for each of the 11 horizontal lines
                         \ in the floor, so set the initial value in X
 
@@ -9770,14 +9768,14 @@ LOAD_C% = LOAD% +P% - CODE%
 
  LDX XSAV               \ Retrieve the loop counter from XSAV
 
- STX Q                  \ Set Q = T
+ STX Q                  \ Set Q to the value of the loop counter
 
  JSR DVID4              \ Calculate the following:
                         \
                         \   (P R) = 256 * A / Q
-                        \         = 256 * 130 / T
+                        \         = 256 * 130 / Q
                         \
-                        \ so P = 130 / T, and as the counter T goes from 2 to
+                        \ so P = 130 / Q, and as the counter Q goes from 2 to
                         \ 12, P goes 65, 43, 32 ... 13, 11, 10, with the
                         \ difference between two consecutive numbers getting
                         \ smaller as P gets smaller
@@ -9788,10 +9786,10 @@ LOAD_C% = LOAD% +P% - CODE%
                         \ the screen) and bunching up towards the horizon (low
                         \ value of P, low y-coordinate, higher up the screen)
 
- LDA P                  \ Set Y = #Y + P
+ LDA P                  \ Set A = #Y + P
  CLC                    \
  ADC #Y                 \ where #Y is the y-coordinate of the centre of the
-                        \ screen, so Y is now the horizontal pixel row of the
+                        \ screen, so A is now the horizontal pixel row of the
                         \ line we want to draw to display the hangar floor
 
  LSR A                  \ Set A = A >> 3
@@ -9841,8 +9839,12 @@ LOAD_C% = LOAD% +P% - CODE%
                         \ hangar, so we also need to draw the horizontal line in
                         \ the gap between the ships
 
- JSR HAS2               \ Call HAS2 to a line to the right, starting with the
-                        \ third pixel of the pixel row at screen address SC(1 0)
+ JSR HAS2               \ Call HAS2 to draw a line to the right, starting with
+                        \ the third pixel of the pixel row at screen address
+                        \ SC(1 0), so this draws a line from just after the
+                        \ halfway point across the right half of the screen,
+                        \ going right until we bump into something already
+                        \ on-screen, at which point it stops drawing
 
  LDY #128               \ We now draw the line from the centre of the screen
                         \ to the left. SC(1 0) points to the start address of
@@ -9866,7 +9868,7 @@ LOAD_C% = LOAD% +P% - CODE%
  LDX XSAV               \ Fetch the loop counter from XSAV and increment it
  INX
 
- CPX #13                \ If the loop counter is less than 13 (i.e. T = 2 to 12)
+ CPX #13                \ If the loop counter is less than 13 (i.e. 2 to 12)
  BCC HAL1               \ then loop back to HAL1 to draw the next line
 
                         \ The floor is done, so now we move on to the back wall
@@ -12542,7 +12544,7 @@ LOAD_C% = LOAD% +P% - CODE%
                         \ about the stolen Constrictor)
 
  BNE BRPS               \ Jump to BRP via BRPS to print the extended token in A
-                        \ and show the Status Mode screen), returning from the
+                        \ and show the Status Mode screen, returning from the
                         \ subroutine using a tail call (this BNE is effectively
                         \ a JMP as A is never zero)
 
@@ -12601,7 +12603,7 @@ LOAD_C% = LOAD% +P% - CODE%
  LDA #1                 \ Clear the top part of the screen, draw a white border,
  JSR TT66               \ and set the current view type in QQ11 to 1
 
- JSR LL9                \ Draw the ship on screen to remove it
+ JSR LL9                \ Draw the ship on screen to redisplay it
 
                         \ Fall through into MT23 to move to row 10, switch to
                         \ white text, and switch to lower case when printing
@@ -16833,7 +16835,7 @@ LOAD_D% = LOAD% + P% - CODE%
  JSR TT66               \ and set the current view type in QQ11 to 16 (Market
                         \ Price screen)
 
- LDA #5                 \ Move the text cursor to column 4
+ LDA #5                 \ Move the text cursor to column 5
  STA XC
 
  LDA #167               \ Print recursive token 7 ("{current system name} MARKET
@@ -18969,7 +18971,7 @@ LOAD_E% = LOAD% + P% - CODE%
 
  LDX QQ17               \ Fetch QQ17, which controls letter case, into X
 
- BEQ TT74               \ If QQ17 = 0, then ALL CAPS is set, so jump to TT27
+ BEQ TT74               \ If QQ17 = 0, then ALL CAPS is set, so jump to TT74
                         \ to print this character as is (i.e. as a capital)
 
  BMI TT41               \ If QQ17 has bit 7 set, then we are using Sentence
@@ -20472,7 +20474,7 @@ LOAD_E% = LOAD% + P% - CODE%
  STA LSX                \ be filled up
 
  JSR CHKON              \ Call CHKON to check whether any part of the new sun's
-                        \ circle appears on-screen, and of it does, set P(2 1)
+                        \ circle appears on-screen, and if it does, set P(2 1)
                         \ to the maximum y-coordinate of the new sun on-screen
 
  LDA #0                 \ Set A = 0
@@ -20861,7 +20863,7 @@ LOAD_E% = LOAD% + P% - CODE%
 .PLF11
 
                         \ If we get here then there is no old sun line on this
-                        \ line, so we can just draw the new sun's line. The new
+                        \ line, so we can just draw the new sun's line
 
  LDX K3                 \ Set YY(1 0) = K3(1 0), the x-coordinate of the centre
  STX YY                 \ of the new sun's line
@@ -21328,7 +21330,7 @@ LOAD_E% = LOAD% + P% - CODE%
 
  LDA #2                 \ The high byte is negative and non-zero, so we went
  STA X1                 \ past the left edge of the screen, so clip X1 to the
-                        \ y-coordinate of the left edge of the screen
+                        \ x-coordinate of the left edge of the screen
 
 .PL44
 
@@ -22857,7 +22859,7 @@ LOAD_F% = LOAD% + P% - CODE%
 \       Name: BR1 (Part 1 of 2)
 \       Type: Subroutine
 \   Category: Start and end
-\    Summary: Start or restart the game
+\    Summary: Show the "Load New Commander (Y/N)?" screen and start the game
 \
 \ ------------------------------------------------------------------------------
 \
@@ -22897,7 +22899,8 @@ LOAD_F% = LOAD% + P% - CODE%
 \       Name: BR1 (Part 2 of 2)
 \       Type: Subroutine
 \   Category: Start and end
-\    Summary: Show the "Load New Commander (Y/N)?" screen and start the game
+\    Summary: Show the "Press Fire or Space, Commander" screen and start the
+\             game
 \
 \ ------------------------------------------------------------------------------
 \
@@ -23560,15 +23563,11 @@ ENDIF
 \       Name: ZERO
 \       Type: Subroutine
 \   Category: Utility routines
-\    Summary: Zero-fill pages &9, &A, &B, &C and &D
+\    Summary: Reset the local bubble of universe and ship status
 \
 \ ------------------------------------------------------------------------------
 \
 \ This resets the following workspaces to zero:
-\
-\   * The ship data blocks ascending from K% at &0900
-\
-\   * The ship line heap descending from WP at &0D40
 \
 \   * WP workspace variables from FRIN to de, which include the ship slots for
 \     the local bubble of universe, and various flight and ship status variables
@@ -24922,7 +24921,7 @@ ENDIF
 
 .ECMOF
 
- LDA #0                 \ Set ECMA and ECMB to 0 to indicate that no E.C.M. is
+ LDA #0                 \ Set ECMA and ECMP to 0 to indicate that no E.C.M. is
  STA ECMA               \ currently running
  STA ECMP
 
@@ -25624,7 +25623,7 @@ ENDIF
 
                         \ --- Mod: Original Acornsoft code removed: ----------->
 
-\ CPX #&64              \ If "B" is not being pressed, skip to DK7
+\ CPX #&64              \ If "B" is not being pressed, skip to nobit
 \ BNE nobit
 \
 \ LDA BSTK              \ Toggle the value of BSTK between 0 and &FF

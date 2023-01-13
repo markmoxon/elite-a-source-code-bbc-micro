@@ -28,7 +28,7 @@
 \
 \ ******************************************************************************
 
-INCLUDE "1-source-files/main-sources/elite-header.h.asm"
+INCLUDE "1-source-files/main-sources/elite-build-options.asm"
 
 _RELEASED               = (_VARIANT = 1)
 _SOURCE_DISC            = (_VARIANT = 2)
@@ -557,8 +557,8 @@ ORG &0000
                         \         Get commander name ("@", save/load commander)
                         \         In-system jump just arrived ("J")
                         \         Data on System screen (red key f6)
-                        \         Buy Cargo screen (red key f1)
-                        \         Mis-jump just arrived (witchspace)
+                        \   2   = Buy Cargo screen (red key f1)
+                        \   3   = Mis-jump just arrived (witchspace)
                         \   4   = Sell Cargo screen (red key f2)
                         \   6   = Death screen
                         \   8   = Status Mode screen (red key f8)
@@ -6527,8 +6527,6 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 \
 \ Other entry points:
 \
-\   RR3+1               Contains an RTS
-\
 \
 \ ******************************************************************************
 
@@ -6645,7 +6643,7 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
  LDA YC                 \ Fetch YC, the y-coordinate (row) of the text cursor
 
  CMP #24                \ If the text cursor is on the screen (i.e. YC < 24, so
- BCC RR3                \ we are on rows 1-23), then jump to RR3 to print the
+ BCC RR3                \ we are on rows 0-23), then jump to RR3 to print the
                         \ character
 
  PHA                    \ Store A on the stack so we can retrieve it below
@@ -7713,7 +7711,7 @@ LOAD_C% = LOAD% +P% - CODE%
  LDX XSAV               \ Fetch the loop counter from XSAV and increment it
  INX
 
- CPX #13                \ If the loop counter is less than 13 (i.e. T = 2 to 12)
+ CPX #13                \ If the loop counter is less than 13 (i.e. 2 to 12)
  BCC HAL1               \ then loop back to HAL1 to draw the next line
 
                         \ The floor is done, so now we move on to the back wall
@@ -9089,7 +9087,7 @@ LOAD_C% = LOAD% +P% - CODE%
                         \ about the stolen Constrictor)
 
  BNE BRPS               \ Jump to BRP via BRPS to print the extended token in A
-                        \ and show the Status Mode screen), returning from the
+                        \ and show the Status Mode screen, returning from the
                         \ subroutine using a tail call (this BNE is effectively
                         \ a JMP as A is never zero)
 
@@ -9148,7 +9146,7 @@ LOAD_C% = LOAD% +P% - CODE%
  LDA #1                 \ Clear the top part of the screen, draw a white border,
  JSR TT66               \ and set the current view type in QQ11 to 1
 
- JSR LL9                \ Draw the ship on screen to remove it
+ JSR LL9                \ Draw the ship on screen to redisplay it
 
                         \ Fall through into MT23 to move to row 10, switch to
                         \ white text, and switch to lower case when printing
@@ -12564,7 +12562,7 @@ LOAD_D% = LOAD% + P% - CODE%
  JSR TT66               \ and set the current view type in QQ11 to 16 (Market
                         \ Price screen)
 
- LDA #5                 \ Move the text cursor to column 4
+ LDA #5                 \ Move the text cursor to column 5
  STA XC
 
  LDA #167               \ Print recursive token 7 ("{current system name} MARKET
@@ -14224,7 +14222,7 @@ LOAD_E% = LOAD% + P% - CODE%
 
  LDX QQ17               \ Fetch QQ17, which controls letter case, into X
 
- BEQ TT74               \ If QQ17 = 0, then ALL CAPS is set, so jump to TT27
+ BEQ TT74               \ If QQ17 = 0, then ALL CAPS is set, so jump to TT74
                         \ to print this character as is (i.e. as a capital)
 
  BMI TT41               \ If QQ17 has bit 7 set, then we are using Sentence
@@ -14957,7 +14955,7 @@ LOAD_E% = LOAD% + P% - CODE%
  STA LSX                \ be filled up
 
  JSR CHKON              \ Call CHKON to check whether any part of the new sun's
-                        \ circle appears on-screen, and of it does, set P(2 1)
+                        \ circle appears on-screen, and if it does, set P(2 1)
                         \ to the maximum y-coordinate of the new sun on-screen
 
  BCS PLF3-3             \ If CHKON set the C flag then the new sun's circle does
@@ -15352,7 +15350,7 @@ LOAD_E% = LOAD% + P% - CODE%
 .PLF11
 
                         \ If we get here then there is no old sun line on this
-                        \ line, so we can just draw the new sun's line. The new
+                        \ line, so we can just draw the new sun's line
 
  LDX K3                 \ Set YY(1 0) = K3(1 0), the x-coordinate of the centre
  STX YY                 \ of the new sun's line
@@ -15676,7 +15674,7 @@ LOAD_E% = LOAD% + P% - CODE%
 
  LDA #2                 \ The high byte is negative and non-zero, so we went
  STA X1                 \ past the left edge of the screen, so clip X1 to the
-                        \ y-coordinate of the left edge of the screen
+                        \ x-coordinate of the left edge of the screen
 
 .PL44
 
@@ -16713,7 +16711,7 @@ LOAD_F% = LOAD% + P% - CODE%
 \       Name: BR1 (Part 1 of 2)
 \       Type: Subroutine
 \   Category: Start and end
-\    Summary: Start or restart the game
+\    Summary: Show the "Load New Commander (Y/N)?" screen and start the game
 \
 \ ------------------------------------------------------------------------------
 \
@@ -16765,7 +16763,8 @@ LOAD_F% = LOAD% + P% - CODE%
 \       Name: BR1 (Part 2 of 2)
 \       Type: Subroutine
 \   Category: Start and end
-\    Summary: Show the "Load New Commander (Y/N)?" screen and start the game
+\    Summary: Show the "Press Fire or Space, Commander" screen and start the
+\             game
 \
 \ ------------------------------------------------------------------------------
 \
@@ -17364,15 +17363,11 @@ ENDIF
 \       Name: ZERO
 \       Type: Subroutine
 \   Category: Utility routines
-\    Summary: Zero-fill pages &9, &A, &B, &C and &D
+\    Summary: Reset the local bubble of universe and ship status
 \
 \ ------------------------------------------------------------------------------
 \
 \ This resets the following workspaces to zero:
-\
-\   * The ship data blocks ascending from K% at &0900
-\
-\   * The ship line heap descending from WP at &0D40
 \
 \   * WP workspace variables from FRIN to de, which include the ship slots for
 \     the local bubble of universe, and various flight and ship status variables
@@ -18366,7 +18361,7 @@ ENDIF
 
 .ECMOF
 
- LDA #0                 \ Set ECMA and ECMB to 0 to indicate that no E.C.M. is
+ LDA #0                 \ Set ECMA and ECMP to 0 to indicate that no E.C.M. is
  STA ECMA               \ currently running
  STA ECMP
 
@@ -48692,13 +48687,17 @@ NEXT
 \       Name: PLS22
 \       Type: Subroutine
 \   Category: Drawing planets
-\    Summary: Draw a circle or half-circle
+\    Summary: Draw an ellipse or half-ellipse
 \  Deep dive: The sine, cosine and arctan tables
+\             Drawing meridians and equators
+\             Drawing craters
 \
 \ ------------------------------------------------------------------------------
 \
-\ Draw a circle or half-circle, used for the planet's equator and meridian, or
-\ crater.
+\ Draw an ellipse or half-ellipse, to be used for the planet's equator and
+\ meridian (in which case we draw half an ellipse), or crater (in which case we
+\ draw a full ellipse). The shape that is drawn is a circle that has been
+\ squashed, as if the circle has been tilted at an angle away from the viewer.
 \
 \ This routine is called from parts 2 and 3 of PL9, and does the following:
 \
@@ -48716,11 +48715,11 @@ NEXT
 \
 \   TGT                 The number of segments to draw:
 \
-\                         * 32 for a half circle (a meridian)
+\                         * 32 for a half ellipse (a meridian)
 \
-\                         * 64 for a half circle (a crater)
+\                         * 64 for a full ellipse (a crater)
 \
-\   CNT2                The starting segment for drawing the half-circle
+\   CNT2                The starting segment for drawing the half-ellipse
 \
 \ ******************************************************************************
 
@@ -51330,7 +51329,7 @@ LOAD_M% = LOAD% + P% - CODE%
  JSR RESET              \ Call RESET to reset most variables
 
  LDA #&FF               \ Set QQ1 to &FF to indicate we are docked, so when
- STA QQ12               \ we reach TT110 after calling FRCE below, it skips the
+ STA QQ12               \ we reach TT110 after calling FRCE below, it shows the
                         \ launch tunnel
 
  STA QQ11               \ Set the view number to a non-zero value, so when we

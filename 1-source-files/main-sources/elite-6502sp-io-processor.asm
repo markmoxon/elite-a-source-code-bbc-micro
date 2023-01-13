@@ -28,7 +28,7 @@
 \
 \ ******************************************************************************
 
-INCLUDE "1-source-files/main-sources/elite-header.h.asm"
+INCLUDE "1-source-files/main-sources/elite-build-options.asm"
 
 _RELEASED               = (_VARIANT = 1)
 _SOURCE_DISC            = (_VARIANT = 2)
@@ -4071,8 +4071,12 @@ ORG CODE%
                         \ the subroutine as there is only one ship in the
                         \ hangar, so we are done
 
- JSR HAS2               \ Call HAS2 to a line to the right, starting with the
-                        \ third pixel of the pixel row at screen address SC(1 0)
+ JSR HAS2               \ Call HAS2 to draw a line to the right, starting with
+                        \ the third pixel of the pixel row at screen address
+                        \ SC(1 0), so this draws a line from just after the
+                        \ halfway point across the right half of the screen,
+                        \ going right until we bump into something already
+                        \ on-screen, at which point it stops drawing
 
  LDY #128               \ We now draw the line from the centre of the screen
                         \ to the left. SC(1 0) points to the start address of
