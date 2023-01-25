@@ -6213,6 +6213,12 @@ LOAD_B% = LOAD% + P% - CODE%
 \
 \   K4(1 0)             Pixel y-coordinate of the centre of the circle
 \
+\   K5(1 0)             Screen x-coordinate of the previous point added to the
+\                       ball line heap (if this is not the first point)
+\
+\   K5(3 2)             Screen y-coordinate of the previous point added to the
+\                       ball line heap (if this is not the first point)
+\
 \   SWAP                If non-zero, we swap (X1, Y1) and (X2, Y2)
 \
 \ Returns:
@@ -6220,6 +6226,12 @@ LOAD_B% = LOAD% + P% - CODE%
 \   CNT                 CNT is updated to CNT + STP
 \
 \   A                   The new value of CNT
+\
+\   K5(1 0)             Screen x-coordinate of the point that we just added to
+\                       the ball line heap
+\
+\   K5(3 2)             Screen y-coordinate of the point that we just added to
+\                       the ball line heap
 \
 \   FLAG                Set to 0
 \
@@ -20983,8 +20995,8 @@ LOAD_E% = LOAD% + P% - CODE%
 
 \.CIRCLE
 \
-\ LDA #0                \ Set LSX2 = 0
-\ STA LSX2
+\ LDA #0                \ Set LSX2 = 0 to indicate that the ball line heap is
+\ STA LSX2              \ not empty, as we are about to fill it
 \
 \ LDX K                 \ Set X = K = radius
 \
