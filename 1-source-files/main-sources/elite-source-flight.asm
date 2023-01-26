@@ -11838,7 +11838,7 @@ LOAD_C% = LOAD% +P% - CODE%
 \
 \ ******************************************************************************
 
-                        \ --- Mod: Whole section added for Elite-A: ----------->
+                        \ --- Mod: Code added for Elite-A: -------------------->
 
 .anger_8c
 
@@ -11846,7 +11846,7 @@ LOAD_C% = LOAD% +P% - CODE%
 
                         \ Fall through into ANGRY to make this ship hostile
 
-                        \ --- End of added section ---------------------------->
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -14949,7 +14949,7 @@ LOAD_D% = LOAD% + P% - CODE%
 \
 \ ******************************************************************************
 
-                        \ --- Mod: Whole section added for Elite-A: ----------->
+                        \ --- Mod: Code added for Elite-A: -------------------->
 
 .tnpr1
 
@@ -15014,7 +15014,7 @@ LOAD_D% = LOAD% + P% - CODE%
 
  RTS                    \ Return from the subroutine
 
-                        \ --- End of added section ---------------------------->
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -20956,7 +20956,7 @@ LOAD_E% = LOAD% + P% - CODE%
 \
 \ ******************************************************************************
 
-                        \ --- Mod: Whole section added for Elite-A: ----------->
+                        \ --- Mod: Code added for Elite-A: -------------------->
 
 .n_oops
 
@@ -20973,7 +20973,7 @@ LOAD_E% = LOAD% + P% - CODE%
                         \ absorb the amount of damage in new_shields), so fall
                         \ into OOPS to take the remaining amount of damage
 
-                        \ --- End of added section ---------------------------->
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -25019,7 +25019,7 @@ LOAD_F% = LOAD% + P% - CODE%
 \
 \ ******************************************************************************
 
-                        \ --- Mod: Whole section added for Elite-A: ----------->
+                        \ --- Mod: Code added for Elite-A: -------------------->
 
 .rand_posn
 
@@ -25058,7 +25058,7 @@ LOAD_F% = LOAD% + P% - CODE%
  JMP DORND              \ Set A and X to random numbers and return from the
                         \ subroutine using a tail call
 
-                        \ --- End of added section ---------------------------->
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -28396,7 +28396,7 @@ LOAD_F% = LOAD% + P% - CODE%
 \
 \ ******************************************************************************
 
-                        \ --- Mod: Whole section added for Elite-A: ----------->
+                        \ --- Mod: Code added for Elite-A: -------------------->
 
 .b_table
 
@@ -28417,7 +28417,7 @@ LOAD_F% = LOAD% + P% - CODE%
  EQUB &38               \ Right column   Bottom row   KYTB+15   Docking computer
  EQUB &68               \ Left column    Bottom row   KYTB+16   Cancel docking
 
-                        \ --- End of added section ---------------------------->
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -28449,7 +28449,7 @@ LOAD_F% = LOAD% + P% - CODE%
 \
 \ ******************************************************************************
 
-                        \ --- Mod: Whole section added for Elite-A: ----------->
+                        \ --- Mod: Code added for Elite-A: -------------------->
 
 .b_13
 
@@ -28562,7 +28562,7 @@ LOAD_F% = LOAD% + P% - CODE%
 
  RTS                    \ Return from the subroutine
 
-                        \ --- End of added section ---------------------------->
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -29488,7 +29488,7 @@ LOAD_F% = LOAD% + P% - CODE%
 \
 \ ******************************************************************************
 
-                        \ --- Mod: Whole section added for Elite-A: ----------->
+                        \ --- Mod: Code added for Elite-A: -------------------->
 
 .cargo_mtok
 
@@ -29497,7 +29497,7 @@ LOAD_F% = LOAD% + P% - CODE%
                         \ in-flight token, which will be in the range 48
                         \ ("FOOD") to 64 ("ALIEN ITEMS")
 
-                        \ --- End of added section ---------------------------->
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -35957,7 +35957,7 @@ LOAD_H% = LOAD% + P% - CODE%
 \
 \ ******************************************************************************
 
-                        \ --- Mod: Whole section added for Elite-A: ----------->
+                        \ --- Mod: Code added for Elite-A: -------------------->
 
 .iff_xor
 
@@ -35971,7 +35971,7 @@ LOAD_H% = LOAD% + P% - CODE%
 
 \EQUB &F0               \ Index 4: Offender/fugitive = %11110000
 
-                        \ --- End of added section ---------------------------->
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -36009,7 +36009,7 @@ LOAD_H% = LOAD% + P% - CODE%
 \
 \ ******************************************************************************
 
-                        \ --- Mod: Whole section added for Elite-A: ----------->
+                        \ --- Mod: Code added for Elite-A: -------------------->
 
 .iff_base
 
@@ -36023,7 +36023,7 @@ LOAD_H% = LOAD% + P% - CODE%
 
  EQUB &FF               \ Index 4: Offender/fugitive = green/cyan
 
-                        \ --- End of added section ---------------------------->
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \

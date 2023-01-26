@@ -7049,7 +7049,7 @@ LOAD_B% = LOAD% + P% - CODE%
 \
 \ ******************************************************************************
 
-                        \ --- Mod: Whole section added for Elite-A: ----------->
+                        \ --- Mod: Code added for Elite-A: -------------------->
 
 .status_equip
 
@@ -7149,7 +7149,7 @@ LOAD_B% = LOAD% + P% - CODE%
  LDA #10                \ Print a line feed to move the text cursor down a line
  JMP TT27               \ and return from the subroutine using a tail call
 
-                        \ --- End of added section ---------------------------->
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -14747,7 +14747,7 @@ LOAD_D% = LOAD% + P% - CODE%
 \
 \ ******************************************************************************
 
-                        \ --- Mod: Whole section added for Elite-A: ----------->
+                        \ --- Mod: Code added for Elite-A: -------------------->
 
 .sell_yn
 
@@ -14760,7 +14760,7 @@ LOAD_D% = LOAD% + P% - CODE%
                         \ Fall through into gnum to get a number from the
                         \ keyboard
 
-                        \ --- End of added section ---------------------------->
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -14907,7 +14907,7 @@ LOAD_D% = LOAD% + P% - CODE%
 \
 \ ******************************************************************************
 
-                        \ --- Mod: Whole section added for Elite-A: ----------->
+                        \ --- Mod: Code added for Elite-A: -------------------->
 
 .sell_jump
 
@@ -14939,7 +14939,7 @@ LOAD_D% = LOAD% + P% - CODE%
                         \ screen) and return from the subroutine with a tail
                         \ call
 
-                        \ --- End of added section ---------------------------->
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -17045,7 +17045,7 @@ LOAD_D% = LOAD% + P% - CODE%
 \
 \ ******************************************************************************
 
-                        \ --- Mod: Whole section added for Elite-A: ----------->
+                        \ --- Mod: Code added for Elite-A: -------------------->
 
 .encyclopedia
 
@@ -17054,7 +17054,7 @@ LOAD_D% = LOAD% + P% - CODE%
                         \ TT110 to execute the command, which will load and run
                         \ the encyclopedia code in 1.E
 
-                        \ --- End of added section ---------------------------->
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -24309,7 +24309,7 @@ ENDIF
 \
 \ ******************************************************************************
 
-                        \ --- Mod: Whole section added for Elite-A: ----------->
+                        \ --- Mod: Code added for Elite-A: -------------------->
 
 .confirm
 
@@ -24344,7 +24344,7 @@ ENDIF
 
  RTS                    \ Return from the subroutine
 
-                        \ --- End of added section ---------------------------->
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -30167,7 +30167,7 @@ LOAD_G% = LOAD% + P% - CODE%
 \
 \ ******************************************************************************
 
-                        \ --- Mod: Whole section added for Elite-A: ----------->
+                        \ --- Mod: Code added for Elite-A: -------------------->
 
 .n_buyship
 
@@ -30392,7 +30392,7 @@ LOAD_G% = LOAD% + P% - CODE%
  JMP BAY                \ Jump to BAY to go to the docking bay (i.e. show the
                         \ Status Mode screen)
 
-                        \ --- End of added section ---------------------------->
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -30404,7 +30404,7 @@ LOAD_G% = LOAD% + P% - CODE%
 \
 \ ******************************************************************************
 
-                        \ --- Mod: Whole section added for Elite-A: ----------->
+                        \ --- Mod: Code added for Elite-A: -------------------->
 
 .n_load
 
@@ -30504,7 +30504,7 @@ LOAD_G% = LOAD% + P% - CODE%
 
  RTS                    \ Return from the subroutine
 
-                        \ --- End of added section ---------------------------->
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -30515,7 +30515,7 @@ LOAD_G% = LOAD% + P% - CODE%
 \
 \ ******************************************************************************
 
-                        \ --- Mod: Whole section added for Elite-A: ----------->
+                        \ --- Mod: Code added for Elite-A: -------------------->
 
 .count_offs
 
@@ -30532,7 +30532,7 @@ LOAD_G% = LOAD% + P% - CODE%
  EQUB 29                \ LASER+29 = GHYP = Galactic hyperdrive
  EQUB 30                \ LASER+30 = ESCP = Escape pod
 
-                        \ --- End of added section ---------------------------->
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -30551,7 +30551,7 @@ LOAD_G% = LOAD% + P% - CODE%
 \
 \ ******************************************************************************
 
-                        \ --- Mod: Whole section added for Elite-A: ----------->
+                        \ --- Mod: Code added for Elite-A: -------------------->
 
 .n_name
 
@@ -30585,7 +30585,7 @@ LOAD_G% = LOAD% + P% - CODE%
 
  RTS                    \ Return from the subroutine
 
-                        \ --- End of added section ---------------------------->
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -30609,7 +30609,7 @@ LOAD_G% = LOAD% + P% - CODE%
 \
 \ ******************************************************************************
 
-                        \ --- Mod: Whole section added for Elite-A: ----------->
+                        \ --- Mod: Code added for Elite-A: -------------------->
 
 .n_price
 
@@ -30637,7 +30637,7 @@ LOAD_G% = LOAD% + P% - CODE%
 
  RTS                    \ Return from the subroutine
 
-                        \ --- End of added section ---------------------------->
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -30649,7 +30649,7 @@ LOAD_G% = LOAD% + P% - CODE%
 \
 \ ******************************************************************************
 
-                        \ --- Mod: Whole section added for Elite-A: ----------->
+                        \ --- Mod: Code added for Elite-A: -------------------->
 
 .cour_buy
 
@@ -30840,7 +30840,7 @@ LOAD_G% = LOAD% + P% - CODE%
  JMP jmp_start3         \ Jump to jmp_start3 to make a beep and show the cargo
                         \ bay
 
-                        \ --- End of added section ---------------------------->
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -30852,7 +30852,7 @@ LOAD_G% = LOAD% + P% - CODE%
 \
 \ ******************************************************************************
 
-                        \ --- Mod: Whole section added for Elite-A: ----------->
+                        \ --- Mod: Code added for Elite-A: -------------------->
 
 .cour_count
 
@@ -31134,7 +31134,7 @@ LOAD_G% = LOAD% + P% - CODE%
 
  JMP cour_loop          \ Loop back to cour_loop to add the next menu item
 
-                        \ --- End of added section ---------------------------->
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -31146,7 +31146,7 @@ LOAD_G% = LOAD% + P% - CODE%
 \
 \ ******************************************************************************
 
-                        \ --- Mod: Whole section added for Elite-A: ----------->
+                        \ --- Mod: Code added for Elite-A: -------------------->
 
 .cour_dock
 
@@ -31219,7 +31219,7 @@ LOAD_G% = LOAD% + P% - CODE%
 
  RTS                    \ Return from the subroutine
 
-                        \ --- End of added section ---------------------------->
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -31230,7 +31230,7 @@ LOAD_G% = LOAD% + P% - CODE%
 \
 \ ******************************************************************************
 
-                        \ --- Mod: Whole section added for Elite-A: ----------->
+                        \ --- Mod: Code added for Elite-A: -------------------->
 
 .stay_here
 
@@ -31248,7 +31248,7 @@ LOAD_G% = LOAD% + P% - CODE%
 
  JSR cour_dock          \ Update the current special cargo delivery mission
 
-                        \ --- End of added section ---------------------------->
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -31393,7 +31393,7 @@ LOAD_G% = LOAD% + P% - CODE%
 \
 \ ******************************************************************************
 
-                        \ --- Mod: Whole section added for Elite-A: ----------->
+                        \ --- Mod: Code added for Elite-A: -------------------->
 
 .new_offsets
 
@@ -31403,7 +31403,7 @@ FOR I%, 0, 14
 
 NEXT
 
-                        \ --- End of added section ---------------------------->
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -31415,7 +31415,7 @@ NEXT
 \
 \ ******************************************************************************
 
-                        \ --- Mod: Whole section added for Elite-A: ----------->
+                        \ --- Mod: Code added for Elite-A: -------------------->
 
 .new_ships
 
@@ -31529,7 +31529,7 @@ ELIF _RELEASED
 
 ENDIF
 
-                        \ --- End of added section ---------------------------->
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -31541,7 +31541,7 @@ ENDIF
 \
 \ ******************************************************************************
 
-                        \ --- Mod: Whole section added for Elite-A: ----------->
+                        \ --- Mod: Code added for Elite-A: -------------------->
 
 .new_details
 
@@ -31918,7 +31918,7 @@ ELIF _RELEASED
 
 ENDIF
 
-                        \ --- End of added section ---------------------------->
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \

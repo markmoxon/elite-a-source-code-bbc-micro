@@ -1231,7 +1231,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-                        \ --- Mod: Whole section added for Elite-A: ----------->
+                        \ --- Mod: Code added for Elite-A: -------------------->
 
 .SHIP_GHAVIAL
 
@@ -1311,7 +1311,7 @@ ENDMACRO
  FACE      -27,      -55,      -13,         31    \ Face 10
  FACE      -28,      -56,        7,         31    \ Face 11
 
-                        \ --- End of added section ---------------------------->
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -1323,7 +1323,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-                        \ --- Mod: Whole section added for Elite-A: ----------->
+                        \ --- Mod: Code added for Elite-A: -------------------->
 
 .SHIP_OPHIDIAN
 
@@ -1419,7 +1419,7 @@ ENDMACRO
  FACE      -18,      -32,       -2,         31    \ Face 10
  FACE        0,        0,      -37,         31    \ Face 11
 
-                        \ --- End of added section ---------------------------->
+                        \ --- End of added code ------------------------------->
 
  EQUB 7                 \ This byte appears to be unused
 

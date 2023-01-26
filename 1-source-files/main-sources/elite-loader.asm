@@ -1035,7 +1035,7 @@ ORG &0D7A
 \
 \ ******************************************************************************
 
-                        \ --- Mod: Whole section added for Elite-A: ----------->
+                        \ --- Mod: Code added for Elite-A: -------------------->
 
 .iff_index
 
@@ -1100,7 +1100,7 @@ ORG &0D7A
 
  RTS                    \ Return from the subroutine
 
-                        \ --- End of added section ---------------------------->
+                        \ --- End of added code ------------------------------->
 
 COPYBLOCK iff_index, P%, iff_index_code
 
@@ -2795,7 +2795,7 @@ ORG &DD00
 \
 \ ******************************************************************************
 
-                        \ --- Mod: Whole section added for Elite-A: ----------->
+                        \ --- Mod: Code added for Elite-A: -------------------->
 
 .do_FILEV
 
@@ -2813,7 +2813,7 @@ ORG &DD00
                         \ character set, so that character printing will work
                         \ once again
 
-                        \ --- End of added section ---------------------------->
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -2825,7 +2825,7 @@ ORG &DD00
 \
 \ ******************************************************************************
 
-                        \ --- Mod: Whole section added for Elite-A: ----------->
+                        \ --- Mod: Code added for Elite-A: -------------------->
 
 .savews
 
@@ -2935,7 +2935,7 @@ ORG &DD00
 
  RTS                    \ Return from the subroutine
 
-                        \ --- End of added section ---------------------------->
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -2947,7 +2947,7 @@ ORG &DD00
 \
 \ ******************************************************************************
 
-                        \ --- Mod: Whole section added for Elite-A: ----------->
+                        \ --- Mod: Code added for Elite-A: -------------------->
 
 .do_FSCV
 
@@ -2964,7 +2964,7 @@ ORG &DD00
                         \ safe place and replace it with the MOS character set,
                         \ so that character printing will work once again
 
-                        \ --- End of added section ---------------------------->
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -2975,7 +2975,7 @@ ORG &DD00
 \
 \ ******************************************************************************
 
-                        \ --- Mod: Whole section added for Elite-A: ----------->
+                        \ --- Mod: Code added for Elite-A: -------------------->
 
 .restorews
 
@@ -3039,7 +3039,7 @@ ORG &DD00
 
  RTS                    \ Return from the subroutine
 
-                        \ --- End of added section ---------------------------->
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -3050,7 +3050,7 @@ ORG &DD00
 \
 \ ******************************************************************************
 
-                        \ --- Mod: Whole section added for Elite-A: ----------->
+                        \ --- Mod: Code added for Elite-A: -------------------->
 
 .do_BYTEV
 
@@ -3070,7 +3070,7 @@ ORG &DD00
                         \ FILEV, FSCV and BYTEV vectors to point to our custom
                         \ handlers
 
-                        \ --- End of added section ---------------------------->
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -3082,7 +3082,7 @@ ORG &DD00
 \
 \ ******************************************************************************
 
-                        \ --- Mod: Whole section added for Elite-A: ----------->
+                        \ --- Mod: Code added for Elite-A: -------------------->
 
 .set_vectors
 
@@ -3112,7 +3112,7 @@ ORG &DD00
 
  RTS                    \ Return from the subroutine
 
-                        \ --- End of added section ---------------------------->
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -3123,7 +3123,7 @@ ORG &DD00
 \
 \ ******************************************************************************
 
-                        \ --- Mod: Whole section added for Elite-A: ----------->
+                        \ --- Mod: Code added for Elite-A: -------------------->
 
 .old_BYTEV
 
@@ -3132,7 +3132,7 @@ ORG &DD00
                         \ loop), so it calls the existing BYTEV handler and
                         \ returns from the subroutine using a tail call
 
-                        \ --- End of added section ---------------------------->
+                        \ --- End of added code ------------------------------->
 
 dd00_len = P% - do_FILEV
 
