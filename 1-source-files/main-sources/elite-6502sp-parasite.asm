@@ -34564,6 +34564,8 @@ ENDMACRO
 \   Category: Maths (Geometry)
 \    Summary: Sine/cosine table
 \  Deep dive: The sine, cosine and arctan tables
+\             Drawing circles
+\             Drawing ellipses
 \
 \ ------------------------------------------------------------------------------
 \
@@ -48660,6 +48662,8 @@ NEXT
 \       Type: Subroutine
 \   Category: Drawing planets
 \    Summary: Draw a half-ellipse
+\  Deep dive: Drawing ellipses
+\             Drawing meridians and equators
 \
 \ ------------------------------------------------------------------------------
 \
@@ -48680,7 +48684,7 @@ NEXT
 \       Type: Subroutine
 \   Category: Drawing planets
 \    Summary: Draw an ellipse or half-ellipse
-\  Deep dive: The sine, cosine and arctan tables
+\  Deep dive: Drawing ellipses
 \             Drawing meridians and equators
 \             Drawing craters
 \
