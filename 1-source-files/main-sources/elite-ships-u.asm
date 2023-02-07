@@ -340,7 +340,7 @@ ENDMACRO
  EQUB %00000110         \ Laser power              = 0
                         \ Missiles                 = 6
 
-\VERTEX    x,    y,    z, face1, face2, face3, face4, visibility
+\          x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX  160,    0,  160,     0,      1,    2,     6,         31    \ Vertex 0
  VERTEX    0,  160,  160,     0,      2,    3,     8,         31    \ Vertex 1
  VERTEX -160,    0,  160,     0,      3,    4,     7,         31    \ Vertex 2
@@ -360,7 +360,7 @@ ENDMACRO
 
 .SHIP_CORIOLIS_EDGES
 
-\EDGE vertex1, vertex2, face1, face2, visibility
+\     vertex1, vertex2, face1, face2, visibility
  EDGE       0,       3,     0,     1,         31    \ Edge 0
  EDGE       0,       1,     0,     2,         31    \ Edge 1
  EDGE       1,       2,     0,     3,         31    \ Edge 2
@@ -392,7 +392,7 @@ ENDMACRO
 
 .SHIP_CORIOLIS_FACES
 
-\FACE normal_x, normal_y, normal_z, visibility
+\     normal_x, normal_y, normal_z, visibility
  FACE        0,        0,      160,         31    \ Face 0
  FACE      107,     -107,      107,         31    \ Face 1
  FACE      107,      107,      107,         31    \ Face 2
@@ -451,7 +451,7 @@ ENDMACRO
  EQUB %00000000         \ Laser power              = 0
                         \ Missiles                 = 0
 
-\VERTEX    x,    y,    z, face1, face2, face3, face4, visibility
+\          x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX   -7,    0,   36,     2,      1,    3,     3,         31    \ Vertex 0
  VERTEX   -7,  -14,  -12,     2,      0,    3,     3,         31    \ Vertex 1
  VERTEX   -7,   14,  -12,     1,      0,    3,     3,         31    \ Vertex 2
@@ -459,7 +459,7 @@ ENDMACRO
 
 .SHIP_ESCAPE_POD_EDGES
 
-\EDGE vertex1, vertex2, face1, face2, visibility
+\     vertex1, vertex2, face1, face2, visibility
  EDGE       0,       1,     3,     2,         31    \ Edge 0
  EDGE       1,       2,     3,     0,         31    \ Edge 1
  EDGE       2,       3,     1,     0,         31    \ Edge 2
@@ -469,7 +469,7 @@ ENDMACRO
 
 .SHIP_ESCAPE_POD_FACES
 
-\FACE normal_x, normal_y, normal_z, visibility
+\     normal_x, normal_y, normal_z, visibility
  FACE       52,        0,     -122,         31    \ Face 0
  FACE       39,      103,       30,         31    \ Face 1
  FACE       39,     -103,       30,         31    \ Face 2
@@ -527,7 +527,7 @@ ENDMACRO
  EQUB %00000000         \ Laser power              = 0
                         \ Missiles                 = 0
 
-\VERTEX    x,    y,    z, face1, face2, face3, face4, visibility
+\          x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX   24,   16,    0,     0,      1,    5,     5,         31    \ Vertex 0
  VERTEX   24,    5,   15,     0,      1,    2,     2,         31    \ Vertex 1
  VERTEX   24,  -13,    9,     0,      2,    3,     3,         31    \ Vertex 2
@@ -541,7 +541,7 @@ ENDMACRO
 
 .SHIP_CANISTER_EDGES
 
-\EDGE vertex1, vertex2, face1, face2, visibility
+\     vertex1, vertex2, face1, face2, visibility
  EDGE       0,       1,     0,     1,         31    \ Edge 0
  EDGE       1,       2,     0,     2,         31    \ Edge 1
  EDGE       2,       3,     0,     3,         31    \ Edge 2
@@ -560,7 +560,7 @@ ENDMACRO
 
 .SHIP_CANISTER_FACES
 
-\FACE normal_x, normal_y, normal_z, visibility
+\     normal_x, normal_y, normal_z, visibility
  FACE       96,        0,        0,         31    \ Face 0
  FACE        0,       41,       30,         31    \ Face 1
  FACE        0,      -18,       48,         31    \ Face 2
@@ -621,7 +621,7 @@ ENDMACRO
 
                         \ --- End of replacement ------------------------------>
 
-\VERTEX    x,    y,    z, face1, face2, face3, face4, visibility
+\          x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX    0,    0,   72,     1,      2,    3,     4,         31    \ Vertex 0
  VERTEX    0,   16,   24,     0,      1,    2,     2,         30    \ Vertex 1
  VERTEX    0,  -16,   24,     3,      4,    5,     5,         30    \ Vertex 2
@@ -640,7 +640,7 @@ ENDMACRO
 
 .SHIP_VIPER_EDGES
 
-\EDGE vertex1, vertex2, face1, face2, visibility
+\     vertex1, vertex2, face1, face2, visibility
  EDGE       0,       3,     2,     4,         31    \ Edge 0
  EDGE       0,       1,     1,     2,         30    \ Edge 1
  EDGE       0,       2,     3,     4,         30    \ Edge 2
@@ -664,7 +664,7 @@ ENDMACRO
 
 .SHIP_VIPER_FACES
 
-\FACE normal_x, normal_y, normal_z, visibility
+\     normal_x, normal_y, normal_z, visibility
  FACE        0,       32,        0,         31    \ Face 0
  FACE      -22,       33,       11,         31    \ Face 1
  FACE       22,       33,       11,         31    \ Face 2
@@ -735,7 +735,7 @@ ENDMACRO
 
                         \ --- End of replacement ------------------------------>
 
-\VERTEX    x,    y,    z, face1, face2, face3, face4, visibility
+\          x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX    0,    0,   96,     1,      0,    3,     2,         31    \ Vertex 0
  VERTEX    0,   18,  -48,     3,      0,    5,     4,         31    \ Vertex 1
  VERTEX    0,  -18,  -48,     2,      1,    5,     4,         31    \ Vertex 2
@@ -756,7 +756,7 @@ ENDMACRO
 
 .SHIP_KRAIT_EDGES
 
-\EDGE vertex1, vertex2, face1, face2, visibility
+\     vertex1, vertex2, face1, face2, visibility
  EDGE       0,       1,     3,     0,         31    \ Edge 0
  EDGE       0,       2,     2,     1,         31    \ Edge 1
  EDGE       0,       3,     1,     0,         31    \ Edge 2
@@ -781,7 +781,7 @@ ENDMACRO
 
 .SHIP_KRAIT_FACES
 
-\FACE normal_x, normal_y, normal_z, visibility
+\     normal_x, normal_y, normal_z, visibility
  FACE        3,       24,        3,         31    \ Face 0
  FACE        3,      -24,        3,         31    \ Face 1
  FACE       -3,      -24,        3,         31    \ Face 2
@@ -841,7 +841,7 @@ ENDMACRO
  EQUB %00000000         \ Laser power              = 0
                         \ Missiles                 = 0
 
-\VERTEX    x,    y,    z, face1, face2, face3, face4, visibility
+\          x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX    0,   80,    0,    15,     15,   15,    15,         31    \ Vertex 0
  VERTEX  -80,  -10,    0,    15,     15,   15,    15,         31    \ Vertex 1
  VERTEX    0,  -80,    0,    15,     15,   15,    15,         31    \ Vertex 2
@@ -854,7 +854,7 @@ ENDMACRO
 
 .SHIP_ASTEROID_EDGES
 
-\EDGE vertex1, vertex2, face1, face2, visibility
+\     vertex1, vertex2, face1, face2, visibility
  EDGE       0,       1,     2,     7,         31    \ Edge 0
  EDGE       0,       4,     6,    13,         31    \ Edge 1
  EDGE       3,       4,     5,    12,         31    \ Edge 2
@@ -879,7 +879,7 @@ ENDMACRO
 
 .SHIP_ASTEROID_FACES
 
-\FACE normal_x, normal_y, normal_z, visibility
+\     normal_x, normal_y, normal_z, visibility
  FACE        9,       66,       81,         31    \ Face 0
  FACE        9,      -66,       81,         31    \ Face 1
  FACE      -72,       64,       31,         31    \ Face 2
@@ -999,7 +999,7 @@ ENDIF
  EQUB %00000000         \ Laser power              = 0
                         \ Missiles                 = 0
 
-\VERTEX    x,    y,    z, face1, face2, face3, face4, visibility
+\          x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX  -24,  -25,   16,     2,      1,    3,     3,         31    \ Vertex 0
  VERTEX    0,   12,  -10,     2,      0,    3,     3,         31    \ Vertex 1
  VERTEX   11,   -6,    2,     1,      0,    3,     3,         31    \ Vertex 2
@@ -1007,7 +1007,7 @@ ENDIF
 
 .SHIP_SPLINTER_FACES
 
-\FACE normal_x, normal_y, normal_z, visibility
+\     normal_x, normal_y, normal_z, visibility
  FACE       35,        0,        4,         31    \ Face 0
  FACE        3,        4,        8,         31    \ Face 1
  FACE        1,        8,       12,         31    \ Face 2
@@ -1047,7 +1047,7 @@ ENDIF
  EQUB %00100011         \ Laser power              = 4
                         \ Missiles                 = 3
 
-\VERTEX    x,    y,    z, face1, face2, face3, face4, visibility
+\          x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX  -18,    0,  110,     5,     2,     1,     0,         31     \ Vertex 0
  VERTEX   18,    0,  110,     4,     3,     1,     0,         31     \ Vertex 1
  VERTEX  -40,    0,    0,    11,     8,     5,     2,         31     \ Vertex 2
@@ -1069,7 +1069,7 @@ ENDIF
 
 .SHIP_CHAMELEON_EDGES
 
-\EDGE vertex1, vertex2, face1, face2, visibility
+\     vertex1, vertex2, face1, face2, visibility
  EDGE       0,       1,     1,     0,         31    \ Edge 0
  EDGE       0,       8,     2,     0,         31    \ Edge 1
  EDGE       0,       9,     5,     1,         31    \ Edge 2
@@ -1102,7 +1102,7 @@ ENDIF
 
 .SHIP_CHAMELEON_FACES
 
-\FACE normal_x, normal_y, normal_z, visibility
+\     normal_x, normal_y, normal_z, visibility
  FACE        0,       90,       31,         31    \ Face 0
  FACE        0,      -90,       31,         31    \ Face 1
  FACE      -57,       76,       11,         31    \ Face 2
@@ -1181,7 +1181,7 @@ ENDIF
 
                         \ --- End of replacement ------------------------------>
 
-\VERTEX    x,    y,    z, face1, face2, face3, face4, visibility
+\          x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX    0,    0,  224,     0,      1,    2,     3,         31    \ Vertex 0
 
                         \ --- Mod: Original Acornsoft code removed: ----------->
@@ -1227,7 +1227,7 @@ ENDIF
 
 .SHIP_PYTHON_EDGES
 
-\EDGE vertex1, vertex2, face1, face2, visibility
+\     vertex1, vertex2, face1, face2, visibility
 
                         \ --- Mod: Original Acornsoft code removed: ----------->
 
@@ -1305,7 +1305,7 @@ ENDIF
 
                         \ --- Mod: Original Acornsoft code removed: ----------->
 
-\\FACE normal_x, normal_y, normal_z, visibility
+\\     normal_x, normal_y, normal_z, visibility
 \ FACE      -27,       40,       11,        31   \ Face 0
 \ FACE       27,       40,       11,        31   \ Face 1
 \ FACE      -27,      -40,       11,        31   \ Face 2
@@ -1322,7 +1322,7 @@ ENDIF
 
                         \ --- And replaced by: -------------------------------->
 
-\FACE normal_x, normal_y, normal_z, visibility
+\     normal_x, normal_y, normal_z, visibility
  FACE      -27,       40,       11,         30    \ Face 0
  FACE       27,       40,       11,         30    \ Face 1
  FACE      -27,      -40,       11,         30    \ Face 2
@@ -1373,7 +1373,7 @@ ENDIF
  EQUB %00101111         \ Laser power              = 5
                         \ Missiles                 = 7
 
-\VERTEX    x,    y,    z, face1, face2, face3, face4, visibility
+\          x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX   30,    0,  100,     7,     6,     1,     0,         31     \ Vertex 0
  VERTEX  -30,    0,  100,    11,     6,     5,     0,         31     \ Vertex 1
  VERTEX   40,   30,  -26,     3,     2,     1,     0,         31     \ Vertex 2
@@ -1389,7 +1389,7 @@ ENDIF
 
 .SHIP_GHAVIAL_EDGES
 
-\EDGE vertex1, vertex2, face1, face2, visibility
+\     vertex1, vertex2, face1, face2, visibility
  EDGE       0,       2,     1,     0,         31    \ Edge 0
  EDGE       4,       2,     2,     1,         31    \ Edge 1
  EDGE       5,       2,     3,     2,         31    \ Edge 2
@@ -1415,7 +1415,7 @@ ENDIF
 
 .SHIP_GHAVIAL_FACES
 
-\FACE normal_x, normal_y, normal_z, visibility
+\     normal_x, normal_y, normal_z, visibility
  FACE        0,       62,       14,         31    \ Face 0
  FACE       51,       36,       12,         31    \ Face 1
  FACE       51,       28,      -25,         31    \ Face 2
@@ -1493,7 +1493,7 @@ ENDIF
 
                         \ --- End of replacement ------------------------------>
 
-\VERTEX    x,    y,    z, face1, face2, face3, face4, visibility
+\          x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX  -18,   -1,   50,     1,      0,    3,     2,         31    \ Vertex 0
  VERTEX   18,   -1,   50,     1,      0,    5,     4,         31    \ Vertex 1
  VERTEX  -66,    0,    7,     3,      2,    8,     8,         31    \ Vertex 2
@@ -1508,7 +1508,7 @@ ENDIF
 
 .SHIP_COBRA_MK_1_EDGES
 
-\EDGE vertex1, vertex2, face1, face2, visibility
+\     vertex1, vertex2, face1, face2, visibility
  EDGE       1,       0,     1,     0,         31    \ Edge 0
  EDGE       0,       2,     3,     2,         31    \ Edge 1
  EDGE       2,       6,     8,     3,         31    \ Edge 2
@@ -1530,7 +1530,7 @@ ENDIF
 
 .SHIP_COBRA_MK_1_FACES
 
-\FACE normal_x, normal_y, normal_z, visibility
+\     normal_x, normal_y, normal_z, visibility
  FACE        0,       41,       10,         31    \ Face 0
  FACE        0,      -27,        3,         31    \ Face 1
  FACE       -8,       46,        8,         31    \ Face 2
@@ -1595,7 +1595,7 @@ ENDIF
  EQUB %00000000         \ Laser power              = 0
                         \ Missiles                 = 0
 
-\VERTEX    x,    y,    z, face1, face2, face3, face4, visibility
+\          x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX  -15,  -22,   -9,    15,     15,   15,    15,         31    \ Vertex 0
  VERTEX  -15,   38,   -9,    15,     15,   15,    15,         31    \ Vertex 1
  VERTEX   19,   32,   11,    15,     15,   15,    15,         20    \ Vertex 2
@@ -1603,7 +1603,7 @@ ENDIF
 
 .SHIP_PLATE_EDGES
 
-\EDGE vertex1, vertex2, face1, face2, visibility
+\     vertex1, vertex2, face1, face2, visibility
  EDGE       0,       1,    15,    15,         31    \ Edge 0
  EDGE       1,       2,    15,    15,         16    \ Edge 1
  EDGE       2,       3,    15,    15,         20    \ Edge 2
@@ -1611,7 +1611,7 @@ ENDIF
 
 .SHIP_PLATE_FACES
 
-\FACE normal_x, normal_y, normal_z, visibility
+\     normal_x, normal_y, normal_z, visibility
  FACE        0,        0,        0,          0    \ Face 0
 
 \ ******************************************************************************
@@ -1656,7 +1656,7 @@ ENDIF
  EQUB %00000000         \ Laser power              = 0
                         \ Missiles                 = 0
 
-\VERTEX    x,    y,    z, face1, face2, face3, face4, visibility
+\          x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX  -18,   37,  -11,     1,      0,    9,     5,         31    \ Vertex 0
  VERTEX   30,    7,   12,     2,      1,    6,     5,         31    \ Vertex 1
  VERTEX   28,   -7,  -12,     3,      2,    7,     6,         31    \ Vertex 2
@@ -1667,7 +1667,7 @@ ENDIF
 
 .SHIP_BOULDER_EDGES
 
-\EDGE vertex1, vertex2, face1, face2, visibility
+\     vertex1, vertex2, face1, face2, visibility
  EDGE       0,       1,     5,     1,         31    \ Edge 0
  EDGE       1,       2,     6,     2,         31    \ Edge 1
  EDGE       2,       3,     7,     3,         31    \ Edge 2
@@ -1686,7 +1686,7 @@ ENDIF
 
 .SHIP_BOULDER_FACES
 
-\FACE normal_x, normal_y, normal_z, visibility
+\     normal_x, normal_y, normal_z, visibility
  FACE      -15,       -3,        8,         31    \ Face 0
  FACE       -7,       12,       30,         31    \ Face 1
  FACE       32,      -47,       24,         31    \ Face 2
