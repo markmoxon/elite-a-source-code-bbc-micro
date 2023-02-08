@@ -13411,8 +13411,10 @@ LOAD_C% = LOAD% +P% - CODE%
 
                         \ --- End of removed code ----------------------------->
 
-.MUL6
+                        \ --- Mod: Code removed for flicker-free ships: ------->
 
+\.MUL6
+\
 \ BCC P%+4
 \ ADC T
 \ ROR A
@@ -13420,6 +13422,9 @@ LOAD_C% = LOAD% +P% - CODE%
 \ DEX
 \ BNE MUL6
 \ RTS
+
+                        \ --- End of removed code ----------------------------->
+
 }
 
 \ ******************************************************************************
@@ -30272,6 +30277,13 @@ LOAD_G% = LOAD% + P% - CODE%
 
 .SHPPT
 
+                        \ --- Mod: Code removed for flicker-free ships: ------->
+
+\JSR EE51               \ Call EE51 to remove the ship's wireframe from the
+\                       \ screen, if there is one
+
+                        \ --- End of removed code ----------------------------->
+
  JSR PROJ               \ Project the ship onto the screen, returning:
                         \
                         \   * K3(1 0) = the screen x-coordinate
@@ -30287,15 +30299,36 @@ LOAD_G% = LOAD% + P% - CODE%
  BCS nono               \ the bottom of the screen, jump to nono as the ship's
                         \ dot is off the bottom of the space view
 
- JSR Shpt               \ Call Shpt to draws a horizontal 4-pixel dash for the 
+                        \ --- Mod: Code removed for flicker-free ships: ------->
+
+\LDY #2                 \ Call Shpt with Y = 2 to set up bytes 1-4 in the ship
+\JSR Shpt               \ lines space, aborting the call to LL9 if the dot is
+\                       \ off the side of the screen. This call sets up the
+\                       \ first row of the dot (i.e. a four-pixel dash)
+\
+\LDY #6                 \ Set Y to 6 for the next call to Shpt
+\
+\LDA K4                 \ Set A = y-coordinate of dot + 1 (so this is the second
+\ADC #1                 \ row of the two-pixel-high dot)
+
+                        \ --- And replaced by: -------------------------------->
+
+ JSR Shpt               \ Call Shpt with Y = 2 to set up bytes 1-4 in the ship
+                        \ lines space, aborting the call to LL9 if the dot is
+                        \ off the side of the screen. This call sets up the
                         \ first row of the dot (i.e. a four-pixel dash)
 
  LDA K4                 \ Set A = y-coordinate of dot + 1 (so this is the second
  CLC                    \ row of the two-pixel-high dot)
  ADC #1
 
- JSR Shpt               \ Call Shpt to draws a horizontal 4-pixel dash for the 
-                        \ first row of the dot (i.e. a four-pixel dash)
+                        \ --- End of replacement ------------------------------>
+
+ JSR Shpt               \ Call Shpt with Y = 6 to set up bytes 5-8 in the ship
+                        \ lines space, aborting the call to LL9 if the dot is
+                        \ off the side of the screen. This call sets up the
+                        \ second row of the dot (i.e. another four-pixel dash,
+                        \ on the row below the first one)
 
  LDA #%00001000         \ Set bit 3 of the ship's byte #31 to record that we
  ORA XX1+31             \ have now drawn something on-screen for this ship
@@ -30311,11 +30344,45 @@ LOAD_G% = LOAD% + P% - CODE%
  AND XX1+31             \ nothing is being drawn on-screen for this ship
  STA XX1+31
 
+                        \ --- Mod: Code removed for flicker-free ships: ------->
+
+\LDA #8                 \ Set A = 8 so when we call LL18+2 next, byte #0 of the
+\                       \ heap gets set to 8, for the 8 bytes we just stuck on
+\                       \ the heap
+\
+\JMP LL81+2             \ Call LL81+2 to draw the ship's dot, returning from the
+\                       \ subroutine using a tail call
+\
+\PLA                    \ Pull the return address from the stack, so the RTS
+\PLA                    \ below actually returns from the subroutine that called
+\                       \ LL9 (as we called SHPPT from LL9 with a JMP)
+
+                        \ --- And replaced by: -------------------------------->
+
  JMP LL155              \ Jump to LL155 to draw any remaining lines that are
                         \ still in the ship line heap and return from the
                         \ subroutine using a tail call
 
+                        \ --- End of replacement ------------------------------>
+
 .Shpt
+
+                        \ --- Mod: Code removed for flicker-free ships: ------->
+
+\                       \ This routine sets up four bytes in the ship line heap,
+\                       \ from byte Y-1 to byte Y+2. If the ship's screen point
+\                       \ turns out to be off-screen, then this routine aborts
+\                       \ the entire call to LL9, exiting via nono. The four
+\                       \ bytes define a horizontal 4-pixel dash, for either the
+\                       \ top or the bottom of the ship's dot
+\
+\STA (XX19),Y           \ Store A in byte Y of the ship line heap
+\
+\INY                    \ Store A in byte Y+2 of the ship line heap
+\INY
+\STA (XX19),Y
+
+                        \ --- And replaced by: -------------------------------->
 
                         \ This routine draws a horizontal 4-pixel dash, for
                         \ either the top or the bottom of the ship's dot
@@ -30323,7 +30390,35 @@ LOAD_G% = LOAD% + P% - CODE%
  STA Y1                 \ Store A in both y-coordinates, as this is a horizontal
  STA Y2                 \ dash at y-coordinate A
 
+                        \ --- End of replacement ------------------------------>
+
  LDA K3                 \ Set A = screen x-coordinate of the ship dot
+
+                        \ --- Mod: Code removed for flicker-free ships: ------->
+
+\DEY                    \ Store A in byte Y+1 of the ship line heap
+\STA (XX19),Y
+\
+\ADC #3                 \ Set A = screen x-coordinate of the ship dot + 3
+\
+\BCS nono-2             \ If the addition pushed the dot off the right side of
+\                       \ the screen, jump to nono-2 to return from the parent
+\                       \ subroutine early (i.e. LL9). This works because we
+\                       \ called Shpt from above with a JSR, so nono-2 removes
+\                       \ that return address from the stack, leaving the next
+\                       \ return address exposed. LL9 called SHPPT with a JMP.
+\                       \ so the next return address is the one that was put on
+\                       \ the stack by the original call to LL9. So the RTS in
+\                       \ nono will actually return us from the original call
+\                       \ to LL9, thus aborting the entire drawing process
+\
+\DEY                    \ Store A in byte Y-1 of the ship line heap
+\DEY
+\STA (XX19),Y
+\
+\RTS                    \ Return from the subroutine
+
+                        \ --- And replaced by: -------------------------------->
 
  STA X1                 \ Store the x-coordinate of the ship dot in X1, as this
                         \ is where the dash starts
@@ -30341,6 +30436,8 @@ LOAD_G% = LOAD% + P% - CODE%
                         \ drawing the ship's new line and then erasing the
                         \ corresponding old line from the screen, and return
                         \ from the subroutine using a tail call
+
+                        \ --- End of replacement ------------------------------>
 
 \ ******************************************************************************
 \
@@ -30789,6 +30886,8 @@ LOAD_G% = LOAD% + P% - CODE%
                         \ update this value below with the actual ship's
                         \ distance if it turns out to be visible on-screen
 
+                        \ --- Mod: Code added for flicker-free ships: --------->
+
                         \ We now set things up for smooth ship plotting, by
                         \ setting the following:
                         \
@@ -30819,6 +30918,8 @@ LOAD_G% = LOAD% + P% - CODE%
 
  LDA (XX19),Y           \ Set XX14+1 to the first byte of the ship's line heap,
  STA XX14+1             \ which contains the number of bytes in the heap
+
+                        \ --- End of added code ------------------------------->
 
  LDA NEWB               \ If bit 7 of the ship's NEWB flags is set, then the
  BMI EE51               \ ship has been scooped or has docked, so jump down to
@@ -32581,9 +32682,23 @@ LOAD_G% = LOAD% + P% - CODE%
 
 .EE31
 
+                        \ --- Mod: Code removed for flicker-free ships: ------->
+
+\LDA #%00001000         \ If bit 3 of the ship's byte #31 is clear, then there
+\BIT XX1+31             \ is nothing already being shown for this ship, so skip
+\BEQ LL74               \ to LL74 as we don't need to erase anything from the
+\                       \ screen
+\
+\JSR LL155              \ Otherwise call LL155 to draw the existing ship, which
+\                       \ removes it from the screen
+
+                        \ --- And replaced by: -------------------------------->
+
  LDY #9                 \ Fetch byte #9 of the ship's blueprint, which is the
  LDA (XX0),Y            \ number of edges, and store it in XX20
  STA XX20
+
+                        \ --- End of replacement ------------------------------>
 
  LDA #%00001000         \ Set bit 3 of A so the next instruction sets bit 3 of
                         \ the ship's byte #31 to denote that we are drawing
@@ -32595,8 +32710,31 @@ LOAD_G% = LOAD% + P% - CODE%
  STA XX1+31             \ was no ship already on screen, the bit is clear,
                         \ otherwise it is set
 
+                        \ --- Mod: Code removed for flicker-free ships: ------->
+
+\LDY #9                 \ Fetch byte #9 of the ship's blueprint, which is the
+\LDA (XX0),Y            \ number of edges, and store it in XX20
+\STA XX20
+\
+\LDY #0                 \ We are about to step through all the edges, using Y
+\                       \ as a counter
+\
+\STY U                  \ Set U = 0 (though we increment it to 1 below)
+\
+\STY XX17               \ Set XX17 = 0, which we are going to use as a counter
+\                       \ for stepping through the ship's edges
+\
+\INC U                  \ We are going to start calculating the lines we need to
+\                       \ draw for this ship, and will store them in the ship
+\                       \ line heap, using U to point to the end of the heap, so
+\                       \ we start by setting U = 1
+
+                        \ --- And replaced by: -------------------------------->
+
  LDY #0                 \ Set XX17 = 0, which we are going to use as a counter
  STY XX17               \ for stepping through the ship's edges
+
+                        \ --- End of replacement ------------------------------>
 
  BIT XX1+31             \ If bit 6 of the ship's byte #31 is clear, then the
  BVC LL170              \ ship is not firing its lasers, so jump to LL170 to
@@ -32678,9 +32816,40 @@ LOAD_G% = LOAD% + P% - CODE%
                         \ screen, so jump to LL170 so we don't store this line
                         \ in the ship line heap
 
+                        \ --- Mod: Code removed for flicker-free ships: ------->
+
+\LDY U                  \ Fetch the ship line heap pointer, which points to the
+\                       \ next free byte on the heap, into Y
+\
+\LDA XX15               \ Add X1 to the end of the heap
+\STA (XX19),Y
+\
+\INY                    \ Increment the heap pointer
+\
+\LDA XX15+1             \ Add Y1 to the end of the heap
+\STA (XX19),Y
+\
+\INY                    \ Increment the heap pointer
+\
+\LDA XX15+2             \ Add X2 to the end of the heap
+\STA (XX19),Y
+\
+\INY                    \ Increment the heap pointer
+\
+\LDA XX15+3             \ Add Y2 to the end of the heap
+\STA (XX19),Y
+\
+\INY                    \ Increment the heap pointer
+\
+\STY U                  \ Store the updated ship line heap pointer in U
+
+                        \ --- And replaced by: -------------------------------->
+
  JSR LLX30              \ Draw the laser line using smooth animation, by first
                         \ drawing the new laser line and then erasing the
                         \ corresponding old line from the screen
+
+                        \ --- End of replacement ------------------------------>
 
 \ ******************************************************************************
 \
@@ -32717,6 +32886,19 @@ LOAD_G% = LOAD% + P% - CODE%
                         \ So V(1 0) now points to the start of the edges data
                         \ for this ship
 
+                        \ --- Mod: Code removed for flicker-free ships: ------->
+
+\LDY #5                 \ Fetch byte #5 of the ship's blueprint, which contains
+\LDA (XX0),Y            \ the maximum heap size for plotting the ship (which is
+\STA T1                 \ 1 + 4 * the maximum number of visible edges) and store
+\                       \ it in T1
+\
+\LDY XX17               \ Set Y to the edge counter in XX17
+\
+\.LL75
+
+                        \ --- And replaced by: -------------------------------->
+
  LDY #5                 \ Fetch byte #5 of the ship's blueprint, which contains
  LDA (XX0),Y            \ the maximum heap size for plotting the ship (which is
  STA CNT                \ 1 + 4 * the maximum number of visible edges) and store
@@ -32725,6 +32907,8 @@ LOAD_G% = LOAD% + P% - CODE%
 .LL75
 
  LDY #0                 \ Set Y = 0 so we start with byte #0
+
+                        \ --- End of replacement ------------------------------>
 
  LDA (V),Y              \ Fetch byte #0 for this edge, which contains the
                         \ visibility distance for this edge, beyond which the
@@ -32745,6 +32929,12 @@ LOAD_G% = LOAD% + P% - CODE%
                         \
                         \     * Bits 4-7 = the number of face 2
 
+                        \ --- Mod: Code removed for flicker-free ships: ------->
+
+\INY                    \ Increment Y to point to byte #2
+
+                        \ --- End of removed code ----------------------------->
+
  STA P                  \ Store byte #1 into P
 
  AND #%00001111         \ Extract the number of face 1 into X
@@ -32764,6 +32954,12 @@ LOAD_G% = LOAD% + P% - CODE%
  LDA XX2,X              \ If XX2+X is zero then we decided in part 5 that
  BEQ LL78               \ face 2 is hidden, so jump to LL78
 
+                        \ --- Mod: Code removed for flicker-free ships: ------->
+
+\JMP LL78               \ Face 2 is hidden, so jump to LL78
+
+                        \ --- End of removed code ----------------------------->
+
 .LL79
 
                         \ We now build the screen line for this edge, as
@@ -32781,10 +32977,24 @@ LOAD_G% = LOAD% + P% - CODE%
                         \ before storing the resulting line in the ship line
                         \ heap
 
+                        \ --- Mod: Code removed for flicker-free ships: ------->
+
+\LDA (V),Y              \ Fetch byte #2 for this edge into X, which contains
+\TAX                    \ the number of the vertex at the start of the edge
+\
+\INY                    \ Increment Y to point to byte #3
+\
+\LDA (V),Y              \ Fetch byte #3 for this edge into Q, which contains
+\STA Q                  \ the number of the vertex at the end of the edge
+
+                        \ --- And replaced by: -------------------------------->
+
  INY                    \ Increment Y to point to byte #2
 
  LDA (V),Y              \ Fetch byte #2 for this edge into X, which contains
  TAX                    \ the number of the vertex at the start of the edge
+
+                        \ --- End of replacement ------------------------------>
 
  LDA XX3+1,X            \ Fetch the x_hi coordinate of the edge's start vertex
  STA XX15+1             \ from the XX3 heap into XX15+1
@@ -32798,10 +33008,19 @@ LOAD_G% = LOAD% + P% - CODE%
  LDA XX3+3,X            \ Fetch the y_hi coordinate of the edge's start vertex
  STA XX15+3             \ from the XX3 heap into XX15+3
 
+                        \ --- Mod: Code removed for flicker-free ships: ------->
+
+\LDX Q                  \ Set X to the number of the vertex at the end of the
+\                       \ edge, which we stored in Q
+
+                        \ --- And replaced by: -------------------------------->
+
  INY                    \ Increment Y to point to byte #3
 
  LDA (V),Y              \ Fetch byte #3 for this edge into X, which contains
  TAX                    \ the number of the vertex at the end of the edge
+
+                        \ --- End of replacement ------------------------------>
 
  LDA XX3,X              \ Fetch the x_lo coordinate of the edge's end vertex
  STA XX15+4             \ from the XX3 heap into XX15+4
@@ -32819,6 +33038,16 @@ LOAD_G% = LOAD% + P% - CODE%
                         \ clipped to fit on-screen, returning the clipped line's
                         \ end-points in (X1, Y1) and (X2, Y2)
 
+                        \ --- Mod: Code removed for flicker-free ships: ------->
+
+\BCS LL79-3             \ If the C flag is set then the line is not visible on
+\                       \ screen, so jump to LL78 (via LL79-3) so we don't store
+\                       \ this line in the ship line heap
+\
+\JMP LL80               \ Jump down to part 11 to draw this edge
+
+                        \ --- And replaced by: -------------------------------->
+
  BCS LL78               \ If the C flag is set then the line is not visible on
                         \ screen, so jump to LL78 so we don't store this line
                         \ in the ship line heap
@@ -32826,6 +33055,8 @@ LOAD_G% = LOAD% + P% - CODE%
  JSR LLX30              \ Draw this edge using smooth animation, by first
                         \ drawing the ship's new line and then erasing the
                         \ corresponding old line from the screen
+
+                        \ --- End of replacement ------------------------------>
 
 \ ******************************************************************************
 \
@@ -32847,6 +33078,56 @@ LOAD_G% = LOAD% + P% - CODE%
 \
 \ ******************************************************************************
 
+                        \ --- Mod: Code removed for flicker-free ships: ------->
+
+\.LL80
+\
+\LDY U                  \ Fetch the ship line heap pointer, which points to the
+\                       \ next free byte on the heap, into Y
+\
+\LDA XX15               \ Add X1 to the end of the heap
+\STA (XX19),Y
+\
+\INY                    \ Increment the heap pointer
+\
+\LDA XX15+1             \ Add Y1 to the end of the heap
+\STA (XX19),Y
+\
+\INY                    \ Increment the heap pointer
+\
+\LDA XX15+2             \ Add X2 to the end of the heap
+\STA (XX19),Y
+\
+\INY                    \ Increment the heap pointer
+\
+\LDA XX15+3             \ Add Y2 to the end of the heap
+\STA (XX19),Y
+\
+\INY                    \ Increment the heap pointer
+\
+\STY U                  \ Store the updated ship line heap pointer in U
+\
+\CPY T1                 \ If Y >= T1 then we have reached the maximum number of
+\BCS LL81               \ edge lines that we can store in the ship line heap, so
+\                       \ skip to LL81 so we don't loop back for the next edge
+\
+\.LL78
+\
+\INC XX17               \ Increment the edge counter to point to the next edge
+\
+\LDY XX17               \ If Y >= XX20, which contains the number of edges in
+\CPY XX20               \ the blueprint, jump to LL81 as we have processed all
+\BCS LL81               \ the edges and don't need to loop back for the next one
+\
+\LDY #0                 \ Set Y to point to byte #0 again, ready for the next
+\                       \ edge
+\
+\LDA V                  \ Increment V by 4 so V(1 0) points to the data for the
+\ADC #4                 \ next edge
+\STA V
+
+                        \ --- And replaced by: -------------------------------->
+
 .LL78
 
  LDA XX14               \ If XX14 >= CNT, skip to LL81 so we don't loop back for
@@ -32860,12 +33141,33 @@ LOAD_G% = LOAD% + P% - CODE%
  ADC #4
  STA V
 
+                        \ --- End of replacement ------------------------------>
+
  BCC ll81               \ If the above addition didn't overflow, jump to ll81
 
  INC V+1                \ Otherwise increment the high byte of V(1 0), as we
                         \ just moved the V(1 0) pointer past a page boundary
 
 .ll81
+
+                        \ --- Mod: Code removed for flicker-free ships: ------->
+
+\JMP LL75               \ Loop back to LL75 to process the next edge
+\
+\.LL81
+\
+\                       \ We have finished adding lines to the ship line heap,
+\                       \ so now we need to set the first byte of the heap to
+\                       \ the number of bytes stored there
+\
+\LDA U                  \ Fetch the ship line heap pointer from U into A, which
+\                       \ points to the end of the heap, and therefore contains
+\                       \ the heap size
+\
+\LDY #0                 \ Store A as the first byte of the ship line heap, so
+\STA (XX19),Y           \ the heap is now correctly set up
+
+                        \ --- And replaced by: -------------------------------->
 
  INC XX17               \ Increment the edge counter to point to the next edge
 
@@ -32877,6 +33179,8 @@ LOAD_G% = LOAD% + P% - CODE%
 
  JMP LL155              \ Jump down to part 12 below to draw any remaining lines
                         \ from the old ship that are still in the ship line heap
+
+                        \ --- End of replacement ------------------------------>
 
 \ ******************************************************************************
 \
@@ -33383,6 +33687,98 @@ LOAD_G% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
 \
+\       Name: LL9 (Part 11 of 12), Moved
+\       Type: Subroutine
+\   Category: Drawing ships
+\    Summary: Draw ship: Add all visible edges to the ship line heap
+\  Deep dive: Drawing ships
+\
+\ ------------------------------------------------------------------------------
+\
+\ This part adds all the visible edges to the ship line heap, so we can draw
+\ them in part 12.
+\
+\ Other entry points:
+\
+\   LL81+2              Draw the contents of the ship line heap, used to draw
+\                       the ship as a dot from SHPPT
+\
+\ ******************************************************************************
+
+                        \ --- Mod: Code moved for flicker-free ships: --------->
+
+\.LL80
+\
+\LDY U                  \ Fetch the ship line heap pointer, which points to the
+\                       \ next free byte on the heap, into Y
+\
+\LDA XX15               \ Add X1 to the end of the heap
+\STA (XX19),Y
+\
+\INY                    \ Increment the heap pointer
+\
+\LDA XX15+1             \ Add Y1 to the end of the heap
+\STA (XX19),Y
+\
+\INY                    \ Increment the heap pointer
+\
+\LDA XX15+2             \ Add X2 to the end of the heap
+\STA (XX19),Y
+\
+\INY                    \ Increment the heap pointer
+\
+\LDA XX15+3             \ Add Y2 to the end of the heap
+\STA (XX19),Y
+\
+\INY                    \ Increment the heap pointer
+\
+\STY U                  \ Store the updated ship line heap pointer in U
+\
+\CPY T1                 \ If Y >= T1 then we have reached the maximum number of
+\BCS LL81               \ edge lines that we can store in the ship line heap, so
+\                       \ skip to LL81 so we don't loop back for the next edge
+\
+\.LL78
+\
+\INC XX17               \ Increment the edge counter to point to the next edge
+\
+\LDY XX17               \ If Y >= XX20, which contains the number of edges in
+\CPY XX20               \ the blueprint, jump to LL81 as we have processed all
+\BCS LL81               \ the edges and don't need to loop back for the next one
+\
+\LDY #0                 \ Set Y to point to byte #0 again, ready for the next
+\                       \ edge
+\
+\LDA V                  \ Increment V by 4 so V(1 0) points to the data for the
+\ADC #4                 \ next edge
+\STA V
+\
+\BCC ll81               \ If the above addition didn't overflow, jump to ll81
+\
+\INC V+1                \ Otherwise increment the high byte of V(1 0), as we
+\                       \ just moved the V(1 0) pointer past a page boundary
+\
+\.ll81
+\
+\JMP LL75               \ Loop back to LL75 to process the next edge
+\
+\.LL81
+\
+\                       \ We have finished adding lines to the ship line heap,
+\                       \ so now we need to set the first byte of the heap to
+\                       \ the number of bytes stored there
+\
+\LDA U                  \ Fetch the ship line heap pointer from U into A, which
+\                       \ points to the end of the heap, and therefore contains
+\                       \ the heap size
+\
+\LDY #0                 \ Store A as the first byte of the ship line heap, so
+\STA (XX19),Y           \ the heap is now correctly set up
+
+                        \ --- End of moved code ------------------------------->
+
+\ ******************************************************************************
+\
 \       Name: LL9 (Part 12 of 12)
 \       Type: Subroutine
 \   Category: Drawing ships
@@ -33395,6 +33791,27 @@ LOAD_G% = LOAD% + P% - CODE%
 \ the ship, and to remove it from the screen.
 \
 \ ******************************************************************************
+
+                        \ --- Mod: Code removed for flicker-free ships: ------->
+
+\.LL155
+\
+\LDY #0                 \ Fetch the first byte from the ship line heap into A,
+\LDA (XX19),Y           \ which contains the number of bytes in the heap
+\
+\STA XX20               \ Store the heap size in XX20
+\
+\CMP #4                 \ If the heap size is less than 4, there is nothing to
+\BCC LL118-1            \ draw, so return from the subroutine (as LL118-1
+\                       \ contains an RTS)
+\
+\INY                    \ Set Y = 1, which we will use as an index into the ship
+\                       \ line heap, starting at byte #1 (as byte #0 contains
+\                       \ the heap size)
+\
+\.LL27
+
+                        \ --- And replaced by: -------------------------------->
 
 .LL155
 
@@ -33411,6 +33828,8 @@ LOAD_G% = LOAD% + P% - CODE%
                         \ If we get here then Y < XX14+1, which means Y is
                         \ pointing to an on-screen line from the old ship that
                         \ we need to erase
+
+                        \ --- End of replacement ------------------------------>
 
  LDA (XX19),Y           \ Fetch the X1 line coordinate from the heap and store
  STA XX15               \ it in XX15
@@ -33435,6 +33854,17 @@ LOAD_G% = LOAD% + P% - CODE%
 
  INY                    \ Increment the heap pointer
 
+                        \ --- Mod: Code removed for flicker-free ships: ------->
+
+\CPY XX20               \ If the heap counter is less than the size of the heap,
+\BCC LL27               \ loop back to LL27 to draw the next line from the heap
+\
+\.LL82                  \ This label is commented out in the original source
+\
+\RTS                    \ Return from the subroutine
+
+                        \ --- And replaced by: -------------------------------->
+
  JMP LL27               \ Loop back to LL27 to draw (i.e. erase) the next line
                         \ from the heap
 
@@ -33447,6 +33877,8 @@ LOAD_G% = LOAD% + P% - CODE%
 .LL82
 
  RTS                    \ Return from the subroutine
+
+                        \ --- End of replacement ------------------------------>
 
 \ ******************************************************************************
 \
@@ -33495,6 +33927,8 @@ LOAD_G% = LOAD% + P% - CODE%
 \   XX14                The offset of the next line in the line heap
 \
 \ ******************************************************************************
+
+                        \ --- Mod: Code added for flicker-free ships: --------->
 
 .LLX30
 
@@ -33564,6 +33998,8 @@ LOAD_G% = LOAD% + P% - CODE%
                         \ point to a line that is still on-screen, so call LL30
                         \ to draw this line and erase it from the screen,
                         \ returning from the subroutine using a tail call
+
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \

@@ -25151,7 +25151,6 @@ S.D.ELTB &1669  &20D4  &11E3  &1669
      283B   46 1B      LSR &1B
      283D   D0 F1      BNE &2830
      283F   60         RTS
-.MUL6
      2840   86 81      STX &81
 .MLTU2
      2842   49 FF      EOR #&FF
