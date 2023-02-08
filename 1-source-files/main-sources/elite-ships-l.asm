@@ -446,7 +446,7 @@ ENDMACRO
  EQUB 16                \ Number of faces          = 16 / 4 = 4
  EQUB 8                 \ Visibility distance      = 8
 
-                        \ --- Mod: Original Acornsoft code removed: ----------->
+                        \ --- Mod: Code removed for Elite-A: ------------------>
 
 \ EQUB 17               \ Max. energy              = 17
 
@@ -509,7 +509,7 @@ ENDMACRO
  EQUB 60                \ Number of vertices       = 60 / 6 = 10
  EQUB 15                \ Number of edges          = 15
 
-                        \ --- Mod: Original Acornsoft code removed: ----------->
+                        \ --- Mod: Code removed for Elite-A: ------------------>
 
 \ EQUW 0                \ Bounty                   = 0
 
@@ -522,7 +522,7 @@ ENDMACRO
  EQUB 28                \ Number of faces          = 28 / 4 = 7
  EQUB 12                \ Visibility distance      = 12
 
-                        \ --- Mod: Original Acornsoft code removed: ----------->
+                        \ --- Mod: Code removed for Elite-A: ------------------>
 
 \ EQUB 17               \ Max. energy              = 17
 
@@ -606,7 +606,7 @@ ENDMACRO
  EQUB 28                \ Number of faces          = 28 / 4 = 7
  EQUB 23                \ Visibility distance      = 23
 
-                        \ --- Mod: Original Acornsoft code removed: ----------->
+                        \ --- Mod: Code removed for Elite-A: ------------------>
 
 \ EQUB 100              \ Max. energy              = 100
 
@@ -621,7 +621,7 @@ ENDMACRO
  EQUB HI(SHIP_VIPER_FACES - SHIP_VIPER)            \ Faces data offset (high)
  EQUB 1                 \ Normals are scaled by    = 2^1 = 2
 
-                        \ --- Mod: Original Acornsoft code removed: ----------->
+                        \ --- Mod: Code removed for Elite-A: ------------------>
 
 \ EQUB %00010001        \ Laser power              = 2
 \                       \ Missiles                 = 1
@@ -717,7 +717,7 @@ ENDMACRO
  EQUB %00000000         \ Laser power              = 0
                         \ Missiles                 = 0
 
-                        \ --- Mod: Original Acornsoft code removed: ----------->
+                        \ --- Mod: Code removed for Elite-A: ------------------>
 
 \\          x,    y,    z, face1, face2, face3, face4, visibility
 \ VERTEX    0,  -17,   23,    15,     15,   15,    15,         31   \ Vertex 0
@@ -790,7 +790,7 @@ ENDMACRO
  EDGE       3,      12,    12,    11,         16    \ Edge 19
  EDGE       8,       9,     9,     9,         16    \ Edge 20
 
-                        \ --- Mod: Original Acornsoft code removed: ----------->
+                        \ --- Mod: Code removed for Elite-A: ------------------>
 
 \ EDGE       9,      10,     9,     9,          7   \ Edge 21
 \ EDGE      10,      11,     9,     9,          9   \ Edge 22
@@ -818,7 +818,7 @@ ENDMACRO
 
 .SHIP_SHUTTLE_FACES
 
-                        \ --- Mod: Original Acornsoft code removed: ----------->
+                        \ --- Mod: Code removed for Elite-A: ------------------>
 
 \\     normal_x, normal_y, normal_z, visibility
 \ FACE      -55,      -55,       40,         31   \ Face 0
@@ -876,7 +876,7 @@ ENDMACRO
  EQUB 60                \ Number of vertices       = 60 / 6 = 10
  EQUB 15                \ Number of edges          = 15
 
-                        \ --- Mod: Original Acornsoft code removed: ----------->
+                        \ --- Mod: Code removed for Elite-A: ------------------>
 
 \ EQUW 50               \ Bounty                   = 50
 
@@ -889,7 +889,7 @@ ENDMACRO
  EQUB 28                \ Number of faces          = 28 / 4 = 7
  EQUB 20                \ Visibility distance      = 20
 
-                        \ --- Mod: Original Acornsoft code removed: ----------->
+                        \ --- Mod: Code removed for Elite-A: ------------------>
 
 \ EQUB 70               \ Max. energy              = 70
 
@@ -904,7 +904,7 @@ ENDMACRO
  EQUB HI(SHIP_SIDEWINDER_FACES - SHIP_SIDEWINDER)  \ Faces data offset (high)
  EQUB 2                 \ Normals are scaled by    = 2^2 = 4
 
-                        \ --- Mod: Original Acornsoft code removed: ----------->
+                        \ --- Mod: Code removed for Elite-A: ------------------>
 
 \ EQUB %00010000        \ Laser power              = 2
 \                       \ Missiles                 = 0
@@ -1088,7 +1088,7 @@ ENDMACRO
  EQUB 78                \ Number of vertices       = 78 / 6 = 13
  EQUB 24                \ Number of edges          = 24
 
-                        \ --- Mod: Original Acornsoft code removed: ----------->
+                        \ --- Mod: Code removed for Elite-A: ------------------>
 
 \ EQUW 0                \ Bounty                   = 0
 
@@ -1101,7 +1101,7 @@ ENDMACRO
  EQUB 52                \ Number of faces          = 52 / 4 = 13
  EQUB 40                \ Visibility distance      = 40
 
-                        \ --- Mod: Original Acornsoft code removed: ----------->
+                        \ --- Mod: Code removed for Elite-A: ------------------>
 
 \ EQUB 250              \ Max. energy              = 250
 
@@ -1116,7 +1116,7 @@ ENDMACRO
  EQUB HI(SHIP_BOA_FACES - SHIP_BOA)                \ Faces data offset (high)
  EQUB 0                 \ Normals are scaled by    = 2^0 = 1
 
-                        \ --- Mod: Original Acornsoft code removed: ----------->
+                        \ --- Mod: Code removed for Elite-A: ------------------>
 
 \ EQUB %00011100        \ Laser power              = 3
 \                       \ Missiles                 = 4
@@ -1319,7 +1319,7 @@ ENDMACRO
  EQUB 24                \ Number of faces          = 24 / 4 = 6
  EQUB 25                \ Visibility distance      = 25
 
-                        \ --- Mod: Original Acornsoft code removed: ----------->
+                        \ --- Mod: Code removed for Elite-A: ------------------>
 
 \ EQUB 80               \ Max. energy              = 80
 
@@ -1334,7 +1334,7 @@ ENDMACRO
  EQUB HI(SHIP_KRAIT_FACES - SHIP_KRAIT)            \ Faces data offset (high)
  EQUB 1                 \ Normals are scaled by    = 2^1 = 2
 
-                        \ --- Mod: Original Acornsoft code removed: ----------->
+                        \ --- Mod: Code removed for Elite-A: ------------------>
 
 \ EQUB %00010000        \ Laser power              = 2
 \                       \ Missiles                 = 0
@@ -1423,7 +1423,7 @@ ENDMACRO
  EQUB 24                \ Number of vertices       = 24 / 6 = 4
  EQUB 4                 \ Number of edges          = 4
 
-                        \ --- Mod: Original Acornsoft code removed: ----------->
+                        \ --- Mod: Code removed for Elite-A: ------------------>
 
 \ EQUW 0                \ Bounty                   = 0
 
@@ -1436,7 +1436,7 @@ ENDMACRO
  EQUB 4                 \ Number of faces          = 4 / 4 = 1
  EQUB 5                 \ Visibility distance      = 5
 
-                        \ --- Mod: Original Acornsoft code removed: ----------->
+                        \ --- Mod: Code removed for Elite-A: ------------------>
 
 \ EQUB 16               \ Max. energy              = 16
 

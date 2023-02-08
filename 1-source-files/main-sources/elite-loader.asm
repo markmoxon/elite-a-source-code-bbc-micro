@@ -390,7 +390,7 @@ ENDMACRO
 
 .ENTRY
 
-                        \ --- Mod: Original Acornsoft code removed: ----------->
+                        \ --- Mod: Code removed for Elite-A: ------------------>
 
 \ JSR PROT1             \ Call PROT1 to calculate checksums into CHKSM
 \
@@ -431,7 +431,7 @@ ENDMACRO
 
  JSR PLL1               \ Call PLL1 to draw Saturn
 
-                        \ --- Mod: Original Acornsoft code removed: ----------->
+                        \ --- Mod: Code removed for Elite-A: ------------------>
 
 \ LDA #16               \ Call OSBYTE with A = 16 and X = 3 to set the ADC to
 \ LDX #3                \ sample 3 channels from the joystick/Bitstik
@@ -457,7 +457,7 @@ ENDMACRO
  LDX #8                 \ ADC conversion type to 8 bits, for the joystick
  JSR OSB
 
-                        \ --- Mod: Original Acornsoft code removed: ----------->
+                        \ --- Mod: Code removed for Elite-A: ------------------>
 
 \ LDA #200              \ Call OSBYTE with A = 200, X = 0 and Y = 0 to enable
 \ LDX #0                \ the ESCAPE key and disable memory clearing if the
@@ -479,7 +479,7 @@ ENDMACRO
  LDX #128               \ the function keys to return ASCII codes for SHIFT-fn
  JSR OSB                \ keys (i.e. add 128)
 
-                        \ --- Mod: Original Acornsoft code removed: ----------->
+                        \ --- Mod: Code removed for Elite-A: ------------------>
 
 \ LDA #12               \ Set A = 12 and  X = 0 to pretend that this is an to
 \ LDX #0                \ innocent call to OSBYTE to reset the keyboard delay
@@ -525,7 +525,7 @@ ENDMACRO
  LDA #HI(TVT1code)
  STA P+1
 
-                        \ --- Mod: Original Acornsoft code removed: ----------->
+                        \ --- Mod: Code removed for Elite-A: ------------------>
 
 \ JSR MVPG              \ Call MVPG to move and decrypt a page of memory from
 \                       \ TVT1code to &1100-&11FF
@@ -552,7 +552,7 @@ ENDMACRO
  STA P+1
  LDX #8
 
-                        \ --- Mod: Original Acornsoft code removed: ----------->
+                        \ --- Mod: Code removed for Elite-A: ------------------>
 
 \ JSR MVBL              \ Call MVBL to move and decrypt 8 pages of memory from
 \                       \ DIALS to &7800-&7FFF
@@ -627,7 +627,7 @@ ENDMACRO
  LDA #HI(CpASOFT)
  STA P+1
 
-                        \ --- Mod: Original Acornsoft code removed: ----------->
+                        \ --- Mod: Code removed for Elite-A: ------------------>
 
 \ JSR MVPG              \ Call MVPG to move and decrypt a page of memory from
 \                       \ CpASOFT to &7600-&76FF
@@ -680,7 +680,7 @@ ENDMACRO
  JSR OSCLI              \ Call OSCLI to run the OS command in MESS1, which
                         \ changes the disc directory to E
 
-                        \ --- Mod: Original Acornsoft code removed: ----------->
+                        \ --- Mod: Code removed for Elite-A: ------------------>
 
 \ LDA #LO(LOAD)         \ Set the following:
 \ STA ZP                \
@@ -1132,7 +1132,7 @@ ORG &0B00
 
 .LOAD
 
-                        \ --- Mod: Original Acornsoft code removed: ----------->
+                        \ --- Mod: Code removed for Elite-A: ------------------>
 
 \ LDX #LO(LTLI)         \ Set (Y X) to point to LTLI ("L.T.CODE")
 \ LDY #HI(LTLI)
@@ -1213,7 +1213,7 @@ ORG &0B00
 
 .LTLI
 
-                        \ --- Mod: Original Acornsoft code removed: ----------->
+                        \ --- Mod: Code removed for Elite-A: ------------------>
 
 \ EQUS "L.T.CODE"       \ This is short for "*LOAD T.CODE"
 \ EQUB 13
@@ -1263,7 +1263,7 @@ ORG LOADcode + P% - LOAD
  LDA P                  \             = r1^2
  STA ZP
 
-                        \ --- Mod: Original Acornsoft code removed: ----------->
+                        \ --- Mod: Code removed for Elite-A: ------------------>
 
 \ LDA #LO(OSBmod)       \ As part of the copy protection, the JSR OSB
 \ STA OSBjsr+1          \ instruction at OSBjsr gets modified to point to OSBmod
@@ -1443,7 +1443,7 @@ ORG LOADcode + P% - LOAD
  STA ZP+1               \ Set ZP+1 = A
                         \          = r5^2 / 256
 
-                        \ --- Mod: Original Acornsoft code removed: ----------->
+                        \ --- Mod: Code removed for Elite-A: ------------------>
 
 \ LDA #HI(OSBmod)       \ As part of the copy protection, the JSR OSB
 \ STA OSBjsr+2          \ instruction at OSBjsr gets modified to point to OSBmod
@@ -1848,7 +1848,7 @@ ORG LOADcode + P% - LOAD
 
  RTS                    \ Return from the subroutine
 
-                        \ --- Mod: Original Acornsoft code removed: ----------->
+                        \ --- Mod: Code removed for Elite-A: ------------------>
 
 \ JMP P%                \ This would hang the computer, but we never get here as
 \                       \ the checksum code has been disabled
@@ -1983,7 +1983,7 @@ ORG LOADcode + P% - LOAD
 
  LDA (P),Y              \ Fetch the Y-th byte of the P(1 0) memory block
 
-                        \ --- Mod: Original Acornsoft code removed: ----------->
+                        \ --- Mod: Code removed for Elite-A: ------------------>
 
 \ EOR #&A5              \ Decrypt it by EOR'ing with &A5
 
@@ -2047,7 +2047,7 @@ ORG LOADcode + P% - LOAD
 
 .MESS1
 
-                        \ --- Mod: Original Acornsoft code removed: ----------->
+                        \ --- Mod: Code removed for Elite-A: ------------------>
 
 \ EQUS "*DIR E"
 \ EQUB 13
@@ -2383,7 +2383,7 @@ ORG &1100
 
 .NA%
 
-                        \ --- Mod: Original Acornsoft code removed: ----------->
+                        \ --- Mod: Code removed for Elite-A: ------------------>
 
 \ EQUS "JAMESON"        \ The current commander name, which defaults to JAMESON
 \ EQUB 13               \
@@ -2424,7 +2424,7 @@ ORG &1100
  EQUW &0248             \ QQ21 = Seed s1 for system 0, galaxy 0 (Tibedied), #5-6
  EQUW &B753             \ QQ21 = Seed s2 for system 0, galaxy 0 (Tibedied), #7-8
 
-                        \ --- Mod: Original Acornsoft code removed: ----------->
+                        \ --- Mod: Code removed for Elite-A: ------------------>
 
 \IF Q%
 \ EQUD &00CA9A3B        \ CASH = Amount of cash (100,000,000 Cr), #9-12
@@ -2450,7 +2450,7 @@ ENDIF
 
  EQUB 0                 \ GCNT = Galaxy number, 0-7, #15
 
-                        \ --- Mod: Original Acornsoft code removed: ----------->
+                        \ --- Mod: Code removed for Elite-A: ------------------>
 
 \ EQUB POW+(128 AND Q%) \ LASER = Front laser, #16
 \
@@ -2468,7 +2468,7 @@ ENDIF
 
  EQUB 0                 \ LASER+3 = Right laser, #19
 
-                        \ --- Mod: Original Acornsoft code removed: ----------->
+                        \ --- Mod: Code removed for Elite-A: ------------------>
 
 \ EQUW 0                \ These bytes appear to be unused (they were originally
 \                       \ used for up/down lasers, but they were dropped),
@@ -2508,7 +2508,7 @@ ENDIF
 
  EQUB Q%                \ BST = Fuel scoops ("barrel status"), #41
 
-                        \ --- Mod: Original Acornsoft code removed: ----------->
+                        \ --- Mod: Code removed for Elite-A: ------------------>
 
 \ EQUB Q% AND 127       \ BOMB = Energy bomb, #42
 
@@ -2526,7 +2526,7 @@ ENDIF
 
  EQUB Q%                \ ESCP = Escape pod, #46
 
-                        \ --- Mod: Original Acornsoft code removed: ----------->
+                        \ --- Mod: Code removed for Elite-A: ------------------>
 
 \ EQUD 0                \ These four bytes appear to be unused, #47-50
 \
@@ -2546,7 +2546,7 @@ ENDIF
 
  EQUB 0                 \ FIST = Legal status ("fugitive/innocent status"), #52
 
-                        \ --- Mod: Original Acornsoft code removed: ----------->
+                        \ --- Mod: Code removed for Elite-A: ------------------>
 
 \ EQUB 16               \ AVL+0  = Market availability of food, #53
 
@@ -2578,7 +2578,7 @@ ENDIF
 
  EQUW 0                 \ TALLY = Number of kills, #71-72
 
-                        \ --- Mod: Original Acornsoft code removed: ----------->
+                        \ --- Mod: Code removed for Elite-A: ------------------>
 
 \ EQUB 128              \ SVC = Save count, #73
 
@@ -2609,7 +2609,7 @@ ENDIF
 
 .CHK2
 
-                        \ --- Mod: Original Acornsoft code removed: ----------->
+                        \ --- Mod: Code removed for Elite-A: ------------------>
 
 \ EQUB &03 EOR &A9      \ The checksum value for the default commander, EOR'd
 \                       \ with &A9 to make it harder to tamper with the checksum
@@ -2644,7 +2644,7 @@ ENDIF
 
 .CHK
 
-                        \ --- Mod: Original Acornsoft code removed: ----------->
+                        \ --- Mod: Code removed for Elite-A: ------------------>
 
 \ EQUB &03              \ The checksum value for the default commander, #75
 
@@ -2707,7 +2707,7 @@ ENDIF
 
  BEQ P%                 \ Hang the computer as something has gone wrong
 
-                        \ --- Mod: Original Acornsoft code removed: ----------->
+                        \ --- Mod: Code removed for Elite-A: ------------------>
 
 \ EQUB &64, &5F, &61    \ These bytes appear to be unused
 \ EQUB &74, &74, &72

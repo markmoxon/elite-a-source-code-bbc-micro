@@ -1258,7 +1258,7 @@ ORG &0300
                         \       (0 = pulse or mining laser) or is always on
                         \       (1 = beam or military laser)
 
-                        \ --- Mod: Original Acornsoft code removed: ----------->
+                        \ --- Mod: Code removed for Elite-A: ------------------>
 
 \ SKIP 2                \ These bytes appear to be unused (they were originally
 \                       \ used for up/down lasers, but they were dropped)
@@ -1369,7 +1369,7 @@ ORG &0300
                         \
                         \   * &FF = fitted
 
-                        \ --- Mod: Original Acornsoft code removed: ----------->
+                        \ --- Mod: Code removed for Elite-A: ------------------>
 
 \ SKIP 4                \ These bytes appear to be unused
 
@@ -2145,7 +2145,7 @@ LOAD_A% = LOAD%
 
 .S%
 
-                        \ --- Mod: Original Acornsoft code removed: ----------->
+                        \ --- Mod: Code removed for Elite-A: ------------------>
 
 \ JMP DOENTRY           \ Decrypt the main docked code and dock at the station
 \
@@ -2209,7 +2209,7 @@ BRKV = P% - 2           \ The address of the destination address in the above
 
 .LTLI
 
-                        \ --- Mod: Original Acornsoft code removed: ----------->
+                        \ --- Mod: Code removed for Elite-A: ------------------>
 
 \ EQUS "L.T.CODE"       \ This is short for "*LOAD T.CODE"
 \ EQUB 13
@@ -2433,7 +2433,7 @@ BRKV = P% - 2           \ The address of the destination address in the above
  CLC                    \ range 220-221, as this is only called in galaxies 0
  ADC GCNT               \ and 1
 
-                        \ --- Mod: Original Acornsoft code removed: ----------->
+                        \ --- Mod: Code removed for Elite-A: ------------------>
 
 \ BNE DETOK             \ Jump to DETOK to print extended token 220-221,
 \                       \ returning from the subroutine using a tail call (this
@@ -2515,7 +2515,7 @@ BRKV = P% - 2           \ The address of the destination address in the above
  LDA (V),Y              \ Load the character at offset Y in the token table,
                         \ which is the next character from the token table
 
-                        \ --- Mod: Original Acornsoft code removed: ----------->
+                        \ --- Mod: Code removed for Elite-A: ------------------>
 
 \ EOR #VE               \ Tokens are stored in memory having been EOR'd with
 \                       \ #VE, so we repeat the EOR to get the actual character
@@ -2565,7 +2565,7 @@ BRKV = P% - 2           \ The address of the destination address in the above
                         \ which is the next character from the token we want to
                         \ print
 
-                        \ --- Mod: Original Acornsoft code removed: ----------->
+                        \ --- Mod: Code removed for Elite-A: ------------------>
 
 \ EOR #VE               \ Tokens are stored in memory having been EOR'd with
 \                       \ #VE, so we repeat the EOR to get the actual character
@@ -3322,7 +3322,7 @@ BRKV = P% - 2           \ The address of the destination address in the above
  EQUW MT2               \ Token  2: Switch to Sentence Case
  EQUW TT27              \ Token  3: Print the selected system name
 
-                        \ --- Mod: Original Acornsoft code removed: ----------->
+                        \ --- Mod: Code removed for Elite-A: ------------------>
 
 \ EQUW TT27             \ Token  4: Print the commander's name
 \ EQUW MT5              \ Token  5: Switch to extended tokens
@@ -3352,7 +3352,7 @@ BRKV = P% - 2           \ The address of the destination address in the above
  EQUW DASC              \ Token 20: Unused
  EQUW CLYNS             \ Token 21: Clear the bottom few lines of the space view
 
-                        \ --- Mod: Original Acornsoft code removed: ----------->
+                        \ --- Mod: Code removed for Elite-A: ------------------>
 
 \ EQUW PAUSE            \ Token 22: Display ship and wait for key press
 \ EQUW MT23             \ Token 23: Move to row 10, white text, set lower case
@@ -7851,7 +7851,7 @@ LOAD_C% = LOAD% +P% - CODE%
 
 .PDESC
 
-                        \ --- Mod: Original Acornsoft code removed: ----------->
+                        \ --- Mod: Code removed for Elite-A: ------------------>
 
 \ LDA QQ8               \ If either byte in QQ18(1 0) is non-zero, meaning that
 \ ORA QQ8+1             \ the distance from the current system to the selected
@@ -8052,7 +8052,7 @@ LOAD_C% = LOAD% +P% - CODE%
                         \ start scanning the keyboard again, returning the
                         \ internal key number in X (or 0 for no key press)
 
-                        \ --- Mod: Original Acornsoft code removed: ----------->
+                        \ --- Mod: Code removed for Elite-A: ------------------>
 
 \ BEQ PAUSE2            \ Keep looping up to PAUSE2 until a key is pressed
 
@@ -8945,7 +8945,7 @@ LOAD_D% = LOAD% + P% - CODE%
                         \ routine, which calls TT111 to populate ZZ before
                         \ calling TT25 (this routine)
 
-                        \ --- Mod: Original Acornsoft code removed: ----------->
+                        \ --- Mod: Code removed for Elite-A: ------------------>
 
 \ JMP PDESC             \ Jump to PDESC to print the system's extended
 \                       \ description, returning from the subroutine using a
@@ -10427,7 +10427,7 @@ LOAD_D% = LOAD% + P% - CODE%
  LDX R                  \ If R is non-zero then skip to NWDAV2, as we are
  BNE NWDAV2             \ already building a number
 
-                        \ --- Mod: Original Acornsoft code removed: ----------->
+                        \ --- Mod: Code removed for Elite-A: ------------------>
 
 \ CMP #'y'              \ If "Y" was pressed, jump to NWDAV1 to return the
 \ BEQ NWDAV1            \ maximum number allowed (i.e. buy/sell the whole stock)
@@ -10448,7 +10448,7 @@ LOAD_D% = LOAD% + P% - CODE%
                         \ with a result of 0, as the key pressed was not a
                         \ number or letter and is less than ASCII "0"
 
-                        \ --- Mod: Original Acornsoft code removed: ----------->
+                        \ --- Mod: Code removed for Elite-A: ------------------>
 
 \ CMP #10               \ If A >= 10, jump to BAY2 to display the Inventory
 \ BCS BAY2              \ screen, as the key pressed was a letter or other
@@ -10505,7 +10505,7 @@ LOAD_D% = LOAD% + P% - CODE%
 
  RTS                    \ Return from the subroutine
 
-                        \ --- Mod: Original Acornsoft code removed: ----------->
+                        \ --- Mod: Code removed for Elite-A: ------------------>
 
 \.NWDAV1
 \
@@ -11786,7 +11786,7 @@ LOAD_E% = LOAD% + P% - CODE%
  STA XX0+1              \ blueprint and store it in XX0+1, so XX0(1 0) now
                         \ contains the address of this ship's blueprint
 
-                        \ --- Mod: Original Acornsoft code removed: ----------->
+                        \ --- Mod: Code removed for Elite-A: ------------------>
 
 \ CPY #2*SST            \ If the ship type is a space station (SST), then jump
 \ BEQ NW6               \ to NW6, skipping the heap space steps below, as the
@@ -13188,7 +13188,7 @@ LOAD_F% = LOAD% + P% - CODE%
 
  STA MCNT               \ Reset MCNT (the main loop counter) to 0
 
-                        \ --- Mod: Original Acornsoft code removed: ----------->
+                        \ --- Mod: Code removed for Elite-A: ------------------>
 
 \.modify
 
@@ -13220,7 +13220,7 @@ LOAD_F% = LOAD% + P% - CODE%
  LDA #HI(LS%)           \ to indicate that the heap is empty
  STA SLSP+1
 
-                        \ --- Mod: Original Acornsoft code removed: ----------->
+                        \ --- Mod: Code removed for Elite-A: ------------------>
 
 \ JSR DIALS             \ Update the dashboard
 
@@ -13334,7 +13334,7 @@ LOAD_F% = LOAD% + P% - CODE%
 \
 \ ******************************************************************************
 
-                        \ --- Mod: Original Acornsoft code removed: ----------->
+                        \ --- Mod: Code removed for Elite-A: ------------------>
 
 \.DORND2
 \
@@ -13409,7 +13409,7 @@ LOAD_F% = LOAD% + P% - CODE%
 
  DEC MCNT               \ Decrement the main loop counter in MCNT
 
-                        \ --- Mod: Original Acornsoft code removed: ----------->
+                        \ --- Mod: Code removed for Elite-A: ------------------>
 
 \ BEQ P%+5              \ If the counter has reached zero, which it will do
 \                       \ every 256 main loops, skip the next JMP instruction
@@ -13515,7 +13515,7 @@ LOAD_F% = LOAD% + P% - CODE%
  TXS                    \ location for the 6502 stack, so this instruction
                         \ effectively resets the stack
 
-                        \ --- Mod: Original Acornsoft code removed: ----------->
+                        \ --- Mod: Code removed for Elite-A: ------------------>
 
 \ LDX GNTMP             \ If the laser temperature in GNTMP is non-zero,
 \ BEQ EE20              \ decrement it (i.e. cool it down a bit)
@@ -13613,7 +13613,7 @@ LOAD_F% = LOAD% + P% - CODE%
 
 .TT102
 
-                        \ --- Mod: Original Acornsoft code removed: ----------->
+                        \ --- Mod: Code removed for Elite-A: ------------------>
 
 \ CMP #f8               \ If red key f8 was pressed, jump to STATUS to show the
 \ BNE P%+5              \ Status Mode screen, returning from the subroutine
@@ -13674,7 +13674,7 @@ LOAD_F% = LOAD% + P% - CODE%
 
 .TT92
 
-                        \ --- Mod: Original Acornsoft code removed: ----------->
+                        \ --- Mod: Code removed for Elite-A: ------------------>
 
 \ CMP #f9               \ If red key f9 was pressed, jump to TT213 to show the
 \ BNE P%+5              \ Inventory screen, returning from the subroutine
@@ -13706,7 +13706,7 @@ LOAD_F% = LOAD% + P% - CODE%
 
 .fvw
 
-                        \ --- Mod: Original Acornsoft code removed: ----------->
+                        \ --- Mod: Code removed for Elite-A: ------------------>
 
 \ CMP #f3               \ If red key f3 was pressed, jump to EQSHP to show the
 \ BNE P%+5              \ Equip Ship screen, returning from the subroutine using
@@ -13803,7 +13803,7 @@ LOAD_F% = LOAD% + P% - CODE%
  LDA T1                 \ Restore the original value of A (the key that's been
                         \ pressed) from T1
 
-                        \ --- Mod: Original Acornsoft code removed: ----------->
+                        \ --- Mod: Code removed for Elite-A: ------------------>
 
 \ CMP #&36              \ If "O" was pressed, do the following three jumps,
 \ BNE ee2               \ otherwise skip to ee2 to continue
@@ -13922,7 +13922,7 @@ LOAD_F% = LOAD% + P% - CODE%
 
 .BR1
 
-                        \ --- Mod: Original Acornsoft code removed: ----------->
+                        \ --- Mod: Code removed for Elite-A: ------------------>
 
 \ LDX #3                \ Set XC = 3 (set text cursor to column 3)
 \ STX XC
@@ -14032,7 +14032,7 @@ LOAD_F% = LOAD% + P% - CODE%
  LDA #&FF               \ Set QQ12 = &FF (the docked flag) to indicate that we
  STA QQ12               \ are docked
 
-                        \ --- Mod: Original Acornsoft code removed: ----------->
+                        \ --- Mod: Code removed for Elite-A: ------------------>
 
 \ LDA #f8               \ Jump into the main loop at FRCE, setting the key
 \ JMP FRCE              \ that's "pressed" to red key f8 (so we show the Status
@@ -14423,7 +14423,7 @@ LOAD_F% = LOAD% + P% - CODE%
 
 .BEEP
 
-                        \ --- Mod: Original Acornsoft code removed: ----------->
+                        \ --- Mod: Code removed for Elite-A: ------------------>
 
 \ LDA #32               \ Call the NOISE routine with A = 32 to make a short,
 \ BNE NOISE             \ high beep, returning from the subroutine using a tail
@@ -14777,7 +14777,7 @@ LOAD_F% = LOAD% + P% - CODE%
 
 .DOKEY
 
-                        \ --- Mod: Original Acornsoft code removed: ----------->
+                        \ --- Mod: Code removed for Elite-A: ------------------>
 
 \ LDA JSTK              \ If JSTK is zero, then we are configured to use the
 \ BEQ DK9               \ keyboard rather than the joystick, so jump to DK9 to
@@ -14875,7 +14875,7 @@ LOAD_F% = LOAD% + P% - CODE%
 
  INY                    \ Increment Y to point to the next toggle key
 
-                        \ --- Mod: Original Acornsoft code removed: ----------->
+                        \ --- Mod: Code removed for Elite-A: ------------------>
 
 \ CPY #&47              \ The last toggle key is &46 (K), so check whether we
 \                       \ have just done that one
@@ -14902,7 +14902,7 @@ LOAD_F% = LOAD% + P% - CODE%
  CPX #&70               \ If ESCAPE is not being pressed, skip over the next
  BNE P%+5               \ instruction
 
-                        \ --- Mod: Original Acornsoft code removed: ----------->
+                        \ --- Mod: Code removed for Elite-A: ------------------>
 
 \ JMP BR1               \ ESCAPE is being pressed, so jump to BR1 to end the
 \                       \ game
@@ -14951,7 +14951,7 @@ LOAD_F% = LOAD% + P% - CODE%
  LDA #&FF               \ Set A to &FF so we can store this in the keyboard
                         \ logger for keys that are being pressed
 
-                        \ --- Mod: Original Acornsoft code removed: ----------->
+                        \ --- Mod: Code removed for Elite-A: ------------------>
 
 \.DK5
 
@@ -14959,7 +14959,7 @@ LOAD_F% = LOAD% + P% - CODE%
 
  RTS                    \ Return from the subroutine
 
-                        \ --- Mod: Original Acornsoft code removed: ----------->
+                        \ --- Mod: Code removed for Elite-A: ------------------>
 
 \.DK9
 \
@@ -16179,7 +16179,7 @@ LOAD_G% = LOAD% + P% - CODE%
  AND #%11110111         \ byte #31 to denote that the ship is no longer being
  STA XX1+31             \ drawn on-screen
 
-                        \ --- Mod: Original Acornsoft code removed: ----------->
+                        \ --- Mod: Code removed for Elite-A: ------------------>
 
 \ JMP DOEXP             \ Jump to DOEXP to return from the subroutine using a
 \                       \ tail call, as in the docked code DOEXP just contains
@@ -17861,7 +17861,7 @@ LOAD_G% = LOAD% + P% - CODE%
  ORA #%00001000         \ #31 to denote that we are drawing something on-screen
  STA XX1+31             \ for this ship
 
-                        \ --- Mod: Original Acornsoft code removed: ----------->
+                        \ --- Mod: Code removed for Elite-A: ------------------>
 
 \ JMP DOEXP             \ Jump to DOEXP to display the explosion cloud,
 \                       \ returning from the subroutine using a tail call
