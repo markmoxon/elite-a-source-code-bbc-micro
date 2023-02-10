@@ -38955,8 +38955,7 @@ LOAD_J% = LOAD% + P% - CODE%
 
 .GOIN
 
-                        \ If we arrive here, either the docking computer has
-                        \ been activated, or we just docked successfully
+                        \ If we arrive here, we just docked successfully
 
  JSR RES2               \ Reset a number of flight variables and workspaces
 
