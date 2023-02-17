@@ -18,15 +18,15 @@ PYTHON?=python
 ifeq ($(variant), source-disc)
   variant-elite-a=2
   folder-elite-a=/source-disc
-  suffix-elite-a=-from-source-disc
+  suffix-elite-a=-flicker-free-from-source-disc
 else ifeq ($(variant), bug-fix)
   variant-elite-a=3
   folder-elite-a=/bug-fix
-  suffix-elite-a=-bug-fix
+  suffix-elite-a=-flicker-free-bug-fix
 else
   variant-elite-a=1
   folder-elite-a=/released
-  suffix-elite-a=-released
+  suffix-elite-a=-flicker-free-released
 endif
 
 .PHONY:build
@@ -68,7 +68,7 @@ build:
 	$(BEEBASM) -i 1-source-files/main-sources/elite-ships-w.asm -v >> 3-assembled-output/compile.txt
 	$(BEEBASM) -i 1-source-files/main-sources/elite-readme.asm -v >> 3-assembled-output/compile.txt
 	$(PYTHON) 2-build-files/elite-checksum.py -u -rel$(variant-elite-a)
-	$(BEEBASM) -i 1-source-files/main-sources/elite-disc.asm -do 5-compiled-game-discs/elite-a-flicker-free$(suffix-elite-a).ssd -opt 3 -title "E L I T E"
+	$(BEEBASM) -i 1-source-files/main-sources/elite-disc.asm -do 5-compiled-game-discs/elite-a$(suffix-elite-a).ssd -opt 3 -title "E L I T E"
 
 .PHONY:encrypt
 encrypt:
@@ -109,8 +109,13 @@ encrypt:
 	$(BEEBASM) -i 1-source-files/main-sources/elite-ships-w.asm -v >> 3-assembled-output/compile.txt
 	$(BEEBASM) -i 1-source-files/main-sources/elite-readme.asm -v >> 3-assembled-output/compile.txt
 	$(PYTHON) 2-build-files/elite-checksum.py -rel$(variant-elite-a)
-	$(BEEBASM) -i 1-source-files/main-sources/elite-disc.asm -do 5-compiled-game-discs/elite-a-flicker-free$(suffix-elite-a).ssd -opt 3 -title "E L I T E"
+	$(BEEBASM) -i 1-source-files/main-sources/elite-disc.asm -do 5-compiled-game-discs/elite-a$(suffix-elite-a).ssd -opt 3 -title "E L I T E"
 
 .PHONY:verify
 verify:
 	@$(PYTHON) 2-build-files/crc32.py 4-reference-binaries$(folder-elite-a) 3-assembled-output
+
+.PHONY:b2
+b2:
+	curl -G "http://localhost:48075/reset/b2"
+	curl -H "Content-Type:application/binary" --upload-file "5-compiled-game-discs/elite-a$(suffix-elite-a).ssd" "http://localhost:48075/run/b2?name=elite-a$(suffix-elite-a).ssd"
