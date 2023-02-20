@@ -1560,13 +1560,27 @@ ORG LOADcode + P% - LOAD
  LDA #&63
  STA ZP+1
 
+                        \ --- Mod: Code removed for Elite-A: ------------------>
+
+\ LDA #LO(ELITE)        \ Set P(1 0) = ELITE
+\ STA P
+\ LDA #HI(ELITE)
+\ STA P+1
+\
+\ LDX #8                \ Call MVPG with X = 8 to copy 8 pages of memory from
+\ JSR MVPG              \ ELITE to &6300
+
+                        \ --- And replaced by: -------------------------------->
+
  LDA #&62               \ Set P(1 0) = &2A62
  STA P
  LDA #&2A
  STA P+1
 
  LDX #8                 \ Call MVPG with X = 8 to copy 8 pages of memory from
- JSR MVPG               \ the address in P(1 0) to the address in ZP(1 0)
+ JSR MVPG               \ &2A62 to &6300
+
+                        \ --- End of replacement ------------------------------>
 
 \ ******************************************************************************
 \
