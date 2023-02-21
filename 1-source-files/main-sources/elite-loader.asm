@@ -1555,6 +1555,11 @@ ORG LOADcode + P% - LOAD
 
  BNE PLL3               \ Loop back to PLL3 until CNT3+1 = 0
 
+                        \ The following code is not required, as we copy the
+                        \ title images to their correct places on-screen when
+                        \ we return from the subroutine, overwriting the copy
+                        \ that we do here
+
  LDA #&00               \ Set ZP(1 0) = &6300
  STA ZP
  LDA #&63
