@@ -46149,7 +46149,8 @@ LOAD_L% = LOAD% + P% - CODE%
  LDA #255               \ Set the view number in QQ11 to 255
  STA QQ11
 
- JSR HFS1               \ Call HFS1 to draw 8 concentric rings
+ JSR HFS1               \ Call HFS1 to draw 8 concentric rings to remove the
+                        \ launch tunnel that we drew above
 
 .NLUNCH
 
