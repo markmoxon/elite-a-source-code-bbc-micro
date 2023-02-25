@@ -18172,7 +18172,7 @@ LOAD_D% = LOAD% + P% - CODE%
 \.ptg
 \
 \ LSR COK               \ Set bit 0 of the competition flags in COK, so that the
-\ SEC                   \ copmpetition code will include the fact that we have
+\ SEC                   \ competition code will include the fact that we have
 \ ROL COK               \ manually forced a mis-jump into witchspace
 
                         \ --- End of removed code ----------------------------->
@@ -18197,7 +18197,8 @@ LOAD_D% = LOAD% + P% - CODE%
 
 .MJP1
 
- JSR GTHG               \ Call GTHG to spawn a Thargoid ship
+ JSR GTHG               \ Call GTHG to spawn a Thargoid ship and a Thargon
+                        \ companion
 
  LDA #3                 \ Fetch the number of Thargoid ships from MANY+THG, and
  CMP MANY+THG           \ if it is less than or equal to 3, loop back to MJP1 to

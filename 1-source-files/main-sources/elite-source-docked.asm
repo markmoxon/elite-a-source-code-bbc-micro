@@ -12385,9 +12385,11 @@ LOAD_C% = LOAD% +P% - CODE%
 
                         \ --- End of added code ------------------------------->
 
- LDA #2                 \ Set ENGY to 2 so our energy banks recharge at twice
- STA ENGY               \ the speed, as our mission reward is a special navy
-                        \ energy unit
+ LDA #2                 \ Set ENGY to 2 so our energy banks recharge at a faster
+ STA ENGY               \ rate, as our mission reward is a special navy energy
+                        \ unit that recharges at a rate of 3 units of energy on
+                        \ each iteration of the main loop, compared to a rate of
+                        \ 2 units of energy for the standard energy unit
 
  INC TALLY+1            \ Award 256 kill points for completing the mission
 
