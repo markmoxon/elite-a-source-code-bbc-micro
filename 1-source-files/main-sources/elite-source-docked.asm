@@ -16589,7 +16589,7 @@ LOAD_D% = LOAD% + P% - CODE%
 
 .TT151
 
- PHA                    \ Store the item number on the stack and in QQ14+4
+ PHA                    \ Store the item number on the stack and in QQ19+4
  STA QQ19+4
 
  ASL A                  \ Store the item number * 4 in QQ19, so this will act as
