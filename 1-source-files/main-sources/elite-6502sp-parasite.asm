@@ -48720,8 +48720,8 @@ NEXT
 \ The ellipse is defined by a centre point, plus two conjugate radius vectors,
 \ u and v, where:
 \
-\   u = [u_x]       v = [v_x]
-\       [u_y]           [v_y]
+\   u = [ u_x ]       v = [ v_x ]
+\       [ u_y ]           [ v_y ]
 \
 \ The individual components of these 2D vectors (i.e. u_x, u_y etc.) are 16-bit
 \ sign-magnitude numbers, where the high bytes contain only the sign bit (in
