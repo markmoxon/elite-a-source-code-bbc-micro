@@ -1492,11 +1492,20 @@ ENDMACRO
 \
 \ ------------------------------------------------------------------------------
 \
-\ To calculate the following:
+\ This lookup table contains sine values for the first half of a circle, from 0
+\ to 180 degrees (0 to PI radians). In terms of circle or ellipse line segments,
+\ there are 64 segments in a circle, so this contains sine values for segments
+\ 0 to 31.
+\
+\ In terms of segments, to calculate the sine of the angle at segment x, we look
+\ up the value in SNE + x, and to calculate the cosine of the angle we look up
+\ the value in SNE + ((x + 16) mod 32).
+\
+\ In terms of radians, to calculate the following:
 \
 \   sin(theta) * 256
 \
-\ where theta is in radians, look up the value in:
+\ where theta is in radians, we look up the value in:
 \
 \   SNE + (theta * 10)
 \

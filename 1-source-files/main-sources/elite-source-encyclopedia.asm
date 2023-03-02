@@ -7429,6 +7429,10 @@ LOAD_C% = LOAD% +P% - CODE%
 \
 \   A = A * Q / 256
 \
+\ Returns:
+\
+\   C flag              The C flag is set
+\
 \ ******************************************************************************
 
 .FMLTU
@@ -7465,6 +7469,9 @@ LOAD_C% = LOAD% +P% - CODE%
                         \ (so we loop through the bits of P until we get to the
                         \ 1 we inserted before the loop, and then we stop)
 
+                        \ If we get here then the C flag is set as we just
+                        \ rotated a 1 out of the right end of P
+
  RTS                    \ Return from the subroutine
 
 .MU7
@@ -7479,6 +7486,9 @@ LOAD_C% = LOAD% +P% - CODE%
  BNE MUL3               \ Loop back to MUL3 if P still contains some set bits
                         \ (so we loop through the bits of P until we get to the
                         \ 1 we inserted before the loop, and then we stop)
+
+                        \ If we get here then the C flag is set as we just
+                        \ rotated a 1 out of the right end of P
 
  RTS                    \ Return from the subroutine
 
