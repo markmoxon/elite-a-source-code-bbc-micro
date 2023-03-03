@@ -29327,7 +29327,7 @@ LOAD_G% = LOAD% + P% - CODE%
                         \ We now keep halving |delta_x| and |delta_y| until
                         \ both of them have zero in their high bytes
 
- TAX                    \ IF |delta_x_hi| is non-zero, skip the following
+ TAX                    \ If |delta_x_hi| is non-zero, skip the following
  BNE LL112
 
  LDX XX12+5             \ If |delta_y_hi| = 0, jump down to LL113 (as both

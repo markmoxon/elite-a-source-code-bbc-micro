@@ -14611,6 +14611,11 @@ LOAD_C% = LOAD% +P% - CODE%
 \
 \   tan(A) = P / Q
 \
+\ The result in A is an integer representing the angle in radians, where 256
+\ represents a full circle of 360 degrees, or 2 * PI radians. The routine
+\ returns values in the range 0 to 128, which covers 0 to 180 degrees (or 0 to
+\ PI radians).
+\
 \ ******************************************************************************
 
 .ARCTAN
@@ -14702,7 +14707,10 @@ LOAD_C% = LOAD% +P% - CODE%
 
 .ARS1
 
-                        \ This routine fetches arctan(A / Q) from the ACT table
+                        \ This routine fetches arctan(A / Q) from the ACT table,
+                        \ so A will be set to an integer in the range 0 to 31
+                        \ that represents an angle from 0 to 45 degrees (or 0 to
+                        \ PI / 4 radians)
 
  JSR LL28               \ Call LL28 to calculate:
                         \
@@ -22320,8 +22328,8 @@ LOAD_E% = LOAD% + P% - CODE%
 \ ******************************************************************************
 
  LDA K                  \ If the planet's radius is less than 6, the planet is
- CMP #6                 \ too small to show a crater, so jump to PL20 to return
- BCC PL20               \ from the subroutine
+ CMP #6                 \ too small to show a meridian, so jump to PL20 to
+ BCC PL20               \ return from the subroutine
 
  LDA INWK+14            \ Set P = -nosev_z_hi
  EOR #%10000000
@@ -24272,11 +24280,27 @@ LOAD_E% = LOAD% + P% - CODE%
                         \
                         \   A = arctan(P / Q)
                         \       arctan(P / A)
+                        \
+                        \ The result in A will be in the range 0 to 128, which
+                        \ represents an angle of 0 to 180 degrees (or 0 to PI
+                        \ radians)
 
  LDX INWK+14            \ If nosev_z_hi is negative, skip the following
- BMI P%+4               \ instruction
+ BMI P%+4               \ instruction to leave the angle in A as a positive
+                        \ integer in the range 0 to 128 (so when we calculate
+                        \ CNT2 below, it will be in the right half of the
+                        \ anti-clockwise that we describe when drawing circles,
+                        \ i.e. from 6 o'clock, through 3 o'clock and on to 12
+                        \ o'clock)
 
- EOR #%10000000         \ nosev_z_hi is positive, so make the arctan negative
+ EOR #%10000000         \ If we get here then nosev_z_hi is positive, so flip
+                        \ bit 7 of the angle in A, which is the same as adding
+                        \ 128 to give a result in the range 129 to 256 (i.e. 129
+                        \ to 0), or 180 to 360 degrees (so when we calculate
+                        \ CNT2 below, it will be in the left half of the
+                        \ anti-clockwise that we describe when drawing circles,
+                        \ i.e. from 12 o'clock, through 9 o'clock and on to 6
+                        \ o'clock)
 
  LSR A                  \ Set CNT2 = A / 4
  LSR A
@@ -33340,7 +33364,7 @@ LOAD_G% = LOAD% + P% - CODE%
                         \ We now keep halving |delta_x| and |delta_y| until
                         \ both of them have zero in their high bytes
 
- TAX                    \ IF |delta_x_hi| is non-zero, skip the following
+ TAX                    \ If |delta_x_hi| is non-zero, skip the following
  BNE LL112
 
  LDX XX12+5             \ If |delta_y_hi| = 0, jump down to LL113 (as both
