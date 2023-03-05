@@ -12154,9 +12154,11 @@ LOAD_C% = LOAD% +P% - CODE%
 \ LDA DJD               \ If keyboard auto-recentre is disabled, then
 \ BNE RE2+2             \ jump to RE2+2 to restore A and return
 \
-\ LDX #128              \ If keyboard auto-recentre is enabled, set X to 128
-\ BMI RE2+2             \ (the middle of our range) and jump to RE2+2 to
-\                       \ restore A and return
+\ LDX #128              \ If we get here then keyboard auto-recentre is enabled,
+\ BMI RE2+2             \ so set X to 128 (the middle of our range) and jump to
+\                       \ RE2+2 to restore A and return from the subroutine
+\                       \ (this BMI is effectively a JMP as bit 7 of X is always
+\                       \ set)
 
                         \ --- End of removed code ----------------------------->
 
