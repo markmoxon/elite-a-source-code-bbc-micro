@@ -38,13 +38,13 @@
 \
 \ ******************************************************************************
 
-INCLUDE "1-source-files/main-sources/elite-build-options.asm"
+ INCLUDE "1-source-files/main-sources/elite-build-options.asm"
 
-_RELEASED               = (_VARIANT = 1)
-_SOURCE_DISC            = (_VARIANT = 2)
-_BUG_FIX                = (_VARIANT = 3)
+ _RELEASED              = (_VARIANT = 1)
+ _SOURCE_DISC           = (_VARIANT = 2)
+ _BUG_FIX               = (_VARIANT = 3)
 
-GUARD &6000             \ Guard against assembling over screen memory
+ GUARD &6000            \ Guard against assembling over screen memory
 
 \ ******************************************************************************
 \
@@ -52,10 +52,10 @@ GUARD &6000             \ Guard against assembling over screen memory
 \
 \ ******************************************************************************
 
-CODE_WORDS% = &0400
-LOAD_WORDS% = &2568
+ CODE_WORDS% = &0400
+ LOAD_WORDS% = &2568
 
-ORG CODE_WORDS%
+ ORG CODE_WORDS%
 
 \ ******************************************************************************
 \
@@ -84,11 +84,11 @@ ORG CODE_WORDS%
 
 MACRO CHAR x
 
-  IF x = '`'
-    EQUB 39 EOR 35
-  ELSE
-    EQUB x EOR 35
-  ENDIF
+ IF x = '`'
+   EQUB 39 EOR 35
+ ELSE
+   EQUB x EOR 35
+ ENDIF
 
 ENDMACRO
 
@@ -121,38 +121,38 @@ ENDMACRO
 
 MACRO TWOK t, k
 
-  IF t = 'A' AND k = 'L' : EQUB 128 EOR 35 : ENDIF
-  IF t = 'L' AND k = 'E' : EQUB 129 EOR 35 : ENDIF
-  IF t = 'X' AND k = 'E' : EQUB 130 EOR 35 : ENDIF
-  IF t = 'G' AND k = 'E' : EQUB 131 EOR 35 : ENDIF
-  IF t = 'Z' AND k = 'A' : EQUB 132 EOR 35 : ENDIF
-  IF t = 'C' AND k = 'E' : EQUB 133 EOR 35 : ENDIF
-  IF t = 'B' AND k = 'I' : EQUB 134 EOR 35 : ENDIF
-  IF t = 'S' AND k = 'O' : EQUB 135 EOR 35 : ENDIF
-  IF t = 'U' AND k = 'S' : EQUB 136 EOR 35 : ENDIF
-  IF t = 'E' AND k = 'S' : EQUB 137 EOR 35 : ENDIF
-  IF t = 'A' AND k = 'R' : EQUB 138 EOR 35 : ENDIF
-  IF t = 'M' AND k = 'A' : EQUB 139 EOR 35 : ENDIF
-  IF t = 'I' AND k = 'N' : EQUB 140 EOR 35 : ENDIF
-  IF t = 'D' AND k = 'I' : EQUB 141 EOR 35 : ENDIF
-  IF t = 'R' AND k = 'E' : EQUB 142 EOR 35 : ENDIF
-  IF t = 'A' AND k = '?' : EQUB 143 EOR 35 : ENDIF
-  IF t = 'E' AND k = 'R' : EQUB 144 EOR 35 : ENDIF
-  IF t = 'A' AND k = 'T' : EQUB 145 EOR 35 : ENDIF
-  IF t = 'E' AND k = 'N' : EQUB 146 EOR 35 : ENDIF
-  IF t = 'B' AND k = 'E' : EQUB 147 EOR 35 : ENDIF
-  IF t = 'R' AND k = 'A' : EQUB 148 EOR 35 : ENDIF
-  IF t = 'L' AND k = 'A' : EQUB 149 EOR 35 : ENDIF
-  IF t = 'V' AND k = 'E' : EQUB 150 EOR 35 : ENDIF
-  IF t = 'T' AND k = 'I' : EQUB 151 EOR 35 : ENDIF
-  IF t = 'E' AND k = 'D' : EQUB 152 EOR 35 : ENDIF
-  IF t = 'O' AND k = 'R' : EQUB 153 EOR 35 : ENDIF
-  IF t = 'Q' AND k = 'U' : EQUB 154 EOR 35 : ENDIF
-  IF t = 'A' AND k = 'N' : EQUB 155 EOR 35 : ENDIF
-  IF t = 'T' AND k = 'E' : EQUB 156 EOR 35 : ENDIF
-  IF t = 'I' AND k = 'S' : EQUB 157 EOR 35 : ENDIF
-  IF t = 'R' AND k = 'I' : EQUB 158 EOR 35 : ENDIF
-  IF t = 'O' AND k = 'N' : EQUB 159 EOR 35 : ENDIF
+ IF t = 'A' AND k = 'L' : EQUB 128 EOR 35 : ENDIF
+ IF t = 'L' AND k = 'E' : EQUB 129 EOR 35 : ENDIF
+ IF t = 'X' AND k = 'E' : EQUB 130 EOR 35 : ENDIF
+ IF t = 'G' AND k = 'E' : EQUB 131 EOR 35 : ENDIF
+ IF t = 'Z' AND k = 'A' : EQUB 132 EOR 35 : ENDIF
+ IF t = 'C' AND k = 'E' : EQUB 133 EOR 35 : ENDIF
+ IF t = 'B' AND k = 'I' : EQUB 134 EOR 35 : ENDIF
+ IF t = 'S' AND k = 'O' : EQUB 135 EOR 35 : ENDIF
+ IF t = 'U' AND k = 'S' : EQUB 136 EOR 35 : ENDIF
+ IF t = 'E' AND k = 'S' : EQUB 137 EOR 35 : ENDIF
+ IF t = 'A' AND k = 'R' : EQUB 138 EOR 35 : ENDIF
+ IF t = 'M' AND k = 'A' : EQUB 139 EOR 35 : ENDIF
+ IF t = 'I' AND k = 'N' : EQUB 140 EOR 35 : ENDIF
+ IF t = 'D' AND k = 'I' : EQUB 141 EOR 35 : ENDIF
+ IF t = 'R' AND k = 'E' : EQUB 142 EOR 35 : ENDIF
+ IF t = 'A' AND k = '?' : EQUB 143 EOR 35 : ENDIF
+ IF t = 'E' AND k = 'R' : EQUB 144 EOR 35 : ENDIF
+ IF t = 'A' AND k = 'T' : EQUB 145 EOR 35 : ENDIF
+ IF t = 'E' AND k = 'N' : EQUB 146 EOR 35 : ENDIF
+ IF t = 'B' AND k = 'E' : EQUB 147 EOR 35 : ENDIF
+ IF t = 'R' AND k = 'A' : EQUB 148 EOR 35 : ENDIF
+ IF t = 'L' AND k = 'A' : EQUB 149 EOR 35 : ENDIF
+ IF t = 'V' AND k = 'E' : EQUB 150 EOR 35 : ENDIF
+ IF t = 'T' AND k = 'I' : EQUB 151 EOR 35 : ENDIF
+ IF t = 'E' AND k = 'D' : EQUB 152 EOR 35 : ENDIF
+ IF t = 'O' AND k = 'R' : EQUB 153 EOR 35 : ENDIF
+ IF t = 'Q' AND k = 'U' : EQUB 154 EOR 35 : ENDIF
+ IF t = 'A' AND k = 'N' : EQUB 155 EOR 35 : ENDIF
+ IF t = 'T' AND k = 'E' : EQUB 156 EOR 35 : ENDIF
+ IF t = 'I' AND k = 'S' : EQUB 157 EOR 35 : ENDIF
+ IF t = 'R' AND k = 'I' : EQUB 158 EOR 35 : ENDIF
+ IF t = 'O' AND k = 'N' : EQUB 159 EOR 35 : ENDIF
 
 ENDMACRO
 
@@ -181,7 +181,7 @@ ENDMACRO
 
 MACRO CONT n
 
-  EQUB n EOR 35
+ EQUB n EOR 35
 
 ENDMACRO
 
@@ -217,15 +217,15 @@ ENDMACRO
 
 MACRO RTOK n
 
-  IF n >= 0 AND n <= 95
-    t = n + 160
-  ELIF n >= 128
-    t = n - 114
-  ELSE
-    t = n
-  ENDIF
+ IF n >= 0 AND n <= 95
+  t = n + 160
+ ELIF n >= 128
+  t = n - 114
+ ELSE
+  t = n
+ ENDIF
 
-  EQUB t EOR 35
+ EQUB t EOR 35
 
 ENDMACRO
 
@@ -1492,11 +1492,20 @@ ENDMACRO
 \
 \ ------------------------------------------------------------------------------
 \
-\ To calculate the following:
+\ This lookup table contains sine values for the first half of a circle, from 0
+\ to 180 degrees (0 to PI radians). In terms of circle or ellipse line segments,
+\ there are 64 segments in a circle, so this contains sine values for segments
+\ 0 to 31.
+\
+\ In terms of segments, to calculate the sine of the angle at segment x, we look
+\ up the value in SNE + x, and to calculate the cosine of the angle we look up
+\ the value in SNE + ((x + 16) mod 32).
+\
+\ In terms of radians, to calculate the following:
 \
 \   sin(theta) * 256
 \
-\ where theta is in radians, look up the value in:
+\ where theta is in radians, we look up the value in:
 \
 \   SNE + (theta * 10)
 \
@@ -1514,17 +1523,17 @@ ENDMACRO
 
 .SNE
 
-FOR I%, 0, 31
-
- N = ABS(SIN((I% / 64) * 2 * PI))
-
- IF N >= 1
-  EQUB 255
- ELSE
-  EQUB INT(256 * N + 0.5)
- ENDIF
-
-NEXT
+ FOR I%, 0, 31
+ 
+  N = ABS(SIN((I% / 64) * 2 * PI))
+ 
+  IF N >= 1
+   EQUB 255
+  ELSE
+   EQUB INT(256 * N + 0.5)
+  ENDIF
+ 
+ NEXT
 
 \ ******************************************************************************
 \
@@ -1536,36 +1545,45 @@ NEXT
 \
 \ ------------------------------------------------------------------------------
 \
-\ To calculate the following:
+\ This table contains lookup values for arctangent calculations involving angles
+\ in the range 0 to 45 degrees (or 0 to PI / 4 radians).
+\
+\ To calculate the value of theta in the following:
 \
 \   theta = arctan(t)
 \
-\ where 0 <= t < 1, look up the value in:
+\ where 0 <= t < 1, we look up the value in:
 \
 \   ACT + (t * 32)
 \
-\ The result will be an integer representing the angle in radians, with 256
-\ representing a full circle of 2 * PI radians.
+\ The result will be an integer representing the angle in radians, where 256
+\ represents a full circle of 360 degrees (2 * PI radians). The result of the
+\ lookup will therefore be an integer in the range 0 to 31, as this represents
+\ 0 to 45 degrees (0 to PI / 4 radians).
 \
-\ The table does not support values of t >= 1 or t < 0 directly, but we can use
-\ the following calculations instead:
+\ The table does not support values of t >= 1 or t < 0 directly, so if we need
+\ to calculate the arctangent for an angle greater than 45 degrees, we can apply
+\ the following calculation to the result from the table:
 \
 \   * For t > 1, arctan(t) = 64 - arctan(1 / t)
 \
+\ For negative values of t where -1 < t < 0, we can apply the following
+\ calculation to the result from the table:
+\
 \   * For t < 0, arctan(-t) = 128 - arctan(t)
 \
-\ If t < -1, we can do the first one to get arctan(|t|), then the second to get
-\ arctan(-|t|).
+\ Finally, if t < -1, we can do the first calculation to get arctan(|t|), and
+\ the second to get arctan(-|t|).
 \
 \ ******************************************************************************
 
 .ACT
 
-FOR I%, 0, 31
+ FOR I%, 0, 31
 
- EQUB INT((128 / PI) * ATN(I% / 32) + 0.5)
+  EQUB INT((128 / PI) * ATN(I% / 32) + 0.5)
 
-NEXT
+ NEXT
 
 \ ******************************************************************************
 \
@@ -1573,12 +1591,12 @@ NEXT
 \
 \ ******************************************************************************
 
-PRINT "WORDS"
-PRINT "Assembled at ", ~CODE_WORDS%
-PRINT "Ends at ", ~P%
-PRINT "Code size is ", ~(P% - CODE_WORDS%)
-PRINT "Execute at ", ~LOAD_WORDS%
-PRINT "Reload at ", ~LOAD_WORDS%
+ PRINT "WORDS"
+ PRINT "Assembled at ", ~CODE_WORDS%
+ PRINT "Ends at ", ~P%
+ PRINT "Code size is ", ~(P% - CODE_WORDS%)
+ PRINT "Execute at ", ~LOAD_WORDS%
+ PRINT "Reload at ", ~LOAD_WORDS%
 
-PRINT "S.WORDS ",~CODE_WORDS%," ",~P%," ",~LOAD_WORDS%," ",~LOAD_WORDS%
-SAVE "3-assembled-output/WORDS.bin", CODE_WORDS%, P%, LOAD_WORDS%
+ PRINT "S.WORDS ",~CODE_WORDS%," ",~P%," ",~LOAD_WORDS%," ",~LOAD_WORDS%
+ SAVE "3-assembled-output/WORDS.bin", CODE_WORDS%, P%, LOAD_WORDS%

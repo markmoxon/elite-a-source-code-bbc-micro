@@ -28,13 +28,13 @@
 \
 \ ******************************************************************************
 
-INCLUDE "1-source-files/main-sources/elite-build-options.asm"
+ INCLUDE "1-source-files/main-sources/elite-build-options.asm"
 
-_RELEASED               = (_VARIANT = 1)
-_SOURCE_DISC            = (_VARIANT = 2)
-_BUG_FIX                = (_VARIANT = 3)
+ _RELEASED              = (_VARIANT = 1)
+ _SOURCE_DISC           = (_VARIANT = 2)
+ _BUG_FIX               = (_VARIANT = 3)
 
-GUARD &6000             \ Guard against assembling over screen memory
+ GUARD &6000            \ Guard against assembling over screen memory
 
 \ ******************************************************************************
 \
@@ -42,59 +42,59 @@ GUARD &6000             \ Guard against assembling over screen memory
 \
 \ ******************************************************************************
 
-Q% = _REMOVE_CHECKSUMS  \ Set Q% to TRUE to max out the default commander, FALSE
+ Q% = _REMOVE_CHECKSUMS \ Set Q% to TRUE to max out the default commander, FALSE
                         \ for the standard default commander (this is set to
                         \ TRUE if checksums are disabled, just for convenience)
 
-N% = 67                 \ N% is set to the number of bytes in the VDU table, so
+ N% = 67                \ N% is set to the number of bytes in the VDU table, so
                         \ we can loop through them in part 1 below
 
-VSCAN = 57              \ Defines the split position in the split-screen mode
+ VSCAN = 57             \ Defines the split position in the split-screen mode
 
-BRKV = &0202            \ The break vector that we intercept to enable us to
+ BRKV = &0202           \ The break vector that we intercept to enable us to
                         \ handle and display system errors
 
-IRQ1V = &0204           \ The IRQ1V vector that we intercept to implement the
+ IRQ1V = &0204          \ The IRQ1V vector that we intercept to implement the
                         \ split-screen mode
 
-WRCHV = &020E           \ The WRCHV vector that we intercept with our custom
+ WRCHV = &020E          \ The WRCHV vector that we intercept with our custom
                         \ text printing routine
 
-BYTEV = &020A           \ The BYTEV vector that we intercept on the BBC Master
+ BYTEV = &020A          \ The BYTEV vector that we intercept on the BBC Master
 
-FILEV = &0212           \ The FILEV vector that we intercept on the BBC Master
+ FILEV = &0212          \ The FILEV vector that we intercept on the BBC Master
 
-FSCV = &021E            \ The FSCV vector that we intercept on the BBC Master
+ FSCV = &021E           \ The FSCV vector that we intercept on the BBC Master
 
-NETV = &0224            \ The NETV vector that we intercept as part of the copy
+ NETV = &0224           \ The NETV vector that we intercept as part of the copy
                         \ protection
 
-LASCT = &0346           \ The laser pulse count for the current laser, matching
+ LASCT = &0346          \ The laser pulse count for the current laser, matching
                         \ the address in the main game code
 
-HFX = &0348             \ A flag that toggles the hyperspace colour effect,
+ HFX = &0348            \ A flag that toggles the hyperspace colour effect,
                         \ matching the address in the main game code
 
-CRGO = &036E            \ The flag that determines whether we have an I.F.F.
+ CRGO = &036E           \ The flag that determines whether we have an I.F.F.
                         \ system fitted, matching the address in the main game
                         \ code
 
-ESCP = &0386            \ The flag that determines whether we have an escape pod
+ ESCP = &0386           \ The flag that determines whether we have an escape pod
                         \ fitted, matching the address in the main game code
 
-S% = &11E3              \ The adress of the main entry point workspace in the
+ S% = &11E3             \ The adress of the main entry point workspace in the
                         \ main game code
 
-VIA = &FE00             \ Memory-mapped space for accessing internal hardware,
+ VIA = &FE00            \ Memory-mapped space for accessing internal hardware,
                         \ such as the video ULA, 6845 CRTC and 6522 VIAs (also
                         \ known as SHEILA)
 
-OSWRCH = &FFEE          \ The address for the OSWRCH routine
-OSBYTE = &FFF4          \ The address for the OSBYTE routine
-OSWORD = &FFF1          \ The address for the OSWORD routine
-OSCLI = &FFF7           \ The address for the OSCLI vector
+ OSWRCH = &FFEE         \ The address for the OSWRCH routine
+ OSBYTE = &FFF4         \ The address for the OSBYTE routine
+ OSWORD = &FFF1         \ The address for the OSWORD routine
+ OSCLI = &FFF7          \ The address for the OSCLI vector
 
-VEC = &7FFE             \ VEC is where we store the original value of the IRQ1
+ VEC = &7FFE            \ VEC is where we store the original value of the IRQ1
                         \ vector, matching the address in the elite-missile.asm
                         \ source
 
@@ -108,7 +108,7 @@ VEC = &7FFE             \ VEC is where we store the original value of the IRQ1
 \
 \ ******************************************************************************
 
-ORG &0004
+ ORG &0004
 
 .TRTB%
 
@@ -116,7 +116,7 @@ ORG &0004
                         \ table, which is used to translate internal key
                         \ numbers to ASCII
 
-ORG &0020
+ ORG &0020
 
 .INF
 
@@ -124,7 +124,7 @@ ORG &0020
                         \ address of a ship's data block, so it can be copied
                         \ to and from the internal workspace at INWK
 
-ORG &0070
+ ORG &0070
 
 .ZP
 
@@ -165,7 +165,7 @@ ORG &0070
 
  SKIP 2                 \ Used in the copy protection code
 
-ORG &008B
+ ORG &008B
 
 .DL
 
@@ -186,7 +186,7 @@ ORG &008B
                         \ as part of the main flight loop. See the table at XX21
                         \ for information about ship types
 
-ORG &0090
+ ORG &0090
 
 .key_tube
 
@@ -195,7 +195,7 @@ ORG &0090
                         \ table), which is used to translate internal key
                         \ numbers to ASCII in the I/O processor code
 
-ORG &00F4
+ ORG &00F4
 
 .LATCH
 
@@ -208,10 +208,10 @@ ORG &00F4
 \
 \ ******************************************************************************
 
-CODE% = &1900
-LOAD% = &1900
+ CODE% = &1900
+ LOAD% = &1900
 
-ORG CODE%
+ ORG CODE%
 
 \ ******************************************************************************
 \
@@ -370,11 +370,11 @@ ORG CODE%
 
 MACRO FNE I%
 
-  LDX #LO(E%+I%*14)     \ Set (Y X) to point to the I%-th set of envelope data
-  LDY #HI(E%+I%*14)     \ in E%
+ LDX #LO(E%+I%*14)      \ Set (Y X) to point to the I%-th set of envelope data
+ LDY #HI(E%+I%*14)      \ in E%
 
-  LDA #8                \ Call OSWORD with A = 8 to set up sound envelope I%
-  JSR OSWORD
+ LDA #8                 \ Call OSWORD with A = 8 to set up sound envelope I%
+ JSR OSWORD
 
 ENDMACRO
 
@@ -998,7 +998,7 @@ ENDMACRO
 
 .iff_index_code
 
-ORG &0D7A
+ ORG &0D7A
 
 \ ******************************************************************************
 \
@@ -1102,9 +1102,9 @@ ORG &0D7A
 
                         \ --- End of added code ------------------------------->
 
-COPYBLOCK iff_index, P%, iff_index_code
+ COPYBLOCK iff_index, P%, iff_index_code
 
-ORG iff_index_code + P% - iff_index
+ ORG iff_index_code + P% - iff_index
 
 \ ******************************************************************************
 \
@@ -1118,7 +1118,7 @@ ORG iff_index_code + P% - iff_index
 
 .LOADcode
 
-ORG &0B00
+ ORG &0B00
 
 \ ******************************************************************************
 \
@@ -1227,9 +1227,9 @@ ORG &0B00
 
                         \ --- End of replacement ------------------------------>
 
-COPYBLOCK LOAD, P%, LOADcode
+ COPYBLOCK LOAD, P%, LOADcode
 
-ORG LOADcode + P% - LOAD
+ ORG LOADcode + P% - LOAD
 
 \ ******************************************************************************
 \
@@ -1488,17 +1488,21 @@ ORG LOADcode + P% - LOAD
                         \ In terms of signed 8-bit integers, this is a random
                         \ number from -32 to 31. Let's call it r7
 
- ADC YY                 \ Set X = A + YY
- TAX                    \       = r7 + r6
+ ADC YY                 \ Set A = A + YY
+                        \       = r7 + r6
 
- JSR SQUA2              \ Set (A P) = r7 * r7
+ TAX                    \ Set X = A
+                        \       = r6 + r7
+
+ JSR SQUA2              \ Set (A P) = A * A
+                        \           = (r6 + r7)^2
 
  TAY                    \ Set Y = A
-                        \       = r7 * r7 / 256
+                        \       = (r6 + r7)^2 / 256
 
  ADC ZP+1               \ Set A = A + ZP+1
-                        \       = r7^2 / 256 + (r5^2 + r6^2) / 256
-                        \       = (r5^2 + r6^2 + r7^2) / 256
+                        \       = (r6 + r7)^2 / 256 + (r5^2 + r6^2) / 256
+                        \       = ((r6 + r7)^2 + r5^2 + r6^2) / 256
 
  BCS PLC3               \ If the addition overflowed, jump down to PLC3 to skip
                         \ to the next pixel
@@ -1510,16 +1514,29 @@ ORG LOADcode + P% - LOAD
  BCC PLC3
 
  TYA                    \ Set A = Y + T
- ADC T                  \       = r7^2 / 256 + r6^2 / 256
-                        \       = (r6^2 + r7^2) / 256
+ ADC T                  \       = (r6 + r7)^2 / 256 + r6^2 / 256
+                        \       = ((r6 + r7)^2 + r6^2) / 256
 
- CMP #16                \ If A > 16, skip to PL1 to plot the pixel
+ CMP #16                \ If A >= 16, skip to PL1 to plot the pixel
  BCS PL1
 
- LDA ZP                 \ If ZP is positive (50% chance), jump down to PLC3 to
+ LDA ZP                 \ If ZP is positive (i.e. r5 < 128), jump down to PLC3 to
  BPL PLC3               \ skip to the next pixel
 
 .PL1
+
+                        \ If we get here then the following is true:
+                        \
+                        \   32 <= ((r6 + r7)^2 + r5^2 + r6^2) / 256 < 80
+                        \
+                        \ and either this is true:
+                        \
+                        \   ((r6 + r7)^2 + r6^2) / 256 >= 16
+                        \
+                        \ or both these are true:
+                        \
+                        \   ((r6 + r7)^2 + r6^2) / 256 < 16
+                        \   r5 >= 128
 
  LDA YY                 \ Set A = YY
                         \       = r6
@@ -1540,8 +1557,12 @@ ORG LOADcode + P% - LOAD
                         \   x = r5 + r7
                         \   y = r5
                         \
-                        \   32 <= (r5^2 + r6^2 + r7^2) / 256 <= 79
-                        \   Draw 50% fewer pixels when (r6^2 + r7^2) / 256 <= 16
+                        \   32 <= ((r6 + r7)^2 + r5^2 + r6^2) / 256 < 80
+                        \
+                        \   Either: ((r6 + r7)^2 + r6^2) / 256 >= 16
+                        \
+                        \   Or:     ((r6 + r7)^2 + r6^2) / 256 <  16
+                        \           r5 >= 128
                         \
                         \ which is what we want
 
@@ -1555,10 +1576,27 @@ ORG LOADcode + P% - LOAD
 
  BNE PLL3               \ Loop back to PLL3 until CNT3+1 = 0
 
+                        \ The following code is not required, as we copy the
+                        \ title images to their correct places on-screen when
+                        \ we return from the subroutine, overwriting the copy
+                        \ that we do here
+
  LDA #&00               \ Set ZP(1 0) = &6300
  STA ZP
  LDA #&63
  STA ZP+1
+
+                        \ --- Mod: Code removed for Elite-A: ------------------>
+
+\ LDA #LO(ELITE)        \ Set P(1 0) = ELITE
+\ STA P
+\ LDA #HI(ELITE)
+\ STA P+1
+\
+\ LDX #8                \ Call MVPG with X = 8 to copy 8 pages of memory from
+\ JSR MVPG              \ ELITE to &6300
+
+                        \ --- And replaced by: -------------------------------->
 
  LDA #&62               \ Set P(1 0) = &2A62
  STA P
@@ -1566,7 +1604,9 @@ ORG LOADcode + P% - LOAD
  STA P+1
 
  LDX #8                 \ Call MVPG with X = 8 to copy 8 pages of memory from
- JSR MVPG               \ the address in P(1 0) to the address in ZP(1 0)
+ JSR MVPG               \ &2A62 to &6300
+
+                        \ --- End of replacement ------------------------------>
 
 \ ******************************************************************************
 \
@@ -2116,7 +2156,7 @@ ORG LOADcode + P% - LOAD
 
 .TVT1code
 
-ORG &1100
+ ORG &1100
 
 \ ******************************************************************************
 \
@@ -2722,9 +2762,9 @@ ENDIF
 
                         \ --- End of removed code ----------------------------->
 
-COPYBLOCK TVT1, P%, TVT1code
+ COPYBLOCK TVT1, P%, TVT1code
 
-ORG TVT1code + P% - TVT1
+ ORG TVT1code + P% - TVT1
 
 \ ******************************************************************************
 \
@@ -2781,11 +2821,11 @@ ORG TVT1code + P% - TVT1
 \
 \ ******************************************************************************
 
-CPU 1
+ CPU 1
 
 .to_dd00
 
-ORG &DD00
+ ORG &DD00
 
 \ ******************************************************************************
 \
@@ -3135,11 +3175,11 @@ ORG &DD00
 
                         \ --- End of added code ------------------------------->
 
-dd00_len = P% - do_FILEV
+ dd00_len = P% - do_FILEV
 
-COPYBLOCK do_FILEV, P%, to_dd00
+ COPYBLOCK do_FILEV, P%, to_dd00
 
-ORG to_dd00 + P% - do_FILEV
+ ORG to_dd00 + P% - do_FILEV
 
 \ ******************************************************************************
 \
@@ -3147,5 +3187,5 @@ ORG to_dd00 + P% - do_FILEV
 \
 \ ******************************************************************************
 
-PRINT "S.ELITE ", ~CODE%, " ", ~P%, " ", ~LOAD%, " ", ~LOAD%
-SAVE "3-assembled-output/ELITE.bin", CODE%, P%, LOAD%
+ PRINT "S.ELITE ", ~CODE%, " ", ~P%, " ", ~LOAD%, " ", ~LOAD%
+ SAVE "3-assembled-output/ELITE.bin", CODE%, P%, LOAD%

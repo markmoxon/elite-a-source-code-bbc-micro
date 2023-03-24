@@ -28,13 +28,13 @@
 \
 \ ******************************************************************************
 
-INCLUDE "1-source-files/main-sources/elite-build-options.asm"
+ INCLUDE "1-source-files/main-sources/elite-build-options.asm"
 
-_RELEASED               = (_VARIANT = 1)
-_SOURCE_DISC            = (_VARIANT = 2)
-_BUG_FIX                = (_VARIANT = 3)
+ _RELEASED              = (_VARIANT = 1)
+ _SOURCE_DISC           = (_VARIANT = 2)
+ _BUG_FIX               = (_VARIANT = 3)
 
-GUARD &6000             \ Guard against assembling over screen memory
+ GUARD &6000            \ Guard against assembling over screen memory
 
 \ ******************************************************************************
 \
@@ -42,49 +42,49 @@ GUARD &6000             \ Guard against assembling over screen memory
 \
 \ ******************************************************************************
 
-NOST = 18               \ The number of stardust particles in normal space (this
+ NOST = 18              \ The number of stardust particles in normal space (this
                         \ goes down to 3 in witchspace)
 
-NOSH = 12               \ The maximum number of ships in our local bubble of
+ NOSH = 12              \ The maximum number of ships in our local bubble of
                         \ universe
 
-NTY = 31                \ The number of different ship types
+ NTY = 31               \ The number of different ship types
 
-SST = 2                 \ Ship blueprint position for the space station
-COPS = 16               \ Ship blueprint position for the cop
-CON = 31                \ Ship blueprint position for the Constrictor
+ SST = 2                \ Ship blueprint position for the space station
+ COPS = 16              \ Ship blueprint position for the cop
+ CON = 31               \ Ship blueprint position for the Constrictor
 
-CYL = 11                \ Ship blueprint position for the title's Cobra Mk III
-KRA = 19                \ Ship blueprint position for the title's Krait
+ CYL = 11               \ Ship blueprint position for the title's Cobra Mk III
+ KRA = 19               \ Ship blueprint position for the title's Krait
 
-NI% = 37                \ The number of bytes in each ship's data block (as
+ NI% = 37               \ The number of bytes in each ship's data block (as
                         \ stored in INWK and K%)
 
-X = 128                 \ The centre x-coordinate of the 256 x 192 space view
-Y = 96                  \ The centre y-coordinate of the 256 x 192 space view
+ X = 128                \ The centre x-coordinate of the 256 x 192 space view
+ Y = 96                 \ The centre y-coordinate of the 256 x 192 space view
 
-f0 = &20                \ Internal key number for red key f0 (Launch, Front)
-f1 = &71                \ Internal key number for red key f1 (Buy Cargo, Rear)
-f2 = &72                \ Internal key number for red key f2 (Sell Cargo, Left)
-f3 = &73                \ Internal key number for red key f3 (Equip Ship, Right)
-f4 = &14                \ Internal key number for red key f4 (Long-range Chart)
-f5 = &74                \ Internal key number for red key f5 (Short-range Chart)
-f6 = &75                \ Internal key number for red key f6 (Data on System)
-f7 = &16                \ Internal key number for red key f7 (Market Price)
-f8 = &76                \ Internal key number for red key f8 (Status Mode)
-f9 = &77                \ Internal key number for red key f9 (Inventory)
+ f0 = &20               \ Internal key number for red key f0 (Launch, Front)
+ f1 = &71               \ Internal key number for red key f1 (Buy Cargo, Rear)
+ f2 = &72               \ Internal key number for red key f2 (Sell Cargo, Left)
+ f3 = &73               \ Internal key number for red key f3 (Equip Ship, Right)
+ f4 = &14               \ Internal key number for red key f4 (Long-range Chart)
+ f5 = &74               \ Internal key number for red key f5 (Short-range Chart)
+ f6 = &75               \ Internal key number for red key f6 (Data on System)
+ f7 = &16               \ Internal key number for red key f7 (Market Price)
+ f8 = &76               \ Internal key number for red key f8 (Status Mode)
+ f9 = &77               \ Internal key number for red key f9 (Inventory)
 
-NRU% = 25               \ The number of planetary systems with extended system
+ NRU% = 25              \ The number of planetary systems with extended system
                         \ description overrides in the RUTOK table
 
-VE = 0                  \ The obfuscation byte used to hide the extended tokens
+ VE = 0                 \ The obfuscation byte used to hide the extended tokens
                         \ table from crackers viewing the binary code, which is
                         \ zero in Elite-A as the token table is not obfuscated
 
-LL = 30                 \ The length of lines (in characters) of justified text
+ LL = 30                \ The length of lines (in characters) of justified text
                         \ in the extended tokens system
 
-save_lock = &0233       \ This flag indicates whether we should be asking for
+ save_lock = &0233      \ This flag indicates whether we should be asking for
                         \ confirmation before saving or loading a commander
                         \ file:
                         \
@@ -99,48 +99,48 @@ save_lock = &0233       \ This flag indicates whether we should be asking for
                         \ It shares a location with the IND2V+1 vector, which we
                         \ do not use, so we can reuse the location
 
-QQ18 = &0400            \ The address of the text token table, as set in
+ QQ18 = &0400           \ The address of the text token table, as set in
                         \ elite-loader.asm
 
-new_name = &074D        \ This points to recursive token 132 in the QQ18 table.
+ new_name = &074D       \ This points to recursive token 132 in the QQ18 table.
                         \ We update the token's text at this address whenever we
                         \ buy a new ship, so that printing token 132 will always
                         \ show the current ship type
 
-SNE = &07C0             \ The address of the sine lookup table, as set in
+ SNE = &07C0            \ The address of the sine lookup table, as set in
                         \ elite-loader.asm
 
-QQ16_FLIGHT = &0880     \ The address of the two-letter text token table in the
+ QQ16_FLIGHT = &0880    \ The address of the two-letter text token table in the
                         \ flight code (this gets populated by the docked code at
                         \ the start of the game)
 
-LS% = &0CFF             \ The start of the descending ship line heap
+ LS% = &0CFF            \ The start of the descending ship line heap
 
-IRQ1 = &114B            \ The address of the IRQ1 routine that implements the
+ IRQ1 = &114B           \ The address of the IRQ1 routine that implements the
                         \ split screen interrupt handler, as set in
                         \ elite-loader.asm
 
-NA% = &1181             \ The address of the data block for the last saved
+ NA% = &1181            \ The address of the data block for the last saved
                         \ commander, as set in elite-loader.asm
 
-CHK2 = &11D3            \ The address of the second checksum byte for the saved
+ CHK2 = &11D3           \ The address of the second checksum byte for the saved
                         \ commander data file, as set in elite-loader.asm
 
-CHK = &11D4             \ The address of the first checksum byte for the saved
+ CHK = &11D4            \ The address of the first checksum byte for the saved
                         \ commander data file, as set in elite-loader.asm
 
-SHIP_MISSILE = &7F00    \ The address of the missile ship blueprint, as set in
+ SHIP_MISSILE = &7F00   \ The address of the missile ship blueprint, as set in
                         \ elite-loader.asm
 
-VIA = &FE00             \ Memory-mapped space for accessing internal hardware,
+ VIA = &FE00            \ Memory-mapped space for accessing internal hardware,
                         \ such as the video ULA, 6845 CRTC and 6522 VIAs (also
                         \ known as SHEILA)
 
-OSFILE = &FFDD          \ The address for the OSFILE routine
-OSWRCH = &FFEE          \ The address for the OSWRCH routine
-OSWORD = &FFF1          \ The address for the OSWORD routine
-OSBYTE = &FFF4          \ The address for the OSBYTE routine
-OSCLI = &FFF7           \ The address for the OSCLI routine
+ OSFILE = &FFDD         \ The address for the OSFILE routine
+ OSWRCH = &FFEE         \ The address for the OSWRCH routine
+ OSWORD = &FFF1         \ The address for the OSWORD routine
+ OSBYTE = &FFF4         \ The address for the OSBYTE routine
+ OSCLI = &FFF7          \ The address for the OSCLI routine
 
 \ ******************************************************************************
 \
@@ -153,7 +153,7 @@ OSCLI = &FFF7           \ The address for the OSCLI routine
 \
 \ ******************************************************************************
 
-ORG &0000
+ ORG &0000
 
 .ZP
 
@@ -722,7 +722,7 @@ ORG &0000
 
                         \ --- End of added code ------------------------------->
 
-ORG &00D1
+ ORG &00D1
 
 .T
 
@@ -741,7 +741,7 @@ ORG &00D1
 
  SKIP 2                 \ Temporary storage, used in a number of places
 
-PRINT "Zero page variables from ", ~ZP, " to ", ~P%
+ PRINT "Zero page variables from ", ~ZP, " to ", ~P%
 
 \ ******************************************************************************
 \
@@ -758,7 +758,7 @@ PRINT "Zero page variables from ", ~ZP, " to ", ~P%
 \
 \ ******************************************************************************
 
-ORG &0100
+ ORG &0100
 
 .XX3
 
@@ -775,7 +775,7 @@ ORG &0100
 \
 \ ******************************************************************************
 
-ORG &0300
+ ORG &0300
 
 .KL
 
@@ -1528,7 +1528,7 @@ ORG &0300
                         \ copied from here to the last saved commander block at
                         \ NA%, CHK and CHK2 get overwritten
 
-NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
+ NT% = SVC + 2 - TP     \ This sets the variable NT% to the size of the current
                         \ commander data block, which starts at TP and ends at
                         \ SVC+2 (inclusive)
 
@@ -2035,7 +2035,7 @@ NT% = SVC + 2 - TP      \ This sets the variable NT% to the size of the current
 \
 \ ******************************************************************************
 
-ORG &0900
+ ORG &0900
 
 .K%
 
@@ -2051,7 +2051,7 @@ ORG &0900
 \
 \ ******************************************************************************
 
-ORG &0E00
+ ORG &0E00
 
 .WP
 
@@ -2158,7 +2158,7 @@ ORG &0E00
                         \ through the list of pirate ship blueprints until we
                         \ find one that has been loaded
 
-PRINT "WP workspace from  ", ~WP," to ", ~P%
+ PRINT "WP workspace from  ", ~WP," to ", ~P%
 
 \ ******************************************************************************
 \
@@ -2166,12 +2166,12 @@ PRINT "WP workspace from  ", ~WP," to ", ~P%
 \
 \ ******************************************************************************
 
-CODE% = &11E3
-LOAD% = &11E3
+ CODE% = &11E3
+ LOAD% = &11E3
 
-ORG CODE%
+ ORG CODE%
 
-LOAD_A% = LOAD%
+ LOAD_A% = LOAD%
 
 \ ******************************************************************************
 \
@@ -2197,7 +2197,7 @@ LOAD_A% = LOAD%
 \
 \ JMP BRBR1             \ BRKV is set to point here by elite-loader3.asm
 \
-\BRKV = P% - 2          \ The address of the destination address in the above
+\ BRKV = P% - 2         \ The address of the destination address in the above
 \                       \ JMP BRBR1 instruction. This ensures that any code that
 \                       \ updates BRKV will update this instruction instead of
 \                       \ the actual vector
@@ -2214,7 +2214,7 @@ LOAD_A% = LOAD%
 
  JMP BRBR               \ BRKV is set to point here by elite-loader.asm
 
-BRKV = P% - 2           \ The address of the destination address in the above
+ BRKV = P% - 2          \ The address of the destination address in the above
                         \ JMP BRBR instruction. This ensures that any code that
                         \ updates BRKV will update this instruction instead of
                         \ the actual vector
@@ -4643,11 +4643,11 @@ BRKV = P% - 2           \ The address of the destination address in the above
 
 .UNIV
 
-FOR I%, 0, NOSH
+ FOR I%, 0, NOSH
 
- EQUW K% + I% * NI%     \ Address of block no. I%, of size NI%, in workspace K%
+  EQUW K% + I% * NI%    \ Address of block no. I%, of size NI%, in workspace K%
 
-NEXT
+ NEXT
 
 \ ******************************************************************************
 \
@@ -4655,14 +4655,14 @@ NEXT
 \
 \ ******************************************************************************
 
-PRINT "ELITE A"
-PRINT "Assembled at ", ~CODE%
-PRINT "Ends at ", ~P%
-PRINT "Code size is ", ~(P% - CODE%)
-PRINT "Execute at ", ~LOAD%
-PRINT "Reload at ", ~LOAD_A%
+ PRINT "ELITE A"
+ PRINT "Assembled at ", ~CODE%
+ PRINT "Ends at ", ~P%
+ PRINT "Code size is ", ~(P% - CODE%)
+ PRINT "Execute at ", ~LOAD%
+ PRINT "Reload at ", ~LOAD_A%
 
-PRINT "S.T.ELTA ", ~CODE%, " ", ~P%, " ", ~LOAD%, " ", ~LOAD_A%
+ PRINT "S.T.ELTA ", ~CODE%, " ", ~P%, " ", ~LOAD%, " ", ~LOAD_A%
 \SAVE "3-assembled-output/T.ELTA.bin", CODE%, P%, LOAD%
 
 \ ******************************************************************************
@@ -4671,8 +4671,8 @@ PRINT "S.T.ELTA ", ~CODE%, " ", ~P%, " ", ~LOAD%, " ", ~LOAD_A%
 \
 \ ******************************************************************************
 
-CODE_B% = P%
-LOAD_B% = LOAD% + P% - CODE%
+ CODE_B% = P%
+ LOAD_B% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
 \
@@ -7865,7 +7865,7 @@ LOAD_B% = LOAD% + P% - CODE%
                         \ modify this instruction (the default value of DTW7 is
                         \ an "A")
 
-DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
+ DTW7 = MT16 + 1        \ Point DTW7 to the second byte of the instruction above
                         \ so that modifying DTW7 changes the value loaded into A
 
                         \ Fall through into TT26 to print the character in A
@@ -9448,14 +9448,14 @@ DTW7 = MT16 + 1         \ Point DTW7 to the second byte of the instruction above
 \
 \ ******************************************************************************
 
-PRINT "ELITE B"
-PRINT "Assembled at ", ~CODE_B%
-PRINT "Ends at ", ~P%
-PRINT "Code size is ", ~(P% - CODE_B%)
-PRINT "Execute at ", ~LOAD%
-PRINT "Reload at ", ~LOAD_B%
+ PRINT "ELITE B"
+ PRINT "Assembled at ", ~CODE_B%
+ PRINT "Ends at ", ~P%
+ PRINT "Code size is ", ~(P% - CODE_B%)
+ PRINT "Execute at ", ~LOAD%
+ PRINT "Reload at ", ~LOAD_B%
 
-PRINT "S.T.ELTB ", ~CODE_B%, " ", ~P%, " ", ~LOAD%, " ", ~LOAD_B%
+ PRINT "S.T.ELTB ", ~CODE_B%, " ", ~P%, " ", ~LOAD%, " ", ~LOAD_B%
 \SAVE "3-assembled-output/T.ELTB.bin", CODE_B%, P%, LOAD%
 
 \ ******************************************************************************
@@ -9464,8 +9464,8 @@ PRINT "S.T.ELTB ", ~CODE_B%, " ", ~P%, " ", ~LOAD%, " ", ~LOAD_B%
 \
 \ ******************************************************************************
 
-CODE_C% = P%
-LOAD_C% = LOAD% +P% - CODE%
+ CODE_C% = P%
+ LOAD_C% = LOAD% +P% - CODE%
 
 \ ******************************************************************************
 \
@@ -10874,6 +10874,10 @@ LOAD_C% = LOAD% +P% - CODE%
 \
 \   A = A * Q / 256
 \
+\ Returns:
+\
+\   C flag              The C flag is set
+\
 \ ******************************************************************************
 
 .FMLTU
@@ -10910,6 +10914,9 @@ LOAD_C% = LOAD% +P% - CODE%
                         \ (so we loop through the bits of P until we get to the
                         \ 1 we inserted before the loop, and then we stop)
 
+                        \ If we get here then the C flag is set as we just
+                        \ rotated a 1 out of the right end of P
+
  RTS                    \ Return from the subroutine
 
 .MU7
@@ -10924,6 +10931,9 @@ LOAD_C% = LOAD% +P% - CODE%
  BNE MUL3               \ Loop back to MUL3 if P still contains some set bits
                         \ (so we loop through the bits of P until we get to the
                         \ 1 we inserted before the loop, and then we stop)
+
+                        \ If we get here then the C flag is set as we just
+                        \ rotated a 1 out of the right end of P
 
  RTS                    \ Return from the subroutine
 
@@ -12144,9 +12154,11 @@ LOAD_C% = LOAD% +P% - CODE%
 \ LDA DJD               \ If keyboard auto-recentre is disabled, then
 \ BNE RE2+2             \ jump to RE2+2 to restore A and return
 \
-\ LDX #128              \ If keyboard auto-recentre is enabled, set X to 128
-\ BMI RE2+2             \ (the middle of our range) and jump to RE2+2 to
-\                       \ restore A and return
+\ LDX #128              \ If we get here then keyboard auto-recentre is enabled,
+\ BMI RE2+2             \ so set X to 128 (the middle of our range) and jump to
+\                       \ RE2+2 to restore A and return from the subroutine
+\                       \ (this BMI is effectively a JMP as bit 7 of X is always
+\                       \ set)
 
                         \ --- End of removed code ----------------------------->
 
@@ -12385,9 +12397,11 @@ LOAD_C% = LOAD% +P% - CODE%
 
                         \ --- End of added code ------------------------------->
 
- LDA #2                 \ Set ENGY to 2 so our energy banks recharge at twice
- STA ENGY               \ the speed, as our mission reward is a special navy
-                        \ energy unit
+ LDA #2                 \ Set ENGY to 2 so our energy banks recharge at a faster
+ STA ENGY               \ rate, as our mission reward is a special navy energy
+                        \ unit that recharges at a rate of 3 units of energy on
+                        \ each iteration of the main loop, compared to a rate of
+                        \ 2 units of energy for the standard energy unit
 
  INC TALLY+1            \ Award 256 kill points for completing the mission
 
@@ -13260,14 +13274,14 @@ LOAD_C% = LOAD% +P% - CODE%
 \
 \ ******************************************************************************
 
-PRINT "ELITE C"
-PRINT "Assembled at ", ~CODE_C%
-PRINT "Ends at ", ~P%
-PRINT "Code size is ", ~(P% - CODE_C%)
-PRINT "Execute at ", ~LOAD%
-PRINT "Reload at ", ~LOAD_C%
+ PRINT "ELITE C"
+ PRINT "Assembled at ", ~CODE_C%
+ PRINT "Ends at ", ~P%
+ PRINT "Code size is ", ~(P% - CODE_C%)
+ PRINT "Execute at ", ~LOAD%
+ PRINT "Reload at ", ~LOAD_C%
 
-PRINT "S.T.ELTC ", ~CODE_C%, " ", ~P%, " ", ~LOAD%, " ", ~LOAD_C%
+ PRINT "S.T.ELTC ", ~CODE_C%, " ", ~P%, " ", ~LOAD%, " ", ~LOAD_C%
 \SAVE "3-assembled-output/T.ELTC.bin", CODE_C%, P%, LOAD%
 
 \ ******************************************************************************
@@ -13276,8 +13290,8 @@ PRINT "S.T.ELTC ", ~CODE_C%, " ", ~P%, " ", ~LOAD%, " ", ~LOAD_C%
 \
 \ ******************************************************************************
 
-CODE_D% = P%
-LOAD_D% = LOAD% + P% - CODE%
+ CODE_D% = P%
+ LOAD_D% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
 \
@@ -16587,7 +16601,7 @@ LOAD_D% = LOAD% + P% - CODE%
 
 .TT151
 
- PHA                    \ Store the item number on the stack and in QQ14+4
+ PHA                    \ Store the item number on the stack and in QQ19+4
  STA QQ19+4
 
  ASL A                  \ Store the item number * 4 in QQ19, so this will act as
@@ -18495,14 +18509,14 @@ LOAD_D% = LOAD% + P% - CODE%
 \
 \ ******************************************************************************
 
-PRINT "ELITE D"
-PRINT "Assembled at ", ~CODE_D%
-PRINT "Ends at ", ~P%
-PRINT "Code size is ", ~(P% - CODE_D%)
-PRINT "Execute at ", ~LOAD%
-PRINT "Reload at ", ~LOAD_D%
+ PRINT "ELITE D"
+ PRINT "Assembled at ", ~CODE_D%
+ PRINT "Ends at ", ~P%
+ PRINT "Code size is ", ~(P% - CODE_D%)
+ PRINT "Execute at ", ~LOAD%
+ PRINT "Reload at ", ~LOAD_D%
 
-PRINT "S.T.ELTD ", ~CODE_D%, " ", ~P%, " ", ~LOAD%, " ", ~LOAD_D%
+ PRINT "S.T.ELTD ", ~CODE_D%, " ", ~P%, " ", ~LOAD%, " ", ~LOAD_D%
 \SAVE "3-assembled-output/T.ELTD.bin", CODE_D%, P%, LOAD%
 
 \ ******************************************************************************
@@ -18511,8 +18525,8 @@ PRINT "S.T.ELTD ", ~CODE_D%, " ", ~P%, " ", ~LOAD%, " ", ~LOAD_D%
 \
 \ ******************************************************************************
 
-CODE_E% = P%
-LOAD_E% = LOAD% + P% - CODE%
+ CODE_E% = P%
+ LOAD_E% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
 \
@@ -21698,14 +21712,14 @@ LOAD_E% = LOAD% + P% - CODE%
 \
 \ ******************************************************************************
 
-PRINT "ELITE E"
-PRINT "Assembled at ", ~CODE_E%
-PRINT "Ends at ", ~P%
-PRINT "Code size is ", ~(P% - CODE_E%)
-PRINT "Execute at ", ~LOAD%
-PRINT "Reload at ", ~LOAD_E%
+ PRINT "ELITE E"
+ PRINT "Assembled at ", ~CODE_E%
+ PRINT "Ends at ", ~P%
+ PRINT "Code size is ", ~(P% - CODE_E%)
+ PRINT "Execute at ", ~LOAD%
+ PRINT "Reload at ", ~LOAD_E%
 
-PRINT "S.T.ELTE ", ~CODE_E%, " ", ~P%, " ", ~LOAD%, " ", ~LOAD_E%
+ PRINT "S.T.ELTE ", ~CODE_E%, " ", ~P%, " ", ~LOAD%, " ", ~LOAD_E%
 \SAVE "3-assembled-output/T.ELTE.bin", CODE_E%, P%, LOAD%
 
 \ ******************************************************************************
@@ -21714,8 +21728,8 @@ PRINT "S.T.ELTE ", ~CODE_E%, " ", ~P%, " ", ~LOAD%, " ", ~LOAD_E%
 \
 \ ******************************************************************************
 
-CODE_F% = P%
-LOAD_F% = LOAD% + P% - CODE%
+ CODE_F% = P%
+ LOAD_F% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
 \
@@ -25893,26 +25907,26 @@ ENDIF
 
 MACRO ITEM price, factor, units, quantity, mask
 
-  IF factor < 0
-    s = 1 << 7
-  ELSE
-    s = 0
-  ENDIF
+ IF factor < 0
+  s = 1 << 7
+ ELSE
+  s = 0
+ ENDIF
 
-  IF units = 't'
-    u = 0
-  ELIF units = 'k'
-    u = 1 << 5
-  ELSE
-    u = 1 << 6
-  ENDIF
+ IF units = 't'
+  u = 0
+ ELIF units = 'k'
+  u = 1 << 5
+ ELSE
+  u = 1 << 6
+ ENDIF
 
-  e = ABS(factor)
+ e = ABS(factor)
 
-  EQUB price
-  EQUB s + u + e
-  EQUB quantity
-  EQUB mask
+ EQUB price
+ EQUB s + u + e
+ EQUB quantity
+ EQUB mask
 
 ENDMACRO
 
@@ -26367,14 +26381,14 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-PRINT "ELITE F"
-PRINT "Assembled at ", ~CODE_F%
-PRINT "Ends at ", ~P%
-PRINT "Code size is ", ~(P% - CODE_F%)
-PRINT "Execute at ", ~LOAD%
-PRINT "Reload at ", ~LOAD_F%
+ PRINT "ELITE F"
+ PRINT "Assembled at ", ~CODE_F%
+ PRINT "Ends at ", ~P%
+ PRINT "Code size is ", ~(P% - CODE_F%)
+ PRINT "Execute at ", ~LOAD%
+ PRINT "Reload at ", ~LOAD_F%
 
-PRINT "S.T.ELTF ", ~CODE_F%, " ", ~P%, " ", ~LOAD%, " ", ~LOAD_F%
+ PRINT "S.T.ELTF ", ~CODE_F%, " ", ~P%, " ", ~LOAD%, " ", ~LOAD_F%
 \SAVE "3-assembled-output/T.ELTF.bin", CODE_F%, P%, LOAD%
 
 \ ******************************************************************************
@@ -26383,8 +26397,8 @@ PRINT "S.T.ELTF ", ~CODE_F%, " ", ~P%, " ", ~LOAD%, " ", ~LOAD_F%
 \
 \ ******************************************************************************
 
-CODE_G% = P%
-LOAD_G% = LOAD% + P% - CODE%
+ CODE_G% = P%
+ LOAD_G% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
 \
@@ -29635,7 +29649,7 @@ LOAD_G% = LOAD% + P% - CODE%
                         \ We now keep halving |delta_x| and |delta_y| until
                         \ both of them have zero in their high bytes
 
- TAX                    \ IF |delta_x_hi| is non-zero, skip the following
+ TAX                    \ If |delta_x_hi| is non-zero, skip the following
  BNE LL112
 
  LDX XX12+5             \ If |delta_y_hi| = 0, jump down to LL113 (as both
@@ -29663,6 +29677,9 @@ LOAD_G% = LOAD% + P% - CODE%
  CMP XX12+4             \ vertical than horizontal, jump to LL114
  BCC LL114
 
+                        \ If we get here then our line is more horizontal than
+                        \ vertical, so it is a shallow slope
+
  STA Q                  \ Set Q = delta_x_lo
 
  LDA XX12+4             \ Set A = delta_y_lo
@@ -29676,6 +29693,9 @@ LOAD_G% = LOAD% + P% - CODE%
 
 .LL114
 
+                        \ If we get here then our line is more vertical than
+                        \ horizontal, so it is a steep slope
+
  LDA XX12+4             \ Set Q = delta_y_lo
  STA Q
  LDA XX12+2             \ Set A = delta_x_lo
@@ -29685,7 +29705,8 @@ LOAD_G% = LOAD% + P% - CODE%
                         \   R = 256 * A / Q
                         \     = 256 * delta_x_lo / delta_y_lo
 
- DEC T                  \ T was set to 0 above, so this sets T = &FF
+ DEC T                  \ T was set to 0 above, so this sets T = &FF when our
+                        \ line is steep
 
 \ ******************************************************************************
 \
@@ -29702,11 +29723,11 @@ LOAD_G% = LOAD% + P% - CODE%
 \ clipping.
 \
 \ If we get here, then R has been set to the gradient of the line (x1, y1) to
-\ (x2, y2), with T indicating the type of slope:
+\ (x2, y2), with T indicating the gradient of slope:
 \
-\   * 0   = it's more vertical than horizontal
+\   * 0   = shallow slope (more horizontal than vertical)
 \
-\   * &FF = it's more horizontal than vertical
+\   * &FF = steep slope (more vertical than horizontal)
 \
 \ and XX13 has been set as follows:
 \
@@ -30162,11 +30183,11 @@ LOAD_G% = LOAD% + P% - CODE%
 \
 \                         * Negative (bit 7 set) = top right to bottom left
 \
-\   T                   The type of slope:
+\   T                   The gradient of slope:
 \
-\                         * 0 if it's more vertical than horizontal
+\                         * 0 if it's a shallow slope
 \
-\                         * &FF if it's more horizontal than vertical
+\                         * &FF if it's a steep slope
 \
 \ Returns:
 \
@@ -30347,11 +30368,19 @@ LOAD_G% = LOAD% + P% - CODE%
 \
 \ Calculate the following:
 \
-\   * If T = 0  (more vertical than horizontal), (Y X) = (S x1_lo) * XX12+2
+\   * If T = 0, this is a shallow slope, so calculate (Y X) = (S x1_lo) * XX12+2
 \
-\   * If T <> 0 (more horizontal than vertical), (Y X) = (S x1_lo) / XX12+2
+\   * If T <> 0, this is a steep slope, so calculate (Y X) = (S x1_lo) / XX12+2
 \
 \ giving (Y X) the opposite sign to the slope direction in XX12+3.
+\
+\ Arguments:
+\
+\   T                   The gradient of slope:
+\
+\                         * 0 if it's a shallow slope
+\
+\                         * &FF if it's a steep slope
 \
 \ Other entry points:
 \
@@ -30379,9 +30408,8 @@ LOAD_G% = LOAD% + P% - CODE%
 
  PHA                    \ Store A on the stack so we can use it later
 
- LDX T                  \ If T is non-zero, so it's more horizontal than
- BNE LL121              \ vertical, jump down to LL121 to calculate this
-                        \ instead:
+ LDX T                  \ If T is non-zero, then it's a steep slope, so jump
+ BNE LL121              \ down to LL121 to calculate this instead:
                         \
                         \   (Y X) = (S R) / Q
 
@@ -30452,9 +30480,9 @@ LOAD_G% = LOAD% + P% - CODE%
 \
 \ Calculate the following:
 \
-\   * If T = 0,  calculate (Y X) = (S R) / XX12+2
+\   * If T = 0, this is a shallow slope, so calculate (Y X) = (S R) / XX12+2
 \
-\   * If T <> 0, calculate (Y X) = (S R) * XX12+2
+\   * If T <> 0, this is a steep slope, so calculate (Y X) = (S R) * XX12+2
 \
 \ giving (Y X) the opposite sign to the slope direction in XX12+3.
 \
@@ -30467,6 +30495,12 @@ LOAD_G% = LOAD% + P% - CODE%
 \                         * Bit 7 clear means top left to bottom right
 \
 \                         * Bit 7 set means top right to bottom left
+\
+\   T                   The gradient of slope:
+\
+\                         * 0 if it's a shallow slope
+\
+\                         * &FF if it's a steep slope
 \
 \ Other entry points:
 \
@@ -30495,8 +30529,8 @@ LOAD_G% = LOAD% + P% - CODE%
 
  PHA                    \ Store A on the stack so we can use it later
 
- LDX T                  \ If T is non-zero, so it's more horizontal than
- BNE LL122              \ vertical, jump up to LL122 to calculate this instead:
+ LDX T                  \ If T is non-zero, then it's a steep slope, so jump up
+ BNE LL122              \ to LL122 to calculate this instead:
                         \
                         \   (Y X) = (S R) * Q
 
@@ -31886,11 +31920,11 @@ LOAD_G% = LOAD% + P% - CODE%
 
 .new_offsets
 
-FOR I%, 0, 14
+ FOR I%, 0, 14
 
- EQUB I% * 13           \ Offset of the 13-byte details block for ship I%
+  EQUB I% * 13          \ Offset of the 13-byte details block for ship I%
 
-NEXT
+ NEXT
 
                         \ --- End of added code ------------------------------->
 
@@ -32415,14 +32449,14 @@ ENDIF
 \
 \ ******************************************************************************
 
-PRINT "ELITE G"
-PRINT "Assembled at ", ~CODE_G%
-PRINT "Ends at ", ~P%
-PRINT "Code size is ", ~(P% - CODE_G%)
-PRINT "Execute at ", ~LOAD%
-PRINT "Reload at ", ~LOAD_G%
+ PRINT "ELITE G"
+ PRINT "Assembled at ", ~CODE_G%
+ PRINT "Ends at ", ~P%
+ PRINT "Code size is ", ~(P% - CODE_G%)
+ PRINT "Execute at ", ~LOAD%
+ PRINT "Reload at ", ~LOAD_G%
 
-PRINT "S.T.ELTG ", ~CODE_G%, " ", ~P%, " ", ~LOAD%, " ", ~LOAD_G%
+ PRINT "S.T.ELTG ", ~CODE_G%, " ", ~P%, " ", ~LOAD%, " ", ~LOAD_G%
 \SAVE "3-assembled-output/T.ELTG.bin", CODE_G%, P%, LOAD%
 
 \ ******************************************************************************
@@ -32431,8 +32465,8 @@ PRINT "S.T.ELTG ", ~CODE_G%, " ", ~P%, " ", ~LOAD%, " ", ~LOAD_G%
 \
 \ ******************************************************************************
 
-CODE_H% = P%
-LOAD_H% = LOAD% + P% - CODE%
+ CODE_H% = P%
+ LOAD_H% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
 \
@@ -32459,7 +32493,7 @@ LOAD_H% = LOAD% + P% - CODE%
 
 MACRO EJMP n
 
-  EQUB n EOR VE
+ EQUB n EOR VE
 
 ENDMACRO
 
@@ -32490,11 +32524,11 @@ ENDMACRO
 
 MACRO ECHR x
 
-  IF x = '`'
-    EQUB 39 EOR VE
-  ELSE
-    EQUB x EOR VE
-  ENDIF
+ IF x = '`'
+  EQUB 39 EOR VE
+ ELSE
+  EQUB x EOR VE
+ ENDIF
 
 ENDMACRO
 
@@ -32524,7 +32558,7 @@ ENDMACRO
 
 MACRO ETOK n
 
-  EQUB n EOR VE
+ EQUB n EOR VE
 
 ENDMACRO
 
@@ -32559,48 +32593,48 @@ ENDMACRO
 
 MACRO ETWO t, k
 
-  IF t = '-' AND k = '-' : EQUB 215 EOR VE : ENDIF
-  IF t = 'A' AND k = 'B' : EQUB 216 EOR VE : ENDIF
-  IF t = 'O' AND k = 'U' : EQUB 217 EOR VE : ENDIF
-  IF t = 'S' AND k = 'E' : EQUB 218 EOR VE : ENDIF
-  IF t = 'I' AND k = 'T' : EQUB 219 EOR VE : ENDIF
-  IF t = 'I' AND k = 'L' : EQUB 220 EOR VE : ENDIF
-  IF t = 'E' AND k = 'T' : EQUB 221 EOR VE : ENDIF
-  IF t = 'S' AND k = 'T' : EQUB 222 EOR VE : ENDIF
-  IF t = 'O' AND k = 'N' : EQUB 223 EOR VE : ENDIF
-  IF t = 'L' AND k = 'O' : EQUB 224 EOR VE : ENDIF
-  IF t = 'N' AND k = 'U' : EQUB 225 EOR VE : ENDIF
-  IF t = 'T' AND k = 'H' : EQUB 226 EOR VE : ENDIF
-  IF t = 'N' AND k = 'O' : EQUB 227 EOR VE : ENDIF
+ IF t = '-' AND k = '-' : EQUB 215 EOR VE : ENDIF
+ IF t = 'A' AND k = 'B' : EQUB 216 EOR VE : ENDIF
+ IF t = 'O' AND k = 'U' : EQUB 217 EOR VE : ENDIF
+ IF t = 'S' AND k = 'E' : EQUB 218 EOR VE : ENDIF
+ IF t = 'I' AND k = 'T' : EQUB 219 EOR VE : ENDIF
+ IF t = 'I' AND k = 'L' : EQUB 220 EOR VE : ENDIF
+ IF t = 'E' AND k = 'T' : EQUB 221 EOR VE : ENDIF
+ IF t = 'S' AND k = 'T' : EQUB 222 EOR VE : ENDIF
+ IF t = 'O' AND k = 'N' : EQUB 223 EOR VE : ENDIF
+ IF t = 'L' AND k = 'O' : EQUB 224 EOR VE : ENDIF
+ IF t = 'N' AND k = 'U' : EQUB 225 EOR VE : ENDIF
+ IF t = 'T' AND k = 'H' : EQUB 226 EOR VE : ENDIF
+ IF t = 'N' AND k = 'O' : EQUB 227 EOR VE : ENDIF
 
-  IF t = 'A' AND k = 'L' : EQUB 228 EOR VE : ENDIF
-  IF t = 'L' AND k = 'E' : EQUB 229 EOR VE : ENDIF
-  IF t = 'X' AND k = 'E' : EQUB 230 EOR VE : ENDIF
-  IF t = 'G' AND k = 'E' : EQUB 231 EOR VE : ENDIF
-  IF t = 'Z' AND k = 'A' : EQUB 232 EOR VE : ENDIF
-  IF t = 'C' AND k = 'E' : EQUB 233 EOR VE : ENDIF
-  IF t = 'B' AND k = 'I' : EQUB 234 EOR VE : ENDIF
-  IF t = 'S' AND k = 'O' : EQUB 235 EOR VE : ENDIF
-  IF t = 'U' AND k = 'S' : EQUB 236 EOR VE : ENDIF
-  IF t = 'E' AND k = 'S' : EQUB 237 EOR VE : ENDIF
-  IF t = 'A' AND k = 'R' : EQUB 238 EOR VE : ENDIF
-  IF t = 'M' AND k = 'A' : EQUB 239 EOR VE : ENDIF
-  IF t = 'I' AND k = 'N' : EQUB 240 EOR VE : ENDIF
-  IF t = 'D' AND k = 'I' : EQUB 241 EOR VE : ENDIF
-  IF t = 'R' AND k = 'E' : EQUB 242 EOR VE : ENDIF
-  IF t = 'A' AND k = '?' : EQUB 243 EOR VE : ENDIF
-  IF t = 'E' AND k = 'R' : EQUB 244 EOR VE : ENDIF
-  IF t = 'A' AND k = 'T' : EQUB 245 EOR VE : ENDIF
-  IF t = 'E' AND k = 'N' : EQUB 246 EOR VE : ENDIF
-  IF t = 'B' AND k = 'E' : EQUB 247 EOR VE : ENDIF
-  IF t = 'R' AND k = 'A' : EQUB 248 EOR VE : ENDIF
-  IF t = 'L' AND k = 'A' : EQUB 249 EOR VE : ENDIF
-  IF t = 'V' AND k = 'E' : EQUB 250 EOR VE : ENDIF
-  IF t = 'T' AND k = 'I' : EQUB 251 EOR VE : ENDIF
-  IF t = 'E' AND k = 'D' : EQUB 252 EOR VE : ENDIF
-  IF t = 'O' AND k = 'R' : EQUB 253 EOR VE : ENDIF
-  IF t = 'Q' AND k = 'U' : EQUB 254 EOR VE : ENDIF
-  IF t = 'A' AND k = 'N' : EQUB 255 EOR VE : ENDIF
+ IF t = 'A' AND k = 'L' : EQUB 228 EOR VE : ENDIF
+ IF t = 'L' AND k = 'E' : EQUB 229 EOR VE : ENDIF
+ IF t = 'X' AND k = 'E' : EQUB 230 EOR VE : ENDIF
+ IF t = 'G' AND k = 'E' : EQUB 231 EOR VE : ENDIF
+ IF t = 'Z' AND k = 'A' : EQUB 232 EOR VE : ENDIF
+ IF t = 'C' AND k = 'E' : EQUB 233 EOR VE : ENDIF
+ IF t = 'B' AND k = 'I' : EQUB 234 EOR VE : ENDIF
+ IF t = 'S' AND k = 'O' : EQUB 235 EOR VE : ENDIF
+ IF t = 'U' AND k = 'S' : EQUB 236 EOR VE : ENDIF
+ IF t = 'E' AND k = 'S' : EQUB 237 EOR VE : ENDIF
+ IF t = 'A' AND k = 'R' : EQUB 238 EOR VE : ENDIF
+ IF t = 'M' AND k = 'A' : EQUB 239 EOR VE : ENDIF
+ IF t = 'I' AND k = 'N' : EQUB 240 EOR VE : ENDIF
+ IF t = 'D' AND k = 'I' : EQUB 241 EOR VE : ENDIF
+ IF t = 'R' AND k = 'E' : EQUB 242 EOR VE : ENDIF
+ IF t = 'A' AND k = '?' : EQUB 243 EOR VE : ENDIF
+ IF t = 'E' AND k = 'R' : EQUB 244 EOR VE : ENDIF
+ IF t = 'A' AND k = 'T' : EQUB 245 EOR VE : ENDIF
+ IF t = 'E' AND k = 'N' : EQUB 246 EOR VE : ENDIF
+ IF t = 'B' AND k = 'E' : EQUB 247 EOR VE : ENDIF
+ IF t = 'R' AND k = 'A' : EQUB 248 EOR VE : ENDIF
+ IF t = 'L' AND k = 'A' : EQUB 249 EOR VE : ENDIF
+ IF t = 'V' AND k = 'E' : EQUB 250 EOR VE : ENDIF
+ IF t = 'T' AND k = 'I' : EQUB 251 EOR VE : ENDIF
+ IF t = 'E' AND k = 'D' : EQUB 252 EOR VE : ENDIF
+ IF t = 'O' AND k = 'R' : EQUB 253 EOR VE : ENDIF
+ IF t = 'Q' AND k = 'U' : EQUB 254 EOR VE : ENDIF
+ IF t = 'A' AND k = 'N' : EQUB 255 EOR VE : ENDIF
 
 ENDMACRO
 
@@ -32632,7 +32666,7 @@ ENDMACRO
 
 MACRO ERND n
 
-  EQUB (n + 91) EOR VE
+ EQUB (n + 91) EOR VE
 
 ENDMACRO
 
@@ -32668,15 +32702,15 @@ ENDMACRO
 
 MACRO TOKN n
 
-  IF n >= 0 AND n <= 95
-    t = n + 160
-  ELIF n >= 128
-    t = n - 114
-  ELSE
-    t = n
-  ENDIF
+ IF n >= 0 AND n <= 95
+  t = n + 160
+ ELIF n >= 128
+  t = n - 114
+ ELSE
+  t = n
+ ENDIF
 
-  EQUB t EOR VE
+ EQUB t EOR VE
 
 ENDMACRO
 
@@ -36997,14 +37031,14 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-PRINT "ELITE H"
-PRINT "Assembled at ", ~CODE_H%
-PRINT "Ends at ", ~P%
-PRINT "Code size is ", ~(P% - CODE_H%)
-PRINT "Execute at ", ~LOAD%
-PRINT "Reload at ", ~LOAD_H%
+ PRINT "ELITE H"
+ PRINT "Assembled at ", ~CODE_H%
+ PRINT "Ends at ", ~P%
+ PRINT "Code size is ", ~(P% - CODE_H%)
+ PRINT "Execute at ", ~LOAD%
+ PRINT "Reload at ", ~LOAD_H%
 
-PRINT "S.T.ELTH ", ~CODE_H%, " ", ~P%, " ", ~LOAD%, " ", ~LOAD_H%
+ PRINT "S.T.ELTH ", ~CODE_H%, " ", ~P%, " ", ~LOAD%, " ", ~LOAD_H%
 \SAVE "versions/disc/3-assembled-output/T.ELTH.bin", CODE_H%, P%, LOAD%
 
 \ ******************************************************************************
@@ -37013,8 +37047,8 @@ PRINT "S.T.ELTH ", ~CODE_H%, " ", ~P%, " ", ~LOAD%, " ", ~LOAD_H%
 \
 \ ******************************************************************************
 
-CODE_SHIPS% = P%
-LOAD_SHIPS% = LOAD% + P% - CODE%
+ CODE_SHIPS% = P%
+ LOAD_SHIPS% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
 \
@@ -37146,32 +37180,32 @@ LOAD_SHIPS% = LOAD% + P% - CODE%
 
 MACRO VERTEX x, y, z, face1, face2, face3, face4, visibility
 
-  IF x < 0
-    s_x = 1 << 7
-  ELSE
-    s_x = 0
-  ENDIF
+ IF x < 0
+  s_x = 1 << 7
+ ELSE
+  s_x = 0
+ ENDIF
 
-  IF y < 0
-    s_y = 1 << 6
-  ELSE
-    s_y = 0
-  ENDIF
+ IF y < 0
+  s_y = 1 << 6
+ ELSE
+  s_y = 0
+ ENDIF
 
-  IF z < 0
-    s_z = 1 << 5
-  ELSE
-    s_z = 0
-  ENDIF
+ IF z < 0
+  s_z = 1 << 5
+ ELSE
+  s_z = 0
+ ENDIF
 
-  s = s_x + s_y + s_z + visibility
-  f1 = face1 + (face2 << 4)
-  f2 = face3 + (face4 << 4)
-  ax = ABS(x)
-  ay = ABS(y)
-  az = ABS(z)
+ s = s_x + s_y + s_z + visibility
+ f1 = face1 + (face2 << 4)
+ f2 = face3 + (face4 << 4)
+ ax = ABS(x)
+ ay = ABS(y)
+ az = ABS(z)
 
-  EQUB ax, ay, az, s, f1, f2
+ EQUB ax, ay, az, s, f1, f2
 
 ENDMACRO
 
@@ -37210,8 +37244,8 @@ ENDMACRO
 
 MACRO EDGE vertex1, vertex2, face1, face2, visibility
 
-  f = face1 + (face2 << 4)
-  EQUB visibility, f, vertex1 << 2, vertex2 << 2
+ f = face1 + (face2 << 4)
+ EQUB visibility, f, vertex1 << 2, vertex2 << 2
 
 ENDMACRO
 
@@ -37248,30 +37282,30 @@ ENDMACRO
 
 MACRO FACE normal_x, normal_y, normal_z, visibility
 
-  IF normal_x < 0
-    s_x = 1 << 7
-  ELSE
-    s_x = 0
-  ENDIF
+ IF normal_x < 0
+  s_x = 1 << 7
+ ELSE
+  s_x = 0
+ ENDIF
 
-  IF normal_y < 0
-    s_y = 1 << 6
-  ELSE
-    s_y = 0
-  ENDIF
+ IF normal_y < 0
+  s_y = 1 << 6
+ ELSE
+  s_y = 0
+ ENDIF
 
-  IF normal_z < 0
-    s_z = 1 << 5
-  ELSE
-    s_z = 0
-  ENDIF
+ IF normal_z < 0
+  s_z = 1 << 5
+ ELSE
+  s_z = 0
+ ENDIF
 
-  s = s_x + s_y + s_z + visibility
-  ax = ABS(normal_x)
-  ay = ABS(normal_y)
-  az = ABS(normal_z)
+ s = s_x + s_y + s_z + visibility
+ ax = ABS(normal_x)
+ ay = ABS(normal_y)
+ az = ABS(normal_z)
 
-  EQUB s, ax, ay, az
+ EQUB s, ax, ay, az
 
 ENDMACRO
 
@@ -38186,14 +38220,14 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-PRINT "S.T"
-PRINT "Assembled at ", ~CODE_SHIPS%
-PRINT "Ends at ", ~P%
-PRINT "Code size is ", ~(P% - CODE_SHIPS%)
-PRINT "Execute at ", ~LOAD%
-PRINT "Reload at ", ~LOAD_SHIPS%
+ PRINT "S.T"
+ PRINT "Assembled at ", ~CODE_SHIPS%
+ PRINT "Ends at ", ~P%
+ PRINT "Code size is ", ~(P% - CODE_SHIPS%)
+ PRINT "Execute at ", ~LOAD%
+ PRINT "Reload at ", ~LOAD_SHIPS%
 
-PRINT "S.S.T ", ~CODE_B%, " ", ~P%, " ", ~LOAD%, " ", ~LOAD_SHIPS%
+ PRINT "S.S.T ", ~CODE_B%, " ", ~P%, " ", ~LOAD%, " ", ~LOAD_SHIPS%
 \SAVE "versions/disc/3-assembled-output/S.T.bin", CODE_SHIPS%, P%, LOAD%
 
 \ ******************************************************************************
@@ -38202,5 +38236,5 @@ PRINT "S.S.T ", ~CODE_B%, " ", ~P%, " ", ~LOAD%, " ", ~LOAD_SHIPS%
 \
 \ ******************************************************************************
 
-PRINT "S.1.D ", ~CODE%, " ", ~P%, " ", ~LOAD%, " ", ~LOAD%
-SAVE "3-assembled-output/1.D.bin", CODE%, P%
+ PRINT "S.1.D ", ~CODE%, " ", ~P%, " ", ~LOAD%, " ", ~LOAD%
+ SAVE "3-assembled-output/1.D.bin", CODE%, P%

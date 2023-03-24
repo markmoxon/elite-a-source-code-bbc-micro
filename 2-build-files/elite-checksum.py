@@ -54,7 +54,7 @@ for i in range(CH, 0, -1):
     CH = CH % 256
     CH = CH ^ data_block[na_per_cent_offset + i + 8]
 
-print("Commander checksum = ", CH)
+print("Commander checksum = ", hex(CH))
 
 # Must have Commander checksum otherwise game will lock:
 

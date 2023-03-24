@@ -28,11 +28,11 @@
 \
 \ ******************************************************************************
 
-INCLUDE "1-source-files/main-sources/elite-build-options.asm"
+ INCLUDE "1-source-files/main-sources/elite-build-options.asm"
 
-_RELEASED               = (_VARIANT = 1)
-_SOURCE_DISC            = (_VARIANT = 2)
-_BUG_FIX                = (_VARIANT = 3)
+ _RELEASED              = (_VARIANT = 1)
+ _SOURCE_DISC           = (_VARIANT = 2)
+ _BUG_FIX               = (_VARIANT = 3)
 
 .readme
 
@@ -93,5 +93,5 @@ ENDIF
  EQUS "*| -----------------------------------"
  EQUB 13
 
-SAVE "3-assembled-output/!BOOT.txt", readme, P%
+ SAVE "3-assembled-output/!BOOT.txt", readme, P%
 
