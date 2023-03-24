@@ -31,13 +31,13 @@
 \
 \ ******************************************************************************
 
-INCLUDE "1-source-files/main-sources/elite-build-options.asm"
+ INCLUDE "1-source-files/main-sources/elite-build-options.asm"
 
-_RELEASED               = (_VARIANT = 1)
-_SOURCE_DISC            = (_VARIANT = 2)
-_BUG_FIX                = (_VARIANT = 3)
+ _RELEASED              = (_VARIANT = 1)
+ _SOURCE_DISC           = (_VARIANT = 2)
+ _BUG_FIX               = (_VARIANT = 3)
 
-GUARD &6000             \ Guard against assembling over screen memory
+ GUARD &6000            \ Guard against assembling over screen memory
 
 \ ******************************************************************************
 \
@@ -45,10 +45,10 @@ GUARD &6000             \ Guard against assembling over screen memory
 \
 \ ******************************************************************************
 
-CODE% = &7F00
-LOAD% = &2468
+ CODE% = &7F00
+ LOAD% = &2468
 
-ORG CODE%
+ ORG CODE%
 
 \ ******************************************************************************
 \
@@ -91,32 +91,32 @@ ORG CODE%
 
 MACRO VERTEX x, y, z, face1, face2, face3, face4, visibility
 
-  IF x < 0
-    s_x = 1 << 7
-  ELSE
-    s_x = 0
-  ENDIF
+ IF x < 0
+  s_x = 1 << 7
+ ELSE
+  s_x = 0
+ ENDIF
 
-  IF y < 0
-    s_y = 1 << 6
-  ELSE
-    s_y = 0
-  ENDIF
+ IF y < 0
+  s_y = 1 << 6
+ ELSE
+  s_y = 0
+ ENDIF
 
-  IF z < 0
-    s_z = 1 << 5
-  ELSE
-    s_z = 0
-  ENDIF
+ IF z < 0
+  s_z = 1 << 5
+ ELSE
+  s_z = 0
+ ENDIF
 
-  s = s_x + s_y + s_z + visibility
-  f1 = face1 + (face2 << 4)
-  f2 = face3 + (face4 << 4)
-  ax = ABS(x)
-  ay = ABS(y)
-  az = ABS(z)
+ s = s_x + s_y + s_z + visibility
+ f1 = face1 + (face2 << 4)
+ f2 = face3 + (face4 << 4)
+ ax = ABS(x)
+ ay = ABS(y)
+ az = ABS(z)
 
-  EQUB ax, ay, az, s, f1, f2
+ EQUB ax, ay, az, s, f1, f2
 
 ENDMACRO
 
@@ -155,8 +155,8 @@ ENDMACRO
 
 MACRO EDGE vertex1, vertex2, face1, face2, visibility
 
-  f = face1 + (face2 << 4)
-  EQUB visibility, f, vertex1 << 2, vertex2 << 2
+ f = face1 + (face2 << 4)
+ EQUB visibility, f, vertex1 << 2, vertex2 << 2
 
 ENDMACRO
 
@@ -193,30 +193,30 @@ ENDMACRO
 
 MACRO FACE normal_x, normal_y, normal_z, visibility
 
-  IF normal_x < 0
-    s_x = 1 << 7
-  ELSE
-    s_x = 0
-  ENDIF
+ IF normal_x < 0
+  s_x = 1 << 7
+ ELSE
+  s_x = 0
+ ENDIF
 
-  IF normal_y < 0
-    s_y = 1 << 6
-  ELSE
-    s_y = 0
-  ENDIF
+ IF normal_y < 0
+  s_y = 1 << 6
+ ELSE
+  s_y = 0
+ ENDIF
 
-  IF normal_z < 0
-    s_z = 1 << 5
-  ELSE
-    s_z = 0
-  ENDIF
+ IF normal_z < 0
+  s_z = 1 << 5
+ ELSE
+  s_z = 0
+ ENDIF
 
-  s = s_x + s_y + s_z + visibility
-  ax = ABS(normal_x)
-  ay = ABS(normal_y)
-  az = ABS(normal_z)
+ s = s_x + s_y + s_z + visibility
+ ax = ABS(normal_x)
+ ay = ABS(normal_y)
+ az = ABS(normal_z)
 
-  EQUB s, ax, ay, az
+ EQUB s, ax, ay, az
 
 ENDMACRO
 
@@ -358,12 +358,12 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-PRINT "MISSILE"
-PRINT "Assembled at ", ~CODE%
-PRINT "Ends at ", ~P%
-PRINT "Code size is ", ~(P% - CODE%)
-PRINT "Execute at ", ~LOAD%
-PRINT "Reload at ", ~LOAD%
+ PRINT "MISSILE"
+ PRINT "Assembled at ", ~CODE%
+ PRINT "Ends at ", ~P%
+ PRINT "Code size is ", ~(P% - CODE%)
+ PRINT "Execute at ", ~LOAD%
+ PRINT "Reload at ", ~LOAD%
 
-PRINT "S.MISSILE ",~CODE%," ",~P%," ",~LOAD%," ",~LOAD%
-SAVE "3-assembled-output/MISSILE.bin", CODE%, P%, LOAD%
+ PRINT "S.MISSILE ",~CODE%," ",~P%," ",~LOAD%," ",~LOAD%
+ SAVE "3-assembled-output/MISSILE.bin", CODE%, P%, LOAD%

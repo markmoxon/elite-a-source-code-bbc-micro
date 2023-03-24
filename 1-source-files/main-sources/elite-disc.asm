@@ -32,39 +32,39 @@
 \
 \ ******************************************************************************
 
-PUTFILE "3-assembled-output/!BOOT.txt", "!BOOT", &FFFFFF, &FFFFFF
+ PUTFILE "3-assembled-output/!BOOT.txt", "!BOOT", &FFFFFF, &FFFFFF
 
-PUTFILE "3-assembled-output/ELITE.bin", "ELITE", &FF1900, &FF197B
+ PUTFILE "3-assembled-output/ELITE.bin", "ELITE", &FF1900, &FF197B
 
-PUTFILE "3-assembled-output/1.D.bin", "1.D", &FF11E3, &FF11E3
-PUTFILE "3-assembled-output/1.E.bin", "1.E", &FF11E3, &FF11E3
-PUTFILE "3-assembled-output/1.F.bin", "1.F", &FF11E3, &FF11E3
+ PUTFILE "3-assembled-output/1.D.bin", "1.D", &FF11E3, &FF11E3
+ PUTFILE "3-assembled-output/1.E.bin", "1.E", &FF11E3, &FF11E3
+ PUTFILE "3-assembled-output/1.F.bin", "1.F", &FF11E3, &FF11E3
 
-PUTFILE "3-assembled-output/2.H.bin", "2.H", &FF1200, &FF1200
-PUTFILE "3-assembled-output/2.T.bin", "2.T", &001000, &002E93
+ PUTFILE "3-assembled-output/2.H.bin", "2.H", &FF1200, &FF1200
+ PUTFILE "3-assembled-output/2.T.bin", "2.T", &001000, &002E93
 
-PUTFILE "3-assembled-output/S.A.bin", "S.A", &FF5600, &FF5600
-PUTFILE "3-assembled-output/S.B.bin", "S.B", &FF5600, &FF5600
-PUTFILE "3-assembled-output/S.C.bin", "S.C", &FF5600, &FF5600
-PUTFILE "3-assembled-output/S.D.bin", "S.D", &FF5600, &FF5600
-PUTFILE "3-assembled-output/S.E.bin", "S.E", &FF5600, &FF5600
-PUTFILE "3-assembled-output/S.F.bin", "S.F", &FF5600, &FF5600
-PUTFILE "3-assembled-output/S.G.bin", "S.G", &FF5600, &FF5600
-PUTFILE "3-assembled-output/S.H.bin", "S.H", &FF5600, &FF5600
-PUTFILE "3-assembled-output/S.I.bin", "S.I", &FF5600, &FF5600
-PUTFILE "3-assembled-output/S.J.bin", "S.J", &FF5600, &FF5600
-PUTFILE "3-assembled-output/S.K.bin", "S.K", &FF5600, &FF5600
-PUTFILE "3-assembled-output/S.L.bin", "S.L", &FF5600, &FF5600
-PUTFILE "3-assembled-output/S.M.bin", "S.M", &FF5600, &FF5600
-PUTFILE "3-assembled-output/S.N.bin", "S.N", &FF5600, &FF5600
-PUTFILE "3-assembled-output/S.O.bin", "S.O", &FF5600, &FF5600
-PUTFILE "3-assembled-output/S.P.bin", "S.P", &FF5600, &FF5600
-PUTFILE "3-assembled-output/S.Q.bin", "S.Q", &FF5600, &FF5600
-PUTFILE "3-assembled-output/S.R.bin", "S.R", &FF5600, &FF5600
-PUTFILE "3-assembled-output/S.S.bin", "S.S", &FF5600, &FF5600
-PUTFILE "3-assembled-output/S.T.bin", "S.T", &FF5600, &FF5600
-PUTFILE "3-assembled-output/S.U.bin", "S.U", &FF5600, &FF5600
-PUTFILE "3-assembled-output/S.V.bin", "S.V", &FF5600, &FF5600
-PUTFILE "3-assembled-output/S.W.bin", "S.W", &FF5600, &FF5600
+ PUTFILE "3-assembled-output/S.A.bin", "S.A", &FF5600, &FF5600
+ PUTFILE "3-assembled-output/S.B.bin", "S.B", &FF5600, &FF5600
+ PUTFILE "3-assembled-output/S.C.bin", "S.C", &FF5600, &FF5600
+ PUTFILE "3-assembled-output/S.D.bin", "S.D", &FF5600, &FF5600
+ PUTFILE "3-assembled-output/S.E.bin", "S.E", &FF5600, &FF5600
+ PUTFILE "3-assembled-output/S.F.bin", "S.F", &FF5600, &FF5600
+ PUTFILE "3-assembled-output/S.G.bin", "S.G", &FF5600, &FF5600
+ PUTFILE "3-assembled-output/S.H.bin", "S.H", &FF5600, &FF5600
+ PUTFILE "3-assembled-output/S.I.bin", "S.I", &FF5600, &FF5600
+ PUTFILE "3-assembled-output/S.J.bin", "S.J", &FF5600, &FF5600
+ PUTFILE "3-assembled-output/S.K.bin", "S.K", &FF5600, &FF5600
+ PUTFILE "3-assembled-output/S.L.bin", "S.L", &FF5600, &FF5600
+ PUTFILE "3-assembled-output/S.M.bin", "S.M", &FF5600, &FF5600
+ PUTFILE "3-assembled-output/S.N.bin", "S.N", &FF5600, &FF5600
+ PUTFILE "3-assembled-output/S.O.bin", "S.O", &FF5600, &FF5600
+ PUTFILE "3-assembled-output/S.P.bin", "S.P", &FF5600, &FF5600
+ PUTFILE "3-assembled-output/S.Q.bin", "S.Q", &FF5600, &FF5600
+ PUTFILE "3-assembled-output/S.R.bin", "S.R", &FF5600, &FF5600
+ PUTFILE "3-assembled-output/S.S.bin", "S.S", &FF5600, &FF5600
+ PUTFILE "3-assembled-output/S.T.bin", "S.T", &FF5600, &FF5600
+ PUTFILE "3-assembled-output/S.U.bin", "S.U", &FF5600, &FF5600
+ PUTFILE "3-assembled-output/S.V.bin", "S.V", &FF5600, &FF5600
+ PUTFILE "3-assembled-output/S.W.bin", "S.W", &FF5600, &FF5600
 
-PUTFILE "1-source-files/basic-programs/B.CONVERT.bin", "B.CONVERT", &FF1900, &FF8023
+ PUTFILE "1-source-files/basic-programs/B.CONVERT.bin", "B.CONVERT", &FF1900, &FF8023
