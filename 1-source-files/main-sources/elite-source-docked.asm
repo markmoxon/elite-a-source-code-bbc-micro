@@ -2749,7 +2749,7 @@
 \ ******************************************************************************
 
                         \ --- Mod: Code moved for Elite-A: -------------------->
-\
+
 \.DETOK3
 \
 \ PHA                   \ Store A on the stack, so we can retrieve it later
@@ -2774,7 +2774,7 @@
 \                       \ the stack, returning from the subroutine using a tail
 \                       \ call (this BNE is effectively a JMP as A is never
 \                       \ zero)
-\
+
                         \ --- End of moved code ------------------------------->
 
 \ ******************************************************************************
