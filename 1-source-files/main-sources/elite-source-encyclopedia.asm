@@ -14687,6 +14687,10 @@
  LDA #128               \ Call OSBYTE with A = 128 to fetch the 16-bit value
  JSR OSBYTE             \ from ADC channel X, returning (Y X), i.e. the high
                         \ byte in Y and the low byte in X
+                        \
+                        \   * Channel 1 is the x-axis: 0 = right, 65520 = left
+                        \
+                        \   * Channel 2 is the y-axis: 0 = down,  65520 = up
 
  TYA                    \ Copy Y to A, so the result is now in (A X)
 
