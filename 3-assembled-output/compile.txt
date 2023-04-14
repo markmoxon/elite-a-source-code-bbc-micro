@@ -31878,7 +31878,7 @@ S.D.ELTE &329C  &3E38  &11E3  &329C
      4221   85 87      STA &87
      4223   A9 20      LDA #&20
      4225   4C 9C 40   JMP &409C
-.LSHIPS
+.LOMOD
      4228   A9 00      LDA #&00
      422A   85 9F      STA &9F
      422C   20 85 3E   JSR &3E85
@@ -96338,7 +96338,7 @@ S.2.ELTL &7F21  &8861  &1000  &7F21
      8BF8   85 A0      STA &A0
      8BFA   A9 20      LDA #&20
      8BFC   4C 13 8A   JMP &8A13
-.LSHIPS
+.LOMOD
      8BFF   A9 00      LDA #&00
      8C01   85 9F      STA &9F
 .SHIPinA

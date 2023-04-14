@@ -18329,7 +18329,7 @@
                         \ and set up data blocks and slots for the planet and
                         \ sun
 
- JSR LSHIPS             \ Call LSHIPS to load a new ship blueprints file
+ JSR LOMOD              \ Call LOMOD to load a new ship blueprints file
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
@@ -27287,7 +27287,7 @@
 
 .RSHIPS
 
- JSR LSHIPS             \ Call LSHIPS to load a new ship blueprints file
+ JSR LOMOD              \ Call LOMOD to load a new ship blueprints file
 
  JSR RESET              \ Call RESET to reset most variables
 
@@ -27305,7 +27305,7 @@
 
 \ ******************************************************************************
 \
-\       Name: LSHIPS
+\       Name: LOMOD
 \       Type: Subroutine
 \   Category: Loader
 \    Summary: Load a new ship blueprints file
@@ -27314,7 +27314,7 @@
 \
 \ ******************************************************************************
 
-.LSHIPS
+.LOMOD
 
                         \ --- Mod: Code added for Elite-A: -------------------->
 

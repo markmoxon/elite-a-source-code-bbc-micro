@@ -46135,7 +46135,7 @@ ENDIF
                         \ and set up data blocks and slots for the planet and
                         \ sun
 
- JSR LSHIPS             \ Call LSHIPS to populate the ship blueprints table
+ JSR LOMOD              \ Call LOMOD to populate the ship blueprints table
                         \ with a random selection of ships
 
  LDA QQ11               \ If the current view in QQ11 is not a space view (0) or
@@ -51557,7 +51557,7 @@ ENDIF
 
 .RSHIPS
 
- JSR LSHIPS             \ Call LSHIPS to populate the ship blueprints table
+ JSR LOMOD              \ Call LOMOD to populate the ship blueprints table
                         \ with a random selection of ships
 
  JSR RESET              \ Call RESET to reset most variables
@@ -51579,7 +51579,7 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: LSHIPS
+\       Name: LOMOD
 \       Type: Subroutine
 \   Category: Universe
 \    Summary: Populate the ship blueprints table at XX21 with a random selection
@@ -51595,7 +51595,7 @@ ENDIF
 \
 \ ******************************************************************************
 
-.LSHIPS
+.LOMOD
 
  LDA #0                 \ Set finder to 0, so the compass shows the planet
  STA finder
@@ -58705,12 +58705,12 @@ ENDIF
 \ ------------------------------------------------------------------------------
 \
 \ This table contains ship data that's used when populating the ship blueprint
-\ positions in LSHIPS, and installing a ship into a blueprint position in
+\ positions in LOMOD, and installing a ship into a blueprint position in
 \ install_ship.
 \
 \ Each ship type has four associated bytes, but only the first two are used:
 \
-\   * Byte #0 is used in LSHIPS when populating the ship blueprint positions. It
+\   * Byte #0 is used in LOMOD when populating the ship blueprint positions. It
 \     is the probability (out of 256) of installing this ship into one of the
 \     positions in which it is allowed. So, if the figure is 100 (as it is for
 \     the Mamba and Sidewinder), then the chance of us adding this ship to a
