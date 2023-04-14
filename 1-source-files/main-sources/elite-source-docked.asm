@@ -2269,7 +2269,7 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ JSR scramble          \ Decrypt the main docked code between &1300 and &5FFF
+\ JSR DEEOR             \ Decrypt the main docked code between &1300 and &5FFF
 
                         \ --- And replaced by: -------------------------------->
 
@@ -2283,7 +2283,7 @@
 
 \ ******************************************************************************
 \
-\       Name: scramble, Removed
+\       Name: DEEOR, Removed
 \       Type: Subroutine
 \   Category: Loader
 \    Summary: Decrypt the main docked code between &1300 and &5FFF and
@@ -2293,7 +2293,7 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\.scramble
+\.DEEOR
 \
 \ LDY #0                \ We're going to work our way through a large number of
 \                       \ encrypted bytes, so we set Y to 0 to be the index of
@@ -2305,7 +2305,7 @@
 \                       \ byte, so we start the decryption with the first byte
 \                       \ of page &13
 \
-\.scrl
+\.DEEORL
 \
 \ STX SCH               \ Set the high byte of SC(1 0) to X, so SC(1 0) now
 \                       \ points to the first byte of page X
@@ -2327,13 +2327,13 @@
 \
 \ DEY                   \ Decrement the index in Y to point to the next byte
 \
-\ BNE scrl              \ Loop back to scrl to decrypt the next byte until we
+\ BNE DEEORL            \ Loop back to DEEORL to decrypt the next byte until we
 \                       \ have done the whole page
 \
 \ INX                   \ Increment X to point to the next page in memory
 \
-\ CPX #&60              \ Loop back to scrl to decrypt the next page until we
-\ BNE scrl              \ reach the start of page &60
+\ CPX #&60              \ Loop back to DEEORL to decrypt the next page until we
+\ BNE DEEORL            \ reach the start of page &60
 \
 \ JMP BRKBK             \ Call BRKBK to set BRKV to point to the BRBR routine
 \                       \ and return from the subroutine using a tail call
@@ -2361,7 +2361,7 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ JSR scramble          \ Decrypt the newly loaded code
+\ JSR DEEOR             \ Decrypt the newly loaded code
 
                         \ --- And replaced by: -------------------------------->
 
@@ -2555,7 +2555,7 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ JSR scramble          \ Decrypt the main docked code between &1300 and &5FFF
+\ JSR DEEOR             \ Decrypt the main docked code between &1300 and &5FFF
 \
 \ JSR RES2              \ Reset a number of flight variables and workspaces
 \
