@@ -646,9 +646,29 @@
 
  SKIP 1                 \ Temporary storage, used in a number of places
 
-.XX14
+                        \ --- Mod: Code removed for flicker-free ships: ------->
 
- SKIP 1                 \ This byte appears to be unused
+\.XX14
+\
+\SKIP 1                 \ This byte appears to be unused
+
+                        \ --- And replaced by: -------------------------------->
+
+.LSNUM
+
+ SKIP 1                 \ The pointer to the current position in the ship line
+                        \ heap as we work our way through the new ship's edges
+                        \ (and the corresponding old ship's edges) when drawing
+                        \ the ship in the main ship-drawing routine at LL9
+
+.LSNUM2
+
+ SKIP 0                 \ The size of the existing ship line heap for the ship
+                        \ we are drawing in LL9, i.e. the number of lines in the
+                        \ old ship that is currently shown on-screen and which
+                        \ we need to erase
+
+                        \ --- End of replacement ------------------------------>
 
 .RAT
 
@@ -15732,7 +15752,7 @@
  STA X2                 \ Store the x-coordinate of the ship dot in X1, as this
                         \ is where the dash starts
 
- JMP LLX30              \ Draw this edge using smooth animation, by first
+ JMP LSPUT              \ Draw this edge using smooth animation, by first
                         \ drawing the ship's new line and then erasing the
                         \ corresponding old line from the screen, and return
                         \ from the subroutine using a tail call
@@ -16183,15 +16203,15 @@
                         \ We now set things up for smooth ship plotting, by
                         \ setting the following:
                         \
-                        \   XX14 = offset to the first coordinate in the ship's
-                        \          line heap
+                        \   LSNUM = offset to the first coordinate in the ship's
+                        \           line heap
                         \
-                        \   XX14+1 = the number of bytes in the heap for the
+                        \   LSNUM2 = the number of bytes in the heap for the
                         \            ship that's currently on-screen (or 0 if
                         \            there is no ship currently on-screen)
 
- LDY #1                 \ Set XX14 = 1, the offset of the first set of line
- STY XX14               \ coordinates in the ship line heap
+ LDY #1                 \ Set LSNUM = 1, the offset of the first set of line
+ STY LSNUM              \ coordinates in the ship line heap
 
  DEY                    \ Decrement Y to 0
 
@@ -16200,7 +16220,7 @@
  BNE P%+5               \ following two instructions
 
  LDA #0                 \ The ship is not being drawn on screen, so set A = 0
-                        \ so that XX14+1 gets set to 0 below (as there are no
+                        \ so that LSNUM2 gets set to 0 below (as there are no
                         \ existing coordinates on the ship line heap for this
                         \ ship)
  
@@ -16208,8 +16228,8 @@
                         \ &2C &B1 &BD, or BIT &BDB1 which does nothing apart
                         \ from affect the flags
 
- LDA (XX19),Y           \ Set XX14+1 to the first byte of the ship's line heap,
- STA XX14+1             \ which contains the number of bytes in the heap
+ LDA (XX19),Y           \ Set LSNUM2 to the first byte of the ship's line heap,
+ STA LSNUM2             \ which contains the number of bytes in the heap
 
                         \ --- End of added code ------------------------------->
 
@@ -18154,7 +18174,7 @@
 
                         \ --- And replaced by: -------------------------------->
 
- JSR LLX30              \ Draw the laser line using smooth animation, by first
+ JSR LSPUT              \ Draw the laser line using smooth animation, by first
                         \ drawing the new laser line and then erasing the
                         \ corresponding old line from the screen
 
@@ -18361,7 +18381,7 @@
                         \ screen, so jump to LL78 so we don't store this line
                         \ in the ship line heap
 
- JSR LLX30              \ Draw this edge using smooth animation, by first
+ JSR LSPUT              \ Draw this edge using smooth animation, by first
                         \ drawing the ship's new line and then erasing the
                         \ corresponding old line from the screen
 
@@ -18439,11 +18459,11 @@
 
 .LL78
 
- LDA XX14               \ If XX14 >= CNT, skip to LL81 so we don't loop back for
- CMP CNT                \ the next edge (CNT was set to the maximum heap size
- BCS LL81               \ for this ship in part 10, so this checks whether we
-                        \ have just run out of space in the ship line heap, and
-                        \ stops drawing edges if we have)
+ LDA LSNUM              \ If LSNUM >= CNT, skip to LL81 so we don't loop back
+ CMP CNT                \ for the next edge (CNT was set to the maximum heap
+ BCS LL81               \ size for this ship in part 10, so this checks whether
+                        \ we have just run out of space in the ship line heap,
+                        \ and stops drawing edges if we have)
 
  LDA V                  \ Increment V by 4 so V(1 0) points to the data for the
  CLC                    \ next edge
@@ -19131,17 +19151,17 @@
 
 .LL155
 
- LDY XX14               \ Set Y to the offset in the line heap XX14
+ LDY LSNUM              \ Set Y to the offset in the line heap LSNUM
 
 .LL27
 
- CPY XX14+1             \ If Y >= XX14+1, jump to LLEX to return from the ship
+ CPY LSNUM2             \ If Y >= LSNUM2, jump to LLEX to return from the ship
  BCS LLEX               \ drawing routine, because the index in Y is greater
                         \ than the size of the existing ship line heap, which
                         \ means we have alrady erased all the old ships lines
                         \ when drawing the new ship
 
-                        \ If we get here then Y < XX14+1, which means Y is
+                        \ If we get here then Y < LSNUM2, which means Y is
                         \ pointing to an on-screen line from the old ship that
                         \ we need to erase
 
@@ -19186,7 +19206,7 @@
 
 .LLEX
 
- LDA XX14               \ Store XX14 in the first byte of the ship line heap
+ LDA LSNUM              \ Store LSNUM in the first byte of the ship line heap
  LDY #0
  STA (XX19),Y
 
@@ -19198,7 +19218,7 @@
 
 \ ******************************************************************************
 \
-\       Name: LLX30
+\       Name: LSPUT
 \       Type: Subroutine
 \   Category: Drawing lines
 \    Summary: Draw a ship line using smooth animation, by drawing the ship's new
@@ -19214,13 +19234,16 @@
 \ Here's the new approach in this routine:
 \
 \   * Draw the new line
-\   * Fetch the corresponding existing line (in position XX14) from the heap
+\
+\   * Fetch the corresponding existing line (in position LSNUM) from the heap
+\
 \   * Store the new line in the heap at this position, replacing the old one
+\
 \   * If the existing line we just took from the heap is on-screen, erase it
 \
 \ Arguments:
 \
-\   XX14                The offset within the line heap where we add the new
+\   LSNUM               The offset within the line heap where we add the new
 \                       line's coordinates
 \
 \   X1                  The screen x-coordinate of the start of the line to add
@@ -19240,18 +19263,18 @@
 \
 \ Returns:
 \
-\   XX14                The offset of the next line in the line heap
+\   LSNUM               The offset of the next line in the line heap
 \
 \ ******************************************************************************
 
                         \ --- Mod: Code added for flicker-free ships: --------->
 
-.LLX30
+.LSPUT
 
- LDY XX14               \ Set Y = XX14, to get the offset within the ship line
+ LDY LSNUM              \ Set Y = LSNUM, to get the offset within the ship line
                         \ heap where we want to insert our new line
 
- CPY XX14+1             \ Compare XX14 and XX14+1 and store the flags on the
+ CPY LSNUM2             \ Compare LSNUM and LSNUM2 and store the flags on the
  PHP                    \ stack so we can retrieve them later
 
  LDX #3                 \ We now want to copy the line coordinates (X1, Y1) and
@@ -19300,13 +19323,13 @@
  STA (XX19),Y
 
  INY                    \ Increment the index to point to the next coordinate
- STY XX14               \ and store the updated index in XX14
+ STY LSNUM              \ and store the updated index in LSNUM
 
  PLP                    \ Restore the result of the comparison above, so if the
- BCS LL82               \ original value of XX14 >= XX14+1, then we have already
-                        \ redrawn all the lines from the old ship's line heap,
-                        \ so return from the subroutine (as LL82 contains an
-                        \ RTS)
+ BCS LL82               \ original value of LSNUM >= LSNUM2, then we have
+                        \ alreadyredrawn all the lines from the old ship's line
+                        \ heap, so return from the subroutine (as LL82 contains
+                        \ an RTS)
 
  JMP LL30               \ Otherwise there are still more lines to erase from the
                         \ old ship on-screen, so the coordinates in (X1, Y1) and

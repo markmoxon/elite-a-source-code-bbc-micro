@@ -3150,8 +3150,10 @@ Saving file '3-assembled-output/MISSILE.bin'
      0096
 .XX20
      0097
-.XX14
+.LSNUM
      0098
+.LSNUM2
+     0099
 .RAT
      0099
 .RAT2
@@ -10442,7 +10444,7 @@ S.T.ELTF &327F  &3A24  &11E3  &327F
      4201   91 67      STA (&67),Y
 .LL82
      4203   60         RTS
-.LLX30
+.LSPUT
      4204   A4 98      LDY &98
      4206   C4 99      CPY &99
      4208   08         PHP
@@ -24710,8 +24712,10 @@ Saving file '3-assembled-output/1.D.bin'
      0096
 .XX20
      0097
-.XX14
+.LSNUM
      0098
+.LSNUM2
+     0099
 .RAT
      0099
 .RAT2
@@ -33834,7 +33838,7 @@ S.D.ELTF &3E2D  &474C  &11E3  &3E2D
      4F3B   91 67      STA (&67),Y
 .LL82
      4F3D   60         RTS
-.LLX30
+.LSPUT
      4F3E   A4 98      LDY &98
      4F40   C4 99      CPY &99
      4F42   08         PHP
@@ -34923,8 +34927,10 @@ Saving file '3-assembled-output/1.F.bin'
      0096
 .XX20
      0097
-.XX14
+.LSNUM
      0098
+.LSNUM2
+     0099
 .RAT
      0099
 .RAT2
@@ -40142,7 +40148,7 @@ S.F.ELTF &26D3  &2B1D  &11E3  &26D3
      32FA   91 67      STA (&67),Y
 .LL82
      32FC   60         RTS
-.LLX30
+.LSPUT
      32FD   A4 98      LDY &98
      32FF   C4 99      CPY &99
      3301   08         PHP
@@ -57883,8 +57889,10 @@ Saving file '3-assembled-output/1.E.bin'
      0096
 .XX20
      0097
-.XX14
+.LSNUM
      0098
+.LSNUM2
+     0099
 .RAT
      0099
 .RAT2
@@ -64552,7 +64560,7 @@ S.2.ELTF &2D8A  &3462  &1000  &2D8A
      3C4A   91 67      STA (&67),Y
 .LL82
      3C4C   60         RTS
-.LLX30
+.LSPUT
      3C4D   A4 98      LDY &98
      3C4F   C4 99      CPY &99
      3C51   08         PHP
