@@ -11931,7 +11931,7 @@
 
  INC MANY,X             \ Increment the total number of ships of type X
 
- LDY #(NI%-1)           \ The final step is to copy the new ship's data block
+ LDY #NI%-1             \ The final step is to copy the new ship's data block
                         \ from INWK to INF, so set up a counter for NI% bytes
                         \ in Y
 
