@@ -1714,6 +1714,7 @@
 \       Type: Subroutine
 \   Category: Drawing lines
 \    Summary: Implement the draw_hline command (draw a horizontal line
+\  Deep dive: Drawing monochrome pixels in mode 4
 \
 \ ------------------------------------------------------------------------------
 \
