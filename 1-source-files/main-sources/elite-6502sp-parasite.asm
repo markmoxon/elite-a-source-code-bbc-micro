@@ -6550,9 +6550,6 @@ ENDIF
 \
 \   C flag              The C flag is cleared
 \
-\ Other entry points:
-\
-\
 \ ******************************************************************************
 
 .CHPR
