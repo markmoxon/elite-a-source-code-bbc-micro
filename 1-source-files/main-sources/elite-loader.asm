@@ -1233,10 +1233,10 @@ ENDMACRO
 
 \ ******************************************************************************
 \
-\       Name: PLL1
+\       Name: PLL1 (Part 1 of 3)
 \       Type: Subroutine
 \   Category: Drawing planets
-\    Summary: Draw Saturn on the loading screen
+\    Summary: Draw Saturn on the loading screen (draw the planet)
 \  Deep dive: Drawing Saturn on the loading screen
 \
 \ ******************************************************************************
@@ -1371,6 +1371,16 @@ ENDMACRO
 
  BNE PLL1               \ Loop back to PLL1 until CNT+1 = 0
 
+\ ******************************************************************************
+\
+\       Name: PLL1 (Part 2 of 3)
+\       Type: Subroutine
+\   Category: Drawing planets
+\    Summary: Draw Saturn on the loading screen (draw the stars)
+\  Deep dive: Drawing Saturn on the loading screen
+\
+\ ******************************************************************************
+
                         \ The following loop iterates CNT2(1 0) times, i.e. &1DD
                         \ or 477 times, and draws the background stars on the
                         \ loading screen
@@ -1426,6 +1436,16 @@ ENDMACRO
  DEC CNT2+1             \ Decrement the counter in CNT2+1 (the high byte)
 
  BNE PLL2               \ Loop back to PLL2 until CNT2+1 = 0
+
+\ ******************************************************************************
+\
+\       Name: PLL1 (Part 3 of 3)
+\       Type: Subroutine
+\   Category: Drawing planets
+\    Summary: Draw Saturn on the loading screen (draw the rings)
+\  Deep dive: Drawing Saturn on the loading screen
+\
+\ ******************************************************************************
 
                         \ The following loop iterates CNT3(1 0) times, i.e. &333
                         \ or 819 times, and draws the rings around the loading
