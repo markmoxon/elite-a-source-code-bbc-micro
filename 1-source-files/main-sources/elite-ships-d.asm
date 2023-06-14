@@ -116,12 +116,12 @@
  EQUB 0
  EQUB 0
  EQUB 0
- EQUB %10100000         \ Boa                        I       nnocent, escape pod
+ EQUB %10100000         \ Boa                               Innocent, escape pod
  EQUB 0
  EQUB 0
  EQUB %00100001         \ Dragon                                Trader, innocent
  EQUB %00001100         \ Sidewinder                             Hostile, pirate
- EQUB %11000010         \ Viper              Bounty hunter, cop, escape pod
+ EQUB %11000010         \ Viper                   Bounty hunter, cop, escape pod
  EQUB %00001100         \ Sidewinder                             Hostile, pirate
  EQUB %00001100         \ Sidewinder                             Hostile, pirate
  EQUB %10000100         \ Gecko                              Hostile, escape pod
@@ -154,7 +154,7 @@
 \
 \ See the deep dive on "Ship blueprints" for details of how vertices are stored
 \ in the ship blueprints, and the deep dive on "Drawing ships" for information
-\ on how vertices are used to draw 3D wiremesh ships.
+\ on how vertices are used to draw 3D wireframe ships.
 \
 \ Arguments:
 \
@@ -224,7 +224,7 @@ ENDMACRO
 \
 \ See the deep dive on "Ship blueprints" for details of how edges are stored
 \ in the ship blueprints, and the deep dive on "Drawing ships" for information
-\ on how edges are used to draw 3D wiremesh ships.
+\ on how edges are used to draw 3D wireframe ships.
 \
 \ Arguments:
 \
@@ -264,7 +264,7 @@ ENDMACRO
 \
 \ See the deep dive on "Ship blueprints" for details of how faces are stored
 \ in the ship blueprints, and the deep dive on "Drawing ships" for information
-\ on how faces are used to draw 3D wiremesh ships.
+\ on how faces are used to draw 3D wireframe ships.
 \
 \ Arguments:
 \

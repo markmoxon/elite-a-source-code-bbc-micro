@@ -1106,10 +1106,10 @@
                         \ This value is shown in the dashboard's RL indicator,
                         \ and determines the rate at which we are rolling
                         \
-                        \ The value ranges from from 1 to 255 with 128 as the
-                        \ centre point, so 1 means roll is decreasing at the
-                        \ maximum rate, 128 means roll is not changing, and
-                        \ 255 means roll is increasing at the maximum rate
+                        \ The value ranges from 1 to 255 with 128 as the centre
+                        \ point, so 1 means roll is decreasing at the maximum
+                        \ rate, 128 means roll is not changing, and 255 means
+                        \ roll is increasing at the maximum rate
                         \
                         \ This value is updated by "<" and ">" key presses, or
                         \ if joysticks are enabled, from the joystick. If
@@ -1125,10 +1125,10 @@
                         \ This value is shown in the dashboard's DC indicator,
                         \ and determines the rate at which we are pitching
                         \
-                        \ The value ranges from from 1 to 255 with 128 as the
-                        \ centre point, so 1 means pitch is decreasing at the
-                        \ maximum rate, 128 means pitch is not changing, and
-                        \ 255 means pitch is increasing at the maximum rate
+                        \ The value ranges from 1 to 255 with 128 as the centre
+                        \ point, so 1 means pitch is decreasing at the maximum
+                        \ rate, 128 means pitch is not changing, and 255 means
+                        \ pitch is increasing at the maximum rate
                         \
                         \ This value is updated by "S" and "X" key presses, or
                         \ if joysticks are enabled, from the joystick. If
@@ -1643,7 +1643,7 @@
  SKIP 2                 \ The distance from the current system to the selected
                         \ system in light years * 10, stored as a 16-bit number
                         \
-                        \ The distance will be 0 if the selected sysyem is the
+                        \ The distance will be 0 if the selected system is the
                         \ current system
                         \
                         \ The galaxy chart is 102.4 light years wide and 51.2
@@ -1786,7 +1786,7 @@
                         \   * 128 = Delta 14B joystick
                         \
                         \ Elite-A doesn't support the Bitstik, but instead it
-                        \ supports the multi-button Volmace Delta 14B joystick,
+                        \ supports the multi-button Voltmace Delta 14B joystick,
                         \ reusing the BSTK variable to determine whether it is
                         \ configured
 
@@ -4151,7 +4151,7 @@
 
 .LL30
 
- SKIP 0                 \ LL30 is a synomym for LOIN
+ SKIP 0                 \ LL30 is a synonym for LOIN
                         \
                         \ In the cassette and disc versions of Elite, LL30 and
                         \ LOIN are synonyms for the same routine, presumably
@@ -4391,7 +4391,7 @@
                         \ line that goes right and up or left and down joins a
                         \ line with any of the other three types of slope
                         \
-                        \ This bug was fixed in the advanced versions of ELite,
+                        \ This bug was fixed in the advanced versions of Elite,
                         \ where the BNE is replaced by a BEQ to bring it in line
                         \ with the other three slopes
 
@@ -5107,11 +5107,11 @@
 .HL1
 
  TXA                    \ Set T = bits 3-7 of X1, which will contain the
- AND #%11111000         \ the character number of the start of the line * 8
+ AND #%11111000         \ character number of the start of the line * 8
  STA T
 
  LDA X2                 \ Set A = bits 3-7 of X2, which will contain the
- AND #%11111000         \ the character number of the end of the line * 8
+ AND #%11111000         \ character number of the end of the line * 8
 
  SEC                    \ Set A = A - T, which will contain the number of
  SBC T                  \ character blocks we need to fill - 1 * 8
@@ -6203,7 +6203,7 @@
 \ DTW4.
 \
 \ The flag is set to %11000000 (justify text, buffer entire token) by routine
-\ MESS, which printe in-flight messages.
+\ MESS, which prints in-flight messages.
 \
 \ The flag is set to %00000000 (do not justify text, print buffer on carriage
 \ return) by jump token 15, {left align}, which calls routine MT1 to change the
@@ -6474,7 +6474,7 @@
                         \ DA6+3 to print a newline
 
  CPX #(LL+1)            \ If X < LL+1, i.e. X <= LL, then the buffer contains
- BCC DA6                \ fewer than LL characters, which is less then a line
+ BCC DA6                \ fewer than LL characters, which is less than a line
                         \ length, so jump down to DA6 to print the contents of
                         \ BUF followed by a newline, as we don't justify the
                         \ last line of the paragraph
@@ -7154,7 +7154,7 @@
  JSR TT20               \ We want to move on to the next system, so call TT20
                         \ to twist the three 16-bit seeds in QQ15
 
- INC XX20               \ Incrememt the system counter in XX20
+ INC XX20               \ Increment the system counter in XX20
 
  BNE HME3               \ If we haven't yet checked all 256 systems in the
                         \ current galaxy, loop back to HME3 to check the next
@@ -7691,7 +7691,7 @@
 
  ORA T                  \ If argument A was negative (and therefore S was also
                         \ negative) then make sure result A is negative by
-                        \ OR-ing the result with the sign bit from argument A
+                        \ OR'ing the result with the sign bit from argument A
                         \ (which we stored in T)
 
  RTS                    \ Return from the subroutine
@@ -7718,9 +7718,8 @@
 
                         \ At this point we have |A P| - |S R| in (A X), so we
                         \ need to check whether the subtraction above was the
-                        \ the right way round (i.e. that we subtracted the
-                        \ smaller absolute value from the larger absolute
-                        \ value)
+                        \ right way round (i.e. that we subtracted the smaller
+                        \ absolute value from the larger absolute value)
 
  BCS MU9                \ If |A| >= |S|, our subtraction was the right way
                         \ round, so jump to MU9 to set the sign
@@ -7741,7 +7740,7 @@
                         \ the correct addition)
 
  LDA #0                 \ Set A = 0 - A, which we can do this time using a
- SBC U                  \ a subtraction with the C flag clear
+ SBC U                  \ subtraction with the C flag clear
 
  ORA #%10000000         \ We now set the sign bit of A, so that the EOR on the
                         \ next line will give the result the opposite sign to
@@ -7898,7 +7897,7 @@
 \                       \ RUPLA-1 because Y is looping from 26 to 1
 \
 \ CMP ZZ                \ If A doesn't match the system whose description we
-\ BNE PD2               \ are printing (in ZZ), junp to PD2 to keep looping
+\ BNE PD2               \ are printing (in ZZ), jump to PD2 to keep looping
 \                       \ through the system numbers in RUPLA
 \
 \                       \ If we get here we have found a match for this system
@@ -10649,7 +10648,7 @@
 
 .cpl
 
- LDX #5                 \ First we need to backup the seeds in QQ15, so set up
+ LDX #5                 \ First we need to back up the seeds in QQ15, so set up
                         \ a counter in X to cover three 16-bit seeds (i.e.
                         \ 6 bytes)
 
@@ -10660,7 +10659,7 @@
 
  DEX                    \ Decrement the loop counter
 
- BPL TT53               \ Loop back for the next byte to backup
+ BPL TT53               \ Loop back for the next byte to back up
 
  LDY #3                 \ Step 1: Now that the seeds are backed up, we can
                         \ start the name-generation process. We will either
@@ -11129,7 +11128,7 @@
                         \ character's case
 
  ADC #32                \ Add 32 to the character, to convert it from upper to
-                        \ to lower case
+                        \ lower case
 
 .TT44
 
@@ -11148,7 +11147,7 @@
 \
 \   * If QQ17 bit 6 is set, print lower case (via TT45)
 \
-\   * If QQ17 bit 6 clear, then:
+\   * If QQ17 bit 6 is clear, then:
 \
 \       * If character is punctuation, just print it
 \
@@ -12068,7 +12067,7 @@
  BNE PLF2               \ the bottom of the screen, so skip to PLF2 with A = 191
 
  CMP P+1                \ If A < P+1, the maximum y-coordinate is underneath the
- BCC PLF2               \ the dashboard, so skip to PLF2 with A = 191
+ BCC PLF2               \ dashboard, so skip to PLF2 with A = 191
 
  LDA P+1                \ Set A = P+1, the low byte of the maximum y-coordinate
                         \ of the sun on-screen
@@ -14213,7 +14212,7 @@
 \ Arguments:
 \
 \   Y                   The offset from (X SC) where we start zeroing, counting
-\                       up to to &FF
+\                       up to &FF
 \
 \   SC                  The low byte (i.e. the offset into the page) of the
 \                       starting point of the zero-fill
@@ -18287,7 +18286,7 @@
                         \ otherwise it is 0
 
  LDA XX15+1             \ If one or both of x1_hi and y1_hi are non-zero, jump
- ORA XX15+3             \ jump to LL83
+ ORA XX15+3             \ to LL83
  BNE LL83
 
  LDA #Y*2-1             \ If y1_lo > the y-coordinate of the bottom of screen
@@ -19472,7 +19471,7 @@
 \
 \ ------------------------------------------------------------------------------
 \
-\ Agruments:
+\ Arguments:
 \
 \   A                   The menu to show:
 \
@@ -19520,8 +19519,8 @@
                         \ A = 1, so jump to ship_over as the choice number is
                         \ already correct (i.e. 0 for Adder to 13 for Ghavial)
 
- ADC menu_entry+1       \ We just showed the the second menu, so the choice
-                        \ number is currently:
+ ADC menu_entry+1       \ We just showed the second menu, so the choice number
+                        \ is currently:
                         \
                         \   * 0 for Iguana to 13 for Worm
                         \
@@ -19575,7 +19574,7 @@
 
 .ship_skip
 
- LDX TYPE               \ Set A to the cards's title x-coordinate (fetched from
+ LDX TYPE               \ Set A to the card's title x-coordinate (fetched from
  LDA ship_centre,X      \ the ship_centre table)
 
  STA XC                 \ Move the text cursor to the correct column for the
@@ -20012,14 +20011,14 @@
                         \ call DTS to print it in the correct case
 
  JMP card_loop          \ Jump back to card_loop to print the next token in the
-                        \ the ship data
+                        \ ship data
 
 .card_macro
 
  JSR DT3                \ Call DT3 to print the jump token given in A
 
  JMP card_loop          \ Jump back to card_loop to print the next token in the
-                        \ the ship data
+                        \ ship data
 
 .card_msg
 
@@ -20035,14 +20034,14 @@
  JSR write_msg3         \ Print the extended token in A
 
  JMP card_loop          \ Jump back to card_loop to print the next token in the
-                        \ the ship data
+                        \ ship data
 
 .card_pairs
 
  JSR msg_pairs          \ Print the extended two-letter token in A
 
  JMP card_loop          \ Jump back to card_loop to print the next token in the
-                        \ the ship data
+                        \ ship data
 
 .card_end
 
@@ -28457,7 +28456,7 @@ ENDIF
  CTOK 49
  EQUB 0
 
-\EQUB 0, 9              \ This data is commented out in the orginal source
+\EQUB 0, 9              \ This data is commented out in the original source
 \EQUA "3|!R"
 
  EQUB 10                \ 10: Drive motors:   "DE{single cap}LACY SPIN{single

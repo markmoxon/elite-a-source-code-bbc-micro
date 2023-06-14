@@ -411,7 +411,7 @@
 
  LDA tube_table,Y       \ Copy the Y-th address from tube_table over the &FFFF
  STA tube_jump+1        \ address of the JMP instruction below, so this modifies
- LDA tube_table+1,Y     \ the instruction so that it jumps to the coresponding
+ LDA tube_table+1,Y     \ the instruction so that it jumps to the corresponding
  STA tube_jump+2        \ address from the lookup table
 
 .tube_jump
@@ -663,7 +663,7 @@
                         \ contents, then it's reversible (so reprinting the
                         \ same character in the same place will revert the
                         \ screen to what it looked like before we printed
-                        \ anything); this means that printing a white pixel on
+                        \ anything); this means that printing a white pixel
                         \ onto a white background results in a black pixel, but
                         \ that's a small price to pay for easily erasable text
 
@@ -987,7 +987,7 @@
 
 .LL30
 
- SKIP 0                 \ LL30 is a synomym for LOIN
+ SKIP 0                 \ LL30 is a synonym for LOIN
                         \
                         \ In the cassette and disc versions of Elite, LL30 and
                         \ LOIN are synonyms for the same routine, presumably
@@ -1238,7 +1238,7 @@
                         \ line that goes right and up or left and down joins a
                         \ line with any of the other three types of slope
                         \
-                        \ This bug was fixed in the advanced versions of ELite,
+                        \ This bug was fixed in the advanced versions of Elite,
                         \ where the BNE is replaced by a BEQ to bring it in line
                         \ with the other three slopes
 
@@ -1795,11 +1795,11 @@
 .HL1
 
  TXA                    \ Set T = bits 3-7 of X1, which will contain the
- AND #%11111000         \ the character number of the start of the line * 8
+ AND #%11111000         \ character number of the start of the line * 8
  STA T
 
  LDA X2                 \ Set A = bits 3-7 of X2, which will contain the
- AND #%11111000         \ the character number of the end of the line * 8
+ AND #%11111000         \ character number of the end of the line * 8
 
  SEC                    \ Set A = A - T, which will contain the number of
  SBC T                  \ character blocks we need to fill - 1 * 8
@@ -2799,7 +2799,7 @@
 
  JSR tube_get           \ Get the parameter from the parasite for the command:
  TAX                    \
-                        \ =scan_xin(key_number)
+                        \   =scan_xin(key_number)
                         \
                         \ and store it as follows:
                         \
@@ -3178,7 +3178,7 @@
                         \ along (as there are 8 bytes in a character block).
                         \ The C flag was cleared above, so this ADC is correct
 
- LDA CTWOS+1,X          \ Refetch the mode 5 1-pixel byte, as we just overwrote
+ LDA CTWOS+1,X          \ Re-fetch the mode 5 1-pixel byte, as we just overwrote
                         \ A (the byte will still be the fifth byte from the
                         \ table, which is correct as we want to draw the
                         \ leftmost pixel in the next character along as the
@@ -3868,7 +3868,7 @@
                         \ which will indicate the button is being pressed. If
                         \ any other button is being pressed, or no buttons at
                         \ all, then the result will be non-zero and we move on
-                        \ to the next buttton
+                        \ to the next button
 
  TXA                    \ Restore the original value of A that we stored in X
 
@@ -4055,7 +4055,7 @@
  LDA #%00000100         \ Now to draw the same line but from the right edge of
                         \ the screen, so set a pixel mask in A to check the
                         \ sixth pixel of the last byte, so we skip the 2-pixel
-                        \ scren border at the right edge of the screen
+                        \ screen border at the right edge of the screen
 
  LDY #248               \ Set Y = 248 so the call to HAS3 starts drawing the
                         \ line in the last byte of the screen row, at the right
@@ -4537,7 +4537,7 @@
  ADC #8                 \ starting with the low byte in SC
  STA SC
 
- BNE print_outer        \ If the above addition didn't wrap wround back to 0,
+ BNE print_outer        \ If the above addition didn't wrap around back to 0,
                         \ the addition is correct, so loop back up to
                         \ print_outer to print the next character block along
 

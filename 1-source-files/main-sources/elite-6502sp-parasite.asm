@@ -1153,10 +1153,10 @@
                         \ This value is shown in the dashboard's RL indicator,
                         \ and determines the rate at which we are rolling
                         \
-                        \ The value ranges from from 1 to 255 with 128 as the
-                        \ centre point, so 1 means roll is decreasing at the
-                        \ maximum rate, 128 means roll is not changing, and
-                        \ 255 means roll is increasing at the maximum rate
+                        \ The value ranges from 1 to 255 with 128 as the centre
+                        \ point, so 1 means roll is decreasing at the maximum
+                        \ rate, 128 means roll is not changing, and 255 means
+                        \ roll is increasing at the maximum rate
                         \
                         \ This value is updated by "<" and ">" key presses, or
                         \ if joysticks are enabled, from the joystick. If
@@ -1172,10 +1172,10 @@
                         \ This value is shown in the dashboard's DC indicator,
                         \ and determines the rate at which we are pitching
                         \
-                        \ The value ranges from from 1 to 255 with 128 as the
-                        \ centre point, so 1 means pitch is decreasing at the
-                        \ maximum rate, 128 means pitch is not changing, and
-                        \ 255 means pitch is increasing at the maximum rate
+                        \ The value ranges from 1 to 255 with 128 as the centre
+                        \ point, so 1 means pitch is decreasing at the maximum
+                        \ rate, 128 means pitch is not changing, and 255 means
+                        \ pitch is increasing at the maximum rate
                         \
                         \ This value is updated by "S" and "X" key presses, or
                         \ if joysticks are enabled, from the joystick. If
@@ -1672,7 +1672,7 @@
  SKIP 2                 \ The distance from the current system to the selected
                         \ system in light years * 10, stored as a 16-bit number
                         \
-                        \ The distance will be 0 if the selected sysyem is the
+                        \ The distance will be 0 if the selected system is the
                         \ current system
                         \
                         \ The galaxy chart is 102.4 light years wide and 51.2
@@ -1815,7 +1815,7 @@
                         \   * 128 = Delta 14B joystick
                         \
                         \ Elite-A doesn't support the Bitstik, but instead it
-                        \ supports the multi-button Volmace Delta 14B joystick,
+                        \ supports the multi-button Voltmace Delta 14B joystick,
                         \ reusing the BSTK variable to determine whether it is
                         \ configured
 
@@ -5052,8 +5052,8 @@ ENDIF
  LDX FRIN+2,Y           \ The ship slots at FRIN are ordered with the first two
                         \ slots reserved for the planet and sun/space station,
                         \ and then any ships, so if the slot at FRIN+2+Y is not
-                        \ empty (i.e is non-zero), then that means the number of
-                        \ non-asteroids in the vicinity is at least 1
+                        \ empty (i.e. is non-zero), then that means the number
+                        \ of non-asteroids in the vicinity is at least 1
 
  BEQ st6                \ So if X = 0, there are no ships in the vicinity, so
                         \ jump to st6 to print "Green" for our ship's condition
@@ -5195,7 +5195,7 @@ ENDIF
  LDA BST                \ If we don't have fuel scoops fitted, skip the
  BEQ P%+9               \ following three instructions
 
- LDA #111               \ We do have a fuel scoops fitted, so print recursive
+ LDA #111               \ We do have fuel scoops fitted, so print recursive
  LDX #25                \ token 111 ("FUEL SCOOPS"). If this is the Status Mode
  JSR status_equip       \ or Inventory screen, print a newline and an indent of
                         \ 8 characters, or if this is the Sell Equipment screen,
@@ -5427,7 +5427,7 @@ ENDIF
  LDX CNT                \ Set X to the value we stored in CNT above, so it now
                         \ contains the equipment flag's offset from LASER
 
- LDA #0                 \ We just sold this pieve of equipment, so set the flag
+ LDA #0                 \ We just sold this piece of equipment, so set the flag
  STA LASER,X            \ to zero to indicate we no longer have the equipment
                         \ fitted
 
@@ -6016,7 +6016,7 @@ ENDIF
 \ DTW4.
 \
 \ The flag is set to %11000000 (justify text, buffer entire token) by routine
-\ MESS, which printe in-flight messages.
+\ MESS, which prints in-flight messages.
 \
 \ The flag is set to %00000000 (do not justify text, print buffer on carriage
 \ return) by jump token 15, {left align}, which calls routine MT1 to change the
@@ -6287,7 +6287,7 @@ ENDIF
                         \ DA6+3 to print a newline
 
  CPX #(LL+1)            \ If X < LL+1, i.e. X <= LL, then the buffer contains
- BCC DA6                \ fewer than LL characters, which is less then a line
+ BCC DA6                \ fewer than LL characters, which is less than a line
                         \ length, so jump down to DA6 to print the contents of
                         \ BUF followed by a newline, as we don't justify the
                         \ last line of the paragraph
@@ -7331,7 +7331,7 @@ ENDIF
  JSR TT20               \ We want to move on to the next system, so call TT20
                         \ to twist the three 16-bit seeds in QQ15
 
- INC XX20               \ Incrememt the system counter in XX20
+ INC XX20               \ Increment the system counter in XX20
 
  BNE HME3               \ If we haven't yet checked all 256 systems in the
                         \ current galaxy, loop back to HME3 to check the next
@@ -7429,7 +7429,7 @@ ENDIF
 \   Byte #2             Bits 0-7 = Ship's z_lo
 \                       Bit 0    = Ship's x_sign
 \
-\ Ths ship's y-coordinate is calculated in the has1 routine from the size of
+\ The ship's y-coordinate is calculated in the has1 routine from the size of
 \ its targetable area. Ships of type 0 are not shown.
 \
 \ Note that ship numbers are for the ship hangar blueprints at XX21 in the
@@ -7525,7 +7525,7 @@ ENDIF
 \ Half the time this will draw one of the four pre-defined ship hangar groups in
 \ HATB, and half the time this will draw a solitary Sidewinder, Mamba, Krait or
 \ Adder on a random position. In all cases, the ships will be randomly spun
-\ around on the ground so they can face in any dirction, and larger ships are
+\ around on the ground so they can face in any direction, and larger ships are
 \ drawn higher up off the ground than smaller ships.
 \
 \ ******************************************************************************
@@ -7644,7 +7644,7 @@ ENDIF
                         \ Cobra Mk III, Python, Viper or Krait
 
  JSR HAS1               \ Call HAS1 to draw this ship in the hangar, with the
-                        \ the following properties:
+                        \ following properties:
                         \
                         \   * Random x-coordinate from -63 to +63
                         \
@@ -8499,7 +8499,7 @@ ENDIF
 
  ORA T                  \ If argument A was negative (and therefore S was also
                         \ negative) then make sure result A is negative by
-                        \ OR-ing the result with the sign bit from argument A
+                        \ OR'ing the result with the sign bit from argument A
                         \ (which we stored in T)
 
  RTS                    \ Return from the subroutine
@@ -8526,9 +8526,8 @@ ENDIF
 
                         \ At this point we have |A P| - |S R| in (A X), so we
                         \ need to check whether the subtraction above was the
-                        \ the right way round (i.e. that we subtracted the
-                        \ smaller absolute value from the larger absolute
-                        \ value)
+                        \ right way round (i.e. that we subtracted the smaller
+                        \ absolute value from the larger absolute value)
 
  BCS MU9                \ If |A| >= |S|, our subtraction was the right way
                         \ round, so jump to MU9 to set the sign
@@ -8549,7 +8548,7 @@ ENDIF
                         \ the correct addition)
 
  LDA #0                 \ Set A = 0 - A, which we can do this time using a
- SBC U                  \ a subtraction with the C flag clear
+ SBC U                  \ subtraction with the C flag clear
 
  ORA #%10000000         \ We now set the sign bit of A, so that the EOR on the
                         \ next line will give the result the opposite sign to
@@ -8768,7 +8767,7 @@ ENDIF
                         \ RUPLA-1 because Y is looping from 26 to 1
 
  CMP ZZ                 \ If A doesn't match the system whose description we
- BNE PD2                \ are printing (in ZZ), junp to PD2 to keep looping
+ BNE PD2                \ are printing (in ZZ), jump to PD2 to keep looping
                         \ through the system numbers in RUPLA
 
                         \ If we get here we have found a match for this system
@@ -10842,7 +10841,7 @@ ENDIF
                         \ returning the number entered in A and R
 
  BCS TQ4                \ If gnum set the C flag, the number entered is greater
-                        \ then the quantity available, so jump up to TQ4 to
+                        \ than the quantity available, so jump up to TQ4 to
                         \ display a "Quantity?" error, beep, clear the number
                         \ and try again
 
@@ -13156,8 +13155,8 @@ ENDIF
                         \ the new piece of equipment
 
  LDA #14                \ Otherwise there isn't room in the hold for any more
-                        \ equipment, so set set A to the value for recursive
-                        \ token 14 ("UNIT")
+                        \ equipment, so set A to the value for recursive token
+                        \ 14 ("UNIT")
 
  JMP query_beep         \ Print the recursive token given in A followed by a
                         \ question mark, then make a beep, pause and go to the
@@ -13300,7 +13299,7 @@ ENDIF
                         \ item number A
 
  INC new_hold           \ We can't buy the requested equipment, so increment the
-                        \ free space in the hold, as we decremented it earler
+                        \ free space in the hold, as we decremented it earlier
                         \ in anticipation of making a deal, but the deal has
                         \ fallen through
 
@@ -13826,7 +13825,7 @@ ENDIF
 
 .cpl
 
- LDX #5                 \ First we need to backup the seeds in QQ15, so set up
+ LDX #5                 \ First we need to back up the seeds in QQ15, so set up
                         \ a counter in X to cover three 16-bit seeds (i.e.
                         \ 6 bytes)
 
@@ -13837,7 +13836,7 @@ ENDIF
 
  DEX                    \ Decrement the loop counter
 
- BPL TT53               \ Loop back for the next byte to backup
+ BPL TT53               \ Loop back for the next byte to back up
 
  LDY #3                 \ Step 1: Now that the seeds are backed up, we can
                         \ start the name-generation process. We will either
@@ -14205,7 +14204,7 @@ ENDIF
  DEX                    \ If token = 5, this is control code 5 (fuel, newline,
  BEQ fwl                \ cash, newline), so jump to fwl
 
- DEX                    \ If token = 6, this is is control code 6 (switch to
+ DEX                    \ If token = 6, this is control code 6 (switch to
  BEQ vdu_80             \ Sentence Case), so jump to vdu_80 to do just that
 
  DEX                    \ If token <> 8, jump to l_31d2 to skip the following
@@ -14321,7 +14320,7 @@ ENDIF
                         \ character's case
 
  ADC #32                \ Add 32 to the character, to convert it from upper to
-                        \ to lower case
+                        \ lower case
 
 .TT44
 
@@ -14340,7 +14339,7 @@ ENDIF
 \
 \   * If QQ17 bit 6 is set, print lower case (via TT45)
 \
-\   * If QQ17 bit 6 clear, then:
+\   * If QQ17 bit 6 is clear, then:
 \
 \       * If character is punctuation, just print it
 \
@@ -15039,7 +15038,7 @@ ENDIF
  BNE PLF2               \ the bottom of the screen, so skip to PLF2 with A = 191
 
  CMP P+1                \ If A < P+1, the maximum y-coordinate is underneath the
- BCC PLF2               \ the dashboard, so skip to PLF2 with A = 191
+ BCC PLF2               \ dashboard, so skip to PLF2 with A = 191
 
  LDA P+1                \ Set A = P+1, the low byte of the maximum y-coordinate
                         \ of the sun on-screen
@@ -16205,7 +16204,7 @@ ENDIF
  STA FSH,X              \ Set the X-th byte of FSH to &FF to charge up that
                         \ shield/bank
 
- DEX                    \ Decrement the lopp counter
+ DEX                    \ Decrement the loop counter
 
  BPL REL5               \ Loop back to REL5 until we have recharged both shields
                         \ and the energy bank
@@ -17480,7 +17479,7 @@ ENDIF
 \ Arguments:
 \
 \   Y                   The offset from (X SC) where we start zeroing, counting
-\                       up to to &FF
+\                       up to &FF
 \
 \   SC                  The low byte (i.e. the offset into the page) of the
 \                       starting point of the zero-fill
@@ -17562,9 +17561,9 @@ ENDIF
 
 .CATS
 
- JSR GTDRV              \ Get an ASCII disc drive drive number from the keyboard
-                        \ in A, setting the C flag if an invalid drive number
-                        \ was entered
+ JSR GTDRV              \ Get an ASCII disc drive number from the keyboard in A,
+                        \ setting the C flag if an invalid drive number was
+                        \ entered
 
  BCS DELT-1             \ If the C flag is set, then an invalid drive number was
                         \ entered, so return from the subroutine (as DELT-1
@@ -17632,7 +17631,7 @@ ENDIF
 \ This routine asks for a disc drive number, and if it is a valid number (0-3)
 \ it displays a catalogue of the disc in that drive. It then asks for a filename
 \ to delete, updates the OS command at DELI so that when that command is run, it
-\ it deletes the correct file, and then it does the deletion.
+\ deletes the correct file, and then it does the deletion.
 \
 \ Other entry points:
 \
@@ -18024,9 +18023,9 @@ ENDIF
  PHA                    \ Store A on the stack so we can restore it after the
                         \ call to GTDRV
 
- JSR GTDRV              \ Get an ASCII disc drive drive number from the keyboard
-                        \ in A, setting the C flag if an invalid drive number
-                        \ was entered
+ JSR GTDRV              \ Get an ASCII disc drive number from the keyboard in A,
+                        \ setting the C flag if an invalid drive number was
+                        \ entered
 
  STA INWK+1             \ Store the ASCII drive number in INWK+1, which is the
                         \ drive character of the filename string ":0.E."
@@ -18065,7 +18064,7 @@ ENDIF
 \       Name: GTDRV
 \       Type: Subroutine
 \   Category: Save and load
-\    Summary: Get an ASCII disc drive drive number from the keyboard
+\    Summary: Get an ASCII disc drive number from the keyboard
 \
 \ ------------------------------------------------------------------------------
 \
@@ -22141,7 +22140,7 @@ ENDMACRO
                         \ otherwise it is 0
 
  LDA XX15+1             \ If one or both of x1_hi and y1_hi are non-zero, jump
- ORA XX15+3             \ jump to LL83
+ ORA XX15+3             \ to LL83
  BNE LL83
 
  LDA #Y*2-1             \ If y1_lo > the y-coordinate of the bottom of screen
@@ -23449,8 +23448,7 @@ ENDMACRO
                         \ the name token for our new ship
 
  LDA new_range          \ Set our fuel level in QQ14 to the hyperspace range of
- STA QQ14               \ of our new ship, so our new ship comes with a full
-                        \ tank
+ STA QQ14               \ our new ship, so our new ship comes with a full tank
 
  JSR msblob             \ Reset the dashboard's missile indicators so they show
                         \ the correct number of missiles fitted to our new ship
@@ -28405,7 +28403,7 @@ ENDMACRO
 \       Name: RUPLA
 \       Type: Variable
 \   Category: Text
-\    Summary: System numbers that have extended decription overrides
+\    Summary: System numbers that have extended description overrides
 \  Deep dive: Extended system descriptions
 \             Extended text tokens
 \
@@ -28460,19 +28458,19 @@ ENDMACRO
 \       Name: RUGAL
 \       Type: Variable
 \   Category: Text
-\    Summary: The criteria for systems with extended decription overrides
+\    Summary: The criteria for systems with extended description overrides
 \  Deep dive: Extended system descriptions
 \             Extended text tokens
 \
 \ ------------------------------------------------------------------------------
 \
-\ This table contains the criteria for printing an extended decription override
+\ This table contains the criteria for printing an extended description override
 \ for a system. The galaxy number is in bits 0-6, while bit 7 determines whether
 \ to show this token during mission 1 only (bit 7 is clear, i.e. a value of &0x
 \ in the table below), or all of the time (bit 7 is set, i.e. a value of &8x in
 \ the table below).
 \
-\ In other words, Teorge, Arredi, Anreer and Lave have extended decription
+\ In other words, Teorge, Arredi, Anreer and Lave have extended description
 \ overrides that are always shown, while the rest only appear when mission 1 is
 \ in progress.
 \
@@ -34805,7 +34803,7 @@ ENDMACRO
 \
 \ ------------------------------------------------------------------------------
 \
-\ Agruments:
+\ Arguments:
 \
 \   A                   The menu to show:
 \
@@ -34851,8 +34849,8 @@ ENDMACRO
                         \ A = 1, so jump to ship_over as the choice number is
                         \ already correct (i.e. 0 for Adder to 13 for Ghavial)
 
- ADC menu_entry+1       \ We just showed the the second menu, so the choice
-                        \ number is currently:
+ ADC menu_entry+1       \ We just showed the second menu, so the choice number
+                        \ is currently:
                         \
                         \   * 0 for Iguana to 13 for Worm
                         \
@@ -34890,7 +34888,7 @@ ENDMACRO
  LDY #0                 \ Install this ship into blueprint position 0 so we can
  JSR install_ship       \ show it on the ship card
 
- LDX TYPE               \ Set A to the cards's title x-coordinate (fetched from
+ LDX TYPE               \ Set A to the card's title x-coordinate (fetched from
  LDA ship_centre,X      \ the ship_centre table)
 
  STA XC                 \ Move the text cursor to the correct column for the
@@ -35174,7 +35172,7 @@ ENDMACRO
  CPX #&70               \ If ESCAPE is not being pressed, jump to dont_quit to
  BNE dont_quit          \ skip the next
 
- JMP DEATH2             \ ESCAPE is being pressed, so jump to DEATH2 to wnd the
+ JMP DEATH2             \ ESCAPE is being pressed, so jump to DEATH2 to end the
                         \ game
 
 .dont_quit
@@ -35385,14 +35383,14 @@ ENDMACRO
                         \ call DTS to print it in the correct case
 
  JMP card_loop          \ Jump back to card_loop to print the next token in the
-                        \ the ship data
+                        \ ship data
 
 .card_macro
 
  JSR DT3                \ Call DT3 to print the jump token given in A
 
  JMP card_loop          \ Jump back to card_loop to print the next token in the
-                        \ the ship data
+                        \ ship data
 
 .card_msg
 
@@ -35408,14 +35406,14 @@ ENDMACRO
  JSR write_msg3         \ Print the extended token in A
 
  JMP card_loop          \ Jump back to card_loop to print the next token in the
-                        \ the ship data
+                        \ ship data
 
 .card_pairs
 
  JSR msg_pairs          \ Print the extended two-letter token in A
 
  JMP card_loop          \ Jump back to card_loop to print the next token in the
-                        \ the ship data
+                        \ ship data
 
 .card_end
 
@@ -37709,7 +37707,7 @@ ENDIF
  CTOK 49
  EQUB 0
 
-\EQUB 0, 9              \ This data is commented out in the orginal source
+\EQUB 0, 9              \ This data is commented out in the original source
 \EQUA "3|!R"
 
  EQUB 10                \ 10: Drive motors:   "DE{single cap}LACY SPIN{single
@@ -39038,7 +39036,7 @@ ENDIF
                         \ If we arrive here, docking has just failed
 
  LDA DELTA              \ If the ship's speed is >= 5, jump to n_crunch to
- CMP #5                 \ register a fair emount of damage to our shields (128)
+ CMP #5                 \ register a fair amount of damage to our shields (128)
  BCS n_crunch
 
                         \ Otherwise we have just crashed gently into the
@@ -39061,7 +39059,7 @@ ENDIF
 \   * Continue looping through all the ships in the local bubble, and for each
 \     one:
 \
-\     * Remove scooped item after both successful and failed scoopings
+\     * Remove scooped item after both successful and failed scooping attempts
 \
 \     * Process collisions
 \
@@ -39098,7 +39096,7 @@ ENDIF
 
  JSR OOPS               \ The amount of damage is in A, so call OOPS to reduce
                         \ our shields, and if the shields are gone, there's a
-                        \ a chance of cargo loss or even death
+                        \ chance of cargo loss or even death
 
  JSR EXNO3              \ Make the sound of colliding with the other ship and
                         \ fall through into MA26 to try targeting a missile
@@ -39216,7 +39214,7 @@ ENDIF
  CMP new_mining         \ then our current laser strength in LAS will match the
  BNE nosp               \ strength of mining lasers when fitted to our current
                         \ ship type, which is stored in new_mining. If they
-                        \ don't match, which means we didn't use minig lasers,
+                        \ don't match, which means we didn't use mining lasers,
                         \ then jump to nosp, otherwise keep going
 
  JSR DORND              \ Set A and X to random numbers
@@ -39226,7 +39224,7 @@ ENDIF
  AND #3                 \ Reduce the random number in A to the range 0-3
 
  JSR SPIN2              \ Call SPIN2 to spawn A items of type X (i.e. spawn
-                        \ 0-3 spliters)
+                        \ 0-3 splinters)
 
 .nosp
 
@@ -39433,7 +39431,7 @@ ENDIF
                         \ a positive number, so having the C flag set indicates
                         \ that the subtraction didn't underflow - in other words
                         \ the damage isn't greater than the energy levels, and
-                        \ the ship has survuved the hit. In this case we jump to
+                        \ the ship has survived the hit. In this case we jump to
                         \ n_kill with the C flag set to indicate that the ship
                         \ has survived the attack
 
@@ -39678,7 +39676,7 @@ ENDIF
 \   * Perform an altitude check with the planet (every 32 iterations of the main
 \     loop, on iteration 10 of each 32)
 \
-\   * Perform an an altitude check with the sun and process fuel scooping (every
+\   * Perform an altitude check with the sun and process fuel scooping (every
 \     32 iterations of the main loop, on iteration 20 of each 32)
 \
 \ ******************************************************************************
@@ -39823,7 +39821,7 @@ ENDIF
                         \ our temperature is off the scale
 
  CMP #224               \ If the cabin temperature < 224 then jump to MA23 to
- BCC MA23               \ to skip fuel scooping, as we aren't close enough
+ BCC MA23               \ skip fuel scooping, as we aren't close enough
 
  LDA BST                \ If we don't have fuel scoops fitted, jump to BA23 to
  BEQ MA23               \ skip fuel scooping, as we can't scoop without fuel
@@ -39887,10 +39885,10 @@ ENDIF
 
  CMP #8                 \ If LASCT >= 8, jump to MA16 to skip the following, so
  BCS MA16               \ for a pulse laser with a LASCT between 8 and 10, the
-                        \ the laser stays on, but for a LASCT of 7 or less it
-                        \ gets turned off and stays off until LASCT reaches zero
-                        \ and the next pulse can start (if the fire button is
-                        \ still being pressed)
+                        \ laser stays on, but for a LASCT of 7 or less it gets
+                        \ turned off and stays off until LASCT reaches zero and
+                        \ the next pulse can start (if the fire button is still
+                        \ being pressed)
 
                         \
                         \ For pulse lasers, LASCT gets set to 10 in ma1 above,
@@ -39924,7 +39922,7 @@ ENDIF
 
 .MA69
 
- LDA ECMA               \ If an E.C.M is going off (our's or an opponent's) then
+ LDA ECMA               \ If an E.C.M is going off (ours or an opponent's) then
  BEQ MA66               \ keep going, otherwise skip to MA66
 
  DEC ECMA               \ Decrement the E.C.M. countdown timer, and if it has
@@ -41421,7 +41419,7 @@ ENDIF
                         \ This is the entry point for missile tactics and is
                         \ called from the main TACTICS routine below
 
- LDA ECMA               \ If an E.C.M. is currently active (either our's or an
+ LDA ECMA               \ If an E.C.M. is currently active (either ours or an
  BNE TA35               \ opponent's), jump to TA35 to destroy this missile
 
  LDA INWK+32            \ Fetch the AI flag from byte #32 and if bit 6 is set
@@ -41722,7 +41720,7 @@ ENDIF
 \     really bad (i.e. a fugitive or serious offender), the ship becomes hostile
 \     (if it isn't already)
 \
-\   * If the ship is not hostile, then either perform docking manouevres (if
+\   * If the ship is not hostile, then either perform docking manoeuvres (if
 \     it's docking) or fly towards the planet (if it isn't docking) and we're
 \     done
 \
@@ -42006,7 +42004,7 @@ ENDIF
  BCS TA3                \ with higher numbers of missiles, jump to TA3 to skip
                         \ firing a missile
 
- LDA ECMA               \ If an E.C.M. is currently active (either our's or an
+ LDA ECMA               \ If an E.C.M. is currently active (either ours or an
  BNE TA3                \ opponent's), jump to TA3 to skip firing a missile
 
  DEC INWK+31            \ We're done with the checks, so it's time to fire off a
@@ -42120,7 +42118,7 @@ ENDIF
 
  DEC INWK+28            \ Halve the attacking ship's acceleration in byte #28
 
- LDA ECMA               \ If an E.C.M. is currently active (either our's or an
+ LDA ECMA               \ If an E.C.M. is currently active (either ours or an
  BNE TA9-1              \ opponent's), return from the subroutine without making
                         \ the laser-strike sound (as TA9-1 contains an RTS)
 
@@ -42521,10 +42519,11 @@ ENDIF
 
  BMI PH3                \ If bit 7 is set, then that means the ship type was set
                         \ to -96 in the DOKEY routine when we switched on our
-                        \ docking compter, so this is us auto-docking our Cobra,
-                        \ so jump to PH3 to refine our approach. Otherwise this
-                        \ is an NPC trying to dock, so turn away from the
-                        \ station
+                        \ docking computer, so this is us auto-docking our
+                        \ Cobra, so jump to PH3 to refine our approach
+                        \
+                        \ Otherwise this is an NPC trying to dock, so keep going
+                        \ to turn away from the station
 
 .PH2
 
@@ -42533,7 +42532,7 @@ ENDIF
                         \ attempt
 
  JSR TAS6               \ Call TAS6 to negate the vector in XX15 so it points in
-                        \ the opposite direction, away from from the station and
+                        \ the opposite direction, away from the station and
                         \ towards the ship
 
  JSR TA151              \ Call TA151 to make the ship head in the direction of
@@ -44162,7 +44161,7 @@ ENDIF
 \       Name: MU5
 \       Type: Subroutine
 \   Category: Maths (Arithmetic)
-\    Summary: Set K(3 2 1 0) = (A A A A) and clear the C flGag
+\    Summary: Set K(3 2 1 0) = (A A A A) and clear the C flag
 \
 \ ------------------------------------------------------------------------------
 \
@@ -45768,7 +45767,7 @@ ENDIF
 .wW
 
  LDA #15                \ The hyperspace countdown starts from 15, so set A to
-                        \ to 15 so we can set the two hyperspace counters
+                        \ 15 so we can set the two hyperspace counters
 
  STA QQ22+1             \ Set the number in QQ22+1 to 15, which is the number
                         \ that's shown on-screen during the hyperspace countdown
@@ -46854,9 +46853,9 @@ ENDIF
  STA INWK+8
 
  LDA QQ15+5             \ Fetch s2_hi, extract bits 0-1 and store in x_sign and
- AND #%00000011         \ y_sign, so the sun is either dead in our rear laser
- STA INWK+2             \ crosshairs, or off to the top left by a distance of 1
- STA INWK+1             \ or 2 when we look out the back
+ AND #%00000011         \ y_sign, so the sun is either dead centre in our rear
+ STA INWK+2             \ laser crosshairs, or off to the top left by a distance
+ STA INWK+1             \ of 1 or 2 when we look out the back
 
  LDA #0                 \ Set the pitch and roll counters to 0 (no rotation)
  STA INWK+29
@@ -47945,7 +47944,7 @@ ENDIF
                         \ settings for the ship's NEWB flags
 
  AND #%01101111         \ Zero bits 4 and 7 (so the new ship is not docking, has
-                        \ has not been scooped, and has not just docked)
+                        \ not been scooped, and has not just docked)
 
  ORA NEWB               \ Apply the result to the ship's NEWB flags, which sets
  STA NEWB               \ bits 0-3 and 5-6 in NEWB if they are set in the E%
@@ -50374,7 +50373,7 @@ ENDIF
  JSR DORND              \ Set A and X to random numbers
 
  LSR A                  \ Clear bit 7 of our random number in A and set the C
-                        \ flag to bit 0 of A, which os random
+                        \ flag to bit 0 of A, which is random
 
  STA INWK+32            \ Store this in the ship's AI flag, so this ship does
                         \ not have AI
@@ -50383,7 +50382,7 @@ ENDIF
                         \ clockwise roll (as bit 7 is clear), and a 1 in 127
                         \ chance of it having no damping
 
- ROL INWK+31            \ Set bit 0 of the ship's missile count ramdomly (as the
+ ROL INWK+31            \ Set bit 0 of the ship's missile count randomly (as the
                         \ C flag was set), giving the ship either no missiles or
                         \ one missile
 
@@ -50545,7 +50544,7 @@ ENDIF
 
  BNE horde_plain        \ Jump to horde_plain to spawn a whole pack of cargo
                         \ canisters, boulders or asteroids, according to the
-                        \ value of A (the BNE is effectivey a JMP, as A will
+                        \ value of A (the BNE is effectively a JMP, as A will
                         \ never be zero)
 
 \ ******************************************************************************
@@ -51101,10 +51100,10 @@ ENDIF
  CMP #&36               \ If "O" was pressed, do the following, otherwise skip
  BNE not_home           \ to not_home to continue checking key presses
 
- LDA QQ11               \ If both bits 6 or 7 of the view number are clear - so
- AND #%11000000         \ this is not the Short-range or Long-range Chart -
- BEQ t95                \ then jump to t95 to return from the subroutine,
-                        \ otherwise do the following three jumps
+ LDA QQ11               \ If bits 6 and 7 of the view number are both clear - so
+ AND #%11000000         \ this is not the Short-range or Long-range Chart - then
+ BEQ t95                \ jump to t95 to return from the subroutine, otherwise
+                        \ do the following three jumps
 
  JSR TT103              \ Draw small crosshairs at coordinates (QQ9, QQ10),
                         \ which will erase the crosshairs currently there
@@ -51124,10 +51123,10 @@ ENDIF
  BNE ee2                \ to the special cargo destination, otherwise skip to
                         \ ee2 to continue
 
- LDA QQ11               \ If both bits 6 or 7 of the view number are clear - so
- AND #%11000000         \ this is not the Short-range or Long-range Chart -
- BEQ t95                \ then jump to t95 to return from the subroutine,
-                        \ otherwise do the following three jumps
+ LDA QQ11               \ If bits 6 and 7 of the view number are both clear - so
+ AND #%11000000         \ this is not the Short-range or Long-range Chart - then
+ BEQ t95                \ jump to t95 to return from the subroutine, otherwise
+                        \ do the following three jumps
 
  LDA cmdr_cour          \ If there is no special cargo delivery mission in
  ORA cmdr_cour+1        \ progress, then the mission timer in cmdr_cour(1 0)
@@ -51750,7 +51749,7 @@ ENDIF
                         \
                         \ note that because we are starting at position 9, we
                         \ can ignore the first case. In our above example, we
-                        \ are filling positon 17, so we would add 2 to X
+                        \ are filling position 17, so we would add 2 to X
 
  CPY #16                \ If the blueprint position we are trying to fill is
  BCC mix_byte2          \ less than 16, jump to mix_byte2 so we increment X once
@@ -52108,7 +52107,7 @@ ENDIF
 
  LDX JUNK               \ Set X to the total number of junk items in the
                         \ vicinity (e.g. asteroids, escape pods, cargo
-                        \ canisters, Shuttles, Transporters and so pn)
+                        \ canisters, Shuttles, Transporters and so on)
 
  LDA FRIN+2,X           \ If the slot at FRIN+2+X is non-zero, then we have
                         \ something else in the vicinity besides asteroids,
@@ -52117,7 +52116,7 @@ ENDIF
 
  ORA JUNK               \ If there is any junk in the vicinity, then JUNK will
                         \ be non-zero, so OR'ing with JUNK will produce a
-                        \ a non-zero result if either A or JUNK are non-zero
+                        \ non-zero result if either A or JUNK are non-zero
                         \ (so this prevents in-system jumps if there is any
                         \ junk nearby, which is different to the other versions
                         \ which allow you to jump, dragging any junk along with
@@ -52125,7 +52124,7 @@ ENDIF
 
  ORA SSPR               \ If there is a space station nearby, then SSPR will
                         \ be non-zero, so OR'ing with SSPR will produce a
-                        \ a non-zero result if either A or SSPR are non-zero
+                        \ non-zero result if either A or SSPR are non-zero
 
  ORA MJ                 \ If we are in witchspace, then MJ will be non-zero, so
                         \ OR'ing with MJ will produce a non-zero result if
@@ -52715,8 +52714,8 @@ ENDIF
 
  BIT INWK+29            \ We shifted the updated roll counter to the left above,
  BPL DK14               \ so this tests bit 6 of the original value, and if it
-                        \ is is clear (i.e. the magnitude is less than 64), jump
-                        \ to DK14 to "press" the key and leave JSTX unchanged
+                        \ is clear (i.e. the magnitude is less than 64), jump to
+                        \ DK14 to "press" the key and leave JSTX unchanged
 
  LDA #64                \ The magnitude of the updated roll is 64 or more, so
  STA JSTX               \ set JSTX to 64 (so the roll decreases at half the
@@ -53652,8 +53651,8 @@ ENDIF
                         \                    = (z_sign z_hi z_lo) - speed
 
  LDA TYPE               \ If the ship type is the sun (129) then skip the next
- AND #%10000001         \ next instruction, otherwise return from the subroutine
- CMP #129               \ as we don't need to rotate the sun around its origin.
+ AND #%10000001         \ instruction, otherwise return from the subroutine as
+ CMP #129               \ we don't need to rotate the sun around its origin.
  BEQ P%+5               \ Having both the AND and the CMP is a little odd, as
                         \ the sun is the only ship type with bits 0 and 7 set,
                         \ so the AND has no effect and could be removed
@@ -54420,7 +54419,7 @@ ENDIF
 \       Name: iff_xor
 \       Type: Variable
 \   Category: Dashboard
-\    Summary: The EOR value for different types of ship in the the I.F.F. system
+\    Summary: The EOR value for different types of ship in the I.F.F. system
 \             for creating striped sticks in the scanner
 \  Deep dive: The I.F.F. system
 \
@@ -54499,7 +54498,7 @@ ENDIF
 \       Name: iff_base
 \       Type: Variable
 \   Category: Dashboard
-\    Summary: Base colours for different types of ship in the the I.F.F. system
+\    Summary: Base colours for different types of ship in the I.F.F. system
 \  Deep dive: The I.F.F. system
 \
 \ ------------------------------------------------------------------------------
@@ -54886,7 +54885,7 @@ ENDIF
 \
 \ See the deep dive on "Ship blueprints" for details of how vertices are stored
 \ in the ship blueprints, and the deep dive on "Drawing ships" for information
-\ on how vertices are used to draw 3D wiremesh ships.
+\ on how vertices are used to draw 3D wireframe ships.
 \
 \ Arguments:
 \
@@ -54956,7 +54955,7 @@ ENDMACRO
 \
 \ See the deep dive on "Ship blueprints" for details of how edges are stored
 \ in the ship blueprints, and the deep dive on "Drawing ships" for information
-\ on how edges are used to draw 3D wiremesh ships.
+\ on how edges are used to draw 3D wireframe ships.
 \
 \ Arguments:
 \
@@ -54996,7 +54995,7 @@ ENDMACRO
 \
 \ See the deep dive on "Ship blueprints" for details of how faces are stored
 \ in the ship blueprints, and the deep dive on "Drawing ships" for information
-\ on how faces are used to draw 3D wiremesh ships.
+\ on how faces are used to draw 3D wireframe ships.
 \
 \ Arguments:
 \
