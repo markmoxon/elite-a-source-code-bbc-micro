@@ -16299,10 +16299,10 @@ ENDIF
 
  JSR DIALS              \ Update the dashboard
 
+ JSR U%                 \ Call U% to clear the key logger
+
                         \ Finally, fall through into ZINF to reset the INWK
                         \ ship workspace
-
- JSR U%                 \ Call U% to clear the key logger
 
 \ ******************************************************************************
 \
@@ -47080,8 +47080,8 @@ ENDIF
 \
 \ ------------------------------------------------------------------------------
 \
-\ Calculate the following, where A is a signed 8-bit integer and the result is a
-\ signed 16-bit integer:
+\ Calculate the following, where A is a sign-magnitude 8-bit integer and the
+\ result is a signed 16-bit integer:
 \
 \   (Y X) = A / 10
 \
@@ -47208,7 +47208,7 @@ ENDIF
                         \ +96 as the vector has been normalised
 
  JSR SPS2               \ Set (Y X) = A / 10, so X will be from -9 to +9, which
-                        \ is the y-offset from the centre of the compass of the
+                        \ is the x-offset from the centre of the compass of the
                         \ dot we want to draw. Returns with the C flag clear
 
  STX T                  \ Set COMY = 204 - X, as 203 is the pixel y-coordinate
@@ -52332,7 +52332,7 @@ ENDIF
 \
 \       Name: EXNO2
 \       Type: Subroutine
-\   Category: Sound
+\   Category: Status
 \    Summary: Process us making a kill
 \  Deep dive: Combat rank
 \
@@ -53394,8 +53394,9 @@ ENDIF
 
  LDA #0                 \ Set A to 0 to stop the speed from going negative
 
- LDY #15                \ Fetch byte #15 from the ship's blueprint, which
-                        \ contains the ship's maximum speed
+ LDY #15                \ We now fetch byte #15 from the ship's blueprint, which
+                        \ contains the ship's maximum speed, so set Y = 15 to
+                        \ use as an index
 
  CMP (XX0),Y            \ If A < the ship's maximum speed, skip the following
  BCC P%+4               \ instruction

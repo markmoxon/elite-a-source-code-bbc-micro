@@ -22056,7 +22056,7 @@
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
 \ CPX NOMSL             \ If the counter is equal to the number of missiles,
-\ BEQ SAL8              \ jump down to SQL8 to draw remaining the missiles, as
+\ BEQ SAL8              \ jump down to SAL8 to draw the remaining missiles, as
 \                       \ the rest of them are present and should be drawn in
 \                       \ green/cyan
 \
@@ -25038,7 +25038,7 @@ ENDIF
 \
 \       Name: EXNO2, Removed
 \       Type: Subroutine
-\   Category: Sound
+\   Category: Status
 \    Summary: Process us making a kill
 \  Deep dive: Combat rank
 \
