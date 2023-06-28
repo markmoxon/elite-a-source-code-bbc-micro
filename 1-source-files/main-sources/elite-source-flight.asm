@@ -88,6 +88,9 @@
  f8 = &76               \ Internal key number for red key f8 (Status Mode)
  f9 = &77               \ Internal key number for red key f9 (Inventory)
 
+ RE = &23               \ The obfuscation byte used to hide the recursive tokens
+                        \ table from crackers viewing the binary code
+
  QQ18 = &0400           \ The address of the text token table, as set in
                         \ elite-loader.asm
 
@@ -5536,7 +5539,7 @@
 \       Name: NLIN3
 \       Type: Subroutine
 \   Category: Drawing lines
-\    Summary: Print a title and a horizontal line at row 19 to box it in
+\    Summary: Print a title and draw a horizontal line at row 19 to box it in
 \
 \ ------------------------------------------------------------------------------
 \
@@ -19074,7 +19077,7 @@
                         \ return from the subroutine using a tail call
 
  DEX                    \ If token = 2, this is control code 2 (current system
- BEQ ypl                \ name), so jump to ypl to print the current system name 
+ BEQ ypl                \ name), so jump to ypl to print the current system name
                         \ and return from the subroutine using a tail call
 
  DEX                    \ If token > 3, skip the following instruction
@@ -19637,8 +19640,9 @@
                         \ which is the next character of this token that we
                         \ want to print
 
- EOR #35                \ Tokens are stored in memory having been EOR'd with 35
-                        \ (see variable QQ18 for details), so we repeat the
+ EOR #RE                \ Tokens are stored in memory having been EOR'd with the
+                        \ value of RE - which is 35 for all versions of Elite
+                        \ except for NES, where RE is 62 - so we repeat the
                         \ EOR to get the actual character to print
 
  JSR TT27               \ Print the text token in A, which could be a letter,

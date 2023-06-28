@@ -77,6 +77,9 @@
  NRU% = 25              \ The number of planetary systems with extended system
                         \ description overrides in the RUTOK table
 
+ RE = &23               \ The obfuscation byte used to hide the recursive tokens
+                        \ table from crackers viewing the binary code
+
  VE = 0                 \ The obfuscation byte used to hide the extended tokens
                         \ table from crackers viewing the binary code, which is
                         \ zero in Elite-A as the token table is not obfuscated
@@ -5525,7 +5528,7 @@
 \       Name: NLIN3
 \       Type: Subroutine
 \   Category: Drawing lines
-\    Summary: Print a title and a horizontal line at row 19 to box it in
+\    Summary: Print a title and draw a horizontal line at row 19 to box it in
 \
 \ ------------------------------------------------------------------------------
 \
@@ -18929,7 +18932,7 @@
                         \ return from the subroutine using a tail call
 
  DEX                    \ If token = 2, this is control code 2 (current system
- BEQ ypl                \ name), so jump to ypl to print the current system name 
+ BEQ ypl                \ name), so jump to ypl to print the current system name
                         \ and return from the subroutine using a tail call
 
  DEX                    \ If token > 3, skip the following instruction
@@ -19491,8 +19494,9 @@
                         \ which is the next character of this token that we
                         \ want to print
 
- EOR #35                \ Tokens are stored in memory having been EOR'd with 35
-                        \ (see variable QQ18 for details), so we repeat the
+ EOR #RE                \ Tokens are stored in memory having been EOR'd with the
+                        \ value of RE - which is 35 for all versions of Elite
+                        \ except for NES, where RE is 62 - so we repeat the
                         \ EOR to get the actual character to print
 
  JSR TT27               \ Print the text token in A, which could be a letter,
@@ -30500,8 +30504,8 @@ ENDMACRO
  LDA new_ships,X        \ Set A to the character/token we want to fetch from
                         \ the new_ships table
 
- EOR #35                \ Tokens in the new_ships table are stored as token
-                        \ numbers that are not EOR'd with 35, but the extended
+ EOR #RE                \ Tokens in the new_ships table are stored as token
+                        \ numbers that are not EOR'd with RE, but the extended
                         \ text token table at QQ18 expects all tokens to be
                         \ obfuscated, so we add the obfuscation here
 
