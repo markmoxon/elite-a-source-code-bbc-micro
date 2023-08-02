@@ -19084,11 +19084,11 @@
  BNE P%+5
 
  JMP cpl                \ This token is control code 3 (selected system name)
-                        \ so jump to cpl to print the selected system name 
+                        \ so jump to cpl to print the selected system name
                         \ and return from the subroutine using a tail call
 
  DEX                    \ If token = 4, this is control code 4 (commander
- BEQ cmn                \ name), so jump to cmm to print the commander name 
+ BEQ cmn                \ name), so jump to cmm to print the commander name
                         \ and return from the subroutine using a tail call
 
  DEX                    \ If token = 5, this is control code 5 (fuel, newline,
@@ -27229,9 +27229,9 @@
  STA INWK+6             \ 127, and store in byte #6 (z_lo)
 
  TXA                    \ Set A to the random number in X and keep bits 0-3 and
- AND #%10001111         \ the bit 7 to get a number between -15 and +15, and
- STA INWK+29            \ store in byte #29 (roll counter) to give our ship a
-                        \ gentle roll with damping
+ AND #%10001111         \ the sign in bit 7 to get a number between -15 and +15,
+ STA INWK+29            \ and store in byte #29 (roll counter) to give our ship
+                        \ a gentle roll with damping
 
  ROR A                  \ The C flag is randomly set from the above call to Ze,
  AND #%10000111         \ so this sets A to a number between -7 and +7, which
@@ -36050,7 +36050,7 @@ ENDMACRO
 \ ------------------------------------------------------------------------------
 \
 \ This routine clears some space at the bottom of the screen and moves the text
-\ cursor to column 1, row 21. 
+\ cursor to column 1, row 21.
 \
 \ Specifically, it zeroes the following screen locations:
 \

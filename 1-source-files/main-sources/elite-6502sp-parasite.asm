@@ -2249,7 +2249,7 @@ ELSE
  EQUD &88130000         \ CASH = Amount of cash (500 Cr), #9-12
 ENDIF
 
- EQUB 60+(15 AND Q%)    \ QQ14 = Fuel level, #13
+ EQUB 60 + (15 AND Q%)  \ QQ14 = Fuel level, #13
 
  EQUB 0                 \ COK = Competition flags, #14
 
@@ -7185,7 +7185,7 @@ ENDIF
 .DL31
 
  JSR tube_write         \ Send the second parameter to the I/O processor:
-                        \ 
+                        \
                         \   * colour = A
 
  LDA SC                 \ Send the third parameter to the I/O processor:
@@ -12938,7 +12938,7 @@ ENDIF
 \       Name: update_pod
 \       Type: Subroutine
 \   Category: Dashboard
-\    Summary: Ensure the correct palette is shown for the dashboard/hyperspace 
+\    Summary: Ensure the correct palette is shown for the dashboard/hyperspace
 \             tunnel, by sending a write_pod command to the I/O processor
 \
 \ ******************************************************************************
@@ -14204,11 +14204,11 @@ ENDIF
  BNE P%+5
 
  JMP cpl                \ This token is control code 3 (selected system name)
-                        \ so jump to cpl to print the selected system name 
+                        \ so jump to cpl to print the selected system name
                         \ and return from the subroutine using a tail call
 
  DEX                    \ If token = 4, this is control code 4 (commander
- BEQ cmn                \ name), so jump to cmm to print the commander name 
+ BEQ cmn                \ name), so jump to cmm to print the commander name
                         \ and return from the subroutine using a tail call
 
  DEX                    \ If token = 5, this is control code 5 (fuel, newline,
@@ -34657,9 +34657,9 @@ ENDMACRO
 .SNE
 
  FOR I%, 0, 31
- 
+
   N = ABS(SIN((I% / 64) * 2 * PI))
- 
+
   IF N >= 1
    B% = 255
   ELSE
@@ -38073,7 +38073,7 @@ ENDIF
 
  ASL A                  \ Set X = X * 4, so we can use it as an index into the
  TAX                    \ ship_bytes table, which has 4 bytes per entry
- 
+
  LDA ship_flags,Y       \ Fetch the ship_flags byte for this ship position, i.e.
                         \ the Y-th entry in the ship_flags table, where the NEWB
                         \ flags live, so this sets A to the default NEWB flags
@@ -47344,7 +47344,7 @@ ENDIF
                         \   draw_blob(x, y, colour)
                         \
                         \ which will draw a dash of the specified colour and
-                        \ position on the dashboard 
+                        \ position on the dashboard
 
  LDA X1                 \ Send the first parameter to the I/O processor:
  JSR tube_write         \
@@ -51521,9 +51521,9 @@ ENDIF
                         \ 255 / 50 = 5.1)
 
  TXA                    \ Set A to the random number in X and keep bits 0-3 and
- AND #%10001111         \ the bit 7 to get a number between -15 and +15, and
- STA INWK+29            \ store in byte #29 (roll counter) to give our ship a
-                        \ gentle roll with damping
+ AND #%10001111         \ the sign in bit 7 to get a number between -15 and +15,
+ STA INWK+29            \ and store in byte #29 (roll counter) to give our ship
+                        \ a gentle roll with damping
 
  ROR A                  \ The C flag is randomly set from the above call to Ze,
  AND #%10000111         \ so this sets A to a number between -7 and +7, which
@@ -51710,7 +51710,7 @@ ENDIF
                         \   X = Y1 + 2
                         \
                         \ and we can use this as an index into the ship_bits
-                        \ table to fetch the relevant byte from the 32-bit  
+                        \ table to fetch the relevant byte from the 32-bit
                         \ number we want to match, which is at this location:
                         \
                         \   ship_bits + X
@@ -58686,7 +58686,7 @@ ENDIF
 \       Blueprint position in ship_data
 \       1 = allowed, 0 = not allowed
 \
-\       30        20        10        0         
+\       30        20        10        0
 \       |         |         |         |
 \       v         v         v         v
 \      10987654321098765432109876543210

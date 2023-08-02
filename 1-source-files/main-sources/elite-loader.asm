@@ -2502,7 +2502,7 @@ ELSE
  EQUD &88130000         \ CASH = Amount of cash (500 Cr), #9-12
 ENDIF
 
- EQUB 60+(15 AND Q%)    \ QQ14 = Fuel level, #13
+ EQUB 60 + (15 AND Q%)  \ QQ14 = Fuel level, #13
 
                         \ --- End of replacement ------------------------------>
 
@@ -2515,6 +2515,16 @@ ENDIF
 \ EQUB POW+(128 AND Q%) \ LASER = Front laser, #16
 \
 \ EQUB (POW+128) AND Q% \ LASER+1 = Rear laser, #17
+\
+\ EQUB 0                \ LASER+2 = Left laser, #18
+\
+\ EQUB 0                \ LASER+3 = Right laser, #19
+\
+\ EQUW 0                \ These bytes appear to be unused (they were originally
+\                       \ used for up/down lasers, but they were dropped),
+\                       \ #20-21
+\
+\ EQUB 22 + (15 AND Q%) \ CRGO = Cargo capacity, #22
 
                         \ --- And replaced by: -------------------------------->
 
@@ -2522,21 +2532,9 @@ ENDIF
 
  EQUB &9C AND Q%        \ LASER+1 = Rear laser, #17
 
-                        \ --- End of replacement ------------------------------>
-
  EQUB 0                 \ LASER+2 = Left laser, #18
 
  EQUB 0                 \ LASER+3 = Right laser, #19
-
-                        \ --- Mod: Code removed for Elite-A: ------------------>
-
-\ EQUW 0                \ These bytes appear to be unused (they were originally
-\                       \ used for up/down lasers, but they were dropped),
-\                       \ #20-21
-\
-\ EQUB 22+(15 AND Q%)   \ CRGO = Cargo capacity, #22
-
-                        \ --- And replaced by: -------------------------------->
 
  EQUB 0                 \ This byte appears to be unused, #20
 
@@ -2590,7 +2588,7 @@ ENDIF
 
 \ EQUD 0                \ These four bytes appear to be unused, #47-50
 \
-\ EQUB 3+(Q% AND 1)     \ NOMSL = Number of missiles, #51
+\ EQUB 3 + (Q% AND 1)   \ NOMSL = Number of missiles, #51
 
                         \ --- And replaced by: -------------------------------->
 
