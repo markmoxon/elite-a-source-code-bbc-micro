@@ -1198,6 +1198,7 @@
                         \
                         \ See the deep dives on "Galaxy and system seeds" and
                         \ "Twisting the system seeds" for more details
+
 .CASH
 
  SKIP 4                 \ Our current cash pot
@@ -1235,7 +1236,7 @@
                         \ stored as galaxy 0 internally
                         \
                         \ The galaxy number increases by one every time a
-                        \ galactic hyperdrive is used, and wraps back round to
+                        \ galactic hyperdrive is used, and wraps back around to
                         \ the start after eight galaxies
 
 .LASER
@@ -6685,7 +6686,7 @@
 \
 \ ------------------------------------------------------------------------------
 \
-\ This is the standard system beep as made by the VDU 7 statement in BBC BASIC.
+\ This is the standard system beep, as made by the ASCII 7 "BELL" control code.
 \
 \ ******************************************************************************
 
@@ -11486,7 +11487,7 @@
  BEQ TT49               \ If the character is null, we've reached the end of
                         \ this token, so jump to TT49
 
- INY                    \ Increment character pointer and loop back round for
+ INY                    \ Increment character pointer and loop back around for
  BNE TT51               \ the next character in this token, assuming Y hasn't
                         \ yet wrapped around to 0
 
@@ -13585,7 +13586,7 @@
 \
 \   * Process more key presses (red function keys, docked keys etc.)
 \
-\ It also support joining the main loop with a key already "pressed", so we can
+\ It also supports joining the main loop with a key already "pressed", so we can
 \ jump into the main game loop to perform a specific action. In practice, this
 \ is used when we enter the docking bay in BAY to display Status Mode (red key
 \ f8), and when we finish buying or selling cargo in BAY2 to jump to the

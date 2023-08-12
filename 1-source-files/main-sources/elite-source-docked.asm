@@ -1238,6 +1238,7 @@
                         \
                         \ See the deep dives on "Galaxy and system seeds" and
                         \ "Twisting the system seeds" for more details
+
 .CASH
 
  SKIP 4                 \ Our current cash pot
@@ -1275,7 +1276,7 @@
                         \ stored as galaxy 0 internally
                         \
                         \ The galaxy number increases by one every time a
-                        \ galactic hyperdrive is used, and wraps back round to
+                        \ galactic hyperdrive is used, and wraps back around to
                         \ the start after eight galaxies
 
 .LASER
@@ -6689,8 +6690,8 @@
  JSR plf                \ Print the text token in A (which contains our legal
                         \ status) followed by a newline
 
- LDA #16                \ Print recursive token 130 ("RATING:")
- JSR spc
+ LDA #16                \ Print recursive token 130 ("RATING:") followed by a
+ JSR spc                \ space
 
  LDA TALLY+1            \ Fetch the high byte of the kill tally, and if it is
  BNE st4                \ not zero, then we have more than 256 kills, so jump
@@ -8200,7 +8201,7 @@
 \
 \ ------------------------------------------------------------------------------
 \
-\ This is the standard system beep as made by the VDU 7 statement in BBC BASIC.
+\ This is the standard system beep, as made by the ASCII 7 "BELL" control code.
 \
 \ ******************************************************************************
 
@@ -10034,7 +10035,7 @@
  STA RAT2               \ Set RAT2 = %10000000, so the yaw calls in HAL5 below
                         \ are negative
 
- LDA #&B                \ Set the ship line heap pointer in INWK(35 34) to point
+ LDA #&0B               \ Set the ship line heap pointer in INWK(34 33) to point
  STA INWK+34            \ to &0B00
 
  JSR DORND              \ We now perform a random number of small angle (3.6
@@ -19447,7 +19448,7 @@
  BEQ TT49               \ If the character is null, we've reached the end of
                         \ this token, so jump to TT49
 
- INY                    \ Increment character pointer and loop back round for
+ INY                    \ Increment character pointer and loop back around for
  BNE TT51               \ the next character in this token, assuming Y hasn't
                         \ yet wrapped around to 0
 
@@ -22434,7 +22435,7 @@
 \
 \   * Process more key presses (red function keys, docked keys etc.)
 \
-\ It also support joining the main loop with a key already "pressed", so we can
+\ It also supports joining the main loop with a key already "pressed", so we can
 \ jump into the main game loop to perform a specific action. In practice, this
 \ is used when we enter the docking bay in BAY to display Status Mode (red key
 \ f8), and when we finish buying or selling cargo in BAY2 to jump to the
