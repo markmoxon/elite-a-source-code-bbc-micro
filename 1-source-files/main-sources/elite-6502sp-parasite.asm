@@ -39022,6 +39022,9 @@ ENDIF
 
  LDA XX15+2             \ Set A to the z-axis of the vector
 
+                        \ This version of Elite omits check 3 (which would check
+                        \ the sign of the z-axis)
+
  CMP #86                \ 4. If z-axis < 86, jump to MA62 to fail docking, as
  BCC MA62               \ we are not in the 26.3 degree safe cone of approach
 
@@ -39559,7 +39562,7 @@ ENDIF
 
  LDA MCNT               \ Fetch the main loop counter and calculate MCNT mod 32,
  AND #31                \ jumping to MA93 if it is on-zero (so the following
- BNE MA93               \ code only runs every 32 iterations of the main loop
+ BNE MA93               \ code only runs every 32 iterations of the main loop)
 
  LDA SSPR               \ If we are inside the space station safe zone, jump to
  BNE MA23S              \ MA23S to skip the following, as we already have a
@@ -40102,13 +40105,15 @@ ENDIF
                         \ to skip the following negation
 
  EOR #%01111111         \ The x-coordinate offset is negative, so flip all the
- CLC                    \ bits apart from the sign bit and add 1, to negate
- ADC #1                 \ it to a positive number, i.e. A is now |X1|
+ CLC                    \ bits apart from the sign bit and add 1, to convert it
+ ADC #1                 \ from a sign-magnitude number to a signed number
 
 .PX1
 
- EOR #%10000000         \ Set X = -|A|
- TAX                    \       = -|X1|
+ EOR #%10000000         \ Set X = X1 + 127
+ TAX                    \
+                        \ So X is now the offset converted to an x-coordinate,
+                        \ centred on x-coordinate 127
 
  LDA Y1                 \ Fetch the y-coordinate offset into A and clear the
  AND #%01111111         \ sign bit, so A = |Y1|
@@ -40128,11 +40133,11 @@ ENDIF
 
 .PX2
 
- STA T                  \ Set A = 97 - A
- LDA #97                \       = 97 - |Y1|
- SBC T                  \
-                        \ so if Y is positive we display the point up from the
-                        \ centre, while a negative Y means down from the centre
+ STA T                  \ Set A = 97 - Y1
+ LDA #97                \
+ SBC T                  \ So if Y is positive we display the point up from the
+                        \ centre at y-coordinate 97, while a negative Y means
+                        \ down from the centre
 
  JMP PIXEL              \ Jump to PIXEL to draw the stardust at the screen
                         \ coordinates in (X, A), returning from the subroutine
