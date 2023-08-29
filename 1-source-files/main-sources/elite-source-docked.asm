@@ -10144,9 +10144,7 @@
 \
 \ This routine draws a line to the right, starting with the third pixel of the
 \ pixel row at screen address SC(1 0), and aborting if we bump into something
-\ that's already on-screen. HAL2 draws from the left edge of the screen to the
-\ halfway point, and then HAL3 takes over to draw from the halfway point across
-\ the right half of the screen.
+\ that's already on-screen.
 \
 \ Other entry points:
 \
