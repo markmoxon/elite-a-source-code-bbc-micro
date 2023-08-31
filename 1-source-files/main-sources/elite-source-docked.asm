@@ -18070,12 +18070,8 @@
 \       Name: dn
 \       Type: Subroutine
 \   Category: Text
-\    Summary: Print the amount of cash and beep
-\
-\ ------------------------------------------------------------------------------
-\
-\ Print the amount of money in the cash pot, then make a short, high beep and
-\ delay for 1 second.
+\    Summary: Print the amount of money we have left in the cash pot, then make
+\             a short, high beep and delay for 1 second
 \
 \ ******************************************************************************
 
