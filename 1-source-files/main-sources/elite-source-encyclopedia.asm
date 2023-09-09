@@ -510,7 +510,7 @@
 
 .QQ11
 
- SKIP 1                 \ The number of the current view:
+ SKIP 1                 \ The type of the current view:
                         \
                         \   0   = Space view
                         \   1   = Title screen
@@ -7899,7 +7899,7 @@
 \.PDL1
 \
 \ LDA RUPLA-1,Y         \ Fetch the Y-th byte from RUPLA-1 into A (we use
-\                       \ RUPLA-1 because Y is looping from 26 to 1
+\                       \ RUPLA-1 because Y is looping from 26 to 1)
 \
 \ CMP ZZ                \ If A doesn't match the system whose description we
 \ BNE PD2               \ are printing (in ZZ), jump to PD2 to keep looping
@@ -9325,7 +9325,7 @@
  BCC TT87               \ won't spill out of the bottom of the screen
 
  LDX QQ11               \ A >= 152, so we need to check whether this will fit in
-                        \ this view, so fetch the view number
+                        \ this view, so fetch the view type
 
  BMI TT87               \ If this is the Short-range Chart then the y-coordinate
                         \ is fine, so skip to TT87
