@@ -1269,10 +1269,10 @@
  SKIP 4                 \ The specifications of the lasers fitted to each of the
                         \ four space views:
                         \
-                        \   * Byte #0 = front view (red key f0)
-                        \   * Byte #1 = rear view (red key f1)
-                        \   * Byte #2 = left view (red key f2)
-                        \   * Byte #3 = right view (red key f3)
+                        \   * Byte #0 = front view
+                        \   * Byte #1 = rear view
+                        \   * Byte #2 = left view
+                        \   * Byte #3 = right view
                         \
                         \ For each of the views:
                         \
@@ -1497,7 +1497,8 @@
                         \   Deadly          = 10 to 24    = 2560 to 6399 kills
                         \   Elite           = 25 and up   = 6400 kills and up
                         \
-                        \ You can see the rating calculation in STATUS
+                        \ You can see the rating calculation in the STATUS
+                        \ subroutine
 
 .SVC
 
@@ -17248,7 +17249,7 @@
  LDA #15                \ The hyperspace countdown starts from 15, so set A to
                         \ 15 so we can set the two hyperspace counters
 
- STA QQ22+1             \ Set the number in QQ22+1 to 15, which is the number
+ STA QQ22+1             \ Set the number in QQ22+1 to A, which is the number
                         \ that's shown on-screen during the hyperspace countdown
 
  STA QQ22               \ Set the number in QQ22 to 15, which is the internal
@@ -21771,12 +21772,8 @@
 \       Name: ECBLB2
 \       Type: Subroutine
 \   Category: Dashboard
-\    Summary: Start up the E.C.M. (indicator, start countdown and make sound)
-\
-\ ------------------------------------------------------------------------------
-\
-\ Light up the E.C.M. indicator bulb on the dashboard, set the E.C.M. countdown
-\ timer to 32, and start making the E.C.M. sound.
+\    Summary: Start up the E.C.M. (light up the indicator, start the countdown
+\             and make the E.C.M. sound)
 \
 \ ******************************************************************************
 
@@ -24181,7 +24178,7 @@
                         \ by checking the low byte of the result in X against
                         \ 2 * #Y - 1, and returning the C flag from this
                         \ comparison. The constant #Y is the y-coordinate of the
-                        \ mid-point of the space view, so 2 * #Y - 1 is 191, the
+                        \ mid-point of the space view, so 2 * #Y - 1, the
                         \ y-coordinate of the bottom pixel row of the space
                         \ view. So this does the following:
                         \
@@ -29197,7 +29194,8 @@
 \       Name: DOKEY
 \       Type: Subroutine
 \   Category: Keyboard
-\    Summary: Scan for the seven primary flight controls
+\    Summary: Scan for the seven primary flight controls and apply the docking
+\             computer manoeuvring code
 \  Deep dive: The key logger
 \             The docking computer
 \
@@ -36360,7 +36358,7 @@ ENDMACRO
                         \
                         \   X1 = 123 + (x_sign x_hi)
 
- LDA INWK+1             \ Set x_hi
+ LDA INWK+1             \ Set A = x_hi
 
  CLC                    \ Clear the C flag so we can do addition below
 
@@ -36368,15 +36366,15 @@ ENDMACRO
 
  BPL SC2                \ If x_sign is positive, skip the following
 
- EOR #%11111111         \ x_sign is negative, so flip the bits in A and subtract
- ADC #1                 \ 1 to make it a negative number (bit 7 will now be set
+ EOR #%11111111         \ x_sign is negative, so flip the bits in A and add 1
+ ADC #1                 \ to make it a negative number (bit 7 will now be set
                         \ as we confirmed above that bits 6 and 7 are clear). So
                         \ this gives A the sign of x_sign and gives it a value
                         \ range of -63 (%11000001) to 0
 
 .SC2
 
- ADC #123               \ Set X1 = 123 + x_hi
+ ADC #123               \ Set X1 = 123 + (x_sign x_hi)
  STA X1
 
                         \ Next, we convert the z_hi coordinate of the ship into
@@ -36394,7 +36392,7 @@ ENDMACRO
  LSR A                  \
  LSR A                  \ So A is in the range 0-15
 
- CLC                    \ Clear the C flag
+ CLC                    \ Clear the C flag for the addition below
 
  LDX INWK+8             \ Set X = z_sign
 

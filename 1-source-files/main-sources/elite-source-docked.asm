@@ -1284,10 +1284,10 @@
  SKIP 4                 \ The specifications of the lasers fitted to each of the
                         \ four space views:
                         \
-                        \   * Byte #0 = front view (red key f0)
-                        \   * Byte #1 = rear view (red key f1)
-                        \   * Byte #2 = left view (red key f2)
-                        \   * Byte #3 = right view (red key f3)
+                        \   * Byte #0 = front view
+                        \   * Byte #1 = rear view
+                        \   * Byte #2 = left view
+                        \   * Byte #3 = right view
                         \
                         \ For each of the views:
                         \
@@ -1512,7 +1512,8 @@
                         \   Deadly          = 10 to 24    = 2560 to 6399 kills
                         \   Elite           = 25 and up   = 6400 kills and up
                         \
-                        \ You can see the rating calculation in STATUS
+                        \ You can see the rating calculation in the STATUS
+                        \ subroutine
 
 .SVC
 
@@ -16310,7 +16311,7 @@
 \ LDA #15               \ The hyperspace countdown starts from 15, so set A to
 \                       \ 15 so we can set the two hyperspace counters
 \
-\ STA QQ22+1            \ Set the number in QQ22+1 to 15, which is the number
+\ STA QQ22+1            \ Set the number in QQ22+1 to A, which is the number
 \                       \ that's shown on-screen during the hyperspace countdown
 \
 \ STA QQ22              \ Set the number in QQ22 to 15, which is the internal
@@ -21557,7 +21558,7 @@
                         \ by checking the low byte of the result in X against
                         \ 2 * #Y - 1, and returning the C flag from this
                         \ comparison. The constant #Y is the y-coordinate of the
-                        \ mid-point of the space view, so 2 * #Y - 1 is 191, the
+                        \ mid-point of the space view, so 2 * #Y - 1, the
                         \ y-coordinate of the bottom pixel row of the space
                         \ view. So this does the following:
                         \
