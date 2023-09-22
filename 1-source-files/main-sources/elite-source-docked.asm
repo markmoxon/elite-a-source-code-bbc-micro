@@ -944,8 +944,7 @@
                         \ of universe
                         \
                         \ The number of ships of type X in the local bubble is
-                        \ stored at MANY+X, so the number of Sidewinders is at
-                        \ MANY+1, the number of Mambas is at MANY+2, and so on
+                        \ stored at MANY+X
                         \
                         \ See the deep dive on "Ship blueprints" for a list of
                         \ ship types
@@ -10962,7 +10961,7 @@
 \       Name: Unused duplicate of MULTU, Removed
 \       Type: Subroutine
 \   Category: Maths (Arithmetic)
-\    Summary: Unused duplicate of the MULTU routine
+\    Summary: An unused duplicate of the MULTU routine
 \
 \ ------------------------------------------------------------------------------
 \
@@ -11097,7 +11096,7 @@
 \       Name: MUT3, Removed
 \       Type: Subroutine
 \   Category: Maths (Arithmetic)
-\    Summary: Unused routine that does the same as MUT2
+\    Summary: An unused routine that does the same as MUT2
 \
 \ ------------------------------------------------------------------------------
 \
@@ -22020,7 +22019,7 @@
 
  STA INWK+22            \ Set byte #22 = sidev_x_hi = 96 = 1
 
- ORA #128               \ Flip the sign of A to represent a -1
+ ORA #%10000000         \ Flip the sign of A to represent a -1
 
  STA INWK+14            \ Set byte #14 = nosev_z_hi = -96 = -1
 
@@ -23324,7 +23323,7 @@ ENDIF
 
  LDA #&51               \ Set 6522 User VIA output register ORB (SHEILA &60) to
  STA VIA+&60            \ the Delta 14B joystick button in the middle column
-                        \ (upper nibble &5) and top row (lower nibble &1), which
+                        \ (high nibble &5) and top row (low nibble &1), which
                         \ corresponds to the fire button
 
                         \ --- End of added code ------------------------------->
@@ -24628,17 +24627,20 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: Unused routine, Removed
+\       Name: GTNMES, Removed
 \       Type: Subroutine
 \   Category: Utility routines
-\    Summary: This code appears to be unused
+\    Summary: An unused routine that fetches the name of a commander file
 \
 \ ******************************************************************************
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ JSR GTNME             \ This code appears to be unused, but it would fetch the
-\ RTS                   \ name of a commander file to save or load
+\.GTNMES
+\
+\ JSR GTNME             \ Fetch the name of a commander file to save or load
+\
+\ RTS                   \ Return from the subroutine
 
                         \ --- End of removed code ----------------------------->
 

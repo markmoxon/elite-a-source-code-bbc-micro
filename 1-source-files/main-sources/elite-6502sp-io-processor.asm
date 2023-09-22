@@ -2732,7 +2732,7 @@
 
  LDA #&51               \ Set 6522 User VIA output register ORB (SHEILA &60) to
  STA VIA+&60            \ the Delta 14B joystick button in the middle column
-                        \ (upper nibble &5) and top row (lower nibble &1), which
+                        \ (high nibble &5) and top row (low nibble &1), which
                         \ corresponds to the fire button
 
  LDA VIA+&40            \ Read 6522 System VIA input register IRB (SHEILA &40)
@@ -3699,7 +3699,7 @@
 \   &5 = %101 = middle column
 \   &3 = %011 = right column
 \
-\ while the lower nibble gives the row:
+\ while the low nibble gives the row:
 \
 \   &1 = %0001 = top row
 \   &2 = %0010 = second row
@@ -3841,7 +3841,7 @@
 
  BEQ b_pressed          \ In the above we AND'd the result from the user port
                         \ with the bottom four bits of the table value (the
-                        \ lower nibble). The lower nibble in b_table contains
+                        \ low nibble). The low nibble in b_table contains
                         \ a 1 in the relevant position for that row that
                         \ corresponds with the clear bit in the response from
                         \ the user port, so if we AND the two together and get
@@ -3858,7 +3858,7 @@
                         \ and we write %0011 in the first pass (when A = 0) to
                         \ set the right column for the rear socket joystick
                         \
-                        \ Now for the row. The lower nibble of the &34 value
+                        \ Now for the row. The low nibble of the &34 value
                         \ from b_table contains the row, so that's &4 = %0100.
                         \ When we read the user port, then we will fetch %1011
                         \ from VIA+&60 if the button in the third row is being
