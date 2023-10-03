@@ -20905,7 +20905,7 @@ ENDMACRO
 
  ETOK 154               \ Token 8:      "{single cap}COMMANDER'S NAME? "
  ECHR '`'               \
- ECHR 'S'               \ Encoded as:   "[154][39]S[200]"
+ ECHR 'S'               \ Encoded as:   "[154]'S[200]"
  ETOK 200
  EQUB VE
 
@@ -20915,7 +20915,7 @@ ENDMACRO
 
  EJMP 22                \ Token 10:     "{tab 16}"
  EQUB VE                \
-                        \ Encoded as:   "{22}"
+                        \ Encoded as:   "{22}" ETWO 'L', 'E'
 
  EQUB VE                \ Token 11:     ""
                         \
@@ -21277,7 +21277,7 @@ ENDMACRO
 
  ETOK 175               \ Token 63:     "ITS INHABITANTS' [165-169] [36-40]"
  ETOK 193               \
- ECHR 'S'               \ Encoded as:   "[175][193]S[39] [7?] [8?]"
+ ECHR 'S'               \ Encoded as:   "[175][193]S' [7?] [8?]"
  ECHR '`'
  ECHR ' '
  ERND 7
@@ -21499,7 +21499,7 @@ ENDMACRO
  ECHR 'H'               \                KNAVE"
  ETWO 'O', 'R'          \
  ETWO 'E', 'S'          \ Encoded as:   "WH<253><237><223> <247><221><229> HEAD
- ETWO 'O', 'N'          \                [198]F<249>P E<238>[39]D KNA<250>"
+ ETWO 'O', 'N'          \                [198]F<249>P E<238>'D KNA<250>"
  ECHR ' '
  ETWO 'B', 'E'
  ETWO 'E', 'T'

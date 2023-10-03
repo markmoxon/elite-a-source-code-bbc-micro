@@ -32448,7 +32448,7 @@ ENDMACRO
 
  ETOK 154               \ Token 8:      "{single cap}COMMANDER'S NAME? "
  ECHR '`'               \
- ECHR 'S'               \ Encoded as:   "[154][39]S[200]"
+ ECHR 'S'               \ Encoded as:   "[154]'S[200]"
  ETOK 200
  EQUB VE
 
@@ -32511,7 +32511,7 @@ ENDMACRO
  ETWO 'O', 'U'          \                {19}C<223><222>RICT<253>, E<254>IP[196]
  ECHR 'L'               \                WI<226>[208]TOP <218>CR<221>[210]SHIELD
  ECHR 'D'               \                 G<246><244><245><253>[204]UNF<253>TUN
- ECHR ' '               \                <245>ELY <219>[39]S <247><246> <222>OL
+ ECHR ' '               \                <245>ELY <219>'S <247><246> <222>OL
  ECHR 'L'               \                <246>[204]{22}<219> W<246>T MISS[195]
  ECHR 'I'               \                FROM <217>R [207] Y<238>D <223> {19}
  ECHR 'K'               \                <230><244> FI<250> M<223><226>S AGO
@@ -32836,14 +32836,14 @@ ENDMACRO
  ECHR 'E'               \                {left align}{tab 6}{all caps}  MESSAGE
  ECHR ' '               \                ENDS{wait for key press}"
  ECHR 'H'               \
- ECHR 'A'               \ Encoded as:   "{25}{9}{23}{14}{2}  <245>T<246>
- ETWO 'V', 'E'          \                <251><223>[213]. {19}WE HA<250> NE[196]
- ECHR ' '               \                OF [179]R <218>RVIC<237> AGA<240>[204]
- ECHR 'N'               \                IF [179] W<217>LD <247> <235> GOOD AS
- ECHR 'E'               \                [201]GO[201]{19}<233><244><241> [179]
- ETOK 196               \                 W<220>L <247> BRIEF<252>[204]IF SUC
- ECHR 'O'               \                <233>SSFUL, [179] W<220>L <247> WELL
- ECHR 'F'               \                 <242>W<238>D<252>[212]{24}"
+ ECHR 'A'               \ Encoded as:   "{25}{9}{23}{14}{2}  <245>T<246><251>
+ ETWO 'V', 'E'          \                <223>[213]. {19}WE HA<250> NE[196]OF
+ ECHR ' '               \                 [179]R <218>RVIC<237> AGA<240>[204]IF
+ ECHR 'N'               \                 [179] W<217>LD <247> <235> GOOD AS
+ ECHR 'E'               \                [201]GO[201]{19}<233><244><241> [179] W
+ ETOK 196               \                <220>L <247> BRIEF<252>[204]IF SUC<233>
+ ECHR 'O'               \                SSFUL, [179] W<220>L <247> WELL <242>W
+ ECHR 'F'               \                <238>D<252>[212]{24}"
  ECHR ' '
  ETOK 179
  ECHR 'R'
@@ -33399,7 +33399,7 @@ ENDMACRO
 
  ETOK 175               \ Token 63:     "ITS INHABITANTS' [165-169] [36-40]"
  ETOK 193               \
- ECHR 'S'               \ Encoded as:   "[175][193]S[39] [7?] [8?]"
+ ECHR 'S'               \ Encoded as:   "[175][193]S' [7?] [8?]"
  ECHR '`'
  ECHR ' '
  ERND 7
@@ -33621,7 +33621,7 @@ ENDMACRO
  ECHR 'H'               \                KNAVE"
  ETWO 'O', 'R'          \
  ETWO 'E', 'S'          \ Encoded as:   "WH<253><237><223> <247><221><229> HEAD
- ETWO 'O', 'N'          \                [198]F<249>P E<238>[39]D KNA<250>"
+ ETWO 'O', 'N'          \                [198]F<249>P E<238>'D KNA<250>"
  ECHR ' '
  ETWO 'B', 'E'
  ETWO 'E', 'T'
@@ -34544,8 +34544,8 @@ ENDMACRO
  EJMP 2                 \ Token 211:    "{sentence case} HER MAJESTY'S SPACE
  ECHR ' '               \                 NAVY{lower case}"
  ECHR 'H'               \
- ETWO 'E', 'R'          \ Encoded as:   "{2} H<244> <239>J<237>TY[39]S SPA<233>
- ECHR ' '               \                 NAVY{13}"
+ ETWO 'E', 'R'          \ Encoded as:   "{2} H<244> <239>J<237>TY'S SPA<233> NAV
+ ECHR ' '               \                Y{13}"
  ETWO 'M', 'A'
  ECHR 'J'
  ETWO 'E', 'S'
@@ -34771,19 +34771,19 @@ ENDMACRO
 \ ETOK 204              \                [204]{24}{9}{29}I{13} HA<250> OBTA
 \ ECHR 'A'              \                <240>[196][147]DEF<246><233> P<249>NS F
 \ ECHR 'S'              \                <253> <226>EIR {19}HI<250> {19}W<253>LD
-\ ECHR ' '              \                S[204][147]<247><221><229>S K<227>W WE
-\ ETOK 179              \                [39]<250> GOT <235>ME<226>[195]BUT
-\ ECHR ' '              \                 <227>T WH<245>[204]IF {19}I T<248>NSM
-\ ECHR 'K'              \                <219> [147]P<249>NS[201]<217>R BA<218>
-\ ETWO 'N', 'O'         \                 <223> {19}<234><242><248> <226>EY[39]L
-\ ECHR 'W'              \                L <240>T<244><233>PT [147]TR<255>SMISSI
-\ ECHR ','              \                <223>. {19}I NE<252>[208][207][201]
-\ ECHR ' '              \                <239>KE [147]RUN[204][179][39]<242> E
-\ ETOK 147              \                <229>CT<252>[204][147]P<249>NS A<242>
-\ EJMP 19               \                 UNIPUL<218> COD[196]WI<226><240> [148]
-\ ECHR 'N'              \                TR<255>SMISSI<223>[204]{8}[179] W<220>L
-\ ECHR 'A'              \                 <247> PAID[204]    {19}GOOD LUCK [154]
-\ ECHR 'V'              \                [212]{24}"
+\ ECHR ' '              \                S[204][147]<247><221><229>S K<227>W WE'
+\ ETOK 179              \                <250> GOT <235>ME<226>[195]BUT <227>T W
+\ ECHR ' '              \                H<245>[204]IF {19}I T<248>NSM<219>
+\ ECHR 'K'              \                 [147]P<249>NS[201]<217>R BA<218> <223>
+\ ETWO 'N', 'O'         \                 {19}<234><242><248> <226>EY'LL <240>T
+\ ECHR 'W'              \                <244><233>PT [147]TR<255>SMISSI<223>.
+\ ECHR ','              \                 {19}I NE<252>[208][207][201]<239>KE
+\ ECHR ' '              \                 [147]RUN[204][179]'<242> E<229>CT<252>
+\ ETOK 147              \                [204][147]P<249>NS A<242> UNIPUL<218> C
+\ EJMP 19               \                OD[196]WI<226><240> [148]TR<255>SMISSI
+\ ECHR 'N'              \                <223>[204]{8}[179] W<220>L <247> PAID
+\ ECHR 'A'              \                [204]    {19}GOOD LUCK [154][212]{24}"
+\ ECHR 'V'
 \ ECHR 'Y'
 
                         \ --- And replaced by: -------------------------------->
@@ -34803,19 +34803,19 @@ ENDMACRO
  ECHR 'A'               \                [204]{24}{9}{29}I{13} HA<250> OBTA
  ECHR 'S'               \                <240>[196][147]DEF<246><233> P<249>NS F
  ECHR ' '               \                <253> <226>EIR {19}HI<250> {19}W<253>LD
- ETOK 179               \                S[204][147]<247><221><229>S K<227>W WE
- ECHR ' '               \                [39]<250> GOT <235>ME<226>[195]BUT
- ECHR 'K'               \                 <227>T WH<245>[204]IF {19}I T<248>NSM
- ETWO 'N', 'O'          \                <219> [147]P<249>NS[201]<217>R BA<218>
- ECHR 'W'               \                 <223> {19}<234><242><248> <226>EY[39]L
- ECHR ','               \                L <240>T<244><233>PT [147]TR<255>SMISSI
- ECHR ' '               \                <223>. {19}I NE<252>[208][207][201]
- ETOK 147               \                <239>KE [147]RUN[204][179][39]<242> E
- EJMP 19                \                <229>CT<252>[204][147]P<249>NS A<242>
- ECHR 'N'               \                 UNIPUL<218> COD[196]WI<226><240> [148]
- ECHR 'A'               \                TR<255>SMISSI<223>[204]{8}[179] W<220>L
- ECHR 'V'               \                 <247> PAID[204]    {19}GOOD LUCK [154]
- ECHR 'Y'               \                [212]{24}"
+ ETOK 179               \                S[204][147]<247><221><229>S K<227>W WE'
+ ECHR ' '               \                <250> GOT <235>ME<226>[195]BUT <227>T W
+ ECHR 'K'               \                H<245>[204]IF {19}I T<248>NSM<219>
+ ETWO 'N', 'O'          \                 [147]P<249>NS[201]<217>R BA<218> <223>
+ ECHR 'W'               \                 {19}<234><242><248> <226>EY'LL <240>T
+ ECHR ','               \                <244><233>PT [147]TR<255>SMISSI<223>.
+ ECHR ' '               \                 {19}I NE<252>[208][207][201]<239>KE
+ ETOK 147               \                 [147]RUN[204][179]'<242> E<229>CT<252>
+ EJMP 19                \                [204][147]P<249>NS A<242> UNIPUL<218> C
+ ECHR 'N'               \                OD[196]WI<226><240> [148]TR<255>SMISSI
+ ECHR 'A'               \                <223>[204]{8}[179] W<220>L <247> PAID
+ ECHR 'V'               \                [204]    {19}GOOD LUCK [154][212]{24}"
+ ECHR 'Y'
 
                         \ --- End of replacement ------------------------------>
 
@@ -34954,16 +34954,18 @@ ENDMACRO
  ECHR 'M'
  ECHR 'E'
  ECHR ' '
- ECHR 'S'
- ECHR 'Y'
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
+\ ECHR 'S'
+\ ECHR 'Y'
 \ ECHR 'S'
 \ ECHR 'T'
 
                         \ --- And replaced by: -------------------------------->
 
+ ECHR 'S'
+ ECHR 'Y'
  ETWO 'S', 'T'
 
                         \ --- End of replacement ------------------------------>
@@ -35238,7 +35240,7 @@ ENDMACRO
  ECHR 'E'               \                 {single cap}YOU HAVE SERVED US WELL
  ECHR 'L'               \                AND WE SHALL REMEMBER.{cr}
  ECHR 'L'               \                 {single cap}WE DID NOT EXPECT THE
- ECHR ' '               \                 {single cap}THARGOIDS TO FIND OUT
+ ECHR ' '               \                {single cap}THARGOIDS TO FIND OUT
  ECHR 'D'               \                ABOUT YOU.{cr}
  ETWO 'O', 'N'          \                 {single cap}FOR THE MOMENT PLEASE
  ECHR 'E'               \                ACCEPT THIS {single cap}NAVY {standard
@@ -35261,6 +35263,9 @@ ENDMACRO
 \ ECHR 'U'              \                NAVY {6}[114]{5} AS PAYM<246>T[212]
 \ ECHR 'S'              \                {24}"
 \ ECHR ' '
+\ ECHR 'W'
+\ ECHR 'E'
+\ ECHR 'L'
 
                         \ --- And replaced by: -------------------------------->
 
@@ -35271,12 +35276,12 @@ ENDMACRO
  ETOK 196               \                 [147]MOM<246>T P<229>A<218> AC<233>PT
  ETWO 'U', 'S'          \                 [148]{19}NAVY {6}[114]{5} AS PAYM<246>
  ECHR ' '               \                T[212]{24}"
-
-                        \ --- End of replacement ------------------------------>
-
  ECHR 'W'
  ECHR 'E'
  ECHR 'L'
+
+                        \ --- End of replacement ------------------------------>
+
  ECHR 'L'
  ETOK 178
  ECHR 'W'
@@ -35294,17 +35299,20 @@ ENDMACRO
  ECHR 'B'
  ETWO 'E', 'R'
  ETOK 204
- ECHR 'W'
- ECHR 'E'
- ECHR ' '
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
+\ ECHR 'W'
+\ ECHR 'E'
+\ ECHR ' '
 \ ECHR 'D'
 \ ECHR 'I'
 
                         \ --- And replaced by: -------------------------------->
 
+ ECHR 'W'
+ ECHR 'E'
+ ECHR ' '
  ETWO 'D', 'I'
 
                         \ --- End of replacement ------------------------------>
@@ -36012,8 +36020,8 @@ ENDMACRO
  ECHR ' '               \                LASERS DIDN'T EVEN SCRATCH THE [91-95]"
  ETOK 207               \
  ECHR ' '               \ Encoded as:   "[24?] [207] W<246>T F<253> ME <245>
- ECHR 'W'               \                 A<236><238>. MY <249>S<244>S <241>DN
- ETWO 'E', 'N'          \                 [39]TEV<246> SC<248>TCH [147][24?]"
+ ECHR 'W'               \                 A<236><238>. MY <249>S<244>S <241>DN'T
+ ETWO 'E', 'N'          \                 EV<246> SC<248>TCH [147][24?]"
  ECHR 'T'
  ECHR ' '
  ECHR 'F'
@@ -36183,8 +36191,8 @@ ENDMACRO
  ECHR ' '               \                IF YOU LIKE. HE'S AT ORARRA"
  ECHR 'C'               \
  ETWO 'A', 'N'          \ Encoded as:   "[179] C<255> TACK<229> [147][13?] [24?]
- ECHR ' '               \                 IF [179] LIKE. HE[39]S <245> <253>
- ECHR 'T'               \                <238><248>"
+ ECHR ' '               \                 IF [179] LIKE. HE'S <245> <253><238>
+ ECHR 'T'               \                <248>"
  ECHR 'A'
  ECHR 'C'
  ECHR 'K'
@@ -36323,8 +36331,8 @@ ENDMACRO
  ETWO 'T', 'H'          \ Token 24:     "THERE'S A REAL [91-95] PIRATE OUT
  ETWO 'E', 'R'          \                THERE"
  ECHR 'E'               \
- ECHR '`'               \ Encoded as:   "<226><244>E[39]S[208]<242><228> [24?] P
- ECHR 'S'               \                I<248>TE <217>T <226><244>E"
+ ECHR '`'               \ Encoded as:   "<226><244>E'S[208]<242><228> [24?] PI
+ ECHR 'S'               \                <248>TE <217>T <226><244>E"
  ETOK 208
  ETWO 'R', 'E'
  ETWO 'A', 'L'

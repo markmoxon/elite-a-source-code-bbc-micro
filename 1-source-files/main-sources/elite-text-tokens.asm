@@ -793,11 +793,11 @@ ENDMACRO
  EQUB 0
 
  CONT 12                \ Token 65:     "{cr}
- CHAR '1'               \                10{cash} CR5{cash} CR"
- CHAR '0'               \
+ CHAR '1'               \                10{cash} CR{cr}
+ CHAR '0'               \                5{cash} CR{cr}
+ CONT 0                 \               "
+ CHAR '5'               \
  CONT 0                 \ Encoded as:   "{12}10{0}5{0}"
- CHAR '5'
- CONT 0
  EQUB 0
 
  CHAR ' '               \ Token 66:     " CR"
