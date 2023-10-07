@@ -16130,7 +16130,7 @@
 \
 \       Name: TT210
 \       Type: Subroutine
-\   Category: Inventory
+\   Category: Market
 \    Summary: Show a list of current cargo in our hold, optionally to sell
 \
 \ ------------------------------------------------------------------------------
@@ -16221,7 +16221,7 @@
 \
 \       Name: TT213
 \       Type: Subroutine
-\   Category: Inventory
+\   Category: Market
 \    Summary: Show the Inventory screen (red key f9)
 \
 \ ******************************************************************************
@@ -25731,7 +25731,7 @@
 \
 \       Name: DORND
 \       Type: Subroutine
-\   Category: Utility routines
+\   Category: Maths (Arithmetic)
 \    Summary: Generate random numbers
 \  Deep dive: Generating random numbers
 \             Fixing ship positions
