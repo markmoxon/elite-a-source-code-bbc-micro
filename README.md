@@ -302,7 +302,19 @@ By default the build process builds the released version, but you can build a sp
 
 ### Building the released version
 
-You can add `variant=released` to produce the `elite-a-released.ssd` file that contains the released version, though that's the default value so it isn't necessary.
+You can add `variant=released` to produce the `elite-a-released.ssd` file that contains the released version, though that's the default value so it isn't necessary. In other words, you can build it like this:
+
+```
+make.bat encrypt verify variant=released
+```
+
+or this on a Mac or Linux:
+
+```
+make encrypt verify variant=released
+```
+
+This will produce a file called `elite-a-released.NES` in the `5-compiled-game-discs` folder that contains the released version.
 
 The verification checksums for this version are as follows:
 
