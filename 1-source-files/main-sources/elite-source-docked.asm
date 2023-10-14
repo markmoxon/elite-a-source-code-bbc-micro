@@ -12708,7 +12708,7 @@
 \
 \       Name: PAS1
 \       Type: Subroutine
-\   Category: Keyboard
+\   Category: Missions
 \    Summary: Display a rotating ship at space coordinates (0, 112, 256) and
 \             scan the keyboard
 \
