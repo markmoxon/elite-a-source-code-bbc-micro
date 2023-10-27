@@ -7774,8 +7774,8 @@
  LDA #118               \ This sets A = 118 if the laser in view X is a mining
                         \ laser (token 118 is "MINING  LASER")
 
- JSR plf2               \ Print the text token in A (which contains our legal
-                        \ status) followed by a newline and an indent of 6
+ JSR plf2               \ Print the text token in A (which contains the laser
+                        \ type) followed by a newline and an indent of 6
                         \ characters
 
 .st1
