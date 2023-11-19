@@ -2174,10 +2174,11 @@
 \
 \ ------------------------------------------------------------------------------
 \
+\ Zero-fill from address (X SC) to (X SC) + &FF.
 \
 \ Arguments:
 \
-\   Y                   The offset from (X SC) where we start zeroing, counting
+\   Y                   Must be set to 0
 \
 \   SC                  The low byte (i.e. the offset into the page) of the
 \                       starting point of the zero-fill

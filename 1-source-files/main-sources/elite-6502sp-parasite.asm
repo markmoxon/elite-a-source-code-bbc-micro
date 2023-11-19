@@ -3025,7 +3025,6 @@ ENDIF
 \
 \   DTS                 Print a single letter in the correct case
 \
-\
 \   DT3                 Print the jump token given in A (where A is in the range
 \                       0 to 31)
 \
@@ -4969,6 +4968,7 @@ ENDIF
 \    Summary: Show the Status Mode screen (red key f8)
 \  Deep dive: Combat rank
 \
+\ ------------------------------------------------------------------------------
 \
 \ Other entry points:
 \
@@ -15187,6 +15187,8 @@ ENDIF
 \
 \ This part draws the new sun. By the time we get to this point, the following
 \ variables should have been set up by parts 1 and 2:
+\
+\ Arguments:
 \
 \   V                   As we draw lines for the new sun, V contains the
 \                       vertical distance between the line we're drawing and the
@@ -48228,7 +48230,6 @@ ENDIF
 \   centre of screen - 1024 < x < centre of screen + 1024
 \   centre of screen - 1024 < y < centre of screen + 1024
 \
-\
 \ The projection calculation is:
 \
 \   K3(1 0) = #X + x / z
@@ -52358,7 +52359,6 @@ ENDIF
 \ We have killed a ship, so increase the kill tally, displaying an iconic
 \ message of encouragement if the kill total is a multiple of 256, and then
 \ make a nearby explosion sound.
-\
 \
 \ ******************************************************************************
 

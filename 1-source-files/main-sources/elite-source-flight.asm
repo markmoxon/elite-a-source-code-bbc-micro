@@ -7436,6 +7436,8 @@
 \    Summary: Show the Status Mode screen (red key f8)
 \  Deep dive: Combat rank
 \
+\ ------------------------------------------------------------------------------
+\
 \ Other entry points:
 \
 \   sell_equip          Show the Sell Equipment screen, i.e. show a "Sell(Y/N)?"
@@ -23281,6 +23283,8 @@
 \
 \ This part draws the new sun. By the time we get to this point, the following
 \ variables should have been set up by parts 1 and 2:
+\
+\ Arguments:
 \
 \   V                   As we draw lines for the new sun, V contains the
 \                       vertical distance between the line we're drawing and the
