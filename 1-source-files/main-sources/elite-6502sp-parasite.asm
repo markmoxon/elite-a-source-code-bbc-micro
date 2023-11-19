@@ -6554,6 +6554,10 @@ ENDIF
 \
 \   C flag              The C flag is cleared
 \
+\ Other entry points:
+\
+\   R5-1                Contains an RTS
+\
 \ ******************************************************************************
 
 .CHPR
@@ -41415,6 +41419,11 @@ ENDIF
 \   * If it has reached its target and the target is a ship, destroy the missile
 \     and the ship, potentially damaging us if we are nearby
 \
+\ Other entry points:
+\
+\   TA87+3              Set bit 7 of the ship's byte #31, which marks the ship
+\                       as being killed, and return from the subroutine
+\
 \ ******************************************************************************
 
 .TA34
@@ -42176,6 +42185,8 @@ ENDIF
 \ Other entry points:
 \
 \   TA151               Make the ship head towards the planet
+\
+\   TA9-1               Contains an RTS
 \
 \ ******************************************************************************
 
