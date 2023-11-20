@@ -3898,6 +3898,10 @@
 \ Delta 14B keyboard for the relevant button press. It returns 0 to the parasite
 \ if the key is not being pressed, or &FF if it is.
 \
+\ Other entry points:
+\
+\   b_quit              Contains an RTS
+\
 \ ******************************************************************************
 
 .scan_y

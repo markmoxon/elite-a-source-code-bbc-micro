@@ -27367,6 +27367,12 @@
 \  Deep dive: Ship blueprints in the disc version
 \             Ship blueprints in Elite-A
 \
+\ ------------------------------------------------------------------------------
+\
+\ Other entry points:
+\
+\   SHIPinA             Load the ship blueprints file specified in A
+\
 \ ******************************************************************************
 
 .LOMOD
@@ -28835,6 +28841,8 @@
 \   b_pressed           Store &FF in the Y-th byte of the key logger at KL, to
 \                       indicate that key is being pressed
 \
+\   b_quit              Contains an RTS
+\
 \ ******************************************************************************
 
 .DKS1
@@ -29488,6 +29496,10 @@
 \
 \   * If this is a space view, scan for secondary flight keys and update the
 \     relevant bytes in the key logger
+\
+\ Other entry points:
+\
+\   DK5                 Contains an RTS
 \
 \ ******************************************************************************
 
@@ -32582,6 +32594,9 @@ ENDMACRO
 \   LL70+1              Contains an RTS (as the first byte of an LDA
 \                       instruction)
 \
+\   LL66                A re-entry point into the ship-drawing routine, used by
+\                       the LL62 routine to store 128 - (U R) on the XX3 heap
+\
 \ ******************************************************************************
 
 .LL60
@@ -34387,6 +34402,11 @@ ENDMACRO
 \   * Apply tactics to ships with AI enabled (by calling the TACTICS routine)
 \
 \   * Remove the ship from the scanner, so we can move it
+\
+\ Other entry points:
+\
+\   MV30                Move the ship in space but without tidying the
+\                       orientation vectors or applying tactics
 \
 \ ******************************************************************************
 
