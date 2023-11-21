@@ -12530,10 +12530,10 @@
 .BRL1
 
  LDX #%01111111         \ Set the ship's roll counter to a positive roll that
- STX INWK+29            \ doesn't dampen
+ STX INWK+29            \ doesn't dampen (a clockwise roll)
 
  STX INWK+30            \ Set the ship's pitch counter to a positive pitch that
-                        \ doesn't dampen
+                        \ doesn't dampen (a diving pitch)
 
  JSR LL9                \ Draw the ship on screen
 
@@ -23193,10 +23193,11 @@ ENDIF
                         \ to 96, which is the distance at which the rotating
                         \ ship starts out before coming towards us
 
- LDX #127               \ Set roll counter = 127, so don't dampen the roll
- STX INWK+29
+ LDX #127               \ Set roll counter = 127, so don't dampen the roll and
+ STX INWK+29            \ make the roll direction clockwise
 
- STX INWK+30            \ Set pitch counter = 127, so don't dampen the pitch
+ STX INWK+30            \ Set pitch counter = 127, so don't dampen the pitch and
+                        \ set the pitch direction to dive
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 

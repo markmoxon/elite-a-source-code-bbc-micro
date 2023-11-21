@@ -9617,7 +9617,7 @@
 \ STA INWK+27
 \
 \ LDA #194              \ Set the Cobra's byte #30 (pitch counter) to 194, so it
-\ STA INWK+30           \ pitches as we pull away
+\ STA INWK+30           \ pitches up as we pull away
 \
 \ LSR A                 \ Set the Cobra's byte #32 (AI flag) to %01100001, so it
 \ STA INWK+32           \ has no AI, and we can use this value as a counter to
@@ -9636,7 +9636,7 @@
  STA INWK+27
 
  LDA #194               \ Set the escape pod's byte #30 (pitch counter) to 194,
- STA INWK+30            \ so it pitches as we pull away
+ STA INWK+30            \ so it pitches up as we pull away
 
  LSR A                  \ Set the escape pod's byte #32 (AI flag) to %01100001,
  STA INWK+32            \ so it has no AI, and we can use this value as a
@@ -11088,8 +11088,8 @@
 
  INC INWK+28            \ Increment the acceleration in byte #28
 
- LDA #%01111111         \ Set the roll counter to a positive roll with no
- STA INWK+29            \ damping, to match the space station's roll
+ LDA #%01111111         \ Set the roll counter to a positive (clockwise) roll
+ STA INWK+29            \ with no damping, to match the space station's roll
 
  BNE TN13               \ Jump down to TN13 (this BNE is effectively a JMP as
                         \ A will never be zero)
@@ -11945,7 +11945,7 @@
  STA (INF),Y
 
  ASL A                  \ Set the ship's byte #30 (pitch counter) to 4, so it
- LDY #30                \ starts pitching
+ LDY #30                \ starts diving
  STA (INF),Y
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
@@ -12193,9 +12193,9 @@
  STA INWK+27
 
  LDA #&FF               \ Set the child's byte #29 (roll counter) to a full
- ROR A                  \ roll, so the canister tumbles through space, with
- STA INWK+29            \ damping randomly enabled or disabled, depending on the
-                        \ C flag from above
+ ROR A                  \ roll with no damping (as bits 0 to 6 are set), so the
+ STA INWK+29            \ canister tumbles through space, with the direction in
+                        \ bit 7 set randomly, depending on the C flag from above
 
  PLA                    \ Retrieve the child's ship type from the stack
 
@@ -20092,9 +20092,9 @@
  JSR msblob             \ Reset the dashboard's missile indicators so none of
                         \ them are targeted
 
- LDA #127               \ Set the pitch and roll counters to 127 (no damping
- STA INWK+29            \ so the planet's rotation doesn't slow down)
- STA INWK+30
+ LDA #127               \ Set the pitch and roll counters to 127, so that's a
+ STA INWK+29            \ clockwise roll and a diving pitch with no damping, so
+ STA INWK+30            \ the planet's rotation doesn't slow down
 
  LDA tek                \ Set A = 128 or 130 depending on bit 1 of the system's
  AND #%00000010         \ tech level in tek
@@ -21311,8 +21311,8 @@
 
                         \ --- And replaced by: -------------------------------->
 
- LDX #255               \ Set roll counter to 255 (maximum roll with no
- STX INWK+29            \ damping)
+ LDX #255               \ Set the roll counter to 255 (maximum anti-clockwise
+ STX INWK+29            \ roll with no damping)
 
  INX                    \ Set pitch counter to 0 (no pitch, roll only)
  STX INWK+30
@@ -21326,8 +21326,8 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ DEX                   \ Set roll counter to 255 (maximum roll with no
-\ STX INWK+29           \ damping)
+\ DEX                   \ Set the roll counter to 255 (maximum anti-clockwise
+\ STX INWK+29           \ roll with no damping)
 
                         \ --- And replaced by: -------------------------------->
 
@@ -29412,7 +29412,7 @@
                         \ indicator)
 
  LDX #0                 \ Set X = 0, so we "press" KY5 below ("X", decrease
-                        \ pitch)
+                        \ pitch, pulling the nose up)
 
  ASL INWK+30            \ Shift ship byte #30 left, which shifts bit 7 of the
                         \ updated pitch counter (i.e. the pitch direction) into
@@ -29425,14 +29425,16 @@
  BCS P%+3               \ If the C flag is set, skip the following instruction
 
  INX                    \ The C flag is clear, i.e. the direction of the updated
-                        \ pitch counter is positive, so increment X to 1 so we
-                        \ "press" KY6 below ("S", increase pitch)
+                        \ pitch counter is positive (dive), so increment X to 1
+                        \ so we "press" KY6 below ("S", increase pitch, so the
+                        \ nose dives)
 
  STA KY5,X              \ Store 128 in either KY5 or KY6 to "press" the relevant
                         \ key, depending on whether the pitch direction is
                         \ negative (in which case we "press" KY5, "X", to
-                        \ decrease the pitch) or positive (in which case we
-                        \ "press" KY6, "S", to increase the pitch)
+                        \ decrease the pitch, pulling the nose up) or positive
+                        \ (in which case we "press" KY6, "S", to increase the
+                        \ pitch, pushing the nose down)
 
  LDA JSTY               \ Fetch A from JSTY so the next instruction has no
                         \ effect
