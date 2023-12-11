@@ -1138,6 +1138,7 @@
                         \ the value is slowly moved towards the centre value of
                         \ 128 (no pitch) if there are no key presses or joystick
                         \ movement
+
 .XSAV2
 
  SKIP 1                 \ Temporary storage, used for storing the value of the X
@@ -2373,6 +2374,7 @@
 \   Category: Text
 \    Summary: Print the captain's name during mission briefings
 \  Deep dive: Extended text tokens
+\             The Constrictor mission
 \
 \ ------------------------------------------------------------------------------
 \
@@ -2412,6 +2414,7 @@
 \   Category: Text
 \    Summary: Print the location hint during the mission 1 briefing
 \  Deep dive: Extended text tokens
+\             The Constrictor mission
 \
 \ ------------------------------------------------------------------------------
 \
