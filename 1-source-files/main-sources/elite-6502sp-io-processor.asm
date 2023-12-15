@@ -411,7 +411,7 @@
 
  LDA tube_table,Y       \ Copy the Y-th address from tube_table over the &FFFF
  STA tube_jump+1        \ address of the JMP instruction below, so this modifies
- LDA tube_table+1,Y     \ the instruction so that it jumps to the coresponding
+ LDA tube_table+1,Y     \ the instruction so that it jumps to the corresponding
  STA tube_jump+2        \ address from the lookup table
 
 .tube_jump
@@ -663,7 +663,7 @@
                         \ contents, then it's reversible (so reprinting the
                         \ same character in the same place will revert the
                         \ screen to what it looked like before we printed
-                        \ anything); this means that printing a white pixel on
+                        \ anything); this means that printing a white pixel
                         \ onto a white background results in a black pixel, but
                         \ that's a small price to pay for easily erasable text
 
@@ -987,7 +987,7 @@
 
 .LL30
 
- SKIP 0                 \ LL30 is a synomym for LOIN
+ SKIP 0                 \ LL30 is a synonym for LOIN
                         \
                         \ In the cassette and disc versions of Elite, LL30 and
                         \ LOIN are synonyms for the same routine, presumably
@@ -1238,7 +1238,7 @@
                         \ line that goes right and up or left and down joins a
                         \ line with any of the other three types of slope
                         \
-                        \ This bug was fixed in the advanced versions of ELite,
+                        \ This bug was fixed in the advanced versions of Elite,
                         \ where the BNE is replaced by a BEQ to bring it in line
                         \ with the other three slopes
 
@@ -1714,6 +1714,7 @@
 \       Type: Subroutine
 \   Category: Drawing lines
 \    Summary: Implement the draw_hline command (draw a horizontal line
+\  Deep dive: Drawing monochrome pixels in mode 4
 \
 \ ------------------------------------------------------------------------------
 \
@@ -1794,11 +1795,11 @@
 .HL1
 
  TXA                    \ Set T = bits 3-7 of X1, which will contain the
- AND #%11111000         \ the character number of the start of the line * 8
+ AND #%11111000         \ character number of the start of the line * 8
  STA T
 
  LDA X2                 \ Set A = bits 3-7 of X2, which will contain the
- AND #%11111000         \ the character number of the end of the line * 8
+ AND #%11111000         \ character number of the end of the line * 8
 
  SEC                    \ Set A = A - T, which will contain the number of
  SBC T                  \ character blocks we need to fill - 1 * 8
@@ -1913,8 +1914,9 @@
                         \   A       = %11111100
                         \   T AND A = %00111100
                         \
-                        \ so if we stick T AND A in screen memory, that's what
-                        \ we do here, setting A = A AND T
+                        \ So we can stick T AND A in screen memory to get the
+                        \ line we want, which is what we do here by setting
+                        \ A = A AND T
 
  EOR (SC),Y             \ Store our horizontal line byte into screen memory at
  STA (SC),Y             \ SC(1 0), using EOR logic so it merges with whatever is
@@ -2172,10 +2174,11 @@
 \
 \ ------------------------------------------------------------------------------
 \
+\ Zero-fill from address (X SC) to (X SC) + &FF.
 \
 \ Arguments:
 \
-\   Y                   The offset from (X SC) where we start zeroing, counting
+\   Y                   Must be set to 0
 \
 \   SC                  The low byte (i.e. the offset into the page) of the
 \                       starting point of the zero-fill
@@ -2730,7 +2733,7 @@
 
  LDA #&51               \ Set 6522 User VIA output register ORB (SHEILA &60) to
  STA VIA+&60            \ the Delta 14B joystick button in the middle column
-                        \ (upper nibble &5) and top row (lower nibble &1), which
+                        \ (high nibble &5) and top row (low nibble &1), which
                         \ corresponds to the fire button
 
  LDA VIA+&40            \ Read 6522 System VIA input register IRB (SHEILA &40)
@@ -2798,7 +2801,7 @@
 
  JSR tube_get           \ Get the parameter from the parasite for the command:
  TAX                    \
-                        \ =scan_xin(key_number)
+                        \   =scan_xin(key_number)
                         \
                         \ and store it as follows:
                         \
@@ -3177,7 +3180,7 @@
                         \ along (as there are 8 bytes in a character block).
                         \ The C flag was cleared above, so this ADC is correct
 
- LDA CTWOS+1,X          \ Refetch the mode 5 1-pixel byte, as we just overwrote
+ LDA CTWOS+1,X          \ Re-fetch the mode 5 1-pixel byte, as we just overwrote
                         \ A (the byte will still be the fifth byte from the
                         \ table, which is correct as we want to draw the
                         \ leftmost pixel in the next character along as the
@@ -3697,7 +3700,7 @@
 \   &5 = %101 = middle column
 \   &3 = %011 = right column
 \
-\ while the lower nibble gives the row:
+\ while the low nibble gives the row:
 \
 \   &1 = %0001 = top row
 \   &2 = %0010 = second row
@@ -3839,7 +3842,7 @@
 
  BEQ b_pressed          \ In the above we AND'd the result from the user port
                         \ with the bottom four bits of the table value (the
-                        \ lower nibble). The lower nibble in b_table contains
+                        \ low nibble). The low nibble in b_table contains
                         \ a 1 in the relevant position for that row that
                         \ corresponds with the clear bit in the response from
                         \ the user port, so if we AND the two together and get
@@ -3856,7 +3859,7 @@
                         \ and we write %0011 in the first pass (when A = 0) to
                         \ set the right column for the rear socket joystick
                         \
-                        \ Now for the row. The lower nibble of the &34 value
+                        \ Now for the row. The low nibble of the &34 value
                         \ from b_table contains the row, so that's &4 = %0100.
                         \ When we read the user port, then we will fetch %1011
                         \ from VIA+&60 if the button in the third row is being
@@ -3867,7 +3870,7 @@
                         \ which will indicate the button is being pressed. If
                         \ any other button is being pressed, or no buttons at
                         \ all, then the result will be non-zero and we move on
-                        \ to the next buttton
+                        \ to the next button
 
  TXA                    \ Restore the original value of A that we stored in X
 
@@ -3894,6 +3897,10 @@
 \ or if the game is configured to use the Delta 14B joystick, it scans the
 \ Delta 14B keyboard for the relevant button press. It returns 0 to the parasite
 \ if the key is not being pressed, or &FF if it is.
+\
+\ Other entry points:
+\
+\   b_quit              Contains an RTS
 \
 \ ******************************************************************************
 
@@ -4054,7 +4061,7 @@
  LDA #%00000100         \ Now to draw the same line but from the right edge of
                         \ the screen, so set a pixel mask in A to check the
                         \ sixth pixel of the last byte, so we skip the 2-pixel
-                        \ scren border at the right edge of the screen
+                        \ screen border at the right edge of the screen
 
  LDY #248               \ Set Y = 248 so the call to HAS3 starts drawing the
                         \ line in the last byte of the screen row, at the right
@@ -4184,9 +4191,7 @@
 \
 \ This routine draws a line to the right, starting with the third pixel of the
 \ pixel row at screen address SC(1 0), and aborting if we bump into something
-\ that's already on-screen. HAL2 draws from the left edge of the screen to the
-\ halfway point, and then HAL3 takes over to draw from the halfway point across
-\ the right half of the screen.
+\ that's already on-screen.
 \
 \ Other entry points:
 \
@@ -4536,7 +4541,7 @@
  ADC #8                 \ starting with the low byte in SC
  STA SC
 
- BNE print_outer        \ If the above addition didn't wrap wround back to 0,
+ BNE print_outer        \ If the above addition didn't wrap around back to 0,
                         \ the addition is correct, so loop back up to
                         \ print_outer to print the next character block along
 

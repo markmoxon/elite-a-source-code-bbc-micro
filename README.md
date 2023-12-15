@@ -1,6 +1,6 @@
 # Fully documented source code for Elite-A on the BBC Micro
 
-[BBC Micro (cassette)](https://github.com/markmoxon/cassette-elite-beebasm) | [BBC Micro (disc)](https://github.com/markmoxon/disc-elite-beebasm) | [6502 Second Processor](https://github.com/markmoxon/6502sp-elite-beebasm) | [BBC Master](https://github.com/markmoxon/master-elite-beebasm) | [Acorn Electron](https://github.com/markmoxon/electron-elite-beebasm) | **Elite-A**
+[BBC Micro (cassette)](https://github.com/markmoxon/cassette-elite-beebasm) | [BBC Micro (disc)](https://github.com/markmoxon/disc-elite-beebasm) | [6502 Second Processor](https://github.com/markmoxon/6502sp-elite-beebasm) | [BBC Master](https://github.com/markmoxon/master-elite-beebasm) | [Acorn Electron](https://github.com/markmoxon/electron-elite-beebasm) | **Elite-A** | [NES](https://github.com/markmoxon/nes-elite-beebasm)
 
 ![Iguana ship details in the Elite-A encyclopedia](https://www.bbcelite.com/images/github/encyclopedia-iguana.png)
 
@@ -8,7 +8,7 @@ This repository contains the original source code for Angus Duggan's Elite-A on 
 
 It is a companion to the [bbcelite.com website](https://www.bbcelite.com).
 
-See the [introduction](#introduction) for more information.
+See the [introduction](#introduction) for more information, or jump straight into the [documented source code](1-source-files/main-sources).
 
 ## Contents
 
@@ -302,9 +302,59 @@ By default the build process builds the released version, but you can build a sp
 
 ### Building the released version
 
-You can add `variant=released` to produce the `elite-a-released.ssd` file that contains the released version, though that's the default value so it isn't necessary.
+You can add `variant=released` to produce the `elite-a-released.ssd` file that contains the released version, though that's the default value so it isn't necessary. In other words, you can build it like this:
 
-The verification checksums for this version are shown above.
+```
+make.bat encrypt verify variant=released
+```
+
+or this on a Mac or Linux:
+
+```
+make encrypt verify variant=released
+```
+
+This will produce a file called `elite-a-released.NES` in the `5-compiled-game-discs` folder that contains the released version.
+
+The verification checksums for this version are as follows:
+
+```
+Results for variant: released
+[--originals--]  [---output----]
+Checksum   Size  Checksum   Size  Match  Filename
+-----------------------------------------------------------
+26ae1732  19997  26ae1732  19997   Yes   1.D.bin
+b1447e60  16778  b1447e60  16778   Yes   1.E.bin
+14ee8b20  17432  14ee8b20  17432   Yes   1.F.bin
+3d638042   1956  3d638042   1956   Yes   2.H.bin
+1f1783e7  43141  1f1783e7  43141   Yes   2.T.bin
+171ccea5   5363  171ccea5   5363   Yes   ELITE.bin
+4f2febe4    256  4f2febe4    256   Yes   MISSILE.bin
+678c1c7f   2560  678c1c7f   2560   Yes   S.A.bin
+cae56eda   2560  cae56eda   2560   Yes   S.B.bin
+7b56fbb5   2560  7b56fbb5   2560   Yes   S.C.bin
+55e86dde   2560  55e86dde   2560   Yes   S.D.bin
+be2665dd   2560  be2665dd   2560   Yes   S.E.bin
+c0917c15   2560  c0917c15   2560   Yes   S.F.bin
+80f4145e   2560  80f4145e   2560   Yes   S.G.bin
+0d9fe4e8   2560  0d9fe4e8   2560   Yes   S.H.bin
+31ea0782   2560  31ea0782   2560   Yes   S.I.bin
+f444274e   2560  f444274e   2560   Yes   S.J.bin
+b9672969   2560  b9672969   2560   Yes   S.K.bin
+05f74f36   2560  05f74f36   2560   Yes   S.L.bin
+39856010   2560  39856010   2560   Yes   S.M.bin
+132980ad   2560  132980ad   2560   Yes   S.N.bin
+26525e5c   2560  26525e5c   2560   Yes   S.O.bin
+76097753   2560  76097753   2560   Yes   S.P.bin
+6bd215b4   2560  6bd215b4   2560   Yes   S.Q.bin
+bcd49589   2560  bcd49589   2560   Yes   S.R.bin
+8b44b8b6   2560  8b44b8b6   2560   Yes   S.S.bin
+155e6a6b   2560  155e6a6b   2560   Yes   S.T.bin
+fab17499   2560  fab17499   2560   Yes   S.U.bin
+8504604f   2560  8504604f   2560   Yes   S.V.bin
+40f96e61   2560  40f96e61   2560   Yes   S.W.bin
+b7b3c692   1024  b7b3c692   1024   Yes   WORDS.bin
+```
 
 ### Building the source disc variant
 

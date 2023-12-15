@@ -82,7 +82,7 @@
  ESCP = &0386           \ The flag that determines whether we have an escape pod
                         \ fitted, matching the address in the main game code
 
- S% = &11E3             \ The adress of the main entry point workspace in the
+ S% = &11E3             \ The address of the main entry point workspace in the
                         \ main game code
 
  VIA = &FE00            \ Memory-mapped space for accessing internal hardware,
@@ -219,7 +219,7 @@
 \       Type: Variable
 \   Category: Screen mode
 \    Summary: VDU commands for setting the square mode 4 screen
-\  Deep dive: The split-screen mode
+\  Deep dive: The split-screen mode in BBC Micro Elite
 \             Drawing monochrome pixels in mode 4
 \
 \ ------------------------------------------------------------------------------
@@ -361,8 +361,8 @@
 \
 \ The following macro is used to define the four sound envelopes used in the
 \ game. It uses OSWORD 8 to create an envelope using the 14 parameters in the
-\ the I%-th block of 14 bytes at location E%. This OSWORD call is the same as
-\ BBC BASIC's ENVELOPE command.
+\ I%-th block of 14 bytes at location E%. This OSWORD call is the same as BBC
+\ BASIC's ENVELOPE command.
 \
 \ See variable E% for more details of the envelopes themselves.
 \
@@ -481,7 +481,7 @@ ENDMACRO
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDA #12               \ Set A = 12 and  X = 0 to pretend that this is an to
+\ LDA #12               \ Set A = 12 and X = 0 to pretend that this is an
 \ LDX #0                \ innocent call to OSBYTE to reset the keyboard delay
 \                       \ and auto-repeat rate to the default, when in reality
 \                       \ the OSB address in the next instruction gets modified
@@ -733,8 +733,8 @@ ENDMACRO
  LDA VIA+&44            \ If the STA instruction were not commented out, then
 \STA &0001              \ this would set location &0001 among the random number
                         \ seeds to a pretty random number (i.e. the value of the
-                        \ the 6522 System VIA T1C-L timer 1 low-order counter),
-                        \ but as the STA is commented out, this has no effect
+                        \ 6522 System VIA T1C-L timer 1 low-order counter), but
+                        \ as the STA is commented out, this has no effect
 
  LDA #%00111001         \ Set 6522 System VIA interrupt enable register IER
  STA VIA+&4E            \ (SHEILA &4E) bits 0 and 3-5 (i.e. disable the Timer1,
@@ -1162,7 +1162,7 @@ ENDMACRO
 \ LDX #&11              \ Set X = &11, so ZP(1 0) will point to &1100 when we
 \                       \ stick X in ZP+1 below
 \
-\ TXA                   \ Set A = &11 = 17, to set the intial value of the
+\ TXA                   \ Set A = &11 = 17, to set the initial value of the
 \                       \ checksum to 18 (17 plus carry)
 \
 \.l1
@@ -1233,10 +1233,10 @@ ENDMACRO
 
 \ ******************************************************************************
 \
-\       Name: PLL1
+\       Name: PLL1 (Part 1 of 3)
 \       Type: Subroutine
 \   Category: Drawing planets
-\    Summary: Draw Saturn on the loading screen
+\    Summary: Draw Saturn on the loading screen (draw the planet)
 \  Deep dive: Drawing Saturn on the loading screen
 \
 \ ******************************************************************************
@@ -1371,6 +1371,16 @@ ENDMACRO
 
  BNE PLL1               \ Loop back to PLL1 until CNT+1 = 0
 
+\ ******************************************************************************
+\
+\       Name: PLL1 (Part 2 of 3)
+\       Type: Subroutine
+\   Category: Drawing planets
+\    Summary: Draw Saturn on the loading screen (draw the stars)
+\  Deep dive: Drawing Saturn on the loading screen
+\
+\ ******************************************************************************
+
                         \ The following loop iterates CNT2(1 0) times, i.e. &1DD
                         \ or 477 times, and draws the background stars on the
                         \ loading screen
@@ -1426,6 +1436,16 @@ ENDMACRO
  DEC CNT2+1             \ Decrement the counter in CNT2+1 (the high byte)
 
  BNE PLL2               \ Loop back to PLL2 until CNT2+1 = 0
+
+\ ******************************************************************************
+\
+\       Name: PLL1 (Part 3 of 3)
+\       Type: Subroutine
+\   Category: Drawing planets
+\    Summary: Draw Saturn on the loading screen (draw the rings)
+\  Deep dive: Drawing Saturn on the loading screen
+\
+\ ******************************************************************************
 
                         \ The following loop iterates CNT3(1 0) times, i.e. &333
                         \ or 819 times, and draws the rings around the loading
@@ -1520,8 +1540,8 @@ ENDMACRO
  CMP #16                \ If A >= 16, skip to PL1 to plot the pixel
  BCS PL1
 
- LDA ZP                 \ If ZP is positive (i.e. r5 < 128), jump down to PLC3 to
- BPL PLC3               \ skip to the next pixel
+ LDA ZP                 \ If ZP is positive (i.e. r5 < 128), jump down to PLC3
+ BPL PLC3               \ to skip to the next pixel
 
 .PL1
 
@@ -1554,8 +1574,8 @@ ENDMACRO
                         \   r6 = random number from 0 to 255
                         \   r7 = r5, squashed into -32 to 31
                         \
-                        \   x = r5 + r7
-                        \   y = r5
+                        \   x = r6 + r7
+                        \   y = r6
                         \
                         \   32 <= ((r6 + r7)^2 + r5^2 + r6^2) / 256 < 80
                         \
@@ -1612,7 +1632,7 @@ ENDMACRO
 \
 \       Name: DORND
 \       Type: Subroutine
-\   Category: Utility routines
+\   Category: Maths (Arithmetic)
 \    Summary: Generate random numbers
 \  Deep dive: Generating random numbers
 \             Fixing ship positions
@@ -2232,12 +2252,12 @@ ENDMACRO
 \       Type: Subroutine
 \   Category: Screen mode
 \    Summary: The main screen-mode interrupt handler (IRQ1V points here)
-\  Deep dive: The split-screen mode
+\  Deep dive: The split-screen mode in BBC Micro Elite
 \
 \ ------------------------------------------------------------------------------
 \
 \ The main interrupt handler, which implements Elite's split-screen mode (see
-\ the deep dive on "The split-screen mode" for details).
+\ the deep dive on "The split-screen mode in BBC Micro Elite" for details).
 \
 \ IRQ1V is set to point to IRQ1 by the loading process.
 \
@@ -2482,7 +2502,7 @@ ELSE
  EQUD &88130000         \ CASH = Amount of cash (500 Cr), #9-12
 ENDIF
 
- EQUB 60+(15 AND Q%)    \ QQ14 = Fuel level, #13
+ EQUB 60 + (15 AND Q%)  \ QQ14 = Fuel level, #13
 
                         \ --- End of replacement ------------------------------>
 
@@ -2495,6 +2515,16 @@ ENDIF
 \ EQUB POW+(128 AND Q%) \ LASER = Front laser, #16
 \
 \ EQUB (POW+128) AND Q% \ LASER+1 = Rear laser, #17
+\
+\ EQUB 0                \ LASER+2 = Left laser, #18
+\
+\ EQUB 0                \ LASER+3 = Right laser, #19
+\
+\ EQUW 0                \ These bytes appear to be unused (they were originally
+\                       \ used for up/down lasers, but they were dropped),
+\                       \ #20-21
+\
+\ EQUB 22 + (15 AND Q%) \ CRGO = Cargo capacity, #22
 
                         \ --- And replaced by: -------------------------------->
 
@@ -2502,21 +2532,9 @@ ENDIF
 
  EQUB &9C AND Q%        \ LASER+1 = Rear laser, #17
 
-                        \ --- End of replacement ------------------------------>
-
  EQUB 0                 \ LASER+2 = Left laser, #18
 
  EQUB 0                 \ LASER+3 = Right laser, #19
-
-                        \ --- Mod: Code removed for Elite-A: ------------------>
-
-\ EQUW 0                \ These bytes appear to be unused (they were originally
-\                       \ used for up/down lasers, but they were dropped),
-\                       \ #20-21
-\
-\ EQUB 22+(15 AND Q%)   \ CRGO = Cargo capacity, #22
-
-                        \ --- And replaced by: -------------------------------->
 
  EQUB 0                 \ This byte appears to be unused, #20
 
@@ -2570,7 +2588,7 @@ ENDIF
 
 \ EQUD 0                \ These four bytes appear to be unused, #47-50
 \
-\ EQUB 3+(Q% AND 1)     \ NOMSL = Number of missiles, #51
+\ EQUB 3 + (Q% AND 1)   \ NOMSL = Number of missiles, #51
 
                         \ --- And replaced by: -------------------------------->
 

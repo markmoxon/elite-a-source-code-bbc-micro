@@ -66,7 +66,7 @@
 \
 \ See the deep dive on "Ship blueprints" for details of how vertices are stored
 \ in the ship blueprints, and the deep dive on "Drawing ships" for information
-\ on how vertices are used to draw 3D wiremesh ships.
+\ on how vertices are used to draw 3D wireframe ships.
 \
 \ Arguments:
 \
@@ -136,7 +136,7 @@ ENDMACRO
 \
 \ See the deep dive on "Ship blueprints" for details of how edges are stored
 \ in the ship blueprints, and the deep dive on "Drawing ships" for information
-\ on how edges are used to draw 3D wiremesh ships.
+\ on how edges are used to draw 3D wireframe ships.
 \
 \ Arguments:
 \
@@ -176,7 +176,7 @@ ENDMACRO
 \
 \ See the deep dive on "Ship blueprints" for details of how faces are stored
 \ in the ship blueprints, and the deep dive on "Drawing ships" for information
-\ on how faces are used to draw 3D wiremesh ships.
+\ on how faces are used to draw 3D wireframe ships.
 \
 \ Arguments:
 \
@@ -234,8 +234,10 @@ ENDMACRO
 
  EQUB 0                 \ Max. canisters on demise = 0
  EQUW 40 * 40           \ Targetable area          = 40 * 40
+
  EQUB LO(SHIP_MISSILE_EDGES - SHIP_MISSILE)        \ Edges data offset (low)
  EQUB LO(SHIP_MISSILE_FACES - SHIP_MISSILE)        \ Faces data offset (low)
+
  EQUB 81                \ Max. edge count          = (81 - 1) / 4 = 20
  EQUB 0                 \ Gun vertex               = 0
  EQUB 10                \ Explosion count          = 1, as (4 * n) + 6 = 10
@@ -246,13 +248,17 @@ ENDMACRO
  EQUB 14                \ Visibility distance      = 14
  EQUB 2                 \ Max. energy              = 2
  EQUB 44                \ Max. speed               = 44
+
  EQUB HI(SHIP_MISSILE_EDGES - SHIP_MISSILE)        \ Edges data offset (high)
  EQUB HI(SHIP_MISSILE_FACES - SHIP_MISSILE)        \ Faces data offset (high)
+
  EQUB 2                 \ Normals are scaled by    = 2^2 = 4
  EQUB %00000000         \ Laser power              = 0
                         \ Missiles                 = 0
 
-\          x,    y,    z, face1, face2, face3, face4, visibility
+.SHIP_MISSILE_VERTICES
+
+      \    x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX    0,    0,   68,     0,      1,    2,     3,         31    \ Vertex 0
  VERTEX    8,   -8,   36,     1,      2,    4,     5,         31    \ Vertex 1
  VERTEX    8,    8,   36,     2,      3,    4,     7,         31    \ Vertex 2
@@ -273,7 +279,7 @@ ENDMACRO
 
 .SHIP_MISSILE_EDGES
 
-\     vertex1, vertex2, face1, face2, visibility
+    \ vertex1, vertex2, face1, face2, visibility
  EDGE       0,       1,     1,     2,         31    \ Edge 0
  EDGE       0,       2,     2,     3,         31    \ Edge 1
  EDGE       0,       3,     0,     3,         31    \ Edge 2
@@ -301,7 +307,7 @@ ENDMACRO
 
 .SHIP_MISSILE_FACES
 
-\     normal_x, normal_y, normal_z, visibility
+    \ normal_x, normal_y, normal_z, visibility
  FACE      -64,        0,       16,         31    \ Face 0
  FACE        0,      -64,       16,         31    \ Face 1
  FACE       64,        0,       16,         31    \ Face 2

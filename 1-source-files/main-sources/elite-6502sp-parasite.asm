@@ -100,6 +100,9 @@
  NRU% = 25              \ The number of planetary systems with extended system
                         \ description overrides in the RUTOK table
 
+ RE = &23               \ The obfuscation byte used to hide the recursive tokens
+                        \ table from crackers viewing the binary code
+
  VE = 0                 \ The obfuscation byte used to hide the extended tokens
                         \ table from crackers viewing the binary code, which is
                         \ zero in Elite-A as the token table is not obfuscated
@@ -550,7 +553,7 @@
 
 .QQ11
 
- SKIP 1                 \ The number of the current view:
+ SKIP 1                 \ The type of the current view:
                         \
                         \   0   = Space view
                         \   1   = Title screen
@@ -968,8 +971,7 @@
                         \ of universe
                         \
                         \ The number of ships of type X in the local bubble is
-                        \ stored at MANY+X, so the number of Sidewinders is at
-                        \ MANY+1, the number of Mambas is at MANY+2, and so on
+                        \ stored at MANY+X
                         \
                         \ See the deep dive on "Ship blueprints" for a list of
                         \ ship types
@@ -1173,10 +1175,10 @@
                         \ This value is shown in the dashboard's RL indicator,
                         \ and determines the rate at which we are rolling
                         \
-                        \ The value ranges from from 1 to 255 with 128 as the
-                        \ centre point, so 1 means roll is decreasing at the
-                        \ maximum rate, 128 means roll is not changing, and
-                        \ 255 means roll is increasing at the maximum rate
+                        \ The value ranges from 1 to 255 with 128 as the centre
+                        \ point, so 1 means roll is decreasing at the maximum
+                        \ rate, 128 means roll is not changing, and 255 means
+                        \ roll is increasing at the maximum rate
                         \
                         \ This value is updated by "<" and ">" key presses, or
                         \ if joysticks are enabled, from the joystick. If
@@ -1192,10 +1194,10 @@
                         \ This value is shown in the dashboard's DC indicator,
                         \ and determines the rate at which we are pitching
                         \
-                        \ The value ranges from from 1 to 255 with 128 as the
-                        \ centre point, so 1 means pitch is decreasing at the
-                        \ maximum rate, 128 means pitch is not changing, and
-                        \ 255 means pitch is increasing at the maximum rate
+                        \ The value ranges from 1 to 255 with 128 as the centre
+                        \ point, so 1 means pitch is decreasing at the maximum
+                        \ rate, 128 means pitch is not changing, and 255 means
+                        \ pitch is increasing at the maximum rate
                         \
                         \ This value is updated by "S" and "X" key presses, or
                         \ if joysticks are enabled, from the joystick. If
@@ -1203,15 +1205,16 @@
                         \ the value is slowly moved towards the centre value of
                         \ 128 (no pitch) if there are no key presses or joystick
                         \ movement
+
 .XSAV2
 
  SKIP 1                 \ Temporary storage, used for storing the value of the X
-                        \ register in the TT26 routine
+                        \ register in the CHPR routine
 
 .YSAV2
 
  SKIP 1                 \ Temporary storage, used for storing the value of the Y
-                        \ register in the TT26 routine
+                        \ register in the CHPR routine
 
 .NAME
 
@@ -1262,6 +1265,7 @@
                         \
                         \ See the deep dives on "Galaxy and system seeds" and
                         \ "Twisting the system seeds" for more details
+
 .CASH
 
  SKIP 4                 \ Our current cash pot
@@ -1299,7 +1303,7 @@
                         \ stored as galaxy 0 internally
                         \
                         \ The galaxy number increases by one every time a
-                        \ galactic hyperdrive is used, and wraps back round to
+                        \ galactic hyperdrive is used, and wraps back around to
                         \ the start after eight galaxies
 
 .LASER
@@ -1307,10 +1311,10 @@
  SKIP 4                 \ The specifications of the lasers fitted to each of the
                         \ four space views:
                         \
-                        \   * Byte #0 = front view (red key f0)
-                        \   * Byte #1 = rear view (red key f1)
-                        \   * Byte #2 = left view (red key f2)
-                        \   * Byte #3 = right view (red key f3)
+                        \   * Byte #0 = front view
+                        \   * Byte #1 = rear view
+                        \   * Byte #2 = left view
+                        \   * Byte #3 = right view
                         \
                         \ For each of the views:
                         \
@@ -1517,7 +1521,8 @@
                         \   Deadly          = 10 to 24    = 2560 to 6399 kills
                         \   Elite           = 25 and up   = 6400 kills and up
                         \
-                        \ You can see the rating calculation in STATUS
+                        \ You can see the rating calculation in the STATUS
+                        \ subroutine
 
 .SVC
 
@@ -1692,7 +1697,7 @@
  SKIP 2                 \ The distance from the current system to the selected
                         \ system in light years * 10, stored as a 16-bit number
                         \
-                        \ The distance will be 0 if the selected sysyem is the
+                        \ The distance will be 0 if the selected system is the
                         \ current system
                         \
                         \ The galaxy chart is 102.4 light years wide and 51.2
@@ -1835,7 +1840,7 @@
                         \   * 128 = Delta 14B joystick
                         \
                         \ Elite-A doesn't support the Bitstik, but instead it
-                        \ supports the multi-button Volmace Delta 14B joystick,
+                        \ supports the multi-button Voltmace Delta 14B joystick,
                         \ reusing the BSTK variable to determine whether it is
                         \ configured
 
@@ -2266,7 +2271,7 @@ ELSE
  EQUD &88130000         \ CASH = Amount of cash (500 Cr), #9-12
 ENDIF
 
- EQUB 60+(15 AND Q%)    \ QQ14 = Fuel level, #13
+ EQUB 60 + (15 AND Q%)  \ QQ14 = Fuel level, #13
 
  EQUB 0                 \ COK = Competition flags, #14
 
@@ -2509,6 +2514,8 @@ ENDIF
 \   Category: Flight
 \    Summary: Dock at the space station, show the ship hangar and work out any
 \             mission progression
+\  Deep dive: The Constrictor mission
+\             The Thargoid Plans mission
 \
 \ ******************************************************************************
 
@@ -2812,6 +2819,7 @@ ENDIF
 \   Category: Text
 \    Summary: Print the captain's name during mission briefings
 \  Deep dive: Extended text tokens
+\             The Constrictor mission
 \
 \ ------------------------------------------------------------------------------
 \
@@ -2851,6 +2859,7 @@ ENDIF
 \   Category: Text
 \    Summary: Print the location hint during the mission 1 briefing
 \  Deep dive: Extended text tokens
+\             The Constrictor mission
 \
 \ ------------------------------------------------------------------------------
 \
@@ -2943,6 +2952,7 @@ ENDIF
                         \ down to DTL2 to do the actual printing. So first, we
                         \ set a counter Y to point to the character offset as we
                         \ scan through the table
+
 .DTL1
 
  LDA (V),Y              \ Load the character at offset Y in the token table,
@@ -3039,7 +3049,6 @@ ENDIF
 \ Other entry points:
 \
 \   DTS                 Print a single letter in the correct case
-\
 \
 \   DT3                 Print the jump token given in A (where A is in the range
 \                       0 to 31)
@@ -3812,6 +3821,10 @@ ENDIF
 \
 \   TYPE                The type of the current ship/planet/sun
 \
+\ Other entry points:
+\
+\   MV3                 Fall through into part 7 of MVEIT
+\
 \ ******************************************************************************
 
 .MVEIT
@@ -4427,7 +4440,7 @@ ENDIF
 \       Name: NLIN3
 \       Type: Subroutine
 \   Category: Drawing lines
-\    Summary: Print a title and a horizontal line at row 19 to box it in
+\    Summary: Print a title and draw a horizontal line at row 19 to box it in
 \
 \ ------------------------------------------------------------------------------
 \
@@ -4984,6 +4997,7 @@ ENDIF
 \    Summary: Show the Status Mode screen (red key f8)
 \  Deep dive: Combat rank
 \
+\ ------------------------------------------------------------------------------
 \
 \ Other entry points:
 \
@@ -5071,8 +5085,8 @@ ENDIF
  LDX FRIN+2,Y           \ The ship slots at FRIN are ordered with the first two
                         \ slots reserved for the planet and sun/space station,
                         \ and then any ships, so if the slot at FRIN+2+Y is not
-                        \ empty (i.e is non-zero), then that means the number of
-                        \ non-asteroids in the vicinity is at least 1
+                        \ empty (i.e. is non-zero), then that means the number
+                        \ of non-asteroids in the vicinity is at least 1
 
  BEQ st6                \ So if X = 0, there are no ships in the vicinity, so
                         \ jump to st6 to print "Green" for our ship's condition
@@ -5134,8 +5148,8 @@ ENDIF
  JSR plf                \ Print the text token in A (which contains our legal
                         \ status) followed by a newline
 
- LDA #16                \ Print recursive token 130 ("RATING:")
- JSR spc
+ LDA #16                \ Print recursive token 130 ("RATING:") followed by a
+ JSR spc                \ space
 
  LDA TALLY+1            \ Fetch the high byte of the kill tally, and if it is
  BNE st4                \ not zero, then we have more than 256 kills, so jump
@@ -5214,7 +5228,7 @@ ENDIF
  LDA BST                \ If we don't have fuel scoops fitted, skip the
  BEQ P%+9               \ following three instructions
 
- LDA #111               \ We do have a fuel scoops fitted, so print recursive
+ LDA #111               \ We do have fuel scoops fitted, so print recursive
  LDX #25                \ token 111 ("FUEL SCOOPS"). If this is the Status Mode
  JSR status_equip       \ or Inventory screen, print a newline and an indent of
                         \ 8 characters, or if this is the Sell Equipment screen,
@@ -5446,7 +5460,7 @@ ENDIF
  LDX CNT                \ Set X to the value we stored in CNT above, so it now
                         \ contains the equipment flag's offset from LASER
 
- LDA #0                 \ We just sold this pieve of equipment, so set the flag
+ LDA #0                 \ We just sold this piece of equipment, so set the flag
  STA LASER,X            \ to zero to indicate we no longer have the equipment
                         \ fitted
 
@@ -6035,7 +6049,7 @@ ENDIF
 \ DTW4.
 \
 \ The flag is set to %11000000 (justify text, buffer entire token) by routine
-\ MESS, which printe in-flight messages.
+\ MESS, which prints in-flight messages.
 \
 \ The flag is set to %00000000 (do not justify text, print buffer on carriage
 \ return) by jump token 15, {left align}, which calls routine MT1 to change the
@@ -6093,7 +6107,7 @@ ENDIF
 \ case}, which calls routine MT10 to change the value of DTW6.
 \
 \ The flag is set to %00000000 (lower case is not enabled) by jump token 1, {all
-\ caps}, and jump token 1, {sentence case}, which call routines MT1 and MT2 to
+\ caps}, and jump token 2, {sentence case}, which call routines MT1 and MT2 to
 \ change the value of DTW6.
 \
 \ ******************************************************************************
@@ -6306,7 +6320,7 @@ ENDIF
                         \ DA6+3 to print a newline
 
  CPX #(LL+1)            \ If X < LL+1, i.e. X <= LL, then the buffer contains
- BCC DA6                \ fewer than LL characters, which is less then a line
+ BCC DA6                \ fewer than LL characters, which is less than a line
                         \ length, so jump down to DA6 to print the contents of
                         \ BUF followed by a newline, as we don't justify the
                         \ last line of the paragraph
@@ -6381,6 +6395,18 @@ ENDIF
  BCS DAL6               \ have moved the SC-th character (i.e. Y < SC)
 
  INC DTW5               \ Increment the buffer size in DTW5
+
+                        \ We've now shifted the line to the right by 1 from
+                        \ position SC onwards, so SC and SC+1 both contain
+                        \ spaces, and Y is now SC-1 as we did a DEY just before
+                        \ the end of the loop - in other words, we have inserted
+                        \ a space at position SC, and Y points to the character
+                        \ before the newly inserted space
+
+                        \ We now want to move the pointer Y left to find the
+                        \ next space in the line buffer, before looping back to
+                        \ check whether we are done, and if not, insert another
+                        \ space
 
 .DAL3
 
@@ -6501,7 +6527,7 @@ ENDIF
 \
 \ ------------------------------------------------------------------------------
 \
-\ This is the standard system beep as made by the VDU 7 statement in BBC BASIC.
+\ This is the standard system beep, as made by the ASCII 7 "BELL" control code.
 \
 \ ******************************************************************************
 
@@ -6559,6 +6585,7 @@ ENDIF
 \
 \ Other entry points:
 \
+\   R5-1                Contains an RTS
 \
 \ ******************************************************************************
 
@@ -7192,7 +7219,7 @@ ENDIF
 .DL31
 
  JSR tube_write         \ Send the second parameter to the I/O processor:
-                        \ 
+                        \
                         \   * colour = A
 
  LDA SC                 \ Send the third parameter to the I/O processor:
@@ -7341,7 +7368,7 @@ ENDIF
  JSR TT20               \ We want to move on to the next system, so call TT20
                         \ to twist the three 16-bit seeds in QQ15
 
- INC XX20               \ Incrememt the system counter in XX20
+ INC XX20               \ Increment the system counter in XX20
 
  BNE HME3               \ If we haven't yet checked all 256 systems in the
                         \ current galaxy, loop back to HME3 to check the next
@@ -7360,7 +7387,7 @@ ENDIF
  JSR NOISE              \ long beep to indicate a failed search
 
  LDA #215               \ Print extended token 215 ("{left align} UNKNOWN
- JMP DETOK              \ PLANET"), which will print on-screem as the left align
+ JMP DETOK              \ PLANET"), which will print on-screen as the left align
                         \ code disables justified text, and return from the
                         \ subroutine using a tail call
 
@@ -7439,7 +7466,7 @@ ENDIF
 \   Byte #2             Bits 0-7 = Ship's z_lo
 \                       Bit 0    = Ship's x_sign
 \
-\ Ths ship's y-coordinate is calculated in the has1 routine from the size of
+\ The ship's y-coordinate is calculated in the has1 routine from the size of
 \ its targetable area. Ships of type 0 are not shown.
 \
 \ Note that ship numbers are for the ship hangar blueprints at XX21 in the
@@ -7535,7 +7562,7 @@ ENDIF
 \ Half the time this will draw one of the four pre-defined ship hangar groups in
 \ HATB, and half the time this will draw a solitary Sidewinder, Mamba, Krait or
 \ Adder on a random position. In all cases, the ships will be randomly spun
-\ around on the ground so they can face in any dirction, and larger ships are
+\ around on the ground so they can face in any direction, and larger ships are
 \ drawn higher up off the ground than smaller ships.
 \
 \ ******************************************************************************
@@ -7654,7 +7681,7 @@ ENDIF
                         \ Cobra Mk III, Python, Viper or Krait
 
  JSR HAS1               \ Call HAS1 to draw this ship in the hangar, with the
-                        \ the following properties:
+                        \ following properties:
                         \
                         \   * Random x-coordinate from -63 to +63
                         \
@@ -7840,7 +7867,7 @@ ENDIF
  STA RAT2               \ Set RAT2 = %10000000, so the yaw calls in HAL5 below
                         \ are negative
 
- LDA #&B                \ Set the ship line heap pointer in INWK(35 34) to point
+ LDA #&0B               \ Set the ship line heap pointer in INWK(34 33) to point
  STA INWK+34            \ to &0B00
 
  JSR DORND              \ We now perform a random number of small angle (3.6
@@ -8434,7 +8461,7 @@ ENDIF
  JSR MULT1              \ Set (A P) = Q * A
 
  STA S                  \ Set (S R) = (A P)
- LDA P
+ LDA P                  \           = Q * A
  STA R
 
  RTS                    \ Return from the subroutine
@@ -8509,7 +8536,7 @@ ENDIF
 
  ORA T                  \ If argument A was negative (and therefore S was also
                         \ negative) then make sure result A is negative by
-                        \ OR-ing the result with the sign bit from argument A
+                        \ OR'ing the result with the sign bit from argument A
                         \ (which we stored in T)
 
  RTS                    \ Return from the subroutine
@@ -8536,9 +8563,8 @@ ENDIF
 
                         \ At this point we have |A P| - |S R| in (A X), so we
                         \ need to check whether the subtraction above was the
-                        \ the right way round (i.e. that we subtracted the
-                        \ smaller absolute value from the larger absolute
-                        \ value)
+                        \ right way round (i.e. that we subtracted the smaller
+                        \ absolute value from the larger absolute value)
 
  BCS MU9                \ If |A| >= |S|, our subtraction was the right way
                         \ round, so jump to MU9 to set the sign
@@ -8559,7 +8585,7 @@ ENDIF
                         \ the correct addition)
 
  LDA #0                 \ Set A = 0 - A, which we can do this time using a
- SBC U                  \ a subtraction with the C flag clear
+ SBC U                  \ subtraction with the C flag clear
 
  ORA #%10000000         \ We now set the sign bit of A, so that the EOR on the
                         \ next line will give the result the opposite sign to
@@ -8775,10 +8801,10 @@ ENDIF
 .PDL1
 
  LDA RUPLA-1,Y          \ Fetch the Y-th byte from RUPLA-1 into A (we use
-                        \ RUPLA-1 because Y is looping from 26 to 1
+                        \ RUPLA-1 because Y is looping from 26 to 1)
 
  CMP ZZ                 \ If A doesn't match the system whose description we
- BNE PD2                \ are printing (in ZZ), junp to PD2 to keep looping
+ BNE PD2                \ are printing (in ZZ), jump to PD2 to keep looping
                         \ through the system numbers in RUPLA
 
                         \ If we get here we have found a match for this system
@@ -8875,6 +8901,7 @@ ENDIF
 \       Type: Subroutine
 \   Category: Missions
 \    Summary: Start mission 2
+\  Deep dive: The Thargoid Plans mission
 \
 \ ******************************************************************************
 
@@ -8914,6 +8941,7 @@ ENDIF
 \       Type: Subroutine
 \   Category: Missions
 \    Summary: Receive the briefing and plans for mission 2
+\  Deep dive: The Thargoid Plans mission
 \
 \ ******************************************************************************
 
@@ -8939,6 +8967,7 @@ ENDIF
 \       Type: Subroutine
 \   Category: Missions
 \    Summary: Finish mission 2
+\  Deep dive: The Thargoid Plans mission
 \
 \ ******************************************************************************
 
@@ -8980,6 +9009,7 @@ ENDIF
 \       Type: Subroutine
 \   Category: Missions
 \    Summary: Finish mission 1
+\  Deep dive: The Constrictor mission
 \
 \ ------------------------------------------------------------------------------
 \
@@ -9017,6 +9047,7 @@ ENDIF
 \       Type: Subroutine
 \   Category: Missions
 \    Summary: Start mission 1 and show the mission briefing
+\  Deep dive: The Constrictor mission
 \
 \ ------------------------------------------------------------------------------
 \
@@ -9069,10 +9100,10 @@ ENDIF
 .BRL1
 
  LDX #%01111111         \ Set the ship's roll counter to a positive roll that
- STX INWK+29            \ doesn't dampen
+ STX INWK+29            \ doesn't dampen (a clockwise roll)
 
  STX INWK+30            \ Set the ship's pitch counter to a positive pitch that
-                        \ doesn't dampen
+                        \ doesn't dampen (a diving pitch)
 
  JSR LL9                \ Draw the ship on screen
 
@@ -9158,7 +9189,7 @@ ENDIF
 \
 \       Name: PAUSE
 \       Type: Subroutine
-\   Category: Keyboard
+\   Category: Missions
 \    Summary: Display a rotating ship, waiting until a key is pressed, then
 \             remove the ship from the screen
 \
@@ -9251,7 +9282,7 @@ ENDIF
 \
 \       Name: PAS1
 \       Type: Subroutine
-\   Category: Keyboard
+\   Category: Missions
 \    Summary: Display a rotating ship at space coordinates (0, 112, 256) and
 \             scan the keyboard
 \
@@ -10203,7 +10234,7 @@ ENDIF
                         \ section
 
  LDA #193               \ Print recursive token 33 ("GROSS PRODUCTIVITY"),
- JSR TT68               \ followed by colon
+ JSR TT68               \ followed by a colon
 
  LDX QQ7                \ Fetch the 16-bit productivity value from QQ7 into
  LDY QQ7+1              \ (Y X)
@@ -10604,7 +10635,7 @@ ENDIF
  BCC TT87               \ won't spill out of the bottom of the screen
 
  LDX QQ11               \ A >= 152, so we need to check whether this will fit in
-                        \ this view, so fetch the view number
+                        \ this view, so fetch the view type
 
  BMI TT87               \ If this is the Short-range Chart then the y-coordinate
                         \ is fine, so skip to TT87
@@ -10852,7 +10883,7 @@ ENDIF
                         \ returning the number entered in A and R
 
  BCS TQ4                \ If gnum set the C flag, the number entered is greater
-                        \ then the quantity available, so jump up to TQ4 to
+                        \ than the quantity available, so jump up to TQ4 to
                         \ display a "Quantity?" error, beep, clear the number
                         \ and try again
 
@@ -10874,7 +10905,7 @@ ENDIF
                         \ price / 4, which was returned in QQ24 by the call
                         \ to TT151 above and store it in Q
 
- JSR GCASH              \ Call GCASH to calculate
+ JSR GCASH              \ Call GCASH to calculate:
                         \
                         \   (Y X) = P * Q * 4
                         \
@@ -11217,7 +11248,7 @@ ENDIF
 \
 \       Name: TT210
 \       Type: Subroutine
-\   Category: Inventory
+\   Category: Market
 \    Summary: Show a list of current cargo in our hold, optionally to sell
 \
 \ ------------------------------------------------------------------------------
@@ -11373,7 +11404,7 @@ ENDIF
 \
 \       Name: TT213
 \       Type: Subroutine
-\   Category: Inventory
+\   Category: Market
 \    Summary: Show the Inventory screen (red key f9)
 \
 \ ******************************************************************************
@@ -12077,7 +12108,7 @@ ENDIF
 
 .TT137
 
- LDA QQ19,X             \ Copy the X-th byte in QQ19 to the X-th byte in QQ15,
+ LDA QQ19,X             \ Copy the X-th byte in QQ19 to the X-th byte in QQ15
  STA QQ15,X
 
  DEX                    \ Decrement the counter
@@ -12446,7 +12477,8 @@ ENDIF
 
  JMP TT152              \ Print the unit ("t", "kg" or "g") for the market item,
                         \ with a following space if required to make it two
-                        \ characters long
+                        \ characters long, and return from the subroutine using
+                        \ a tail call
 
 .TT172
 
@@ -12945,7 +12977,7 @@ ENDIF
 \       Name: update_pod
 \       Type: Subroutine
 \   Category: Dashboard
-\    Summary: Ensure the correct palette is shown for the dashboard/hyperspace 
+\    Summary: Ensure the correct palette is shown for the dashboard/hyperspace
 \             tunnel, by sending a write_pod command to the I/O processor
 \
 \ ******************************************************************************
@@ -13166,8 +13198,8 @@ ENDIF
                         \ the new piece of equipment
 
  LDA #14                \ Otherwise there isn't room in the hold for any more
-                        \ equipment, so set set A to the value for recursive
-                        \ token 14 ("UNIT")
+                        \ equipment, so set A to the value for recursive token
+                        \ 14 ("UNIT")
 
  JMP query_beep         \ Print the recursive token given in A followed by a
                         \ question mark, then make a beep, pause and go to the
@@ -13310,7 +13342,7 @@ ENDIF
                         \ item number A
 
  INC new_hold           \ We can't buy the requested equipment, so increment the
-                        \ free space in the hold, as we decremented it earler
+                        \ free space in the hold, as we decremented it earlier
                         \ in anticipation of making a deal, but the deal has
                         \ fallen through
 
@@ -13511,12 +13543,8 @@ ENDIF
 \       Name: dn
 \       Type: Subroutine
 \   Category: Text
-\    Summary: Print the amount of cash and beep
-\
-\ ------------------------------------------------------------------------------
-\
-\ Print the amount of money in the cash pot, then make a short, high beep and
-\ delay for 1 second.
+\    Summary: Print the amount of money we have left in the cash pot, then make
+\             a short, high beep and delay for 1 second
 \
 \ ******************************************************************************
 
@@ -13836,7 +13864,7 @@ ENDIF
 
 .cpl
 
- LDX #5                 \ First we need to backup the seeds in QQ15, so set up
+ LDX #5                 \ First we need to back up the seeds in QQ15, so set up
                         \ a counter in X to cover three 16-bit seeds (i.e.
                         \ 6 bytes)
 
@@ -13847,7 +13875,7 @@ ENDIF
 
  DEX                    \ Decrement the loop counter
 
- BPL TT53               \ Loop back for the next byte to backup
+ BPL TT53               \ Loop back for the next byte to back up
 
  LDY #3                 \ Step 1: Now that the seeds are backed up, we can
                         \ start the name-generation process. We will either
@@ -14170,8 +14198,7 @@ ENDIF
 \ ------------------------------------------------------------------------------
 \
 \ Print a text token (i.e. a character, control code, two-letter token or
-\ recursive token). See variable QQ18 for a discussion of the token system
-\ used in Elite.
+\ recursive token).
 \
 \ Arguments:
 \
@@ -14192,31 +14219,38 @@ ENDIF
                         \ value of the token
 
  BEQ csh                \ If token = 0, this is control code 0 (current amount
-                        \ of cash and newline), so jump to csh
+                        \ of cash and newline), so jump to csh to print the
+                        \ amount of cash and return from the subroutine using
+                        \ a tail call
 
  BMI TT43               \ If token > 127, this is either a two-letter token
                         \ (128-159) or a recursive token (160-255), so jump
                         \ to TT43 to process tokens
 
  DEX                    \ If token = 1, this is control code 1 (current galaxy
- BEQ tal                \ number), so jump to tal
+ BEQ tal                \ number), so jump to tal to print the galaxy number and
+                        \ return from the subroutine using a tail call
 
  DEX                    \ If token = 2, this is control code 2 (current system
- BEQ ypl                \ name), so jump to ypl
+ BEQ ypl                \ name), so jump to ypl to print the current system name
+                        \ and return from the subroutine using a tail call
 
  DEX                    \ If token > 3, skip the following instruction
  BNE P%+5
 
  JMP cpl                \ This token is control code 3 (selected system name)
-                        \ so jump to cpl
+                        \ so jump to cpl to print the selected system name
+                        \ and return from the subroutine using a tail call
 
  DEX                    \ If token = 4, this is control code 4 (commander
- BEQ cmn                \ name), so jump to cmm
+ BEQ cmn                \ name), so jump to cmm to print the commander name
+                        \ and return from the subroutine using a tail call
 
  DEX                    \ If token = 5, this is control code 5 (fuel, newline,
- BEQ fwl                \ cash, newline), so jump to fwl
+ BEQ fwl                \ cash, newline), so jump to fwl to print the fuel level
+                        \ and return from the subroutine using a tail call
 
- DEX                    \ If token = 6, this is is control code 6 (switch to
+ DEX                    \ If token = 6, this is control code 6 (switch to
  BEQ vdu_80             \ Sentence Case), so jump to vdu_80 to do just that
 
  DEX                    \ If token <> 8, jump to l_31d2 to skip the following
@@ -14332,7 +14366,7 @@ ENDIF
                         \ character's case
 
  ADC #32                \ Add 32 to the character, to convert it from upper to
-                        \ to lower case
+                        \ lower case
 
 .TT44
 
@@ -14351,7 +14385,7 @@ ENDIF
 \
 \   * If QQ17 bit 6 is set, print lower case (via TT45)
 \
-\   * If QQ17 bit 6 clear, then:
+\   * If QQ17 bit 6 is clear, then:
 \
 \       * If character is punctuation, just print it
 \
@@ -14627,19 +14661,18 @@ ENDIF
 \       Type: Subroutine
 \   Category: Text
 \    Summary: Print a recursive token
+\  Deep dive: Printing text tokens
 \
 \ ------------------------------------------------------------------------------
 \
-\ This routine works its way through the recursive tokens that are stored in
-\ tokenised form in memory at &0400 to &06FF, and when it finds token number A,
+\ This routine works its way through the recursive text tokens that are stored
+\ in tokenised form in the table at QQ18, and when it finds token number A,
 \ it prints it. Tokens are null-terminated in memory and fill three pages,
 \ but there is no lookup table as that would consume too much memory, so the
 \ only way to find the correct token is to start at the beginning and look
 \ through the table byte by byte, counting tokens as we go until we are in the
 \ right place. This approach might not be terribly speed efficient, but it is
 \ certainly memory-efficient.
-\
-\ For details of the tokenisation system, see variable QQ18.
 \
 \ Arguments:
 \
@@ -14680,7 +14713,7 @@ ENDIF
  BEQ TT49               \ If the character is null, we've reached the end of
                         \ this token, so jump to TT49
 
- INY                    \ Increment character pointer and loop back round for
+ INY                    \ Increment character pointer and loop back around for
  BNE TT51               \ the next character in this token, assuming Y hasn't
                         \ yet wrapped around to 0
 
@@ -14727,8 +14760,9 @@ ENDIF
                         \ which is the next character of this token that we
                         \ want to print
 
- EOR #35                \ Tokens are stored in memory having been EOR'd with 35
-                        \ (see variable QQ18 for details), so we repeat the
+ EOR #RE                \ Tokens are stored in memory having been EOR'd with the
+                        \ value of RE - which is 35 for all versions of Elite
+                        \ except for NES, where RE is 62 - so we repeat the
                         \ EOR to get the actual character to print
 
  JSR TT27               \ Print the text token in A, which could be a letter,
@@ -14940,7 +14974,7 @@ ENDIF
 \       Name: SUN (Part 1 of 4)
 \       Type: Subroutine
 \   Category: Drawing suns
-\    Summary: Draw the sun: Set up all the variables needed
+\    Summary: Draw the sun: Set up all the variables needed to draw the sun
 \  Deep dive: Drawing the sun
 \
 \ ------------------------------------------------------------------------------
@@ -14974,13 +15008,16 @@ ENDIF
                         \ &FF, for when the new sun's centre is off the bottom
                         \ of the screen (so we don't need to draw its bottom
                         \ half)
+                        \
+                        \ This happens when the y-coordinate of the centre of
+                        \ the sun is bigger than the y-coordinate of the bottom
+                        \ of the space view
 
  TXA                    \ Negate X using two's complement, so X = ~X + 1
- EOR #%11111111         \
- CLC                    \ We do this because X is negative at this point, as it
- ADC #1                 \ is calculated as 191 - the y-coordinate of the sun's
- TAX                    \ centre, and the centre is off the bottom of the
-                        \ screen, past 191. So we negate it to make it positive
+ EOR #%11111111
+ CLC
+ ADC #1
+ TAX
 
 .PLF17
 
@@ -15045,13 +15082,15 @@ ENDIF
 
  LDA #2*Y-1             \ #Y is the y-coordinate of the centre of the space
                         \ view, so this sets Y to the y-coordinate of the bottom
-                        \ of the space view, i.e. 191
+                        \ of the space view
 
  LDX P+2                \ If P+2 is non-zero, the maximum y-coordinate is off
- BNE PLF2               \ the bottom of the screen, so skip to PLF2 with A = 191
+ BNE PLF2               \ the bottom of the screen, so skip to PLF2 with A set
+                        \ to the y-coordinate of the bottom of the space view
 
  CMP P+1                \ If A < P+1, the maximum y-coordinate is underneath the
- BCC PLF2               \ the dashboard, so skip to PLF2 with A = 191
+ BCC PLF2               \ dashboard, so skip to PLF2 with A set to the
+                        \ y-coordinate of the bottom of the space view
 
  LDA P+1                \ Set A = P+1, the low byte of the maximum y-coordinate
                         \ of the sun on-screen
@@ -15128,7 +15167,8 @@ ENDIF
 \       Name: SUN (Part 2 of 4)
 \       Type: Subroutine
 \   Category: Drawing suns
-\    Summary: Draw the sun: Start from bottom of screen and erase the old sun
+\    Summary: Draw the sun: Start from the bottom of the screen and erase the
+\             old sun line by line
 \  Deep dive: Drawing the sun
 \
 \ ------------------------------------------------------------------------------
@@ -15178,12 +15218,15 @@ ENDIF
 \       Type: Subroutine
 \   Category: Drawing suns
 \    Summary: Draw the sun: Continue to move up the screen, drawing the new sun
+\             line by line
 \  Deep dive: Drawing the sun
 \
 \ ------------------------------------------------------------------------------
 \
 \ This part draws the new sun. By the time we get to this point, the following
 \ variables should have been set up by parts 1 and 2:
+\
+\ Arguments:
 \
 \   V                   As we draw lines for the new sun, V contains the
 \                       vertical distance between the line we're drawing and the
@@ -15429,7 +15472,8 @@ ENDIF
 \       Name: SUN (Part 4 of 4)
 \       Type: Subroutine
 \   Category: Drawing suns
-\    Summary: Draw the sun: Continue to the top of the screen, erasing old sun
+\    Summary: Draw the sun: Continue to the top of the screen, erasing the old
+\             sun line by line
 \  Deep dive: Drawing the sun
 \
 \ ------------------------------------------------------------------------------
@@ -15887,7 +15931,7 @@ ENDIF
                         \ by checking the low byte of the result in X against
                         \ 2 * #Y - 1, and returning the C flag from this
                         \ comparison. The constant #Y is the y-coordinate of the
-                        \ mid-point of the space view, so 2 * #Y - 1 is 191, the
+                        \ mid-point of the space view, so 2 * #Y - 1, the
                         \ y-coordinate of the bottom pixel row of the space
                         \ view. So this does the following:
                         \
@@ -16117,10 +16161,10 @@ ENDIF
 \
 \   channel/flush, amplitude (or envelope number if 1-4), pitch, duration
 \
-\ For the channel/flush parameter, the top nibble of the low byte is the flush
+\ For the channel/flush parameter, the high nibble of the low byte is the flush
 \ control (where a flush control of 0 queues the sound, and a flush control of
-\ 1 makes the sound instantly), while the bottom nibble of the low byte is the
-\ channel number . When written in hexadecimal, the first figure gives the flush
+\ 1 makes the sound instantly), while the low nibble of the low byte is the
+\ channel number. When written in hexadecimal, the first figure gives the flush
 \ control, while the second is the channel (so &13 indicates flush control = 1
 \ and channel = 3).
 \
@@ -16217,7 +16261,7 @@ ENDIF
  STA FSH,X              \ Set the X-th byte of FSH to &FF to charge up that
                         \ shield/bank
 
- DEX                    \ Decrement the lopp counter
+ DEX                    \ Decrement the loop counter
 
  BPL REL5               \ Loop back to REL5 until we have recharged both shields
                         \ and the energy bank
@@ -16304,16 +16348,16 @@ ENDIF
 
  JSR DIALS              \ Update the dashboard
 
+ JSR U%                 \ Call U% to clear the key logger
+
                         \ Finally, fall through into ZINF to reset the INWK
                         \ ship workspace
-
- JSR U%                 \ Call U% to clear the key logger
 
 \ ******************************************************************************
 \
 \       Name: ZINF
 \       Type: Subroutine
-\   Category: Utility routines
+\   Category: Universe
 \    Summary: Reset the INWK workspace and orientation vectors
 \  Deep dive: Orientation vectors
 \
@@ -16364,7 +16408,7 @@ ENDIF
 
  STA INWK+22            \ Set byte #22 = sidev_x_hi = 96 = 1
 
- ORA #128               \ Flip the sign of A to represent a -1
+ ORA #%10000000         \ Flip the sign of A to represent a -1
 
  STA INWK+14            \ Set byte #14 = nosev_z_hi = -96 = -1
 
@@ -16540,7 +16584,7 @@ ENDIF
 \
 \   * Process more key presses (red function keys, docked keys etc.)
 \
-\ It also support joining the main loop with a key already "pressed", so we can
+\ It also supports joining the main loop with a key already "pressed", so we can
 \ jump into the main game loop to perform a specific action. In practice, this
 \ is used when we enter the docking bay in BAY to display Status Mode (red key
 \ f8), and when we finish buying or selling cargo in BAY2 to jump to the
@@ -16572,7 +16616,7 @@ ENDIF
 \
 \       Name: DORND
 \       Type: Subroutine
-\   Category: Utility routines
+\   Category: Maths (Arithmetic)
 \    Summary: Generate random numbers
 \  Deep dive: Generating random numbers
 \             Fixing ship positions
@@ -16761,6 +16805,11 @@ ENDIF
 \
 \ BRKV is set to point to BR1 by the loading process.
 \
+\ Other entry points:
+\
+\   QU5                 Restart the game using the last saved commander without
+\                       asking whether to load a new commander file
+\
 \ ******************************************************************************
 
 .BR1
@@ -16827,8 +16876,9 @@ ENDIF
  JSR ping               \ Set the target system coordinates (QQ9, QQ10) to the
                         \ current system coordinates (QQ0, QQ1) we just loaded
 
- JSR hyp1               \ Arrive in the system closest to (QQ9, QQ10) and then
-                        \ fall through into the docking bay routine below
+ JSR hyp1               \ Arrive in the system closest to (QQ9, QQ10)
+
+                        \ Fall through into the docking bay routine below
 
 \ ******************************************************************************
 \
@@ -16975,10 +17025,11 @@ ENDIF
                         \ to 96, which is the distance at which the rotating
                         \ ship starts out before coming towards us
 
- LDX #127               \ Set roll counter = 127, so don't dampen the roll
- STX INWK+29
+ LDX #127               \ Set roll counter = 127, so don't dampen the roll and
+ STX INWK+29            \ make the roll direction clockwise
 
- STX INWK+30            \ Set pitch counter = 127, so don't dampen the pitch
+ STX INWK+30            \ Set pitch counter = 127, so don't dampen the pitch and
+                        \ set the pitch direction to dive
 
  INX                    \ Set QQ17 to 128 (so bit 7 is set) to switch to
  STX QQ17               \ Sentence Case, with the next letter printing in upper
@@ -17252,6 +17303,10 @@ ENDIF
 \                       the form ":0.E.JAMESON", for example, terminated by a
 \                       return character (13)
 \
+\ Other entry points:
+\
+\   GTNME               Skip the delay at the start of the routine
+\
 \ ******************************************************************************
 
 .GTNMEW
@@ -17492,7 +17547,7 @@ ENDIF
 \ Arguments:
 \
 \   Y                   The offset from (X SC) where we start zeroing, counting
-\                       up to to &FF
+\                       up to &FF
 \
 \   SC                  The low byte (i.e. the offset into the page) of the
 \                       starting point of the zero-fill
@@ -17574,9 +17629,9 @@ ENDIF
 
 .CATS
 
- JSR GTDRV              \ Get an ASCII disc drive drive number from the keyboard
-                        \ in A, setting the C flag if an invalid drive number
-                        \ was entered
+ JSR GTDRV              \ Get an ASCII disc drive number from the keyboard in A,
+                        \ setting the C flag if an invalid drive number was
+                        \ entered
 
  BCS DELT-1             \ If the C flag is set, then an invalid drive number was
                         \ entered, so return from the subroutine (as DELT-1
@@ -17644,7 +17699,7 @@ ENDIF
 \ This routine asks for a disc drive number, and if it is a valid number (0-3)
 \ it displays a catalogue of the disc in that drive. It then asks for a filename
 \ to delete, updates the OS command at DELI so that when that command is run, it
-\ it deletes the correct file, and then it does the deletion.
+\ deletes the correct file, and then it does the deletion.
 \
 \ Other entry points:
 \
@@ -18036,9 +18091,9 @@ ENDIF
  PHA                    \ Store A on the stack so we can restore it after the
                         \ call to GTDRV
 
- JSR GTDRV              \ Get an ASCII disc drive drive number from the keyboard
-                        \ in A, setting the C flag if an invalid drive number
-                        \ was entered
+ JSR GTDRV              \ Get an ASCII disc drive number from the keyboard in A,
+                        \ setting the C flag if an invalid drive number was
+                        \ entered
 
  STA INWK+1             \ Store the ASCII drive number in INWK+1, which is the
                         \ drive character of the filename string ":0.E."
@@ -18077,7 +18132,7 @@ ENDIF
 \       Name: GTDRV
 \       Type: Subroutine
 \   Category: Save and load
-\    Summary: Get an ASCII disc drive drive number from the keyboard
+\    Summary: Get an ASCII disc drive number from the keyboard
 \
 \ ------------------------------------------------------------------------------
 \
@@ -18130,6 +18185,10 @@ ENDIF
 \ ------------------------------------------------------------------------------
 \
 \ The filename should be stored at INWK, terminated with a carriage return (13).
+\
+\ Other entry points:
+\
+\   LOR                 Set the C flag and return from the subroutine
 \
 \ ******************************************************************************
 
@@ -18648,6 +18707,10 @@ ENDIF
  LDA #128               \ Call OSBYTE with A = 128 to fetch the 16-bit value
  JSR OSBYTE             \ from ADC channel X, returning (Y X), i.e. the high
                         \ byte in Y and the low byte in X
+                        \
+                        \   * Channel 1 is the x-axis: 0 = right, 65520 = left
+                        \
+                        \   * Channel 2 is the y-axis: 0 = down,  65520 = up
 
  TYA                    \ Copy Y to A, so the result is now in (A X)
 
@@ -18740,7 +18803,8 @@ ENDIF
 \       Name: DOKEY
 \       Type: Subroutine
 \   Category: Keyboard
-\    Summary: Scan for the seven primary flight controls
+\    Summary: Scan for the seven primary flight controls and apply the docking
+\             computer manoeuvring code
 \  Deep dive: The key logger
 \             The docking computer
 \
@@ -19017,23 +19081,23 @@ ENDMACRO
 
 .QQ23
 
- ITEM 19,  -2, 't',   6, %00000001   \  0 = Food
- ITEM 20,  -1, 't',  10, %00000011   \  1 = Textiles
- ITEM 65,  -3, 't',   2, %00000111   \  2 = Radioactives
- ITEM 40,  -5, 't', 226, %00011111   \  3 = Slaves
- ITEM 83,  -5, 't', 251, %00001111   \  4 = Liquor/Wines
- ITEM 196,  8, 't',  54, %00000011   \  5 = Luxuries
- ITEM 235, 29, 't',   8, %01111000   \  6 = Narcotics
- ITEM 154, 14, 't',  56, %00000011   \  7 = Computers
- ITEM 117,  6, 't',  40, %00000111   \  8 = Machinery
- ITEM 78,   1, 't',  17, %00011111   \  9 = Alloys
- ITEM 124, 13, 't',  29, %00000111   \ 10 = Firearms
- ITEM 176, -9, 't', 220, %00111111   \ 11 = Furs
- ITEM 32,  -1, 't',  53, %00000011   \ 12 = Minerals
- ITEM 97,  -1, 'k',  66, %00000111   \ 13 = Gold
- ITEM 171, -2, 'k',  55, %00011111   \ 14 = Platinum
- ITEM 45,  -1, 'g', 250, %00001111   \ 15 = Gem-Stones
- ITEM 53,  15, 't', 192, %00000111   \ 16 = Alien items
+ ITEM 19,  -2, 't',   6, %00000001  \  0 = Food
+ ITEM 20,  -1, 't',  10, %00000011  \  1 = Textiles
+ ITEM 65,  -3, 't',   2, %00000111  \  2 = Radioactives
+ ITEM 40,  -5, 't', 226, %00011111  \  3 = Slaves
+ ITEM 83,  -5, 't', 251, %00001111  \  4 = Liquor/Wines
+ ITEM 196,  8, 't',  54, %00000011  \  5 = Luxuries
+ ITEM 235, 29, 't',   8, %01111000  \  6 = Narcotics
+ ITEM 154, 14, 't',  56, %00000011  \  7 = Computers
+ ITEM 117,  6, 't',  40, %00000111  \  8 = Machinery
+ ITEM 78,   1, 't',  17, %00011111  \  9 = Alloys
+ ITEM 124, 13, 't',  29, %00000111  \ 10 = Firearms
+ ITEM 176, -9, 't', 220, %00111111  \ 11 = Furs
+ ITEM 32,  -1, 't',  53, %00000011  \ 12 = Minerals
+ ITEM 97,  -1, 'k',  66, %00000111  \ 13 = Gold
+ ITEM 171, -2, 'k',  55, %00011111  \ 14 = Platinum
+ ITEM 45,  -1, 'g', 250, %00001111  \ 15 = Gem-Stones
+ ITEM 53,  15, 't', 192, %00000111  \ 16 = Alien items
 
 \ ******************************************************************************
 \
@@ -20451,11 +20515,11 @@ ENDMACRO
 
  LDA #255               \ Set the 15th byte of XX2 to 255, so that face 15 is
  STA XX2+15             \ always visible. No ship definitions actually have this
-                        \ number of faces in the cassette version, but this
-                        \ allows us to force a vertex to always be visible by
-                        \ associating it with face 15 (see the blueprints for
-                        \ the Cobra Mk III at SHIP_COBRA_MK_3 and asteroid at
-                        \ SHIP_ASTEROID for examples)
+                        \ number of faces, but this allows us to force a vertex
+                        \ to always be visible by associating it with face 15
+                        \ (see the ship blueprints for the Cobra Mk III at
+                        \ SHIP_COBRA_MK_3 and the asteroid at SHIP_ASTEROID for
+                        \ examples of vertices that are associated with face 15)
 
  LDY #12                \ Set Y = 12 to point to the ship blueprint byte #12,
 
@@ -21623,6 +21687,9 @@ ENDMACRO
 \   LL70+1              Contains an RTS (as the first byte of an LDA
 \                       instruction)
 \
+\   LL66                A re-entry point into the ship-drawing routine, used by
+\                       the LL62 routine to store 128 - (U R) on the XX3 heap
+\
 \ ******************************************************************************
 
 .LL60
@@ -21746,7 +21813,7 @@ ENDMACRO
  STA XX3,X              \ Store the high byte of the result in the X-th byte of
                         \ the heap at XX3
 
- JMP LL50               \ Jump to LL68 to skip the division for y_lo < z_lo
+ JMP LL50               \ Jump to LL50 to move on to the next vertex
 
 .LL67
 
@@ -22439,13 +22506,13 @@ ENDMACRO
 
 .LL147
 
- LDX #Y*2-1             \ Set Y2 = #Y * 2 - 1. The constant #Y is 96, the
+ LDX #Y*2-1             \ Set X = #Y * 2 - 1. The constant #Y is 96, the
                         \ y-coordinate of the mid-point of the space view, so
                         \ this sets Y2 to 191, the y-coordinate of the bottom
                         \ pixel row of the space view
 
  ORA XX12+1             \ If one or both of x2_hi and y2_hi are non-zero, jump
- BNE LL107              \ to LL107 to skip the following
+ BNE LL107              \ to LL107 to skip the following, leaving X at 191
 
  CPX XX12               \ If y2_lo > the y-coordinate of the bottom of screen
  BCC LL107              \ then (x2, y2) is off the bottom of the screen, so skip
@@ -22466,7 +22533,7 @@ ENDMACRO
                         \ otherwise it is 0
 
  LDA XX15+1             \ If one or both of x1_hi and y1_hi are non-zero, jump
- ORA XX15+3             \ jump to LL83
+ ORA XX15+3             \ to LL83
  BNE LL83
 
  LDA #Y*2-1             \ If y1_lo > the y-coordinate of the bottom of screen
@@ -22944,7 +23011,8 @@ ENDMACRO
 \ADC #4                 \ next edge
 \STA V
 \
-\BCC ll81               \ If the above addition didn't overflow, jump to ll81
+\BCC ll81               \ If the above addition didn't overflow, jump to ll81 to
+\                       \ skip the following instruction
 \
 \INC V+1                \ Otherwise increment the high byte of V(1 0), as we
 \                       \ just moved the V(1 0) pointer past a page boundary
@@ -23245,8 +23313,8 @@ ENDMACRO
 
 .LL118
 
- LDA XX15+1             \ If x1_hi is positive, jump down to LL119 to skip
- BPL LL119              \ the following
+ LDA XX15+1             \ If x1_hi is positive, jump down to LL119 to skip the
+ BPL LL119              \ following
 
  STA S                  \ Otherwise x1_hi is negative, i.e. off the left of the
                         \ screen, so set S = x1_hi
@@ -23352,7 +23420,7 @@ ENDMACRO
 
 .LL135
 
- LDA XX15+2             \ Set (S R) = (y1_hi y1_lo) - 192
+ LDA XX15+2             \ Set (S R) = (y1_hi y1_lo) - screen height
  SEC                    \
  SBC #Y*2               \ starting with the low bytes
  STA R
@@ -23361,22 +23429,22 @@ ENDMACRO
  SBC #0
  STA S
 
- BCC LL136              \ If the subtraction underflowed, i.e. if y1 < 192, then
-                        \ y1 is already on-screen, so jump to LL136 to return
-                        \ from the subroutine, as we are done
+ BCC LL136              \ If the subtraction underflowed, i.e. if y1 < screen
+                        \ height, then y1 is already on-screen, so jump to LL136
+                        \ to return from the subroutine, as we are done
 
 .LL139
 
-                        \ If we get here then y1 >= 192, i.e. off the bottom of
-                        \ the screen
+                        \ If we get here then y1 >= screen height, i.e. off the
+                        \ bottom of the screen
 
  JSR LL123              \ Call LL123 to calculate:
                         \
                         \   (Y X) = (S R) / XX12+2      if T = 0
-                        \         = (y1 - 192) / gradient
+                        \         = (y1 - screen height) / gradient
                         \
                         \   (Y X) = (S R) * XX12+2      if T <> 0
-                        \         = (y1 - 192) * gradient
+                        \         = (y1 - screen height) * gradient
                         \
                         \ with the sign of (Y X) set to the opposite of the
                         \ line's direction of slope
@@ -23945,8 +24013,7 @@ ENDMACRO
                         \ the name token for our new ship
 
  LDA new_range          \ Set our fuel level in QQ14 to the hyperspace range of
- STA QQ14               \ of our new ship, so our new ship comes with a full
-                        \ tank
+ STA QQ14               \ our new ship, so our new ship comes with a full tank
 
  JSR msblob             \ Reset the dashboard's missile indicators so they show
                         \ the correct number of missiles fitted to our new ship
@@ -24004,8 +24071,8 @@ ENDMACRO
  LDA new_ships,X        \ Set A to the character/token we want to fetch from
                         \ the new_ships table
 
- EOR #35                \ Tokens in the new_ships table are stored as token
-                        \ numbers that are not EOR'd with 35, but the extended
+ EOR #RE                \ Tokens in the new_ships table are stored as token
+                        \ numbers that are not EOR'd with RE, but the extended
                         \ text token table at QQ18 expects all tokens to be
                         \ obfuscated, so we add the obfuscation here
 
@@ -24195,6 +24262,14 @@ ENDMACRO
 \   Category: Missions
 \    Summary: Show the Special Cargo screen (CTRL-f1)
 \  Deep dive: Special cargo missions
+\
+\ ------------------------------------------------------------------------------
+\
+\ Other entry points:
+\
+\   cour_loop           The start of the loop for displaying mission menu items
+\
+\   cour_menu           Display the mission menu and process the choice
 \
 \ ******************************************************************************
 
@@ -25873,7 +25948,7 @@ ENDMACRO
 
  ETOK 154               \ Token 8:      "{single cap}COMMANDER'S NAME? "
  ECHR '`'               \
- ECHR 'S'               \ Encoded as:   "[154][39]S[200]"
+ ECHR 'S'               \ Encoded as:   "[154]'S[200]"
  ETOK 200
  EQUB VE
 
@@ -25936,7 +26011,7 @@ ENDMACRO
  ETWO 'O', 'U'          \                {19}C<223><222>RICT<253>, E<254>IP[196]
  ECHR 'L'               \                WI<226>[208]TOP <218>CR<221>[210]SHIELD
  ECHR 'D'               \                 G<246><244><245><253>[204]UNF<253>TUN
- ECHR ' '               \                <245>ELY <219>[39]S <247><246> <222>OL
+ ECHR ' '               \                <245>ELY <219>'S <247><246> <222>OL
  ECHR 'L'               \                <246>[204]{22}<219> W<246>T MISS[195]
  ECHR 'I'               \                FROM <217>R [207] Y<238>D <223> {19}
  ECHR 'K'               \                <230><244> FI<250> M<223><226>S AGO
@@ -26261,14 +26336,14 @@ ENDMACRO
  ECHR 'E'               \                {left align}{tab 6}{all caps}  MESSAGE
  ECHR ' '               \                ENDS{wait for key press}"
  ECHR 'H'               \
- ECHR 'A'               \ Encoded as:   "{25}{9}{23}{14}{2}  <245>T<246>
- ETWO 'V', 'E'          \                <251><223>[213]. {19}WE HA<250> NE[196]
- ECHR ' '               \                OF [179]R <218>RVIC<237> AGA<240>[204]
- ECHR 'N'               \                IF [179] W<217>LD <247> <235> GOOD AS
- ECHR 'E'               \                [201]GO[201]{19}<233><244><241> [179]
- ETOK 196               \                 W<220>L <247> BRIEF<252>[204]IF SUC
- ECHR 'O'               \                <233>SSFUL, [179] W<220>L <247> WELL
- ECHR 'F'               \                 <242>W<238>D<252>[212]{24}"
+ ECHR 'A'               \ Encoded as:   "{25}{9}{23}{14}{2}  <245>T<246><251>
+ ETWO 'V', 'E'          \                <223>[213]. {19}WE HA<250> NE[196]OF
+ ECHR ' '               \                 [179]R <218>RVIC<237> AGA<240>[204]IF
+ ECHR 'N'               \                 [179] W<217>LD <247> <235> GOOD AS
+ ECHR 'E'               \                [201]GO[201]{19}<233><244><241> [179] W
+ ETOK 196               \                <220>L <247> BRIEF<252>[204]IF SUC<233>
+ ECHR 'O'               \                SSFUL, [179] W<220>L <247> WELL <242>W
+ ECHR 'F'               \                <238>D<252>[212]{24}"
  ECHR ' '
  ETOK 179
  ECHR 'R'
@@ -26824,7 +26899,7 @@ ENDMACRO
 
  ETOK 175               \ Token 63:     "ITS INHABITANTS' [165-169] [36-40]"
  ETOK 193               \
- ECHR 'S'               \ Encoded as:   "[175][193]S[39] [7?] [8?]"
+ ECHR 'S'               \ Encoded as:   "[175][193]S' [7?] [8?]"
  ECHR '`'
  ECHR ' '
  ERND 7
@@ -27046,7 +27121,7 @@ ENDMACRO
  ECHR 'H'               \                KNAVE"
  ETWO 'O', 'R'          \
  ETWO 'E', 'S'          \ Encoded as:   "WH<253><237><223> <247><221><229> HEAD
- ETWO 'O', 'N'          \                [198]F<249>P E<238>[39]D KNA<250>"
+ ETWO 'O', 'N'          \                [198]F<249>P E<238>'D KNA<250>"
  ECHR ' '
  ETWO 'B', 'E'
  ETWO 'E', 'T'
@@ -27945,8 +28020,8 @@ ENDMACRO
  EJMP 2                 \ Token 211:    "{sentence case} HER MAJESTY'S SPACE
  ECHR ' '               \                 NAVY{lower case}"
  ECHR 'H'               \
- ETWO 'E', 'R'          \ Encoded as:   "{2} H<244> <239>J<237>TY[39]S SPA<233>
- ECHR ' '               \                 NAVY{13}"
+ ETWO 'E', 'R'          \ Encoded as:   "{2} H<244> <239>J<237>TY'S SPA<233> NAV
+ ECHR ' '               \                Y{13}"
  ETWO 'M', 'A'
  ECHR 'J'
  ETWO 'E', 'S'
@@ -28169,19 +28244,19 @@ ENDMACRO
  ECHR 'A'               \                [204]{24}{9}{29}I{13} HA<250> OBTA
  ECHR 'S'               \                <240>[196][147]DEF<246><233> P<249>NS F
  ECHR ' '               \                <253> <226>EIR {19}HI<250> {19}W<253>LD
- ETOK 179               \                S[204][147]<247><221><229>S K<227>W WE
- ECHR ' '               \                [39]<250> GOT <235>ME<226>[195]BUT
- ECHR 'K'               \                 <227>T WH<245>[204]IF {19}I T<248>NSM
- ETWO 'N', 'O'          \                <219> [147]P<249>NS[201]<217>R BA<218>
- ECHR 'W'               \                 <223> {19}<234><242><248> <226>EY[39]L
- ECHR ','               \                L <240>T<244><233>PT [147]TR<255>SMISSI
- ECHR ' '               \                <223>. {19}I NE<252>[208][207][201]
- ETOK 147               \                <239>KE [147]RUN[204][179][39]<242> E
- EJMP 19                \                <229>CT<252>[204][147]P<249>NS A<242>
- ECHR 'N'               \                 UNIPUL<218> COD[196]WI<226><240> [148]
- ECHR 'A'               \                TR<255>SMISSI<223>[204]{8}[179] W<220>L
- ECHR 'V'               \                 <247> PAID[204]    {19}GOOD LUCK [154]
- ECHR 'Y'               \                [212]{24}"
+ ETOK 179               \                S[204][147]<247><221><229>S K<227>W WE'
+ ECHR ' '               \                <250> GOT <235>ME<226>[195]BUT <227>T W
+ ECHR 'K'               \                H<245>[204]IF {19}I T<248>NSM<219>
+ ETWO 'N', 'O'          \                 [147]P<249>NS[201]<217>R BA<218> <223>
+ ECHR 'W'               \                 {19}<234><242><248> <226>EY'LL <240>T
+ ECHR ','               \                <244><233>PT [147]TR<255>SMISSI<223>.
+ ECHR ' '               \                 {19}I NE<252>[208][207][201]<239>KE
+ ETOK 147               \                 [147]RUN[204][179]'<242> E<229>CT<252>
+ EJMP 19                \                [204][147]P<249>NS A<242> UNIPUL<218> C
+ ECHR 'N'               \                OD[196]WI<226><240> [148]TR<255>SMISSI
+ ECHR 'A'               \                <223>[204]{8}[179] W<220>L <247> PAID
+ ECHR 'V'               \                [204]    {19}GOOD LUCK [154][212]{24}"
+ ECHR 'Y'
  ECHR ' '
  ECHR 'H'
  ECHR 'A'
@@ -28579,7 +28654,7 @@ ENDMACRO
  ECHR 'E'               \                 {single cap}YOU HAVE SERVED US WELL
  ECHR 'L'               \                AND WE SHALL REMEMBER.{cr}
  ECHR 'L'               \                 {single cap}WE DID NOT EXPECT THE
- ECHR ' '               \                 {single cap}THARGOIDS TO FIND OUT
+ ECHR ' '               \                {single cap}THARGOIDS TO FIND OUT
  ECHR 'D'               \                ABOUT YOU.{cr}
  ETWO 'O', 'N'          \                 {single cap}FOR THE MOMENT PLEASE
  ECHR 'E'               \                ACCEPT THIS {single cap}NAVY {standard
@@ -28901,9 +28976,10 @@ ENDMACRO
 \       Name: RUPLA
 \       Type: Variable
 \   Category: Text
-\    Summary: System numbers that have extended decription overrides
+\    Summary: System numbers that have extended description overrides
 \  Deep dive: Extended system descriptions
 \             Extended text tokens
+\             The Constrictor mission
 \
 \ ------------------------------------------------------------------------------
 \
@@ -28956,21 +29032,22 @@ ENDMACRO
 \       Name: RUGAL
 \       Type: Variable
 \   Category: Text
-\    Summary: The criteria for systems with extended decription overrides
+\    Summary: The criteria for systems with extended description overrides
 \  Deep dive: Extended system descriptions
 \             Extended text tokens
+\             The Constrictor mission
 \
 \ ------------------------------------------------------------------------------
 \
-\ This table contains the criteria for printing an extended decription override
+\ This table contains the criteria for printing an extended description override
 \ for a system. The galaxy number is in bits 0-6, while bit 7 determines whether
 \ to show this token during mission 1 only (bit 7 is clear, i.e. a value of &0x
 \ in the table below), or all of the time (bit 7 is set, i.e. a value of &8x in
 \ the table below).
 \
-\ In other words, Teorge, Arredi, Anreer and Lave have extended decription
-\ overrides descriptions that are always shown, while the rest only appear when
-\ mission 1 is in progress.
+\ In other words, Teorge, Arredi, Anreer and Lave have extended description
+\ overrides that are always shown, while the rest only appear when mission 1 is
+\ in progress.
 \
 \ The three variables work as follows:
 \
@@ -29021,6 +29098,7 @@ ENDMACRO
 \    Summary: The second extended token table for recursive tokens 0-26 (DETOK3)
 \  Deep dive: Extended system descriptions
 \             Extended text tokens
+\             The Constrictor mission
 \
 \ ------------------------------------------------------------------------------
 \
@@ -29291,8 +29369,8 @@ ENDMACRO
  ECHR ' '               \                LASERS DIDN'T EVEN SCRATCH THE [91-95]"
  ETOK 207               \
  ECHR ' '               \ Encoded as:   "[24?] [207] W<246>T F<253> ME <245>
- ECHR 'W'               \                 A<236><238>. MY <249>S<244>S <241>DN
- ETWO 'E', 'N'          \                 [39]TEV<246> SC<248>TCH [147][24?]"
+ ECHR 'W'               \                 A<236><238>. MY <249>S<244>S <241>DN'T
+ ETWO 'E', 'N'          \                 EV<246> SC<248>TCH [147][24?]"
  ECHR 'T'
  ECHR ' '
  ECHR 'F'
@@ -29451,8 +29529,8 @@ ENDMACRO
  ECHR ' '               \                IF YOU LIKE. HE'S AT ORARRA"
  ECHR 'C'               \
  ETWO 'A', 'N'          \ Encoded as:   "[179] C<255> TACK<229> [147][13?] [24?]
- ECHR ' '               \                 IF [179] LIKE. HE[39]S <245> <253>
- ECHR 'T'               \                <238><248>"
+ ECHR ' '               \                 IF [179] LIKE. HE'S <245> <253><238>
+ ECHR 'T'               \                <248>"
  ECHR 'A'
  ECHR 'C'
  ECHR 'K'
@@ -29585,8 +29663,8 @@ ENDMACRO
  ETWO 'T', 'H'          \ Token 24:     "THERE'S A REAL [91-95] PIRATE OUT
  ETWO 'E', 'R'          \                THERE"
  ECHR 'E'               \
- ECHR '`'               \ Encoded as:   "<226><244>E[39]S[208]<242><228> [24?] P
- ECHR 'S'               \                I<248>TE <217>T <226><244>E"
+ ECHR '`'               \ Encoded as:   "<226><244>E'S[208]<242><228> [24?] PI
+ ECHR 'S'               \                <248>TE <217>T <226><244>E"
  ETOK 208
  ETWO 'R', 'E'
  ETWO 'A', 'L'
@@ -33824,9 +33902,9 @@ ENDMACRO
 MACRO CHAR x
 
  IF x = '`'
-   EQUB 39 EOR 35
+   EQUB 39 EOR RE
  ELSE
-   EQUB x EOR 35
+   EQUB x EOR RE
  ENDIF
 
 ENDMACRO
@@ -33860,38 +33938,38 @@ ENDMACRO
 
 MACRO TWOK t, k
 
- IF t = 'A' AND k = 'L' : EQUB 128 EOR 35 : ENDIF
- IF t = 'L' AND k = 'E' : EQUB 129 EOR 35 : ENDIF
- IF t = 'X' AND k = 'E' : EQUB 130 EOR 35 : ENDIF
- IF t = 'G' AND k = 'E' : EQUB 131 EOR 35 : ENDIF
- IF t = 'Z' AND k = 'A' : EQUB 132 EOR 35 : ENDIF
- IF t = 'C' AND k = 'E' : EQUB 133 EOR 35 : ENDIF
- IF t = 'B' AND k = 'I' : EQUB 134 EOR 35 : ENDIF
- IF t = 'S' AND k = 'O' : EQUB 135 EOR 35 : ENDIF
- IF t = 'U' AND k = 'S' : EQUB 136 EOR 35 : ENDIF
- IF t = 'E' AND k = 'S' : EQUB 137 EOR 35 : ENDIF
- IF t = 'A' AND k = 'R' : EQUB 138 EOR 35 : ENDIF
- IF t = 'M' AND k = 'A' : EQUB 139 EOR 35 : ENDIF
- IF t = 'I' AND k = 'N' : EQUB 140 EOR 35 : ENDIF
- IF t = 'D' AND k = 'I' : EQUB 141 EOR 35 : ENDIF
- IF t = 'R' AND k = 'E' : EQUB 142 EOR 35 : ENDIF
- IF t = 'A' AND k = '?' : EQUB 143 EOR 35 : ENDIF
- IF t = 'E' AND k = 'R' : EQUB 144 EOR 35 : ENDIF
- IF t = 'A' AND k = 'T' : EQUB 145 EOR 35 : ENDIF
- IF t = 'E' AND k = 'N' : EQUB 146 EOR 35 : ENDIF
- IF t = 'B' AND k = 'E' : EQUB 147 EOR 35 : ENDIF
- IF t = 'R' AND k = 'A' : EQUB 148 EOR 35 : ENDIF
- IF t = 'L' AND k = 'A' : EQUB 149 EOR 35 : ENDIF
- IF t = 'V' AND k = 'E' : EQUB 150 EOR 35 : ENDIF
- IF t = 'T' AND k = 'I' : EQUB 151 EOR 35 : ENDIF
- IF t = 'E' AND k = 'D' : EQUB 152 EOR 35 : ENDIF
- IF t = 'O' AND k = 'R' : EQUB 153 EOR 35 : ENDIF
- IF t = 'Q' AND k = 'U' : EQUB 154 EOR 35 : ENDIF
- IF t = 'A' AND k = 'N' : EQUB 155 EOR 35 : ENDIF
- IF t = 'T' AND k = 'E' : EQUB 156 EOR 35 : ENDIF
- IF t = 'I' AND k = 'S' : EQUB 157 EOR 35 : ENDIF
- IF t = 'R' AND k = 'I' : EQUB 158 EOR 35 : ENDIF
- IF t = 'O' AND k = 'N' : EQUB 159 EOR 35 : ENDIF
+ IF t = 'A' AND k = 'L' : EQUB 128 EOR RE : ENDIF
+ IF t = 'L' AND k = 'E' : EQUB 129 EOR RE : ENDIF
+ IF t = 'X' AND k = 'E' : EQUB 130 EOR RE : ENDIF
+ IF t = 'G' AND k = 'E' : EQUB 131 EOR RE : ENDIF
+ IF t = 'Z' AND k = 'A' : EQUB 132 EOR RE : ENDIF
+ IF t = 'C' AND k = 'E' : EQUB 133 EOR RE : ENDIF
+ IF t = 'B' AND k = 'I' : EQUB 134 EOR RE : ENDIF
+ IF t = 'S' AND k = 'O' : EQUB 135 EOR RE : ENDIF
+ IF t = 'U' AND k = 'S' : EQUB 136 EOR RE : ENDIF
+ IF t = 'E' AND k = 'S' : EQUB 137 EOR RE : ENDIF
+ IF t = 'A' AND k = 'R' : EQUB 138 EOR RE : ENDIF
+ IF t = 'M' AND k = 'A' : EQUB 139 EOR RE : ENDIF
+ IF t = 'I' AND k = 'N' : EQUB 140 EOR RE : ENDIF
+ IF t = 'D' AND k = 'I' : EQUB 141 EOR RE : ENDIF
+ IF t = 'R' AND k = 'E' : EQUB 142 EOR RE : ENDIF
+ IF t = 'A' AND k = '?' : EQUB 143 EOR RE : ENDIF
+ IF t = 'E' AND k = 'R' : EQUB 144 EOR RE : ENDIF
+ IF t = 'A' AND k = 'T' : EQUB 145 EOR RE : ENDIF
+ IF t = 'E' AND k = 'N' : EQUB 146 EOR RE : ENDIF
+ IF t = 'B' AND k = 'E' : EQUB 147 EOR RE : ENDIF
+ IF t = 'R' AND k = 'A' : EQUB 148 EOR RE : ENDIF
+ IF t = 'L' AND k = 'A' : EQUB 149 EOR RE : ENDIF
+ IF t = 'V' AND k = 'E' : EQUB 150 EOR RE : ENDIF
+ IF t = 'T' AND k = 'I' : EQUB 151 EOR RE : ENDIF
+ IF t = 'E' AND k = 'D' : EQUB 152 EOR RE : ENDIF
+ IF t = 'O' AND k = 'R' : EQUB 153 EOR RE : ENDIF
+ IF t = 'Q' AND k = 'U' : EQUB 154 EOR RE : ENDIF
+ IF t = 'A' AND k = 'N' : EQUB 155 EOR RE : ENDIF
+ IF t = 'T' AND k = 'E' : EQUB 156 EOR RE : ENDIF
+ IF t = 'I' AND k = 'S' : EQUB 157 EOR RE : ENDIF
+ IF t = 'R' AND k = 'I' : EQUB 158 EOR RE : ENDIF
+ IF t = 'O' AND k = 'N' : EQUB 159 EOR RE : ENDIF
 
 ENDMACRO
 
@@ -33920,7 +33998,7 @@ ENDMACRO
 
 MACRO CONT n
 
- EQUB n EOR 35
+ EQUB n EOR RE
 
 ENDMACRO
 
@@ -33964,7 +34042,7 @@ MACRO RTOK n
   t = n
  ENDIF
 
- EQUB t EOR 35
+ EQUB t EOR RE
 
 ENDMACRO
 
@@ -34498,11 +34576,11 @@ ENDMACRO
  EQUB 0
 
  CONT 12                \ Token 65:     "{cr}
- CHAR '1'               \                10{cash} CR5{cash} CR"
- CHAR '0'               \
+ CHAR '1'               \                10{cash} CR{cr}
+ CHAR '0'               \                5{cash} CR{cr}
+ CONT 0                 \               "
+ CHAR '5'               \
  CONT 0                 \ Encoded as:   "{12}10{0}5{0}"
- CHAR '5'
- CONT 0
  EQUB 0
 
  CHAR ' '               \ Token 66:     " CR"
@@ -35142,15 +35220,17 @@ ENDMACRO
 .SNE
 
  FOR I%, 0, 31
- 
+
   N = ABS(SIN((I% / 64) * 2 * PI))
- 
+
   IF N >= 1
-   EQUB 255
+   B% = 255
   ELSE
-   EQUB INT(256 * N + 0.5)
+   B% = INT(256 * N + 0.5)
   ENDIF
- 
+
+  EQUB B%
+
  NEXT
 
 \ ******************************************************************************
@@ -35299,7 +35379,7 @@ ENDMACRO
 \
 \ ------------------------------------------------------------------------------
 \
-\ Agruments:
+\ Arguments:
 \
 \   A                   The menu to show:
 \
@@ -35345,8 +35425,8 @@ ENDMACRO
                         \ A = 1, so jump to ship_over as the choice number is
                         \ already correct (i.e. 0 for Adder to 13 for Ghavial)
 
- ADC menu_entry+1       \ We just showed the the second menu, so the choice
-                        \ number is currently:
+ ADC menu_entry+1       \ We just showed the second menu, so the choice number
+                        \ is currently:
                         \
                         \   * 0 for Iguana to 13 for Worm
                         \
@@ -35384,7 +35464,7 @@ ENDMACRO
  LDY #0                 \ Install this ship into blueprint position 0 so we can
  JSR install_ship       \ show it on the ship card
 
- LDX TYPE               \ Set A to the cards's title x-coordinate (fetched from
+ LDX TYPE               \ Set A to the card's title x-coordinate (fetched from
  LDA ship_centre,X      \ the ship_centre table)
 
  STA XC                 \ Move the text cursor to the correct column for the
@@ -35406,10 +35486,11 @@ ENDMACRO
  LDA #176               \ Set z_hi = 176 (very far away)
  STA INWK+7
 
- LDX #127               \ Set roll counter = 127, so don't dampen the roll
- STX INWK+29
+ LDX #127               \ Set roll counter = 127, so don't dampen the roll and
+ STX INWK+29            \ make the roll direction clockwise
 
- STX INWK+30            \ Set pitch counter = 127, so don't dampen the pitch
+ STX INWK+30            \ Set pitch counter = 127, so don't dampen the pitch and
+                        \ set the pitch direction to dive
 
  INX                    \ Set X = 128
 
@@ -35668,7 +35749,7 @@ ENDMACRO
  CPX #&70               \ If ESCAPE is not being pressed, jump to dont_quit to
  BNE dont_quit          \ skip the next
 
- JMP DEATH2             \ ESCAPE is being pressed, so jump to DEATH2 to wnd the
+ JMP DEATH2             \ ESCAPE is being pressed, so jump to DEATH2 to end the
                         \ game
 
 .dont_quit
@@ -35879,14 +35960,14 @@ ENDMACRO
                         \ call DTS to print it in the correct case
 
  JMP card_loop          \ Jump back to card_loop to print the next token in the
-                        \ the ship data
+                        \ ship data
 
 .card_macro
 
  JSR DT3                \ Call DT3 to print the jump token given in A
 
  JMP card_loop          \ Jump back to card_loop to print the next token in the
-                        \ the ship data
+                        \ ship data
 
 .card_msg
 
@@ -35902,14 +35983,14 @@ ENDMACRO
  JSR write_msg3         \ Print the extended token in A
 
  JMP card_loop          \ Jump back to card_loop to print the next token in the
-                        \ the ship data
+                        \ ship data
 
 .card_pairs
 
  JSR msg_pairs          \ Print the extended two-letter token in A
 
  JMP card_loop          \ Jump back to card_loop to print the next token in the
-                        \ the ship data
+                        \ ship data
 
 .card_end
 
@@ -38203,7 +38284,7 @@ ENDIF
  CTOK 49
  EQUB 0
 
-\EQUB 0, 9              \ This data is commented out in the orginal source
+\EQUB 0, 9              \ This data is commented out in the original source
 \EQUA "3|!R"
 
  EQUB 10                \ 10: Drive motors:   "DE{single cap}LACY SPIN{single
@@ -38556,7 +38637,7 @@ ENDIF
 
  ASL A                  \ Set X = X * 4, so we can use it as an index into the
  TAX                    \ ship_bytes table, which has 4 bytes per entry
- 
+
  LDA ship_flags,Y       \ Fetch the ship_flags byte for this ship position, i.e.
                         \ the Y-th entry in the ship_flags table, where the NEWB
                         \ flags live, so this sets A to the default NEWB flags
@@ -38756,7 +38837,8 @@ ENDIF
  JSR cntr               \ rate in X creeps towards the centre by 2
 
                         \ The roll rate in JSTX increases if we press ">" (and
-                        \ the RL indicator on the dashboard goes to the right).
+                        \ the RL indicator on the dashboard goes to the right)
+                        \
                         \ This rolls our ship to the right (clockwise), but we
                         \ actually implement this by rolling everything else
                         \ to the left (anti-clockwise), so a positive roll rate
@@ -39049,8 +39131,8 @@ ENDIF
  AND ESCP               \ fitted, keep going, otherwise jump to noescp to skip
  BEQ noescp             \ the following instructions
 
- JMP ESCAPE             \ The "launch escape pod" button is being pressed and
-                        \ we have an escape pod fitted, so jump to ESCAPE to
+ JMP ESCAPE             \ The button is being pressed to launch an escape pod
+                        \ and we have an escape pod fitted, so jump to ESCAPE to
                         \ launch it, and exit the main flight loop using a tail
                         \ call
 
@@ -39071,7 +39153,7 @@ ENDIF
                         \ skip the following (as we can't have two E.C.M.
                         \ systems operating at the same time)
 
- DEC ECMP               \ The "E.C.M." button is being pressed and nobody else
+ DEC ECMP               \ The E.C.M. button is being pressed and nobody else
                         \ is operating their E.C.M., so decrease the value of
                         \ ECMP to make it non-zero, to denote that our E.C.M.
                         \ is now on
@@ -39137,10 +39219,9 @@ ENDIF
                         \ otherwise jump down to ma1 to skip the following
                         \ instruction
 
- LDA #0                 \ This is an "always on" laser (i.e. a beam laser,
-                        \ as the cassette version of Elite doesn't have military
-                        \ lasers), so set A = 0, which will be stored in LASCT
-                        \ to denote that this is not a pulsing laser
+ LDA #0                 \ This is an "always on" laser (i.e. a beam laser or a
+                        \ military laser), so set A = 0, which will be stored in
+                        \ LASCT to denote that this is not a pulsing laser
 
 .ma1
 
@@ -39280,7 +39361,7 @@ ENDIF
                         \ do the reverse of the copy we did before, this time
                         \ copying from INWK to INF
 
- LDY #(NI%-1)           \ Set a counter in Y so we can loop through the NI%
+ LDY #NI%-1             \ Set a counter in Y so we can loop through the NI%
                         \ bytes in the ship data block
 
 .MAL3
@@ -39401,12 +39482,12 @@ ENDIF
                         \ scooping checks
 
                         \ Only the Thargon, alloy plate, splinter and escape pod
-                        \ have non-zero upper nibbles in their blueprint byte #0
+                        \ have non-zero high nibbles in their blueprint byte #0
                         \ so if we get here, our ship is one of those, and the
-                        \ upper nibble gives the market item number of the item
+                        \ high nibble gives the market item number of the item
                         \ when scooped, less 1
 
- ADC #1                 \ Add 1 to the upper nibble to get the market item
+ ADC #1                 \ Add 1 to the high nibble to get the market item
                         \ number
 
  BNE slvy2              \ Skip to slvy2 so we scoop the ship as a market item
@@ -39504,6 +39585,9 @@ ENDIF
 
  LDA XX15+2             \ Set A to the z-axis of the vector
 
+                        \ This version of Elite omits check 3 (which would check
+                        \ the sign of the z-axis)
+
  CMP #86                \ 4. If z-axis < 86, jump to MA62 to fail docking, as
  BCC MA62               \ we are not in the 26.3 degree safe cone of approach
 
@@ -39532,7 +39616,7 @@ ENDIF
                         \ If we arrive here, docking has just failed
 
  LDA DELTA              \ If the ship's speed is >= 5, jump to n_crunch to
- CMP #5                 \ register a fair emount of damage to our shields (128)
+ CMP #5                 \ register a fair amount of damage to our shields (128)
  BCS n_crunch
 
                         \ Otherwise we have just crashed gently into the
@@ -39555,7 +39639,7 @@ ENDIF
 \   * Continue looping through all the ships in the local bubble, and for each
 \     one:
 \
-\     * Remove scooped item after both successful and failed scoopings
+\     * Remove scooped item after both successful and failed scooping attempts
 \
 \     * Process collisions
 \
@@ -39592,7 +39676,7 @@ ENDIF
 
  JSR OOPS               \ The amount of damage is in A, so call OOPS to reduce
                         \ our shields, and if the shields are gone, there's a
-                        \ a chance of cargo loss or even death
+                        \ chance of cargo loss or even death
 
  JSR EXNO3              \ Make the sound of colliding with the other ship and
                         \ fall through into MA26 to try targeting a missile
@@ -39710,7 +39794,7 @@ ENDIF
  CMP new_mining         \ then our current laser strength in LAS will match the
  BNE nosp               \ strength of mining lasers when fitted to our current
                         \ ship type, which is stored in new_mining. If they
-                        \ don't match, which means we didn't use minig lasers,
+                        \ don't match, which means we didn't use mining lasers,
                         \ then jump to nosp, otherwise keep going
 
  JSR DORND              \ Set A and X to random numbers
@@ -39720,7 +39804,7 @@ ENDIF
  AND #3                 \ Reduce the random number in A to the range 0-3
 
  JSR SPIN2              \ Call SPIN2 to spawn A items of type X (i.e. spawn
-                        \ 0-3 spliters)
+                        \ 0-3 splinters)
 
 .nosp
 
@@ -39927,7 +40011,7 @@ ENDIF
                         \ a positive number, so having the C flag set indicates
                         \ that the subtraction didn't underflow - in other words
                         \ the damage isn't greater than the energy levels, and
-                        \ the ship has survuved the hit. In this case we jump to
+                        \ the ship has survived the hit. In this case we jump to
                         \ n_kill with the C flag set to indicate that the ship
                         \ has survived the attack
 
@@ -40023,6 +40107,7 @@ ENDIF
 \  Deep dive: Program flow of the main game loop
 \             Scheduling tasks with the main loop counter
 \             Ship data blocks
+\             The space station safe zone
 \
 \ ------------------------------------------------------------------------------
 \
@@ -40040,7 +40125,7 @@ ENDIF
 
  LDA MCNT               \ Fetch the main loop counter and calculate MCNT mod 32,
  AND #31                \ jumping to MA93 if it is on-zero (so the following
- BNE MA93               \ code only runs every 32 iterations of the main loop
+ BNE MA93               \ code only runs every 32 iterations of the main loop)
 
  LDA SSPR               \ If we are inside the space station safe zone, jump to
  BNE MA23S              \ MA23S to skip the following, as we already have a
@@ -40080,10 +40165,26 @@ ENDIF
                         \ first 28 bytes of K% to INWK
 
                         \ We now check the distance from our ship (at the
-                        \ origin) towards the planet's surface, by adding the
-                        \ planet's nosev vector to the planet's centre at
-                        \ (x, y, z) and checking our distance to the end
-                        \ point along the relevant axis
+                        \ origin) towards the point where we will spawn the
+                        \ space station if we are close enough
+                        \
+                        \ This point is calculated by starting at the planet's
+                        \ centre and adding 2 * nosev, which takes us to a point
+                        \ above the planet's surface, at an altitude that
+                        \ matches the planet's radius
+                        \
+                        \ This point pitches and rolls around the planet as the
+                        \ nosev vector rotates with the planet, and if our ship
+                        \ is within a distance of (192 0) from this point in all
+                        \ three axes, then we spawn the space station at this
+                        \ point, with the station's slot facing towards the
+                        \ planet, along the nosev vector
+                        \
+                        \ This works because in the following, we calculate the
+                        \ station's coordinates one axis at a time, and store
+                        \ the results in the INWK block, so by the time we have
+                        \ calculated and checked all three, the ship data block
+                        \ is set up with the correct spawning coordinates
 
  INX                    \ Set X = 0 (as we ended the above loop with X as &FF)
 
@@ -40091,7 +40192,7 @@ ENDIF
  JSR MAS1               \
                         \   (x_sign x_hi x_lo) += (nosev_x_hi nosev_x_lo) * 2
                         \
-                        \   A = |x_hi|
+                        \   A = |x_sign|
 
  BNE MA23S              \ If A > 0, jump to MA23S to skip the following, as we
                         \ are too far from the planet in the x-direction to
@@ -40101,7 +40202,7 @@ ENDIF
  LDY #11                \
  JSR MAS1               \   (y_sign y_hi y_lo) += (nosev_y_hi nosev_y_lo) * 2
                         \
-                        \   A = |y_hi|
+                        \   A = |y_sign|
 
  BNE MA23S              \ If A > 0, jump to MA23S to skip the following, as we
                         \ are too far from the planet in the y-direction to
@@ -40111,7 +40212,7 @@ ENDIF
  LDY #13                \
  JSR MAS1               \   (z_sign z_hi z_lo) += (nosev_z_hi nosev_z_lo) * 2
                         \
-                        \   A = |z_hi|
+                        \   A = |z_sign|
 
  BNE MA23S              \ If A > 0, jump to MA23S to skip the following, as we
                         \ are too far from the planet in the z-direction to
@@ -40155,7 +40256,7 @@ ENDIF
 \   * Perform an altitude check with the planet (every 32 iterations of the main
 \     loop, on iteration 10 of each 32)
 \
-\   * Perform an an altitude check with the sun and process fuel scooping (every
+\   * Perform an altitude check with the sun and process fuel scooping (every
 \     32 iterations of the main loop, on iteration 20 of each 32)
 \
 \ ******************************************************************************
@@ -40299,8 +40400,8 @@ ENDIF
  BCS MA28               \ If the C flag is set then jump to MA28 to die, as
                         \ our temperature is off the scale
 
- CMP #&E0               \ If the cabin temperature < 224 then jump to MA23 to
- BCC MA23               \ to skip fuel scooping, as we aren't close enough
+ CMP #224               \ If the cabin temperature < 224 then jump to MA23 to
+ BCC MA23               \ skip fuel scooping, as we aren't close enough
 
  LDA BST                \ If we don't have fuel scoops fitted, jump to BA23 to
  BEQ MA23               \ skip fuel scooping, as we can't scoop without fuel
@@ -40364,10 +40465,10 @@ ENDIF
 
  CMP #8                 \ If LASCT >= 8, jump to MA16 to skip the following, so
  BCS MA16               \ for a pulse laser with a LASCT between 8 and 10, the
-                        \ the laser stays on, but for a LASCT of 7 or less it
-                        \ gets turned off and stays off until LASCT reaches zero
-                        \ and the next pulse can start (if the fire button is
-                        \ still being pressed)
+                        \ laser stays on, but for a LASCT of 7 or less it gets
+                        \ turned off and stays off until LASCT reaches zero and
+                        \ the next pulse can start (if the fire button is still
+                        \ being pressed)
 
                         \
                         \ For pulse lasers, LASCT gets set to 10 in ma1 above,
@@ -40401,7 +40502,7 @@ ENDIF
 
 .MA69
 
- LDA ECMA               \ If an E.C.M is going off (our's or an opponent's) then
+ LDA ECMA               \ If an E.C.M is going off (ours or an opponent's) then
  BEQ MA66               \ keep going, otherwise skip to MA66
 
  DEC ECMA               \ Decrement the E.C.M. countdown timer, and if it has
@@ -40567,13 +40668,15 @@ ENDIF
                         \ to skip the following negation
 
  EOR #%01111111         \ The x-coordinate offset is negative, so flip all the
- CLC                    \ bits apart from the sign bit and add 1, to negate
- ADC #1                 \ it to a positive number, i.e. A is now |X1|
+ CLC                    \ bits apart from the sign bit and add 1, to convert it
+ ADC #1                 \ from a sign-magnitude number to a signed number
 
 .PX1
 
- EOR #%10000000         \ Set X = -|A|
- TAX                    \       = -|X1|
+ EOR #%10000000         \ Set X = X1 + 128
+ TAX                    \
+                        \ So X is now the offset converted to an x-coordinate,
+                        \ centred on x-coordinate 128
 
  LDA Y1                 \ Fetch the y-coordinate offset into A and clear the
  AND #%01111111         \ sign bit, so A = |Y1|
@@ -40593,11 +40696,11 @@ ENDIF
 
 .PX2
 
- STA T                  \ Set A = 97 - A
- LDA #97                \       = 97 - |Y1|
- SBC T                  \
-                        \ so if Y is positive we display the point up from the
-                        \ centre, while a negative Y means down from the centre
+ STA T                  \ Set A = 97 - Y1
+ LDA #97                \
+ SBC T                  \ So if Y is positive we display the point up from the
+                        \ centre at y-coordinate 97, while a negative Y means
+                        \ down from the centre
 
  JMP PIXEL              \ Jump to PIXEL to draw the stardust at the screen
                         \ coordinates in (X, A), returning from the subroutine
@@ -40940,8 +41043,8 @@ ENDIF
 
  STA XX+1               \ Store the high byte A in XX+1
 
- TXA
- STA SXL,Y              \ Store the low byte X in x_lo
+ TXA                    \ Store the low byte X in x_lo
+ STA SXL,Y
 
                         \ So (XX+1 x_lo) now contains:
                         \
@@ -40986,7 +41089,7 @@ ENDIF
 
  AND #%01111111         \ If |x_hi| >= 120 then jump to KILL1 to recycle this
  CMP #120               \ particle, as it's gone off the side of the screen,
- BCS KILL1              \ and re-join at STC1 with the new particle
+ BCS KILL1              \ and rejoin at STC1 with the new particle
 
  LDA YY+1               \ Set Y1 and y_hi to the high byte of YY in YY+1, so
  STA SY,Y               \ the new x-coordinate is in (y_hi y_lo) and the high
@@ -40994,11 +41097,11 @@ ENDIF
 
  AND #%01111111         \ If |y_hi| >= 120 then jump to KILL1 to recycle this
  CMP #120               \ particle, as it's gone off the top or bottom of the
- BCS KILL1              \ screen, and re-join at STC1 with the new particle
+ BCS KILL1              \ screen, and rejoin at STC1 with the new particle
 
  LDA SZ,Y               \ If z_hi < 16 then jump to KILL1 to recycle this
  CMP #16                \ particle, as it's so close that it's effectively gone
- BCC KILL1              \ past us, and re-join at STC1 with the new particle
+ BCC KILL1              \ past us, and rejoin at STC1 with the new particle
 
  STA ZZ                 \ Set ZZ to the z-coordinate in z_hi
 
@@ -41282,8 +41385,8 @@ ENDIF
 
  STA XX+1               \ Store the high byte A in XX+1
 
- TXA
- STA SXL,Y              \ Store the low byte X in x_lo
+ TXA                    \ Store the low byte X in x_lo
+ STA SXL,Y
 
                         \ So (XX+1 x_lo) now contains:
                         \
@@ -41329,11 +41432,11 @@ ENDIF
 
  AND #%01111111         \ If |y_hi| >= 110 then jump to KILL6 to recycle this
  CMP #110               \ particle, as it's gone off the top or bottom of the
- BCS KILL6              \ screen, and re-join at STC6 with the new particle
+ BCS KILL6              \ screen, and rejoin at STC6 with the new particle
 
  LDA SZ,Y               \ If z_hi >= 160 then jump to KILL6 to recycle this
  CMP #160               \ particle, as it's so far away that it's too far to
- BCS KILL6              \ see, and re-join at STC1 with the new particle
+ BCS KILL6              \ see, and rejoin at STC1 with the new particle
 
  STA ZZ                 \ Set ZZ to the z-coordinate in z_hi
 
@@ -41407,6 +41510,7 @@ ENDIF
 \       Type: Subroutine
 \   Category: Maths (Geometry)
 \    Summary: Add an orientation vector coordinate to an INWK coordinate
+\  Deep dive: The space station safe zone
 \
 \ ------------------------------------------------------------------------------
 \
@@ -41439,8 +41543,8 @@ ENDIF
 \
 \ Returns:
 \
-\   A                   The high byte of the result with the sign cleared (e.g.
-\                       |x_hi| if X = 0, etc.)
+\   A                   The highest byte of the result with the sign cleared
+\                       (e.g. |x_sign| when X = 0, etc.)
 \
 \ Other entry points:
 \
@@ -41470,7 +41574,8 @@ ENDIF
  LDY K+2
  STY INWK+1,X
 
- AND #%01111111         \ Set A to the sign byte with the sign cleared
+ AND #%01111111         \ Set A to the sign byte with the sign cleared,
+                        \ i.e. |x_sign| when X = 0
 
 .MA9
 
@@ -41738,7 +41843,7 @@ ENDIF
  STA INWK+27
 
  LDA #194               \ Set the escape pod's byte #30 (pitch counter) to 194,
- STA INWK+30            \ so it pitches as we pull away
+ STA INWK+30            \ so it pitches up as we pull away
 
  LSR A                  \ Set the escape pod's byte #32 (AI flag) to %01100001,
  STA INWK+32            \ so it has no AI, and we can use this value as a
@@ -41866,6 +41971,11 @@ ENDIF
 \   * If it has reached its target and the target is a ship, destroy the missile
 \     and the ship, potentially damaging us if we are nearby
 \
+\ Other entry points:
+\
+\   TA87+3              Set bit 7 of the ship's byte #31, which marks the ship
+\                       as being killed, and return from the subroutine
+\
 \ ******************************************************************************
 
 .TA34
@@ -41896,7 +42006,7 @@ ENDIF
                         \ This is the entry point for missile tactics and is
                         \ called from the main TACTICS routine below
 
- LDA ECMA               \ If an E.C.M. is currently active (either our's or an
+ LDA ECMA               \ If an E.C.M. is currently active (either ours or an
  BNE TA35               \ opponent's), jump to TA35 to destroy this missile
 
  LDA INWK+32            \ Fetch the AI flag from byte #32 and if bit 6 is set
@@ -42197,7 +42307,7 @@ ENDIF
 \     really bad (i.e. a fugitive or serious offender), the ship becomes hostile
 \     (if it isn't already)
 \
-\   * If the ship is not hostile, then either perform docking manouevres (if
+\   * If the ship is not hostile, then either perform docking manoeuvres (if
 \     it's docking) or fly towards the planet (if it isn't docking) and we're
 \     done
 \
@@ -42481,7 +42591,7 @@ ENDIF
  BCS TA3                \ with higher numbers of missiles, jump to TA3 to skip
                         \ firing a missile
 
- LDA ECMA               \ If an E.C.M. is currently active (either our's or an
+ LDA ECMA               \ If an E.C.M. is currently active (either ours or an
  BNE TA3                \ opponent's), jump to TA3 to skip firing a missile
 
  DEC INWK+31            \ We're done with the checks, so it's time to fire off a
@@ -42579,6 +42689,7 @@ ENDIF
 
  CPX #163               \ If X < 163, i.e. X > -35, then we are not in the enemy
  BCC TA4                \ ship's crosshairs, so jump to TA4 to skip the laser
+                        \ checks
 
  LDA (XX0),Y            \ Fetch the enemy ship's byte #19 from their ship's
                         \ blueprint into A
@@ -42595,7 +42706,7 @@ ENDIF
 
  DEC INWK+28            \ Halve the attacking ship's acceleration in byte #28
 
- LDA ECMA               \ If an E.C.M. is currently active (either our's or an
+ LDA ECMA               \ If an E.C.M. is currently active (either ours or an
  BNE TA9-1              \ opponent's), return from the subroutine without making
                         \ the laser-strike sound (as TA9-1 contains an RTS)
 
@@ -42627,6 +42738,8 @@ ENDIF
 \
 \   TA151               Make the ship head towards the planet
 \
+\   TA9-1               Contains an RTS
+\
 \ ******************************************************************************
 
 .TA4
@@ -42648,18 +42761,23 @@ ENDIF
 
  JSR DORND              \ Set A and X to random numbers
 
- ORA #%10000000         \ Set bit 7 of A
+ ORA #%10000000         \ Set bit 7 of A, so A is at least 128
 
  CMP INWK+32            \ If A >= byte #32 (the ship's AI flag) then jump down
  BCS TA15               \ to TA15 so it heads away from us
 
                         \ We get here if A < byte #32, and the chances of this
-                        \ being true are greater with high values of byte #32.
+                        \ being true are greater with high values of byte #32,
+                        \ as long as they are at least 128
+                        \
                         \ In other words, higher byte #32 values increase the
                         \ chances of a ship changing direction to head towards
                         \ us - or, to put it another way, ships with higher
-                        \ byte #32 values are spoiling for a fight. Thargoids
-                        \ have byte #32 set to 255, which explains an awful lot
+                        \ byte #32 values of 128 or more are spoiling for a
+                        \ fight
+                        \
+                        \ Thargoids have byte #32 set to 255, which explains
+                        \ an awful lot
 
 .TA20
 
@@ -42996,10 +43114,11 @@ ENDIF
 
  BMI PH3                \ If bit 7 is set, then that means the ship type was set
                         \ to -96 in the DOKEY routine when we switched on our
-                        \ docking compter, so this is us auto-docking our Cobra,
-                        \ so jump to PH3 to refine our approach. Otherwise this
-                        \ is an NPC trying to dock, so turn away from the
-                        \ station
+                        \ docking computer, so this is us auto-docking our
+                        \ Cobra, so jump to PH3 to refine our approach
+                        \
+                        \ Otherwise this is an NPC trying to dock, so keep going
+                        \ to turn away from the station
 
 .PH2
 
@@ -43008,7 +43127,7 @@ ENDIF
                         \ attempt
 
  JSR TAS6               \ Call TAS6 to negate the vector in XX15 so it points in
-                        \ the opposite direction, away from from the station and
+                        \ the opposite direction, away from the station and
                         \ towards the ship
 
  JSR TA151              \ Call TA151 to make the ship head in the direction of
@@ -43063,8 +43182,8 @@ ENDIF
 
  INC INWK+28            \ Increment the acceleration in byte #28
 
- LDA #%01111111         \ Set the roll counter to a positive roll with no
- STA INWK+29            \ damping, to match the space station's roll
+ LDA #%01111111         \ Set the roll counter to a positive (clockwise) roll
+ STA INWK+29            \ with no damping, to match the space station's roll
 
  BNE TN13               \ Jump down to TN13 (this BNE is effectively a JMP as
                         \ A will never be zero)
@@ -43894,7 +44013,7 @@ ENDIF
  STA (INF),Y
 
  ASL A                  \ Set the ship's byte #30 (pitch counter) to 4, so it
- LDY #30                \ starts pitching
+ LDY #30                \ starts diving
  STA (INF),Y
 
  LDA TYPE               \ If the ship's type is < 11 (i.e. a missile, Coriolis
@@ -44131,9 +44250,9 @@ ENDIF
  STA INWK+27
 
  LDA #&FF               \ Set the child's byte #29 (roll counter) to a full
- ROR A                  \ roll, so the canister tumbles through space, with
- STA INWK+29            \ damping randomly enabled or disabled, depending on the
-                        \ C flag from above
+ ROR A                  \ roll with no damping (as bits 0 to 6 are set), so the
+ STA INWK+29            \ canister tumbles through space, with the direction in
+                        \ bit 7 set randomly, depending on the C flag from above
 
  PLA                    \ Retrieve the child's ship type from the stack
 
@@ -44487,8 +44606,8 @@ ENDIF
 
  STA XX+1               \ Store the high byte A in XX+1
 
- TXA
- STA SXL,Y              \ Store the low byte X in x_lo
+ TXA                    \ Store the low byte X in x_lo
+ STA SXL,Y
 
                         \ So (XX+1 x_lo) now contains result 5 above:
                         \
@@ -44540,7 +44659,7 @@ ENDIF
 
  AND #%01111111         \ If |x_hi| >= 116 then jump to KILL2 to recycle this
  CMP #116               \ particle, as it's gone off the side of the screen,
- BCS KILL2              \ and re-join at STC2 with the new particle
+ BCS KILL2              \ and rejoin at STC2 with the new particle
 
  LDA YY+1               \ Set Y1 and y_hi to the high byte of YY in YY+1, so
  STA SY,Y               \ the new x-coordinate is in (y_hi y_lo) and the high
@@ -44548,7 +44667,7 @@ ENDIF
 
  AND #%01111111         \ If |y_hi| >= 116 then jump to ST5 to recycle this
  CMP #116               \ particle, as it's gone off the top or bottom of the
- BCS ST5                \ screen, and re-join at STC2 with the new particle
+ BCS ST5                \ screen, and rejoin at STC2 with the new particle
 
 .STC2
 
@@ -44637,7 +44756,7 @@ ENDIF
 \       Name: MU5
 \       Type: Subroutine
 \   Category: Maths (Arithmetic)
-\    Summary: Set K(3 2 1 0) = (A A A A) and clear the C flGag
+\    Summary: Set K(3 2 1 0) = (A A A A) and clear the C flag
 \
 \ ------------------------------------------------------------------------------
 \
@@ -45014,7 +45133,7 @@ ENDIF
 \       Name: Unused duplicate of MULTU
 \       Type: Subroutine
 \   Category: Maths (Arithmetic)
-\    Summary: Unused duplicate of the MULTU routine
+\    Summary: An unused duplicate of the MULTU routine
 \
 \ ------------------------------------------------------------------------------
 \
@@ -46243,9 +46362,9 @@ ENDIF
 .wW
 
  LDA #15                \ The hyperspace countdown starts from 15, so set A to
-                        \ to 15 so we can set the two hyperspace counters
+                        \ 15 so we can set the two hyperspace counters
 
- STA QQ22+1             \ Set the number in QQ22+1 to 15, which is the number
+ STA QQ22+1             \ Set the number in QQ22+1 to A, which is the number
                         \ that's shown on-screen during the hyperspace countdown
 
  STA QQ22               \ Set the number in QQ22 to 15, which is the internal
@@ -46637,7 +46756,7 @@ ENDIF
                         \ and set up data blocks and slots for the planet and
                         \ sun
 
- JSR LSHIPS             \ Call LSHIPS to populate the ship blueprints table
+ JSR LOMOD              \ Call LOMOD to populate the ship blueprints table
                         \ with a random selection of ships
 
  LDA QQ11               \ If the current view in QQ11 is not a space view (0) or
@@ -46715,7 +46834,7 @@ ENDIF
 
  STA FIST               \ Update our legal status with the new value
 
- LDA #255               \ Set the view number in QQ11 to 255
+ LDA #255               \ Set the view type in QQ11 to 255
  STA QQ11
 
  JSR HFS1               \ Call HFS1 to draw 8 concentric rings to remove the
@@ -47223,9 +47342,9 @@ ENDIF
  JSR msblob             \ Reset the dashboard's missile indicators so none of
                         \ them are targeted
 
- LDA #127               \ Set the pitch and roll counters to 127 (no damping
- STA INWK+29            \ so the planet's rotation doesn't slow down)
- STA INWK+30
+ LDA #127               \ Set the pitch and roll counters to 127, so that's a
+ STA INWK+29            \ clockwise roll and a diving pitch with no damping, so
+ STA INWK+30            \ the planet's rotation doesn't slow down
 
  LDA tek                \ Set A = 128 or 130 depending on bit 1 of the system's
  AND #%00000010         \ tech level in tek
@@ -47329,9 +47448,9 @@ ENDIF
  STA INWK+8
 
  LDA QQ15+5             \ Fetch s2_hi, extract bits 0-1 and store in x_sign and
- AND #%00000011         \ y_sign, so the sun is either dead in our rear laser
- STA INWK+2             \ crosshairs, or off to the top left by a distance of 1
- STA INWK+1             \ or 2 when we look out the back
+ AND #%00000011         \ y_sign, so the sun is either dead centre in our rear
+ STA INWK+2             \ laser crosshairs, or off to the top left by a distance
+ STA INWK+1             \ of 1 or 2 when we look out the back
 
  LDA #0                 \ Set the pitch and roll counters to 0 (no rotation)
  STA INWK+29
@@ -47547,8 +47666,8 @@ ENDIF
 \
 \ ------------------------------------------------------------------------------
 \
-\ Calculate the following, where A is a signed 8-bit integer and the result is a
-\ signed 16-bit integer:
+\ Calculate the following, where A is a sign-magnitude 8-bit integer and the
+\ result is a signed 16-bit integer:
 \
 \   (Y X) = A / 10
 \
@@ -47675,7 +47794,7 @@ ENDIF
                         \ +96 as the vector has been normalised
 
  JSR SPS2               \ Set (Y X) = A / 10, so X will be from -9 to +9, which
-                        \ is the y-offset from the centre of the compass of the
+                        \ is the x-offset from the centre of the compass of the
                         \ dot we want to draw. Returns with the C flag clear
 
  STX T                  \ Set COMY = 204 - X, as 203 is the pixel y-coordinate
@@ -47807,7 +47926,7 @@ ENDIF
                         \   draw_blob(x, y, colour)
                         \
                         \ which will draw a dash of the specified colour and
-                        \ position on the dashboard 
+                        \ position on the dashboard
 
  LDA X1                 \ Send the first parameter to the I/O processor:
  JSR tube_write         \
@@ -48108,8 +48227,8 @@ ENDIF
  LDX #%10000001         \ Set the AI flag in byte #32 to %10000001 (hostile,
  STX INWK+32            \ no AI, has an E.C.M.)
 
- LDX #255               \ Set roll counter to 255 (maximum roll with no
- STX INWK+29            \ damping)
+ LDX #255               \ Set the roll counter to 255 (maximum anti-clockwise
+ STX INWK+29            \ roll with no damping)
 
  INX                    \ Set pitch counter to 0 (no pitch, roll only)
  STX INWK+30
@@ -48420,13 +48539,13 @@ ENDIF
                         \ settings for the ship's NEWB flags
 
  AND #%01101111         \ Zero bits 4 and 7 (so the new ship is not docking, has
-                        \ has not been scooped, and has not just docked)
+                        \ not been scooped, and has not just docked)
 
  ORA NEWB               \ Apply the result to the ship's NEWB flags, which sets
  STA NEWB               \ bits 0-3 and 5-6 in NEWB if they are set in the E%
                         \ byte
 
- LDY #(NI%-1)           \ The final step is to copy the new ship's data block
+ LDY #NI%-1             \ The final step is to copy the new ship's data block
                         \ from INWK to INF, so set up a counter for NI% bytes
                         \ in Y
 
@@ -48551,12 +48670,8 @@ ENDIF
 \       Name: ECBLB2
 \       Type: Subroutine
 \   Category: Dashboard
-\    Summary: Start up the E.C.M. (indicator, start countdown and make sound)
-\
-\ ------------------------------------------------------------------------------
-\
-\ Light up the E.C.M. indicator bulb on the dashboard, set the E.C.M. countdown
-\ timer to 32, and start making the E.C.M. sound.
+\    Summary: Start up the E.C.M. (light up the indicator, start the countdown
+\             and make the E.C.M. sound)
 \
 \ ******************************************************************************
 
@@ -48677,7 +48792,6 @@ ENDIF
 \
 \   centre of screen - 1024 < x < centre of screen + 1024
 \   centre of screen - 1024 < y < centre of screen + 1024
-\
 \
 \ The projection calculation is:
 \
@@ -49141,10 +49255,10 @@ ENDIF
  STA K2+3
  STY XX16+3
 
- LDA #64                \ Set TGT = 64, so we draw a full circle in the call to
+ LDA #64                \ Set TGT = 64, so we draw a full ellipse in the call to
  STA TGT                \ PLS22 below
 
- LDA #0                 \ Set CNT2 = 0 as we are drawing a full circle, so we
+ LDA #0                 \ Set CNT2 = 0 as we are drawing a full ellipse, so we
  STA CNT2               \ don't need to apply an offset
 
  BEQ PLS22              \ Jump to PLS22 to draw the crater, returning from the
@@ -49319,6 +49433,10 @@ ENDIF
 \                         * 64 for a full ellipse (a crater)
 \
 \   CNT2                The starting segment for drawing the half-ellipse
+\
+\ Other entry points:
+\
+\   PL40                Contains an RTS
 \
 \ ******************************************************************************
 
@@ -49935,18 +50053,18 @@ ENDIF
  BMI P%+4               \ instruction to leave the angle in A as a positive
                         \ integer in the range 0 to 128 (so when we calculate
                         \ CNT2 below, it will be in the right half of the
-                        \ anti-clockwise that we describe when drawing circles,
-                        \ i.e. from 6 o'clock, through 3 o'clock and on to 12
-                        \ o'clock)
+                        \ anti-clockwise arc that we describe when drawing
+                        \ circles, i.e. from 6 o'clock, through 3 o'clock and
+                        \ on to 12 o'clock)
 
  EOR #%10000000         \ If we get here then nosev_z_hi is positive, so flip
                         \ bit 7 of the angle in A, which is the same as adding
                         \ 128 to give a result in the range 129 to 256 (i.e. 129
                         \ to 0), or 180 to 360 degrees (so when we calculate
                         \ CNT2 below, it will be in the left half of the
-                        \ anti-clockwise that we describe when drawing circles,
-                        \ i.e. from 12 o'clock, through 9 o'clock and on to 6
-                        \ o'clock)
+                        \ anti-clockwise arc that we describe when drawing
+                        \ circles, i.e. from 12 o'clock, through 9 o'clock and
+                        \ on to 6 o'clock)
 
  LSR A                  \ Set CNT2 = A / 4
  LSR A
@@ -50108,13 +50226,13 @@ ENDIF
 \       Name: KS3
 \       Type: Subroutine
 \   Category: Universe
-\    Summary: Set the SLSP ship heap pointer after shuffling ship slots
+\    Summary: Set the SLSP ship line heap pointer after shuffling ship slots
 \
 \ ------------------------------------------------------------------------------
 \
 \ The final part of the KILLSHP routine, called after we have shuffled the ship
 \ slots and sorted out our missiles. This simply sets SLSP to the new bottom of
-\ the ship heap space.
+\ the ship line heap.
 \
 \ Arguments:
 \
@@ -50127,7 +50245,7 @@ ENDIF
 .KS3
 
  LDA P                  \ After shuffling the ship slots, P(1 0) will point to
- STA SLSP               \ the new bottom of the ship heap, so store this in
+ STA SLSP               \ the new bottom of the ship line heap, so store this in
  LDA P+1                \ SLSP(1 0), which stores the bottom of the heap
  STA SLSP+1
 
@@ -50144,7 +50262,7 @@ ENDIF
 \
 \ Part 12 of the main flight loop calls this routine to remove the ship that is
 \ currently being analysed by the flight loop. Once the ship is removed, it
-\ jumps back to MAL1 to re-join the main flight loop, with X pointing to the
+\ jumps back to MAL1 to rejoin the main flight loop, with X pointing to the
 \ same slot that we just cleared (and which now contains the next ship in the
 \ local bubble of universe).
 \
@@ -50166,7 +50284,7 @@ ENDIF
  LDX XSAV               \ Restore the current ship's slot number from XSAV,
                         \ which now points to the next ship in the bubble
 
- JMP MAL1               \ Jump to MAL1 to re-join the main flight loop at the
+ JMP MAL1               \ Jump to MAL1 to rejoin the main flight loop at the
                         \ start of the ship analysis loop
 
 \ ******************************************************************************
@@ -50240,8 +50358,8 @@ ENDIF
  INX                    \ Increment the counter (so it starts at 0 on the first
                         \ iteration)
 
- LDA FRIN,X             \ If slot X is empty, loop round again until it isn't,
- BEQ KS3                \ at which point A contains the ship type in that slot
+ LDA FRIN,X             \ If slot X is empty then we have worked our way through
+ BEQ KS3                \ all the slots, so jump to KS3 to stop looking
 
  CMP #MSL               \ If the slot does not contain a missile, loop back to
  BNE KSL4               \ KSL4 to check the next slot
@@ -50526,8 +50644,7 @@ ENDIF
  LDA (SC),Y             \ Fetch byte #35 of the source's ship data block at SC,
  STA (INF),Y            \ and store it in byte #35 of the destination's block
                         \ at INF, so that's the ship's energy copied from the
-                        \ source to the destination. One down, quite a few to
-                        \ go...
+                        \ source to the destination
 
  DEY                    \ Fetch byte #34 of the source ship, which is the
  LDA (SC),Y             \ high byte of the source ship's line heap, and store
@@ -50804,7 +50921,7 @@ ENDIF
 \
 \       Name: DORND2
 \       Type: Subroutine
-\   Category: Utility routines
+\   Category: Maths (Arithmetic)
 \    Summary: Generate random numbers, making sure the C flag doesn't affect the
 \             outcome
 \  Deep dive: Generating random numbers
@@ -50849,7 +50966,7 @@ ENDIF
  JSR DORND              \ Set A and X to random numbers
 
  LSR A                  \ Clear bit 7 of our random number in A and set the C
-                        \ flag to bit 0 of A, which os random
+                        \ flag to bit 0 of A, which is random
 
  STA INWK+32            \ Store this in the ship's AI flag, so this ship does
                         \ not have AI
@@ -50858,7 +50975,7 @@ ENDIF
                         \ clockwise roll (as bit 7 is clear), and a 1 in 127
                         \ chance of it having no damping
 
- ROL INWK+31            \ Set bit 0 of the ship's missile count ramdomly (as the
+ ROL INWK+31            \ Set bit 0 of the ship's missile count randomly (as the
                         \ C flag was set), giving the ship either no missiles or
                         \ one missile
 
@@ -51020,7 +51137,7 @@ ENDIF
 
  BNE horde_plain        \ Jump to horde_plain to spawn a whole pack of cargo
                         \ canisters, boulders or asteroids, according to the
-                        \ value of A (the BNE is effectivey a JMP, as A will
+                        \ value of A (the BNE is effectively a JMP, as A will
                         \ never be zero)
 
 \ ******************************************************************************
@@ -51430,6 +51547,12 @@ ENDIF
 \   Category: Main loop
 \    Summary: Process non-flight key presses (red function keys, docked keys)
 \
+\ ------------------------------------------------------------------------------
+\
+\ Other entry points:
+\
+\   FRCE_FLIGHT         Press the key in A and restart the main loop
+\
 \ ******************************************************************************
 
 .FRCE_FLIGHT
@@ -51576,10 +51699,10 @@ ENDIF
  CMP #&36               \ If "O" was pressed, do the following, otherwise skip
  BNE not_home           \ to not_home to continue checking key presses
 
- LDA QQ11               \ If both bits 6 or 7 of the view number are clear - so
- AND #%11000000         \ this is not the Short-range or Long-range Chart -
- BEQ t95                \ then jump to t95 to return from the subroutine,
-                        \ otherwise do the following three jumps
+ LDA QQ11               \ If bits 6 and 7 of the view type are both clear - so
+ AND #%11000000         \ this is not the Short-range or Long-range Chart - then
+ BEQ t95                \ jump to t95 to return from the subroutine, otherwise
+                        \ do the following three jumps
 
  JSR TT103              \ Draw small crosshairs at coordinates (QQ9, QQ10),
                         \ which will erase the crosshairs currently there
@@ -51599,10 +51722,10 @@ ENDIF
  BNE ee2                \ to the special cargo destination, otherwise skip to
                         \ ee2 to continue
 
- LDA QQ11               \ If both bits 6 or 7 of the view number are clear - so
- AND #%11000000         \ this is not the Short-range or Long-range Chart -
- BEQ t95                \ then jump to t95 to return from the subroutine,
-                        \ otherwise do the following three jumps
+ LDA QQ11               \ If bits 6 and 7 of the view type are both clear - so
+ AND #%11000000         \ this is not the Short-range or Long-range Chart - then
+ BEQ t95                \ jump to t95 to return from the subroutine, otherwise
+                        \ do the following three jumps
 
  LDA cmdr_cour          \ If there is no special cargo delivery mission in
  ORA cmdr_cour+1        \ progress, then the mission timer in cmdr_cour(1 0)
@@ -51985,9 +52108,9 @@ ENDIF
                         \ 255 / 50 = 5.1)
 
  TXA                    \ Set A to the random number in X and keep bits 0-3 and
- AND #%10001111         \ the bit 7 to get a number between -15 and +15, and
- STA INWK+29            \ store in byte #29 (roll counter) to give our ship a
-                        \ gentle roll with damping
+ AND #%10001111         \ the sign in bit 7 to get a number between -15 and +15,
+ STA INWK+29            \ and store in byte #29 (roll counter) to give our ship
+                        \ a gentle roll with damping
 
  ROR A                  \ The C flag is randomly set from the above call to Ze,
  AND #%10000111         \ so this sets A to a number between -7 and +7, which
@@ -52059,7 +52182,7 @@ ENDIF
 
 .RSHIPS
 
- JSR LSHIPS             \ Call LSHIPS to populate the ship blueprints table
+ JSR LOMOD              \ Call LOMOD to populate the ship blueprints table
                         \ with a random selection of ships
 
  JSR RESET              \ Call RESET to reset most variables
@@ -52068,7 +52191,7 @@ ENDIF
  STA QQ12               \ we reach TT110 after calling FRCE below, it shows the
                         \ launch tunnel
 
- STA QQ11               \ Set the view number to a non-zero value, so when we
+ STA QQ11               \ Set the view type to a non-zero value, so when we
                         \ reach LOOK1 after calling FRCE below, it sets up a
                         \ new space view
 
@@ -52081,7 +52204,7 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: LSHIPS
+\       Name: LOMOD
 \       Type: Subroutine
 \   Category: Universe
 \    Summary: Populate the ship blueprints table at XX21 with a random selection
@@ -52097,7 +52220,7 @@ ENDIF
 \
 \ ******************************************************************************
 
-.LSHIPS
+.LOMOD
 
  LDA #0                 \ Set finder to 0, so the compass shows the planet
  STA finder
@@ -52174,7 +52297,7 @@ ENDIF
                         \   X = Y1 + 2
                         \
                         \ and we can use this as an index into the ship_bits
-                        \ table to fetch the relevant byte from the 32-bit  
+                        \ table to fetch the relevant byte from the 32-bit
                         \ number we want to match, which is at this location:
                         \
                         \   ship_bits + X
@@ -52225,7 +52348,7 @@ ENDIF
                         \
                         \ note that because we are starting at position 9, we
                         \ can ignore the first case. In our above example, we
-                        \ are filling positon 17, so we would add 2 to X
+                        \ are filling position 17, so we would add 2 to X
 
  CPY #16                \ If the blueprint position we are trying to fill is
  BCC mix_byte2          \ less than 16, jump to mix_byte2 so we increment X once
@@ -52583,7 +52706,7 @@ ENDIF
 
  LDX JUNK               \ Set X to the total number of junk items in the
                         \ vicinity (e.g. asteroids, escape pods, cargo
-                        \ canisters, Shuttles, Transporters and so pn)
+                        \ canisters, Shuttles, Transporters and so on)
 
  LDA FRIN+2,X           \ If the slot at FRIN+2+X is non-zero, then we have
                         \ something else in the vicinity besides asteroids,
@@ -52592,7 +52715,7 @@ ENDIF
 
  ORA JUNK               \ If there is any junk in the vicinity, then JUNK will
                         \ be non-zero, so OR'ing with JUNK will produce a
-                        \ a non-zero result if either A or JUNK are non-zero
+                        \ non-zero result if either A or JUNK are non-zero
                         \ (so this prevents in-system jumps if there is any
                         \ junk nearby, which is different to the other versions
                         \ which allow you to jump, dragging any junk along with
@@ -52600,7 +52723,7 @@ ENDIF
 
  ORA SSPR               \ If there is a space station nearby, then SSPR will
                         \ be non-zero, so OR'ing with SSPR will produce a
-                        \ a non-zero result if either A or SSPR are non-zero
+                        \ non-zero result if either A or SSPR are non-zero
 
  ORA MJ                 \ If we are in witchspace, then MJ will be non-zero, so
                         \ OR'ing with MJ will produce a non-zero result if
@@ -52800,7 +52923,7 @@ ENDIF
 \
 \       Name: EXNO2
 \       Type: Subroutine
-\   Category: Sound
+\   Category: Status
 \    Summary: Process us making a kill
 \  Deep dive: Combat rank
 \
@@ -52809,7 +52932,6 @@ ENDIF
 \ We have killed a ship, so increase the kill tally, displaying an iconic
 \ message of encouragement if the kill total is a multiple of 256, and then
 \ make a nearby explosion sound.
-\
 \
 \ ******************************************************************************
 
@@ -52931,6 +53053,10 @@ ENDIF
 \
 \   Y                   The offset into the KYTB table above of the key that we
 \                       want to scan on the keyboard
+\
+\ Other entry points:
+\
+\   b_quit              Contains an RTS
 \
 \ ******************************************************************************
 
@@ -53172,7 +53298,7 @@ ENDIF
                         \ stored in JSTX (i.e. the centre of the roll indicator)
 
  LDX #0                 \ Set X = 0, so we "press" KY3 below ("<", increase
-                        \ roll)
+                        \ roll, which rolls our ship in a clockwise direction)
 
  ASL INWK+29            \ Shift ship byte #29 left, which shifts bit 7 of the
                         \ updated roll counter (i.e. the roll direction) into
@@ -53185,13 +53311,15 @@ ENDIF
  BCC P%+3               \ If the C flag is clear, skip the following instruction
 
  INX                    \ The C flag is set, i.e. the direction of the updated
-                        \ roll counter is negative, so increment X to 1 so we
-                        \ "press" KY4 below (">", decrease roll)
+                        \ roll counter is negative (anti-clockwise roll), so
+                        \ increment X to 1 so we "press" KY4 below (">",
+                        \ decrease roll, which rolls our ship in an
+                        \ anti-clockwise direction)
 
  BIT INWK+29            \ We shifted the updated roll counter to the left above,
  BPL DK14               \ so this tests bit 6 of the original value, and if it
-                        \ is is clear (i.e. the magnitude is less than 64), jump
-                        \ to DK14 to "press" the key and leave JSTX unchanged
+                        \ is clear (i.e. the magnitude is less than 64), jump to
+                        \ DK14 to "press" the key and leave JSTX unchanged
 
  LDA #64                \ The magnitude of the updated roll is 64 or more, so
  STA JSTX               \ set JSTX to 64 (so the roll decreases at half the
@@ -53223,7 +53351,7 @@ ENDIF
                         \ indicator)
 
  LDX #0                 \ Set X = 0, so we "press" KY5 below ("X", decrease
-                        \ pitch)
+                        \ pitch, which pulls the nose up)
 
  ASL INWK+30            \ Shift ship byte #30 left, which shifts bit 7 of the
                         \ updated pitch counter (i.e. the pitch direction) into
@@ -53236,8 +53364,9 @@ ENDIF
  BCS P%+3               \ If the C flag is set, skip the following instruction
 
  INX                    \ The C flag is clear, i.e. the direction of the updated
-                        \ pitch counter is positive, so increment X to 1 so we
-                        \ "press" KY6 below ("S", increase pitch)
+                        \ pitch counter is positive (dive), so increment X to 1
+                        \ so we "press" KY6 below ("S", increase pitch, which
+                        \ pushes the nose down)
 
  STA KY5,X              \ Store 128 in either KY5 or KY6 to "press" the relevant
                         \ key, depending on whether the pitch direction is
@@ -53706,6 +53835,11 @@ ENDIF
 \
 \   * Remove the ship from the scanner, so we can move it
 \
+\ Other entry points:
+\
+\   MV30                Move the ship in space but without tidying the
+\                       orientation vectors or applying tactics
+\
 \ ******************************************************************************
 
  LDX TYPE               \ If the type of the ship we are moving is positive,
@@ -53862,8 +53996,9 @@ ENDIF
 
  LDA #0                 \ Set A to 0 to stop the speed from going negative
 
- LDY #15                \ Fetch byte #15 from the ship's blueprint, which
-                        \ contains the ship's maximum speed
+ LDY #15                \ We now fetch byte #15 from the ship's blueprint, which
+                        \ contains the ship's maximum speed, so set Y = 15 to
+                        \ use as an index
 
  CMP (XX0),Y            \ If A < the ship's maximum speed, skip the following
  BCC P%+4               \ instruction
@@ -54127,8 +54262,8 @@ ENDIF
                         \                    = (z_sign z_hi z_lo) - speed
 
  LDA TYPE               \ If the ship type is the sun (129) then skip the next
- AND #%10000001         \ next instruction, otherwise return from the subroutine
- CMP #129               \ as we don't need to rotate the sun around its origin.
+ AND #%10000001         \ instruction, otherwise return from the subroutine as
+ CMP #129               \ we don't need to rotate the sun around its origin.
  BEQ P%+5               \ Having both the AND and the CMP is a little odd, as
                         \ the sun is the only ship type with bits 0 and 7 set,
                         \ so the AND has no effect and could be removed
@@ -54796,11 +54931,8 @@ ENDIF
 \   X                   The space view to set:
 \
 \                         * 0 = front
-\
 \                         * 1 = rear
-\
 \                         * 2 = left
-\
 \                         * 3 = right
 \
 \ Other entry points:
@@ -54895,7 +55027,7 @@ ENDIF
 \       Name: iff_xor
 \       Type: Variable
 \   Category: Dashboard
-\    Summary: The EOR value for different types of ship in the the I.F.F. system
+\    Summary: The EOR value for different types of ship in the I.F.F. system
 \             for creating striped sticks in the scanner
 \  Deep dive: The I.F.F. system
 \
@@ -54974,7 +55106,7 @@ ENDIF
 \       Name: iff_base
 \       Type: Variable
 \   Category: Dashboard
-\    Summary: Base colours for different types of ship in the the I.F.F. system
+\    Summary: Base colours for different types of ship in the I.F.F. system
 \  Deep dive: The I.F.F. system
 \
 \ ------------------------------------------------------------------------------
@@ -55140,7 +55272,7 @@ ENDIF
                         \
                         \   X1 = 123 + (x_sign x_hi)
 
- LDA INWK+1             \ Set x_hi
+ LDA INWK+1             \ Set A = x_hi
 
  CLC                    \ Clear the C flag so we can do addition below
 
@@ -55148,15 +55280,15 @@ ENDIF
 
  BPL SC2                \ If x_sign is positive, skip the following
 
- EOR #%11111111         \ x_sign is negative, so flip the bits in A and subtract
- ADC #1                 \ 1 to make it a negative number (bit 7 will now be set
+ EOR #%11111111         \ x_sign is negative, so flip the bits in A and add 1
+ ADC #1                 \ to make it a negative number (bit 7 will now be set
                         \ as we confirmed above that bits 6 and 7 are clear). So
                         \ this gives A the sign of x_sign and gives it a value
                         \ range of -63 (%11000001) to 0
 
 .SC2
 
- ADC #123               \ Set X1 = 123 + x_hi
+ ADC #123               \ Set X1 = 123 + (x_sign x_hi)
  STA X1
 
                         \ Next, we convert the z_hi coordinate of the ship into
@@ -55174,7 +55306,7 @@ ENDIF
  LSR A                  \
  LSR A                  \ So A is in the range 0-15
 
- CLC                    \ Clear the C flag
+ CLC                    \ Clear the C flag for the addition below
 
  LDX INWK+8             \ Set X = z_sign
 
@@ -55361,7 +55493,7 @@ ENDIF
 \
 \ See the deep dive on "Ship blueprints" for details of how vertices are stored
 \ in the ship blueprints, and the deep dive on "Drawing ships" for information
-\ on how vertices are used to draw 3D wiremesh ships.
+\ on how vertices are used to draw 3D wireframe ships.
 \
 \ Arguments:
 \
@@ -55431,7 +55563,7 @@ ENDMACRO
 \
 \ See the deep dive on "Ship blueprints" for details of how edges are stored
 \ in the ship blueprints, and the deep dive on "Drawing ships" for information
-\ on how edges are used to draw 3D wiremesh ships.
+\ on how edges are used to draw 3D wireframe ships.
 \
 \ Arguments:
 \
@@ -55471,7 +55603,7 @@ ENDMACRO
 \
 \ See the deep dive on "Ship blueprints" for details of how faces are stored
 \ in the ship blueprints, and the deep dive on "Drawing ships" for information
-\ on how faces are used to draw 3D wiremesh ships.
+\ on how faces are used to draw 3D wireframe ships.
 \
 \ Arguments:
 \
@@ -55529,8 +55661,10 @@ ENDMACRO
 
  EQUB 0                 \ Max. canisters on demise = 0
  EQUW 180 * 180         \ Targetable area          = 180 * 180
+
  EQUB LO(SHIP_DODO_EDGES - SHIP_DODO)              \ Edges data offset (low)
  EQUB LO(SHIP_DODO_FACES - SHIP_DODO)              \ Faces data offset (low)
+
  EQUB 97                \ Max. edge count          = (97 - 1) / 4 = 24
  EQUB 0                 \ Gun vertex               = 0
  EQUB 54                \ Explosion count          = 12, as (4 * n) + 6 = 54
@@ -55541,13 +55675,17 @@ ENDMACRO
  EQUB 125               \ Visibility distance      = 125
  EQUB 240               \ Max. energy              = 240
  EQUB 0                 \ Max. speed               = 0
+
  EQUB HI(SHIP_DODO_EDGES - SHIP_DODO)              \ Edges data offset (high)
  EQUB HI(SHIP_DODO_FACES - SHIP_DODO)              \ Faces data offset (high)
+
  EQUB 0                 \ Normals are scaled by    = 2^0 = 1
  EQUB %00000000         \ Laser power              = 0
                         \ Missiles                 = 0
 
-\          x,    y,    z, face1, face2, face3, face4, visibility
+.SHIP_DODO_VERTICES
+
+      \    x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX    0,  150,  196,     1,      0,    5,     5,         31    \ Vertex 0
  VERTEX  143,   46,  196,     1,      0,    2,     2,         31    \ Vertex 1
  VERTEX   88, -121,  196,     2,      0,    3,     3,         31    \ Vertex 2
@@ -55575,7 +55713,7 @@ ENDMACRO
 
 .SHIP_DODO_EDGES
 
-\     vertex1, vertex2, face1, face2, visibility
+    \ vertex1, vertex2, face1, face2, visibility
  EDGE       0,       1,     1,     0,         31    \ Edge 0
  EDGE       1,       2,     2,     0,         31    \ Edge 1
  EDGE       2,       3,     3,     0,         31    \ Edge 2
@@ -55613,7 +55751,7 @@ ENDMACRO
 
 .SHIP_DODO_FACES
 
-\     normal_x, normal_y, normal_z, visibility
+    \ normal_x, normal_y, normal_z, visibility
  FACE        0,        0,      196,         31    \ Face 0
  FACE      103,      142,       88,         31    \ Face 1
  FACE      169,      -55,       89,         31    \ Face 2
@@ -55641,8 +55779,10 @@ ENDMACRO
 
  EQUB 0                 \ Max. canisters on demise = 0
  EQUW 160 * 160         \ Targetable area          = 160 * 160
+
  EQUB LO(SHIP_CORIOLIS_EDGES - SHIP_CORIOLIS)      \ Edges data offset (low)
  EQUB LO(SHIP_CORIOLIS_FACES - SHIP_CORIOLIS)      \ Faces data offset (low)
+
  EQUB 85                \ Max. edge count          = (85 - 1) / 4 = 21
  EQUB 0                 \ Gun vertex               = 0
  EQUB 54                \ Explosion count          = 12, as (4 * n) + 6 = 54
@@ -55653,13 +55793,17 @@ ENDMACRO
  EQUB 120               \ Visibility distance      = 120
  EQUB 240               \ Max. energy              = 240
  EQUB 0                 \ Max. speed               = 0
+
  EQUB HI(SHIP_CORIOLIS_EDGES - SHIP_CORIOLIS)      \ Edges data offset (high)
  EQUB HI(SHIP_CORIOLIS_FACES - SHIP_CORIOLIS)      \ Faces data offset (high)
+
  EQUB 0                 \ Normals are scaled by    = 2^0 = 1
  EQUB %00000110         \ Laser power              = 0
                         \ Missiles                 = 6
 
-\          x,    y,    z, face1, face2, face3, face4, visibility
+.SHIP_CORIOLIS_VERTICES
+
+      \    x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX  160,    0,  160,     0,      1,    2,     6,         31    \ Vertex 0
  VERTEX    0,  160,  160,     0,      2,    3,     8,         31    \ Vertex 1
  VERTEX -160,    0,  160,     0,      3,    4,     7,         31    \ Vertex 2
@@ -55679,7 +55823,7 @@ ENDMACRO
 
 .SHIP_CORIOLIS_EDGES
 
-\     vertex1, vertex2, face1, face2, visibility
+    \ vertex1, vertex2, face1, face2, visibility
  EDGE       0,       3,     0,     1,         31    \ Edge 0
  EDGE       0,       1,     0,     2,         31    \ Edge 1
  EDGE       1,       2,     0,     3,         31    \ Edge 2
@@ -55711,7 +55855,7 @@ ENDMACRO
 
 .SHIP_CORIOLIS_FACES
 
-\     normal_x, normal_y, normal_z, visibility
+    \ normal_x, normal_y, normal_z, visibility
  FACE        0,        0,      160,         31    \ Face 0
  FACE      107,     -107,      107,         31    \ Face 1
  FACE      107,      107,      107,         31    \ Face 2
@@ -55742,8 +55886,10 @@ ENDMACRO
  EQUB 0 + (2 << 4)      \ Max. canisters on demise = 0
                         \ Market item when scooped = 2 + 1 = 3 (slaves)
  EQUW 16 * 16           \ Targetable area          = 16 * 16
+
  EQUB LO(SHIP_ESCAPE_POD_EDGES - SHIP_ESCAPE_POD)  \ Edges data offset (low)
  EQUB LO(SHIP_ESCAPE_POD_FACES - SHIP_ESCAPE_POD)  \ Faces data offset (low)
+
  EQUB 25                \ Max. edge count          = (25 - 1) / 4 = 6
  EQUB 0                 \ Gun vertex               = 0
  EQUB 22                \ Explosion count          = 4, as (4 * n) + 6 = 22
@@ -55754,13 +55900,17 @@ ENDMACRO
  EQUB 8                 \ Visibility distance      = 8
  EQUB 8                 \ Max. energy              = 8
  EQUB 8                 \ Max. speed               = 8
+
  EQUB HI(SHIP_ESCAPE_POD_EDGES - SHIP_ESCAPE_POD)  \ Edges data offset (high)
  EQUB HI(SHIP_ESCAPE_POD_FACES - SHIP_ESCAPE_POD)  \ Faces data offset (high)
+
  EQUB 4                 \ Normals are scaled by    =  2^4 = 16
  EQUB %00000000         \ Laser power              = 0
                         \ Missiles                 = 0
 
-\          x,    y,    z, face1, face2, face3, face4, visibility
+.SHIP_ESCAPE_POD_VERTICES
+
+      \    x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX   -7,    0,   36,     2,      1,    3,     3,         31    \ Vertex 0
  VERTEX   -7,  -14,  -12,     2,      0,    3,     3,         31    \ Vertex 1
  VERTEX   -7,   14,  -12,     1,      0,    3,     3,         31    \ Vertex 2
@@ -55768,7 +55918,7 @@ ENDMACRO
 
 .SHIP_ESCAPE_POD_EDGES
 
-\     vertex1, vertex2, face1, face2, visibility
+    \ vertex1, vertex2, face1, face2, visibility
  EDGE       0,       1,     3,     2,         31    \ Edge 0
  EDGE       1,       2,     3,     0,         31    \ Edge 1
  EDGE       2,       3,     1,     0,         31    \ Edge 2
@@ -55778,7 +55928,7 @@ ENDMACRO
 
 .SHIP_ESCAPE_POD_FACES
 
-\     normal_x, normal_y, normal_z, visibility
+    \ normal_x, normal_y, normal_z, visibility
  FACE       52,        0,     -122,         31    \ Face 0
  FACE       39,      103,       30,         31    \ Face 1
  FACE       39,     -103,       30,         31    \ Face 2
@@ -55799,8 +55949,10 @@ ENDMACRO
  EQUB 0 + (8 << 4)      \ Max. canisters on demise = 0
                         \ Market item when scooped = 8 + 1 = 9 (Alloys)
  EQUW 10 * 10           \ Targetable area          = 10 * 10
+
  EQUB LO(SHIP_PLATE_EDGES - SHIP_PLATE)            \ Edges data offset (low)
  EQUB LO(SHIP_PLATE_FACES - SHIP_PLATE)            \ Faces data offset (low)
+
  EQUB 17                \ Max. edge count          = (17 - 1) / 4 = 4
  EQUB 0                 \ Gun vertex               = 0
  EQUB 10                \ Explosion count          = 1, as (4 * n) + 6 = 10
@@ -55811,13 +55963,17 @@ ENDMACRO
  EQUB 5                 \ Visibility distance      = 5
  EQUB 8                 \ Max. energy              = 8
  EQUB 16                \ Max. speed               = 16
+
  EQUB HI(SHIP_PLATE_EDGES - SHIP_PLATE)            \ Edges data offset (high)
  EQUB HI(SHIP_PLATE_FACES - SHIP_PLATE)            \ Faces data offset (high)
+
  EQUB 3                 \ Normals are scaled by    = 2^3 = 8
  EQUB %00000000         \ Laser power              = 0
                         \ Missiles                 = 0
 
-\          x,    y,    z, face1, face2, face3, face4, visibility
+.SHIP_PLATE_VERTICES
+
+      \    x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX  -15,  -22,   -9,    15,     15,   15,    15,         31    \ Vertex 0
  VERTEX  -15,   38,   -9,    15,     15,   15,    15,         31    \ Vertex 1
  VERTEX   19,   32,   11,    15,     15,   15,    15,         20    \ Vertex 2
@@ -55825,7 +55981,7 @@ ENDMACRO
 
 .SHIP_PLATE_EDGES
 
-\     vertex1, vertex2, face1, face2, visibility
+    \ vertex1, vertex2, face1, face2, visibility
  EDGE       0,       1,    15,    15,         31    \ Edge 0
  EDGE       1,       2,    15,    15,         16    \ Edge 1
  EDGE       2,       3,    15,    15,         20    \ Edge 2
@@ -55833,7 +55989,7 @@ ENDMACRO
 
 .SHIP_PLATE_FACES
 
-\     normal_x, normal_y, normal_z, visibility
+    \ normal_x, normal_y, normal_z, visibility
  FACE        0,        0,        0,          0    \ Face 0
 
 \ ******************************************************************************
@@ -55850,8 +56006,10 @@ ENDMACRO
 
  EQUB 0                 \ Max. canisters on demise = 0
  EQUW 20 * 20           \ Targetable area          = 20 * 20
+
  EQUB LO(SHIP_CANISTER_EDGES - SHIP_CANISTER)      \ Edges data offset (low)
  EQUB LO(SHIP_CANISTER_FACES - SHIP_CANISTER)      \ Faces data offset (low)
+
  EQUB 49                \ Max. edge count          = (49 - 1) / 4 = 12
  EQUB 0                 \ Gun vertex               = 0
  EQUB 18                \ Explosion count          = 3, as (4 * n) + 6 = 18
@@ -55862,13 +56020,17 @@ ENDMACRO
  EQUB 12                \ Visibility distance      = 12
  EQUB 8                 \ Max. energy              = 8
  EQUB 15                \ Max. speed               = 15
+
  EQUB HI(SHIP_CANISTER_EDGES - SHIP_CANISTER)      \ Edges data offset (high)
  EQUB HI(SHIP_CANISTER_FACES - SHIP_CANISTER)      \ Faces data offset (high)
+
  EQUB 2                 \ Normals are scaled by    = 2^2 = 4
  EQUB %00000000         \ Laser power              = 0
                         \ Missiles                 = 0
 
-\          x,    y,    z, face1, face2, face3, face4, visibility
+.SHIP_CANISTER_VERTICES
+
+      \    x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX   24,   16,    0,     0,      1,    5,     5,         31    \ Vertex 0
  VERTEX   24,    5,   15,     0,      1,    2,     2,         31    \ Vertex 1
  VERTEX   24,  -13,    9,     0,      2,    3,     3,         31    \ Vertex 2
@@ -55882,7 +56044,7 @@ ENDMACRO
 
 .SHIP_CANISTER_EDGES
 
-\     vertex1, vertex2, face1, face2, visibility
+    \ vertex1, vertex2, face1, face2, visibility
  EDGE       0,       1,     0,     1,         31    \ Edge 0
  EDGE       1,       2,     0,     2,         31    \ Edge 1
  EDGE       2,       3,     0,     3,         31    \ Edge 2
@@ -55901,7 +56063,7 @@ ENDMACRO
 
 .SHIP_CANISTER_FACES
 
-\     normal_x, normal_y, normal_z, visibility
+    \ normal_x, normal_y, normal_z, visibility
  FACE       96,        0,        0,         31    \ Face 0
  FACE        0,       41,       30,         31    \ Face 1
  FACE        0,      -18,       48,         31    \ Face 2
@@ -55924,8 +56086,10 @@ ENDMACRO
 
  EQUB 0                 \ Max. canisters on demise = 0
  EQUW 99 * 99           \ Targetable area          = 99 * 99
+
  EQUB LO(SHIP_THARGOID_EDGES - SHIP_THARGOID)      \ Edges data offset (low)
  EQUB LO(SHIP_THARGOID_FACES - SHIP_THARGOID)      \ Faces data offset (low)
+
  EQUB 101               \ Max. edge count          = (101 - 1) / 4 = 25
  EQUB 60                \ Gun vertex               = 60 / 4 = 15
  EQUB 38                \ Explosion count          = 8, as (4 * n) + 6 = 38
@@ -55936,13 +56100,17 @@ ENDMACRO
  EQUB 55                \ Visibility distance      = 55
  EQUB 253               \ Max. energy              = 253
  EQUB 39                \ Max. speed               = 39
+
  EQUB HI(SHIP_THARGOID_EDGES - SHIP_THARGOID)      \ Edges data offset (high)
  EQUB HI(SHIP_THARGOID_FACES - SHIP_THARGOID)      \ Faces data offset (high)
+
  EQUB 2                 \ Normals are scaled by    = 2^2 = 4
  EQUB %00111000         \ Laser power              = 7
                         \ Missiles                 = 0
 
-\          x,    y,    z, face1, face2, face3, face4, visibility
+.SHIP_THARGOID_VERTICES
+
+      \    x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX   32,  -48,   48,     0,      4,    8,     8,         31    \ Vertex 0
  VERTEX   32,  -68,    0,     0,      1,    4,     4,         31    \ Vertex 1
  VERTEX   32,  -48,  -48,     1,      2,    4,     4,         31    \ Vertex 2
@@ -55966,7 +56134,7 @@ ENDMACRO
 
 .SHIP_THARGOID_EDGES
 
-\     vertex1, vertex2, face1, face2, visibility
+    \ vertex1, vertex2, face1, face2, visibility
  EDGE       0,       7,     4,     8,         31    \ Edge 0
  EDGE       0,       1,     0,     4,         31    \ Edge 1
  EDGE       1,       2,     1,     4,         31    \ Edge 2
@@ -55996,7 +56164,7 @@ ENDMACRO
 
 .SHIP_THARGOID_FACES
 
-\     normal_x, normal_y, normal_z, visibility
+    \ normal_x, normal_y, normal_z, visibility
  FACE      103,      -60,       25,         31    \ Face 0
  FACE      103,      -60,      -25,         31    \ Face 1
  FACE      103,      -25,      -60,         31    \ Face 2
@@ -56028,8 +56196,10 @@ ENDMACRO
  EQUB 0 + (15 << 4)     \ Max. canisters on demise = 0
                         \ Market item when scooped = 15 + 1 = 16 (alien items)
  EQUW 40 * 40           \ Targetable area          = 40 * 40
+
  EQUB LO(SHIP_CANISTER_EDGES - SHIP_THARGON)       \ Edges from canister
  EQUB LO(SHIP_THARGON_FACES - SHIP_THARGON)        \ Faces data offset (low)
+
  EQUB 65                \ Max. edge count          = (65 - 1) / 4 = 16
  EQUB 0                 \ Gun vertex               = 0
  EQUB 18                \ Explosion count          = 3, as (4 * n) + 6 = 18
@@ -56040,13 +56210,17 @@ ENDMACRO
  EQUB 20                \ Visibility distance      = 20
  EQUB 33                \ Max. energy              = 33
  EQUB 30                \ Max. speed               = 30
+
  EQUB HI(SHIP_CANISTER_EDGES - SHIP_THARGON)       \ Edges from canister
  EQUB HI(SHIP_THARGON_FACES - SHIP_THARGON)        \ Faces data offset (high)
+
  EQUB 2                 \ Normals are scaled by    = 2^2 = 4
  EQUB %00100000         \ Laser power              = 4
                         \ Missiles                 = 0
 
-\          x,    y,    z, face1, face2, face3, face4, visibility
+.SHIP_THARGON_VERTICES
+
+      \    x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX   -9,    0,   40,     1,      0,    5,     5,         31    \ Vertex 0
  VERTEX   -9,  -38,   12,     1,      0,    2,     2,         31    \ Vertex 1
  VERTEX   -9,  -24,  -32,     2,      0,    3,     3,         31    \ Vertex 2
@@ -56060,7 +56234,7 @@ ENDMACRO
 
 .SHIP_THARGON_FACES
 
-\     normal_x, normal_y, normal_z, visibility
+    \ normal_x, normal_y, normal_z, visibility
  FACE      -36,        0,        0,         31    \ Face 0
  FACE       20,       -5,        7,         31    \ Face 1
  FACE       46,      -42,      -14,         31    \ Face 2
@@ -56083,8 +56257,10 @@ ENDMACRO
 
  EQUB 0                 \ Max. canisters on demise = 0
  EQUW 30 * 30           \ Targetable area          = 30 * 30
+
  EQUB LO(SHIP_BOULDER_EDGES - SHIP_BOULDER)        \ Edges data offset (low)
  EQUB LO(SHIP_BOULDER_FACES - SHIP_BOULDER)        \ Faces data offset (low)
+
  EQUB 45                \ Max. edge count          = (45 - 1) / 4 = 11
  EQUB 0                 \ Gun vertex               = 0
  EQUB 14                \ Explosion count          = 2, as (4 * n) + 6 = 14
@@ -56095,13 +56271,17 @@ ENDMACRO
  EQUB 20                \ Visibility distance      = 20
  EQUB 16                \ Max. energy              = 16
  EQUB 30                \ Max. speed               = 30
+
  EQUB HI(SHIP_BOULDER_EDGES - SHIP_BOULDER)        \ Edges data offset (high)
  EQUB HI(SHIP_BOULDER_FACES - SHIP_BOULDER)        \ Faces data offset (high)
+
  EQUB 2                 \ Normals are scaled by    = 2^2 = 4
  EQUB %00000000         \ Laser power              = 0
                         \ Missiles                 = 0
 
-\          x,    y,    z, face1, face2, face3, face4, visibility
+.SHIP_BOULDER_VERTICES
+
+      \    x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX  -18,   37,  -11,     1,      0,    9,     5,         31    \ Vertex 0
  VERTEX   30,    7,   12,     2,      1,    6,     5,         31    \ Vertex 1
  VERTEX   28,   -7,  -12,     3,      2,    7,     6,         31    \ Vertex 2
@@ -56112,7 +56292,7 @@ ENDMACRO
 
 .SHIP_BOULDER_EDGES
 
-\     vertex1, vertex2, face1, face2, visibility
+    \ vertex1, vertex2, face1, face2, visibility
  EDGE       0,       1,     5,     1,         31    \ Edge 0
  EDGE       1,       2,     6,     2,         31    \ Edge 1
  EDGE       2,       3,     7,     3,         31    \ Edge 2
@@ -56131,7 +56311,7 @@ ENDMACRO
 
 .SHIP_BOULDER_FACES
 
-\     normal_x, normal_y, normal_z, visibility
+    \ normal_x, normal_y, normal_z, visibility
  FACE      -15,       -3,        8,         31    \ Face 0
  FACE       -7,       12,       30,         31    \ Face 1
  FACE       32,      -47,       24,         31    \ Face 2
@@ -56157,8 +56337,10 @@ ENDMACRO
 
  EQUB 0                 \ Max. canisters on demise = 0
  EQUW 80 * 80           \ Targetable area          = 80 * 80
+
  EQUB LO(SHIP_ASTEROID_EDGES - SHIP_ASTEROID)      \ Edges data offset (low)
  EQUB LO(SHIP_ASTEROID_FACES - SHIP_ASTEROID)      \ Faces data offset (low)
+
  EQUB 65                \ Max. edge count          = (65 - 1) / 4 = 16
  EQUB 0                 \ Gun vertex               = 0
  EQUB 34                \ Explosion count          = 7, as (4 * n) + 6 = 34
@@ -56169,13 +56351,17 @@ ENDMACRO
  EQUB 50                \ Visibility distance      = 50
  EQUB 56                \ Max. energy              = 56
  EQUB 30                \ Max. speed               = 30
+
  EQUB HI(SHIP_ASTEROID_EDGES - SHIP_ASTEROID)      \ Edges data offset (high)
  EQUB HI(SHIP_ASTEROID_FACES - SHIP_ASTEROID)      \ Faces data offset (high)
+
  EQUB 1                 \ Normals are scaled by    = 2^1 = 2
  EQUB %00000000         \ Laser power              = 0
                         \ Missiles                 = 0
 
-\          x,    y,    z, face1, face2, face3, face4, visibility
+.SHIP_ASTEROID_VERTICES
+
+      \    x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX    0,   80,    0,    15,     15,   15,    15,         31    \ Vertex 0
  VERTEX  -80,  -10,    0,    15,     15,   15,    15,         31    \ Vertex 1
  VERTEX    0,  -80,    0,    15,     15,   15,    15,         31    \ Vertex 2
@@ -56188,7 +56374,7 @@ ENDMACRO
 
 .SHIP_ASTEROID_EDGES
 
-\     vertex1, vertex2, face1, face2, visibility
+    \ vertex1, vertex2, face1, face2, visibility
  EDGE       0,       1,     2,     7,         31    \ Edge 0
  EDGE       0,       4,     6,    13,         31    \ Edge 1
  EDGE       3,       4,     5,    12,         31    \ Edge 2
@@ -56213,7 +56399,7 @@ ENDMACRO
 
 .SHIP_ASTEROID_FACES
 
-\     normal_x, normal_y, normal_z, visibility
+    \ normal_x, normal_y, normal_z, visibility
  FACE        9,       66,       81,         31    \ Face 0
  FACE        9,      -66,       81,         31    \ Face 1
  FACE      -72,       64,       31,         31    \ Face 2
@@ -56271,6 +56457,7 @@ ELIF _BUG_FIX
 ENDIF
 
  EQUB LO(SHIP_SPLINTER_FACES - SHIP_SPLINTER) + 24 \ Faces data offset (low)
+
  EQUB 25                \ Max. edge count          = (25 - 1) / 4 = 6
  EQUB 0                 \ Gun vertex               = 0
  EQUB 22                \ Explosion count          = 4, as (4 * n) + 6 = 22
@@ -56293,11 +56480,14 @@ ELIF _BUG_FIX
 ENDIF
 
  EQUB HI(SHIP_SPLINTER_FACES - SHIP_SPLINTER)      \ Faces data offset (low)
+
  EQUB 5                 \ Normals are scaled by    = 2^5 = 32
  EQUB %00000000         \ Laser power              = 0
                         \ Missiles                 = 0
 
-\          x,    y,    z, face1, face2, face3, face4, visibility
+.SHIP_SPLINTER_VERTICES
+
+      \    x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX  -24,  -25,   16,     2,      1,    3,     3,         31    \ Vertex 0
  VERTEX    0,   12,  -10,     2,      0,    3,     3,         31    \ Vertex 1
  VERTEX   11,   -6,    2,     1,      0,    3,     3,         31    \ Vertex 2
@@ -56305,7 +56495,7 @@ ENDIF
 
 .SHIP_SPLINTER_FACES
 
-\     normal_x, normal_y, normal_z, visibility
+    \ normal_x, normal_y, normal_z, visibility
  FACE       35,        0,        4,         31    \ Face 0
  FACE        3,        4,        8,         31    \ Face 1
  FACE        1,        8,       12,         31    \ Face 2
@@ -56325,8 +56515,10 @@ ENDIF
 
  EQUB 15                \ Max. canisters on demise = 15
  EQUW 50 * 50           \ Targetable area          = 50 * 50
+
  EQUB LO(SHIP_SHUTTLE_EDGES - SHIP_SHUTTLE)        \ Edges data offset (low)
  EQUB LO(SHIP_SHUTTLE_FACES - SHIP_SHUTTLE)        \ Faces data offset (low)
+
  EQUB 109               \ Max. edge count          = (109 - 1) / 4 = 27
  EQUB 0                 \ Gun vertex               = 0
  EQUB 38                \ Explosion count          = 8, as (4 * n) + 6 = 38
@@ -56337,13 +56529,17 @@ ENDIF
  EQUB 22                \ Visibility distance      = 22
  EQUB 32                \ Max. energy              = 32
  EQUB 8                 \ Max. speed               = 8
+
  EQUB HI(SHIP_SHUTTLE_EDGES - SHIP_SHUTTLE)        \ Edges data offset (high)
  EQUB HI(SHIP_SHUTTLE_FACES - SHIP_SHUTTLE)        \ Faces data offset (high)
+
  EQUB 2                 \ Normals are scaled by    = 2^2 = 4
  EQUB %00000000         \ Laser power              = 0
                         \ Missiles                 = 0
 
-\          x,    y,    z, face1, face2, face3, face4, visibility
+.SHIP_SHUTTLE_VERTICES
+
+      \    x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX    0,  -35,   47,    15,    15,    15,    15,         31     \ Vertex 0
  VERTEX  -35,    0,   47,    15,    15,    15,    15,         31     \ Vertex 1
  VERTEX    0,   35,   47,    15,    15,    15,    15,         31     \ Vertex 2
@@ -56366,7 +56562,7 @@ ENDIF
 
 .SHIP_SHUTTLE_EDGES
 
-\     vertex1, vertex2, face1, face2, visibility
+    \ vertex1, vertex2, face1, face2, visibility
  EDGE       0,       1,     2,     0,         31    \ Edge 0
  EDGE       1,       2,    10,     4,         31    \ Edge 1
  EDGE       2,       3,    11,     6,         31    \ Edge 2
@@ -56400,7 +56596,7 @@ ENDIF
 
 .SHIP_SHUTTLE_FACES
 
-\     normal_x, normal_y, normal_z, visibility
+    \ normal_x, normal_y, normal_z, visibility
  FACE     -110,     -110,       80,         31    \ Face 0
  FACE        0,     -149,        7,         31    \ Face 1
  FACE     -102,     -102,       46,         31    \ Face 2
@@ -56429,8 +56625,10 @@ ENDIF
 
  EQUB 0                 \ Max. canisters on demise = 0
  EQUW 50 * 50           \ Targetable area          = 50 * 50
+
  EQUB LO(SHIP_TRANSPORTER_EDGES - SHIP_TRANSPORTER)   \ Edges data offset (low)
  EQUB LO(SHIP_TRANSPORTER_FACES - SHIP_TRANSPORTER)   \ Faces data offset (low)
+
  EQUB 145               \ Max. edge count          = (145 - 1) / 4 = 36
  EQUB 48                \ Gun vertex               = 48 / 4 = 12
  EQUB 26                \ Explosion count          = 5, as (4 * n) + 6 = 26
@@ -56441,13 +56639,17 @@ ENDIF
  EQUB 16                \ Visibility distance      = 16
  EQUB 32                \ Max. energy              = 32
  EQUB 10                \ Max. speed               = 10
+
  EQUB HI(SHIP_TRANSPORTER_EDGES - SHIP_TRANSPORTER)   \ Edges data offset (high)
  EQUB HI(SHIP_TRANSPORTER_FACES - SHIP_TRANSPORTER)   \ Faces data offset (high)
+
  EQUB 1                 \ Normals are scaled by    = 2^1 = 2
  EQUB %00000000         \ Laser power              = 0
                         \ Missiles                 = 0
 
-\          x,    y,    z, face1, face2, face3, face4, visibility
+.SHIP_TRANSPORTER_VERTICES
+
+      \    x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX    0,   19,  -51,     6,     0,     7,     7,         31     \ Vertex 0
  VERTEX  -51,    7,  -51,     1,     0,     7,     7,         31     \ Vertex 1
  VERTEX  -57,   -7,  -51,     1,     0,     2,     2,         31     \ Vertex 2
@@ -56488,7 +56690,7 @@ ENDIF
 
 .SHIP_TRANSPORTER_EDGES
 
-\     vertex1, vertex2, face1, face2, visibility
+    \ vertex1, vertex2, face1, face2, visibility
  EDGE       0,       1,     7,     0,         31    \ Edge 0
  EDGE       1,       2,     1,     0,         31    \ Edge 1
  EDGE       2,       3,     2,     0,         31    \ Edge 2
@@ -56538,7 +56740,7 @@ ENDIF
 
 .SHIP_TRANSPORTER_FACES
 
-\     normal_x, normal_y, normal_z, visibility
+    \ normal_x, normal_y, normal_z, visibility
  FACE        0,        0,     -103,         31    \ Face 0
  FACE     -111,       48,       -7,         31    \ Face 1
  FACE     -105,      -63,      -21,         31    \ Face 2
@@ -56568,8 +56770,10 @@ ENDIF
 
  EQUB 3                 \ Max. canisters on demise = 3
  EQUW 95 * 95           \ Targetable area          = 95 * 95
+
  EQUB LO(SHIP_COBRA_MK_3_EDGES - SHIP_COBRA_MK_3)  \ Edges data offset (low)
  EQUB LO(SHIP_COBRA_MK_3_FACES - SHIP_COBRA_MK_3)  \ Faces data offset (low)
+
  EQUB 153               \ Max. edge count          = (153 - 1) / 4 = 38
  EQUB 84                \ Gun vertex               = 84 / 4 = 21
  EQUB 42                \ Explosion count          = 9, as (4 * n) + 6 = 42
@@ -56580,13 +56784,17 @@ ENDIF
  EQUB 50                \ Visibility distance      = 50
  EQUB 98                \ Max. energy              = 98
  EQUB 28                \ Max. speed               = 28
+
  EQUB HI(SHIP_COBRA_MK_3_EDGES - SHIP_COBRA_MK_3)  \ Edges data offset (low)
  EQUB HI(SHIP_COBRA_MK_3_FACES - SHIP_COBRA_MK_3)  \ Faces data offset (low)
+
  EQUB 1                 \ Normals are scaled by    = 2^1 = 2
  EQUB %00100100         \ Laser power              = 4
                         \ Missiles                 = 4
 
-\          x,    y,    z, face1, face2, face3, face4, visibility
+.SHIP_COBRA_MK_3_VERTICES
+
+      \    x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX   32,    0,   76,    15,     15,   15,    15,         31    \ Vertex 0
  VERTEX  -32,    0,   76,    15,     15,   15,    15,         31    \ Vertex 1
  VERTEX    0,   26,   24,    15,     15,   15,    15,         31    \ Vertex 2
@@ -56618,7 +56826,7 @@ ENDIF
 
 .SHIP_COBRA_MK_3_EDGES
 
-\     vertex1, vertex2, face1, face2, visibility
+    \ vertex1, vertex2, face1, face2, visibility
  EDGE       0,       1,     0,    11,         31    \ Edge 0
  EDGE       0,       4,     4,    12,         31    \ Edge 1
  EDGE       1,       3,     3,    10,         31    \ Edge 2
@@ -56660,7 +56868,7 @@ ENDIF
 
 .SHIP_COBRA_MK_3_FACES
 
-\     normal_x, normal_y, normal_z, visibility
+    \ normal_x, normal_y, normal_z, visibility
  FACE        0,       62,       31,         31    \ Face 0
  FACE      -18,       55,       16,         31    \ Face 1
  FACE       18,       55,       16,         31    \ Face 2
@@ -56689,8 +56897,10 @@ ENDIF
 
  EQUB 5                 \ Max. canisters on demise = 5
  EQUW 80 * 80           \ Targetable area          = 80 * 80
+
  EQUB LO(SHIP_PYTHON_EDGES - SHIP_PYTHON)          \ Edges data offset (low)
  EQUB LO(SHIP_PYTHON_FACES - SHIP_PYTHON)          \ Faces data offset (low)
+
  EQUB 85                \ Max. edge count          = (85 - 1) / 4 = 21
  EQUB 0                 \ Gun vertex               = 0
  EQUB 42                \ Explosion count          = 9, as (4 * n) + 6 = 42
@@ -56701,13 +56911,17 @@ ENDIF
  EQUB 40                \ Visibility distance      = 40
  EQUB 125               \ Max. energy              = 125
  EQUB 20                \ Max. speed               = 20
+
  EQUB HI(SHIP_PYTHON_EDGES - SHIP_PYTHON)          \ Edges data offset (high)
  EQUB HI(SHIP_PYTHON_FACES - SHIP_PYTHON)          \ Faces data offset (high)
+
  EQUB 0                 \ Normals are scaled by    = 2^0 = 1
  EQUB %00101100         \ Laser power              = 5
                         \ Missiles                 = 4
 
-\          x,    y,    z, face1, face2, face3, face4, visibility
+.SHIP_PYTHON_VERTICES
+
+      \    x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX    0,    0,  224,     0,      1,    2,     3,         31    \ Vertex 0
  VERTEX    0,   48,   48,     0,      1,    4,     5,         30    \ Vertex 1
  VERTEX   96,    0,  -16,    15,     15,   15,    15,         31    \ Vertex 2
@@ -56722,7 +56936,7 @@ ENDIF
 
 .SHIP_PYTHON_EDGES
 
-\     vertex1, vertex2, face1, face2, visibility
+    \ vertex1, vertex2, face1, face2, visibility
  EDGE       0,       8,     2,     3,         30    \ Edge 0
  EDGE       0,       3,     0,     2,         31    \ Edge 1
  EDGE       0,       2,     1,     3,         31    \ Edge 2
@@ -56752,7 +56966,7 @@ ENDIF
 
 .SHIP_PYTHON_FACES
 
-\     normal_x, normal_y, normal_z, visibility
+    \ normal_x, normal_y, normal_z, visibility
  FACE      -27,       40,       11,         30    \ Face 0
  FACE       27,       40,       11,         30    \ Face 1
  FACE      -27,      -40,       11,         30    \ Face 2
@@ -56781,8 +56995,10 @@ ENDIF
 
  EQUB 5                 \ Max. canisters on demise = 5
  EQUW 70 * 70           \ Targetable area          = 70 * 70
+
  EQUB LO(SHIP_BOA_EDGES - SHIP_BOA)                \ Edges data offset (low)
  EQUB LO(SHIP_BOA_FACES - SHIP_BOA)                \ Faces data offset (low)
+
  EQUB 89                \ Max. edge count          = (89 - 1) / 4 = 22
  EQUB 0                 \ Gun vertex               = 0
  EQUB 38                \ Explosion count          = 8, as (4 * n) + 6 = 38
@@ -56793,13 +57009,17 @@ ENDIF
  EQUB 40                \ Visibility distance      = 40
  EQUB 164               \ Max. energy              = 164
  EQUB 24                \ Max. speed               = 24
+
  EQUB HI(SHIP_BOA_EDGES - SHIP_BOA)                \ Edges data offset (high)
  EQUB HI(SHIP_BOA_FACES - SHIP_BOA)                \ Faces data offset (high)
+
  EQUB 0                 \ Normals are scaled by    = 2^0 = 1
  EQUB %00101010         \ Laser power              = 5
                         \ Missiles                 = 2
 
-\          x,    y,    z, face1, face2, face3, face4, visibility
+.SHIP_BOA_VERTICES
+
+      \    x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX    0,    0,   93,    15,     15,   15,    15,         31    \ Vertex 0
  VERTEX    0,   40,  -87,     2,      0,    3,     3,         24    \ Vertex 1
  VERTEX   38,  -25,  -99,     1,      0,    4,     4,         24    \ Vertex 2
@@ -56816,7 +57036,7 @@ ENDIF
 
 .SHIP_BOA_EDGES
 
-\     vertex1, vertex2, face1, face2, visibility
+    \ vertex1, vertex2, face1, face2, visibility
  EDGE       0,       5,    11,     6,         31    \ Edge 0
  EDGE       0,       7,    10,     8,         31    \ Edge 1
  EDGE       0,       9,     9,     7,         31    \ Edge 2
@@ -56844,7 +57064,7 @@ ENDIF
 
 .SHIP_BOA_FACES
 
-\     normal_x, normal_y, normal_z, visibility
+    \ normal_x, normal_y, normal_z, visibility
  FACE       43,       37,      -60,         31    \ Face 0
  FACE        0,      -45,      -89,         31    \ Face 1
  FACE      -43,       37,      -60,         31    \ Face 2
@@ -56873,8 +57093,10 @@ ENDIF
 
  EQUB 7                 \ Max. canisters on demise = 7
  EQUW 100 * 100         \ Targetable area          = 100 * 100
+
  EQUB LO(SHIP_ANACONDA_EDGES - SHIP_ANACONDA)      \ Edges data offset (low)
  EQUB LO(SHIP_ANACONDA_FACES - SHIP_ANACONDA)      \ Faces data offset (low)
+
  EQUB 89                \ Max. edge count          = (89 - 1) / 4 = 22
  EQUB 48                \ Gun vertex               = 48 / 4 = 12
  EQUB 46                \ Explosion count          = 10, as (4 * n) + 6 = 46
@@ -56885,13 +57107,17 @@ ENDIF
  EQUB 50                \ Visibility distance      = 50
  EQUB 252               \ Max. energy              = 252
  EQUB 14                \ Max. speed               = 14
+
  EQUB HI(SHIP_ANACONDA_EDGES - SHIP_ANACONDA)      \ Edges data offset (high)
  EQUB HI(SHIP_ANACONDA_FACES - SHIP_ANACONDA)      \ Faces data offset (high)
+
  EQUB 1                 \ Normals are scaled by    = 2^1 = 2
  EQUB %01001111         \ Laser power              = 9
                         \ Missiles                 = 7
 
-\          x,    y,    z, face1, face2, face3, face4, visibility
+.SHIP_ANACONDA_VERTICES
+
+      \    x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX    0,    7,  -58,     1,      0,    5,     5,         30    \ Vertex 0
  VERTEX  -43,  -13,  -37,     1,      0,    2,     2,         30    \ Vertex 1
  VERTEX  -26,  -47,   -3,     2,      0,    3,     3,         30    \ Vertex 2
@@ -56910,7 +57136,7 @@ ENDIF
 
 .SHIP_ANACONDA_EDGES
 
-\     vertex1, vertex2, face1, face2, visibility
+    \ vertex1, vertex2, face1, face2, visibility
  EDGE       0,       1,     1,     0,         30    \ Edge 0
  EDGE       1,       2,     2,     0,         30    \ Edge 1
  EDGE       2,       3,     3,     0,         30    \ Edge 2
@@ -56939,7 +57165,7 @@ ENDIF
 
 .SHIP_ANACONDA_FACES
 
-\     normal_x, normal_y, normal_z, visibility
+    \ normal_x, normal_y, normal_z, visibility
  FACE        0,      -51,      -49,         30    \ Face 0
  FACE      -51,       18,      -87,         30    \ Face 1
  FACE      -77,      -57,      -19,         30    \ Face 2
@@ -56967,8 +57193,10 @@ ENDIF
 
  EQUB 0                 \ Max. canisters on demise = 0
  EQUW 99 * 99           \ Targetable area          = 99 * 99
+
  EQUB LO(SHIP_WORM_EDGES - SHIP_WORM)              \ Edges data offset (low)
  EQUB LO(SHIP_WORM_FACES - SHIP_WORM)              \ Faces data offset (low)
+
  EQUB 73                \ Max. edge count          = (73 - 1) / 4 = 18
  EQUB 0                 \ Gun vertex               = 0
  EQUB 18                \ Explosion count          = 3, as (4 * n) + 6 = 18
@@ -56979,13 +57207,17 @@ ENDIF
  EQUB 19                \ Visibility distance      = 19
  EQUB 32                \ Max. energy              = 32
  EQUB 23                \ Max. speed               = 23
+
  EQUB HI(SHIP_WORM_EDGES - SHIP_WORM)              \ Edges data offset (high)
  EQUB HI(SHIP_WORM_FACES - SHIP_WORM)              \ Faces data offset (high)
+
  EQUB 3                 \ Normals are scaled by    = 2^3 = 8
  EQUB %00011000         \ Laser power              = 3
                         \ Missiles                 = 0
 
-\          x,    y,    z, face1, face2, face3, face4, visibility
+.SHIP_WORM_VERTICES
+
+      \    x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX   10,  -10,   35,     2,      0,    7,     7,         31    \ Vertex 0
  VERTEX  -10,  -10,   35,     3,      0,    7,     7,         31    \ Vertex 1
  VERTEX    5,    6,   15,     1,      0,    4,     2,         31    \ Vertex 2
@@ -56999,7 +57231,7 @@ ENDIF
 
 .SHIP_WORM_EDGES
 
-\     vertex1, vertex2, face1, face2, visibility
+    \ vertex1, vertex2, face1, face2, visibility
  EDGE       0,       1,     7,     0,         31    \ Edge 0
  EDGE       1,       5,     7,     3,         31    \ Edge 1
  EDGE       5,       7,     7,     5,         31    \ Edge 2
@@ -57019,7 +57251,7 @@ ENDIF
 
 .SHIP_WORM_FACES
 
-\     normal_x, normal_y, normal_z, visibility
+    \ normal_x, normal_y, normal_z, visibility
  FACE        0,       88,       70,         31    \ Face 0
  FACE        0,       69,       14,         31    \ Face 1
  FACE       70,       66,       35,         31    \ Face 2
@@ -57043,8 +57275,10 @@ ENDIF
 
  EQUB 0                 \ Max. canisters on demise = 0
  EQUW 40 * 40           \ Targetable area          = 40 * 40
+
  EQUB LO(SHIP_MISSILE_EDGES - SHIP_MISSILE)        \ Edges data offset (low)
  EQUB LO(SHIP_MISSILE_FACES - SHIP_MISSILE)        \ Faces data offset (low)
+
  EQUB 81                \ Max. edge count          = (81 - 1) / 4 = 20
  EQUB 0                 \ Gun vertex               = 0
  EQUB 10                \ Explosion count          = 1, as (4 * n) + 6 = 10
@@ -57055,13 +57289,17 @@ ENDIF
  EQUB 14                \ Visibility distance      = 14
  EQUB 2                 \ Max. energy              = 2
  EQUB 44                \ Max. speed               = 44
+
  EQUB HI(SHIP_MISSILE_EDGES - SHIP_MISSILE)        \ Edges data offset (high)
  EQUB HI(SHIP_MISSILE_FACES - SHIP_MISSILE)        \ Faces data offset (high)
+
  EQUB 2                 \ Normals are scaled by    = 2^2 = 4
  EQUB %00000000         \ Laser power              = 0
                         \ Missiles                 = 0
 
-\          x,    y,    z, face1, face2, face3, face4, visibility
+.SHIP_MISSILE_VERTICES
+
+      \    x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX    0,    0,   68,     0,      1,    2,     3,         31    \ Vertex 0
  VERTEX    8,   -8,   36,     1,      2,    4,     5,         31    \ Vertex 1
  VERTEX    8,    8,   36,     2,      3,    4,     7,         31    \ Vertex 2
@@ -57082,7 +57320,7 @@ ENDIF
 
 .SHIP_MISSILE_EDGES
 
-\     vertex1, vertex2, face1, face2, visibility
+    \ vertex1, vertex2, face1, face2, visibility
  EDGE       0,       1,     1,     2,         31    \ Edge 0
  EDGE       0,       2,     2,     3,         31    \ Edge 1
  EDGE       0,       3,     0,     3,         31    \ Edge 2
@@ -57110,7 +57348,7 @@ ENDIF
 
 .SHIP_MISSILE_FACES
 
-\     normal_x, normal_y, normal_z, visibility
+    \ normal_x, normal_y, normal_z, visibility
  FACE      -64,        0,       16,         31    \ Face 0
  FACE        0,      -64,       16,         31    \ Face 1
  FACE       64,        0,       16,         31    \ Face 2
@@ -57135,8 +57373,10 @@ ENDIF
 
  EQUB 0                 \ Max. canisters on demise = 0
  EQUW 75 * 75           \ Targetable area          = 75 * 75
+
  EQUB LO(SHIP_VIPER_EDGES - SHIP_VIPER)            \ Edges data offset (low)
  EQUB LO(SHIP_VIPER_FACES - SHIP_VIPER)            \ Faces data offset (low)
+
  EQUB 77                \ Max. edge count          = (77 - 1) / 4 = 19
  EQUB 0                 \ Gun vertex               = 0
  EQUB 42                \ Explosion count          = 9, as (4 * n) + 6 = 42
@@ -57147,13 +57387,17 @@ ENDIF
  EQUB 23                \ Visibility distance      = 23
  EQUB 91                \ Max. energy              = 91
  EQUB 32                \ Max. speed               = 32
+
  EQUB HI(SHIP_VIPER_EDGES - SHIP_VIPER)            \ Edges data offset (high)
  EQUB HI(SHIP_VIPER_FACES - SHIP_VIPER)            \ Faces data offset (high)
+
  EQUB 1                 \ Normals are scaled by    = 2^1 = 2
  EQUB %00101001         \ Laser power              = 5
                         \ Missiles                 = 1
 
-\          x,    y,    z, face1, face2, face3, face4, visibility
+.SHIP_VIPER_VERTICES
+
+      \    x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX    0,    0,   72,     1,      2,    3,     4,         31    \ Vertex 0
  VERTEX    0,   16,   24,     0,      1,    2,     2,         30    \ Vertex 1
  VERTEX    0,  -16,   24,     3,      4,    5,     5,         30    \ Vertex 2
@@ -57172,7 +57416,7 @@ ENDIF
 
 .SHIP_VIPER_EDGES
 
-\     vertex1, vertex2, face1, face2, visibility
+    \ vertex1, vertex2, face1, face2, visibility
  EDGE       0,       3,     2,     4,         31    \ Edge 0
  EDGE       0,       1,     1,     2,         30    \ Edge 1
  EDGE       0,       2,     3,     4,         30    \ Edge 2
@@ -57196,7 +57440,7 @@ ENDIF
 
 .SHIP_VIPER_FACES
 
-\     normal_x, normal_y, normal_z, visibility
+    \ normal_x, normal_y, normal_z, visibility
  FACE        0,       32,        0,         31    \ Face 0
  FACE      -22,       33,       11,         31    \ Face 1
  FACE       22,       33,       11,         31    \ Face 2
@@ -57219,8 +57463,10 @@ ENDIF
 
  EQUB 0                 \ Max. canisters on demise = 0
  EQUW 65 * 65           \ Targetable area          = 65 * 65
+
  EQUB LO(SHIP_SIDEWINDER_EDGES - SHIP_SIDEWINDER)  \ Edges data offset (low)
  EQUB LO(SHIP_SIDEWINDER_FACES - SHIP_SIDEWINDER)  \ Faces data offset (low)
+
  EQUB 61                \ Max. edge count          = (61 - 1) / 4 = 15
  EQUB 0                 \ Gun vertex               = 0
  EQUB 30                \ Explosion count          = 6, as (4 * n) + 6 = 30
@@ -57231,13 +57477,17 @@ ENDIF
  EQUB 20                \ Visibility distance      = 20
  EQUB 73                \ Max. energy              = 73
  EQUB 37                \ Max. speed               = 37
+
  EQUB HI(SHIP_SIDEWINDER_EDGES - SHIP_SIDEWINDER)  \ Edges data offset (high)
  EQUB HI(SHIP_SIDEWINDER_FACES - SHIP_SIDEWINDER)  \ Faces data offset (high)
+
  EQUB 2                 \ Normals are scaled by    = 2^2 = 4
  EQUB %00100000         \ Laser power              = 4
                         \ Missiles                 = 0
 
-\          x,    y,    z, face1, face2, face3, face4, visibility
+.SHIP_SIDEWINDER_VERTICES
+
+      \    x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX  -32,    0,   36,     0,      1,    4,     5,         31    \ Vertex 0
  VERTEX   32,    0,   36,     0,      2,    5,     6,         31    \ Vertex 1
  VERTEX   64,    0,  -28,     2,      3,    6,     6,         31    \ Vertex 2
@@ -57251,7 +57501,7 @@ ENDIF
 
 .SHIP_SIDEWINDER_EDGES
 
-\     vertex1, vertex2, face1, face2, visibility
+    \ vertex1, vertex2, face1, face2, visibility
  EDGE       0,       1,     0,     5,         31    \ Edge 0
  EDGE       1,       2,     2,     6,         31    \ Edge 1
  EDGE       1,       4,     0,     2,         31    \ Edge 2
@@ -57270,7 +57520,7 @@ ENDIF
 
 .SHIP_SIDEWINDER_FACES
 
-\     normal_x, normal_y, normal_z, visibility
+    \ normal_x, normal_y, normal_z, visibility
  FACE        0,       32,        8,         31    \ Face 0
  FACE      -12,       47,        6,         31    \ Face 1
  FACE       12,       47,        6,         31    \ Face 2
@@ -57293,8 +57543,10 @@ ENDIF
 
  EQUB 1                 \ Max. canisters on demise = 1
  EQUW 70 * 70           \ Targetable area          = 70 * 70
+
  EQUB LO(SHIP_MAMBA_EDGES - SHIP_MAMBA)            \ Edges data offset (low)
  EQUB LO(SHIP_MAMBA_FACES - SHIP_MAMBA)            \ Faces data offset (low)
+
  EQUB 93                \ Max. edge count          = (93 - 1) / 4 = 23
  EQUB 0                 \ Gun vertex               = 0
  EQUB 34                \ Explosion count          = 7, as (4 * n) + 6 = 34
@@ -57305,13 +57557,17 @@ ENDIF
  EQUB 25                \ Visibility distance      = 25
  EQUB 80                \ Max. energy              = 80
  EQUB 30                \ Max. speed               = 30
+
  EQUB HI(SHIP_MAMBA_EDGES - SHIP_MAMBA)            \ Edges data offset (high)
  EQUB HI(SHIP_MAMBA_FACES - SHIP_MAMBA)            \ Faces data offset (high)
+
  EQUB 2                 \ Normals are scaled by    = 2^2 = 4
  EQUB %00100010         \ Laser power              = 4
                         \ Missiles                 = 2
 
-\          x,    y,    z, face1, face2, face3, face4, visibility
+.SHIP_MAMBA_VERTICES
+
+      \    x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX    0,    0,   64,     0,      1,    2,     3,         31    \ Vertex 0
  VERTEX  -64,   -8,  -32,     0,      2,    4,     4,         31    \ Vertex 1
  VERTEX  -32,    8,  -32,     1,      2,    4,     4,         30    \ Vertex 2
@@ -57340,7 +57596,7 @@ ENDIF
 
 .SHIP_MAMBA_EDGES
 
-\     vertex1, vertex2, face1, face2, visibility
+    \ vertex1, vertex2, face1, face2, visibility
  EDGE       0,       1,     0,     2,         31    \ Edge 0
  EDGE       0,       4,     0,     3,         31    \ Edge 1
  EDGE       1,       4,     0,     4,         31    \ Edge 2
@@ -57372,7 +57628,7 @@ ENDIF
 
 .SHIP_MAMBA_FACES
 
-\     normal_x, normal_y, normal_z, visibility
+    \ normal_x, normal_y, normal_z, visibility
  FACE        0,      -24,        2,         30    \ Face 0
  FACE        0,       24,        2,         30    \ Face 1
  FACE      -32,       64,       16,         30    \ Face 2
@@ -57393,8 +57649,10 @@ ENDIF
 
  EQUB 1                 \ Max. canisters on demise = 1
  EQUW 60 * 60           \ Targetable area          = 60 * 60
+
  EQUB LO(SHIP_KRAIT_EDGES - SHIP_KRAIT)            \ Edges data offset (low)
  EQUB LO(SHIP_KRAIT_FACES - SHIP_KRAIT)            \ Faces data offset (low)
+
  EQUB 85                \ Max. edge count          = (85 - 1) / 4 = 21
  EQUB 0                 \ Gun vertex               = 0
  EQUB 18                \ Explosion count          = 3, as (4 * n) + 6 = 18
@@ -57405,13 +57663,17 @@ ENDIF
  EQUB 25                \ Visibility distance      = 25
  EQUB 73                \ Max. energy              = 73
  EQUB 30                \ Max. speed               = 30
+
  EQUB HI(SHIP_KRAIT_EDGES - SHIP_KRAIT)            \ Edges data offset (high)
  EQUB HI(SHIP_KRAIT_FACES - SHIP_KRAIT)            \ Faces data offset (high)
+
  EQUB 1                 \ Normals are scaled by    = 2^1 = 2
  EQUB %00100000         \ Laser power              = 4
                         \ Missiles                 = 0
 
-\          x,    y,    z, face1, face2, face3, face4, visibility
+.SHIP_KRAIT_VERTICES
+
+      \    x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX    0,    0,   96,     1,      0,    3,     2,         31    \ Vertex 0
  VERTEX    0,   18,  -48,     3,      0,    5,     4,         31    \ Vertex 1
  VERTEX    0,  -18,  -48,     2,      1,    5,     4,         31    \ Vertex 2
@@ -57432,7 +57694,7 @@ ENDIF
 
 .SHIP_KRAIT_EDGES
 
-\     vertex1, vertex2, face1, face2, visibility
+    \ vertex1, vertex2, face1, face2, visibility
  EDGE       0,       1,     3,     0,         31    \ Edge 0
  EDGE       0,       2,     2,     1,         31    \ Edge 1
  EDGE       0,       3,     1,     0,         31    \ Edge 2
@@ -57457,7 +57719,7 @@ ENDIF
 
 .SHIP_KRAIT_FACES
 
-\     normal_x, normal_y, normal_z, visibility
+    \ normal_x, normal_y, normal_z, visibility
  FACE        3,       24,        3,         31    \ Face 0
  FACE        3,      -24,        3,         31    \ Face 1
  FACE       -3,      -24,        3,         31    \ Face 2
@@ -57479,8 +57741,10 @@ ENDIF
 
  EQUB 0                 \ Max. canisters on demise = 0
  EQUW 50 * 50           \ Targetable area          = 50 * 50
+
  EQUB LO(SHIP_ADDER_EDGES - SHIP_ADDER)            \ Edges data offset (low)
  EQUB LO(SHIP_ADDER_FACES - SHIP_ADDER)            \ Faces data offset (low)
+
  EQUB 97                \ Max. edge count          = (97 - 1) / 4 = 24
  EQUB 0                 \ Gun vertex               = 0
  EQUB 22                \ Explosion count          = 4, as (4 * n) + 6 = 22
@@ -57491,13 +57755,17 @@ ENDIF
  EQUB 23                \ Visibility distance      = 23
  EQUB 72                \ Max. energy              = 72
  EQUB 24                \ Max. speed               = 24
+
  EQUB HI(SHIP_ADDER_EDGES - SHIP_ADDER)            \ Edges data offset (high)
  EQUB HI(SHIP_ADDER_FACES - SHIP_ADDER)            \ Faces data offset (high)
+
  EQUB 2                 \ Normals are scaled by    = 2^2 = 4
  EQUB %00100001         \ Laser power              = 4
                         \ Missiles                 = 1
 
-\          x,    y,    z, face1, face2, face3, face4, visibility
+.SHIP_ADDER_VERTICES
+
+      \    x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX  -18,    0,   40,     1,      0,   12,    11,         31    \ Vertex 0
  VERTEX   18,    0,   40,     1,      0,    3,     2,         31    \ Vertex 1
  VERTEX   30,    0,  -24,     3,      2,    5,     4,         31    \ Vertex 2
@@ -57519,7 +57787,7 @@ ENDIF
 
 .SHIP_ADDER_EDGES
 
-\     vertex1, vertex2, face1, face2, visibility
+    \ vertex1, vertex2, face1, face2, visibility
  EDGE       0,       1,     1,     0,         31    \ Edge 0
  EDGE       1,       2,     3,     2,          7    \ Edge 1
  EDGE       2,       3,     5,     4,         31    \ Edge 2
@@ -57552,7 +57820,7 @@ ENDIF
 
 .SHIP_ADDER_FACES
 
-\     normal_x, normal_y, normal_z, visibility
+    \ normal_x, normal_y, normal_z, visibility
  FACE        0,       39,       10,         31    \ Face 0
  FACE        0,      -39,       10,         31    \ Face 1
  FACE       69,       50,       13,         31    \ Face 2
@@ -57583,8 +57851,10 @@ ENDIF
 
  EQUB 0                 \ Max. canisters on demise = 0
  EQUW 99 * 99           \ Targetable area          = 99 * 99
+
  EQUB LO(SHIP_GECKO_EDGES - SHIP_GECKO)            \ Edges data offset (low)
  EQUB LO(SHIP_GECKO_FACES - SHIP_GECKO)            \ Faces data offset (low)
+
  EQUB 65                \ Max. edge count          = (65 - 1) / 4 = 16
  EQUB 0                 \ Gun vertex               = 0
  EQUB 26                \ Explosion count          = 5, as (4 * n) + 6 = 26
@@ -57595,13 +57865,17 @@ ENDIF
  EQUB 18                \ Visibility distance      = 18
  EQUB 65                \ Max. energy              = 65
  EQUB 30                \ Max. speed               = 30
+
  EQUB HI(SHIP_GECKO_EDGES - SHIP_GECKO)            \ Edges data offset (high)
  EQUB HI(SHIP_GECKO_FACES - SHIP_GECKO)            \ Faces data offset (high)
+
  EQUB 3                 \ Normals are scaled by    = 2^3 = 8
  EQUB %00100000         \ Laser power              = 4
                         \ Missiles                 = 0
 
-\          x,    y,    z, face1, face2, face3, face4, visibility
+.SHIP_GECKO_VERTICES
+
+      \    x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX  -10,   -4,   47,     3,      0,    5,     4,         31    \ Vertex 0
  VERTEX   10,   -4,   47,     1,      0,    3,     2,         31    \ Vertex 1
  VERTEX  -16,    8,  -23,     5,      0,    7,     6,         31    \ Vertex 2
@@ -57617,7 +57891,7 @@ ENDIF
 
 .SHIP_GECKO_EDGES
 
-\     vertex1, vertex2, face1, face2, visibility
+    \ vertex1, vertex2, face1, face2, visibility
  EDGE       0,       1,     3,     0,         31    \ Edge 0
  EDGE       1,       5,     2,     1,         31    \ Edge 1
  EDGE       5,       3,     8,     1,         31    \ Edge 2
@@ -57638,7 +57912,7 @@ ENDIF
 
 .SHIP_GECKO_FACES
 
-\     normal_x, normal_y, normal_z, visibility
+    \ normal_x, normal_y, normal_z, visibility
  FACE        0,       31,        5,         31    \ Face 0
  FACE        4,       45,        8,         31    \ Face 1
  FACE       25,     -108,       19,         31    \ Face 2
@@ -57663,8 +57937,10 @@ ENDIF
 
  EQUB 3                 \ Max. canisters on demise = 3
  EQUW 99 * 99           \ Targetable area          = 99 * 99
+
  EQUB LO(SHIP_COBRA_MK_1_EDGES - SHIP_COBRA_MK_1)  \ Edges data offset (low)
  EQUB LO(SHIP_COBRA_MK_1_FACES - SHIP_COBRA_MK_1)  \ Faces data offset (low)
+
  EQUB 69                \ Max. edge count          = (69 - 1) / 4 = 17
  EQUB 40                \ Gun vertex               = 40 / 4 = 10
  EQUB 26                \ Explosion count          = 5, as (4 * n) + 6 = 26
@@ -57675,13 +57951,17 @@ ENDIF
  EQUB 19                \ Visibility distance      = 19
  EQUB 81                \ Max. energy              = 81
  EQUB 26                \ Max. speed               = 26
+
  EQUB HI(SHIP_COBRA_MK_1_EDGES - SHIP_COBRA_MK_1)  \ Edges data offset (high)
  EQUB HI(SHIP_COBRA_MK_1_FACES - SHIP_COBRA_MK_1)  \ Faces data offset (high)
+
  EQUB 2                 \ Normals are scaled by    = 2^2 = 4
  EQUB %00100010         \ Laser power              = 4
                         \ Missiles                 = 2
 
-\          x,    y,    z, face1, face2, face3, face4, visibility
+.SHIP_COBRA_MK_1_VERTICES
+
+      \    x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX  -18,   -1,   50,     1,      0,    3,     2,         31    \ Vertex 0
  VERTEX   18,   -1,   50,     1,      0,    5,     4,         31    \ Vertex 1
  VERTEX  -66,    0,    7,     3,      2,    8,     8,         31    \ Vertex 2
@@ -57696,7 +57976,7 @@ ENDIF
 
 .SHIP_COBRA_MK_1_EDGES
 
-\     vertex1, vertex2, face1, face2, visibility
+    \ vertex1, vertex2, face1, face2, visibility
  EDGE       1,       0,     1,     0,         31    \ Edge 0
  EDGE       0,       2,     3,     2,         31    \ Edge 1
  EDGE       2,       6,     8,     3,         31    \ Edge 2
@@ -57718,7 +57998,7 @@ ENDIF
 
 .SHIP_COBRA_MK_1_FACES
 
-\     normal_x, normal_y, normal_z, visibility
+    \ normal_x, normal_y, normal_z, visibility
  FACE        0,       41,       10,         31    \ Face 0
  FACE        0,      -27,        3,         31    \ Face 1
  FACE       -8,       46,        8,         31    \ Face 2
@@ -57744,8 +58024,10 @@ ENDIF
 
  EQUB 0                 \ Max. canisters on demise = 0
  EQUW 60 * 60           \ Targetable area          = 60 * 60
+
  EQUB LO(SHIP_ASP_MK_2_EDGES - SHIP_ASP_MK_2)      \ Edges data offset (low)
  EQUB LO(SHIP_ASP_MK_2_FACES - SHIP_ASP_MK_2)      \ Faces data offset (low)
+
  EQUB 101               \ Max. edge count          = (101 - 1) / 4 = 25
  EQUB 32                \ Gun vertex               = 32 / 4 = 8
  EQUB 26                \ Explosion count          = 5, as (4 * n) + 6 = 26
@@ -57756,13 +58038,17 @@ ENDIF
  EQUB 40                \ Visibility distance      = 40
  EQUB 109               \ Max. energy              = 109
  EQUB 40                \ Max. speed               = 40
+
  EQUB HI(SHIP_ASP_MK_2_EDGES - SHIP_ASP_MK_2)      \ Edges data offset (high)
  EQUB HI(SHIP_ASP_MK_2_FACES - SHIP_ASP_MK_2)      \ Faces data offset (high)
+
  EQUB 1                 \ Normals are scaled by    = 2^1 = 2
  EQUB %01001001         \ Laser power              = 9
                         \ Missiles                 = 1
 
-\          x,    y,    z, face1, face2, face3, face4, visibility
+.SHIP_ASP_MK_2_VERTICES
+
+      \    x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX    0,  -18,    0,     1,      0,    2,     2,         22    \ Vertex 0
  VERTEX    0,   -9,  -45,     2,      1,   11,    11,         31    \ Vertex 1
  VERTEX   43,    0,  -45,     6,      1,   11,    11,         31    \ Vertex 2
@@ -57785,7 +58071,7 @@ ENDIF
 
 .SHIP_ASP_MK_2_EDGES
 
-\     vertex1, vertex2, face1, face2, visibility
+    \ vertex1, vertex2, face1, face2, visibility
  EDGE       0,       1,     2,     1,         22    \ Edge 0
  EDGE       0,       4,     1,     0,         22    \ Edge 1
  EDGE       0,       7,     2,     0,         22    \ Edge 2
@@ -57817,7 +58103,7 @@ ENDIF
 
 .SHIP_ASP_MK_2_FACES
 
-\     normal_x, normal_y, normal_z, visibility
+    \ normal_x, normal_y, normal_z, visibility
  FACE        0,      -35,        5,         31    \ Face 0
  FACE        8,      -38,       -7,         31    \ Face 1
  FACE       -8,      -38,       -7,         31    \ Face 2
@@ -57845,8 +58131,10 @@ ENDIF
 
  EQUB 0                 \ Max. canisters on demise = 0
  EQUW 40 * 40           \ Targetable area          = 40 * 40
+
  EQUB LO(SHIP_FER_DE_LANCE_EDGES - SHIP_FER_DE_LANCE) \ Edges data offset (low)
  EQUB LO(SHIP_FER_DE_LANCE_FACES - SHIP_FER_DE_LANCE) \ Faces data offset (low)
+
  EQUB 105               \ Max. edge count          = (105 - 1) / 4 = 26
  EQUB 0                 \ Gun vertex               = 0
  EQUB 26                \ Explosion count          = 5, as (4 * n) + 6 = 26
@@ -57857,13 +58145,17 @@ ENDIF
  EQUB 40                \ Visibility distance      = 40
  EQUB 83                \ Max. energy              = 83
  EQUB 30                \ Max. speed               = 30
+
  EQUB HI(SHIP_FER_DE_LANCE_EDGES - SHIP_FER_DE_LANCE) \ Edges data offset (high)
  EQUB HI(SHIP_FER_DE_LANCE_FACES - SHIP_FER_DE_LANCE) \ Faces data offset (high)
+
  EQUB 1                 \ Normals are scaled by    = 2^1 = 2
  EQUB %00110010         \ Laser power              = 6
                         \ Missiles                 = 2
 
-\          x,    y,    z, face1, face2, face3, face4, visibility
+.SHIP_FER_DE_LANCE_VERTICES
+
+      \    x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX    0,  -14,  108,     1,      0,    9,     5,         31    \ Vertex 0
  VERTEX  -40,  -14,   -4,     2,      1,    9,     9,         31    \ Vertex 1
  VERTEX  -12,  -14,  -52,     3,      2,    9,     9,         31    \ Vertex 2
@@ -57886,7 +58178,7 @@ ENDIF
 
 .SHIP_FER_DE_LANCE_EDGES
 
-\     vertex1, vertex2, face1, face2, visibility
+    \ vertex1, vertex2, face1, face2, visibility
  EDGE       0,       1,     9,     1,         31    \ Edge 0
  EDGE       1,       2,     9,     2,         31    \ Edge 1
  EDGE       2,       3,     9,     3,         31    \ Edge 2
@@ -57917,7 +58209,7 @@ ENDIF
 
 .SHIP_FER_DE_LANCE_FACES
 
-\     normal_x, normal_y, normal_z, visibility
+    \ normal_x, normal_y, normal_z, visibility
  FACE        0,       24,        6,         28    \ Face 0
  FACE      -68,        0,       24,         31    \ Face 1
  FACE      -63,        0,      -37,         31    \ Face 2
@@ -57943,8 +58235,10 @@ ENDIF
 
  EQUB 1                 \ Max. canisters on demise = 1
  EQUW 30 * 30           \ Targetable area          = 30 * 30
+
  EQUB LO(SHIP_MORAY_EDGES - SHIP_MORAY)            \ Edges data offset (low)
  EQUB LO(SHIP_MORAY_FACES - SHIP_MORAY)            \ Faces data offset (low)
+
  EQUB 69                \ Max. edge count          = (69 - 1) / 4 = 17
  EQUB 0                 \ Gun vertex               = 0
  EQUB 26                \ Explosion count          = 5, as (4 * n) + 6 = 26
@@ -57955,13 +58249,17 @@ ENDIF
  EQUB 40                \ Visibility distance      = 40
  EQUB 89                \ Max. energy              = 89
  EQUB 25                \ Max. speed               = 25
+
  EQUB HI(SHIP_MORAY_EDGES - SHIP_MORAY)            \ Edges data offset (high)
  EQUB HI(SHIP_MORAY_FACES - SHIP_MORAY)            \ Faces data offset (high)
+
  EQUB 2                 \ Normals are scaled by    = 2^2 = 4
  EQUB %00101010         \ Laser power              = 5
                         \ Missiles                 = 2
 
-\          x,    y,    z, face1, face2, face3, face4, visibility
+.SHIP_MORAY_VERTICES
+
+      \    x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX   15,    0,   65,     2,      0,    8,     7,         31    \ Vertex 0
  VERTEX  -15,    0,   65,     1,      0,    7,     6,         31    \ Vertex 1
  VERTEX    0,   18,  -40,    15,     15,   15,    15,         17    \ Vertex 2
@@ -57979,7 +58277,7 @@ ENDIF
 
 .SHIP_MORAY_EDGES
 
-\     vertex1, vertex2, face1, face2, visibility
+    \ vertex1, vertex2, face1, face2, visibility
  EDGE       0,       1,     7,     0,         31    \ Edge 0
  EDGE       1,       3,     6,     1,         31    \ Edge 1
  EDGE       3,       6,     6,     3,         24    \ Edge 2
@@ -58002,7 +58300,7 @@ ENDIF
 
 .SHIP_MORAY_FACES
 
-\     normal_x, normal_y, normal_z, visibility
+    \ normal_x, normal_y, normal_z, visibility
  FACE        0,       43,        7,         31    \ Face 0
  FACE      -10,       49,        7,         31    \ Face 1
  FACE       10,       49,        7,         31    \ Face 2
@@ -58028,8 +58326,10 @@ ENDIF
  EQUB 3 + (15 << 4)     \ Max. canisters on demise = 3
                         \ Market item when scooped = 15 + 1 = 16 (alien items)
  EQUW 99 * 99           \ Targetable area          = 99 * 99
+
  EQUB LO(SHIP_CONSTRICTOR_EDGES - SHIP_CONSTRICTOR)   \ Edges data offset (low)
  EQUB LO(SHIP_CONSTRICTOR_FACES - SHIP_CONSTRICTOR)   \ Faces data offset (low)
+
  EQUB 77                \ Max. edge count          = (77 - 1) / 4 = 19
  EQUB 0                 \ Gun vertex               = 0
  EQUB 46                \ Explosion count          = 10, as (4 * n) + 6 = 46
@@ -58040,13 +58340,17 @@ ENDIF
  EQUB 45                \ Visibility distance      = 45
  EQUB 115               \ Max. energy              = 115
  EQUB 55                \ Max. speed               = 55
+
  EQUB HI(SHIP_CONSTRICTOR_EDGES - SHIP_CONSTRICTOR)   \ Edges data offset (high)
  EQUB HI(SHIP_CONSTRICTOR_FACES - SHIP_CONSTRICTOR)   \ Faces data offset (high)
+
  EQUB 2                 \ Normals are scaled by    = 2^2 = 4
  EQUB %01000111         \ Laser power              = 8
                         \ Missiles                 = 7
 
-\          x,    y,    z, face1, face2, face3, face4, visibility
+.SHIP_CONSTRICTOR_VERTICES
+
+      \    x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX   20,   -7,   80,     2,      0,    9,     9,         31    \ Vertex 0
  VERTEX  -20,   -7,   80,     1,      0,    9,     9,         31    \ Vertex 1
  VERTEX  -54,   -7,   40,     4,      1,    9,     9,         31    \ Vertex 2
@@ -58067,7 +58371,7 @@ ENDIF
 
 .SHIP_CONSTRICTOR_EDGES
 
-\     vertex1, vertex2, face1, face2, visibility
+    \ vertex1, vertex2, face1, face2, visibility
  EDGE       0,       1,     9,     0,         31    \ Edge 0
  EDGE       1,       2,     9,     1,         31    \ Edge 1
  EDGE       1,       9,     1,     0,         31    \ Edge 2
@@ -58095,7 +58399,7 @@ ENDIF
 
 .SHIP_CONSTRICTOR_FACES
 
-\     normal_x, normal_y, normal_z, visibility
+    \ normal_x, normal_y, normal_z, visibility
  FACE        0,       55,       15,         31    \ Face 0
  FACE      -24,       75,       20,         31    \ Face 1
  FACE       24,       75,       20,         31    \ Face 2
@@ -58121,8 +58425,10 @@ ENDIF
 
  EQUB 0                 \ Max. canisters on demise = 0
  EQUW 26192             \ Targetable area          = 161.83 * 161.83
+
  EQUB LO(SHIP_DRAGON_EDGES - SHIP_DRAGON)          \ Edges data offset (low)
  EQUB LO(SHIP_DRAGON_FACES - SHIP_DRAGON)          \ Faces data offset (low)
+
  EQUB 65                \ Max. edge count          = (65 - 1) / 4 = 16
  EQUB 0                 \ Gun vertex               = 0
  EQUB 60                \ Explosion count          = 13, as (4 * n) + 6 = 60
@@ -58133,13 +58439,17 @@ ENDIF
  EQUB 32                \ Visibility distance      = 32
  EQUB 247               \ Max. energy              = 247
  EQUB 20                \ Max. speed               = 20
+
  EQUB HI(SHIP_DRAGON_EDGES - SHIP_DRAGON)          \ Edges data offset (high)
  EQUB HI(SHIP_DRAGON_FACES - SHIP_DRAGON)          \ Faces data offset (high)
+
  EQUB 0                 \ Normals are scaled by    = 2^0 = 1
  EQUB %01000111         \ Laser power              = 8
                         \ Missiles                 = 7
 
-\          x,    y,    z, face1, face2, face3, face4, visibility
+.SHIP_DRAGON_VERTICES
+
+      \    x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX    0,    0,  250,    11,     6,     5,     0,         31     \ Vertex 0
  VERTEX  216,    0,  124,     7,     6,     1,     0,         31     \ Vertex 1
  VERTEX  216,    0, -124,     8,     7,     2,     1,         31     \ Vertex 2
@@ -58152,7 +58462,7 @@ ENDIF
 
 .SHIP_DRAGON_EDGES
 
-\     vertex1, vertex2, face1, face2, visibility
+    \ vertex1, vertex2, face1, face2, visibility
  EDGE       1,       7,     1,     0,         31    \ Edge 0
  EDGE       2,       7,     2,     1,         31    \ Edge 1
  EDGE       3,       7,     3,     2,         31    \ Edge 2
@@ -58177,7 +58487,7 @@ ENDIF
 
 .SHIP_DRAGON_FACES
 
-\     normal_x, normal_y, normal_z, visibility
+    \ normal_x, normal_y, normal_z, visibility
  FACE       16,       90,       28,         31    \ Face 0
  FACE       33,       90,        0,         31    \ Face 1
  FACE       25,       91,      -14,         31    \ Face 2
@@ -58207,8 +58517,10 @@ ENDIF
 
  EQUB 4                 \ Max. canisters on demise = 4
  EQUW 13824             \ Targetable area          = 117.57 * 117.57
+
  EQUB LO(SHIP_MONITOR_EDGES - SHIP_MONITOR)        \ Edges data offset (low)
  EQUB LO(SHIP_MONITOR_FACES - SHIP_MONITOR)        \ Faces data offset (low)
+
  EQUB 101               \ Max. edge count          = (101 - 1) / 4 = 25
  EQUB 0                 \ Gun vertex               = 0
  EQUB 42                \ Explosion count          = 9, as (4 * n) + 6 = 42
@@ -58219,13 +58531,17 @@ ENDIF
  EQUB 40                \ Visibility distance      = 40
  EQUB 132               \ Max. energy              = 132
  EQUB 16                \ Max. speed               = 16
+
  EQUB HI(SHIP_MONITOR_EDGES - SHIP_MONITOR)        \ Edges data offset (high)
  EQUB HI(SHIP_MONITOR_FACES - SHIP_MONITOR)        \ Faces data offset (high)
+
  EQUB 0                 \ Normals are scaled by    = 2^0 = 1
  EQUB %00110111         \ Laser power              = 6
                         \ Missiles                 = 7
 
-\          x,    y,    z, face1, face2, face3, face4, visibility
+.SHIP_MONITOR_VERTICES
+
+      \    x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX    0,   10,  140,    15,    15,    15,    15,         31     \ Vertex 0
  VERTEX   20,   40,  -20,     3,     2,     1,     0,         31     \ Vertex 1
  VERTEX  -20,   40,  -20,     0,     5,     4,     3,         31     \ Vertex 2
@@ -58246,7 +58562,7 @@ ENDIF
 
 .SHIP_MONITOR_EDGES
 
-\     vertex1, vertex2, face1, face2, visibility
+    \ vertex1, vertex2, face1, face2, visibility
  EDGE       0,       1,     1,     0,         31    \ Edge 0
  EDGE       1,       3,     2,     1,         31    \ Edge 1
  EDGE       1,       7,     3,     2,         31    \ Edge 2
@@ -58273,7 +58589,7 @@ ENDIF
 
 .SHIP_MONITOR_FACES
 
-\     normal_x, normal_y, normal_z, visibility
+    \ normal_x, normal_y, normal_z, visibility
  FACE        0,       62,       11,         31    \ Face 0
  FACE       44,       43,       13,         31    \ Face 1
  FACE       54,       28,      -16,         31    \ Face 2
@@ -58300,8 +58616,10 @@ ENDIF
 
  EQUB 2                 \ Max. canisters on demise = 2
  EQUW 3720              \ Targetable area          = 60.99 * 60.99
+
  EQUB LO(SHIP_OPHIDIAN_EDGES - SHIP_OPHIDIAN)      \ Edges data offset (low)
  EQUB LO(SHIP_OPHIDIAN_FACES - SHIP_OPHIDIAN)      \ Faces data offset (low)
+
  EQUB 113               \ Max. edge count          = (113 - 1) / 4 = 28
  EQUB 0                 \ Gun vertex               = 0
  EQUB 60                \ Explosion count          = 13, as (4 * n) + 6 = 60
@@ -58312,13 +58630,17 @@ ENDIF
  EQUB 20                \ Visibility distance      = 20
  EQUB 64                \ Max. energy              = 64
  EQUB 34                \ Max. speed               = 34
+
  EQUB HI(SHIP_OPHIDIAN_EDGES - SHIP_OPHIDIAN)      \ Edges data offset (high)
  EQUB HI(SHIP_OPHIDIAN_FACES - SHIP_OPHIDIAN)      \ Faces data offset (high)
+
  EQUB 1                 \ Normals are scaled by    = 2^1 = 2
  EQUB %00011010         \ Laser power              = 3
                         \ Missiles                 = 2
 
-\          x,    y,    z, face1, face2, face3, face4, visibility
+.SHIP_OPHIDIAN_VERTICES
+
+      \    x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX  -20,    0,   70,     8,     6,     2,     0,         31     \ Vertex 0
  VERTEX   20,    0,   70,     7,     6,     1,     0,         31     \ Vertex 1
  VERTEX    0,   10,   40,     2,     2,     1,     0,         31     \ Vertex 2
@@ -58342,7 +58664,7 @@ ENDIF
 
 .SHIP_OPHIDIAN_EDGES
 
-\     vertex1, vertex2, face1, face2, visibility
+    \ vertex1, vertex2, face1, face2, visibility
  EDGE       0,       1,     6,     0,         31    \ Edge 0
  EDGE       1,       2,     1,     0,         31    \ Edge 1
  EDGE       0,       2,     2,     0,         31    \ Edge 2
@@ -58376,7 +58698,7 @@ ENDIF
 
 .SHIP_OPHIDIAN_FACES
 
-\     normal_x, normal_y, normal_z, visibility
+    \ normal_x, normal_y, normal_z, visibility
  FACE        0,       37,       12,         31    \ Face 0
  FACE       11,       28,        5,         31    \ Face 1
  FACE      -11,       28,        5,         31    \ Face 2
@@ -58404,8 +58726,10 @@ ENDIF
 
  EQUB 3                 \ Max. canisters on demise = 3
  EQUW 9728              \ Targetable area          = 98.63 * 98.63
+
  EQUB LO(SHIP_GHAVIAL_EDGES - SHIP_GHAVIAL)        \ Edges data offset (low)
  EQUB LO(SHIP_GHAVIAL_FACES - SHIP_GHAVIAL)        \ Faces data offset (low)
+
  EQUB 97                \ Max. edge count          = (97 - 1) / 4 = 24
  EQUB 0                 \ Gun vertex               = 0
  EQUB 34                \ Explosion count          = 7, as (4 * n) + 6 = 34
@@ -58416,13 +58740,17 @@ ENDIF
  EQUB 10                \ Visibility distance      = 10
  EQUB 114               \ Max. energy              = 114
  EQUB 16                \ Max. speed               = 16
+
  EQUB HI(SHIP_GHAVIAL_EDGES - SHIP_GHAVIAL)        \ Edges data offset (high)
  EQUB HI(SHIP_GHAVIAL_FACES - SHIP_GHAVIAL)        \ Faces data offset (high)
+
  EQUB 0                 \ Normals are scaled by    = 2^0 = 1
  EQUB %00100111         \ Laser power              = 4
                         \ Missiles                 = 7
 
-\          x,    y,    z, face1, face2, face3, face4, visibility
+.SHIP_GHAVIAL_VERTICES
+
+      \    x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX   30,    0,  100,     7,     6,     1,     0,         31     \ Vertex 0
  VERTEX  -30,    0,  100,    11,     6,     5,     0,         31     \ Vertex 1
  VERTEX   40,   30,  -26,     3,     2,     1,     0,         31     \ Vertex 2
@@ -58438,7 +58766,7 @@ ENDIF
 
 .SHIP_GHAVIAL_EDGES
 
-\     vertex1, vertex2, face1, face2, visibility
+    \ vertex1, vertex2, face1, face2, visibility
  EDGE       0,       2,     1,     0,         31    \ Edge 0
  EDGE       4,       2,     2,     1,         31    \ Edge 1
  EDGE       5,       2,     3,     2,         31    \ Edge 2
@@ -58464,7 +58792,7 @@ ENDIF
 
 .SHIP_GHAVIAL_FACES
 
-\     normal_x, normal_y, normal_z, visibility
+    \ normal_x, normal_y, normal_z, visibility
  FACE        0,       62,       14,         31    \ Face 0
  FACE       51,       36,       12,         31    \ Face 1
  FACE       51,       28,      -25,         31    \ Face 2
@@ -58492,8 +58820,10 @@ ENDIF
 
  EQUB 0                 \ Max. canisters on demise = 0
  EQUW 4250              \ Targetable area          = 65.19 * 65.19
+
  EQUB LO(SHIP_BUSHMASTER_EDGES - SHIP_BUSHMASTER)  \ Edges data offset (low)
  EQUB LO(SHIP_BUSHMASTER_FACES - SHIP_BUSHMASTER)  \ Faces data offset (low)
+
  EQUB 81                \ Max. edge count          = (81 - 1) / 4 = 20
  EQUB 0                 \ Gun vertex               = 0
  EQUB 30                \ Explosion count          = 6, as (4 * n) + 6 = 30
@@ -58504,13 +58834,17 @@ ENDIF
  EQUB 20                \ Visibility distance      = 20
  EQUB 74                \ Max. energy              = 74
  EQUB 35                \ Max. speed               = 35
+
  EQUB HI(SHIP_BUSHMASTER_EDGES - SHIP_BUSHMASTER)  \ Edges data offset (high)
  EQUB HI(SHIP_BUSHMASTER_FACES - SHIP_BUSHMASTER)  \ Faces data offset (high)
+
  EQUB 2                 \ Normals are scaled by    = 2^2 = 4
  EQUB %00100001         \ Laser power              = 4
                         \ Missiles                 = 1
 
-\          x,    y,    z, face1, face2, face3, face4, visibility
+.SHIP_BUSHMASTER_VERTICES
+
+      \    x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX    0,    0,   60,     3,     2,     1,     0,         31     \ Vertex 0
  VERTEX   50,    0,   20,     7,     5,     3,     1,         31     \ Vertex 1
  VERTEX  -50,    0,   20,     6,     4,     2,     0,         31     \ Vertex 2
@@ -58526,7 +58860,7 @@ ENDIF
 
 .SHIP_BUSHMASTER_EDGES
 
-\     vertex1, vertex2, face1, face2, visibility
+    \ vertex1, vertex2, face1, face2, visibility
  EDGE       0,       1,     3,     1,         31    \ Edge 0
  EDGE       0,       2,     2,     0,         31    \ Edge 1
  EDGE       0,       3,     1,     0,         31    \ Edge 2
@@ -58549,7 +58883,7 @@ ENDIF
 
 .SHIP_BUSHMASTER_FACES
 
-\     normal_x, normal_y, normal_z, visibility
+    \ normal_x, normal_y, normal_z, visibility
  FACE      -23,       88,       29,         31    \ Face 0
  FACE       23,       88,       29,         31    \ Face 1
  FACE      -14,      -93,       18,         31    \ Face 2
@@ -58574,8 +58908,10 @@ ENDIF
 
  EQUB 2                 \ Max. canisters on demise = 2
  EQUW 6000              \ Targetable area          = 77.46 * 77.46
+
  EQUB LO(SHIP_RATTLER_EDGES - SHIP_RATTLER)        \ Edges data offset (low)
  EQUB LO(SHIP_RATTLER_FACES - SHIP_RATTLER)        \ Faces data offset (low)
+
  EQUB 89                \ Max. edge count          = (89 - 1) / 4 = 22
  EQUB 0                 \ Gun vertex               = 0
  EQUB 42                \ Explosion count          = 9, as (4 * n) + 6 = 42
@@ -58586,13 +58922,17 @@ ENDIF
  EQUB 10                \ Visibility distance      = 10
  EQUB 113               \ Max. energy              = 113
  EQUB 31                \ Max. speed               = 31
+
  EQUB HI(SHIP_RATTLER_EDGES - SHIP_RATTLER)        \ Edges data offset (high)
  EQUB HI(SHIP_RATTLER_FACES - SHIP_RATTLER)        \ Faces data offset (high)
+
  EQUB 1                 \ Normals are scaled by    = 2^1 = 2
  EQUB %00100010         \ Laser power              = 4
                         \ Missiles                 = 2
 
-\          x,    y,    z, face1, face2, face3, face4, visibility
+.SHIP_RATTLER_VERTICES
+
+      \    x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX    0,    0,   60,     9,     8,     3,     2,         31     \ Vertex 0
  VERTEX   40,    0,   40,    10,     9,     4,     3,         31     \ Vertex 1
  VERTEX  -40,    0,   40,     8,     7,     2,     1,         31     \ Vertex 2
@@ -58611,7 +58951,7 @@ ENDIF
 
 .SHIP_RATTLER_EDGES
 
-\     vertex1, vertex2, face1, face2, visibility
+    \ vertex1, vertex2, face1, face2, visibility
  EDGE       4,       6,     6,     0,         31    \ Edge 0
  EDGE       2,       4,     7,     1,         31    \ Edge 1
  EDGE       0,       2,     8,     2,         31    \ Edge 2
@@ -58641,7 +58981,7 @@ ENDIF
 
 .SHIP_RATTLER_FACES
 
-\     normal_x, normal_y, normal_z, visibility
+    \ normal_x, normal_y, normal_z, visibility
  FACE      -26,       92,        6,         31    \ Face 0
  FACE      -23,       92,       11,         31    \ Face 1
  FACE       -9,       93,       18,         31    \ Face 2
@@ -58670,8 +59010,10 @@ ENDIF
 
  EQUB 1                 \ Max. canisters on demise = 1
  EQUW 3500              \ Targetable area          = 59.16 * 59.16
+
  EQUB LO(SHIP_IGUANA_EDGES - SHIP_IGUANA)          \ Edges data offset (low)
  EQUB LO(SHIP_IGUANA_FACES - SHIP_IGUANA)          \ Faces data offset (low)
+
  EQUB 81                \ Max. edge count          = (81 - 1) / 4 = 20
  EQUB 0                 \ Gun vertex               = 0
  EQUB 26                \ Explosion count          = 5, as (4 * n) + 6 = 26
@@ -58682,13 +59024,17 @@ ENDIF
  EQUB 10                \ Visibility distance      = 10
  EQUB 90                \ Max. energy              = 90
  EQUB 33                \ Max. speed               = 33
+
  EQUB HI(SHIP_IGUANA_EDGES - SHIP_IGUANA)          \ Edges data offset (high)
  EQUB HI(SHIP_IGUANA_FACES - SHIP_IGUANA)          \ Faces data offset (high)
+
  EQUB 1                 \ Normals are scaled by    = 2^1 = 2
  EQUB %00100011         \ Laser power              = 4
                         \ Missiles                 = 3
 
-\          x,    y,    z, face1, face2, face3, face4, visibility
+.SHIP_IGUANA_VERTICES
+
+      \    x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX    0,    0,   90,     3,     2,     1,     0,         31     \ Vertex 0
  VERTEX    0,   20,   30,     6,     4,     2,     0,         31     \ Vertex 1
  VERTEX  -40,    0,   10,     5,     4,     1,     0,         31     \ Vertex 2
@@ -58707,7 +59053,7 @@ ENDIF
 
 .SHIP_IGUANA_EDGES
 
-\     vertex1, vertex2, face1, face2, visibility
+    \ vertex1, vertex2, face1, face2, visibility
  EDGE       0,       1,     2,     0,         31    \ Edge 0
  EDGE       0,       2,     1,     0,         31    \ Edge 1
  EDGE       0,       3,     3,     1,         31    \ Edge 2
@@ -58734,7 +59080,7 @@ ENDIF
 
 .SHIP_IGUANA_FACES
 
-\     normal_x, normal_y, normal_z, visibility
+    \ normal_x, normal_y, normal_z, visibility
  FACE      -51,       77,       25,         31    \ Face 0
  FACE      -51,      -77,       25,         31    \ Face 1
  FACE       51,       77,       25,         31    \ Face 2
@@ -58760,8 +59106,10 @@ ENDIF
 
  EQUB 15                \ Max. canisters on demise = 15
  EQUW 50 * 50           \ Targetable area          = 50 * 50
+
  EQUB LO(SHIP_SHUTTLE_MK_2_EDGES - SHIP_SHUTTLE_MK_2) \ Edges data offset (low)
  EQUB LO(SHIP_SHUTTLE_MK_2_FACES - SHIP_SHUTTLE_MK_2) \ Faces data offset (low)
+
  EQUB 89                \ Max. edge count          = (89 - 1) / 4 = 22
  EQUB 0                 \ Gun vertex               = 0
  EQUB 38                \ Explosion count          = 8, as (4 * n) + 6 = 38
@@ -58772,13 +59120,17 @@ ENDIF
  EQUB 10                \ Visibility distance      = 10
  EQUB 32                \ Max. energy              = 32
  EQUB 9                 \ Max. speed               = 9
+
  EQUB HI(SHIP_SHUTTLE_MK_2_EDGES - SHIP_SHUTTLE_MK_2) \ Edges data offset (high)
  EQUB HI(SHIP_SHUTTLE_MK_2_FACES - SHIP_SHUTTLE_MK_2) \ Faces data offset (high)
+
  EQUB 2                 \ Normals are scaled by    = 2^2 = 4
  EQUB %00000000         \ Laser power              = 0
                         \ Missiles                 = 0
 
-\          x,    y,    z, face1, face2, face3, face4, visibility
+.SHIP_SHUTTLE_MK_2_VERTICES
+
+      \    x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX    0,    0,   40,     3,     2,     1,     0,         31     \ Vertex 0
  VERTEX    0,   20,   30,     4,     3,     0,     0,         31     \ Vertex 1
  VERTEX  -20,    0,   30,     5,     1,     0,     0,         31     \ Vertex 2
@@ -58799,7 +59151,7 @@ ENDIF
 
 .SHIP_SHUTTLE_MK_2_EDGES
 
-\     vertex1, vertex2, face1, face2, visibility
+    \ vertex1, vertex2, face1, face2, visibility
  EDGE       0,       2,     1,     0,         31    \ Edge 0
  EDGE       0,       3,     2,     1,         31    \ Edge 1
  EDGE       0,       4,     3,     2,         31    \ Edge 2
@@ -58831,7 +59183,7 @@ ENDIF
 
 .SHIP_SHUTTLE_MK_2_FACES
 
-\     normal_x, normal_y, normal_z, visibility
+    \ normal_x, normal_y, normal_z, visibility
  FACE      -39,       39,       78,         31    \ Face 0
  FACE      -39,      -39,       78,         31    \ Face 1
  FACE       39,      -39,       78,         31    \ Face 2
@@ -58860,8 +59212,10 @@ ENDIF
 
  EQUB 3                 \ Max. canisters on demise = 3
  EQUW 4000              \ Targetable area          = 63.24 * 63.24
+
  EQUB LO(SHIP_CHAMELEON_EDGES - SHIP_CHAMELEON)    \ Edges data offset (low)
  EQUB LO(SHIP_CHAMELEON_FACES - SHIP_CHAMELEON)    \ Faces data offset (low)
+
  EQUB 89                \ Max. edge count          = (89 - 1) / 4 = 22
  EQUB 0                 \ Gun vertex               = 0
  EQUB 26                \ Explosion count          = 5, as (4 * n) + 6 = 26
@@ -58872,13 +59226,17 @@ ENDIF
  EQUB 10                \ Visibility distance      = 10
  EQUB 100               \ Max. energy              = 100
  EQUB 29                \ Max. speed               = 29
+
  EQUB HI(SHIP_CHAMELEON_EDGES - SHIP_CHAMELEON)    \ Edges data offset (high)
  EQUB HI(SHIP_CHAMELEON_FACES - SHIP_CHAMELEON)    \ Faces data offset (high)
+
  EQUB 1                 \ Normals are scaled by    = 2^1 = 2
  EQUB %00100011         \ Laser power              = 4
                         \ Missiles                 = 3
 
-\          x,    y,    z, face1, face2, face3, face4, visibility
+.SHIP_CHAMELEON_VERTICES
+
+      \    x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX  -18,    0,  110,     5,     2,     1,     0,         31     \ Vertex 0
  VERTEX   18,    0,  110,     4,     3,     1,     0,         31     \ Vertex 1
  VERTEX  -40,    0,    0,    11,     8,     5,     2,         31     \ Vertex 2
@@ -58900,7 +59258,7 @@ ENDIF
 
 .SHIP_CHAMELEON_EDGES
 
-\     vertex1, vertex2, face1, face2, visibility
+    \ vertex1, vertex2, face1, face2, visibility
  EDGE       0,       1,     1,     0,         31    \ Edge 0
  EDGE       0,       8,     2,     0,         31    \ Edge 1
  EDGE       0,       9,     5,     1,         31    \ Edge 2
@@ -58933,7 +59291,7 @@ ENDIF
 
 .SHIP_CHAMELEON_FACES
 
-\     normal_x, normal_y, normal_z, visibility
+    \ normal_x, normal_y, normal_z, visibility
  FACE        0,       90,       31,         31    \ Face 0
  FACE        0,      -90,       31,         31    \ Face 1
  FACE      -57,       76,       11,         31    \ Face 2
@@ -59077,14 +59435,14 @@ ENDIF
 \
 \ The NEWB flags are as follows:
 \
-\    * Bit 0: Trader flag (0 = not a trader, 1 = trader)
-\    * Bit 1: Bounty hunter flag (0 = not a bounty hunter, 1 = bounty hunter)
-\    * Bit 2: Hostile flag (0 = not hostile, 1 = hostile)
-\    * Bit 3: Pirate flag (0 = not a pirate, 1 = pirate)
-\    * Bit 4: Docking flag (0 = not docking, 1 = docking)
-\    * Bit 5: Innocent bystander (0 = normal, 1 = innocent bystander)
-\    * Bit 6: Cop flag (0 = not a cop, 1 = cop)
-\    * Bit 7: For spawned ships: ship been scooped or has docked
+\   * Bit 0: Trader flag (0 = not a trader, 1 = trader)
+\   * Bit 1: Bounty hunter flag (0 = not a bounty hunter, 1 = bounty hunter)
+\   * Bit 2: Hostile flag (0 = not hostile, 1 = hostile)
+\   * Bit 3: Pirate flag (0 = not a pirate, 1 = pirate)
+\   * Bit 4: Docking flag (0 = not docking, 1 = docking)
+\   * Bit 5: Innocent bystander (0 = normal, 1 = innocent bystander)
+\   * Bit 6: Cop flag (0 = not a cop, 1 = cop)
+\   * Bit 7: For spawned ships: ship been scooped or has docked
 \
 \ See the deep dive on "Advanced tactics with the NEWB flags" for details of
 \ how this works.
@@ -59149,7 +59507,7 @@ ENDIF
 \       Blueprint position in ship_data
 \       1 = allowed, 0 = not allowed
 \
-\       30        20        10        0         
+\       30        20        10        0
 \       |         |         |         |
 \       v         v         v         v
 \      10987654321098765432109876543210
@@ -59207,12 +59565,12 @@ ENDIF
 \ ------------------------------------------------------------------------------
 \
 \ This table contains ship data that's used when populating the ship blueprint
-\ positions in LSHIPS, and installing a ship into a blueprint position in
+\ positions in LOMOD, and installing a ship into a blueprint position in
 \ install_ship.
 \
 \ Each ship type has four associated bytes, but only the first two are used:
 \
-\   * Byte #0 is used in LSHIPS when populating the ship blueprint positions. It
+\   * Byte #0 is used in LOMOD when populating the ship blueprint positions. It
 \     is the probability (out of 256) of installing this ship into one of the
 \     positions in which it is allowed. So, if the figure is 100 (as it is for
 \     the Mamba and Sidewinder), then the chance of us adding this ship to a

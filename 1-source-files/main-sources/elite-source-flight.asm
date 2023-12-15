@@ -88,6 +88,9 @@
  f8 = &76               \ Internal key number for red key f8 (Status Mode)
  f9 = &77               \ Internal key number for red key f9 (Inventory)
 
+ RE = &23               \ The obfuscation byte used to hide the recursive tokens
+                        \ table from crackers viewing the binary code
+
  QQ18 = &0400           \ The address of the text token table, as set in
                         \ elite-loader.asm
 
@@ -532,7 +535,7 @@
 
 .QQ11
 
- SKIP 1                 \ The number of the current view:
+ SKIP 1                 \ The type of the current view:
                         \
                         \   0   = Space view
                         \   1   = Title screen
@@ -946,8 +949,7 @@
                         \ of universe
                         \
                         \ The number of ships of type X in the local bubble is
-                        \ stored at MANY+X, so the number of Sidewinders is at
-                        \ MANY+1, the number of Mambas is at MANY+2, and so on
+                        \ stored at MANY+X
                         \
                         \ See the deep dive on "Ship blueprints" for a list of
                         \ ship types
@@ -1151,10 +1153,10 @@
                         \ This value is shown in the dashboard's RL indicator,
                         \ and determines the rate at which we are rolling
                         \
-                        \ The value ranges from from 1 to 255 with 128 as the
-                        \ centre point, so 1 means roll is decreasing at the
-                        \ maximum rate, 128 means roll is not changing, and
-                        \ 255 means roll is increasing at the maximum rate
+                        \ The value ranges from 1 to 255 with 128 as the centre
+                        \ point, so 1 means roll is decreasing at the maximum
+                        \ rate, 128 means roll is not changing, and 255 means
+                        \ roll is increasing at the maximum rate
                         \
                         \ This value is updated by "<" and ">" key presses, or
                         \ if joysticks are enabled, from the joystick. If
@@ -1170,10 +1172,10 @@
                         \ This value is shown in the dashboard's DC indicator,
                         \ and determines the rate at which we are pitching
                         \
-                        \ The value ranges from from 1 to 255 with 128 as the
-                        \ centre point, so 1 means pitch is decreasing at the
-                        \ maximum rate, 128 means pitch is not changing, and
-                        \ 255 means pitch is increasing at the maximum rate
+                        \ The value ranges from 1 to 255 with 128 as the centre
+                        \ point, so 1 means pitch is decreasing at the maximum
+                        \ rate, 128 means pitch is not changing, and 255 means
+                        \ pitch is increasing at the maximum rate
                         \
                         \ This value is updated by "S" and "X" key presses, or
                         \ if joysticks are enabled, from the joystick. If
@@ -1181,6 +1183,7 @@
                         \ the value is slowly moved towards the centre value of
                         \ 128 (no pitch) if there are no key presses or joystick
                         \ movement
+
 .XSAV2
 
  SKIP 1                 \ Temporary storage, used for storing the value of the X
@@ -1240,6 +1243,7 @@
                         \
                         \ See the deep dives on "Galaxy and system seeds" and
                         \ "Twisting the system seeds" for more details
+
 .CASH
 
  SKIP 4                 \ Our current cash pot
@@ -1277,7 +1281,7 @@
                         \ stored as galaxy 0 internally
                         \
                         \ The galaxy number increases by one every time a
-                        \ galactic hyperdrive is used, and wraps back round to
+                        \ galactic hyperdrive is used, and wraps back around to
                         \ the start after eight galaxies
 
 .LASER
@@ -1285,10 +1289,10 @@
  SKIP 4                 \ The specifications of the lasers fitted to each of the
                         \ four space views:
                         \
-                        \   * Byte #0 = front view (red key f0)
-                        \   * Byte #1 = rear view (red key f1)
-                        \   * Byte #2 = left view (red key f2)
-                        \   * Byte #3 = right view (red key f3)
+                        \   * Byte #0 = front view
+                        \   * Byte #1 = rear view
+                        \   * Byte #2 = left view
+                        \   * Byte #3 = right view
                         \
                         \ For each of the views:
                         \
@@ -1513,7 +1517,8 @@
                         \   Deadly          = 10 to 24    = 2560 to 6399 kills
                         \   Elite           = 25 and up   = 6400 kills and up
                         \
-                        \ You can see the rating calculation in STATUS
+                        \ You can see the rating calculation in the STATUS
+                        \ subroutine
 
 .SVC
 
@@ -1688,7 +1693,7 @@
  SKIP 2                 \ The distance from the current system to the selected
                         \ system in light years * 10, stored as a 16-bit number
                         \
-                        \ The distance will be 0 if the selected sysyem is the
+                        \ The distance will be 0 if the selected system is the
                         \ current system
                         \
                         \ The galaxy chart is 102.4 light years wide and 51.2
@@ -1831,7 +1836,7 @@
                         \   * 128 = Delta 14B joystick
                         \
                         \ Elite-A doesn't support the Bitstik, but instead it
-                        \ supports the multi-button Volmace Delta 14B joystick,
+                        \ supports the multi-button Voltmace Delta 14B joystick,
                         \ reusing the BSTK variable to determine whether it is
                         \ configured
 
@@ -2192,9 +2197,9 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ JMP scramble          \ Decrypt the main flight code and join the main loop
+\ JMP DEEOR             \ Decrypt the main flight code and join the main loop
 \
-\ JMP scramble          \ Decrypt the main flight code and start a new game
+\ JMP DEEOR             \ Decrypt the main flight code and start a new game
 \
 \ JMP TT26              \ WRCHV is set to point here by elite-loader3.asm
 \
@@ -2260,7 +2265,7 @@
 
 \ ******************************************************************************
 \
-\       Name: scramble, Removed
+\       Name: DEEOR, Removed
 \       Type: Subroutine
 \   Category: Loader
 \    Summary: Decrypt the main flight code between &1300 and &55FF and jump into
@@ -2270,7 +2275,7 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\.scramble
+\.DEEOR
 \
 \ LDY #0                \ We're going to work our way through a large number of
 \                       \ encrypted bytes, so we set Y to 0 to be the index of
@@ -2282,7 +2287,7 @@
 \                       \ byte, so we start the decryption with the first byte
 \                       \ of page &13
 \
-\.scrl
+\.DEEORL
 \
 \ STX SCH               \ Set the high byte of SC(1 0) to X, so SC(1 0) now
 \                       \ points to the first byte of page X
@@ -2304,13 +2309,13 @@
 \
 \ DEY                   \ Decrement the index in Y to point to the next byte
 \
-\ BNE scrl              \ Loop back to scrl to decrypt the next byte until we
+\ BNE DEEORL            \ Loop back to DEEORL to decrypt the next byte until we
 \                       \ have done the whole page
 \
 \ INX                   \ Increment X to point to the next page in memory
 \
-\ CPX #&56              \ Loop back to scrl to decrypt the next page until we
-\ BNE scrl              \ reach the start of page &56
+\ CPX #&56              \ Loop back to DEEORL to decrypt the next page until we
+\ BNE DEEORL            \ reach the start of page &56
 \
 \ JMP RSHIPS            \ Call RSHIPS to launch from the station, load a new set
 \                       \ of ship blueprints and jump into the main game loop
@@ -2457,7 +2462,8 @@
  JSR cntr               \ rate in X creeps towards the centre by 2
 
                         \ The roll rate in JSTX increases if we press ">" (and
-                        \ the RL indicator on the dashboard goes to the right).
+                        \ the RL indicator on the dashboard goes to the right)
+                        \
                         \ This rolls our ship to the right (clockwise), but we
                         \ actually implement this by rolling everything else
                         \ to the left (anti-clockwise), so a positive roll rate
@@ -2785,7 +2791,7 @@
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
 \ LDA KY12              \ If TAB is being pressed, keep going, otherwise jump
-\ BEQ MA76              \ jump down to MA76 to skip the following
+\ BEQ MA76              \ down to MA76 to skip the following
 \
 \ ASL BOMB              \ The "energy bomb" key is being pressed, so double
 \                       \ the value in BOMB. If we have an energy bomb fitted,
@@ -2861,8 +2867,8 @@
  AND ESCP               \ fitted, keep going, otherwise jump to noescp to skip
  BEQ noescp             \ the following instructions
 
- JMP ESCAPE             \ The "launch escape pod" button is being pressed and
-                        \ we have an escape pod fitted, so jump to ESCAPE to
+ JMP ESCAPE             \ The button is being pressed to launch an escape pod
+                        \ and we have an escape pod fitted, so jump to ESCAPE to
                         \ launch it, and exit the main flight loop using a tail
                         \ call
 
@@ -2883,7 +2889,7 @@
                         \ skip the following (as we can't have two E.C.M.
                         \ systems operating at the same time)
 
- DEC ECMP               \ The "E.C.M." button is being pressed and nobody else
+ DEC ECMP               \ The E.C.M. button is being pressed and nobody else
                         \ is operating their E.C.M., so decrease the value of
                         \ ECMP to make it non-zero, to denote that our E.C.M.
                         \ is now on
@@ -2968,10 +2974,9 @@
                         \ otherwise jump down to ma1 to skip the following
                         \ instruction
 
- LDA #0                 \ This is an "always on" laser (i.e. a beam laser,
-                        \ as the cassette version of Elite doesn't have military
-                        \ lasers), so set A = 0, which will be stored in LASCT
-                        \ to denote that this is not a pulsing laser
+ LDA #0                 \ This is an "always on" laser (i.e. a beam laser or a
+                        \ military laser), so set A = 0, which will be stored in
+                        \ LASCT to denote that this is not a pulsing laser
 
 .ma1
 
@@ -3165,7 +3170,7 @@
                         \ do the reverse of the copy we did before, this time
                         \ copying from INWK to INF
 
- LDY #(NI%-1)           \ Set a counter in Y so we can loop through the NI%
+ LDY #NI%-1             \ Set a counter in Y so we can loop through the NI%
                         \ bytes in the ship data block
 
 .MAL3
@@ -3286,12 +3291,12 @@
                         \ scooping checks
 
                         \ Only the Thargon, alloy plate, splinter and escape pod
-                        \ have non-zero upper nibbles in their blueprint byte #0
+                        \ have non-zero high nibbles in their blueprint byte #0
                         \ so if we get here, our ship is one of those, and the
-                        \ upper nibble gives the market item number of the item
+                        \ high nibble gives the market item number of the item
                         \ when scooped, less 1
 
- ADC #1                 \ Add 1 to the upper nibble to get the market item
+ ADC #1                 \ Add 1 to the high nibble to get the market item
                         \ number
 
  BNE slvy2              \ Skip to slvy2 so we scoop the ship as a market item
@@ -3451,6 +3456,9 @@
 
  LDA XX15+2             \ Set A to the z-axis of the vector
 
+                        \ This version of Elite omits check 3 (which would check
+                        \ the sign of the z-axis)
+
  CMP #86                \ 4. If z-axis < 86, jump to MA62 to fail docking, as
  BCC MA62               \ we are not in the 26.3 degree safe cone of approach
 
@@ -3490,7 +3498,7 @@
                         \ --- And replaced by: -------------------------------->
 
  LDA DELTA              \ If the ship's speed is >= 5, jump to n_crunch to
- CMP #5                 \ register a fair emount of damage to our shields (128)
+ CMP #5                 \ register a fair amount of damage to our shields (128)
  BCS n_crunch
 
                         \ Otherwise we have just crashed gently into the
@@ -3515,7 +3523,7 @@
 \   * Continue looping through all the ships in the local bubble, and for each
 \     one:
 \
-\     * Remove scooped item after both successful and failed scoopings
+\     * Remove scooped item after both successful and failed scooping attempts
 \
 \     * Process collisions
 \
@@ -3607,7 +3615,7 @@
 
  JSR OOPS               \ The amount of damage is in A, so call OOPS to reduce
                         \ our shields, and if the shields are gone, there's a
-                        \ a chance of cargo loss or even death
+                        \ chance of cargo loss or even death
 
  JSR EXNO3              \ Make the sound of colliding with the other ship and
                         \ fall through into MA26 to try targeting a missile
@@ -3767,7 +3775,7 @@
  CMP new_mining         \ then our current laser strength in LAS will match the
  BNE nosp               \ strength of mining lasers when fitted to our current
                         \ ship type, which is stored in new_mining. If they
-                        \ don't match, which means we didn't use minig lasers,
+                        \ don't match, which means we didn't use mining lasers,
                         \ then jump to nosp, otherwise keep going
 
                         \ --- End of replacement ------------------------------>
@@ -3779,7 +3787,7 @@
  AND #3                 \ Reduce the random number in A to the range 0-3
 
  JSR SPIN2              \ Call SPIN2 to spawn A items of type X (i.e. spawn
-                        \ 0-3 spliters)
+                        \ 0-3 splinters)
 
 .nosp
 
@@ -4026,7 +4034,7 @@
                         \ a positive number, so having the C flag set indicates
                         \ that the subtraction didn't underflow - in other words
                         \ the damage isn't greater than the energy levels, and
-                        \ the ship has survuved the hit. In this case we jump to
+                        \ the ship has survived the hit. In this case we jump to
                         \ n_kill with the C flag set to indicate that the ship
                         \ has survived the attack
 
@@ -4152,6 +4160,7 @@
 \  Deep dive: Program flow of the main game loop
 \             Scheduling tasks with the main loop counter
 \             Ship data blocks
+\             The space station safe zone
 \
 \ ------------------------------------------------------------------------------
 \
@@ -4169,7 +4178,7 @@
 
  LDA MCNT               \ Fetch the main loop counter and calculate MCNT mod 32,
  AND #31                \ jumping to MA93 if it is on-zero (so the following
- BNE MA93               \ code only runs every 32 iterations of the main loop
+ BNE MA93               \ code only runs every 32 iterations of the main loop)
 
  LDA SSPR               \ If we are inside the space station safe zone, jump to
  BNE MA23S              \ MA23S to skip the following, as we already have a
@@ -4209,10 +4218,26 @@
                         \ first 28 bytes of K% to INWK
 
                         \ We now check the distance from our ship (at the
-                        \ origin) towards the planet's surface, by adding the
-                        \ planet's nosev vector to the planet's centre at
-                        \ (x, y, z) and checking our distance to the end
-                        \ point along the relevant axis
+                        \ origin) towards the point where we will spawn the
+                        \ space station if we are close enough
+                        \
+                        \ This point is calculated by starting at the planet's
+                        \ centre and adding 2 * nosev, which takes us to a point
+                        \ above the planet's surface, at an altitude that
+                        \ matches the planet's radius
+                        \
+                        \ This point pitches and rolls around the planet as the
+                        \ nosev vector rotates with the planet, and if our ship
+                        \ is within a distance of (192 0) from this point in all
+                        \ three axes, then we spawn the space station at this
+                        \ point, with the station's slot facing towards the
+                        \ planet, along the nosev vector
+                        \
+                        \ This works because in the following, we calculate the
+                        \ station's coordinates one axis at a time, and store
+                        \ the results in the INWK block, so by the time we have
+                        \ calculated and checked all three, the ship data block
+                        \ is set up with the correct spawning coordinates
 
  INX                    \ Set X = 0 (as we ended the above loop with X as &FF)
 
@@ -4220,7 +4245,7 @@
  JSR MAS1               \
                         \   (x_sign x_hi x_lo) += (nosev_x_hi nosev_x_lo) * 2
                         \
-                        \   A = |x_hi|
+                        \   A = |x_sign|
 
  BNE MA23S              \ If A > 0, jump to MA23S to skip the following, as we
                         \ are too far from the planet in the x-direction to
@@ -4230,7 +4255,7 @@
  LDY #11                \
  JSR MAS1               \   (y_sign y_hi y_lo) += (nosev_y_hi nosev_y_lo) * 2
                         \
-                        \   A = |y_hi|
+                        \   A = |y_sign|
 
  BNE MA23S              \ If A > 0, jump to MA23S to skip the following, as we
                         \ are too far from the planet in the y-direction to
@@ -4240,7 +4265,7 @@
  LDY #13                \
  JSR MAS1               \   (z_sign z_hi z_lo) += (nosev_z_hi nosev_z_lo) * 2
                         \
-                        \   A = |z_hi|
+                        \   A = |z_sign|
 
  BNE MA23S              \ If A > 0, jump to MA23S to skip the following, as we
                         \ are too far from the planet in the z-direction to
@@ -4284,7 +4309,7 @@
 \   * Perform an altitude check with the planet (every 32 iterations of the main
 \     loop, on iteration 10 of each 32)
 \
-\   * Perform an an altitude check with the sun and process fuel scooping (every
+\   * Perform an altitude check with the sun and process fuel scooping (every
 \     32 iterations of the main loop, on iteration 20 of each 32)
 \
 \ ******************************************************************************
@@ -4428,8 +4453,8 @@
  BCS MA28               \ If the C flag is set then jump to MA28 to die, as
                         \ our temperature is off the scale
 
- CMP #&E0               \ If the cabin temperature < 224 then jump to MA23 to
- BCC MA23               \ to skip fuel scooping, as we aren't close enough
+ CMP #224               \ If the cabin temperature < 224 then jump to MA23 to
+ BCC MA23               \ skip fuel scooping, as we aren't close enough
 
  LDA BST                \ If we don't have fuel scoops fitted, jump to BA23 to
  BEQ MA23               \ skip fuel scooping, as we can't scoop without fuel
@@ -4501,10 +4526,10 @@
 
  LDA LASCT              \ If LASCT >= 8, jump to MA16 to skip the following, so
  CMP #8                 \ for a pulse laser with a LASCT between 8 and 10, the
- BCS MA16               \ the laser stays on, but for a LASCT of 7 or less it
-                        \ gets turned off and stays off until LASCT reaches zero
-                        \ and the next pulse can start (if the fire button is
-                        \ still being pressed)
+ BCS MA16               \ laser stays on, but for a LASCT of 7 or less it gets
+                        \ turned off and stays off until LASCT reaches zero and
+                        \ the next pulse can start (if the fire button is still
+                        \ being pressed)
                         \
                         \ For pulse lasers, LASCT gets set to 10 in ma1 above,
                         \ and it decrements every vertical sync (50 times a
@@ -4537,7 +4562,7 @@
 
 .MA69
 
- LDA ECMA               \ If an E.C.M is going off (our's or an opponent's) then
+ LDA ECMA               \ If an E.C.M is going off (ours or an opponent's) then
  BEQ MA66               \ keep going, otherwise skip to MA66
 
  DEC ECMA               \ Decrement the E.C.M. countdown timer, and if it has
@@ -4796,7 +4821,7 @@
 
 .LL30
 
- SKIP 0                 \ LL30 is a synomym for LOIN
+ SKIP 0                 \ LL30 is a synonym for LOIN
                         \
                         \ In the cassette and disc versions of Elite, LL30 and
                         \ LOIN are synonyms for the same routine, presumably
@@ -5036,7 +5061,7 @@
                         \ line that goes right and up or left and down joins a
                         \ line with any of the other three types of slope
                         \
-                        \ This bug was fixed in the advanced versions of ELite,
+                        \ This bug was fixed in the advanced versions of Elite,
                         \ where the BNE is replaced by a BEQ to bring it in line
                         \ with the other three slopes
 
@@ -5539,7 +5564,7 @@
 \       Name: NLIN3
 \       Type: Subroutine
 \   Category: Drawing lines
-\    Summary: Print a title and a horizontal line at row 19 to box it in
+\    Summary: Print a title and draw a horizontal line at row 19 to box it in
 \
 \ ------------------------------------------------------------------------------
 \
@@ -5687,6 +5712,7 @@
 \       Type: Subroutine
 \   Category: Drawing lines
 \    Summary: Draw a horizontal line from (X1, Y1) to (X2, Y1)
+\  Deep dive: Drawing monochrome pixels in mode 4
 \
 \ ------------------------------------------------------------------------------
 \
@@ -5755,11 +5781,11 @@
 .HL1
 
  TXA                    \ Set T = bits 3-7 of X1, which will contain the
- AND #%11111000         \ the character number of the start of the line * 8
+ AND #%11111000         \ character number of the start of the line * 8
  STA T
 
  LDA X2                 \ Set A = bits 3-7 of X2, which will contain the
- AND #%11111000         \ the character number of the end of the line * 8
+ AND #%11111000         \ character number of the end of the line * 8
 
  SEC                    \ Set A = A - T, which will contain the number of
  SBC T                  \ character blocks we need to fill - 1 * 8
@@ -5877,8 +5903,9 @@
                         \   A       = %11111100
                         \   T AND A = %00111100
                         \
-                        \ so if we stick T AND A in screen memory, that's what
-                        \ we do here, setting A = A AND T
+                        \ So we can stick T AND A in screen memory to get the
+                        \ line we want, which is what we do here by setting
+                        \ A = A AND T
 
  EOR (SC),Y             \ Store our horizontal line byte into screen memory at
  STA (SC),Y             \ SC(1 0), using EOR logic so it merges with whatever is
@@ -6059,13 +6086,15 @@
                         \ to skip the following negation
 
  EOR #%01111111         \ The x-coordinate offset is negative, so flip all the
- CLC                    \ bits apart from the sign bit and add 1, to negate
- ADC #1                 \ it to a positive number, i.e. A is now |X1|
+ CLC                    \ bits apart from the sign bit and add 1, to convert it
+ ADC #1                 \ from a sign-magnitude number to a signed number
 
 .PX1
 
- EOR #%10000000         \ Set X = -|A|
- TAX                    \       = -|X1|
+ EOR #%10000000         \ Set X = X1 + 128
+ TAX                    \
+                        \ So X is now the offset converted to an x-coordinate,
+                        \ centred on x-coordinate 128
 
  LDA Y1                 \ Fetch the y-coordinate offset into A and clear the
  AND #%01111111         \ sign bit, so A = |Y1|
@@ -6085,11 +6114,11 @@
 
 .PX2
 
- STA T                  \ Set A = 97 - A
- LDA #97                \       = 97 - |Y1|
- SBC T                  \
-                        \ so if Y is positive we display the point up from the
-                        \ centre, while a negative Y means down from the centre
+ STA T                  \ Set A = 97 - Y1
+ LDA #97                \
+ SBC T                  \ So if Y is positive we display the point up from the
+                        \ centre at y-coordinate 97, while a negative Y means
+                        \ down from the centre
 
                         \ Fall through into PIXEL to draw the stardust at the
                         \ screen coordinates in (X, A)
@@ -6747,8 +6776,8 @@
 
  STA XX+1               \ Store the high byte A in XX+1
 
- TXA
- STA SXL,Y              \ Store the low byte X in x_lo
+ TXA                    \ Store the low byte X in x_lo
+ STA SXL,Y
 
                         \ So (XX+1 x_lo) now contains:
                         \
@@ -6793,7 +6822,7 @@
 
  AND #%01111111         \ If |x_hi| >= 120 then jump to KILL1 to recycle this
  CMP #120               \ particle, as it's gone off the side of the screen,
- BCS KILL1              \ and re-join at STC1 with the new particle
+ BCS KILL1              \ and rejoin at STC1 with the new particle
 
  LDA YY+1               \ Set Y1 and y_hi to the high byte of YY in YY+1, so
  STA SY,Y               \ the new x-coordinate is in (y_hi y_lo) and the high
@@ -6801,11 +6830,11 @@
 
  AND #%01111111         \ If |y_hi| >= 120 then jump to KILL1 to recycle this
  CMP #120               \ particle, as it's gone off the top or bottom of the
- BCS KILL1              \ screen, and re-join at STC1 with the new particle
+ BCS KILL1              \ screen, and rejoin at STC1 with the new particle
 
  LDA SZ,Y               \ If z_hi < 16 then jump to KILL1 to recycle this
  CMP #16                \ particle, as it's so close that it's effectively gone
- BCC KILL1              \ past us, and re-join at STC1 with the new particle
+ BCC KILL1              \ past us, and rejoin at STC1 with the new particle
 
  STA ZZ                 \ Set ZZ to the z-coordinate in z_hi
 
@@ -7089,8 +7118,8 @@
 
  STA XX+1               \ Store the high byte A in XX+1
 
- TXA
- STA SXL,Y              \ Store the low byte X in x_lo
+ TXA                    \ Store the low byte X in x_lo
+ STA SXL,Y
 
                         \ So (XX+1 x_lo) now contains:
                         \
@@ -7136,11 +7165,11 @@
 
  AND #%01111111         \ If |y_hi| >= 110 then jump to KILL6 to recycle this
  CMP #110               \ particle, as it's gone off the top or bottom of the
- BCS KILL6              \ screen, and re-join at STC6 with the new particle
+ BCS KILL6              \ screen, and rejoin at STC6 with the new particle
 
  LDA SZ,Y               \ If z_hi >= 160 then jump to KILL6 to recycle this
  CMP #160               \ particle, as it's so far away that it's too far to
- BCS KILL6              \ see, and re-join at STC1 with the new particle
+ BCS KILL6              \ see, and rejoin at STC1 with the new particle
 
  STA ZZ                 \ Set ZZ to the z-coordinate in z_hi
 
@@ -7230,6 +7259,7 @@
 \       Type: Subroutine
 \   Category: Maths (Geometry)
 \    Summary: Add an orientation vector coordinate to an INWK coordinate
+\  Deep dive: The space station safe zone
 \
 \ ------------------------------------------------------------------------------
 \
@@ -7262,8 +7292,8 @@
 \
 \ Returns:
 \
-\   A                   The high byte of the result with the sign cleared (e.g.
-\                       |x_hi| if X = 0, etc.)
+\   A                   The highest byte of the result with the sign cleared
+\                       (e.g. |x_sign| when X = 0, etc.)
 \
 \ Other entry points:
 \
@@ -7293,7 +7323,8 @@
  LDY K+2
  STY INWK+1,X
 
- AND #%01111111         \ Set A to the sign byte with the sign cleared
+ AND #%01111111         \ Set A to the sign byte with the sign cleared,
+                        \ i.e. |x_sign| when X = 0
 
 .MA9
 
@@ -7426,6 +7457,8 @@
 \    Summary: Show the Status Mode screen (red key f8)
 \  Deep dive: Combat rank
 \
+\ ------------------------------------------------------------------------------
+\
 \ Other entry points:
 \
 \   sell_equip          Show the Sell Equipment screen, i.e. show a "Sell(Y/N)?"
@@ -7507,8 +7540,8 @@
  LDX FRIN+2,Y           \ The ship slots at FRIN are ordered with the first two
                         \ slots reserved for the planet and sun/space station,
                         \ and then any ships, so if the slot at FRIN+2+Y is not
-                        \ empty (i.e is non-zero), then that means the number of
-                        \ non-asteroids in the vicinity is at least 1
+                        \ empty (i.e. is non-zero), then that means the number
+                        \ of non-asteroids in the vicinity is at least 1
 
  BEQ st6                \ So if X = 0, there are no ships in the vicinity, so
                         \ jump to st6 to print "Green" for our ship's condition
@@ -7557,8 +7590,8 @@
  JSR plf                \ Print the text token in A (which contains our legal
                         \ status) followed by a newline
 
- LDA #16                \ Print recursive token 130 ("RATING:")
- JSR spc
+ LDA #16                \ Print recursive token 130 ("RATING:") followed by a
+ JSR spc                \ space
 
  LDA TALLY+1            \ Fetch the high byte of the kill tally, and if it is
  BNE st4                \ not zero, then we have more than 256 kills, so jump
@@ -7647,7 +7680,7 @@
  LDA BST                \ If we don't have fuel scoops fitted, skip the
  BEQ P%+7               \ following two instructions
 
- LDA #111               \ We do have a fuel scoops fitted, so print recursive
+ LDA #111               \ We do have fuel scoops fitted, so print recursive
  JSR plf2               \ token 111 ("FUEL SCOOPS"), followed by a newline and
                         \ an indent of 6 characters
 
@@ -7764,8 +7797,8 @@
  LDA #118               \ This sets A = 118 if the laser in view X is a mining
                         \ laser (token 118 is "MINING  LASER")
 
- JSR plf2               \ Print the text token in A (which contains our legal
-                        \ status) followed by a newline and an indent of 6
+ JSR plf2               \ Print the text token in A (which contains the laser
+                        \ type) followed by a newline and an indent of 6
                         \ characters
 
 .st1
@@ -8569,7 +8602,7 @@
 \
 \ ------------------------------------------------------------------------------
 \
-\ This is the standard system beep as made by the VDU 7 statement in BBC BASIC.
+\ This is the standard system beep, as made by the ASCII 7 "BELL" control code.
 \
 \ ******************************************************************************
 
@@ -8851,7 +8884,7 @@
                         \ contents, then it's reversible (so reprinting the
                         \ same character in the same place will revert the
                         \ screen to what it looked like before we printed
-                        \ anything); this means that printing a white pixel on
+                        \ anything); this means that printing a white pixel
                         \ onto a white background results in a black pixel, but
                         \ that's a small price to pay for easily erasable text
 
@@ -9605,7 +9638,7 @@
 \ STA INWK+27
 \
 \ LDA #194              \ Set the Cobra's byte #30 (pitch counter) to 194, so it
-\ STA INWK+30           \ pitches as we pull away
+\ STA INWK+30           \ pitches up as we pull away
 \
 \ LSR A                 \ Set the Cobra's byte #32 (AI flag) to %01100001, so it
 \ STA INWK+32           \ has no AI, and we can use this value as a counter to
@@ -9624,7 +9657,7 @@
  STA INWK+27
 
  LDA #194               \ Set the escape pod's byte #30 (pitch counter) to 194,
- STA INWK+30            \ so it pitches as we pull away
+ STA INWK+30            \ so it pitches up as we pull away
 
  LSR A                  \ Set the escape pod's byte #32 (AI flag) to %01100001,
  STA INWK+32            \ so it has no AI, and we can use this value as a
@@ -9771,6 +9804,11 @@
 \   * If it has reached its target and the target is a ship, destroy the missile
 \     and the ship, potentially damaging us if we are nearby
 \
+\ Other entry points:
+\
+\   TA87+3              Set bit 7 of the ship's byte #31, which marks the ship
+\                       as being killed, and return from the subroutine
+\
 \ ******************************************************************************
 
 .TA34
@@ -9811,7 +9849,7 @@
                         \ This is the entry point for missile tactics and is
                         \ called from the main TACTICS routine below
 
- LDA ECMA               \ If an E.C.M. is currently active (either our's or an
+ LDA ECMA               \ If an E.C.M. is currently active (either ours or an
  BNE TA35               \ opponent's), jump to TA35 to destroy this missile
 
  LDA INWK+32            \ Fetch the AI flag from byte #32 and if bit 6 is set
@@ -10157,7 +10195,7 @@
 \     really bad (i.e. a fugitive or serious offender), the ship becomes hostile
 \     (if it isn't already)
 \
-\   * If the ship is not hostile, then either perform docking manouevres (if
+\   * If the ship is not hostile, then either perform docking manoeuvres (if
 \     it's docking) or fly towards the planet (if it isn't docking) and we're
 \     done
 \
@@ -10469,7 +10507,7 @@
  BCS TA3                \ with higher numbers of missiles, jump to TA3 to skip
                         \ firing a missile
 
- LDA ECMA               \ If an E.C.M. is currently active (either our's or an
+ LDA ECMA               \ If an E.C.M. is currently active (either ours or an
  BNE TA3                \ opponent's), jump to TA3 to skip firing a missile
 
  DEC INWK+31            \ We're done with the checks, so it's time to fire off a
@@ -10567,6 +10605,7 @@
 
  CPX #163               \ If X < 163, i.e. X > -35, then we are not in the enemy
  BCC TA4                \ ship's crosshairs, so jump to TA4 to skip the laser
+                        \ checks
 
  LDA (XX0),Y            \ Fetch the enemy ship's byte #19 from their ship's
                         \ blueprint into A
@@ -10594,7 +10633,7 @@
 
  DEC INWK+28            \ Halve the attacking ship's acceleration in byte #28
 
- LDA ECMA               \ If an E.C.M. is currently active (either our's or an
+ LDA ECMA               \ If an E.C.M. is currently active (either ours or an
  BNE TA9-1              \ opponent's), return from the subroutine without making
                         \ the laser-strike sound (as TA9-1 contains an RTS)
 
@@ -10626,6 +10665,8 @@
 \
 \   TA151               Make the ship head towards the planet
 \
+\   TA9-1               Contains an RTS
+\
 \ ******************************************************************************
 
 .TA4
@@ -10647,18 +10688,23 @@
 
  JSR DORND              \ Set A and X to random numbers
 
- ORA #%10000000         \ Set bit 7 of A
+ ORA #%10000000         \ Set bit 7 of A, so A is at least 128
 
  CMP INWK+32            \ If A >= byte #32 (the ship's AI flag) then jump down
  BCS TA15               \ to TA15 so it heads away from us
 
                         \ We get here if A < byte #32, and the chances of this
-                        \ being true are greater with high values of byte #32.
+                        \ being true are greater with high values of byte #32,
+                        \ as long as they are at least 128
+                        \
                         \ In other words, higher byte #32 values increase the
                         \ chances of a ship changing direction to head towards
                         \ us - or, to put it another way, ships with higher
-                        \ byte #32 values are spoiling for a fight. Thargoids
-                        \ have byte #32 set to 255, which explains an awful lot
+                        \ byte #32 values of 128 or more are spoiling for a
+                        \ fight
+                        \
+                        \ Thargoids have byte #32 set to 255, which explains
+                        \ an awful lot
 
 .TA20
 
@@ -10995,10 +11041,11 @@
 
  BMI PH3                \ If bit 7 is set, then that means the ship type was set
                         \ to -96 in the DOKEY routine when we switched on our
-                        \ docking compter, so this is us auto-docking our Cobra,
-                        \ so jump to PH3 to refine our approach. Otherwise this
-                        \ is an NPC trying to dock, so turn away from the
-                        \ station
+                        \ docking computer, so this is us auto-docking our
+                        \ Cobra, so jump to PH3 to refine our approach
+                        \
+                        \ Otherwise this is an NPC trying to dock, so keep going
+                        \ to turn away from the station
 
 .PH2
 
@@ -11007,7 +11054,7 @@
                         \ attempt
 
  JSR TAS6               \ Call TAS6 to negate the vector in XX15 so it points in
-                        \ the opposite direction, away from from the station and
+                        \ the opposite direction, away from the station and
                         \ towards the ship
 
  JSR TA151              \ Call TA151 to make the ship head in the direction of
@@ -11062,8 +11109,8 @@
 
  INC INWK+28            \ Increment the acceleration in byte #28
 
- LDA #%01111111         \ Set the roll counter to a positive roll with no
- STA INWK+29            \ damping, to match the space station's roll
+ LDA #%01111111         \ Set the roll counter to a positive (clockwise) roll
+ STA INWK+29            \ with no damping, to match the space station's roll
 
  BNE TN13               \ Jump down to TN13 (this BNE is effectively a JMP as
                         \ A will never be zero)
@@ -11919,7 +11966,7 @@
  STA (INF),Y
 
  ASL A                  \ Set the ship's byte #30 (pitch counter) to 4, so it
- LDY #30                \ starts pitching
+ LDY #30                \ starts diving
  STA (INF),Y
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
@@ -12167,9 +12214,9 @@
  STA INWK+27
 
  LDA #&FF               \ Set the child's byte #29 (roll counter) to a full
- ROR A                  \ roll, so the canister tumbles through space, with
- STA INWK+29            \ damping randomly enabled or disabled, depending on the
-                        \ C flag from above
+ ROR A                  \ roll with no damping (as bits 0 to 6 are set), so the
+ STA INWK+29            \ canister tumbles through space, with the direction in
+                        \ bit 7 set randomly, depending on the C flag from above
 
  PLA                    \ Retrieve the child's ship type from the stack
 
@@ -12601,8 +12648,8 @@
 
  STA XX+1               \ Store the high byte A in XX+1
 
- TXA
- STA SXL,Y              \ Store the low byte X in x_lo
+ TXA                    \ Store the low byte X in x_lo
+ STA SXL,Y
 
                         \ So (XX+1 x_lo) now contains result 5 above:
                         \
@@ -12654,7 +12701,7 @@
 
  AND #%01111111         \ If |x_hi| >= 116 then jump to KILL2 to recycle this
  CMP #116               \ particle, as it's gone off the side of the screen,
- BCS KILL2              \ and re-join at STC2 with the new particle
+ BCS KILL2              \ and rejoin at STC2 with the new particle
 
  LDA YY+1               \ Set Y1 and y_hi to the high byte of YY in YY+1, so
  STA SY,Y               \ the new x-coordinate is in (y_hi y_lo) and the high
@@ -12662,7 +12709,7 @@
 
  AND #%01111111         \ If |y_hi| >= 116 then jump to ST5 to recycle this
  CMP #116               \ particle, as it's gone off the top or bottom of the
- BCS ST5                \ screen, and re-join at STC2 with the new particle
+ BCS ST5                \ screen, and rejoin at STC2 with the new particle
 
 .STC2
 
@@ -12751,7 +12798,7 @@
 \       Name: MU5
 \       Type: Subroutine
 \   Category: Maths (Arithmetic)
-\    Summary: Set K(3 2 1 0) = (A A A A) and clear the C flGag
+\    Summary: Set K(3 2 1 0) = (A A A A) and clear the C flag
 \
 \ ------------------------------------------------------------------------------
 \
@@ -13415,7 +13462,7 @@
 \       Name: Unused duplicate of MULTU
 \       Type: Subroutine
 \   Category: Maths (Arithmetic)
-\    Summary: Unused duplicate of the MULTU routine
+\    Summary: An unused duplicate of the MULTU routine
 \
 \ ------------------------------------------------------------------------------
 \
@@ -13578,7 +13625,7 @@
 \       Name: MUT3, Removed
 \       Type: Subroutine
 \   Category: Maths (Arithmetic)
-\    Summary: Unused routine that does the same as MUT2
+\    Summary: An unused routine that does the same as MUT2
 \
 \ ------------------------------------------------------------------------------
 \
@@ -13736,7 +13783,7 @@
  JSR MULT1              \ Set (A P) = Q * A
 
  STA S                  \ Set (S R) = (A P)
- LDA P
+ LDA P                  \           = Q * A
  STA R
 
  RTS                    \ Return from the subroutine
@@ -13881,7 +13928,7 @@
 
  ORA T                  \ If argument A was negative (and therefore S was also
                         \ negative) then make sure result A is negative by
-                        \ OR-ing the result with the sign bit from argument A
+                        \ OR'ing the result with the sign bit from argument A
                         \ (which we stored in T)
 
  RTS                    \ Return from the subroutine
@@ -13908,9 +13955,8 @@
 
                         \ At this point we have |A P| - |S R| in (A X), so we
                         \ need to check whether the subtraction above was the
-                        \ the right way round (i.e. that we subtracted the
-                        \ smaller absolute value from the larger absolute
-                        \ value)
+                        \ right way round (i.e. that we subtracted the smaller
+                        \ absolute value from the larger absolute value)
 
  BCS MU9                \ If |A| >= |S|, our subtraction was the right way
                         \ round, so jump to MU9 to set the sign
@@ -13931,7 +13977,7 @@
                         \ the correct addition)
 
  LDA #0                 \ Set A = 0 - A, which we can do this time using a
- SBC U                  \ a subtraction with the C flag clear
+ SBC U                  \ subtraction with the C flag clear
 
  ORA #%10000000         \ We now set the sign bit of A, so that the EOR on the
                         \ next line will give the result the opposite sign to
@@ -15561,7 +15607,7 @@
                         \ section
 
  LDA #193               \ Print recursive token 33 ("GROSS PRODUCTIVITY"),
- JSR TT68               \ followed by colon
+ JSR TT68               \ followed by a colon
 
  LDX QQ7                \ Fetch the 16-bit productivity value from QQ7 into
  LDY QQ7+1              \ (Y X)
@@ -15959,7 +16005,7 @@
  BCC TT87               \ won't spill out of the bottom of the screen
 
  LDX QQ11               \ A >= 152, so we need to check whether this will fit in
-                        \ this view, so fetch the view number
+                        \ this view, so fetch the view type
 
  BMI TT87               \ If this is the Short-range Chart then the y-coordinate
                         \ is fine, so skip to TT87
@@ -16119,7 +16165,7 @@
 \
 \       Name: TT210
 \       Type: Subroutine
-\   Category: Inventory
+\   Category: Market
 \    Summary: Show a list of current cargo in our hold, optionally to sell
 \
 \ ------------------------------------------------------------------------------
@@ -16210,7 +16256,7 @@
 \
 \       Name: TT213
 \       Type: Subroutine
-\   Category: Inventory
+\   Category: Market
 \    Summary: Show the Inventory screen (red key f9)
 \
 \ ******************************************************************************
@@ -16973,7 +17019,7 @@
 
 .TT137
 
- LDA QQ19,X             \ Copy the X-th byte in QQ19 to the X-th byte in QQ15,
+ LDA QQ19,X             \ Copy the X-th byte in QQ19 to the X-th byte in QQ15
  STA QQ15,X
 
  DEX                    \ Decrement the counter
@@ -17241,9 +17287,9 @@
 .wW
 
  LDA #15                \ The hyperspace countdown starts from 15, so set A to
-                        \ to 15 so we can set the two hyperspace counters
+                        \ 15 so we can set the two hyperspace counters
 
- STA QQ22+1             \ Set the number in QQ22+1 to 15, which is the number
+ STA QQ22+1             \ Set the number in QQ22+1 to A, which is the number
                         \ that's shown on-screen during the hyperspace countdown
 
  STA QQ22               \ Set the number in QQ22 to 15, which is the internal
@@ -17699,7 +17745,8 @@
 
  JMP TT152              \ Print the unit ("t", "kg" or "g") for the market item,
                         \ with a following space if required to make it two
-                        \ characters long
+                        \ characters long, and return from the subroutine using
+                        \ a tail call
 
 .TT172
 
@@ -18354,7 +18401,7 @@
                         \ and set up data blocks and slots for the planet and
                         \ sun
 
- JSR LSHIPS             \ Call LSHIPS to load a new ship blueprints file
+ JSR LOMOD              \ Call LOMOD to load a new ship blueprints file
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
@@ -18441,7 +18488,7 @@
 
  STA FIST               \ Update our legal status with the new value
 
- LDA #255               \ Set the view number in QQ11 to 255
+ LDA #255               \ Set the view type in QQ11 to 255
  STA QQ11
 
  JSR HFS1               \ Call HFS1 to draw 8 concentric rings to remove the
@@ -18695,7 +18742,7 @@
 
 .cpl
 
- LDX #5                 \ First we need to backup the seeds in QQ15, so set up
+ LDX #5                 \ First we need to back up the seeds in QQ15, so set up
                         \ a counter in X to cover three 16-bit seeds (i.e.
                         \ 6 bytes)
 
@@ -18706,7 +18753,7 @@
 
  DEX                    \ Decrement the loop counter
 
- BPL TT53               \ Loop back for the next byte to backup
+ BPL TT53               \ Loop back for the next byte to back up
 
  LDY #3                 \ Step 1: Now that the seeds are backed up, we can
                         \ start the name-generation process. We will either
@@ -19041,8 +19088,7 @@
 \ ------------------------------------------------------------------------------
 \
 \ Print a text token (i.e. a character, control code, two-letter token or
-\ recursive token). See variable QQ18 for a discussion of the token system
-\ used in Elite.
+\ recursive token).
 \
 \ Arguments:
 \
@@ -19065,29 +19111,36 @@
                         \ value of the token
 
  BEQ csh                \ If token = 0, this is control code 0 (current amount
-                        \ of cash and newline), so jump to csh
+                        \ of cash and newline), so jump to csh to print the
+                        \ amount of cash and return from the subroutine using
+                        \ a tail call
 
  BMI TT43               \ If token > 127, this is either a two-letter token
                         \ (128-159) or a recursive token (160-255), so jump
                         \ to TT43 to process tokens
 
  DEX                    \ If token = 1, this is control code 1 (current galaxy
- BEQ tal                \ number), so jump to tal
+ BEQ tal                \ number), so jump to tal to print the galaxy number and
+                        \ return from the subroutine using a tail call
 
  DEX                    \ If token = 2, this is control code 2 (current system
- BEQ ypl                \ name), so jump to ypl
+ BEQ ypl                \ name), so jump to ypl to print the current system name
+                        \ and return from the subroutine using a tail call
 
  DEX                    \ If token > 3, skip the following instruction
  BNE P%+5
 
  JMP cpl                \ This token is control code 3 (selected system name)
-                        \ so jump to cpl
+                        \ so jump to cpl to print the selected system name
+                        \ and return from the subroutine using a tail call
 
  DEX                    \ If token = 4, this is control code 4 (commander
- BEQ cmn                \ name), so jump to cmm
+ BEQ cmn                \ name), so jump to cmm to print the commander name
+                        \ and return from the subroutine using a tail call
 
  DEX                    \ If token = 5, this is control code 5 (fuel, newline,
- BEQ fwl                \ cash, newline), so jump to fwl
+ BEQ fwl                \ cash, newline), so jump to fwl to print the fuel level
+                        \ and return from the subroutine using a tail call
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
@@ -19227,7 +19280,7 @@
                         \ character's case
 
  ADC #32                \ Add 32 to the character, to convert it from upper to
-                        \ to lower case
+                        \ lower case
 
 .TT44
 
@@ -19246,7 +19299,7 @@
 \
 \   * If QQ17 bit 6 is set, print lower case (via TT45)
 \
-\   * If QQ17 bit 6 clear, then:
+\   * If QQ17 bit 6 is clear, then:
 \
 \       * If character is punctuation, just print it
 \
@@ -19522,19 +19575,18 @@
 \       Type: Subroutine
 \   Category: Text
 \    Summary: Print a recursive token
+\  Deep dive: Printing text tokens
 \
 \ ------------------------------------------------------------------------------
 \
-\ This routine works its way through the recursive tokens that are stored in
-\ tokenised form in memory at &0400 to &06FF, and when it finds token number A,
+\ This routine works its way through the recursive text tokens that are stored
+\ in tokenised form in the table at QQ18, and when it finds token number A,
 \ it prints it. Tokens are null-terminated in memory and fill three pages,
 \ but there is no lookup table as that would consume too much memory, so the
 \ only way to find the correct token is to start at the beginning and look
 \ through the table byte by byte, counting tokens as we go until we are in the
 \ right place. This approach might not be terribly speed efficient, but it is
 \ certainly memory-efficient.
-\
-\ For details of the tokenisation system, see variable QQ18.
 \
 \ Arguments:
 \
@@ -19588,7 +19640,7 @@
  BEQ TT49               \ If the character is null, we've reached the end of
                         \ this token, so jump to TT49
 
- INY                    \ Increment character pointer and loop back round for
+ INY                    \ Increment character pointer and loop back around for
  BNE TT51               \ the next character in this token, assuming Y hasn't
                         \ yet wrapped around to 0
 
@@ -19635,8 +19687,9 @@
                         \ which is the next character of this token that we
                         \ want to print
 
- EOR #35                \ Tokens are stored in memory having been EOR'd with 35
-                        \ (see variable QQ18 for details), so we repeat the
+ EOR #RE                \ Tokens are stored in memory having been EOR'd with the
+                        \ value of RE - which is 35 for all versions of Elite
+                        \ except for NES, where RE is 62 - so we repeat the
                         \ EOR to get the actual character to print
 
  JSR TT27               \ Print the text token in A, which could be a letter,
@@ -20065,9 +20118,9 @@
  JSR msblob             \ Reset the dashboard's missile indicators so none of
                         \ them are targeted
 
- LDA #127               \ Set the pitch and roll counters to 127 (no damping
- STA INWK+29            \ so the planet's rotation doesn't slow down)
- STA INWK+30
+ LDA #127               \ Set the pitch and roll counters to 127, so that's a
+ STA INWK+29            \ clockwise roll and a diving pitch with no damping, so
+ STA INWK+30            \ the planet's rotation doesn't slow down
 
  LDA tek                \ Set A = 128 or 130 depending on bit 1 of the system's
  AND #%00000010         \ tech level in tek
@@ -20182,9 +20235,9 @@
  STA INWK+8
 
  LDA QQ15+5             \ Fetch s2_hi, extract bits 0-1 and store in x_sign and
- AND #%00000011         \ y_sign, so the sun is either dead in our rear laser
- STA INWK+2             \ crosshairs, or off to the top left by a distance of 1
- STA INWK+1             \ or 2 when we look out the back
+ AND #%00000011         \ y_sign, so the sun is either dead centre in our rear
+ STA INWK+2             \ laser crosshairs, or off to the top left by a distance
+ STA INWK+1             \ of 1 or 2 when we look out the back
 
  LDA #0                 \ Set the pitch and roll counters to 0 (no rotation)
  STA INWK+29
@@ -20511,8 +20564,8 @@
 \
 \ ------------------------------------------------------------------------------
 \
-\ Calculate the following, where A is a signed 8-bit integer and the result is a
-\ signed 16-bit integer:
+\ Calculate the following, where A is a sign-magnitude 8-bit integer and the
+\ result is a signed 16-bit integer:
 \
 \   (Y X) = A / 10
 \
@@ -20623,8 +20676,8 @@
 \
 \ ------------------------------------------------------------------------------
 \
-\ Calculate the following, where A is a signed 8-bit integer and the result is a
-\ signed 16-bit integer:
+\ Calculate the following, where A is a sign-magnitude 8-bit integer and the
+\ result is a signed 16-bit integer:
 \
 \   (Y X) = A / 10
 \
@@ -20635,7 +20688,7 @@
 \ ******************************************************************************
 
                         \ --- Mod: Code moved for Elite-A: -------------------->
-\
+
 \.SPS2
 \
 \ ASL A                 \ Set X = |A| * 2, and set the C flag to the sign bit of
@@ -20676,7 +20729,7 @@
 \ INX
 \
 \ RTS                   \ Return from the subroutine
-\
+
                         \ --- End of moved code ------------------------------->
 
 \ ******************************************************************************
@@ -20777,7 +20830,7 @@
                         \ +96 as the vector has been normalised
 
  JSR SPS2               \ Set (Y X) = A / 10, so X will be from -9 to +9, which
-                        \ is the y-offset from the centre of the compass of the
+                        \ is the x-offset from the centre of the compass of the
                         \ dot we want to draw. Returns with the C flag clear
 
  STX T                  \ Set COMY = 204 - X, as 203 is the pixel y-coordinate
@@ -20967,7 +21020,7 @@
                         \ along (as there are 8 bytes in a character block).
                         \ The C flag was cleared above, so this ADC is correct
 
- LDA CTWOS+1,X          \ Refetch the mode 5 1-pixel byte, as we just overwrote
+ LDA CTWOS+1,X          \ Re-fetch the mode 5 1-pixel byte, as we just overwrote
                         \ A (the byte will still be the fifth byte from the
                         \ table, which is correct as we want to draw the
                         \ leftmost pixel in the next character along as the
@@ -21284,8 +21337,8 @@
 
                         \ --- And replaced by: -------------------------------->
 
- LDX #255               \ Set roll counter to 255 (maximum roll with no
- STX INWK+29            \ damping)
+ LDX #255               \ Set the roll counter to 255 (maximum anti-clockwise
+ STX INWK+29            \ roll with no damping)
 
  INX                    \ Set pitch counter to 0 (no pitch, roll only)
  STX INWK+30
@@ -21299,8 +21352,8 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ DEX                   \ Set roll counter to 255 (maximum roll with no
-\ STX INWK+29           \ damping)
+\ DEX                   \ Set the roll counter to 255 (maximum anti-clockwise
+\ STX INWK+29           \ roll with no damping)
 
                         \ --- And replaced by: -------------------------------->
 
@@ -21620,13 +21673,13 @@
                         \ settings for the ship's NEWB flags
 
  AND #%01101111         \ Zero bits 4 and 7 (so the new ship is not docking, has
-                        \ has not been scooped, and has not just docked)
+                        \ not been scooped, and has not just docked)
 
  ORA NEWB               \ Apply the result to the ship's NEWB flags, which sets
  STA NEWB               \ bits 0-3 and 5-6 in NEWB if they are set in the E%
                         \ byte
 
- LDY #(NI%-1)           \ The final step is to copy the new ship's data block
+ LDY #NI%-1             \ The final step is to copy the new ship's data block
                         \ from INWK to INF, so set up a counter for NI% bytes
                         \ in Y
 
@@ -21759,12 +21812,8 @@
 \       Name: ECBLB2
 \       Type: Subroutine
 \   Category: Dashboard
-\    Summary: Start up the E.C.M. (indicator, start countdown and make sound)
-\
-\ ------------------------------------------------------------------------------
-\
-\ Light up the E.C.M. indicator bulb on the dashboard, set the E.C.M. countdown
-\ timer to 32, and start making the E.C.M. sound.
+\    Summary: Start up the E.C.M. (light up the indicator, start the countdown
+\             and make the E.C.M. sound)
 \
 \ ******************************************************************************
 
@@ -22540,10 +22589,10 @@
  STA K2+3
  STY XX16+3
 
- LDA #64                \ Set TGT = 64, so we draw a full circle in the call to
+ LDA #64                \ Set TGT = 64, so we draw a full ellipse in the call to
  STA TGT                \ PLS22 below
 
- LDA #0                 \ Set CNT2 = 0 as we are drawing a full circle, so we
+ LDA #0                 \ Set CNT2 = 0 as we are drawing a full ellipse, so we
  STA CNT2               \ don't need to apply an offset
 
  BEQ PLS22              \ Jump to PLS22 to draw the crater, returning from the
@@ -23005,7 +23054,7 @@
 \       Name: SUN (Part 1 of 4)
 \       Type: Subroutine
 \   Category: Drawing suns
-\    Summary: Draw the sun: Set up all the variables needed
+\    Summary: Draw the sun: Set up all the variables needed to draw the sun
 \  Deep dive: Drawing the sun
 \
 \ ------------------------------------------------------------------------------
@@ -23039,24 +23088,25 @@
                         \ &FF, for when the new sun's centre is off the bottom
                         \ of the screen (so we don't need to draw its bottom
                         \ half)
+                        \
+                        \ This happens when the y-coordinate of the centre of
+                        \ the sun is bigger than the y-coordinate of the bottom
+                        \ of the space view
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
 \ TXA                   \ Negate X using two's complement, so X = ~X + 1
-\ EOR #%11111111        \
-\ CLC                   \ We do this because X is negative at this point, as it
-\ ADC #1                \ is calculated as 191 - the y-coordinate of the sun's
-\ TAX                   \ centre, and the centre is off the bottom of the
-\                       \ screen, past 191. So we negate it to make it positive
+\ EOR #%11111111
+\ CLC
+\ ADC #1
+\ TAX
 
                         \ --- And replaced by: -------------------------------->
 
  TXA                    \ Negate X using two's complement, so X = ~X + 1
- EOR #%11111111         \
- TAX                    \ We do this because X is negative at this point, as it
- INX                    \ is calculated as 191 - the y-coordinate of the sun's
-                        \ centre, and the centre is off the bottom of the
-                        \ screen, past 191. So we negate it to make it positive
+ EOR #%11111111
+ TAX
+ INX
 
                         \ --- End of replacement ------------------------------>
 
@@ -23123,13 +23173,15 @@
 
  LDA #2*Y-1             \ #Y is the y-coordinate of the centre of the space
                         \ view, so this sets Y to the y-coordinate of the bottom
-                        \ of the space view, i.e. 191
+                        \ of the space view
 
  LDX P+2                \ If P+2 is non-zero, the maximum y-coordinate is off
- BNE PLF2               \ the bottom of the screen, so skip to PLF2 with A = 191
+ BNE PLF2               \ the bottom of the screen, so skip to PLF2 with A set
+                        \ to the y-coordinate of the bottom of the space view
 
  CMP P+1                \ If A < P+1, the maximum y-coordinate is underneath the
- BCC PLF2               \ the dashboard, so skip to PLF2 with A = 191
+ BCC PLF2               \ dashboard, so skip to PLF2 with A set to the
+                        \ y-coordinate of the bottom of the space view
 
  LDA P+1                \ Set A = P+1, the low byte of the maximum y-coordinate
                         \ of the sun on-screen
@@ -23206,7 +23258,8 @@
 \       Name: SUN (Part 2 of 4)
 \       Type: Subroutine
 \   Category: Drawing suns
-\    Summary: Draw the sun: Start from bottom of screen and erase the old sun
+\    Summary: Draw the sun: Start from the bottom of the screen and erase the
+\             old sun line by line
 \  Deep dive: Drawing the sun
 \
 \ ------------------------------------------------------------------------------
@@ -23256,12 +23309,15 @@
 \       Type: Subroutine
 \   Category: Drawing suns
 \    Summary: Draw the sun: Continue to move up the screen, drawing the new sun
+\             line by line
 \  Deep dive: Drawing the sun
 \
 \ ------------------------------------------------------------------------------
 \
 \ This part draws the new sun. By the time we get to this point, the following
 \ variables should have been set up by parts 1 and 2:
+\
+\ Arguments:
 \
 \   V                   As we draw lines for the new sun, V contains the
 \                       vertical distance between the line we're drawing and the
@@ -23507,7 +23563,8 @@
 \       Name: SUN (Part 4 of 4)
 \       Type: Subroutine
 \   Category: Drawing suns
-\    Summary: Draw the sun: Continue to the top of the screen, erasing old sun
+\    Summary: Draw the sun: Continue to the top of the screen, erasing the old
+\             sun line by line
 \  Deep dive: Drawing the sun
 \
 \ ------------------------------------------------------------------------------
@@ -24000,8 +24057,8 @@
 
                         \ --- And replaced by: -------------------------------->
 
- BEQ P%+8               \ If the high byte subtraction is zero, then skip the
-                        \ following three instructions, as the line fits
+ BEQ P%+8               \ If the high byte of the subtraction is zero, then skip
+                        \ the following three instructions, as the line fits
                         \ on-screen and we want to clear the C flag and return
                         \ from the subroutine
 
@@ -24163,7 +24220,7 @@
                         \ by checking the low byte of the result in X against
                         \ 2 * #Y - 1, and returning the C flag from this
                         \ comparison. The constant #Y is the y-coordinate of the
-                        \ mid-point of the space view, so 2 * #Y - 1 is 191, the
+                        \ mid-point of the space view, so 2 * #Y - 1, the
                         \ y-coordinate of the bottom pixel row of the space
                         \ view. So this does the following:
                         \
@@ -24326,18 +24383,18 @@
  BMI P%+4               \ instruction to leave the angle in A as a positive
                         \ integer in the range 0 to 128 (so when we calculate
                         \ CNT2 below, it will be in the right half of the
-                        \ anti-clockwise that we describe when drawing circles,
-                        \ i.e. from 6 o'clock, through 3 o'clock and on to 12
-                        \ o'clock)
+                        \ anti-clockwise arc that we describe when drawing
+                        \ circles, i.e. from 6 o'clock, through 3 o'clock and
+                        \ on to 12 o'clock)
 
  EOR #%10000000         \ If we get here then nosev_z_hi is positive, so flip
                         \ bit 7 of the angle in A, which is the same as adding
                         \ 128 to give a result in the range 129 to 256 (i.e. 129
                         \ to 0), or 180 to 360 degrees (so when we calculate
                         \ CNT2 below, it will be in the left half of the
-                        \ anti-clockwise that we describe when drawing circles,
-                        \ i.e. from 12 o'clock, through 9 o'clock and on to 6
-                        \ o'clock)
+                        \ anti-clockwise arc that we describe when drawing
+                        \ circles, i.e. from 12 o'clock, through 9 o'clock and
+                        \ on to 6 o'clock)
 
  LSR A                  \ Set CNT2 = A / 4
  LSR A
@@ -24619,13 +24676,13 @@
 \       Name: KS3
 \       Type: Subroutine
 \   Category: Universe
-\    Summary: Set the SLSP ship heap pointer after shuffling ship slots
+\    Summary: Set the SLSP ship line heap pointer after shuffling ship slots
 \
 \ ------------------------------------------------------------------------------
 \
 \ The final part of the KILLSHP routine, called after we have shuffled the ship
 \ slots and sorted out our missiles. This simply sets SLSP to the new bottom of
-\ the ship heap space.
+\ the ship line heap.
 \
 \ Arguments:
 \
@@ -24638,7 +24695,7 @@
 .KS3
 
  LDA P                  \ After shuffling the ship slots, P(1 0) will point to
- STA SLSP               \ the new bottom of the ship heap, so store this in
+ STA SLSP               \ the new bottom of the ship line heap, so store this in
  LDA P+1                \ SLSP(1 0), which stores the bottom of the heap
  STA SLSP+1
 
@@ -24655,7 +24712,7 @@
 \
 \ Part 12 of the main flight loop calls this routine to remove the ship that is
 \ currently being analysed by the flight loop. Once the ship is removed, it
-\ jumps back to MAL1 to re-join the main flight loop, with X pointing to the
+\ jumps back to MAL1 to rejoin the main flight loop, with X pointing to the
 \ same slot that we just cleared (and which now contains the next ship in the
 \ local bubble of universe).
 \
@@ -24677,7 +24734,7 @@
  LDX XSAV               \ Restore the current ship's slot number from XSAV,
                         \ which now points to the next ship in the bubble
 
- JMP MAL1               \ Jump to MAL1 to re-join the main flight loop at the
+ JMP MAL1               \ Jump to MAL1 to rejoin the main flight loop at the
                         \ start of the ship analysis loop
 
 \ ******************************************************************************
@@ -24751,8 +24808,8 @@
  INX                    \ Increment the counter (so it starts at 0 on the first
                         \ iteration)
 
- LDA FRIN,X             \ If slot X is empty, loop round again until it isn't,
- BEQ KS3                \ at which point A contains the ship type in that slot
+ LDA FRIN,X             \ If slot X is empty then we have worked our way through
+ BEQ KS3                \ all the slots, so jump to KS3 to stop looking
 
  CMP #MSL               \ If the slot does not contain a missile, loop back to
  BNE KSL4               \ KSL4 to check the next slot
@@ -25037,8 +25094,7 @@
  LDA (SC),Y             \ Fetch byte #35 of the source's ship data block at SC,
  STA (INF),Y            \ and store it in byte #35 of the destination's block
                         \ at INF, so that's the ship's energy copied from the
-                        \ source to the destination. One down, quite a few to
-                        \ go...
+                        \ source to the destination
 
  DEY                    \ Fetch byte #34 of the source ship, which is the
  LDA (SC),Y             \ high byte of the source ship's line heap, and store
@@ -25156,10 +25212,10 @@
 \
 \   channel/flush, amplitude (or envelope number if 1-4), pitch, duration
 \
-\ For the channel/flush parameter, the top nibble of the low byte is the flush
+\ For the channel/flush parameter, the high nibble of the low byte is the flush
 \ control (where a flush control of 0 queues the sound, and a flush control of
-\ 1 makes the sound instantly), while the bottom nibble of the low byte is the
-\ channel number . When written in hexadecimal, the first figure gives the flush
+\ 1 makes the sound instantly), while the low nibble of the low byte is the
+\ channel number. When written in hexadecimal, the first figure gives the flush
 \ control, while the second is the channel (so &13 indicates flush control = 1
 \ and channel = 3).
 \
@@ -25385,7 +25441,7 @@
  STA FSH,X              \ Set the X-th byte of FSH to &FF to charge up that
                         \ shield/bank
 
- DEX                    \ Decrement the lopp counter
+ DEX                    \ Decrement the loop counter
 
  BPL REL5               \ Loop back to REL5 until we have recharged both shields
                         \ and the energy bank
@@ -25462,16 +25518,16 @@
 
  JSR DIALS              \ Update the dashboard
 
+ JSR U%                 \ Call U% to clear the key logger
+
                         \ Finally, fall through into ZINF to reset the INWK
                         \ ship workspace
-
- JSR U%                 \ Call U% to clear the key logger
 
 \ ******************************************************************************
 \
 \       Name: ZINF
 \       Type: Subroutine
-\   Category: Utility routines
+\   Category: Universe
 \    Summary: Reset the INWK workspace and orientation vectors
 \  Deep dive: Orientation vectors
 \
@@ -25522,7 +25578,7 @@
 
  STA INWK+22            \ Set byte #22 = sidev_x_hi = 96 = 1
 
- ORA #128               \ Flip the sign of A to represent a -1
+ ORA #%10000000         \ Flip the sign of A to represent a -1
 
  STA INWK+14            \ Set byte #14 = nosev_z_hi = -96 = -1
 
@@ -25568,7 +25624,7 @@
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
 \ CPX NOMSL             \ If the counter is equal to the number of missiles,
-\ BEQ SAL8              \ jump down to SQL8 to draw remaining the missiles, as
+\ BEQ SAL8              \ jump down to SAL8 to draw the remaining missiles, as
 \                       \ the rest of them are present and should be drawn in
 \                       \ green/cyan
 \
@@ -25712,7 +25768,7 @@
 \
 \       Name: DORND
 \       Type: Subroutine
-\   Category: Utility routines
+\   Category: Maths (Arithmetic)
 \    Summary: Generate random numbers
 \  Deep dive: Generating random numbers
 \             Fixing ship positions
@@ -25789,7 +25845,7 @@
  JSR DORND              \ Set A and X to random numbers
 
  LSR A                  \ Clear bit 7 of our random number in A and set the C
-                        \ flag to bit 0 of A, which os random
+                        \ flag to bit 0 of A, which is random
 
  STA INWK+32            \ Store this in the ship's AI flag, so this ship does
                         \ not have AI
@@ -25798,7 +25854,7 @@
                         \ clockwise roll (as bit 7 is clear), and a 1 in 127
                         \ chance of it having no damping
 
- ROL INWK+31            \ Set bit 0 of the ship's missile count ramdomly (as the
+ ROL INWK+31            \ Set bit 0 of the ship's missile count randomly (as the
                         \ C flag was set), giving the ship either no missiles or
                         \ one missile
 
@@ -26092,7 +26148,7 @@
 
  BNE horde_plain        \ Jump to horde_plain to spawn a whole pack of cargo
                         \ canisters, boulders or asteroids, according to the
-                        \ value of A (the BNE is effectivey a JMP, as A will
+                        \ value of A (the BNE is effectively a JMP, as A will
                         \ never be zero)
 
                         \ --- End of replacement ------------------------------>
@@ -26648,7 +26704,7 @@
 \
 \   * Process more key presses (red function keys, docked keys etc.)
 \
-\ It also support joining the main loop with a key already "pressed", so we can
+\ It also supports joining the main loop with a key already "pressed", so we can
 \ jump into the main game loop to perform a specific action. In practice, this
 \ is used when we enter the docking bay in BAY to display Status Mode (red key
 \ f8), and when we finish buying or selling cargo in BAY2 to jump to the
@@ -27224,9 +27280,9 @@
  STA INWK+6             \ 127, and store in byte #6 (z_lo)
 
  TXA                    \ Set A to the random number in X and keep bits 0-3 and
- AND #%10001111         \ the bit 7 to get a number between -15 and +15, and
- STA INWK+29            \ store in byte #29 (roll counter) to give our ship a
-                        \ gentle roll with damping
+ AND #%10001111         \ the sign in bit 7 to get a number between -15 and +15,
+ STA INWK+29            \ and store in byte #29 (roll counter) to give our ship
+                        \ a gentle roll with damping
 
  ROR A                  \ The C flag is randomly set from the above call to Ze,
  AND #%10000111         \ so this sets A to a number between -7 and +7, which
@@ -27312,7 +27368,7 @@
 
 .RSHIPS
 
- JSR LSHIPS             \ Call LSHIPS to load a new ship blueprints file
+ JSR LOMOD              \ Call LOMOD to load a new ship blueprints file
 
  JSR RESET              \ Call RESET to reset most variables
 
@@ -27320,7 +27376,7 @@
  STA QQ12               \ we reach TT110 after calling FRCE below, it shows the
                         \ launch tunnel
 
- STA QQ11               \ Set the view number to a non-zero value, so when we
+ STA QQ11               \ Set the view type to a non-zero value, so when we
                         \ reach LOOK1 after calling FRCE below, it sets up a
                         \ new space view
 
@@ -27330,16 +27386,22 @@
 
 \ ******************************************************************************
 \
-\       Name: LSHIPS
+\       Name: LOMOD
 \       Type: Subroutine
 \   Category: Loader
 \    Summary: Load a new ship blueprints file
 \  Deep dive: Ship blueprints in the disc version
 \             Ship blueprints in Elite-A
 \
+\ ------------------------------------------------------------------------------
+\
+\ Other entry points:
+\
+\   SHIPinA             Load the ship blueprints file specified in A
+\
 \ ******************************************************************************
 
-.LSHIPS
+.LOMOD
 
                         \ --- Mod: Code added for Elite-A: -------------------->
 
@@ -27985,7 +28047,7 @@
 
  LDX JUNK               \ Set X to the total number of junk items in the
                         \ vicinity (e.g. asteroids, escape pods, cargo
-                        \ canisters, Shuttles, Transporters and so pn)
+                        \ canisters, Shuttles, Transporters and so on)
 
  LDA FRIN+2,X           \ If the slot at FRIN+2+X is non-zero, then we have
                         \ something else in the vicinity besides asteroids,
@@ -27996,7 +28058,7 @@
 
  ORA JUNK               \ If there is any junk in the vicinity, then JUNK will
                         \ be non-zero, so OR'ing with JUNK will produce a
-                        \ a non-zero result if either A or JUNK are non-zero
+                        \ non-zero result if either A or JUNK are non-zero
                         \ (so this prevents in-system jumps if there is any
                         \ junk nearby, which is different to the other versions
                         \ which allow you to jump, dragging any junk along with
@@ -28006,7 +28068,7 @@
 
  ORA SSPR               \ If there is a space station nearby, then SSPR will
                         \ be non-zero, so OR'ing with SSPR will produce a
-                        \ a non-zero result if either A or SSPR are non-zero
+                        \ non-zero result if either A or SSPR are non-zero
 
  ORA MJ                 \ If we are in witchspace, then MJ will be non-zero, so
                         \ OR'ing with MJ will produce a non-zero result if
@@ -28261,7 +28323,7 @@
 \
 \       Name: EXNO2
 \       Type: Subroutine
-\   Category: Sound
+\   Category: Status
 \    Summary: Process us making a kill
 \  Deep dive: Combat rank
 \
@@ -28593,7 +28655,7 @@
 \   &5 = %101 = middle column
 \   &3 = %011 = right column
 \
-\ while the lower nibble gives the row:
+\ while the low nibble gives the row:
 \
 \   &1 = %0001 = top row
 \   &2 = %0010 = second row
@@ -28741,7 +28803,7 @@
 
  BEQ b_pressed          \ In the above we AND'd the result from the user port
                         \ with the bottom four bits of the table value (the
-                        \ lower nibble). The lower nibble in b_table contains
+                        \ low nibble). The low nibble in b_table contains
                         \ a 1 in the relevant position for that row that
                         \ corresponds with the clear bit in the response from
                         \ the user port, so if we AND the two together and get
@@ -28758,7 +28820,7 @@
                         \ and we write %0011 in the first pass (when A = 0) to
                         \ set the right column for the rear socket joystick
                         \
-                        \ Now for the row. The lower nibble of the &34 value
+                        \ Now for the row. The low nibble of the &34 value
                         \ from b_table contains the row, so that's &4 = %0100.
                         \ When we read the user port, then we will fetch %1011
                         \ from VIA+&60 if the button in the third row is being
@@ -28769,7 +28831,7 @@
                         \ which will indicate the button is being pressed. If
                         \ any other button is being pressed, or no buttons at
                         \ all, then the result will be non-zero and we move on
-                        \ to the next buttton
+                        \ to the next button
 
  TXA                    \ Restore the original value of A that we stored in X
 
@@ -28804,6 +28866,8 @@
 \
 \   b_pressed           Store &FF in the Y-th byte of the key logger at KL, to
 \                       indicate that key is being pressed
+\
+\   b_quit              Contains an RTS
 \
 \ ******************************************************************************
 
@@ -28976,6 +29040,10 @@
  LDA #128               \ Call OSBYTE with A = 128 to fetch the 16-bit value
  JSR OSBYTE             \ from ADC channel X, returning (Y X), i.e. the high
                         \ byte in Y and the low byte in X
+                        \
+                        \   * Channel 1 is the x-axis: 0 = right, 65520 = left
+                        \
+                        \   * Channel 2 is the y-axis: 0 = down,  65520 = up
 
  TYA                    \ Copy Y to A, so the result is now in (A X)
 
@@ -29096,7 +29164,7 @@
 
  LDA #&51               \ Set 6522 User VIA output register ORB (SHEILA &60) to
  STA VIA+&60            \ the Delta 14B joystick button in the middle column
-                        \ (upper nibble &5) and top row (lower nibble &1), which
+                        \ (high nibble &5) and top row (low nibble &1), which
                         \ corresponds to the fire button
 
                         \ --- End of added code ------------------------------->
@@ -29176,7 +29244,8 @@
 \       Name: DOKEY
 \       Type: Subroutine
 \   Category: Keyboard
-\    Summary: Scan for the seven primary flight controls
+\    Summary: Scan for the seven primary flight controls and apply the docking
+\             computer manoeuvring code
 \  Deep dive: The key logger
 \             The docking computer
 \
@@ -29336,8 +29405,8 @@
 
  BIT INWK+29            \ We shifted the updated roll counter to the left above,
  BPL DK14               \ so this tests bit 6 of the original value, and if it
-                        \ is is clear (i.e. the magnitude is less than 64), jump
-                        \ to DK14 to "press" the key and leave JSTX unchanged
+                        \ is clear (i.e. the magnitude is less than 64), jump to
+                        \ DK14 to "press" the key and leave JSTX unchanged
 
  LDA #64                \ The magnitude of the updated roll is 64 or more, so
  STA JSTX               \ set JSTX to 64 (so the roll decreases at half the
@@ -29369,7 +29438,7 @@
                         \ indicator)
 
  LDX #0                 \ Set X = 0, so we "press" KY5 below ("X", decrease
-                        \ pitch)
+                        \ pitch, pulling the nose up)
 
  ASL INWK+30            \ Shift ship byte #30 left, which shifts bit 7 of the
                         \ updated pitch counter (i.e. the pitch direction) into
@@ -29382,14 +29451,16 @@
  BCS P%+3               \ If the C flag is set, skip the following instruction
 
  INX                    \ The C flag is clear, i.e. the direction of the updated
-                        \ pitch counter is positive, so increment X to 1 so we
-                        \ "press" KY6 below ("S", increase pitch)
+                        \ pitch counter is positive (dive), so increment X to 1
+                        \ so we "press" KY6 below ("S", increase pitch, so the
+                        \ nose dives)
 
  STA KY5,X              \ Store 128 in either KY5 or KY6 to "press" the relevant
                         \ key, depending on whether the pitch direction is
                         \ negative (in which case we "press" KY5, "X", to
-                        \ decrease the pitch) or positive (in which case we
-                        \ "press" KY6, "S", to increase the pitch)
+                        \ decrease the pitch, pulling the nose up) or positive
+                        \ (in which case we "press" KY6, "S", to increase the
+                        \ pitch, pushing the nose down)
 
  LDA JSTY               \ Fetch A from JSTY so the next instruction has no
                         \ effect
@@ -29453,6 +29524,10 @@
 \
 \   * If this is a space view, scan for secondary flight keys and update the
 \     relevant bytes in the key logger
+\
+\ Other entry points:
+\
+\   DK5                 Contains an RTS
 \
 \ ******************************************************************************
 
@@ -30039,23 +30114,23 @@ ENDMACRO
 
 .QQ23
 
- ITEM 19,  -2, 't',   6, %00000001   \  0 = Food
- ITEM 20,  -1, 't',  10, %00000011   \  1 = Textiles
- ITEM 65,  -3, 't',   2, %00000111   \  2 = Radioactives
- ITEM 40,  -5, 't', 226, %00011111   \  3 = Slaves
- ITEM 83,  -5, 't', 251, %00001111   \  4 = Liquor/Wines
- ITEM 196,  8, 't',  54, %00000011   \  5 = Luxuries
- ITEM 235, 29, 't',   8, %01111000   \  6 = Narcotics
- ITEM 154, 14, 't',  56, %00000011   \  7 = Computers
- ITEM 117,  6, 't',  40, %00000111   \  8 = Machinery
- ITEM 78,   1, 't',  17, %00011111   \  9 = Alloys
- ITEM 124, 13, 't',  29, %00000111   \ 10 = Firearms
- ITEM 176, -9, 't', 220, %00111111   \ 11 = Furs
- ITEM 32,  -1, 't',  53, %00000011   \ 12 = Minerals
- ITEM 97,  -1, 'k',  66, %00000111   \ 13 = Gold
- ITEM 171, -2, 'k',  55, %00011111   \ 14 = Platinum
- ITEM 45,  -1, 'g', 250, %00001111   \ 15 = Gem-Stones
- ITEM 53,  15, 't', 192, %00000111   \ 16 = Alien items
+ ITEM 19,  -2, 't',   6, %00000001  \  0 = Food
+ ITEM 20,  -1, 't',  10, %00000011  \  1 = Textiles
+ ITEM 65,  -3, 't',   2, %00000111  \  2 = Radioactives
+ ITEM 40,  -5, 't', 226, %00011111  \  3 = Slaves
+ ITEM 83,  -5, 't', 251, %00001111  \  4 = Liquor/Wines
+ ITEM 196,  8, 't',  54, %00000011  \  5 = Luxuries
+ ITEM 235, 29, 't',   8, %01111000  \  6 = Narcotics
+ ITEM 154, 14, 't',  56, %00000011  \  7 = Computers
+ ITEM 117,  6, 't',  40, %00000111  \  8 = Machinery
+ ITEM 78,   1, 't',  17, %00011111  \  9 = Alloys
+ ITEM 124, 13, 't',  29, %00000111  \ 10 = Firearms
+ ITEM 176, -9, 't', 220, %00111111  \ 11 = Furs
+ ITEM 32,  -1, 't',  53, %00000011  \ 12 = Minerals
+ ITEM 97,  -1, 'k',  66, %00000111  \ 13 = Gold
+ ITEM 171, -2, 'k',  55, %00011111  \ 14 = Platinum
+ ITEM 45,  -1, 'g', 250, %00001111  \ 15 = Gem-Stones
+ ITEM 53,  15, 't', 192, %00000111  \ 16 = Alien items
 
 \ ******************************************************************************
 \
@@ -31476,11 +31551,11 @@ ENDMACRO
 
  LDA #255               \ Set the 15th byte of XX2 to 255, so that face 15 is
  STA XX2+15             \ always visible. No ship definitions actually have this
-                        \ number of faces in the cassette version, but this
-                        \ allows us to force a vertex to always be visible by
-                        \ associating it with face 15 (see the blueprints for
-                        \ the Cobra Mk III at SHIP_COBRA_MK_3 and asteroid at
-                        \ SHIP_ASTEROID for examples)
+                        \ number of faces, but this allows us to force a vertex
+                        \ to always be visible by associating it with face 15
+                        \ (see the ship blueprints for the Cobra Mk III at
+                        \ SHIP_COBRA_MK_3 and the asteroid at SHIP_ASTEROID for
+                        \ examples of vertices that are associated with face 15)
 
  LDY #12                \ Set Y = 12 to point to the ship blueprint byte #12,
 
@@ -32648,6 +32723,9 @@ ENDMACRO
 \   LL70+1              Contains an RTS (as the first byte of an LDA
 \                       instruction)
 \
+\   LL66                A re-entry point into the ship-drawing routine, used by
+\                       the LL62 routine to store 128 - (U R) on the XX3 heap
+\
 \ ******************************************************************************
 
 .LL60
@@ -32771,7 +32849,7 @@ ENDMACRO
  STA XX3,X              \ Store the high byte of the result in the X-th byte of
                         \ the heap at XX3
 
- JMP LL50               \ Jump to LL68 to skip the division for y_lo < z_lo
+ JMP LL50               \ Jump to LL50 to move on to the next vertex
 
 .LL67
 
@@ -33464,13 +33542,13 @@ ENDMACRO
 
 .LL147
 
- LDX #Y*2-1             \ Set Y2 = #Y * 2 - 1. The constant #Y is 96, the
+ LDX #Y*2-1             \ Set X = #Y * 2 - 1. The constant #Y is 96, the
                         \ y-coordinate of the mid-point of the space view, so
                         \ this sets Y2 to 191, the y-coordinate of the bottom
                         \ pixel row of the space view
 
  ORA XX12+1             \ If one or both of x2_hi and y2_hi are non-zero, jump
- BNE LL107              \ to LL107 to skip the following
+ BNE LL107              \ to LL107 to skip the following, leaving X at 191
 
  CPX XX12               \ If y2_lo > the y-coordinate of the bottom of screen
  BCC LL107              \ then (x2, y2) is off the bottom of the screen, so skip
@@ -33491,7 +33569,7 @@ ENDMACRO
                         \ otherwise it is 0
 
  LDA XX15+1             \ If one or both of x1_hi and y1_hi are non-zero, jump
- ORA XX15+3             \ jump to LL83
+ ORA XX15+3             \ to LL83
  BNE LL83
 
  LDA #Y*2-1             \ If y1_lo > the y-coordinate of the bottom of screen
@@ -33969,7 +34047,8 @@ ENDMACRO
 \ADC #4                 \ next edge
 \STA V
 \
-\BCC ll81               \ If the above addition didn't overflow, jump to ll81
+\BCC ll81               \ If the above addition didn't overflow, jump to ll81 to
+\                       \ skip the following instruction
 \
 \INC V+1                \ Otherwise increment the high byte of V(1 0), as we
 \                       \ just moved the V(1 0) pointer past a page boundary
@@ -34270,8 +34349,8 @@ ENDMACRO
 
 .LL118
 
- LDA XX15+1             \ If x1_hi is positive, jump down to LL119 to skip
- BPL LL119              \ the following
+ LDA XX15+1             \ If x1_hi is positive, jump down to LL119 to skip the
+ BPL LL119              \ following
 
  STA S                  \ Otherwise x1_hi is negative, i.e. off the left of the
                         \ screen, so set S = x1_hi
@@ -34377,7 +34456,7 @@ ENDMACRO
 
 .LL135
 
- LDA XX15+2             \ Set (S R) = (y1_hi y1_lo) - 192
+ LDA XX15+2             \ Set (S R) = (y1_hi y1_lo) - screen height
  SEC                    \
  SBC #Y*2               \ starting with the low bytes
  STA R
@@ -34386,22 +34465,22 @@ ENDMACRO
  SBC #0
  STA S
 
- BCC LL136              \ If the subtraction underflowed, i.e. if y1 < 192, then
-                        \ y1 is already on-screen, so jump to LL136 to return
-                        \ from the subroutine, as we are done
+ BCC LL136              \ If the subtraction underflowed, i.e. if y1 < screen
+                        \ height, then y1 is already on-screen, so jump to LL136
+                        \ to return from the subroutine, as we are done
 
 .LL139
 
-                        \ If we get here then y1 >= 192, i.e. off the bottom of
-                        \ the screen
+                        \ If we get here then y1 >= screen height, i.e. off the
+                        \ bottom of the screen
 
  JSR LL123              \ Call LL123 to calculate:
                         \
                         \   (Y X) = (S R) / XX12+2      if T = 0
-                        \         = (y1 - 192) / gradient
+                        \         = (y1 - screen height) / gradient
                         \
                         \   (Y X) = (S R) * XX12+2      if T <> 0
-                        \         = (y1 - 192) * gradient
+                        \         = (y1 - screen height) * gradient
                         \
                         \ with the sign of (Y X) set to the opposite of the
                         \ line's direction of slope
@@ -34836,6 +34915,11 @@ ENDMACRO
 \
 \   * Remove the ship from the scanner, so we can move it
 \
+\ Other entry points:
+\
+\   MV30                Move the ship in space but without tidying the
+\                       orientation vectors or applying tactics
+\
 \ ******************************************************************************
 
 .MV3
@@ -34994,8 +35078,9 @@ ENDMACRO
 
  LDA #0                 \ Set A to 0 to stop the speed from going negative
 
- LDY #15                \ Fetch byte #15 from the ship's blueprint, which
-                        \ contains the ship's maximum speed
+ LDY #15                \ We now fetch byte #15 from the ship's blueprint, which
+                        \ contains the ship's maximum speed, so set Y = 15 to
+                        \ use as an index
 
  CMP (XX0),Y            \ If A < the ship's maximum speed, skip the following
  BCC P%+4               \ instruction
@@ -36203,11 +36288,8 @@ ENDMACRO
 \   X                   The space view to set:
 \
 \                         * 0 = front
-\
 \                         * 1 = rear
-\
 \                         * 2 = left
-\
 \                         * 3 = right
 \
 \ Other entry points:
@@ -36523,7 +36605,7 @@ ENDMACRO
 \ ------------------------------------------------------------------------------
 \
 \ This routine clears some space at the bottom of the screen and moves the text
-\ cursor to column 1, row 21. 
+\ cursor to column 1, row 21.
 \
 \ Specifically, it zeroes the following screen locations:
 \
@@ -36615,7 +36697,7 @@ ENDMACRO
 \       Name: iff_xor
 \       Type: Variable
 \   Category: Dashboard
-\    Summary: The EOR value for different types of ship in the the I.F.F. system
+\    Summary: The EOR value for different types of ship in the I.F.F. system
 \             for creating striped sticks in the scanner
 \  Deep dive: The I.F.F. system
 \
@@ -36698,7 +36780,7 @@ ENDMACRO
 \       Name: iff_base
 \       Type: Variable
 \   Category: Dashboard
-\    Summary: Base colours for different types of ship in the the I.F.F. system
+\    Summary: Base colours for different types of ship in the I.F.F. system
 \  Deep dive: The I.F.F. system
 \
 \ ------------------------------------------------------------------------------
@@ -36824,7 +36906,7 @@ ENDMACRO
                         \
                         \   X1 = 123 + (x_sign x_hi)
 
- LDA INWK+1             \ Set x_hi
+ LDA INWK+1             \ Set A = x_hi
 
  CLC                    \ Clear the C flag so we can do addition below
 
@@ -36832,15 +36914,15 @@ ENDMACRO
 
  BPL SC2                \ If x_sign is positive, skip the following
 
- EOR #%11111111         \ x_sign is negative, so flip the bits in A and subtract
- ADC #1                 \ 1 to make it a negative number (bit 7 will now be set
+ EOR #%11111111         \ x_sign is negative, so flip the bits in A and add 1
+ ADC #1                 \ to make it a negative number (bit 7 will now be set
                         \ as we confirmed above that bits 6 and 7 are clear). So
                         \ this gives A the sign of x_sign and gives it a value
                         \ range of -63 (%11000001) to 0
 
 .SC2
 
- ADC #123               \ Set X1 = 123 + x_hi
+ ADC #123               \ Set X1 = 123 + (x_sign x_hi)
  STA X1
 
                         \ Next, we convert the z_hi coordinate of the ship into
@@ -36858,7 +36940,7 @@ ENDMACRO
  LSR A                  \
  LSR A                  \ So A is in the range 0-15
 
- CLC                    \ Clear the C flag
+ CLC                    \ Clear the C flag for the addition below
 
  LDX INWK+8             \ Set X = z_sign
 
