@@ -15122,6 +15122,25 @@
 \
 \ This routine twists the three 16-bit seeds in QQ15 once.
 \
+\ If we start with seeds s0, s1 and s2 and we want to work out their new values
+\ after we perform a twist (let's call the new values s0´, s1´ and s2´), then:
+\
+\  s0´ = s1
+\  s1´ = s2
+\  s2´ = s0 + s1 + s2
+\
+\ So given an existing set of seeds in s0, s1 and s2, we can get the new values
+\ s0´, s1´ and s2´ simply by doing the above sums. And if we want to do the
+\ above in-place without creating three new w´ variables, then we can do the
+\ following:
+\
+\  tmp = s0 + s1
+\  s0 = s1
+\  s1 = s2
+\  s2 = tmp + s1
+\
+\ So this is what we do in this routine, where each seed is a 16-bit number.
+\
 \ ******************************************************************************
 
 .TT54
@@ -15162,7 +15181,7 @@
 \
 \       Name: TT146
 \       Type: Subroutine
-\   Category: Text
+\   Category: Universe
 \    Summary: Print the distance to the selected system in light years
 \
 \ ------------------------------------------------------------------------------
@@ -15293,7 +15312,7 @@
 \
 \       Name: TT70
 \       Type: Subroutine
-\   Category: Text
+\   Category: Universe
 \    Summary: Display "MAINLY " and jump to TT72
 \
 \ ------------------------------------------------------------------------------
@@ -17444,7 +17463,7 @@
 \
 \       Name: ee3
 \       Type: Subroutine
-\   Category: Text
+\   Category: Flight
 \    Summary: Print the hyperspace countdown in the top-left of the screen
 \
 \ ------------------------------------------------------------------------------
@@ -17532,7 +17551,7 @@
 \
 \       Name: TT147
 \       Type: Subroutine
-\   Category: Text
+\   Category: Flight
 \    Summary: Print an error when a system is out of hyperspace range
 \
 \ ------------------------------------------------------------------------------
@@ -18703,7 +18722,7 @@
 \
 \       Name: cpl
 \       Type: Subroutine
-\   Category: Text
+\   Category: Universe
 \    Summary: Print the selected system name
 \  Deep dive: Generating system names
 \             Galaxy and system seeds
@@ -18786,7 +18805,7 @@
 \
 \       Name: cmn
 \       Type: Subroutine
-\   Category: Text
+\   Category: Status
 \    Summary: Print the commander's name
 \
 \ ------------------------------------------------------------------------------
@@ -18823,7 +18842,7 @@
 \
 \       Name: ypl
 \       Type: Subroutine
-\   Category: Text
+\   Category: Universe
 \    Summary: Print the current system name
 \
 \ ------------------------------------------------------------------------------
@@ -18875,7 +18894,7 @@
 \
 \       Name: tal
 \       Type: Subroutine
-\   Category: Text
+\   Category: Universe
 \    Summary: Print the current galaxy number
 \
 \ ------------------------------------------------------------------------------
@@ -18919,7 +18938,7 @@
 \
 \       Name: fwl
 \       Type: Subroutine
-\   Category: Text
+\   Category: Status
 \    Summary: Print fuel and cash levels
 \
 \ ------------------------------------------------------------------------------
@@ -18955,7 +18974,7 @@
 \
 \       Name: csh
 \       Type: Subroutine
-\   Category: Text
+\   Category: Status
 \    Summary: Print the current amount of cash
 \
 \ ------------------------------------------------------------------------------
@@ -20426,7 +20445,7 @@
 \
 \       Name: DET1
 \       Type: Subroutine
-\   Category: Screen mode
+\   Category: Drawing the screen
 \    Summary: Show or hide the dashboard (for when we die)
 \
 \ ------------------------------------------------------------------------------
@@ -25647,7 +25666,7 @@
 \
 \       Name: me2
 \       Type: Subroutine
-\   Category: Text
+\   Category: Flight
 \    Summary: Remove an in-flight message from the space view
 \
 \ ******************************************************************************
@@ -29663,7 +29682,7 @@
 \
 \       Name: me1
 \       Type: Subroutine
-\   Category: Text
+\   Category: Flight
 \    Summary: Erase an old in-flight message and display a new one
 \
 \ ------------------------------------------------------------------------------
@@ -29699,7 +29718,7 @@
 \
 \       Name: ou2, Removed
 \       Type: Subroutine
-\   Category: Text
+\   Category: Flight
 \    Summary: Display "E.C.M.SYSTEM DESTROYED" as an in-flight message
 \
 \ ******************************************************************************
@@ -29721,7 +29740,7 @@
 \
 \       Name: ou3, Removed
 \       Type: Subroutine
-\   Category: Text
+\   Category: Flight
 \    Summary: Display "FUEL SCOOPS DESTROYED" as an in-flight message
 \
 \ ******************************************************************************
@@ -29769,7 +29788,7 @@
 \
 \       Name: MESS
 \       Type: Subroutine
-\   Category: Text
+\   Category: Flight
 \    Summary: Display an in-flight message
 \
 \ ------------------------------------------------------------------------------
@@ -29815,7 +29834,7 @@
 \
 \       Name: mes9
 \       Type: Subroutine
-\   Category: Text
+\   Category: Flight
 \    Summary: Print a text token, possibly followed by " DESTROYED"
 \
 \ ------------------------------------------------------------------------------
@@ -35874,7 +35893,7 @@ ENDMACRO
 \
 \       Name: TT66
 \       Type: Subroutine
-\   Category: Utility routines
+\   Category: Drawing the screen
 \    Summary: Clear the screen and set the current view type
 \
 \ ------------------------------------------------------------------------------
@@ -35900,7 +35919,7 @@ ENDMACRO
 \
 \       Name: TTX66
 \       Type: Subroutine
-\   Category: Utility routines
+\   Category: Drawing the screen
 \    Summary: Clear the top part of the screen and draw a white border
 \
 \ ------------------------------------------------------------------------------
@@ -36090,7 +36109,7 @@ ENDMACRO
 \
 \       Name: CLYNS
 \       Type: Subroutine
-\   Category: Utility routines
+\   Category: Drawing the screen
 \    Summary: Clear the bottom three text rows of the mode 4 screen
 \
 \ ------------------------------------------------------------------------------
@@ -36144,7 +36163,7 @@ ENDMACRO
 \
 \       Name: LYN
 \       Type: Subroutine
-\   Category: Utility routines
+\   Category: Drawing the screen
 \    Summary: Clear most of a row of pixels
 \
 \ ------------------------------------------------------------------------------
@@ -36735,7 +36754,7 @@ ENDMACRO
 \
 \       Name: WSCAN
 \       Type: Subroutine
-\   Category: Screen mode
+\   Category: Drawing the screen
 \    Summary: Wait for the vertical sync
 \
 \ ------------------------------------------------------------------------------

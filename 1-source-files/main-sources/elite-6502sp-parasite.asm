@@ -8737,7 +8737,7 @@ ENDIF
 \
 \       Name: PDESC
 \       Type: Subroutine
-\   Category: Text
+\   Category: Universe
 \    Summary: Print the system's extended description or a mission 1 directive
 \  Deep dive: Extended system descriptions
 \             Extended text tokens
@@ -9334,7 +9334,7 @@ ENDIF
 \
 \       Name: TT66
 \       Type: Subroutine
-\   Category: Utility routines
+\   Category: Drawing the screen
 \    Summary: Clear the screen and set the current view type
 \
 \ ------------------------------------------------------------------------------
@@ -9360,7 +9360,7 @@ ENDIF
 \
 \       Name: TTX66
 \       Type: Subroutine
-\   Category: Utility routines
+\   Category: Drawing the screen
 \    Summary: Clear the top part of the screen and draw a white border by
 \             sending a clr_scrn command to the I/O processor
 \
@@ -9528,7 +9528,7 @@ ENDIF
 \
 \       Name: CLYNS
 \       Type: Subroutine
-\   Category: Utility routines
+\   Category: Drawing the screen
 \    Summary: Clear the bottom three text rows of the mode 4 screen by sending a
 \             clr_line command to the I/O processor
 \
@@ -9570,7 +9570,7 @@ ENDIF
 \
 \       Name: WSCAN
 \       Type: Subroutine
-\   Category: Screen mode
+\   Category: Drawing the screen
 \    Summary: Wait for the vertical sync by sending a sync_in command to the I/O
 \             processor
 \
@@ -9759,6 +9759,25 @@ ENDIF
 \
 \ This routine twists the three 16-bit seeds in QQ15 once.
 \
+\ If we start with seeds s0, s1 and s2 and we want to work out their new values
+\ after we perform a twist (let's call the new values s0´, s1´ and s2´), then:
+\
+\  s0´ = s1
+\  s1´ = s2
+\  s2´ = s0 + s1 + s2
+\
+\ So given an existing set of seeds in s0, s1 and s2, we can get the new values
+\ s0´, s1´ and s2´ simply by doing the above sums. And if we want to do the
+\ above in-place without creating three new w´ variables, then we can do the
+\ following:
+\
+\  tmp = s0 + s1
+\  s0 = s1
+\  s1 = s2
+\  s2 = tmp + s1
+\
+\ So this is what we do in this routine, where each seed is a 16-bit number.
+\
 \ ******************************************************************************
 
 .TT54
@@ -9799,7 +9818,7 @@ ENDIF
 \
 \       Name: TT146
 \       Type: Subroutine
-\   Category: Text
+\   Category: Universe
 \    Summary: Print the distance to the selected system in light years
 \
 \ ------------------------------------------------------------------------------
@@ -9922,7 +9941,7 @@ ENDIF
 \
 \       Name: TT70
 \       Type: Subroutine
-\   Category: Text
+\   Category: Universe
 \    Summary: Display "MAINLY " and jump to TT72
 \
 \ ------------------------------------------------------------------------------
@@ -13522,7 +13541,7 @@ ENDIF
 \
 \       Name: dn
 \       Type: Subroutine
-\   Category: Text
+\   Category: Market
 \    Summary: Print the amount of money we have left in the cash pot, then make
 \             a short, high beep and delay for 1 second
 \
@@ -13830,7 +13849,7 @@ ENDIF
 \
 \       Name: cpl
 \       Type: Subroutine
-\   Category: Text
+\   Category: Universe
 \    Summary: Print the selected system name
 \  Deep dive: Generating system names
 \             Galaxy and system seeds
@@ -13913,7 +13932,7 @@ ENDIF
 \
 \       Name: cmn
 \       Type: Subroutine
-\   Category: Text
+\   Category: Status
 \    Summary: Print the commander's name
 \
 \ ------------------------------------------------------------------------------
@@ -13953,7 +13972,7 @@ ENDIF
 \
 \       Name: ypl
 \       Type: Subroutine
-\   Category: Text
+\   Category: Universe
 \    Summary: Print the current system name
 \
 \ ------------------------------------------------------------------------------
@@ -14005,7 +14024,7 @@ ENDIF
 \
 \       Name: tal
 \       Type: Subroutine
-\   Category: Text
+\   Category: Universe
 \    Summary: Print the current galaxy number
 \
 \ ------------------------------------------------------------------------------
@@ -14034,7 +14053,7 @@ ENDIF
 \
 \       Name: fwl
 \       Type: Subroutine
-\   Category: Text
+\   Category: Status
 \    Summary: Print fuel and cash levels
 \
 \ ------------------------------------------------------------------------------
@@ -14070,7 +14089,7 @@ ENDIF
 \
 \       Name: csh
 \       Type: Subroutine
-\   Category: Text
+\   Category: Status
 \    Summary: Print the current amount of cash
 \
 \ ------------------------------------------------------------------------------
@@ -16444,7 +16463,7 @@ ENDIF
 \
 \       Name: me2
 \       Type: Subroutine
-\   Category: Text
+\   Category: Flight
 \    Summary: Remove an in-flight message from the space view
 \
 \ ******************************************************************************
@@ -45988,7 +46007,7 @@ ENDIF
 \
 \       Name: ee3
 \       Type: Subroutine
-\   Category: Text
+\   Category: Flight
 \    Summary: Print the hyperspace countdown in the top-left of the screen
 \
 \ ------------------------------------------------------------------------------
@@ -46020,7 +46039,7 @@ ENDIF
 \
 \       Name: TT147
 \       Type: Subroutine
-\   Category: Text
+\   Category: Flight
 \    Summary: Print an error when a system is out of hyperspace range
 \
 \ ------------------------------------------------------------------------------
@@ -47054,7 +47073,7 @@ ENDIF
 \
 \       Name: DET1
 \       Type: Subroutine
-\   Category: Screen mode
+\   Category: Drawing the screen
 \    Summary: Show or hide the dashboard (for when we die) by sending a
 \             write_crtc command to the I/O processor
 \
@@ -53024,7 +53043,7 @@ ENDIF
 \
 \       Name: me1
 \       Type: Subroutine
-\   Category: Text
+\   Category: Flight
 \    Summary: Erase an old in-flight message and display a new one
 \
 \ ------------------------------------------------------------------------------
@@ -53087,7 +53106,7 @@ ENDIF
 \
 \       Name: MESS
 \       Type: Subroutine
-\   Category: Text
+\   Category: Flight
 \    Summary: Display an in-flight message
 \
 \ ------------------------------------------------------------------------------
@@ -53125,7 +53144,7 @@ ENDIF
 \
 \       Name: mes9
 \       Type: Subroutine
-\   Category: Text
+\   Category: Flight
 \    Summary: Print a text token, possibly followed by " DESTROYED"
 \
 \ ------------------------------------------------------------------------------

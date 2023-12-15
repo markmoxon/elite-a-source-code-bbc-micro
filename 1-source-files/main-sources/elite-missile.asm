@@ -332,7 +332,7 @@ ENDMACRO
 \
 \       Name: VEC
 \       Type: Variable
-\   Category: Screen mode
+\   Category: Drawing the screen
 \    Summary: The original value of the IRQ1 vector
 \
 \ ******************************************************************************

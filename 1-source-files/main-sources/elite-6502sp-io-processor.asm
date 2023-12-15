@@ -2213,7 +2213,7 @@
 \
 \       Name: CLYNS
 \       Type: Subroutine
-\   Category: Utility routines
+\   Category: Drawing the screen
 \    Summary: Clear the bottom three text rows of the mode 4 screen
 \
 \ ------------------------------------------------------------------------------
@@ -2263,7 +2263,7 @@
 \
 \       Name: LYN
 \       Type: Subroutine
-\   Category: Utility routines
+\   Category: Drawing the screen
 \    Summary: Clear most of a row of pixels
 \
 \ ------------------------------------------------------------------------------
@@ -2306,7 +2306,7 @@
 \
 \       Name: sync_in
 \       Type: Subroutine
-\   Category: Screen mode
+\   Category: Drawing the screen
 \    Summary: Implement the sync_in command (wait for the vertical sync)
 \
 \ ------------------------------------------------------------------------------
@@ -2329,7 +2329,7 @@
 \
 \       Name: WSCAN
 \       Type: Subroutine
-\   Category: Screen mode
+\   Category: Drawing the screen
 \    Summary: Wait for the vertical sync
 \
 \ ------------------------------------------------------------------------------
@@ -3604,7 +3604,7 @@
 \
 \       Name: DET1
 \       Type: Subroutine
-\   Category: Screen mode
+\   Category: Drawing the screen
 \    Summary: Show or hide the dashboard (for when we die)
 \
 \ ------------------------------------------------------------------------------
