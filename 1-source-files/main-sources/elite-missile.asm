@@ -346,8 +346,9 @@ ENDMACRO
 \                       \ This gets set to the value of the original IRQ1 vector
 \                       \ by the loading process
 \                       \
-\                       \ This default value is presumably noise included at the
-\                       \ time of compilation, as it gets overwritten
+\                       \ This default value is random workspace noise left over
+\                       \ from the BBC Micro assembly process; it gets
+\                       \ overwritten
 
                         \ --- And replaced by: -------------------------------->
 
