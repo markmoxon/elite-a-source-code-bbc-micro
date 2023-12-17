@@ -26245,8 +26245,7 @@
 \       Name: Main game loop (Part 4 of 6)
 \       Type: Subroutine
 \   Category: Main loop
-\    Summary: Potentially spawn a lone bounty hunter, a Thargoid, or up to four
-\             pirates
+\    Summary: Potentially spawn a lone bounty hunter or up to four pirates
 \  Deep dive: Program flow of the main game loop
 \             Ship data blocks
 \             Fixing ship positions
@@ -26256,7 +26255,7 @@
 \ This section covers the following:
 \
 \   * Potentially spawn (47% chance) either a pack of up to 8 bounty hunters,
-\     a Thargoid, or a pack of up to 8 pirates
+\     or a pack of up to 8 pirates
 \
 \   * Also potentially spawn a Constrictor if this is the mission 1 endgame, or
 \     Thargoids if mission 2 is in progress
@@ -26319,8 +26318,8 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\                       \ Now to spawn a lone bounty hunter, a Thargoid or a
-\                       \ group of pirates
+\                       \ Now to spawn a lone bounty hunter or a group of
+\                       \ pirates
 \
 \ JSR Ze                \ Call Ze to initialise INWK to a potentially hostile
 \                       \ ship, and set A and X to random values
@@ -26333,7 +26332,7 @@
 \
 \ CMP #100              \ If the random number in A >= 100 (61% chance), jump
 \ BCS mt1               \ to mt1 to spawn pirates, otherwise keep going to
-\                       \ spawn a lone bounty hunter or a Thargoid
+\                       \ spawn a lone bounty hunter
 
                         \ --- And replaced by: -------------------------------->
 
@@ -26415,7 +26414,7 @@
 
 .focoug
 
- JSR NWSHP              \ Spawn the new ship, whether it's a pirate, Thargoid or
+ JSR NWSHP              \ Spawn the new ship, whether it's a pirate or
                         \ Constrictor
 
 .mj1

@@ -50732,8 +50732,7 @@ ENDIF
 \       Name: Main game loop for flight (Part 4 of 6)
 \       Type: Subroutine
 \   Category: Main loop
-\    Summary: Potentially spawn a lone bounty hunter, a Thargoid, or up to four
-\             pirates
+\    Summary: Potentially spawn a lone bounty hunter or up to four pirates
 \  Deep dive: Program flow of the main game loop
 \             Ship data blocks
 \             Fixing ship positions
@@ -50743,7 +50742,7 @@ ENDIF
 \ This section covers the following:
 \
 \   * Potentially spawn (47% chance) either a pack of up to 8 bounty hunters,
-\     a Thargoid, or a pack of up to 8 pirates
+\     or a pack of up to 8 pirates
 \
 \   * Also potentially spawn a Constrictor if this is the mission 1 endgame, or
 \     Thargoids if mission 2 is in progress
@@ -50869,7 +50868,7 @@ ENDIF
 
 .focoug
 
- JSR NWSHP              \ Spawn the new ship, whether it's a pirate, Thargoid or
+ JSR NWSHP              \ Spawn the new ship, whether it's a pirate or
                         \ Constrictor
 
 .mj1
