@@ -27,9 +27,9 @@ See the [introduction](#introduction) for more information, or jump straight int
 * [Building Elite-A from the source](#building-elite-a-from-the-source)
 
   * [Requirements](#requirements)
-  * [Build targets](#build-targets)
   * [Windows](#windows)
   * [Mac and Linux](#mac-and-linux)
+  * [Build options](#build-options)
   * [Verifying the output](#verifying-the-output)
   * [Log files](#log-files)
   * [Auto-deploying to the b2 emulator](#auto-deploying-to-the-b2-emulator)
@@ -139,6 +139,8 @@ For more information on flicker-free Elite, see the [hacks section of the accomp
 
 ## Building Elite-A from the source
 
+Builds are supported for both Windows and Mac/Linux systems. In all cases the build process is defined in the `Makefile` provided.
+
 ### Requirements
 
 You will need the following to build Elite-A from the source:
@@ -151,29 +153,14 @@ You will need the following to build Elite-A from the source:
 
 Let's look at how to build Elite-A from the source.
 
-### Build targets
-
-There are two main build targets available. They are:
-
-* `build` - A version with a maxed-out commander flying a Fer-de-Lance
-* `encrypt` - A version that exactly matches the released version of the game
-
-Unlike the Acornsoft versions of Elite, Elite-A is not encrypted, so there is no difference in encryption between the two targets. I have used the same target names for consistency, but the only difference is in the commander file.
-
-Builds are supported for both Windows and Mac/Linux systems. In all cases the build process is defined in the `Makefile` provided.
-
 ### Windows
 
-For Windows users, there is a batch file called `make.bat` to which you can pass one of the build targets above. Before this will work, you should edit the batch file and change the values of the `BEEBASM` and `PYTHON` variables to point to the locations of your `beebasm.exe` and `python.exe` executables. You also need to change directory to the repository folder (i.e. the same folder as `make.bat`).
+For Windows users, there is a batch file called `make.bat` which you can use to build the game. Before this will work, you should edit the batch file and change the values of the `BEEBASM` and `PYTHON` variables to point to the locations of your `beebasm.exe` and `python.exe` executables. You also need to change directory to the repository folder (i.e. the same folder as `make.bat`).
 
-All being well, doing one of the following:
-
-```
-make.bat build
-```
+All being well, entering the following into a command window:
 
 ```
-make.bat encrypt
+make.bat
 ```
 
 will produce a file called `elite-a-released.ssd` in the `5-compiled-game-discs` folder that contains the released version of Elite-A, which you can then load into an emulator, or into a real BBC Micro using a device like a Gotek.
@@ -182,45 +169,39 @@ will produce a file called `elite-a-released.ssd` in the `5-compiled-game-discs`
 
 The build process uses a standard GNU `Makefile`, so you just need to install `make` if your system doesn't already have it. If BeebAsm or Python are not on your path, then you can either fix this, or you can edit the `Makefile` and change the `BEEBASM` and `PYTHON` variables in the first two lines to point to their locations. You also need to change directory to the repository folder (i.e. the same folder as `Makefile`).
 
-All being well, doing one of the following:
+All being well, entering the following into a terminal window:
 
 ```
-make build
-```
-
-```
-make encrypt
+make
 ```
 
 will produce a file called `elite-a-released.ssd` in the `5-compiled-game-discs` folder that contains the released version of Elite-A, which you can then load into an emulator, or into a real BBC Micro using a device like a Gotek.
 
+### Build options
+
+By default the build process will create a typical Elite game disc with a standard commander and verified binaries. There are various arguments you can pass to the build to change how it works. They are:
+
+* `variant=<name>` - Build the specified variant:
+
+  * `variant=released` (default)
+  * `variant=source-disc`
+  * `variant=bug-fix`
+
+* `commander=max` - Start with a maxed-out commander
+
+* `verify=no` - Disable crc32 verification of the game binaries
+
+So, for example:
+
+`make variant=bug-fix commander=max verify=no`
+
+will build the bug-fix variant with a maxed-out commander and no crc32 verification.
+
+See below for more on the verification process.
+
 ### Verifying the output
 
-The build process also supports a verification target that prints out checksums of all the generated files, along with the checksums of the files from the original sources.
-
-You can run this verification step on its own, or you can run it once a build has finished. To run it on its own, use the following command on Windows:
-
-```
-make.bat verify
-```
-
-or on Mac/Linux:
-
-```
-make verify
-```
-
-To run a build and then verify the results, you can add two targets, like this on Windows:
-
-```
-make.bat encrypt verify
-```
-
-or this on Mac/Linux:
-
-```
-make encrypt verify
-```
+The default build process prints out checksums of all the generated files, along with the checksums of the files from the original sources. You can disable verification by passing `verify=no` to the build.
 
 The Python script `crc32.py` in the `2-build-files` folder does the actual verification, and shows the checksums and file sizes of both sets of files, alongside each other, and with a Match column that flags any discrepancies.
 
@@ -274,17 +255,19 @@ During compilation, details of every step are output in a file called `compile.t
 
 For users of the excellent [b2 emulator](https://github.com/tom-seddon/b2), you can include the build parameter `b2` to automatically load and boot the assembled disc image in b2. The b2 emulator must be running for this to work.
 
-For example, to build, verify and load into b2, you can do this on Windows:
+For example, to build, verify and load the game into b2, you can do this on Windows:
 
 ```
-make.bat encrypt verify b2
+make.bat all b2
 ```
 
 or this on Mac/Linux:
 
 ```
-make encrypt verify b2
+make all b2
 ```
+
+If you omit the `all` target then b2 will start up with the results of the last successful build.
 
 Note that you should manually choose the correct platform in b2 (I intentionally haven't automated this part to make it easier to test across multiple platforms).
 
@@ -305,13 +288,13 @@ By default the build process builds the released version, but you can build a sp
 You can add `variant=released` to produce the `elite-a-released.ssd` file that contains the released version, though that's the default value so it isn't necessary. In other words, you can build it like this:
 
 ```
-make.bat encrypt verify variant=released
+make.bat variant=released
 ```
 
 or this on a Mac or Linux:
 
 ```
-make encrypt verify variant=released
+make variant=released
 ```
 
 This will produce a file called `elite-a-released.NES` in the `5-compiled-game-discs` folder that contains the released version.
