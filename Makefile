@@ -40,15 +40,15 @@ endif
 ifeq ($(variant), source-disc)
   variant-number=2
   folder=/source-disc
-  suffix=-flicker-free--from-source-disc
+  suffix=-flicker-free-from-source-disc
 else ifeq ($(variant), bug-fix)
   variant-number=3
   folder=/bug-fix
-  suffix=-flicker-free--bug-fix
+  suffix=-flicker-free-bug-fix
 else
   variant-number=1
   folder=/released
-  suffix=-flicker-free--released
+  suffix=-flicker-free-released
 endif
 
 .PHONY:all
