@@ -42,9 +42,8 @@
 \
 \ ******************************************************************************
 
- Q% = _REMOVE_CHECKSUMS \ Set Q% to TRUE to max out the default commander, FALSE
-                        \ for the standard default commander (this is set to
-                        \ TRUE if checksums are disabled, just for convenience)
+ Q% = _MAX_COMMANDER    \ Set Q% to TRUE to max out the default commander, FALSE
+                        \ for the standard default commander
 
  N% = 67                \ N% is set to the number of bytes in the VDU table, so
                         \ we can loop through them in part 1 below
@@ -217,7 +216,7 @@
 \
 \       Name: B%
 \       Type: Variable
-\   Category: Screen mode
+\   Category: Drawing the screen
 \    Summary: VDU commands for setting the square mode 4 screen
 \  Deep dive: The split-screen mode in BBC Micro Elite
 \             Drawing monochrome pixels in mode 4
@@ -2182,7 +2181,7 @@ ENDMACRO
 \
 \       Name: TVT1
 \       Type: Variable
-\   Category: Screen mode
+\   Category: Drawing the screen
 \    Summary: Palette data for space and the two dashboard colour schemes
 \
 \ ------------------------------------------------------------------------------
@@ -2250,7 +2249,7 @@ ENDMACRO
 \
 \       Name: IRQ1
 \       Type: Subroutine
-\   Category: Screen mode
+\   Category: Drawing the screen
 \    Summary: The main screen-mode interrupt handler (IRQ1V points here)
 \  Deep dive: The split-screen mode in BBC Micro Elite
 \
