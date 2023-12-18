@@ -187,7 +187,7 @@ By default the build process will create a typical Elite game disc with a standa
   * `variant=source-disc`
   * `variant=bug-fix`
 
-* `commander=max` - Start with a maxed-out commander
+* `commander=max` - Start with a maxed-out commander (specifically, this is the test commander file from the original source, which is almost but not quite maxed-out)
 
 * `verify=no` - Disable crc32 verification of the game binaries
 
