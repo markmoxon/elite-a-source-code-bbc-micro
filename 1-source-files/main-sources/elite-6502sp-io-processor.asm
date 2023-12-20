@@ -390,6 +390,8 @@
 \ This routine calls the routine given in the tube_table lookup table for the
 \ Tube command specified in A.
 \
+\ ------------------------------------------------------------------------------
+\
 \ Arguments:
 \
 \   A                   The command number (&80-&FF)
@@ -551,6 +553,8 @@
 \ handler to implement the call. We already set WRCHV to point here in the
 \ tube_elite routine, so when the I/O processor receives a byte from the
 \ parasite over FIFO 1, the Tube host code calls this routine.
+\
+\ ------------------------------------------------------------------------------
 \
 \ Arguments:
 \
@@ -772,6 +776,8 @@
 \
 \   A                   The character to be printed (ASCII)
 \
+\ ------------------------------------------------------------------------------
+\
 \ Returns:
 \
 \   font(1 0)           The address of the MOS character definition of the
@@ -974,9 +980,13 @@
 \
 \ This stage calculates the line deltas.
 \
+\ ------------------------------------------------------------------------------
+\
 \ Returns:
 \
 \   Y                   Y is preserved
+\
+\ ------------------------------------------------------------------------------
 \
 \ Other entry points:
 \
@@ -1638,6 +1648,8 @@
 \   * Draw from (X1, Y1) at bottom left to (X2, Y2) at top right, omitting the
 \     first pixel
 \
+\ ------------------------------------------------------------------------------
+\
 \ Other entry points:
 \
 \   HL6                 Contains an RTS
@@ -1725,6 +1737,8 @@
 \
 \ To understand how this routine works, you might find it helpful to read the
 \ deep dive on "Drawing monochrome pixels in mode 4".
+\
+\ ------------------------------------------------------------------------------
 \
 \ Returns:
 \
@@ -1994,6 +2008,8 @@
 \ a distant point (i.e. where the distance ZZ >= &90). See the PIXEL routine for
 \ details, as this routine is effectively part of PIXEL.
 \
+\ ------------------------------------------------------------------------------
+\
 \ Arguments:
 \
 \   X                   The x-coordinate of the pixel within the character block
@@ -2028,6 +2044,8 @@
 \ This routine is run when the parasite sends a draw_pixel command. It draws a
 \ dot in the space view.
 \
+\ ------------------------------------------------------------------------------
+\
 \ Arguments:
 \
 \   X                   The screen x-coordinate of the point to draw
@@ -2035,6 +2053,8 @@
 \   A                   The screen y-coordinate of the point to draw
 \
 \   ZZ                  The distance of the point (further away = smaller point)
+\
+\ ------------------------------------------------------------------------------
 \
 \ Returns:
 \
@@ -2176,12 +2196,16 @@
 \
 \ Zero-fill from address (X SC) to (X SC) + &FF.
 \
+\ ------------------------------------------------------------------------------
+\
 \ Arguments:
 \
 \   Y                   Must be set to 0
 \
 \   SC                  The low byte (i.e. the offset into the page) of the
 \                       starting point of the zero-fill
+\
+\ ------------------------------------------------------------------------------
 \
 \ Returns:
 \
@@ -2232,6 +2256,8 @@
 \ clearing each row from text column 1 to 30 (so it doesn't overwrite the box
 \ border in columns 0 and 32, or the last usable column in column 31).
 \
+\ ------------------------------------------------------------------------------
+\
 \ Returns:
 \
 \   A                   A is set to 0
@@ -2270,14 +2296,20 @@
 \
 \ Set pixels 0-233 to the value in A, starting at the pixel pointed to by SC.
 \
+\ ------------------------------------------------------------------------------
+\
 \ Arguments:
 \
 \   A                   The value to store in pixels 1-233 (the only value that
 \                       is actually used is A = 0, which clears those pixels)
 \
+\ ------------------------------------------------------------------------------
+\
 \ Returns:
 \
 \   Y                   Y is set to 0
+\
+\ ------------------------------------------------------------------------------
 \
 \ Other entry points:
 \
@@ -2519,11 +2551,15 @@
 \ the vertical bar never appears in the leftmost position (though it does appear
 \ in the rightmost).
 \
+\ ------------------------------------------------------------------------------
+\
 \ Arguments:
 \
 \   A                   The offset of the vertical bar to show in the indicator,
 \                       from 0 at the far left, to 8 in the middle, and 15 at
 \                       the far right
+\
+\ ------------------------------------------------------------------------------
 \
 \ Returns:
 \
@@ -2829,6 +2865,8 @@
 \                       the Advanced User Guide for a list of internal key
 \                       numbers)
 \
+\ ------------------------------------------------------------------------------
+\
 \ Returns:
 \
 \   A                   If the key in A is being pressed, A contains the
@@ -2919,6 +2957,8 @@
 \
 \ If CTRL-P is pressed, then the routine calls the printer routine to print the
 \ screen, and returns 0 in A and X.
+\
+\ ------------------------------------------------------------------------------
 \
 \ Returns:
 \
@@ -3108,6 +3148,8 @@
 \ ------------------------------------------------------------------------------
 \
 \ Draw a single-height mode 5 dash (1 pixel high, 2 pixels wide).
+\
+\ ------------------------------------------------------------------------------
 \
 \ Arguments:
 \
@@ -3454,6 +3496,8 @@
 \                       be drawn (i.e. ECBT for the E.C.M. bulb, or SPBT for the
 \                       space station bulb)
 \
+\ ------------------------------------------------------------------------------
+\
 \ Other entry points:
 \
 \   BULB-2              Set the Y screen address
@@ -3574,6 +3618,8 @@
 \
 \ The routine name, UNWISE, sums up this approach - if anything goes wrong, the
 \ results would be messy.
+\
+\ ------------------------------------------------------------------------------
 \
 \ Other entry points:
 \
@@ -3761,6 +3807,8 @@
 \   Hyperspace Unit        E.C.M.                 Escape pod
 \   Docking computer on    In-system jump         Docking computer off
 \
+\ ------------------------------------------------------------------------------
+\
 \ Arguments:
 \
 \   Y                   The offset into the KYTB table of the key that we want
@@ -3897,6 +3945,8 @@
 \ or if the game is configured to use the Delta 14B joystick, it scans the
 \ Delta 14B keyboard for the relevant button press. It returns 0 to the parasite
 \ if the key is not being pressed, or &FF if it is.
+\
+\ ------------------------------------------------------------------------------
 \
 \ Other entry points:
 \
@@ -4192,6 +4242,8 @@
 \ This routine draws a line to the right, starting with the third pixel of the
 \ pixel row at screen address SC(1 0), and aborting if we bump into something
 \ that's already on-screen.
+\
+\ ------------------------------------------------------------------------------
 \
 \ Other entry points:
 \

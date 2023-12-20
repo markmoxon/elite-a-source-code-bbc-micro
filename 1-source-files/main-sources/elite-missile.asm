@@ -68,6 +68,8 @@
 \ in the ship blueprints, and the deep dive on "Drawing ships" for information
 \ on how vertices are used to draw 3D wireframe ships.
 \
+\ ------------------------------------------------------------------------------
+\
 \ Arguments:
 \
 \   x                   The vertex's x-coordinate
@@ -138,6 +140,8 @@ ENDMACRO
 \ in the ship blueprints, and the deep dive on "Drawing ships" for information
 \ on how edges are used to draw 3D wireframe ships.
 \
+\ ------------------------------------------------------------------------------
+\
 \ Arguments:
 \
 \   vertex1             The number of the vertex at the start of the edge
@@ -177,6 +181,8 @@ ENDMACRO
 \ See the deep dive on "Ship blueprints" for details of how faces are stored
 \ in the ship blueprints, and the deep dive on "Drawing ships" for information
 \ on how faces are used to draw 3D wireframe ships.
+\
+\ ------------------------------------------------------------------------------
 \
 \ Arguments:
 \
