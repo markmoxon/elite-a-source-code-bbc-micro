@@ -1011,6 +1011,8 @@ ENDMACRO
 \
 \ This routine is copied to &0D7A in part 1 above.
 \
+\ ------------------------------------------------------------------------------
+\
 \ Returns:
 \
 \   X                   The index for the current ship in the I.F.F. system:
@@ -1761,11 +1763,15 @@ ENDMACRO
 \
 \ See the PIXEL routine in the main game code for more details.
 \
+\ ------------------------------------------------------------------------------
+\
 \ Arguments:
 \
 \   X                   The screen x-coordinate of the pixel to draw
 \
 \   A                   The screen y-coordinate of the pixel to draw, negated
+\
+\ ------------------------------------------------------------------------------
 \
 \ Other entry points:
 \
