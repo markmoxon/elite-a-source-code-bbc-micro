@@ -21801,7 +21801,7 @@ ENDMACRO
  ECHR 'E'
  EQUB VE
 
- ECHR 'W'               \ Token 95:     "WHORESON BEETLE HEAD FLAP EAR'D
+ ECHR 'W'               \ Token 95:     "WHORESON BEETLE HEADFLAP EAR'D
  ECHR 'H'               \                KNAVE"
  ETWO 'O', 'R'          \
  ETWO 'E', 'S'          \ Encoded as:   "WH<253><237><223> <247><221><229> HEAD
