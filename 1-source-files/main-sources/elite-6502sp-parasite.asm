@@ -17015,8 +17015,6 @@ ENDIF
 \
 \ BRKV is set to point to BR1 by the loading process.
 \
-\ ------------------------------------------------------------------------------
-\
 \ Other entry points:
 \
 \   QU5                 Restart the game using the last saved commander without
@@ -17591,8 +17589,6 @@ ENDIF
 \
 \ If ESCAPE is pressed or a blank name is entered, then an empty string is
 \ returned.
-\
-\ ------------------------------------------------------------------------------
 \
 \ Returns:
 \
@@ -22932,8 +22928,6 @@ ENDMACRO
 \
 \ This part adds all the visible edges to the ship line heap, so we can draw
 \ them in part 12.
-\
-\ ------------------------------------------------------------------------------
 \
 \ Other entry points:
 \
@@ -52590,8 +52584,6 @@ ENDIF
 \
 \ ------------------------------------------------------------------------------
 \
-\ ------------------------------------------------------------------------------
-\
 \ Arguments:
 \
 \   Y                   Determines the object whose vector we are calculating:
@@ -52599,8 +52591,6 @@ ENDIF
 \                         * 0 = calculate the vector to the planet
 \
 \                         * NI% = calculate the vector to the sun/space station
-\
-\ ------------------------------------------------------------------------------
 \
 \ Other entry points:
 \

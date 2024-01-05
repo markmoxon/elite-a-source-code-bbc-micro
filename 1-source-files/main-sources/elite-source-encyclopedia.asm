@@ -14307,8 +14307,6 @@
 \ If ESCAPE is pressed or a blank name is entered, then an empty string is
 \ returned.
 \
-\ ------------------------------------------------------------------------------
-\
 \ Returns:
 \
 \   Y                   The size of the entered text, or 0 if none was entered
@@ -19001,8 +18999,6 @@
 \
 \ This part adds all the visible edges to the ship line heap, so we can draw
 \ them in part 12.
-\
-\ ------------------------------------------------------------------------------
 \
 \ Other entry points:
 \

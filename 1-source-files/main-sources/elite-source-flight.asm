@@ -28045,8 +28045,6 @@
 \
 \ ------------------------------------------------------------------------------
 \
-\ ------------------------------------------------------------------------------
-\
 \ Arguments:
 \
 \   Y                   Determines the object whose vector we are calculating:
@@ -28054,8 +28052,6 @@
 \                         * 0 = calculate the vector to the planet
 \
 \                         * NI% = calculate the vector to the sun/space station
-\
-\ ------------------------------------------------------------------------------
 \
 \ Other entry points:
 \
@@ -34148,8 +34144,6 @@ ENDMACRO
 \
 \ This part adds all the visible edges to the ship line heap, so we can draw
 \ them in part 12.
-\
-\ ------------------------------------------------------------------------------
 \
 \ Other entry points:
 \
