@@ -3212,3 +3212,16 @@ ENDIF
 
  PRINT "S.ELITE ", ~CODE%, " ", ~P%, " ", ~LOAD%, " ", ~LOAD%
  SAVE "3-assembled-output/ELITE.bin", CODE%, P%, LOAD%
+
+ PRINT "Addresses for the scramble routines in elite-checksum.py"
+ PRINT "Load address = ", ~CODE%
+ PRINT "TVT1code = ", ~TVT1code
+ PRINT "ELITE = ", ~ELITE
+ PRINT "LOADcode = ", ~LOADcode
+ PRINT "DIALS = ", ~DIALS
+ PRINT "ELITE = ", ~ELITE
+ PRINT "End of ELITE4 file = ", ~P%
+ PRINT "TVT1code = ", ~TVT1code
+ PRINT "TVT1 = ", ~TVT1
+ PRINT "NA% = ", ~NA%
+ PRINT "CHK2 = ", ~CHK2
