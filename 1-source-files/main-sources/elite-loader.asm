@@ -852,6 +852,14 @@ ENDMACRO
  LDA BYTEV+1            \ routine)
  STA old_BYTEV+2
 
+IF _BUG_FIX
+
+ JSR savews             \ The do_FILEV handler starts by restoring the filing
+                        \ system workspace, so we need to save it first so the
+                        \ handler will work
+
+ENDIF
+
  JSR set_vectors        \ Call set_vectors to update FILEV, FSCV and BYTEV to
                         \ point to the new handlers in do_FILEV, do_FSCV and
                         \ do_BYTEV
@@ -2898,6 +2906,14 @@ ENDIF
  PHX                    \ calls to the subroutine
  PHY
 
+IF _BUG_FIX
+
+ BIT wsstate            \ If bit 7 of wsstate is set then the filing system
+ BMI saverts            \ workspace is already in its safe place, so jump to
+                        \ saverts so we don't save it again
+
+ENDIF
+
  LDA #%00001000         \ Set bit 3 of the Access Control Register at SHEILA &34
  TSB VIA+&34            \ to map the filing system RAM space into &C000-&DFFF
                         \ (HAZEL), in place of the MOS VDU workspace (the TSB
@@ -2992,6 +3008,15 @@ ENDIF
  STA VIA+&30            \ Store the same value in SHEILA &30, to switch back to
                         \ the ROM that was selected before we changed it above
 
+IF _BUG_FIX
+
+ LDA #%10000000         \ Clear bit 7 of wsstate to denote that we have saved
+ STA wsstate            \ the filing system workspace
+
+.saverts
+
+ENDIF
+
  PLY                    \ Restore the status register, A, X and Y from the
  PLX                    \ stack, so they are preserved by the subroutine
  PLA
@@ -3046,6 +3071,15 @@ ENDIF
  PHA                    \ Store A and X on the stack, so we can retrieve them
  PHX                    \ later to preserve them across calls to the subroutine
 
+IF _BUG_FIX
+
+ BIT wsstate            \ If bit 7 of wsstate is clear then the filing system
+ BPL restorerts         \ workspace is already restored, so jump to restorerts
+                        \ so we don't restore it again
+ 
+
+ENDIF
+
                         \ We now want to copy the first three pages from the
                         \ safe place back to &C00), reversing the copy that we
                         \ did in savews. As with savews, the location of the
@@ -3097,6 +3131,15 @@ ENDIF
 
  BNE getws              \ Loop back until we have copied a whole page of bytes
                         \ (three times)
+
+IF _BUG_FIX
+
+ STZ wsstate            \ Clear bit 7 of wsstate to denote that we have restored
+                        \ the filing system workspace
+
+.restorerts
+
+ENDIF
 
  PLX                    \ Retore A and X from the stack, so they are preserved
  PLA                    \ by the subroutine
@@ -3197,6 +3240,32 @@ ENDIF
                         \ returns from the subroutine using a tail call
 
                         \ --- End of added code ------------------------------->
+
+\ ******************************************************************************
+\
+\       Name: wsstate
+\       Type: Subroutine
+\   Category: Variable
+\    Summary: Flag to keep track of whether we have saved or restored the filing
+\             system workspace
+\
+\ ******************************************************************************
+
+.wsstate
+
+IF _BUG_FIX
+
+ EQUB 0                 \ Bit 7 determines the state of the filing system
+                        \ workspace and MOS character definitions:
+                        \
+                        \   * Clear = filing system workspace restored to &C000
+                        \             so it is safe to do file operations
+                        \
+                        \   * Set = filing system workspace saved to safe place
+                        \           and replaced by MOS character definitions
+                        \           at &C000
+
+ENDIF
 
  dd00_len = P% - do_FILEV
 
