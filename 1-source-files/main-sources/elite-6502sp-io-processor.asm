@@ -62,6 +62,19 @@
  ESCP = &0386           \ The flag that determines whether we have an escape pod
                         \ fitted, matching the address in the main game code
 
+                        \ --- Mod: Code added for Elite-A: -------------------->
+
+IF _BUG_FIX
+
+ savews = &DD06         \ Addresses for the workspace routines from the loader
+ restorews = &DD65      \ so we can call them to ensure the MOS character
+ wsstate = &DDBA        \ definitions are loaded before printing text on the
+                        \ BBC Master
+
+ENDIF
+
+                        \ --- End of added code ------------------------------->
+
  VIA = &FE00            \ Memory-mapped space for accessing internal hardware,
                         \ such as the video ULA, 6845 CRTC and 6522 VIAs (also
                         \ known as SHEILA)
@@ -498,6 +511,12 @@
  EQUW HANGER            \ &9A   picture_h(line_count, multiple_ships)
  EQUW HA2               \ &9B   picture_v(line_count)
 
+IF _BUG_FIX
+
+ EQUW savews            \ &9C   savews()
+
+ENDIF
+
 \ ******************************************************************************
 \
 \       Name: CHPR
@@ -597,6 +616,17 @@
  BEQ wrch_quit          \ If A = 0 then there is no character to print, so jump
                         \ to wrch_quit to return from the subroutine
 
+                        \ --- Mod: Code added for Elite-A: -------------------->
+
+IF _BUG_FIX
+
+ JSR SwitchToCharSet    \ Switch &C000 to the MOS character definitions if we
+                        \ are printing while there is disc activity
+
+ENDIF
+
+                        \ --- End of added code ------------------------------->
+
  CMP #127               \ If A = 127 then this is a delete character, so jump
  BEQ wrch_del           \ to wrch_del to erase the character to the left of the
                         \ cursor
@@ -624,6 +654,16 @@
  INC XC                 \ Move the text cursor to the right by 1 column
 
 .wrch_quit
+
+                        \ --- Mod: Code added for Elite-A: -------------------->
+
+IF _BUG_FIX
+
+ JSR SwitchToFileSys    \ Switch &C000 back to the filing system workspace
+
+ENDIF
+
+                        \ --- End of added code ------------------------------->
 
  LDY YSAV2              \ Restore the values of the A, X and Y registers that we
  LDX XSAV2              \ saved above
@@ -882,6 +922,89 @@
                         \ location where this character should go
 
  RTS                    \ Return from the subroutine
+
+\ ******************************************************************************
+\
+\       Name: SwitchToCharSet
+\       Type: Subroutine
+\   Category: Encyclopedia
+\    Summary: Switch the MOS character definitions into memory at &C000 on a BBC
+\             Master
+\
+\ ******************************************************************************
+
+                        \ --- Mod: Code added for Elite-A: -------------------->
+
+IF _BUG_FIX
+
+.wsstatecopy
+
+ EQUB 0                 \ We store a copy of the wstate here so we know which
+                        \ state to switch back to after printing
+
+.SwitchToCharSet
+
+                        \ This routine switches the MOS character definitions
+                        \ into memory at &C000 on a BBC Master
+
+ LDA #0                 \ Call OSBYTE with A = 0 and X = 1 to fetch bit 0 of the
+ LDX #1                 \ operating system version into X
+ JSR OSBYTE
+
+ CPX #3                 \ If X =< 3 then this is not a BBC Master, so jump to
+ BCC char1              \ char1 to continue drawing the character
+
+ LDA wsstate            \ Copy wsstate into wsstatecopy
+ STA wsstatecopy
+
+ JSR savews             \ Call savews to put the character set in the correct
+                        \ place
+
+.char1
+
+ LDA K3                 \ Set A to the character to print
+
+ RTS                    \ Return from the subroutine
+
+                        \ --- End of added code ------------------------------->
+
+\ ******************************************************************************
+\
+\       Name: SwitchToFileSys
+\       Type: Subroutine
+\   Category: Encyclopedia
+\    Summary: Restore the filing system workspace to &C000 on a BBC Master
+\
+\ ******************************************************************************
+
+                        \ --- Mod: Code added for Elite-A: -------------------->
+
+.SwitchToFileSys
+
+                        \ This routine restores the filing system workspace to
+                        \ &C000 on a BBC Master, but only if we overwrote it in
+                        \ SwitchToCharSet
+
+ LDA #0                 \ Call OSBYTE with A = 0 and X = 1 to fetch bit 0 of the
+ LDX #1                 \ operating system version into X
+ JSR OSBYTE
+
+ CPX #3                 \ If X =< 3 then this is not a BBC Master, so jump to
+ BCC file1              \ file1 to continue drawing the character
+
+ BIT wsstatecopy        \ If bit 7 of wsstatecopy is set then the character set
+ BMI file1              \ was already present before this call, so skip the
+                        \ following so we don't change that
+
+ JSR restorews          \ Call restorews to restore the filing system workspace
+
+.file1
+
+ RTS                    \ Return from the subroutine
+
+ENDIF
+
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \

@@ -16919,6 +16919,17 @@ ENDIF
 
 .boot_in
 
+IF _BUG_FIX
+
+ LDA #&9C               \ Send command &9C to the I/O processor:
+ JSR tube_write         \
+                        \   savews()
+                        \
+                        \ which will switch the MOS character definitions into
+                        \ &C000 so we can print properly
+
+ENDIF
+
  LDA #0                 \ Set save_lock to 0 to indicate there are no unsaved
  STA save_lock          \ changes in the commander file
 
