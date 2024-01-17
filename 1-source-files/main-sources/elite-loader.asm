@@ -852,6 +852,8 @@ ENDMACRO
  LDA BYTEV+1            \ routine)
  STA old_BYTEV+2
 
+                        \ --- Mod: Code added for Elite-A: -------------------->
+
 IF _BUG_FIX
 
  JSR savews             \ The do_FILEV handler starts by restoring the filing
@@ -859,6 +861,8 @@ IF _BUG_FIX
                         \ handler will work
 
 ENDIF
+
+                        \ --- End of added code ------------------------------->
 
  JSR set_vectors        \ Call set_vectors to update FILEV, FSCV and BYTEV to
                         \ point to the new handlers in do_FILEV, do_FSCV and
@@ -2906,6 +2910,8 @@ ENDIF
  PHX                    \ calls to the subroutine
  PHY
 
+                        \ --- Mod: Code added for Elite-A: -------------------->
+
 IF _BUG_FIX
 
  BIT wsstate            \ If bit 7 of wsstate is set then the filing system
@@ -2913,6 +2919,8 @@ IF _BUG_FIX
                         \ saverts so we don't save it again
 
 ENDIF
+
+                        \ --- End of added code ------------------------------->
 
  LDA #%00001000         \ Set bit 3 of the Access Control Register at SHEILA &34
  TSB VIA+&34            \ to map the filing system RAM space into &C000-&DFFF
@@ -3008,6 +3016,8 @@ ENDIF
  STA VIA+&30            \ Store the same value in SHEILA &30, to switch back to
                         \ the ROM that was selected before we changed it above
 
+                        \ --- Mod: Code added for Elite-A: -------------------->
+
 IF _BUG_FIX
 
  LDA #%10000000         \ Clear bit 7 of wsstate to denote that we have saved
@@ -3016,6 +3026,8 @@ IF _BUG_FIX
 .saverts
 
 ENDIF
+
+                        \ --- End of added code ------------------------------->
 
  PLY                    \ Restore the status register, A, X and Y from the
  PLX                    \ stack, so they are preserved by the subroutine
@@ -3071,14 +3083,17 @@ ENDIF
  PHA                    \ Store A and X on the stack, so we can retrieve them
  PHX                    \ later to preserve them across calls to the subroutine
 
+                        \ --- Mod: Code added for Elite-A: -------------------->
+
 IF _BUG_FIX
 
  BIT wsstate            \ If bit 7 of wsstate is clear then the filing system
  BPL restorerts         \ workspace is already restored, so jump to restorerts
                         \ so we don't restore it again
- 
 
 ENDIF
+
+                        \ --- End of added code ------------------------------->
 
                         \ We now want to copy the first three pages from the
                         \ safe place back to &C00), reversing the copy that we
@@ -3132,6 +3147,8 @@ ENDIF
  BNE getws              \ Loop back until we have copied a whole page of bytes
                         \ (three times)
 
+                        \ --- Mod: Code added for Elite-A: -------------------->
+
 IF _BUG_FIX
 
  STZ wsstate            \ Clear bit 7 of wsstate to denote that we have restored
@@ -3140,6 +3157,8 @@ IF _BUG_FIX
 .restorerts
 
 ENDIF
+
+                        \ --- End of added code ------------------------------->
 
  PLX                    \ Retore A and X from the stack, so they are preserved
  PLA                    \ by the subroutine
@@ -3251,6 +3270,8 @@ ENDIF
 \
 \ ******************************************************************************
 
+                        \ --- Mod: Code added for Elite-A: -------------------->
+
 IF _BUG_FIX
 
 .wsstate
@@ -3266,6 +3287,8 @@ IF _BUG_FIX
                         \           at &C000
 
 ENDIF
+
+                        \ --- End of added code ------------------------------->
 
  dd00_len = P% - do_FILEV
 
