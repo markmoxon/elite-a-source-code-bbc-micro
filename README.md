@@ -49,7 +49,7 @@ See the [introduction](#introduction) for more information, or jump straight int
 
 This repository contains the original source code for Angus Duggan's Elite-A on the BBC Micro.
 
-You can build the fully functioning game from this source. [Three variants](#building-different-variants-of-elite-a) are currently supported: the officially released version from Angus's site, the variant produced by the original source discs (which was never released), and a variant that fixes various bugs.
+You can build the fully functioning game from this source. [Three variants](#building-different-variants-of-elite-a) are currently supported: the officially released version from Angus's site, the variant produced by the original source discs (which was never released), and a variant that fixes various bugs and which works on the BBC Master (which the original doesn't).
 
 It is a companion to the [bbcelite.com website](https://www.bbcelite.com), which contains all the code from this repository, but laid out in a much more human-friendly fashion. The links at the top of this page will take you to repositories for the other versions of Elite that are covered by this project.
 
@@ -418,12 +418,12 @@ Results for variant: bug-fix
 [--originals--]  [---output----]
 Checksum   Size  Checksum   Size  Match  Filename
 -----------------------------------------------------------
-0ce6de36  19945  0ce6de36  19945   Yes   1.D.bin
-fdf8073b  16778  fdf8073b  16778   Yes   1.E.bin
+d733f7f3  19997  d733f7f3  19997   Yes   1.D.bin
+cd68d57e  16796  cd68d57e  16796   Yes   1.E.bin
 14ee8b20  17432  14ee8b20  17432   Yes   1.F.bin
-3d638042   1956  3d638042   1956   Yes   2.H.bin
-1336cda8  43089  1336cda8  43089   Yes   2.T.bin
-171ccea5   5363  171ccea5   5363   Yes   ELITE.bin
+07b3750f   2008  07b3750f   2008   Yes   2.H.bin
+f02c9501  43094  f02c9501  43094   Yes   2.T.bin
+067375d2   5385  067375d2   5385   Yes   ELITE.bin
 4f2febe4    256  4f2febe4    256   Yes   MISSILE.bin
 678c1c7f   2560  678c1c7f   2560   Yes   S.A.bin
 cae56eda   2560  cae56eda   2560   Yes   S.B.bin
@@ -457,7 +457,7 @@ You can see the differences between the variants by searching the source code fo
 
 The only difference in the source disc variant is that the latter has considerably lower ship prices.
 
-There is a bug in the original version of Elite-A that prevents splinters from displaying properly, which makes mining all but impossible. The bug fix variant fixes that bug, as well as an incorrect cargo capacity in the Adder ship card in the encyclopedia.
+The bug fix variant works on the BBC Master and BBC Master with 6502 Second Processor, which the original version of Elite-A doesn't. There is also a bug in the original version that prevents splinters from displaying properly, which makes mining all but impossible. The bug fix variant fixes that bug, as well as an incorrect cargo capacity in the Adder ship card in the encyclopedia.
 
 See the [accompanying website](https://www.bbcelite.com/elite-a/releases.html) for a comprehensive list of differences between the variants.
 
