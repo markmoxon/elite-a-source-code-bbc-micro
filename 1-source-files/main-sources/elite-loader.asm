@@ -3251,9 +3251,9 @@ ENDIF
 \
 \ ******************************************************************************
 
-.wsstate
-
 IF _BUG_FIX
+
+.wsstate
 
  EQUB 0                 \ Bit 7 determines the state of the filing system
                         \ workspace and MOS character definitions:

@@ -132,6 +132,16 @@
  CHK = &11D4            \ The address of the first checksum byte for the saved
                         \ commander data file, as set in elite-loader.asm
 
+IF _BUG_FIX
+
+ savews = &DD06         \ Addresses for the workspace routines from the loader
+ restorews = &DD65      \ so we can call them to ensure the MOS character
+ wsstate = &DDBA        \ definitions are loaded before printing text on the
+                        \ BBC Master
+
+ENDIF
+
+
  SHIP_MISSILE = &7F00   \ The address of the missile ship blueprint, as set in
                         \ elite-loader.asm
 
@@ -8369,6 +8379,13 @@
  STY YSAV2              \ them at the end (so they don't get changed by this
  STX XSAV2              \ routine)
 
+IF _BUG_FIX
+
+ JSR SwitchToCharSet    \ Switch &C000 to the MOS character definitions if we
+                        \ are printing while there is disc activity
+
+ENDIF
+
 .RRNEW
 
  LDY QQ17               \ Load the QQ17 flag, which contains the text printing
@@ -8684,6 +8701,12 @@
 
 .RR4
 
+IF _BUG_FIX
+
+ JSR SwitchToFileSystem \ Switch &C000 back to the filing system workspace
+
+ENDIF
+
  LDY YSAV2              \ We're done printing, so restore the values of the
  LDX XSAV2              \ A, X and Y registers that we saved above and clear
  LDA K3                 \ the C flag, so everything is back to how it was
@@ -8697,6 +8720,68 @@
 
  JMP RR4                \ Jump to RR4 to restore the registers and return from
                         \ the subroutine using a tail call
+
+IF _BUG_FIX
+
+.wsstatecopy
+
+ EQUB 0                 \ We store a copy of the wstate here so we know which
+                        \ state to switch back to after printing
+
+.SwitchToCharSet
+
+                        \ This routine switches the MOS character set into
+                        \ memory at &C000 on a BBC Master when CATF is non-zero
+
+ LDX CATF               \ If CATF = 0, jump to char1, otherwise we are
+ BEQ char1              \ printing a disc catalogue
+
+ LDA #0                 \ Call OSBYTE with A = 0 and X = 1 to fetch bit 0 of the
+ LDX #1                 \ operating system version into X
+ JSR OSBYTE
+
+ CPX #3                 \ If X =< 3 then this is not a BBC Master, so jump to
+ BCC char1              \ char1 to continue drawing the character
+
+ LDA wsstate            \ Copy wsstate into wsstatecopy
+ STA wsstatecopy
+
+ JSR savews             \ Call savews to put the character set in the correct
+                        \ place
+
+.char1
+
+ LDA K3                 \ Set A to the character to print
+
+ RTS                    \ Return from the subroutine
+
+.SwitchToFileSystem
+
+                        \ This routine restores the filing system workspace to
+                        \ &C000 on a BBC Master, but only if we overwrote it
+                        \ in SwitchToCharSet
+
+ LDX CATF               \ If CATF = 0, jump to file1, otherwise we are
+ BEQ file1              \ printing a disc catalogue
+
+ LDA #0                 \ Call OSBYTE with A = 0 and X = 1 to fetch bit 0 of the
+ LDX #1                 \ operating system version into X
+ JSR OSBYTE
+
+ CPX #3                 \ If X =< 3 then this is not a BBC Master, so jump to
+ BCC file1              \ file1 to continue drawing the character
+
+ BIT wsstatecopy        \ If bit 7 of wsstatecopy is set then the character set
+ BMI file1              \ was already present before this call, so skip the
+                        \ following so we don't change that
+
+ JSR restorews          \ Call restorews to restore the filing system workspace
+
+.file1
+
+ RTS                    \ Return from the subroutine
+
+ENDIF
 
 \ ******************************************************************************
 \
@@ -24438,6 +24523,15 @@ ENDIF
 
                         \ --- End of replacement ------------------------------>
 
+IF _BUG_FIX
+
+ LDY #1                 \ Set CATF to non-zero so the character routine at CHPR
+ STY CATF               \ knows we are printing while disc activity is present
+
+ JSR SwitchToCharSet    \ Switch &C000 to the MOS character definitions
+
+ENDIF
+
  LDY #0                 \ Set Y to 0 to use as a loop counter below
 
  LDA #7                 \ Set A = 7 to generate a beep before we print the error
@@ -24459,6 +24553,15 @@ ENDIF
                         \ JSR OSWRCH above to print the it, and keep looping
                         \ until we fetch a zero (which marks the end of the
                         \ message)
+
+IF _BUG_FIX
+
+ JSR SwitchToFileSystem \ Switch &C000 back to the filing system workspace
+
+ LDY #0                 \ Set CATF to zero so the character routine at CHPR
+ STY CATF               \ goes back to normal printing
+
+ENDIF
 
  BEQ retry              \ Jump to retry to wait for a key press and display the
                         \ disc access menu (this BEQ is effectively a JMP, as we
@@ -38337,7 +38440,15 @@ ENDMACRO
  FACE        0,        0,     -160,         31    \ Face 8
  FACE        0,      -27,        0,         31    \ Face 9
 
+IF _RELEASED OR _SOURCE_DISC
+
  SKIP 171               \ These bytes appear to be unused
+
+ELIF _BUG_FIX
+
+ SKIP 147               \ These bytes appear to be unused
+
+ENDIF
 
 \ ******************************************************************************
 \
