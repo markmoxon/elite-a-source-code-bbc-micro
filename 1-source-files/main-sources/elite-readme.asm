@@ -67,7 +67,7 @@ ELIF _SOURCE_DISC
 
 ELIF _BUG_FIX
 
- EQUS "*| Variant: Bug fixes (mining bug)"
+ EQUS "*| Variant: Bug fixes"
  EQUB 13
 
 ENDIF

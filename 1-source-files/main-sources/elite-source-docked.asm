@@ -135,6 +135,19 @@
  SHIP_MISSILE = &7F00   \ The address of the missile ship blueprint, as set in
                         \ elite-loader.asm
 
+                        \ --- Mod: Code added for Elite-A: -------------------->
+
+IF _BUG_FIX
+
+ savews = &DD06         \ Addresses for the workspace routines from the loader
+ restorews = &DD65      \ so we can call them to ensure the MOS character
+ wsstate = &DDBA        \ definitions are loaded before printing text on the
+                        \ BBC Master
+
+ENDIF
+
+                        \ --- End of added code ------------------------------->
+
  VIA = &FE00            \ Memory-mapped space for accessing internal hardware,
                         \ such as the video ULA, 6845 CRTC and 6522 VIAs (also
                         \ known as SHEILA)
@@ -2391,6 +2404,13 @@
 \ JSR DEEOR             \ Decrypt the newly loaded code
 
                         \ --- And replaced by: -------------------------------->
+
+IF _BUG_FIX
+
+ JSR SwitchToCharSet+5  \ Switch &C000 to the MOS character definitions even if
+                        \ we are not in the middle of disc activity
+
+ENDIF
 
  LDA KL+1               \ Before loading the docked code, the encyclopedia code
  BNE INBAY              \ sets KL+1 to a non-zero value (in the launch routine),
@@ -8389,6 +8409,17 @@
  STY YSAV2              \ them at the end (so they don't get changed by this
  STX XSAV2              \ routine)
 
+                        \ --- Mod: Code added for Elite-A: -------------------->
+
+IF _BUG_FIX
+
+ JSR SwitchToCharSet    \ Switch &C000 to the MOS character definitions if we
+                        \ are printing while there is disc activity
+
+ENDIF
+
+                        \ --- End of added code ------------------------------->
+
 .RRNEW
 
  LDY QQ17               \ Load the QQ17 flag, which contains the text printing
@@ -8704,6 +8735,16 @@
 
 .RR4
 
+                        \ --- Mod: Code added for Elite-A: -------------------->
+
+IF _BUG_FIX
+
+ JSR SwitchToFileSys    \ Switch &C000 back to the filing system workspace
+
+ENDIF
+
+                        \ --- End of added code ------------------------------->
+
  LDY YSAV2              \ We're done printing, so restore the values of the
  LDX XSAV2              \ A, X and Y registers that we saved above and clear
  LDA K3                 \ the C flag, so everything is back to how it was
@@ -8717,6 +8758,102 @@
 
  JMP RR4                \ Jump to RR4 to restore the registers and return from
                         \ the subroutine using a tail call
+
+\ ******************************************************************************
+\
+\       Name: SwitchToCharSet
+\       Type: Subroutine
+\   Category: Encyclopedia
+\    Summary: Switch the MOS character definitions into memory at &C000 on a BBC
+\             Master
+\
+\ ******************************************************************************
+
+                        \ --- Mod: Code added for Elite-A: -------------------->
+
+IF _BUG_FIX
+
+.wsstatecopy
+
+ EQUB 0                 \ We store a copy of the wstate here so we know which
+                        \ state to switch back to after printing
+
+.SwitchToCharSet
+
+                        \ This routine switches the MOS character definitions
+                        \ into memory at &C000 on a BBC Master when CATF is
+                        \ non-zero
+                        \
+                        \ Call it at SwitchToCharSet+5 to switch the character
+                        \ set irrespective of the value of CATF
+
+ LDX CATF               \ If CATF = 0, jump to char1, otherwise we are
+ BEQ char1              \ printing a disc catalogue
+
+ LDA #0                 \ Call OSBYTE with A = 0 and X = 1 to fetch bit 0 of the
+ LDX #1                 \ operating system version into X
+ JSR OSBYTE
+
+ CPX #3                 \ If X =< 3 then this is not a BBC Master, so jump to
+ BCC char1              \ char1 to continue drawing the character
+
+ LDA wsstate            \ Copy wsstate into wsstatecopy
+ STA wsstatecopy
+
+ JSR savews             \ Call savews to put the character set in the correct
+                        \ place
+
+.char1
+
+ LDA K3                 \ Set A to the character to print
+
+ RTS                    \ Return from the subroutine
+
+                        \ --- End of added code ------------------------------->
+
+\ ******************************************************************************
+\
+\       Name: SwitchToFileSys
+\       Type: Subroutine
+\   Category: Encyclopedia
+\    Summary: Restore the filing system workspace to &C000 on a BBC Master
+\
+\ ******************************************************************************
+
+                        \ --- Mod: Code added for Elite-A: -------------------->
+
+.SwitchToFileSys
+
+                        \ This routine restores the filing system workspace to
+                        \ &C000 on a BBC Master, but only if CATF is non-zero
+                        \ and we overwrote it in SwitchToCharSet
+                        \
+                        \ Call it at SwitchToFileSys+5 to restore the workspace
+                        \ irrespective of the value of CATF
+
+ LDX CATF               \ If CATF = 0, jump to file1, otherwise we are
+ BEQ file1              \ printing a disc catalogue
+
+ LDA #0                 \ Call OSBYTE with A = 0 and X = 1 to fetch bit 0 of the
+ LDX #1                 \ operating system version into X
+ JSR OSBYTE
+
+ CPX #3                 \ If X =< 3 then this is not a BBC Master, so jump to
+ BCC file1              \ file1 to continue drawing the character
+
+ BIT wsstatecopy        \ If bit 7 of wsstatecopy is set then the character set
+ BMI file1              \ was already present before this call, so skip the
+                        \ following so we don't change that
+
+ JSR restorews          \ Call restorews to restore the filing system workspace
+
+.file1
+
+ RTS                    \ Return from the subroutine
+
+ENDIF
+
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -24456,6 +24593,13 @@ ENDIF
                         \ us both a byte in this instruction, as well the byte
                         \ of the stack variable
 
+IF _BUG_FIX
+
+ JSR SwitchToCharSet+5  \ Switch &C000 to the MOS character definitions even if
+                        \ we are not in the middle of disc activity
+
+ENDIF
+
                         \ --- End of replacement ------------------------------>
 
  LDY #0                 \ Set Y to 0 to use as a loop counter below
@@ -24479,6 +24623,17 @@ ENDIF
                         \ JSR OSWRCH above to print the it, and keep looping
                         \ until we fetch a zero (which marks the end of the
                         \ message)
+
+                        \ --- Mod: Code added for Elite-A: -------------------->
+
+IF _BUG_FIX
+
+ JSR SwitchToFileSys+5  \ Switch &C000 back to the filing system workspace if
+                        \ this was the case at the start of the routine
+
+ENDIF
+
+                        \ --- End of added code ------------------------------->
 
  BEQ retry              \ Jump to retry to wait for a key press and display the
                         \ disc access menu (this BEQ is effectively a JMP, as we
@@ -38849,7 +39004,15 @@ ENDMACRO
  FACE        0,        0,     -160,         31    \ Face 8
  FACE        0,      -27,        0,         31    \ Face 9
 
+IF _RELEASED OR _SOURCE_DISC
+
  SKIP 169               \ These bytes appear to be unused
+
+ELIF _BUG_FIX
+
+ SKIP 152               \ These bytes appear to be unused
+
+ENDIF
 
 \ ******************************************************************************
 \

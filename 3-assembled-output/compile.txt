@@ -112631,6 +112631,18 @@ End macro FNE
      DDA5   4C 00 01   JMP &0100
 S.ELITE &1900  &2DF3  &1900  &1900 
 Saving file '3-assembled-output/ELITE.bin'
+Addresses for the scramble routines in elite-checksum.py
+Load address = &1900 
+TVT1code = &2968 
+ELITE = &2A4B 
+LOADcode = &1BB5 
+DIALS = &1D68 
+ELITE = &2A4B 
+End of ELITE4 file = &2DF3 
+TVT1code = &2968 
+TVT1 = &1100 
+NA% = &1181 
+CHK2 = &11D3 
 .XX21
      5600   00 7F
      5602   5D 56
@@ -191975,6 +191987,11 @@ Saving file '3-assembled-output/S.W.bin'
      0155   0D
      0156   2A 7C 20 ...
      0179   0D
-     017A   2A 7C 20 ...
-     01A0   0D
+     017A   2A 7C 
+     017C   0D
+     017D   2A 7C 20 ...
+     0187   32 30 32 ...
+     019A   0D
+     019B   2A 7C 20 ...
+     01C1   0D
 Saving file '3-assembled-output/!BOOT.txt'
