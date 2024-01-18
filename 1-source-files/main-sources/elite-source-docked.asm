@@ -135,8 +135,6 @@
  SHIP_MISSILE = &7F00   \ The address of the missile ship blueprint, as set in
                         \ elite-loader.asm
 
-                        \ --- Mod: Code added for Elite-A: -------------------->
-
 IF _BUG_FIX
 
  savews = &DD06         \ Addresses for the workspace routines from the loader
@@ -145,8 +143,6 @@ IF _BUG_FIX
                         \ BBC Master
 
 ENDIF
-
-                        \ --- End of added code ------------------------------->
 
  VIA = &FE00            \ Memory-mapped space for accessing internal hardware,
                         \ such as the video ULA, 6845 CRTC and 6522 VIAs (also
@@ -8789,6 +8785,8 @@ IF _BUG_FIX
 
  RTS                    \ Return from the subroutine
 
+ENDIF
+
                         \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
@@ -8801,6 +8799,8 @@ IF _BUG_FIX
 \ ******************************************************************************
 
                         \ --- Mod: Code added for Elite-A: -------------------->
+
+IF _BUG_FIX
 
 .SwitchToFileSys
 
