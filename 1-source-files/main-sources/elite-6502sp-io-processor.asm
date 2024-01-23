@@ -62,8 +62,6 @@
  ESCP = &0386           \ The flag that determines whether we have an escape pod
                         \ fitted, matching the address in the main game code
 
-                        \ --- Mod: Code added for Elite-A: -------------------->
-
 IF _BUG_FIX
 
  savews = &DD06         \ Addresses for the workspace routines from the loader
@@ -72,8 +70,6 @@ IF _BUG_FIX
                         \ BBC Master
 
 ENDIF
-
-                        \ --- End of added code ------------------------------->
 
  VIA = &FE00            \ Memory-mapped space for accessing internal hardware,
                         \ such as the video ULA, 6845 CRTC and 6522 VIAs (also
@@ -616,16 +612,12 @@ ENDIF
  BEQ wrch_quit          \ If A = 0 then there is no character to print, so jump
                         \ to wrch_quit to return from the subroutine
 
-                        \ --- Mod: Code added for Elite-A: -------------------->
-
 IF _BUG_FIX
 
  JSR SwitchToCharSet    \ Switch &C000 to the MOS character definitions if we
                         \ are printing while there is disc activity
 
 ENDIF
-
-                        \ --- End of added code ------------------------------->
 
  CMP #127               \ If A = 127 then this is a delete character, so jump
  BEQ wrch_del           \ to wrch_del to erase the character to the left of the
@@ -655,15 +647,11 @@ ENDIF
 
 .wrch_quit
 
-                        \ --- Mod: Code added for Elite-A: -------------------->
-
 IF _BUG_FIX
 
  JSR SwitchToFileSys    \ Switch &C000 back to the filing system workspace
 
 ENDIF
-
-                        \ --- End of added code ------------------------------->
 
  LDY YSAV2              \ Restore the values of the A, X and Y registers that we
  LDX XSAV2              \ saved above
@@ -927,13 +915,11 @@ ENDIF
 \
 \       Name: SwitchToCharSet
 \       Type: Subroutine
-\   Category: Encyclopedia
+\   Category: Utility routines
 \    Summary: Switch the MOS character definitions into memory at &C000 on a BBC
 \             Master
 \
 \ ******************************************************************************
-
-                        \ --- Mod: Code added for Elite-A: -------------------->
 
 IF _BUG_FIX
 
@@ -966,18 +952,18 @@ IF _BUG_FIX
 
  RTS                    \ Return from the subroutine
 
-                        \ --- End of added code ------------------------------->
+ENDIF
 
 \ ******************************************************************************
 \
 \       Name: SwitchToFileSys
 \       Type: Subroutine
-\   Category: Encyclopedia
+\   Category: Utility routines
 \    Summary: Restore the filing system workspace to &C000 on a BBC Master
 \
 \ ******************************************************************************
 
-                        \ --- Mod: Code added for Elite-A: -------------------->
+IF _BUG_FIX
 
 .SwitchToFileSys
 
@@ -1003,8 +989,6 @@ IF _BUG_FIX
  RTS                    \ Return from the subroutine
 
 ENDIF
-
-                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \

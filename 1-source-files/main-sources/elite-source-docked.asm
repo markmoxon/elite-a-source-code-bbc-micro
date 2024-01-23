@@ -135,8 +135,6 @@
  SHIP_MISSILE = &7F00   \ The address of the missile ship blueprint, as set in
                         \ elite-loader.asm
 
-                        \ --- Mod: Code added for Elite-A: -------------------->
-
 IF _BUG_FIX
 
  savews = &DD06         \ Addresses for the workspace routines from the loader
@@ -145,8 +143,6 @@ IF _BUG_FIX
                         \ BBC Master
 
 ENDIF
-
-                        \ --- End of added code ------------------------------->
 
  VIA = &FE00            \ Memory-mapped space for accessing internal hardware,
                         \ such as the video ULA, 6845 CRTC and 6522 VIAs (also
@@ -8763,9 +8759,16 @@ ENDIF
 \
 \       Name: SwitchToCharSet
 \       Type: Subroutine
-\   Category: Encyclopedia
+\   Category: Utility routines
 \    Summary: Switch the MOS character definitions into memory at &C000 on a BBC
 \             Master
+\
+\ ------------------------------------------------------------------------------
+\
+\ Other entry points:
+\
+\   SwitchToCharSet+5   Switch the character set irrespective of the value of
+\                       CATF
 \
 \ ******************************************************************************
 
@@ -8809,18 +8812,28 @@ IF _BUG_FIX
 
  RTS                    \ Return from the subroutine
 
+ENDIF
+
                         \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
 \       Name: SwitchToFileSys
 \       Type: Subroutine
-\   Category: Encyclopedia
+\   Category: Utility routines
 \    Summary: Restore the filing system workspace to &C000 on a BBC Master
+\
+\ ------------------------------------------------------------------------------
+\
+\ Other entry points:
+\
+\   SwitchToFileSys+5   Restore the workspace irrespective of the value of CATF
 \
 \ ******************************************************************************
 
                         \ --- Mod: Code added for Elite-A: -------------------->
+
+IF _BUG_FIX
 
 .SwitchToFileSys
 

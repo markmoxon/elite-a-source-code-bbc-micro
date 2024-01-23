@@ -97,8 +97,6 @@
  XX21 = &5600           \ The address of the ship blueprints lookup table, where
                         \ the chosen ship blueprints file is loaded
 
-                        \ --- Mod: Code added for Elite-A: -------------------->
-
 IF _BUG_FIX
 
  savews = &DD06         \ Addresses for the savews routine from the loader
@@ -107,8 +105,6 @@ IF _BUG_FIX
                         \ BBC Master
 
 ENDIF
-
-                        \ --- End of added code ------------------------------->
 
  VIA = &FE00            \ Memory-mapped space for accessing internal hardware,
                         \ such as the video ULA, 6845 CRTC and 6522 VIAs (also
@@ -2322,16 +2318,11 @@ ENDIF
 
  JSR BRKBK              \ Set the standard BRKV handler for the game
 
-                        \ --- Mod: Code added for Elite-A: -------------------->
-
 IF _BUG_FIX
 
- JSR SwitchToCharSet+5  \ Switch &C000 to the MOS character definitions even if
-                        \ we are not in the middle of disc activity
+ JSR SwitchToCharSet    \ Switch &C000 to the MOS character definitions
 
 ENDIF
-
-                        \ --- End of added code ------------------------------->
 
  JSR RES2               \ Reset a number of flight variables and workspaces
 
@@ -21433,7 +21424,7 @@ ENDIF
 \
 \       Name: SwitchToCharSet
 \       Type: Subroutine
-\   Category: Encyclopedia
+\   Category: Utility routines
 \    Summary: Switch the MOS character definitions into memory at &C000 on a BBC
 \             Master
 \
@@ -21463,6 +21454,7 @@ IF _BUG_FIX
  RTS                    \ Return from the subroutine
 
 ENDIF
+
                         \ --- End of added code ------------------------------->
 
 \ ******************************************************************************

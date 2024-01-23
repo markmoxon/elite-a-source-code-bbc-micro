@@ -852,8 +852,6 @@ ENDMACRO
  LDA BYTEV+1            \ routine)
  STA old_BYTEV+2
 
-                        \ --- Mod: Code added for Elite-A: -------------------->
-
 IF _BUG_FIX
 
  JSR savews             \ The do_FILEV handler starts by restoring the filing
@@ -861,8 +859,6 @@ IF _BUG_FIX
                         \ handler will work
 
 ENDIF
-
-                        \ --- End of added code ------------------------------->
 
  JSR set_vectors        \ Call set_vectors to update FILEV, FSCV and BYTEV to
                         \ point to the new handlers in do_FILEV, do_FSCV and
@@ -2910,8 +2906,6 @@ ENDIF
  PHX                    \ calls to the subroutine
  PHY
 
-                        \ --- Mod: Code added for Elite-A: -------------------->
-
 IF _BUG_FIX
 
  BIT wsstate            \ If bit 7 of wsstate is set then the filing system
@@ -3036,8 +3030,6 @@ ENDIF
 
  RTS                    \ Return from the subroutine
 
-                        \ --- End of added code ------------------------------->
-
 \ ******************************************************************************
 \
 \       Name: do_FSCV
@@ -3083,8 +3075,6 @@ ENDIF
  PHA                    \ Store A and X on the stack, so we can retrieve them
  PHX                    \ later to preserve them across calls to the subroutine
 
-                        \ --- Mod: Code added for Elite-A: -------------------->
-
 IF _BUG_FIX
 
  BIT wsstate            \ If bit 7 of wsstate is clear then the filing system
@@ -3092,8 +3082,6 @@ IF _BUG_FIX
                         \ so we don't restore it again
 
 ENDIF
-
-                        \ --- End of added code ------------------------------->
 
                         \ We now want to copy the first three pages from the
                         \ safe place back to &C00), reversing the copy that we
@@ -3147,8 +3135,6 @@ ENDIF
  BNE getws              \ Loop back until we have copied a whole page of bytes
                         \ (three times)
 
-                        \ --- Mod: Code added for Elite-A: -------------------->
-
 IF _BUG_FIX
 
  STZ wsstate            \ Clear bit 7 of wsstate to denote that we have restored
@@ -3157,8 +3143,6 @@ IF _BUG_FIX
 .restorerts
 
 ENDIF
-
-                        \ --- End of added code ------------------------------->
 
  PLX                    \ Retore A and X from the stack, so they are preserved
  PLA                    \ by the subroutine
@@ -3263,8 +3247,8 @@ ENDIF
 \ ******************************************************************************
 \
 \       Name: wsstate
-\       Type: Subroutine
-\   Category: Variable
+\       Type: Variable
+\   Category: Utility routines
 \    Summary: Flag to keep track of whether we have saved or restored the filing
 \             system workspace
 \
