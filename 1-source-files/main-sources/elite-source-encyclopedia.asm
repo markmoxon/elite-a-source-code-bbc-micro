@@ -2300,8 +2300,7 @@ ENDIF
 
 IF _BUG_FIX
 
- JSR SwitchToCharSet+5  \ Switch &C000 to the MOS character definitions even if
-                        \ we are not in the middle of disc activity
+ JSR SwitchToCharSet    \ Switch &C000 to the MOS character definitions
 
 ENDIF
 
@@ -20913,7 +20912,7 @@ ENDIF
 \
 \       Name: SwitchToCharSet
 \       Type: Subroutine
-\   Category: Encyclopedia
+\   Category: Utility routines
 \    Summary: Switch the MOS character definitions into memory at &C000 on a BBC
 \             Master
 \

@@ -915,7 +915,7 @@ ENDIF
 \
 \       Name: SwitchToCharSet
 \       Type: Subroutine
-\   Category: Encyclopedia
+\   Category: Utility routines
 \    Summary: Switch the MOS character definitions into memory at &C000 on a BBC
 \             Master
 \
@@ -958,7 +958,7 @@ ENDIF
 \
 \       Name: SwitchToFileSys
 \       Type: Subroutine
-\   Category: Encyclopedia
+\   Category: Utility routines
 \    Summary: Restore the filing system workspace to &C000 on a BBC Master
 \
 \ ******************************************************************************
