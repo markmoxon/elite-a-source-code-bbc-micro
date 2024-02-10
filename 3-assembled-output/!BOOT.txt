@@ -1,1 +1,1 @@
-*DIR :0.$*ELITE*|*| -----------------------------------*| Angus Duggan's Elite-A*|*| Version: BBC Micro/Tube/BBC Master*| Variant: From Angus Duggan's site*| Product: The official release*|*| See www.bbcelite.com for details*| -----------------------------------
+*DIR :0.$*ELITE*|*| -----------------------------------*| Angus Duggan's Elite-A*|*| Version: BBC Micro/Tube/BBC Master*| Variant: Bug fixes*|*| See www.bbcelite.com for details*| -----------------------------------

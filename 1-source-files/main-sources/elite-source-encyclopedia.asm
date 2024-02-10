@@ -27236,10 +27236,21 @@ ENDIF
  CTOK 63                \ Encoded as:         "10[63]"
  EQUB 0
 
+IF _RELEASED OR _SOURCE_DISC
+
  EQUB 7                 \ 7: Cargo space:     "245{all caps}TC{sentence case}"
  EQUS "245"             \
  CTOK 62                \ Encoded as:         "245[62]"
  EQUB 0
+
+ELIF _BUG_FIX
+
+ EQUB 7                 \ 7: Cargo space:     "253{all caps}TC{sentence case}"
+ EQUS "253"             \
+ CTOK 62                \ Encoded as:         "253[62]"
+ EQUB 0
+
+ENDIF
 
  EQUB 8                 \ 8: Armaments:       "HASSONI HI-RAD PULSE LASER{cr}
  CTOK 59                \                      GERET STARSEEKER MISSILES"
@@ -27320,10 +27331,21 @@ ENDIF
  CTOK 63                \ Encoded as:         "12.5[63]"
  EQUB 0
 
+IF _RELEASED OR _SOURCE_DISC
+
  EQUB 7                 \ 7: Cargo space:     "0{all caps}TC{sentence case}"
  EQUS "0"               \
  CTOK 62                \ Encoded as:         "0[62]"
  EQUB 0
+
+ELIF _BUG_FIX
+
+ EQUB 7                 \ 7: Cargo space:     "6{all caps}TC{sentence case}"
+ EQUS "6"               \
+ CTOK 62                \ Encoded as:         "6[62]"
+ EQUB 0
+
+ENDIF
 
  EQUB 8                 \ 8: Armaments:       "HASSONI-{single cap}KRUGER BURST
  CTOK 59                \                      LASER{cr}
@@ -27408,10 +27430,21 @@ ENDIF
  CTOK 63                \ Encoded as:         "9[63]"
  EQUB 0
 
+IF _RELEASED OR _SOURCE_DISC
+
  EQUB 7                 \ 7: Cargo space:     "125{all caps}TC{sentence case}"
  EQUS "125"             \
  CTOK 62                \ Encoded as:         "125[62]"
  EQUB 0
+
+ELIF _BUG_FIX
+
+ EQUB 7                 \ 7: Cargo space:     "132{all caps}TC{sentence case}"
+ EQUS "132"             \
+ CTOK 62                \ Encoded as:         "132[62]"
+ EQUB 0
+
+ENDIF
 
  EQUB 8                 \ 8: Armaments:       "ERGON LASER SYSTEM{cr}
  CTOK 52                \                      {all caps}IFS{sentence case} SEEK
@@ -27575,10 +27608,21 @@ ENDIF
  CTOK 63                \ Encoded as:         "8[63]"
  EQUB 0
 
+IF _RELEASED OR _SOURCE_DISC
+
  EQUB 7                 \ 7: Cargo space:     "30{all caps}TC{sentence case}"
  EQUS "30"              \
  CTOK 62                \ Encoded as:         "30[62]"
  EQUB 0
+
+ELIF _BUG_FIX
+
+ EQUB 7                 \ 7: Cargo space:     "35{all caps}TC{sentence case}"
+ EQUS "35"              \
+ CTOK 62                \ Encoded as:         "35[62]"
+ EQUB 0
+
+ENDIF
 
  EQUB 8                 \ 8: Armaments:       "INGRAM MEGABLAST PULSE LASER{cr}
  CTOK 56                \                      SEEKER X3 MISSILES"
@@ -27664,10 +27708,21 @@ ENDIF
  CTOK 63                \ Encoded as:         "6[63]"
  EQUB 0
 
+IF _RELEASED OR _SOURCE_DISC
+
  EQUB 7                 \ 7: Cargo space:     "10{all caps}TC{sentence case}"
  EQUS "10"              \
  CTOK 62                \ Encoded as:         "10[62]"
  EQUB 0
+
+ELIF _BUG_FIX
+
+ EQUB 7                 \ 7: Cargo space:     "14{all caps}TC{sentence case}"
+ EQUS "14"              \
+ CTOK 62                \ Encoded as:         "14[62]"
+ EQUB 0
+
+ENDIF
 
  EQUB 8                 \ 8: Armaments:       "HASSONI VARISCAN LASER{cr}
  CTOK 59                \                      LANCE & FERMAN MISSILES"
@@ -27745,10 +27800,21 @@ ENDIF
  CTOK 63                \ Encoded as:         "7[63]"
  EQUB 0
 
+IF _RELEASED OR _SOURCE_DISC
+
  EQUB 7                 \ 7: Cargo space:     "35{all caps}TC{sentence case}"
  EQUS "35"              \
  CTOK 62                \ Encoded as:         "35[62]"
  EQUB 0
+
+ELIF _BUG_FIX
+
+ EQUB 7                 \ 7: Cargo space:     "42{all caps}TC{sentence case}"
+ EQUS "42"              \
+ CTOK 62                \ Encoded as:         "42[62]"
+ EQUB 0
+
+ENDIF
 
  EQUB 8                 \ 8: Armaments:       "INGRAM LASER SYSTEM{cr}
  CTOK 56                \                      LANCE & FERMAN MISSILES"
@@ -27927,10 +27993,21 @@ ENDIF
  CTOK 63                \ Encoded as:         "8.5[63]"
  EQUB 0
 
+IF _RELEASED OR _SOURCE_DISC
+
  EQUB 7                 \ 7: Cargo space:     "2{all caps}TC{sentence case}"
  EQUS "2"               \
  CTOK 62                \ Encoded as:         "2[62]"
  EQUB 0
+
+ELIF _BUG_FIX
+
+ EQUB 7                 \ 7: Cargo space:     "9{all caps}TC{sentence case}"
+ EQUS "9"               \
+ CTOK 62                \ Encoded as:         "9[62]"
+ EQUB 0
+
+ENDIF
 
  EQUB 8                 \ 8: Armaments:       "ERGON LASER SYSTEM{cr}
  CTOK 52                \                      {all caps}IFS{sentence case} SEEK
@@ -28024,10 +28101,21 @@ ENDIF
  CTOK 63                \ Encoded as:         "7[63]"
  EQUB 0
 
+IF _RELEASED OR _SOURCE_DISC
+
  EQUB 7                 \ 7: Cargo space:     "3{all caps}TC{sentence case}"
  EQUS "3"               \
  CTOK 62                \ Encoded as:         "3[62]"
  EQUB 0
+
+ELIF _BUG_FIX
+
+ EQUB 7                 \ 7: Cargo space:     "9{all caps}TC{sentence case}"
+ EQUS "9"               \
+ CTOK 62                \ Encoded as:         "9[62]"
+ EQUB 0
+
+ENDIF
 
  EQUB 8                 \ 8: Armaments:       "INGRAM 1919 A4 LASER{cr}
  CTOK 56                \                      {all caps}LM{sentence case}
@@ -28113,10 +28201,21 @@ ENDIF
  CTOK 63                \ Encoded as:         "8[63]"
  EQUB 0
 
+IF _RELEASED OR _SOURCE_DISC
+
  EQUB 7                 \ 7: Cargo space:     "50{all caps}TC{sentence case}"
  EQUS "50"              \
  CTOK 62                \ Encoded as:         "50[62]"
  EQUB 0
+
+ELIF _BUG_FIX
+
+ EQUB 7                 \ 7: Cargo space:     "55{all caps}TC{sentence case}"
+ EQUS "55"              \
+ CTOK 62                \ Encoded as:         "55[62]"
+ EQUB 0
+
+ENDIF
 
  EQUB 8                 \ 8: Armaments:       "FAIREY PULSE LASER{cr}
  EQUS "Fai"             \                      LANCE & FERMAN MISSILES"
@@ -28198,10 +28297,21 @@ ENDIF
  CTOK 63                \ Encoded as:         "7.5[63]"
  EQUB 0
 
+IF _RELEASED OR _SOURCE_DISC
+
  EQUB 7                 \ 7: Cargo space:     "15{all caps}TC{sentence case}"
  EQUS "15"              \
  CTOK 62                \ Encoded as:         "15[62]"
  EQUB 0
+
+ELIF _BUG_FIX
+
+ EQUB 7                 \ 7: Cargo space:     "21{all caps}TC{sentence case}"
+ EQUS "21"              \
+ CTOK 62                \ Encoded as:         "21[62]"
+ EQUB 0
+
+ENDIF
 
  EQUB 8                 \ 8: Armaments:       "LANCE & FERMAN LASER{cr}
  CTOK 57                \                      SEEKER X1 MISSILES"
@@ -28433,10 +28543,21 @@ ENDIF
  CTOK 63                \ Encoded as:         "11[63]"
  EQUB 0
 
+IF _RELEASED OR _SOURCE_DISC
+
  EQUB 7                 \ 7: Cargo space:     "75{all caps}TC{sentence case}"
  EQUS "75"              \
  CTOK 62                \ Encoded as:         "75[62]"
  EQUB 0
+
+ELIF _BUG_FIX
+
+ EQUB 7                 \ 7: Cargo space:     "81{all caps}TC{sentence case}"
+ EQUS "81"              \
+ CTOK 62                \ Encoded as:         "81[62]"
+ EQUB 0
+
+ENDIF
 
  EQUB 8                 \ 8: Armaments:       "{single cap}KRUGER {all caps}HMB
  CTOK 58                \                      {sentence case} LASER{cr}
@@ -28517,10 +28638,21 @@ ENDIF
  CTOK 63                \ Encoded as:         "8[63]"
  EQUB 0
 
+IF _RELEASED OR _SOURCE_DISC
+
  EQUB 7                 \ 7: Cargo space:     "7{all caps}TC{sentence case}"
  EQUS "7"               \
  CTOK 62                \ Encoded as:         "7[62]"
  EQUB 0
+
+ELIF _BUG_FIX
+
+ EQUB 7                 \ 7: Cargo space:     "11{all caps}TC{sentence case}"
+ EQUS "11"              \
+ CTOK 62                \ Encoded as:         "11[62]"
+ EQUB 0
+
+ENDIF
 
  EQUB 8                 \ 8: Armaments:       "INGRAM LASER SYSTEM{cr}
  CTOK 56                \                      GERET STARSEEKER MISSILES"
@@ -28600,10 +28732,21 @@ ENDIF
  CTOK 63                \ Encoded as:         "7[63]"
  EQUB 0
 
+IF _RELEASED OR _SOURCE_DISC
+
  EQUB 7                 \ 7: Cargo space:     "20{all caps}TC{sentence case}"
  EQUS "20"              \
  CTOK 62                \ Encoded as:         "20[62]"
  EQUB 0
+
+ELIF _BUG_FIX
+
+ EQUB 7                 \ 7: Cargo space:     "24{all caps}TC{sentence case}"
+ EQUS "24"              \
+ CTOK 62                \ Encoded as:         "24[62]"
+ EQUB 0
+
+ENDIF
 
  EQUB 8                 \ 8: Armaments:       "LANCE & FERMAN LASER{cr}
  CTOK 57                \                      SEEKER X1 MISSILES"
@@ -28684,10 +28827,21 @@ ENDIF
  CTOK 63                \ Encoded as:         "8[63]"
  EQUB 0
 
+IF _RELEASED OR _SOURCE_DISC
+
  EQUB 7                 \ 7: Cargo space:     "100{all caps}TC{sentence case}"
  EQUS "100"             \
  CTOK 62                \ Encoded as:         "100[62]"
  EQUB 0
+
+ELIF _BUG_FIX
+
+ EQUB 7                 \ 7: Cargo space:     "106{all caps}TC{sentence case}"
+ EQUS "106"             \
+ CTOK 62                \ Encoded as:         "106[62]"
+ EQUB 0
+
+ENDIF
 
  EQUB 8                 \ 8: Armaments:       "VOLT-{all caps}VARISCAN PULSE
  EQUS "Volt-"           \                      LASER"
