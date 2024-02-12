@@ -205,7 +205,7 @@ The default build process prints out checksums of all the generated files, along
 
 The Python script `crc32.py` in the `2-build-files` folder does the actual verification, and shows the checksums and file sizes of both sets of files, alongside each other, and with a Match column that flags any discrepancies.
 
-The binaries in the `4-reference-binaries` folder were taken straight from Angus Duggan's original source discs, while those in the `3-assembled-output` folder are produced by the build process. For example, if you don't make any changes to the code and build the project with `make build verify`, then this is the output of the verification process:
+The binaries in the `4-reference-binaries` folder were taken straight from Angus Duggan's original source discs, while those in the `3-assembled-output` folder are produced by the build process. For example, if you don't make any changes to the code and build the project with `make`, then this is the output of the verification process:
 
 ```
 Results for variant: released
@@ -344,13 +344,13 @@ b7b3c692   1024  b7b3c692   1024   Yes   WORDS.bin
 You can build the source disc variant by appending `variant=source-disc` to the `make` command, like this on Windows:
 
 ```
-make.bat build verify variant=source-disc
+make.bat variant=source-disc
 ```
 
 or this on a Mac or Linux:
 
 ```
-make build verify variant=source-disc
+make variant=source-disc
 ```
 
 This will produce a file called `elite-a-from-source-disc.ssd` in the `5-compiled-game-discs` folder that contains the source disc variant.
@@ -400,13 +400,13 @@ b7b3c692   1024  b7b3c692   1024   Yes   WORDS.bin
 You can build the source disc variant by appending `variant=bug-fix` to the `make` command, like this on Windows:
 
 ```
-make.bat build verify variant=bug-fix
+make.bat variant=bug-fix
 ```
 
 or this on a Mac or Linux:
 
 ```
-make build verify variant=bug-fix
+make variant=bug-fix
 ```
 
 This will produce a file called `elite-a-bug-fix.ssd` in the `5-compiled-game-discs` folder that contains the bug fix variant.
