@@ -457,7 +457,7 @@ You can see the differences between the variants by searching the source code fo
 
 The only difference in the source disc variant is that the latter has considerably lower ship prices.
 
-The bug fix variant works on the BBC Master and BBC Master with 6502 Second Processor, which the original version of Elite-A doesn't. There is also a bug in the original version that prevents splinters from displaying properly, which makes mining all but impossible. The bug fix variant fixes that bug, as well as an incorrect cargo capacity in the Adder ship card in the encyclopedia.
+The bug fix variant works on the BBC Master and BBC Master with 6502 Second Processor, which the original version of Elite-A doesn't. There is also a bug in the original version that prevents splinters from displaying properly, which makes mining all but impossible. The bug fix variant fixes that bug, and it also adds a quality-of-life improvement to the cargo capacities shown for flyable ships in the encyclopedia, so they reflect the in-game capacity when no equipment is fitted, rather than the "normal configuration" from the original version (which is a bit subjective).
 
 See the [accompanying website](https://www.bbcelite.com/elite-a/releases.html) for a comprehensive list of differences between the variants.
 
