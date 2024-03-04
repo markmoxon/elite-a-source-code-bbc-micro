@@ -51,27 +51,40 @@
  NTY = 31               \ The number of different ship types
 
  SST = 2                \ Ship blueprint position for the space station
+
  COPS = 16              \ Ship blueprint position for the cop
+
  CON = 31               \ Ship blueprint position for the Constrictor
 
  CYL = 11               \ Ship blueprint position for the title's Cobra Mk III
+
  KRA = 19               \ Ship blueprint position for the title's Krait
 
  NI% = 37               \ The number of bytes in each ship's data block (as
                         \ stored in INWK and K%)
 
  X = 128                \ The centre x-coordinate of the 256 x 192 space view
+
  Y = 96                 \ The centre y-coordinate of the 256 x 192 space view
 
  f0 = &20               \ Internal key number for red key f0 (Launch, Front)
+
  f1 = &71               \ Internal key number for red key f1 (Buy Cargo, Rear)
+
  f2 = &72               \ Internal key number for red key f2 (Sell Cargo, Left)
+
  f3 = &73               \ Internal key number for red key f3 (Equip Ship, Right)
+
  f4 = &14               \ Internal key number for red key f4 (Long-range Chart)
+
  f5 = &74               \ Internal key number for red key f5 (Short-range Chart)
+
  f6 = &75               \ Internal key number for red key f6 (Data on System)
+
  f7 = &16               \ Internal key number for red key f7 (Market Price)
+
  f8 = &76               \ Internal key number for red key f8 (Status Mode)
+
  f9 = &77               \ Internal key number for red key f9 (Inventory)
 
  NRU% = 25              \ The number of planetary systems with extended system
@@ -137,10 +150,20 @@
 
 IF _BUG_FIX
 
- savews = &DD06         \ Addresses for the workspace routines from the loader
- restorews = &DD65      \ so we can call them to ensure the MOS character
- wsstate = &DDBA        \ definitions are loaded before printing text on the
-                        \ BBC Master
+ savews = &DD06         \ The address for the savews workspace routine from
+                        \ the loader so we can call it to ensure the MOS
+                        \ characterdefinitions are loaded before printing
+                        \ text on the BBC Master
+
+ restorews = &DD65      \ The address for the restorews workspace routine from
+                        \ the loader so we can call it to ensure the MOS
+                        \ characterdefinitions are loaded before printing
+                        \ text on the BBC Master
+
+ wsstate = &DDBA        \ The address for the wsstate workspace routine from
+                        \ the loader so we can call it to ensure the MOS
+                        \ characterdefinitions are loaded before printing
+                        \ text on the BBC Master
 
 ENDIF
 
@@ -149,9 +172,13 @@ ENDIF
                         \ known as SHEILA)
 
  OSFILE = &FFDD         \ The address for the OSFILE routine
+
  OSWRCH = &FFEE         \ The address for the OSWRCH routine
+
  OSWORD = &FFF1         \ The address for the OSWORD routine
+
  OSBYTE = &FFF4         \ The address for the OSBYTE routine
+
  OSCLI = &FFF7          \ The address for the OSCLI routine
 
 \ ******************************************************************************

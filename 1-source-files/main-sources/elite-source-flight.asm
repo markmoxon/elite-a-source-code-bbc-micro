@@ -51,16 +51,27 @@
  NTY = 31               \ The number of different ship types
 
  MSL = 1                \ Ship blueprint position for the missile
+
  SST = 2                \ Ship blueprint position for the space station
+
  ESC = 3                \ Ship blueprint position for the escape pod
+
  PLT = 4                \ Ship blueprint position for the alloy plate
+
  OIL = 5                \ Ship blueprint position for the cargo canister
+
  AST = 7                \ Ship blueprint position for the asteroid
+
  SPL = 8                \ Ship blueprint position for the splinter
+
  SHU = 9                \ Ship blueprint position for the shuttle
+
  COPS = 16              \ Ship blueprint position for the cop
+
  THG = 29               \ Ship blueprint position for the Thargoid
+
  TGL = 30               \ Ship blueprint position for the Thargon
+
  CON = 31               \ Ship blueprint position for the Constrictor
 
  JL = ESC               \ Junk is defined as starting from the escape pod
@@ -75,17 +86,27 @@
                         \ stored in INWK and K%)
 
  X = 128                \ The centre x-coordinate of the 256 x 192 space view
+
  Y = 96                 \ The centre y-coordinate of the 256 x 192 space view
 
  f0 = &20               \ Internal key number for red key f0 (Launch, Front)
+
  f1 = &71               \ Internal key number for red key f1 (Buy Cargo, Rear)
+
  f2 = &72               \ Internal key number for red key f2 (Sell Cargo, Left)
+
  f3 = &73               \ Internal key number for red key f3 (Equip Ship, Right)
+
  f4 = &14               \ Internal key number for red key f4 (Long-range Chart)
+
  f5 = &74               \ Internal key number for red key f5 (Short-range Chart)
+
  f6 = &75               \ Internal key number for red key f6 (Data on System)
+
  f7 = &16               \ Internal key number for red key f7 (Market Price)
+
  f8 = &76               \ Internal key number for red key f8 (Status Mode)
+
  f9 = &77               \ Internal key number for red key f9 (Inventory)
 
  RE = &23               \ The obfuscation byte used to hide the recursive tokens
@@ -127,7 +148,9 @@
                         \ known as SHEILA)
 
  OSWORD = &FFF1         \ The address for the OSWORD routine
+
  OSBYTE = &FFF4         \ The address for the OSBYTE routine
+
  OSCLI = &FFF7          \ The address for the OSCLI routine
 
 \ ******************************************************************************
