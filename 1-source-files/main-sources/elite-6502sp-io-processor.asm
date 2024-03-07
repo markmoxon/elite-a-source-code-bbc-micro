@@ -42,7 +42,12 @@
 \
 \ ******************************************************************************
 
+ CODE% = &1200          \ The address where the code will be run
+
+ LOAD% = &1200          \ The address where the code will be loaded
+
  X = 128                \ The centre x-coordinate of the 256 x 192 space view
+
  Y = 96                 \ The centre y-coordinate of the 256 x 192 space view
 
  tube_brk = &0016       \ The location of the Tube host code's break handler
@@ -64,10 +69,20 @@
 
 IF _BUG_FIX
 
- savews = &DD06         \ Addresses for the workspace routines from the loader
- restorews = &DD65      \ so we can call them to ensure the MOS character
- wsstate = &DDBA        \ definitions are loaded before printing text on the
-                        \ BBC Master
+ savews = &DD06         \ The address for the savews workspace routine from
+                        \ the loader so we can call it to ensure the MOS
+                        \ characterdefinitions are loaded before printing
+                        \ text on the BBC Master
+
+ restorews = &DD65      \ The address for the restorews workspace routine from
+                        \ the loader so we can call it to ensure the MOS
+                        \ characterdefinitions are loaded before printing
+                        \ text on the BBC Master
+
+ wsstate = &DDBA        \ The address for the wsstate workspace routine from
+                        \ the loader so we can call it to ensure the MOS
+                        \ characterdefinitions are loaded before printing
+                        \ text on the BBC Master
 
 ENDIF
 
@@ -76,17 +91,25 @@ ENDIF
                         \ known as SHEILA)
 
  tube_r1s = &FEE0       \ The Tube's memory-mapped FIFO 1 status register
+
  tube_r1d = &FEE1       \ The Tube's memory-mapped FIFO 1 data register
+
  tube_r2s = &FEE2       \ The Tube's memory-mapped FIFO 2 status register
+
  tube_r2d = &FEE3       \ The Tube's memory-mapped FIFO 2 data register
+
  tube_r3s = &FEE4       \ The Tube's memory-mapped FIFO 3 status register
+
  tube_r3d = &FEE5       \ The Tube's memory-mapped FIFO 3 data register
+
  tube_r4s = &FEE6       \ The Tube's memory-mapped FIFO 4 status register
+
  tube_r4d = &FEE7       \ The Tube's memory-mapped FIFO 4 data register
 
  rawrch = &FFBC         \ The address of the MOS's VDU character output routine
 
  OSBYTE = &FFF4         \ The address for the OSBYTE routine
+
  OSCLI = &FFF7          \ The address for the OSCLI routine
 
 \ ******************************************************************************
@@ -227,9 +250,6 @@ ENDIF
 \ ELITE I/O PROCESSOR
 \
 \ ******************************************************************************
-
- CODE% = &1200
- LOAD% = &1200
 
  ORG CODE%
 
