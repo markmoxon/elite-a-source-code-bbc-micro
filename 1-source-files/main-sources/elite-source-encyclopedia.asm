@@ -15,7 +15,7 @@
 \ in the documentation are entirely my fault
 \
 \ The terminology and notations used in this commentary are explained at
-\ https://www.bbcelite.com/about_site/terminology_used_in_this_commentary.html
+\ https://www.bbcelite.com/terminology
 \
 \ The deep dive articles referred to in this commentary can be found at
 \ https://www.bbcelite.com/deep_dives
@@ -42,6 +42,10 @@
 \
 \ ******************************************************************************
 
+ CODE% = &11E3          \ The address where the code will be run
+
+ LOAD% = &11E3          \ The address where the code will be loaded
+
  NOST = 18              \ The number of stardust particles in normal space (this
                         \ goes down to 3 in witchspace)
 
@@ -56,17 +60,27 @@
                         \ stored in INWK and K%)
 
  X = 128                \ The centre x-coordinate of the 256 x 192 space view
+
  Y = 96                 \ The centre y-coordinate of the 256 x 192 space view
 
  f0 = &20               \ Internal key number for red key f0 (Launch, Front)
+
  f1 = &71               \ Internal key number for red key f1 (Buy Cargo, Rear)
+
  f2 = &72               \ Internal key number for red key f2 (Sell Cargo, Left)
+
  f3 = &73               \ Internal key number for red key f3 (Equip Ship, Right)
+
  f4 = &14               \ Internal key number for red key f4 (Long-range Chart)
+
  f5 = &74               \ Internal key number for red key f5 (Short-range Chart)
+
  f6 = &75               \ Internal key number for red key f6 (Data on System)
+
  f7 = &16               \ Internal key number for red key f7 (Market Price)
+
  f8 = &76               \ Internal key number for red key f8 (Status Mode)
+
  f9 = &77               \ Internal key number for red key f9 (Inventory)
 
  RE = &23               \ The obfuscation byte used to hide the recursive tokens
@@ -99,10 +113,10 @@
 
 IF _BUG_FIX
 
- savews = &DD06         \ Addresses for the savews routine from the loader
-                        \ so we can call it to ensure the MOS character
-                        \ definitions are loaded before printing text on the
-                        \ BBC Master
+ savews = &DD06         \ The address for the savews workspace routine from
+                        \ the loader so we can call it to ensure the MOS
+                        \ characterdefinitions are loaded before printing
+                        \ text on the BBC Master
 
 ENDIF
 
@@ -111,7 +125,9 @@ ENDIF
                         \ known as SHEILA)
 
  OSWORD = &FFF1         \ The address for the OSWORD routine
+
  OSBYTE = &FFF4         \ The address for the OSBYTE routine
+
  OSCLI = &FFF7          \ The address for the OSCLI routine
 
 \ ******************************************************************************
@@ -2160,9 +2176,6 @@ ENDIF
 \
 \ ******************************************************************************
 
- CODE% = &11E3
- LOAD% = &11E3
-
  ORG CODE%
 
  LOAD_A% = LOAD%
@@ -4100,6 +4113,7 @@ ENDIF
 \ ******************************************************************************
 
  CODE_B% = P%
+
  LOAD_B% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
@@ -7335,6 +7349,7 @@ ENDIF
 \ ******************************************************************************
 
  CODE_C% = P%
+
  LOAD_C% = LOAD% +P% - CODE%
 
 \ ******************************************************************************
@@ -8565,6 +8580,7 @@ ENDIF
 \ ******************************************************************************
 
  CODE_D% = P%
+
  LOAD_D% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
@@ -10808,6 +10824,7 @@ ENDIF
 \ ******************************************************************************
 
  CODE_E% = P%
+
  LOAD_E% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
@@ -13355,6 +13372,7 @@ ENDIF
 \ ******************************************************************************
 
  CODE_F% = P%
+
  LOAD_F% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
@@ -15872,6 +15890,7 @@ ENDIF
 \ ******************************************************************************
 
  CODE_G% = P%
+
  LOAD_G% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
@@ -20215,6 +20234,7 @@ ENDIF
 \ ******************************************************************************
 
  CODE_H% = P%
+
  LOAD_H% = LOAD% + P% - CODE%
 
 \ ******************************************************************************

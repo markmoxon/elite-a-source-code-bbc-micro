@@ -15,7 +15,7 @@
 \ in the documentation are entirely my fault
 \
 \ The terminology and notations used in this commentary are explained at
-\ https://www.bbcelite.com/about_site/terminology_used_in_this_commentary.html
+\ https://www.bbcelite.com/terminology
 \
 \ The deep dive articles referred to in this commentary can be found at
 \ https://www.bbcelite.com/deep_dives
@@ -45,8 +45,9 @@
 \
 \ ******************************************************************************
 
- CODE% = &7F00
- LOAD% = &2468
+ CODE% = &7F00			\ The address where the code will be run
+
+ LOAD% = &2468			\ The address where the code will be loaded
 
  ORG CODE%
 

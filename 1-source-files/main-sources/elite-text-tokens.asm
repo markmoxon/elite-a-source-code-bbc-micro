@@ -15,7 +15,7 @@
 \ in the documentation are entirely my fault
 \
 \ The terminology and notations used in this commentary are explained at
-\ https://www.bbcelite.com/about_site/terminology_used_in_this_commentary.html
+\ https://www.bbcelite.com/terminology
 \
 \ The deep dive articles referred to in this commentary can be found at
 \ https://www.bbcelite.com/deep_dives
@@ -52,11 +52,12 @@
 \
 \ ******************************************************************************
 
+ CODE_WORDS% = &0400    \ The address where the code will be run
+
+ LOAD_WORDS% = &2568    \ The address where the code will be loaded
+
  RE = &23               \ The obfuscation byte used to hide the recursive tokens
                         \ table from crackers viewing the binary code
-
- CODE_WORDS% = &0400
- LOAD_WORDS% = &2568
 
  ORG CODE_WORDS%
 

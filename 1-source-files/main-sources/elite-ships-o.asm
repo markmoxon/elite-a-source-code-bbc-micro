@@ -15,7 +15,7 @@
 \ in the documentation are entirely my fault
 \
 \ The terminology and notations used in this commentary are explained at
-\ https://www.bbcelite.com/about_site/terminology_used_in_this_commentary.html
+\ https://www.bbcelite.com/terminology
 \
 \ The deep dive articles referred to in this commentary can be found at
 \ https://www.bbcelite.com/deep_dives
@@ -42,10 +42,13 @@
 \
 \ ******************************************************************************
 
- SHIP_MISSILE = &7F00   \ The address of the missile ship blueprint
+ CODE% = &5600          \ The flight code runs this file at address &5600, at
+           				\ label XX21
 
- CODE% = &5600          \ The flight code loads this file at address &5600, at
- LOAD% = &5600          \ label XX21
+ LOAD% = &5600			\ The flight code loads this file at address &5600, at
+           				\ label XX21
+
+ SHIP_MISSILE = &7F00   \ The address of the missile ship blueprint
 
  ORG CODE%
 

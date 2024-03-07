@@ -15,7 +15,7 @@
 \ in the documentation are entirely my fault
 \
 \ The terminology and notations used in this commentary are explained at
-\ https://www.bbcelite.com/about_site/terminology_used_in_this_commentary.html
+\ https://www.bbcelite.com/terminology
 \
 \ The deep dive articles referred to in this commentary can be found at
 \ https://www.bbcelite.com/deep_dives
@@ -41,6 +41,10 @@
 \ Configuration variables
 \
 \ ******************************************************************************
+
+ CODE% = &1900          \ The address where the code will be run
+
+ LOAD% = &1900          \ The address where the code will be loaded
 
  Q% = _MAX_COMMANDER    \ Set Q% to TRUE to max out the default commander, FALSE
                         \ for the standard default commander
@@ -89,8 +93,11 @@
                         \ known as SHEILA)
 
  OSWRCH = &FFEE         \ The address for the OSWRCH routine
+
  OSBYTE = &FFF4         \ The address for the OSBYTE routine
+
  OSWORD = &FFF1         \ The address for the OSWORD routine
+
  OSCLI = &FFF7          \ The address for the OSCLI vector
 
  VEC = &7FFE            \ VEC is where we store the original value of the IRQ1
@@ -206,9 +213,6 @@
 \ ELITE LOADER
 \
 \ ******************************************************************************
-
- CODE% = &1900
- LOAD% = &1900
 
  ORG CODE%
 

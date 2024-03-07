@@ -1,6 +1,6 @@
 # Fully documented source code for Elite-A on the BBC Micro
 
-[BBC Micro cassette Elite](https://github.com/markmoxon/cassette-elite-beebasm) | [BBC Micro disc Elite](https://github.com/markmoxon/disc-elite-beebasm) | [6502 Second Processor Elite](https://github.com/markmoxon/6502sp-elite-beebasm) | [BBC Master Elite](https://github.com/markmoxon/master-elite-beebasm) | [Acorn Electron Elite](https://github.com/markmoxon/electron-elite-beebasm) | [NES Elite](https://github.com/markmoxon/nes-elite-beebasm) | **Elite-A** | [Teletext Elite](https://github.com/markmoxon/teletext-elite) | [Elite Universe Editor](https://github.com/markmoxon/elite-universe-editor) | [Elite Compendium](https://github.com/markmoxon/elite-compendium) | [Elite over Econet](https://github.com/markmoxon/elite-over-econet) | [Flicker-free C64 Elite](https://github.com/markmoxon/c64-elite-flicker-free) | [Aviator](https://github.com/markmoxon/aviator-beebasm) | [Revs](https://github.com/markmoxon/revs-beebasm)
+[BBC Micro cassette Elite](https://github.com/markmoxon/cassette-elite-beebasm) | [BBC Micro disc Elite](https://github.com/markmoxon/disc-elite-beebasm) | [6502 Second Processor Elite](https://github.com/markmoxon/6502sp-elite-beebasm) | [BBC Master Elite](https://github.com/markmoxon/master-elite-beebasm) | [Acorn Electron Elite](https://github.com/markmoxon/electron-elite-beebasm) | [NES Elite](https://github.com/markmoxon/nes-elite-beebasm) | **Elite-A** | [Teletext Elite](https://github.com/markmoxon/teletext-elite) | [Elite Universe Editor](https://github.com/markmoxon/elite-universe-editor) | [Elite Compendium](https://github.com/markmoxon/elite-compendium) | [Elite over Econet](https://github.com/markmoxon/elite-over-econet) | [Flicker-free Commodore 64 Elite](https://github.com/markmoxon/c64-elite-flicker-free) | [BBC Micro Aviator](https://github.com/markmoxon/aviator-beebasm) | [BBC Micro Revs](https://github.com/markmoxon/revs-beebasm) | [Archimedes Lander](https://github.com/markmoxon/archimedes-lander)
 
 ![Iguana ship details in the Elite-A encyclopedia](https://www.bbcelite.com/images/github/encyclopedia-iguana.png)
 
@@ -101,7 +101,7 @@ If you want to browse the source in an IDE, you might find the following useful.
 
 * The source files for Elite-A are unique amongst the annotated versions in this project, in that they contain inline diffs. Angus created Elite-A by taking the original disc version of Elite and modifying the code to include all his new features. The annotated source files in this repository contain both the original disc code and all of Angus's modifications, so you can look through the source to see exactly what Angus changed in order to create Elite-A. Any code that he removed from the disc version is commented out in the source files, so when they are assembled they produce the Elite-A binaries, while still containing details of Angus's modifications. You can find all the diffs by searching the sources for `Mod:`. (Note that this feature does not apply to the two 6502 Second Processor version source files, which just contain the Elite-A code.)
 
-* It's probably worth skimming through the [notes on terminology and notations](https://www.bbcelite.com/about_site/terminology_used_in_this_commentary.html) on the accompanying website, as this explains a number of terms used in the commentary, without which it might be a bit tricky to follow at times (in particular, you should understand the terminology I use for multi-byte numbers).
+* It's probably worth skimming through the [notes on terminology and notations](https://www.bbcelite.com/terminology/) on the accompanying website, as this explains a number of terms used in the commentary, without which it might be a bit tricky to follow at times (in particular, you should understand the terminology I use for multi-byte numbers).
 
 * The accompanying website contains [a number of "deep dive" articles](https://www.bbcelite.com/deep_dives/), each of which goes into an aspect of the game in detail. Routines that are explained further in these articles are tagged with the label `Deep dive:` and the relevant article name.
 
@@ -147,7 +147,7 @@ You will need the following to build Elite-A from the source:
 
 * BeebAsm, which can be downloaded from the [BeebAsm repository](https://github.com/stardot/beebasm). Mac and Linux users will have to build their own executable with `make code`, while Windows users can just download the `beebasm.exe` file.
 
-* Python. Both versions 2.7 and 3.x should work.
+* Python. The build process has only been tested on 3.x, but 2.7 should work.
 
 * Mac and Linux users may need to install `make` if it isn't already present (for Windows users, `make.exe` is included in this repository).
 
@@ -205,7 +205,7 @@ The default build process prints out checksums of all the generated files, along
 
 The Python script `crc32.py` in the `2-build-files` folder does the actual verification, and shows the checksums and file sizes of both sets of files, alongside each other, and with a Match column that flags any discrepancies.
 
-The binaries in the `4-reference-binaries` folder were taken straight from Angus Duggan's original source discs, while those in the `3-assembled-output` folder are produced by the build process. For example, if you don't make any changes to the code and build the project with `make build verify`, then this is the output of the verification process:
+The binaries in the `4-reference-binaries` folder were taken straight from Angus Duggan's original source discs, while those in the `3-assembled-output` folder are produced by the build process. For example, if you don't make any changes to the code and build the project with `make`, then this is the output of the verification process:
 
 ```
 Results for variant: released
@@ -344,13 +344,13 @@ b7b3c692   1024  b7b3c692   1024   Yes   WORDS.bin
 You can build the source disc variant by appending `variant=source-disc` to the `make` command, like this on Windows:
 
 ```
-make.bat build verify variant=source-disc
+make.bat variant=source-disc
 ```
 
 or this on a Mac or Linux:
 
 ```
-make build verify variant=source-disc
+make variant=source-disc
 ```
 
 This will produce a file called `elite-a-from-source-disc.ssd` in the `5-compiled-game-discs` folder that contains the source disc variant.
@@ -400,13 +400,13 @@ b7b3c692   1024  b7b3c692   1024   Yes   WORDS.bin
 You can build the source disc variant by appending `variant=bug-fix` to the `make` command, like this on Windows:
 
 ```
-make.bat build verify variant=bug-fix
+make.bat variant=bug-fix
 ```
 
 or this on a Mac or Linux:
 
 ```
-make build verify variant=bug-fix
+make variant=bug-fix
 ```
 
 This will produce a file called `elite-a-bug-fix.ssd` in the `5-compiled-game-discs` folder that contains the bug fix variant.
@@ -457,7 +457,7 @@ You can see the differences between the variants by searching the source code fo
 
 The only difference in the source disc variant is that the latter has considerably lower ship prices.
 
-The bug fix variant works on the BBC Master and BBC Master with 6502 Second Processor, which the original version of Elite-A doesn't. There is also a bug in the original version that prevents splinters from displaying properly, which makes mining all but impossible. The bug fix variant fixes that bug, as well as an incorrect cargo capacity in the Adder ship card in the encyclopedia.
+The bug fix variant works on the BBC Master and BBC Master with 6502 Second Processor, which the original version of Elite-A doesn't. There is also a bug in the original version that prevents splinters from displaying properly, which makes mining all but impossible. The bug fix variant fixes that bug, and it also adds a quality-of-life improvement to the cargo capacities shown for flyable ships in the encyclopedia, so they reflect the in-game capacity when no equipment is fitted, rather than the "normal configuration" from the original version (which is a bit subjective).
 
 See the [accompanying website](https://www.bbcelite.com/elite-a/releases.html) for a comprehensive list of differences between the variants.
 

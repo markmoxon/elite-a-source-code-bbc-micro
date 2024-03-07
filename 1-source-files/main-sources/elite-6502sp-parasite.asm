@@ -15,7 +15,7 @@
 \ in the documentation are entirely my fault
 \
 \ The terminology and notations used in this commentary are explained at
-\ https://www.bbcelite.com/about_site/terminology_used_in_this_commentary.html
+\ https://www.bbcelite.com/terminology
 \
 \ The deep dive articles referred to in this commentary can be found at
 \ https://www.bbcelite.com/deep_dives
@@ -42,6 +42,10 @@
 \
 \ ******************************************************************************
 
+ CODE% = &1000          \ The address where the code will be run
+
+ LOAD% = &1000          \ The address where the code will be loaded
+
  Q% = _MAX_COMMANDER    \ Set Q% to TRUE to max out the default commander, FALSE
                         \ for the standard default commander
 
@@ -56,19 +60,31 @@
  ship_total = 38        \ The number of different ship blueprints in Elite-A
 
  MSL = 1                \ Ship blueprint position for the missile
+
  SST = 2                \ Ship blueprint position for the space station
+
  ESC = 3                \ Ship blueprint position for the escape pod
+
  PLT = 4                \ Ship blueprint position for the alloy plate
+
  OIL = 5                \ Ship blueprint position for the cargo canister
+
  AST = 7                \ Ship blueprint position for the asteroid
+
  SPL = 8                \ Ship blueprint position for the splinter
+
  SHU = 9                \ Ship blueprint position for the shuttle
+
  COPS = 16              \ Ship blueprint position for the cop
+
  THG = 29               \ Ship blueprint position for the Thargoid
+
  TGL = 30               \ Ship blueprint position for the Thargon
+
  CON = 31               \ Ship blueprint position for the Constrictor
 
  CYL = 11               \ Ship blueprint position for the title's Cobra Mk III
+
  KRA = 19               \ Ship blueprint position for the title's Krait
 
  JL = ESC               \ Junk is defined as starting from the escape pod
@@ -83,17 +99,27 @@
                         \ stored in INWK and K%)
 
  X = 128                \ The centre x-coordinate of the 256 x 192 space view
+
  Y = 96                 \ The centre y-coordinate of the 256 x 192 space view
 
  f0 = &20               \ Internal key number for red key f0 (Launch, Front)
+
  f1 = &71               \ Internal key number for red key f1 (Buy Cargo, Rear)
+
  f2 = &72               \ Internal key number for red key f2 (Sell Cargo, Left)
+
  f3 = &73               \ Internal key number for red key f3 (Equip Ship, Right)
+
  f4 = &14               \ Internal key number for red key f4 (Long-range Chart)
+
  f5 = &74               \ Internal key number for red key f5 (Short-range Chart)
+
  f6 = &75               \ Internal key number for red key f6 (Data on System)
+
  f7 = &16               \ Internal key number for red key f7 (Market Price)
+
  f8 = &76               \ Internal key number for red key f8 (Status Mode)
+
  f9 = &77               \ Internal key number for red key f9 (Inventory)
 
  NRU% = 25              \ The number of planetary systems with extended system
@@ -133,18 +159,29 @@
                         \ known as SHEILA)
 
  tube_r1s = &FEF8       \ The Tube's memory-mapped FIFO 1 status register
+
  tube_r1d = &FEF9       \ The Tube's memory-mapped FIFO 1 data register
+
  tube_r2s = &FEFA       \ The Tube's memory-mapped FIFO 2 status register
+
  tube_r2d = &FEFB       \ The Tube's memory-mapped FIFO 2 data register
+
  tube_r3s = &FEFC       \ The Tube's memory-mapped FIFO 3 data register
+
  tube_r3d = &FEFD       \ The Tube's memory-mapped FIFO 3 status register
+
  tube_r4s = &FEFE       \ The Tube's memory-mapped FIFO 4 data register
+
  tube_r4d = &FEFF       \ The Tube's memory-mapped FIFO 4 status register
 
  OSBYTE = &FFF4         \ The address for the OSBYTE routine
+
  OSWORD = &FFF1         \ The address for the OSWORD routine
+
  OSFILE = &FFDD         \ The address for the OSFILE routine
+
  OSWRCH = &FFEE         \ The address for the OSWRCH routine
+
  OSCLI = &FFF7          \ The address for the OSCLI routine
 
 \ ******************************************************************************
@@ -2174,9 +2211,6 @@
 \ ELITE A FILE
 \
 \ ******************************************************************************
-
- CODE% = &1000
- LOAD% = &1000
 
  ORG CODE%
 
@@ -4391,6 +4425,7 @@ ENDIF
 \ ******************************************************************************
 
  CODE_B% = P%
+
  LOAD_B% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
@@ -7503,6 +7538,7 @@ ENDIF
 \ ******************************************************************************
 
  CODE_C% = P%
+
  LOAD_C% = LOAD% +P% - CODE%
 
 \ ******************************************************************************
@@ -9710,6 +9746,7 @@ ENDIF
 \ ******************************************************************************
 
  CODE_D% = P%
+
  LOAD_D% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
@@ -14012,6 +14049,7 @@ ENDIF
 \ ******************************************************************************
 
  CODE_E% = P%
+
  LOAD_E% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
@@ -16357,6 +16395,7 @@ ENDIF
 \ ******************************************************************************
 
  CODE_F% = P%
+
  LOAD_F% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
@@ -19808,6 +19847,7 @@ ENDMACRO
 \ ******************************************************************************
 
  CODE_G% = P%
+
  LOAD_G% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
@@ -25875,6 +25915,7 @@ ENDIF
 \ ******************************************************************************
 
  CODE_H% = P%
+
  LOAD_H% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
@@ -35665,6 +35706,7 @@ ENDMACRO
 \ ******************************************************************************
 
  CODE_I% = P%
+
  LOAD_I% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
@@ -39271,6 +39313,7 @@ ENDIF
 \ ******************************************************************************
 
  CODE_J% = P%
+
  LOAD_J% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
@@ -40834,10 +40877,26 @@ ENDIF
                         \ fair distance from the planet, so jump to MA23 as we
                         \ haven't crashed into the planet
 
- SBC #36                \ Subtract 36 from x_hi^2 + y_hi^2 + z_hi^2. The radius
-                        \ of the planet is defined as 6 units and 6^2 = 36, so
-                        \ A now contains the high byte of our altitude above
-                        \ the planet surface, squared
+ SBC #36                \ Subtract 36 from x_hi^2 + y_hi^2 + z_hi^2
+                        \
+                        \ When we do the 3D Pythagoras calculation, we only use
+                        \ the high bytes of the coordinates, so that's x_hi,
+                        \ y_hi and z_hi and
+                        \
+                        \ The planet radius is (0 96 0), as defined in the
+                        \ PLANET routine, so the high byte is 96
+                        \
+                        \ When we square the coordinates above and add them,
+                        \ the result gets divided by 256 (otherwise the result
+                        \ wouldn't fit into one byte), so if we do the same for
+                        \ the planet's radius, we get:
+                        \
+                        \   96 * 96 / 256 = 36
+                        \
+                        \ So for the planet, the equivalent figure to test the
+                        \ sum of the _hi bytes against is 36, so A now contains
+                        \ the high byte of our altitude above the planet
+                        \ surface, squared
 
  BCC MA28               \ If A < 0 then jump to MA28 as we have crashed into
                         \ the planet
@@ -42490,6 +42549,7 @@ ENDIF
 \ ******************************************************************************
 
  CODE_K% = P%
+
  LOAD_K% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
@@ -46767,6 +46827,7 @@ ENDIF
 \ ******************************************************************************
 
  CODE_L% = P%
+
  LOAD_L% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
@@ -51453,6 +51514,7 @@ ENDIF
 \ ******************************************************************************
 
  CODE_M% = P%
+
  LOAD_M% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
@@ -56241,6 +56303,7 @@ ENDIF
 \ ******************************************************************************
 
  CODE_SHIPS% = P%
+
  LOAD_SHIPS% = LOAD% + P% - CODE%
 
 \ ******************************************************************************
