@@ -297,7 +297,7 @@ or this on a Mac or Linux:
 make variant=released
 ```
 
-This will produce a file called `elite-a-released.NES` in the `5-compiled-game-discs` folder that contains the released version.
+This will produce a file called `elite-a-released.ssd` in the `5-compiled-game-discs` folder that contains the released version.
 
 The verification checksums for this version are as follows:
 
