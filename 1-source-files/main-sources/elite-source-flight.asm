@@ -2281,6 +2281,8 @@
 
 \.DEEOR
 \
+\IF _STH_DISC OR _IB_DISC
+\
 \ LDY #0                \ We're going to work our way through a large number of
 \                       \ encrypted bytes, so we set Y to 0 to be the index of
 \                       \ the current byte within its page in memory
@@ -2323,6 +2325,13 @@
 \
 \ JMP RSHIPS            \ Call RSHIPS to launch from the station, load a new set
 \                       \ of ship blueprints and jump into the main game loop
+\
+\ELIF _SRAM_DISC
+\
+\ JMP RSHIPS            \ Call RSHIPS to launch from the station, load a new set
+\                       \ of ship blueprints and jump into the main game loop
+\
+\ENDIF
 
                         \ --- End of removed code ----------------------------->
 
@@ -26454,7 +26463,7 @@
 \ BVS MTT4              \ If V flag is set (50% chance), jump up to MTT4 to
 \                       \ spawn a trader
 \
-\IF _STH_DISC
+\IF _STH_DISC OR _SRAM_DISC
 \
 \ NOP                   \ In the first version of disc Elite, asteroids never
 \ NOP                   \ appeared. It turned out that the authors had put in a
@@ -36943,6 +36952,8 @@ ENDMACRO
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
+\IF _STH_DISC OR _IB_DISC
+\
 \ LDX #&FF              \ Set X to the default scanner colour of green/cyan
 \                       \ (a 4-pixel mode 5 byte in colour 3)
 \
@@ -36950,6 +36961,19 @@ ENDMACRO
 \ BNE P%+4              \ instruction
 \
 \ LDX #&F0              \ This is a missile, so set X to colour 2 (yellow/white)
+\
+\ELIF _SRAM_DISC
+\
+\ JSR SCANCOL           \ Call SCANCOL to set the correct colour on the scanner
+\                       \ for the current ship type
+\
+\ NOP                   \ Pad out the code so it takes up the same amount of
+\ NOP                   \ space as in the original version
+\ NOP
+\ NOP
+\ NOP
+\
+\ENDIF
 \
 \ STX COL               \ Store X, the colour of this ship on the scanner, in
 \                       \ COL

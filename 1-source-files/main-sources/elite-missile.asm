@@ -45,9 +45,9 @@
 \
 \ ******************************************************************************
 
- CODE% = &7F00			\ The address where the code will be run
+ CODE% = &7F00          \ The address where the code will be run
 
- LOAD% = &2468			\ The address where the code will be loaded
+ LOAD% = &2468          \ The address where the code will be loaded
 
  ORG CODE%
 
@@ -325,8 +325,17 @@ ENDMACRO
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
+\IF _STH_DISC OR _IB_DISC
+\
 \ FACE        0,      160,      110,         31   \ Face 7
 \ FACE        0,       64,        4,          0   \ Face 8
+\
+\ELIF _SRAM_DISC
+\
+\ FACE        0,       32,        0,         31   \ Face 7
+\ FACE        0,        0,     -176,         31   \ Face 8
+\
+\ENDIF
 
                         \ --- And replaced by: -------------------------------->
 
@@ -348,6 +357,8 @@ ENDMACRO
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
+\IF _STH_DISC OR _IB_DISC
+\
 \ EQUW &0004            \ VEC = &7FFE
 \                       \
 \                       \ This gets set to the value of the original IRQ1 vector
@@ -356,6 +367,15 @@ ENDMACRO
 \                       \ This default value is random workspace noise left over
 \                       \ from the BBC Micro assembly process; it gets
 \                       \ overwritten
+\
+\ELIF _SRAM_DISC
+\
+\ SKIP 2                \ VEC = &7FFE
+\                       \
+\                       \ This gets set to the value of the original IRQ1 vector
+\                       \ by the loading process
+\
+\ENDIF
 
                         \ --- And replaced by: -------------------------------->
 

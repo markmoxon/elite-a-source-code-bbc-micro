@@ -43,10 +43,10 @@
 \ ******************************************************************************
 
  CODE% = &5600          \ The flight code runs this file at address &5600, at
-           				\ label XX21
+                        \ label XX21
 
- LOAD% = &5600			\ The flight code loads this file at address &5600, at
-           				\ label XX21
+ LOAD% = &5600          \ The flight code loads this file at address &5600, at
+                        \ label XX21
 
  SHIP_MISSILE = &7F00   \ The address of the missile ship blueprint
 
