@@ -2030,7 +2030,7 @@
 \
 \       Name: K%
 \       Type: Workspace
-\    Address: &0900 to &0D3F
+\    Address: &0900 to &0CFF
 \   Category: Workspaces
 \    Summary: Ship data blocks and ship line heaps
 \  Deep dive: Ship data blocks
@@ -2062,7 +2062,7 @@
 \
 \       Name: WP
 \       Type: Workspace
-\    Address: &0E00 to &0E3B
+\    Address: &0E00 to &0FD2
 \   Category: Workspaces
 \    Summary: Variables
 \
