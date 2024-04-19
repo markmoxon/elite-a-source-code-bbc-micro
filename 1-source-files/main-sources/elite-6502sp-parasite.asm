@@ -51751,7 +51751,7 @@ ENDIF
                         \ result isn't used anywhere, as CMP affects the Z and N
                         \ flags (not the C flag), and these same flags will be
                         \ overwritten by the two DEC instructions below... so
-                        \ instruction has no effect
+                        \ this instruction has no effect
 
  BCS P%+7               \ If the ship was successfully added, skip the following
                         \ two instructions

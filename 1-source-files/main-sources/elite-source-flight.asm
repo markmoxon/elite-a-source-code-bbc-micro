@@ -26789,6 +26789,35 @@
 \                       \ passed through the BCS above), so A is now one of the
 \                       \ lone bounty hunter ships, i.e. Cobra Mk III (pirate),
 \                       \ Asp Mk II, Python (pirate) or Fer-de-lance
+\                       \
+\                       \ Interestingly, this logic means that the Moray, which
+\                       \ is the ship after the Fer-de-lance in the XX21 table,
+\                       \ never spawns, as the above logic chooses a blueprint
+\                       \ number in the range CYL2 to CYL2+3 (i.e. 24 to 27),
+\                       \ and the Moray is blueprint 28
+\                       \
+\                       \ No other code spawns the ship with blueprint 28, so
+\                       \ this means the Moray is never seen in Elite
+\                       \
+\                       \ This is presumably a bug, which could be very easily
+\                       \ fixed by inserting one of the following instructions
+\                       \ before the ADC #CYL2 instruction above:
+\                       \
+\                       \   * SEC would change the range to 25 to 28, which
+\                       \     would cover the Asp Mk II, Python (pirate),
+\                       \     Fer-de-lance and Moray
+\                       \
+\                       \   * LSR A would set the C flag to a random number to
+\                       \     give a range of 24 to 28, which would cover the
+\                       \     Cobra Mk III (pirate), Asp Mk II, Python (pirate),
+\                       \     Fer-de-lance and Moray
+\                       \
+\                       \ It's hard to know what the authors' original intent
+\                       \ was, but the Cobra Mk III (pirate) can already be
+\                       \ spawned as part of a group of pirates (see mt1 below),
+\                       \ so I suspect the first fix might be the correct one,
+\                       \ as then there is no overlap between pirates and bounty
+\                       \ hunters
 
                         \ --- And replaced by: -------------------------------->
 
@@ -27024,7 +27053,7 @@
                         \ result isn't used anywhere, as CMP affects the Z and N
                         \ flags (not the C flag), and these same flags will be
                         \ overwritten by the two DEC instructions below... so
-                        \ instruction has no effect
+                        \ this instruction has no effect
 
  BCS P%+7               \ If the ship was successfully added, skip the following
                         \ two instructions
