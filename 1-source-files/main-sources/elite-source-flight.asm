@@ -2243,6 +2243,30 @@
 
  JSR OSCLI              \ Call OSCLI to run the OS command in LTLI, which *RUNs
                         \ the main docked code in 1.D
+                        \
+                        \ Note that this is a JSR rather than a JMP, so if LTLI
+                        \ is still set to "L.1.D" (rather than "R.1.D"),
+                        \ then once the command has been run and the docked code
+                        \ has loaded, execution will continue from the next
+                        \ instruction
+                        \
+                        \ By this point the 1.D binary has loaded over the
+                        \ top of this one, so we don't fall through into the
+                        \ LTLI variable (as that's in the flight code), but
+                        \ instead we fall through into the DOBEGIN routine in
+                        \ the docked code)
+                        \
+                        \ This means that if the LTLI command is unchanged, then
+                        \ we load the docked code and fall through into DOBEGIN
+                        \ to restart the game from the title screen, so by
+                        \ default, loading the docked code will restart the game
+                        \
+                        \ However if we call DOENTRY in the flight code first,
+                        \ then the command in LTLI is changed to the "R.1.D"
+                        \ version, which *RUNs the docked code and starts
+                        \ execution from the start of the docked binary at S%,
+                        \ which contains a JMP DOENTRY instruction that docks at
+                        \ the station instead
 
 \ ******************************************************************************
 \
@@ -2348,6 +2372,14 @@
 
  LDA #'R'               \ Modify the command in LTLI from "L.1.D" to "R.1.D" so
  STA LTLI               \ it *RUNs the code rather than loading it
+                        \
+                        \ This ensures that when we load the docked code, then
+                        \ instead of continuing execution following a *LOAD,
+                        \ which would restart the game by falling through into
+                        \ the DOBEGIN routine in the docked code, we instead
+                        \ jump to the start of the docked code at S%, which
+                        \ jumps to the docked DOENTRY routine to dock with the
+                        \ space station
 
                         \ Fall into DEATH2 to reset most variables and *RUN the
                         \ docked code

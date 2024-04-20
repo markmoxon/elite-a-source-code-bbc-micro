@@ -3453,7 +3453,7 @@ WP workspace from  &E00  to &FD3
 .INBAY
      11F1   20 9D 12   JSR &129D
      11F4   4C 94 12   JMP &1294
-     11F7   00         BRK
+     11F7   00
      11F8   A9 00      LDA #&00
      11FA   20 9A 12   JSR &129A
      11FD   20 BC 32   JSR &32BC
