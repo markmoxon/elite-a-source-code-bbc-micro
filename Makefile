@@ -22,6 +22,23 @@ PYTHON?=python
 #
 # will build the bug-fix variant with a maxed-out commander and no crc32
 # verification
+#
+# The following variables are written into elite-build-options.asm depending on
+# the above arguments, so they can be passed to BeebAsm:
+#
+# _VERSION
+#   6 = Elite-A
+#
+# _VARIANT
+#   1 = Released version (default)
+#   2 = Source disc
+#   3 = Bug fix
+#
+# _MAX_COMMANDER
+#   TRUE  = Maxed-out commander
+#   FALSE = Standard commander
+#
+# The verify argument is passed to the crc32.py script, rather than BeebAsm
 
 ifeq ($(commander), max)
   max-commander=TRUE
