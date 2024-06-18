@@ -15,10 +15,10 @@
 \ in the documentation are entirely my fault
 \
 \ The terminology and notations used in this commentary are explained at
-\ https://www.bbcelite.com/terminology
+\ https://elite.bbcelite.com/terminology
 \
 \ The deep dive articles referred to in this commentary can be found at
-\ https://www.bbcelite.com/deep_dives
+\ https://elite.bbcelite.com/deep_dives
 \
 \ ------------------------------------------------------------------------------
 \
@@ -2059,7 +2059,7 @@
 \
 \       Name: K%
 \       Type: Workspace
-\    Address: &0900 to &0D3F
+\    Address: &0900 to &0CFF
 \   Category: Workspaces
 \    Summary: Ship data blocks and ship line heaps
 \  Deep dive: Ship data blocks
@@ -2091,7 +2091,7 @@
 \
 \       Name: WP
 \       Type: Workspace
-\    Address: &0E00 to &0E3B
+\    Address: &0E00 to &0FD2
 \   Category: Workspaces
 \    Summary: Variables
 \
@@ -10303,8 +10303,8 @@ ENDIF
  JSR spc                \ 67 + A, followed by a space, so:
                         \
                         \   A = 0 prints token 67 ("LARGE") and a space
-                        \   A = 1 prints token 67 ("FIERCE") and a space
-                        \   A = 2 prints token 67 ("SMALL") and a space
+                        \   A = 1 prints token 68 ("FIERCE") and a space
+                        \   A = 2 prints token 69 ("SMALL") and a space
 
 .TT205
 
@@ -10358,14 +10358,14 @@ ENDIF
 
  ADC #242               \ A = 0 to 7, so print recursive token 82 + A, so:
  JSR TT27               \
-                        \   A = 0 prints token 76 ("RODENT")
-                        \   A = 1 prints token 76 ("FROG")
-                        \   A = 2 prints token 76 ("LIZARD")
-                        \   A = 3 prints token 76 ("LOBSTER")
-                        \   A = 4 prints token 76 ("BIRD")
-                        \   A = 5 prints token 76 ("HUMANOID")
-                        \   A = 6 prints token 76 ("FELINE")
-                        \   A = 7 prints token 76 ("INSECT")
+                        \   A = 0 prints token 82 ("RODENT")
+                        \   A = 1 prints token 83 ("FROG")
+                        \   A = 2 prints token 84 ("LIZARD")
+                        \   A = 3 prints token 85 ("LOBSTER")
+                        \   A = 4 prints token 86 ("BIRD")
+                        \   A = 5 prints token 87 ("HUMANOID")
+                        \   A = 6 prints token 88 ("FELINE")
+                        \   A = 7 prints token 89 ("INSECT")
 
 .TT76
 
@@ -11225,9 +11225,10 @@ ENDIF
  SEC                    \ Subtract ASCII "0" from the key pressed, to leave the
  SBC #'0'               \ numeric value of the key in A (if it was a number key)
 
- BCC OUT                \ If A < 0, jump to OUT to return from the subroutine
-                        \ with a result of 0, as the key pressed was not a
-                        \ number or letter and is less than ASCII "0"
+ BCC OUT                \ If A < 0, jump to OUT to load the current number and
+                        \ return from the subroutine, as the key pressed was
+                        \ RETURN (or some other ncharacter with a value less
+                        \ than ASCII "0")
 
  CMP #10                \ If A >= 10, jump to BAY2 to display the Inventory
  BCS BAY2               \ screen, as the key pressed was a letter or other
@@ -12518,6 +12519,12 @@ ENDIF
 \ Arguments:
 \
 \   A                   The text token to be printed
+\
+\ ------------------------------------------------------------------------------
+\
+\ Other entry points:
+\
+\   prq+3               Print a question mark
 \
 \ ******************************************************************************
 
@@ -40932,8 +40939,8 @@ ENDIF
                         \ docking computer manoeuvring
 
  LDA auto               \ If auto is zero, then the docking computer is not
- BEQ MA23               \ activated, so jump to MA33 to skip the
-                        \ docking computer manoeuvring
+ BEQ MA23               \ activated, so jump to MA23 to skip to the next
+                        \ section
 
  LDA #123               \ Set A = 123 and jump down to MA34 to print token 123
  BNE MA34               \ ("DOCKING COMPUTERS ON") as an in-flight message
@@ -52253,7 +52260,7 @@ ENDIF
                         \ result isn't used anywhere, as CMP affects the Z and N
                         \ flags (not the C flag), and these same flags will be
                         \ overwritten by the two DEC instructions below... so
-                        \ instruction has no effect
+                        \ this instruction has no effect
 
  BCS P%+7               \ If the ship was successfully added, skip the following
                         \ two instructions

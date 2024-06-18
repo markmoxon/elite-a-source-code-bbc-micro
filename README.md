@@ -2,11 +2,11 @@
 
 [BBC Micro cassette Elite](https://github.com/markmoxon/cassette-elite-beebasm) | [BBC Micro disc Elite](https://github.com/markmoxon/disc-elite-beebasm) | [6502 Second Processor Elite](https://github.com/markmoxon/6502sp-elite-beebasm) | [BBC Master Elite](https://github.com/markmoxon/master-elite-beebasm) | [Acorn Electron Elite](https://github.com/markmoxon/electron-elite-beebasm) | [NES Elite](https://github.com/markmoxon/nes-elite-beebasm) | **Elite-A** | [Teletext Elite](https://github.com/markmoxon/teletext-elite) | [Elite Universe Editor](https://github.com/markmoxon/elite-universe-editor) | [Elite Compendium](https://github.com/markmoxon/elite-compendium) | [Elite over Econet](https://github.com/markmoxon/elite-over-econet) | [Flicker-free Commodore 64 Elite](https://github.com/markmoxon/c64-elite-flicker-free) | [BBC Micro Aviator](https://github.com/markmoxon/aviator-beebasm) | [BBC Micro Revs](https://github.com/markmoxon/revs-beebasm) | [Archimedes Lander](https://github.com/markmoxon/archimedes-lander)
 
-![Iguana ship details in the Elite-A encyclopedia](https://www.bbcelite.com/images/github/encyclopedia-iguana.png)
+![Iguana ship details in the Elite-A encyclopedia](https://elite.bbcelite.com/images/github/encyclopedia-iguana.png)
 
 This repository contains the original source code for Angus Duggan's Elite-A on the BBC Micro, with every single line documented and (for the most part) explained.
 
-It is a companion to the [bbcelite.com website](https://www.bbcelite.com).
+It is a companion to the [elite.bbcelite.com website](https://elite.bbcelite.com).
 
 See the [introduction](#introduction) for more information, or jump straight into the [documented source code](1-source-files/main-sources).
 
@@ -51,7 +51,7 @@ This repository contains the original source code for Angus Duggan's Elite-A on 
 
 You can build the fully functioning game from this source. [Three variants](#building-different-variants-of-elite-a) are currently supported: the officially released version from Angus's site, the variant produced by the original source discs (which was never released), and a variant that fixes various bugs and which works on the BBC Master (which the original doesn't).
 
-It is a companion to the [bbcelite.com website](https://www.bbcelite.com), which contains all the code from this repository, but laid out in a much more human-friendly fashion. The links at the top of this page will take you to repositories for the other versions of Elite that are covered by this project.
+It is a companion to the [elite.bbcelite.com website](https://elite.bbcelite.com), which contains all the code from this repository, but laid out in a much more human-friendly fashion. The links at the top of this page will take you to repositories for the other versions of Elite that are covered by this project.
 
 Elite-A is legendary amongst BBC Elite fans, and remains a deeply impressive project that has achieved almost mythical status in the Acorn retro scene (and deservedly so). Ian Bell, co-author of the original Elite, has this to say on his website:
 
@@ -63,7 +63,7 @@ I am very grateful to Angus for giving me permission to analyse his work on Elit
 
 See [Angus's Elite-A site](http://knackered.org/angus/beeb/elite.html) for more information on playing Elite-A.
 
-My hope is that this repository and the [accompanying website](https://www.bbcelite.com) will be useful for those who want to learn more about Elite and what makes it tick. It is provided on an educational and non-profit basis, with the aim of helping people appreciate one of the most iconic games of the 8-bit era.
+My hope is that this repository and the [accompanying website](https://elite.bbcelite.com) will be useful for those who want to learn more about Elite and what makes it tick. It is provided on an educational and non-profit basis, with the aim of helping people appreciate one of the most iconic games of the 8-bit era.
 
 ## Acknowledgements
 
@@ -73,7 +73,7 @@ The code on this site is identical to Angus Duggan's source discs (it's just bee
 
 The commentary is copyright &copy; Mark Moxon. Any misunderstandings or mistakes in the documentation are entirely my fault.
 
-Huge thanks are due to Angus Duggan for giving me permission to document his work in extending Elite; to the original authors of Elite for not only creating such an important piece of my childhood, but also for releasing the source code for us to play with; to Paul Brink for his annotated disassembly; and to Kieran Connell for his [BeebAsm version](https://github.com/kieranhj/elite-beebasm), which I forked as the original basis for this project. You can find more information about this project in the [accompanying website's project page](https://www.bbcelite.com/about_site/about_this_project.html).
+Huge thanks are due to Angus Duggan for giving me permission to document his work in extending Elite; to the original authors of Elite for not only creating such an important piece of my childhood, but also for releasing the source code for us to play with; to Paul Brink for his annotated disassembly; and to Kieran Connell for his [BeebAsm version](https://github.com/kieranhj/elite-beebasm), which I forked as the original basis for this project. You can find more information about this project in the [accompanying website's project page](https://elite.bbcelite.com/about_site/about_this_project.html).
 
 ### A note on licences, copyright etc.
 
@@ -101,15 +101,15 @@ If you want to browse the source in an IDE, you might find the following useful.
 
 * The source files for Elite-A are unique amongst the annotated versions in this project, in that they contain inline diffs. Angus created Elite-A by taking the original disc version of Elite and modifying the code to include all his new features. The annotated source files in this repository contain both the original disc code and all of Angus's modifications, so you can look through the source to see exactly what Angus changed in order to create Elite-A. Any code that he removed from the disc version is commented out in the source files, so when they are assembled they produce the Elite-A binaries, while still containing details of Angus's modifications. You can find all the diffs by searching the sources for `Mod:`. (Note that this feature does not apply to the two 6502 Second Processor version source files, which just contain the Elite-A code.)
 
-* It's probably worth skimming through the [notes on terminology and notations](https://www.bbcelite.com/terminology/) on the accompanying website, as this explains a number of terms used in the commentary, without which it might be a bit tricky to follow at times (in particular, you should understand the terminology I use for multi-byte numbers).
+* It's probably worth skimming through the [notes on terminology and notations](https://elite.bbcelite.com/terminology/) on the accompanying website, as this explains a number of terms used in the commentary, without which it might be a bit tricky to follow at times (in particular, you should understand the terminology I use for multi-byte numbers).
 
-* The accompanying website contains [a number of "deep dive" articles](https://www.bbcelite.com/deep_dives/), each of which goes into an aspect of the game in detail. Routines that are explained further in these articles are tagged with the label `Deep dive:` and the relevant article name.
+* The accompanying website contains [a number of "deep dive" articles](https://elite.bbcelite.com/deep_dives/), each of which goes into an aspect of the game in detail. Routines that are explained further in these articles are tagged with the label `Deep dive:` and the relevant article name.
 
 * There are loads of routines and variables in Elite - literally hundreds. You can find them in the source files by searching for the following: `Type: Subroutine`, `Type: Variable`, `Type: Workspace` and `Type: Macro`.
 
 * If you know the name of a routine, you can find it by searching for `Name: <name>`, as in `Name: SCAN` (for the 3D scanner routine) or `Name: LL9` (for the ship-drawing routine).
 
-* The entry point for the [main game code](1-source-files/main-sources/elite-source-docked.asm) is routine `TT170`, which you can find by searching for `Name: TT170`. If you want to follow the program flow all the way from the title screen around the main game loop, then you can find a number of [deep dives on program flow](https://www.bbcelite.com/deep_dives/) on the accompanying website.
+* The entry point for the [main game code](1-source-files/main-sources/elite-source-docked.asm) is routine `TT170`, which you can find by searching for `Name: TT170`. If you want to follow the program flow all the way from the title screen around the main game loop, then you can find a number of [deep dives on program flow](https://elite.bbcelite.com/deep_dives/) on the accompanying website.
 
 * The source code is designed to be read at an 80-column width and with a monospaced font, just like in the good old days.
 
@@ -135,7 +135,7 @@ This repository also includes a flicker-free version, which incorporates the bac
 
 The annotated source files in the `flicker-free` branch contain both the original Elite-A code and all of the modifications for flicker-free Elite, so you can look through the source to see exactly what's changed. Any code that I've removed from the original version is commented out in the source files, so when they are assembled they produce the flicker-free binaries, while still containing details of all the modifications. You can find all the diffs by searching the sources for `Mod:`.
 
-For more information on flicker-free Elite, see the [hacks section of the accompanying website](https://www.bbcelite.com/hacks/flicker-free_elite.html).
+For more information on flicker-free Elite, see the [hacks section of the accompanying website](https://elite.bbcelite.com/hacks/flicker-free_elite.html).
 
 ## Building Elite-A from the source
 
@@ -297,7 +297,7 @@ or this on a Mac or Linux:
 make variant=released
 ```
 
-This will produce a file called `elite-a-released.NES` in the `5-compiled-game-discs` folder that contains the released version.
+This will produce a file called `elite-a-released.ssd` in the `5-compiled-game-discs` folder that contains the released version.
 
 The verification checksums for this version are as follows:
 
@@ -459,7 +459,7 @@ The only difference in the source disc variant is that the latter has considerab
 
 The bug fix variant works on the BBC Master and BBC Master with 6502 Second Processor, which the original version of Elite-A doesn't. There is also a bug in the original version that prevents splinters from displaying properly, which makes mining all but impossible. The bug fix variant fixes that bug, and it also adds a quality-of-life improvement to the cargo capacities shown for flyable ships in the encyclopedia, so they reflect the in-game capacity when no equipment is fitted, rather than the "normal configuration" from the original version (which is a bit subjective).
 
-See the [accompanying website](https://www.bbcelite.com/elite-a/releases.html) for a comprehensive list of differences between the variants.
+See the [accompanying website](https://elite.bbcelite.com/elite-a/releases.html) for a comprehensive list of differences between the variants.
 
 ## Notes on the original source files
 

@@ -15,10 +15,10 @@
 \ in the documentation are entirely my fault
 \
 \ The terminology and notations used in this commentary are explained at
-\ https://www.bbcelite.com/terminology
+\ https://elite.bbcelite.com/terminology
 \
 \ The deep dive articles referred to in this commentary can be found at
-\ https://www.bbcelite.com/deep_dives
+\ https://elite.bbcelite.com/deep_dives
 \
 \ ------------------------------------------------------------------------------
 \
@@ -43,10 +43,10 @@
 \ ******************************************************************************
 
  CODE% = &5600          \ The flight code runs this file at address &5600, at
-           				\ label XX21
+                        \ label XX21
 
- LOAD% = &5600			\ The flight code loads this file at address &5600, at
-           				\ label XX21
+ LOAD% = &5600          \ The flight code loads this file at address &5600, at
+                        \ label XX21
 
  SHIP_MISSILE = &7F00   \ The address of the missile ship blueprint
 

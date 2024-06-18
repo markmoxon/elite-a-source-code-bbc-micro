@@ -15,10 +15,10 @@
 \ in the documentation are entirely my fault
 \
 \ The terminology and notations used in this commentary are explained at
-\ https://www.bbcelite.com/terminology
+\ https://elite.bbcelite.com/terminology
 \
 \ The deep dive articles referred to in this commentary can be found at
-\ https://www.bbcelite.com/deep_dives
+\ https://elite.bbcelite.com/deep_dives
 \
 \ ------------------------------------------------------------------------------
 \
@@ -2023,7 +2023,7 @@ ENDIF
 \
 \       Name: K%
 \       Type: Workspace
-\    Address: &0900 to &0D3F
+\    Address: &0900 to &0CFF
 \   Category: Workspaces
 \    Summary: Ship data blocks and ship line heaps
 \  Deep dive: Ship data blocks
@@ -2055,7 +2055,7 @@ ENDIF
 \
 \       Name: WP
 \       Type: Workspace
-\    Address: &0E00 to &0E3B
+\    Address: &0E00 to &0FD2
 \   Category: Workspaces
 \    Summary: Variables
 \
@@ -2244,6 +2244,30 @@ ENDIF
 
  JSR OSCLI              \ Call OSCLI to run the OS command in LTLI, which *RUNs
                         \ the main docked code in 1.D
+                        \
+                        \ Note that this is a JSR rather than a JMP, so if LTLI
+                        \ is still set to "L.1.D" (rather than "R.1.D"),
+                        \ then once the command has been run and the docked code
+                        \ has loaded, execution will continue from the next
+                        \ instruction
+                        \
+                        \ By this point the 1.D binary has loaded over the
+                        \ top of this one, so we don't fall through into the
+                        \ LTLI variable (as that's in the flight code), but
+                        \ instead we fall through into the DOBEGIN routine in
+                        \ the docked code)
+                        \
+                        \ This means that if the LTLI command is unchanged, then
+                        \ we load the docked code and fall through into DOBEGIN
+                        \ to restart the game from the title screen, so by
+                        \ default, loading the docked code will restart the game
+                        \
+                        \ However if we call DOENTRY in the flight code first,
+                        \ then the command in LTLI is changed to the "R.1.D"
+                        \ version, which *RUNs the docked code and starts
+                        \ execution from the start of the docked binary at S%,
+                        \ which contains a JMP DOENTRY instruction that docks at
+                        \ the station instead
 
 \ ******************************************************************************
 \
@@ -8997,8 +9021,8 @@ ENDIF
  JSR spc                \ 67 + A, followed by a space, so:
                         \
                         \   A = 0 prints token 67 ("LARGE") and a space
-                        \   A = 1 prints token 67 ("FIERCE") and a space
-                        \   A = 2 prints token 67 ("SMALL") and a space
+                        \   A = 1 prints token 68 ("FIERCE") and a space
+                        \   A = 2 prints token 69 ("SMALL") and a space
 
 .TT205
 
@@ -9052,14 +9076,14 @@ ENDIF
 
  ADC #242               \ A = 0 to 7, so print recursive token 82 + A, so:
  JSR TT27               \
-                        \   A = 0 prints token 76 ("RODENT")
-                        \   A = 1 prints token 76 ("FROG")
-                        \   A = 2 prints token 76 ("LIZARD")
-                        \   A = 3 prints token 76 ("LOBSTER")
-                        \   A = 4 prints token 76 ("BIRD")
-                        \   A = 5 prints token 76 ("HUMANOID")
-                        \   A = 6 prints token 76 ("FELINE")
-                        \   A = 7 prints token 76 ("INSECT")
+                        \   A = 0 prints token 82 ("RODENT")
+                        \   A = 1 prints token 83 ("FROG")
+                        \   A = 2 prints token 84 ("LIZARD")
+                        \   A = 3 prints token 85 ("LOBSTER")
+                        \   A = 4 prints token 86 ("BIRD")
+                        \   A = 5 prints token 87 ("HUMANOID")
+                        \   A = 6 prints token 88 ("FELINE")
+                        \   A = 7 prints token 89 ("INSECT")
 
 .TT76
 
@@ -10663,9 +10687,10 @@ ENDIF
  SEC                    \ Subtract ASCII "0" from the key pressed, to leave the
  SBC #'0'               \ numeric value of the key in A (if it was a number key)
 
- BCC OUT                \ If A < 0, jump to OUT to return from the subroutine
-                        \ with a result of 0, as the key pressed was not a
-                        \ number or letter and is less than ASCII "0"
+ BCC OUT                \ If A < 0, jump to OUT to load the current number and
+                        \ return from the subroutine, as the key pressed was
+                        \ RETURN (or some other ncharacter with a value less
+                        \ than ASCII "0")
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 

@@ -15,10 +15,10 @@
 \ in the documentation are entirely my fault
 \
 \ The terminology and notations used in this commentary are explained at
-\ https://www.bbcelite.com/terminology
+\ https://elite.bbcelite.com/terminology
 \
 \ The deep dive articles referred to in this commentary can be found at
-\ https://www.bbcelite.com/deep_dives
+\ https://elite.bbcelite.com/deep_dives
 \
 \ ------------------------------------------------------------------------------
 \
@@ -312,11 +312,24 @@
                         \ is 49 for modes 4 and 5, but needs to be adjusted for
                         \ our custom screen's width
 
- EQUB 23, 0, 10, 32     \ Set 6845 register R10 = 32
+ EQUB 23, 0, 10, 32     \ Set 6845 register R10 = %00100000 = 32
  EQUB 0, 0, 0           \
- EQUB 0, 0, 0           \ This is the "cursor start" register, so this sets the
-                        \ cursor start line at 0, effectively disabling the
-                        \ cursor
+ EQUB 0, 0, 0           \ This is the "cursor start" register, and bits 5 and 6
+                        \ define the "cursor display mode", as follows:
+                        \
+                        \   * %00 = steady, non-blinking cursor
+                        \
+                        \   * %01 = do not display a cursor
+                        \
+                        \   * %10 = fast blinking cursor (blink at 1/16 of the
+                        \           field rate)
+                        \
+                        \   * %11 = slow blinking cursor (blink at 1/32 of the
+                        \           field rate)
+                        \
+                        \ We can therefore turn off the cursor completely by
+                        \ setting cursor display mode %01, with bit 6 of R10
+                        \ clear and bit 5 of R10 set
 
 \ ******************************************************************************
 \
@@ -395,7 +408,16 @@ ENDMACRO
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
+\IF _STH_DISC OR _IB_DISC
+\
 \ JSR PROT1             \ Call PROT1 to calculate checksums into CHKSM
+\
+\ELIF _SRAM_DISC
+\
+\ JSR PROT4             \ Fetch the address of the keyboard translation table
+\                       \ before calling PROT1 to calculate checksums into CHKSM
+\
+\ENDIF
 \
 \ LDA #144              \ Call OSBYTE with A = 144, X = 255 and Y = 0 to move
 \ LDX #255              \ the screen down one line and turn screen interlace on
@@ -462,9 +484,28 @@ ENDMACRO
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
+\IF _STH_DISC OR _IB_DISC
+\
 \ LDA #200              \ Call OSBYTE with A = 200, X = 0 and Y = 0 to enable
 \ LDX #0                \ the ESCAPE key and disable memory clearing if the
 \ JSR OSB               \ BREAK key is pressed
+\
+\ELIF _SRAM_DISC
+\
+\ LDA #219              \ Store 219 in location &9F. This gets checked by the
+\ STA &9F               \ TITLE routine in the main docked code as part of the
+\                       \ copy protection (the game hangs if it doesn't match)
+\                       \
+\                       \ This is normally done in the OSBmod routine, but the
+\                       \ sideways RAM variant doesn't call OSBmod as that part
+\                       \ of the copy protection is disabled, so we set the
+\                       \ value of location &BF here instead
+\
+\ NOP                   \ Pad out the code so it takes up the same amount of
+\ NOP                   \ space as in the original version
+\ NOP
+\
+\ENDIF
 
                         \ --- And replaced by: -------------------------------->
 
@@ -492,9 +533,19 @@ ENDMACRO
 \
 \.OSBjsr
 \
+\IF _STH_DISC OR _IB_DISC
+\
 \ JSR OSB               \ This JSR gets modified by code inserted into PLL1 so
 \                       \ that it points to OSBmod instead of OSB, so this
 \                       \ actually calls OSBmod to calculate some checksums
+\
+\ELIF _SRAM_DISC
+\
+\ NOP                   \ The sideways RAM variant has this part of the copy
+\ NOP                   \ protection disabled, so pad out the code so it takes
+\ NOP                   \ up the same amount of space as in the original version
+\
+\ENDIF
 
                         \ --- End of removed code ----------------------------->
 
@@ -701,7 +752,15 @@ ENDMACRO
 \
 \ LDA (P),Y             \ Fetch the Y-th byte of the P(1 0) memory block
 \
+\IF _STH_DISC OR _IB_DISC
+\
 \ EOR #&18              \ Decrypt it by EOR'ing with &18
+\
+\ELIF _SRAM_DISC
+\
+\ EOR CHKSM             \ Decrypt it by EOR'ing with the checksum value
+\
+\ENDIF
 \
 \ STA (ZP),Y            \ Store the decrypted result in the Y-th byte of the
 \                       \ ZP(1 0) memory block
@@ -1205,8 +1264,17 @@ ENDIF
 \
 \ELSE
 \
+\IF _STH_DISC OR _IB_DISC
+\
 \ BNE P%                \ If the checksums don't match then enter an infinite
 \                       \ loop, which hangs the computer
+\
+\ELIF _SRAM_DISC
+\
+\ NOP                   \ The sideways RAM variant ignores the result of the
+\ NOP                   \ checksum comparison
+\
+\ENDIF
 \
 \ENDIF
 
