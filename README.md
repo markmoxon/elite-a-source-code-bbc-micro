@@ -418,11 +418,11 @@ Results for variant: bug-fix
 [--originals--]  [---output----]
 Checksum   Size  Checksum   Size  Match  Filename
 -----------------------------------------------------------
-d733f7f3  19997  d733f7f3  19997   Yes   1.D.bin
-cd68d57e  16796  cd68d57e  16796   Yes   1.E.bin
+e5ba3c27  19945  e5ba3c27  19945   Yes   1.D.bin
+9dc55321  16797  9dc55321  16797   Yes   1.E.bin
 14ee8b20  17432  14ee8b20  17432   Yes   1.F.bin
 07b3750f   2008  07b3750f   2008   Yes   2.H.bin
-f02c9501  43094  f02c9501  43094   Yes   2.T.bin
+d3ed6338  43147  d3ed6338  43147   Yes   2.T.bin
 067375d2   5385  067375d2   5385   Yes   ELITE.bin
 4f2febe4    256  4f2febe4    256   Yes   MISSILE.bin
 678c1c7f   2560  678c1c7f   2560   Yes   S.A.bin
