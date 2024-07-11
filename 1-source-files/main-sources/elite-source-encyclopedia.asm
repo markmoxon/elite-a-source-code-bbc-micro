@@ -115,7 +115,7 @@ IF _BUG_FIX
 
  savews = &DD06         \ The address for the savews workspace routine from
                         \ the loader so we can call it to ensure the MOS
-                        \ characterdefinitions are loaded before printing
+                        \ character definitions are loaded before printing
                         \ text on the BBC Master
 
 ENDIF
