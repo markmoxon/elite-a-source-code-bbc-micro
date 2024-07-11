@@ -25404,7 +25404,7 @@ ENDMACRO
 
 .new_ships
 
-IF _SOURCE_DISC OR _BUG_FIX
+IF _SOURCE_DISC
 
  EQUS "ADDER    "       \ #0 = Adder         = 27,000.0 Cr
 
@@ -25458,7 +25458,7 @@ IF _SOURCE_DISC OR _BUG_FIX
  EQUS "ASP MK2  "       \ #14 = Asp Mk II    = 895,000.0 Cr
  EQUD 8950000
 
-ELIF _RELEASED
+ELIF _RELEASED OR _BUG_FIX
 
  EQUS "ADDER    "       \ #0 = Adder         = 31,000.0 Cr
 
@@ -25718,7 +25718,7 @@ IF _SOURCE_DISC
 \EQUB 9                 \ Not used (new_space)                  = 9
 \EQUB 0                 \ Not used
 
-ELIF _RELEASED
+ELIF _RELEASED OR _BUG_FIX
 
                         \ Fer-de-lance
 
@@ -25857,7 +25857,7 @@ IF _SOURCE_DISC
 \EQUB 7                 \ Not used (new_space)                  = 7
 \EQUB 0                 \ Not used
 
-ELIF _RELEASED
+ELIF _RELEASED OR _BUG_FIX
 
                         \ Asp Mk II
 
