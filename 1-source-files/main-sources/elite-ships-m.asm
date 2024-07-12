@@ -453,7 +453,7 @@ ENDMACRO
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ EQUB 17               \ Max. energy              = 17
+\EQUB 17                \ Max. energy              = 17
 
                         \ --- And replaced by: -------------------------------->
 
@@ -522,7 +522,7 @@ ENDMACRO
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ EQUW 0                \ Bounty                   = 0
+\EQUW 0                 \ Bounty                   = 0
 
                         \ --- And replaced by: -------------------------------->
 
@@ -535,7 +535,7 @@ ENDMACRO
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ EQUB 17               \ Max. energy              = 17
+\EQUB 17                \ Max. energy              = 17
 
                         \ --- And replaced by: -------------------------------->
 
@@ -625,7 +625,7 @@ ENDMACRO
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ EQUB 100              \ Max. energy              = 100
+\EQUB 100               \ Max. energy              = 100
 
                         \ --- And replaced by: -------------------------------->
 
@@ -642,7 +642,7 @@ ENDMACRO
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ EQUB %00010001        \ Laser power              = 2
+\EQUB %00010001         \ Laser power              = 2
 \                       \ Missiles                 = 1
 
                         \ --- And replaced by: -------------------------------->
@@ -735,7 +735,7 @@ ENDMACRO
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ EQUB 90               \ Max. energy              = 90
+\EQUB 90                \ Max. energy              = 90
 
                         \ --- And replaced by: -------------------------------->
 
@@ -752,7 +752,7 @@ ENDMACRO
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ EQUB %00010010        \ Laser power              = 2
+\EQUB %00010010         \ Laser power              = 2
 \                       \ Missiles                 = 2
 
                         \ --- And replaced by: -------------------------------->
@@ -858,7 +858,7 @@ ENDMACRO
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ EQUW 0                \ Bounty                   = 0
+\EQUW 0                 \ Bounty                   = 0
 
                         \ --- And replaced by: -------------------------------->
 
@@ -871,7 +871,7 @@ ENDMACRO
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ EQUB 160              \ Max. energy              = 160
+\EQUB 160               \ Max. energy              = 160
 
                         \ --- And replaced by: -------------------------------->
 
@@ -888,7 +888,7 @@ ENDMACRO
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ EQUB %00010010        \ Laser power              = 2
+\EQUB %00010010         \ Laser power              = 2
 \                       \ Missiles                 = 2
 
                         \ --- And replaced by: -------------------------------->
@@ -995,7 +995,7 @@ ENDMACRO
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ EQUB 90               \ Max. energy              = 90
+\EQUB 90                \ Max. energy              = 90
 
                         \ --- And replaced by: -------------------------------->
 
@@ -1012,7 +1012,7 @@ ENDMACRO
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ EQUB %00010010        \ Laser power              = 2
+\EQUB %00010010         \ Laser power              = 2
 \                       \ Missiles                 = 2
 
                         \ --- And replaced by: -------------------------------->
@@ -1418,7 +1418,7 @@ ENDMACRO
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ EQUW 0                \ Bounty                   = 0
+\EQUW 0                 \ Bounty                   = 0
 
                         \ --- And replaced by: -------------------------------->
 
@@ -1431,7 +1431,7 @@ ENDMACRO
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ EQUB 16               \ Max. energy              = 16
+\EQUB 16                \ Max. energy              = 16
 
                         \ --- And replaced by: -------------------------------->
 

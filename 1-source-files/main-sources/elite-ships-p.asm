@@ -465,7 +465,7 @@ ENDMACRO
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ EQUB 17               \ Max. energy              = 17
+\EQUB 17                \ Max. energy              = 17
 
                         \ --- And replaced by: -------------------------------->
 
@@ -534,7 +534,7 @@ ENDMACRO
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ EQUW 0                \ Bounty                   = 0
+\EQUW 0                 \ Bounty                   = 0
 
                         \ --- And replaced by: -------------------------------->
 
@@ -547,7 +547,7 @@ ENDMACRO
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ EQUB 17               \ Max. energy              = 17
+\EQUB 17                \ Max. energy              = 17
 
                         \ --- And replaced by: -------------------------------->
 
@@ -637,7 +637,7 @@ ENDMACRO
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ EQUB 100              \ Max. energy              = 100
+\EQUB 100               \ Max. energy              = 100
 
                         \ --- And replaced by: -------------------------------->
 
@@ -654,7 +654,7 @@ ENDMACRO
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ EQUB %00010001        \ Laser power              = 2
+\EQUB %00010001         \ Laser power              = 2
 \                       \ Missiles                 = 1
 
                         \ --- And replaced by: -------------------------------->
@@ -752,7 +752,7 @@ ENDMACRO
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ EQUB 2                \ Normals are scaled by    = 2^2 = 4
+\EQUB 2                 \ Normals are scaled by    = 2^2 = 4
 
                         \ --- And replaced by: -------------------------------->
 
@@ -768,43 +768,43 @@ ENDMACRO
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
 \     \    x,    y,    z, face1, face2, face3, face4, visibility
-\ VERTEX    0,   10,  -26,     6,      0,    7,     7,         31   \ Vertex 0
-\ VERTEX  -25,    4,  -26,     1,      0,    7,     7,         31   \ Vertex 1
-\ VERTEX  -28,   -3,  -26,     1,      0,    2,     2,         31   \ Vertex 2
-\ VERTEX  -25,   -8,  -26,     2,      0,    3,     3,         31   \ Vertex 3
-\ VERTEX   26,   -8,  -26,     3,      0,    4,     4,         31   \ Vertex 4
-\ VERTEX   29,   -3,  -26,     4,      0,    5,     5,         31   \ Vertex 5
-\ VERTEX   26,    4,  -26,     5,      0,    6,     6,         31   \ Vertex 6
-\ VERTEX    0,    6,   12,    15,     15,   15,    15,         19   \ Vertex 7
-\ VERTEX  -30,   -1,   12,     7,      1,    9,     8,         31   \ Vertex 8
-\ VERTEX  -33,   -8,   12,     2,      1,    9,     3,         31   \ Vertex 9
-\ VERTEX   33,   -8,   12,     4,      3,   10,     5,         31   \ Vertex 10
-\ VERTEX   30,   -1,   12,     6,      5,   11,    10,         31   \ Vertex 11
-\ VERTEX  -11,   -2,   30,     9,      8,   13,    12,         31   \ Vertex 12
-\ VERTEX  -13,   -8,   30,     9,      3,   13,    13,         31   \ Vertex 13
-\ VERTEX   14,   -8,   30,    10,      3,   13,    13,         31   \ Vertex 14
-\ VERTEX   11,   -2,   30,    11,     10,   13,    12,         31   \ Vertex 15
-\ VERTEX   -5,    6,    2,     7,      7,    7,     7,          7   \ Vertex 16
-\ VERTEX  -18,    3,    2,     7,      7,    7,     7,          7   \ Vertex 17
-\ VERTEX   -5,    7,   -7,     7,      7,    7,     7,          7   \ Vertex 18
-\ VERTEX  -18,    4,   -7,     7,      7,    7,     7,          7   \ Vertex 19
-\ VERTEX  -11,    6,  -14,     7,      7,    7,     7,          7   \ Vertex 20
-\ VERTEX  -11,    5,   -7,     7,      7,    7,     7,          7   \ Vertex 21
-\ VERTEX    5,    7,  -14,     6,      6,    6,     6,          7   \ Vertex 22
-\ VERTEX   18,    4,  -14,     6,      6,    6,     6,          7   \ Vertex 23
-\ VERTEX   11,    5,   -7,     6,      6,    6,     6,          7   \ Vertex 24
-\ VERTEX    5,    6,   -3,     6,      6,    6,     6,          7   \ Vertex 25
-\ VERTEX   18,    3,   -3,     6,      6,    6,     6,          7   \ Vertex 26
-\ VERTEX   11,    4,    8,     6,      6,    6,     6,          7   \ Vertex 27
-\ VERTEX   11,    5,   -3,     6,      6,    6,     6,          7   \ Vertex 28
-\ VERTEX  -16,   -8,  -13,     3,      3,    3,     3,          6   \ Vertex 29
-\ VERTEX  -16,   -8,   16,     3,      3,    3,     3,          6   \ Vertex 30
-\ VERTEX   17,   -8,  -13,     3,      3,    3,     3,          6   \ Vertex 31
-\ VERTEX   17,   -8,   16,     3,      3,    3,     3,          6   \ Vertex 32
-\ VERTEX  -13,   -3,  -26,     0,      0,    0,     0,          8   \ Vertex 33
-\ VERTEX   13,   -3,  -26,     0,      0,    0,     0,          8   \ Vertex 34
-\ VERTEX    9,    3,  -26,     0,      0,    0,     0,          5   \ Vertex 35
-\ VERTEX   -8,    3,  -26,     0,      0,    0,     0,          5   \ Vertex 36
+\VERTEX    0,   10,  -26,     6,      0,    7,     7,         31    \ Vertex 0
+\VERTEX  -25,    4,  -26,     1,      0,    7,     7,         31    \ Vertex 1
+\VERTEX  -28,   -3,  -26,     1,      0,    2,     2,         31    \ Vertex 2
+\VERTEX  -25,   -8,  -26,     2,      0,    3,     3,         31    \ Vertex 3
+\VERTEX   26,   -8,  -26,     3,      0,    4,     4,         31    \ Vertex 4
+\VERTEX   29,   -3,  -26,     4,      0,    5,     5,         31    \ Vertex 5
+\VERTEX   26,    4,  -26,     5,      0,    6,     6,         31    \ Vertex 6
+\VERTEX    0,    6,   12,    15,     15,   15,    15,         19    \ Vertex 7
+\VERTEX  -30,   -1,   12,     7,      1,    9,     8,         31    \ Vertex 8
+\VERTEX  -33,   -8,   12,     2,      1,    9,     3,         31    \ Vertex 9
+\VERTEX   33,   -8,   12,     4,      3,   10,     5,         31    \ Vertex 10
+\VERTEX   30,   -1,   12,     6,      5,   11,    10,         31    \ Vertex 11
+\VERTEX  -11,   -2,   30,     9,      8,   13,    12,         31    \ Vertex 12
+\VERTEX  -13,   -8,   30,     9,      3,   13,    13,         31    \ Vertex 13
+\VERTEX   14,   -8,   30,    10,      3,   13,    13,         31    \ Vertex 14
+\VERTEX   11,   -2,   30,    11,     10,   13,    12,         31    \ Vertex 15
+\VERTEX   -5,    6,    2,     7,      7,    7,     7,          7    \ Vertex 16
+\VERTEX  -18,    3,    2,     7,      7,    7,     7,          7    \ Vertex 17
+\VERTEX   -5,    7,   -7,     7,      7,    7,     7,          7    \ Vertex 18
+\VERTEX  -18,    4,   -7,     7,      7,    7,     7,          7    \ Vertex 19
+\VERTEX  -11,    6,  -14,     7,      7,    7,     7,          7    \ Vertex 20
+\VERTEX  -11,    5,   -7,     7,      7,    7,     7,          7    \ Vertex 21
+\VERTEX    5,    7,  -14,     6,      6,    6,     6,          7    \ Vertex 22
+\VERTEX   18,    4,  -14,     6,      6,    6,     6,          7    \ Vertex 23
+\VERTEX   11,    5,   -7,     6,      6,    6,     6,          7    \ Vertex 24
+\VERTEX    5,    6,   -3,     6,      6,    6,     6,          7    \ Vertex 25
+\VERTEX   18,    3,   -3,     6,      6,    6,     6,          7    \ Vertex 26
+\VERTEX   11,    4,    8,     6,      6,    6,     6,          7    \ Vertex 27
+\VERTEX   11,    5,   -3,     6,      6,    6,     6,          7    \ Vertex 28
+\VERTEX  -16,   -8,  -13,     3,      3,    3,     3,          6    \ Vertex 29
+\VERTEX  -16,   -8,   16,     3,      3,    3,     3,          6    \ Vertex 30
+\VERTEX   17,   -8,  -13,     3,      3,    3,     3,          6    \ Vertex 31
+\VERTEX   17,   -8,   16,     3,      3,    3,     3,          6    \ Vertex 32
+\VERTEX  -13,   -3,  -26,     0,      0,    0,     0,          8    \ Vertex 33
+\VERTEX   13,   -3,  -26,     0,      0,    0,     0,          8    \ Vertex 34
+\VERTEX    9,    3,  -26,     0,      0,    0,     0,          5    \ Vertex 35
+\VERTEX   -8,    3,  -26,     0,      0,    0,     0,          5    \ Vertex 36
 
                         \ --- And replaced by: -------------------------------->
 
@@ -862,7 +862,7 @@ ENDMACRO
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ EDGE       0,       7,     7,     6,         16   \ Edge 7
+\EDGE       0,       7,     7,     6,         16    \ Edge 7
 
                         \ --- And replaced by: -------------------------------->
 
@@ -874,7 +874,7 @@ ENDMACRO
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ EDGE       2,       9,     2,     1,         11   \ Edge 9
+\EDGE       2,       9,     2,     1,         11    \ Edge 9
 
                         \ --- And replaced by: -------------------------------->
 
@@ -887,7 +887,7 @@ ENDMACRO
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ EDGE       5,      10,     5,     4,         11   \ Edge 12
+\EDGE       5,      10,     5,     4,         11    \ Edge 12
 
                         \ --- And replaced by: -------------------------------->
 
@@ -899,12 +899,12 @@ ENDMACRO
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ EDGE       7,       8,     8,     7,         17   \ Edge 14
-\ EDGE       8,       9,     9,     1,         17   \ Edge 15
-\ EDGE      10,      11,    10,     5,         17   \ Edge 16
-\ EDGE       7,      11,    11,     6,         17   \ Edge 17
-\ EDGE       7,      15,    12,    11,         19   \ Edge 18
-\ EDGE       7,      12,    12,     8,         19   \ Edge 19
+\EDGE       7,       8,     8,     7,         17    \ Edge 14
+\EDGE       8,       9,     9,     1,         17    \ Edge 15
+\EDGE      10,      11,    10,     5,         17    \ Edge 16
+\EDGE       7,      11,    11,     6,         17    \ Edge 17
+\EDGE       7,      15,    12,    11,         19    \ Edge 18
+\EDGE       7,      12,    12,     8,         19    \ Edge 19
 
                         \ --- And replaced by: -------------------------------->
 
@@ -928,24 +928,24 @@ ENDMACRO
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ EDGE      16,      17,     7,     7,          7   \ Edge 28
-\ EDGE      18,      19,     7,     7,          7   \ Edge 29
-\ EDGE      19,      20,     7,     7,          7   \ Edge 30
-\ EDGE      18,      20,     7,     7,          7   \ Edge 31
-\ EDGE      20,      21,     7,     7,          7   \ Edge 32
-\ EDGE      22,      23,     6,     6,          7   \ Edge 33
-\ EDGE      23,      24,     6,     6,          7   \ Edge 34
-\ EDGE      24,      22,     6,     6,          7   \ Edge 35
-\ EDGE      25,      26,     6,     6,          7   \ Edge 36
-\ EDGE      26,      27,     6,     6,          7   \ Edge 37
-\ EDGE      25,      27,     6,     6,          7   \ Edge 38
-\ EDGE      27,      28,     6,     6,          7   \ Edge 39
-\ EDGE      29,      30,     3,     3,          6   \ Edge 40
-\ EDGE      31,      32,     3,     3,          6   \ Edge 41
-\ EDGE      33,      34,     0,     0,          8   \ Edge 42
-\ EDGE      34,      35,     0,     0,          5   \ Edge 43
-\ EDGE      35,      36,     0,     0,          5   \ Edge 44
-\ EDGE      36,      33,     0,     0,          5   \ Edge 45
+\EDGE      16,      17,     7,     7,          7    \ Edge 28
+\EDGE      18,      19,     7,     7,          7    \ Edge 29
+\EDGE      19,      20,     7,     7,          7    \ Edge 30
+\EDGE      18,      20,     7,     7,          7    \ Edge 31
+\EDGE      20,      21,     7,     7,          7    \ Edge 32
+\EDGE      22,      23,     6,     6,          7    \ Edge 33
+\EDGE      23,      24,     6,     6,          7    \ Edge 34
+\EDGE      24,      22,     6,     6,          7    \ Edge 35
+\EDGE      25,      26,     6,     6,          7    \ Edge 36
+\EDGE      26,      27,     6,     6,          7    \ Edge 37
+\EDGE      25,      27,     6,     6,          7    \ Edge 38
+\EDGE      27,      28,     6,     6,          7    \ Edge 39
+\EDGE      29,      30,     3,     3,          6    \ Edge 40
+\EDGE      31,      32,     3,     3,          6    \ Edge 41
+\EDGE      33,      34,     0,     0,          8    \ Edge 42
+\EDGE      34,      35,     0,     0,          5    \ Edge 43
+\EDGE      35,      36,     0,     0,          5    \ Edge 44
+\EDGE      36,      33,     0,     0,          5    \ Edge 45
 
                         \ --- And replaced by: -------------------------------->
 
@@ -984,7 +984,7 @@ ENDMACRO
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ FACE       -8,       34,       11,         19   \ Face 8
+\FACE       -8,       34,       11,         19    \ Face 8
 
                         \ --- And replaced by: -------------------------------->
 
@@ -997,7 +997,7 @@ ENDMACRO
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ FACE        8,       34,       11,         19   \ Face 11
+\FACE        8,       34,       11,         19    \ Face 11
 
                         \ --- And replaced by: -------------------------------->
 
@@ -1149,7 +1149,7 @@ ENDMACRO
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ EQUB 90               \ Max. energy              = 90
+\EQUB 90                \ Max. energy              = 90
 
                         \ --- And replaced by: -------------------------------->
 
@@ -1166,7 +1166,7 @@ ENDMACRO
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ EQUB %00010010        \ Laser power              = 2
+\EQUB %00010010         \ Laser power              = 2
 \                       \ Missiles                 = 2
 
                         \ --- And replaced by: -------------------------------->
@@ -1389,7 +1389,7 @@ ENDMACRO
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ EQUB 100              \ Max. energy              = 100
+\EQUB 100               \ Max. energy              = 100
 
                         \ --- And replaced by: -------------------------------->
 
@@ -1406,7 +1406,7 @@ ENDMACRO
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ EQUB %00010000        \ Laser power              = 2
+\EQUB %00010000         \ Laser power              = 2
 \                       \ Missiles                 = 0
 
                         \ --- And replaced by: -------------------------------->

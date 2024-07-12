@@ -1344,7 +1344,7 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ SKIP 2                \ These bytes appear to be unused (they were originally
+\SKIP 2                 \ These bytes appear to be unused (they were originally
 \                       \ used for up/down lasers, but they were dropped)
 
                         \ --- And replaced by: -------------------------------->
@@ -1455,7 +1455,7 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ SKIP 4                \ These bytes appear to be unused
+\SKIP 4                 \ These bytes appear to be unused
 
                         \ --- And replaced by: -------------------------------->
 
@@ -2229,17 +2229,17 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ JMP DOENTRY           \ Decrypt the main docked code and dock at the station
+\JMP DOENTRY            \ Decrypt the main docked code and dock at the station
 \
-\ JMP DOBEGIN           \ Decrypt the main docked code and start a new game
+\JMP DOBEGIN            \ Decrypt the main docked code and start a new game
 \
-\ JMP CHPR              \ WRCHV is set to point here by elite-loader3.asm
+\JMP CHPR               \ WRCHV is set to point here by elite-loader3.asm
 \
-\ EQUW IRQ1             \ IRQ1V is set to point here by elite-loader3.asm
+\EQUW IRQ1              \ IRQ1V is set to point here by elite-loader3.asm
 \
-\ JMP BRBR1             \ BRKV is set to point here by elite-loader3.asm
+\JMP BRBR1              \ BRKV is set to point here by elite-loader3.asm
 \
-\ BRKV = P% - 2         \ The address of the destination address in the above
+\BRKV = P% - 2          \ The address of the destination address in the above
 \                       \ JMP BRBR1 instruction. This ensures that any code that
 \                       \ updates BRKV will update this instruction instead of
 \                       \ the actual vector
@@ -2277,10 +2277,10 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDX #0                \ This code is never run, but it takes up the same
-\ LDY #0                \ number of bytes as the INBAY routine in the flight
-\ JSR &8888             \ code, so if the flight code *LOADs the docked code in
-\ JMP SCRAM             \ its own version of the INBAY routine, then execution
+\LDX #0                 \ This code is never run, but it takes up the same
+\LDY #0                 \ number of bytes as the INBAY routine in the flight
+\JSR &8888              \ code, so if the flight code *LOADs the docked code in
+\JMP SCRAM              \ its own version of the INBAY routine, then execution
 \                       \ will fall through into the DOBEGIN routine below once
 \                       \ the docked binary has loaded
 \                       \
@@ -2343,7 +2343,7 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ JSR DEEOR             \ Decrypt the main docked code between &1300 and &5FFF
+\JSR DEEOR              \ Decrypt the main docked code between &1300 and &5FFF
 
                         \ --- And replaced by: -------------------------------->
 
@@ -2371,29 +2371,29 @@ ENDIF
 \
 \IF _STH_DISC OR _IB_DISC
 \
-\ LDY #0                \ We're going to work our way through a large number of
+\LDY #0                 \ We're going to work our way through a large number of
 \                       \ encrypted bytes, so we set Y to 0 to be the index of
 \                       \ the current byte within its page in memory
 \
-\ STY SC                \ Set the low byte of SC(1 0) to 0
+\STY SC                 \ Set the low byte of SC(1 0) to 0
 \
-\ LDX #&13              \ Set X to &13 to be the page number of the current
+\LDX #&13               \ Set X to &13 to be the page number of the current
 \                       \ byte, so we start the decryption with the first byte
 \                       \ of page &13
 \
 \.DEEORL
 \
-\ STX SCH               \ Set the high byte of SC(1 0) to X, so SC(1 0) now
+\STX SCH                \ Set the high byte of SC(1 0) to X, so SC(1 0) now
 \                       \ points to the first byte of page X
 \
-\ TYA                   \ Set A to Y, so A now contains the index of the current
+\TYA                    \ Set A to Y, so A now contains the index of the current
 \                       \ byte within its page
 \
-\ EOR (SC),Y            \ EOR the current byte with its index within the page
+\EOR (SC),Y             \ EOR the current byte with its index within the page
 \
-\ EOR #&33              \ EOR the current byte with &33
+\EOR #&33               \ EOR the current byte with &33
 \
-\ STA (SC),Y            \ Update the current byte
+\STA (SC),Y             \ Update the current byte
 \
 \                       \ The current byte is in page X at offset Y, and SC(1 0)
 \                       \ points to the first byte of page X, so we just did
@@ -2401,46 +2401,46 @@ ENDIF
 \                       \
 \                       \   (X Y) = (X Y) EOR Y EOR &33
 \
-\ DEY                   \ Decrement the index in Y to point to the next byte
+\DEY                    \ Decrement the index in Y to point to the next byte
 \
-\ BNE DEEORL            \ Loop back to DEEORL to decrypt the next byte until we
+\BNE DEEORL             \ Loop back to DEEORL to decrypt the next byte until we
 \                       \ have done the whole page
 \
-\ INX                   \ Increment X to point to the next page in memory
+\INX                    \ Increment X to point to the next page in memory
 \
-\ CPX #&60              \ Loop back to DEEORL to decrypt the next page until we
-\ BNE DEEORL            \ reach the start of page &60
+\CPX #&60               \ Loop back to DEEORL to decrypt the next page until we
+\BNE DEEORL             \ reach the start of page &60
 \
-\ JMP BRKBK             \ Call BRKBK to set BRKV to point to the BRBR routine
+\JMP BRKBK              \ Call BRKBK to set BRKV to point to the BRBR routine
 \                       \ and return from the subroutine using a tail call
 \
 \ELIF _SRAM_DISC
 \
-\ NOP                   \ The sideways RAM variant is not encrypted, so the
-\ NOP                   \ decryption code is disabled and is replaced by NOPs
-\ NOP
-\ NOP
-\ NOP
-\ NOP
-\ NOP
-\ NOP
-\ NOP
-\ NOP
-\ NOP
-\ NOP
-\ NOP
-\ NOP
-\ NOP
-\ NOP
-\ NOP
-\ NOP
-\ NOP
-\ NOP
-\ NOP
-\ NOP
-\ NOP
+\NOP                    \ The sideways RAM variant is not encrypted, so the
+\NOP                    \ decryption code is disabled and is replaced by NOPs
+\NOP
+\NOP
+\NOP
+\NOP
+\NOP
+\NOP
+\NOP
+\NOP
+\NOP
+\NOP
+\NOP
+\NOP
+\NOP
+\NOP
+\NOP
+\NOP
+\NOP
+\NOP
+\NOP
+\NOP
+\NOP
 \
-\ JMP BRKBK             \ Call BRKBK to set BRKV to point to the BRBR routine
+\JMP BRKBK              \ Call BRKBK to set BRKV to point to the BRBR routine
 \                       \ and return from the subroutine using a tail call
 \
 \ENDIF
@@ -2470,7 +2470,7 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ JSR DEEOR             \ Decrypt the newly loaded code
+\JSR DEEOR              \ Decrypt the newly loaded code
 
                         \ --- And replaced by: -------------------------------->
 
@@ -2671,11 +2671,11 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ JSR DEEOR             \ Decrypt the main docked code between &1300 and &5FFF
+\JSR DEEOR              \ Decrypt the main docked code between &1300 and &5FFF
 \
-\ JSR RES2              \ Reset a number of flight variables and workspaces
+\JSR RES2               \ Reset a number of flight variables and workspaces
 \
-\ JMP TT170             \ Jump to TT170 to start the game
+\JMP TT170              \ Jump to TT170 to start the game
 
                         \ --- And replaced by: -------------------------------->
 
@@ -2832,7 +2832,7 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ BNE DETOK             \ Jump to DETOK to print extended token 220-221,
+\BNE DETOK              \ Jump to DETOK to print extended token 220-221,
 \                       \ returning from the subroutine using a tail call (this
 \                       \ BNE is effectively a JMP as A is never zero)
 
@@ -2874,24 +2874,24 @@ ENDIF
 
 \.DETOK3
 \
-\ PHA                   \ Store A on the stack, so we can retrieve it later
+\PHA                    \ Store A on the stack, so we can retrieve it later
 \
-\ TAX                   \ Copy the token number from A into X
+\TAX                    \ Copy the token number from A into X
 \
-\ TYA                   \ Store Y on the stack
-\ PHA
+\TYA                    \ Store Y on the stack
+\PHA
 \
-\ LDA V                 \ Store V(1 0) on the stack
-\ PHA
-\ LDA V+1
-\ PHA
+\LDA V                  \ Store V(1 0) on the stack
+\PHA
+\LDA V+1
+\PHA
 \
-\ LDA #LO(RUTOK)        \ Set V to the low byte of RUTOK
-\ STA V
+\LDA #LO(RUTOK)         \ Set V to the low byte of RUTOK
+\STA V
 \
-\ LDA #HI(RUTOK)        \ Set A to the high byte of RUTOK
+\LDA #HI(RUTOK)         \ Set A to the high byte of RUTOK
 \
-\ BNE DTEN              \ Call DTEN to print token number X from the RUTOK
+\BNE DTEN               \ Call DTEN to print token number X from the RUTOK
 \                       \ table and restore the values of A, Y and V(1 0) from
 \                       \ the stack, returning from the subroutine using a tail
 \                       \ call (this BNE is effectively a JMP as A is never
@@ -2975,7 +2975,7 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ EOR #VE               \ Tokens are stored in memory having been EOR'd with
+\EOR #VE                \ Tokens are stored in memory having been EOR'd with
 \                       \ #VE, so we repeat the EOR to get the actual character
 \                       \ in this token
 
@@ -3025,7 +3025,7 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ EOR #VE               \ Tokens are stored in memory having been EOR'd with
+\EOR #VE                \ Tokens are stored in memory having been EOR'd with
 \                       \ #VE, so we repeat the EOR to get the actual character
 \                       \ in this token
 
@@ -4043,20 +4043,20 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDA INWK+31           \ Fetch the ship's exploding/killed state from byte #31
+\LDA INWK+31            \ Fetch the ship's exploding/killed state from byte #31
 \
-\ AND #%00100000        \ If we are exploding then jump to MVD1 to remove it
-\ BNE MVD1              \ from the scanner permanently
+\AND #%00100000         \ If we are exploding then jump to MVD1 to remove it
+\BNE MVD1               \ from the scanner permanently
 \
-\ LDA INWK+31           \ Set bit 4 to keep the ship visible on the scanner
-\ ORA #%00010000
-\ STA INWK+31
+\LDA INWK+31            \ Set bit 4 to keep the ship visible on the scanner
+\ORA #%00010000
+\STA INWK+31
 \
 \.MVD1
 \
-\ LDA INWK+31           \ Clear bit 4 to hide the ship on the scanner
-\ AND #%11101111
-\ STA INWK+31
+\LDA INWK+31            \ Clear bit 4 to hide the ship on the scanner
+\AND #%11101111
+\STA INWK+31
 
                         \ --- End of removed code ----------------------------->
 
@@ -4111,29 +4111,29 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ AND #%10000000        \ Clear bits 0-6 of A
+\AND #%10000000         \ Clear bits 0-6 of A
 \
 \.MVT1
 \
-\ ASL A                 \ Set the C flag to the sign bit of the delta, leaving
+\ASL A                  \ Set the C flag to the sign bit of the delta, leaving
 \                       \ delta_hi << 1 in A
 \
-\ STA S                 \ Set S = delta_hi << 1
+\STA S                  \ Set S = delta_hi << 1
 \                       \
 \                       \ This also clears bit 0 of S
 \
-\ LDA #0                \ Set T = just the sign bit of delta (in bit 7)
-\ ROR A
-\ STA T
+\LDA #0                 \ Set T = just the sign bit of delta (in bit 7)
+\ROR A
+\STA T
 \
-\ LSR S                 \ Set S = delta_hi >> 1
+\LSR S                  \ Set S = delta_hi >> 1
 \                       \       = |delta_hi|
 \                       \
 \                       \ This also clear the C flag, as we know that bit 0 of
 \                       \ S was clear before the LSR
 \
-\ EOR INWK+2,X          \ If T EOR x_sign has bit 7 set, then x_sign and delta
-\ BMI MV10              \ have different signs, so jump to MV10
+\EOR INWK+2,X           \ If T EOR x_sign has bit 7 set, then x_sign and delta
+\BMI MV10               \ have different signs, so jump to MV10
 \
 \                       \ At this point, we know x_sign and delta have the same
 \                       \ sign, that sign is in T, and S contains |delta_hi|,
@@ -4144,20 +4144,20 @@ ENDIF
 \                       \ and then set the sign of the result to the same sign
 \                       \ as x_sign and delta
 \
-\ LDA R                 \ First we add the low bytes, so:
-\ ADC INWK,X            \
-\ STA INWK,X            \   x_lo = x_lo + R
+\LDA R                  \ First we add the low bytes, so:
+\ADC INWK,X             \
+\STA INWK,X             \   x_lo = x_lo + R
 \
-\ LDA S                 \ Then we add the high bytes:
-\ ADC INWK+1,X          \
-\ STA INWK+1,X          \   x_hi = x_hi + S
+\LDA S                  \ Then we add the high bytes:
+\ADC INWK+1,X           \
+\STA INWK+1,X           \   x_hi = x_hi + S
 \
-\ LDA INWK+2,X          \ And finally we add any carry into x_sign, and if the
-\ ADC #0                \ sign of x_sign and delta in T is negative, make sure
-\ ORA T                 \ the result is negative (by OR'ing with T)
-\ STA INWK+2,X
+\LDA INWK+2,X           \ And finally we add any carry into x_sign, and if the
+\ADC #0                 \ sign of x_sign and delta in T is negative, make sure
+\ORA T                  \ the result is negative (by OR'ing with T)
+\STA INWK+2,X
 \
-\ RTS                   \ Return from the subroutine
+\RTS                    \ Return from the subroutine
 \
 \.MV10
 \
@@ -4170,23 +4170,23 @@ ENDIF
 \                       \ and then set the sign of the result according to
 \                       \ the signs of x_sign and delta
 \
-\ LDA INWK,X            \ First we subtract the low bytes, so:
-\ SEC                   \
-\ SBC R                 \   x_lo = x_lo - R
-\ STA INWK,X
+\LDA INWK,X             \ First we subtract the low bytes, so:
+\SEC                    \
+\SBC R                  \   x_lo = x_lo - R
+\STA INWK,X
 \
-\ LDA INWK+1,X          \ Then we subtract the high bytes:
-\ SBC S                 \
-\ STA INWK+1,X          \   x_hi = x_hi - S
+\LDA INWK+1,X           \ Then we subtract the high bytes:
+\SBC S                  \
+\STA INWK+1,X           \   x_hi = x_hi - S
 \
-\ LDA INWK+2,X          \ And finally we subtract any borrow from bits 0-6 of
-\ AND #%01111111        \ x_sign, and give the result the opposite sign bit to T
-\ SBC #0                \ (i.e. give it the sign of the original x_sign)
-\ ORA #%10000000
-\ EOR T
-\ STA INWK+2,X
+\LDA INWK+2,X           \ And finally we subtract any borrow from bits 0-6 of
+\AND #%01111111         \ x_sign, and give the result the opposite sign bit to T
+\SBC #0                 \ (i.e. give it the sign of the original x_sign)
+\ORA #%10000000
+\EOR T
+\STA INWK+2,X
 \
-\ BCS MV11              \ If the C flag is set by the above SBC, then our sum
+\BCS MV11               \ If the C flag is set by the above SBC, then our sum
 \                       \ above didn't underflow and is correct - to put it
 \                       \ another way, (x_sign x_hi x_lo) >= (S R) so the result
 \                       \ should indeed have the same sign as x_sign, so jump to
@@ -4202,25 +4202,25 @@ ENDIF
 \                       \ (S R), the delta, as that's the dominant figure in the
 \                       \ sum
 \
-\ LDA #1                \ First we subtract the low bytes, so:
-\ SBC INWK,X            \
-\ STA INWK,X            \   x_lo = 1 - x_lo
+\LDA #1                 \ First we subtract the low bytes, so:
+\SBC INWK,X             \
+\STA INWK,X             \   x_lo = 1 - x_lo
 \
-\ LDA #0                \ Then we subtract the high bytes:
-\ SBC INWK+1,X          \
-\ STA INWK+1,X          \   x_hi = 0 - x_hi
+\LDA #0                 \ Then we subtract the high bytes:
+\SBC INWK+1,X           \
+\STA INWK+1,X           \   x_hi = 0 - x_hi
 \
-\ LDA #0                \ And then we subtract the sign bytes:
-\ SBC INWK+2,X          \
+\LDA #0                 \ And then we subtract the sign bytes:
+\SBC INWK+2,X           \
 \                       \   x_sign = 0 - x_sign
 \
-\ AND #%01111111        \ Finally, we set the sign bit to the sign in T, the
-\ ORA T                 \ sign of the original delta, as the delta is the
-\ STA INWK+2,X          \ dominant figure in the sum
+\AND #%01111111         \ Finally, we set the sign bit to the sign in T, the
+\ORA T                  \ sign of the original delta, as the delta is the
+\STA INWK+2,X           \ dominant figure in the sum
 \
 \.MV11
 \
-\ RTS                   \ Return from the subroutine
+\RTS                    \ Return from the subroutine
 
                         \ --- End of removed code ----------------------------->
 
@@ -4265,57 +4265,57 @@ ENDIF
 
 \.MVT3
 \
-\ LDA K+3               \ Set S = K+3
-\ STA S
+\LDA K+3                \ Set S = K+3
+\STA S
 \
-\ AND #%10000000        \ Set T = sign bit of K(3 2 1)
-\ STA T
+\AND #%10000000         \ Set T = sign bit of K(3 2 1)
+\STA T
 \
-\ EOR INWK+2,X          \ If x_sign has a different sign to K(3 2 1), jump to
-\ BMI MV13              \ MV13 to process the addition as a subtraction
+\EOR INWK+2,X           \ If x_sign has a different sign to K(3 2 1), jump to
+\BMI MV13               \ MV13 to process the addition as a subtraction
 \
-\ LDA K+1               \ Set K(3 2 1) = K(3 2 1) + (x_sign x_hi x_lo)
-\ CLC                   \ starting with the low bytes
-\ ADC INWK,X
-\ STA K+1
+\LDA K+1                \ Set K(3 2 1) = K(3 2 1) + (x_sign x_hi x_lo)
+\CLC                    \ starting with the low bytes
+\ADC INWK,X
+\STA K+1
 \
-\ LDA K+2               \ Then the middle bytes
-\ ADC INWK+1,X
-\ STA K+2
+\LDA K+2                \ Then the middle bytes
+\ADC INWK+1,X
+\STA K+2
 \
-\ LDA K+3               \ And finally the high bytes
-\ ADC INWK+2,X
+\LDA K+3                \ And finally the high bytes
+\ADC INWK+2,X
 \
-\ AND #%01111111        \ Setting the sign bit of K+3 to T, the original sign
-\ ORA T                 \ of K(3 2 1)
-\ STA K+3
+\AND #%01111111         \ Setting the sign bit of K+3 to T, the original sign
+\ORA T                  \ of K(3 2 1)
+\STA K+3
 \
-\ RTS                   \ Return from the subroutine
+\RTS                    \ Return from the subroutine
 \
 \.MV13
 \
-\ LDA S                 \ Set S = |K+3| (i.e. K+3 with the sign bit cleared)
-\ AND #%01111111
-\ STA S
+\LDA S                  \ Set S = |K+3| (i.e. K+3 with the sign bit cleared)
+\AND #%01111111
+\STA S
 \
-\ LDA INWK,X            \ Set K(3 2 1) = (x_sign x_hi x_lo) - K(3 2 1)
-\ SEC                   \ starting with the low bytes
-\ SBC K+1
-\ STA K+1
+\LDA INWK,X             \ Set K(3 2 1) = (x_sign x_hi x_lo) - K(3 2 1)
+\SEC                    \ starting with the low bytes
+\SBC K+1
+\STA K+1
 \
-\ LDA INWK+1,X          \ Then the middle bytes
-\ SBC K+2
-\ STA K+2
+\LDA INWK+1,X           \ Then the middle bytes
+\SBC K+2
+\STA K+2
 \
-\ LDA INWK+2,X          \ And finally the high bytes, doing A = |x_sign| - |K+3|
-\ AND #%01111111        \ and setting the C flag for testing below
-\ SBC S
+\LDA INWK+2,X           \ And finally the high bytes, doing A = |x_sign| - |K+3|
+\AND #%01111111         \ and setting the C flag for testing below
+\SBC S
 \
-\ ORA #%10000000        \ Set the sign bit of K+3 to the opposite sign of T,
-\ EOR T                 \ i.e. the opposite sign to the original K(3 2 1)
-\ STA K+3
+\ORA #%10000000         \ Set the sign bit of K+3 to the opposite sign of T,
+\EOR T                  \ i.e. the opposite sign to the original K(3 2 1)
+\STA K+3
 \
-\ BCS MV14              \ If the C flag is set, i.e. |x_sign| >= |K+3|, then
+\BCS MV14               \ If the C flag is set, i.e. |x_sign| >= |K+3|, then
 \                       \ the sign of K(3 2 1). In this case, we want the
 \                       \ result to have the same sign as the largest argument,
 \                       \ which is (x_sign x_hi x_lo), which we know has the
@@ -4323,25 +4323,25 @@ ENDIF
 \                       \ the sign of K(3 2 1) to... so we can jump to MV14 to
 \                       \ return from the subroutine
 \
-\ LDA #1                \ We need to swap the sign of the result in K(3 2 1),
-\ SBC K+1               \ which we do by calculating 0 - K(3 2 1), which we can
-\ STA K+1               \ do with 1 - C - K(3 2 1), as we know the C flag is
+\LDA #1                 \ We need to swap the sign of the result in K(3 2 1),
+\SBC K+1                \ which we do by calculating 0 - K(3 2 1), which we can
+\STA K+1                \ do with 1 - C - K(3 2 1), as we know the C flag is
 \                       \ clear. We start with the low bytes
 \
-\ LDA #0                \ Then the middle bytes
-\ SBC K+2
-\ STA K+2
+\LDA #0                 \ Then the middle bytes
+\SBC K+2
+\STA K+2
 \
-\ LDA #0                \ And finally the high bytes
-\ SBC K+3
+\LDA #0                 \ And finally the high bytes
+\SBC K+3
 \
-\ AND #%01111111        \ Set the sign bit of K+3 to the same sign as T,
-\ ORA T                 \ i.e. the same sign as the original K(3 2 1), as
-\ STA K+3               \ that's the largest argument
+\AND #%01111111         \ Set the sign bit of K+3 to the same sign as T,
+\ORA T                  \ i.e. the same sign as the original K(3 2 1), as
+\STA K+3                \ that's the largest argument
 \
 \.MV14
 \
-\ RTS                   \ Return from the subroutine
+\RTS                    \ Return from the subroutine
 
                         \ --- End of removed code ----------------------------->
 
@@ -4709,72 +4709,72 @@ ENDIF
 
 \.MVT6
 \
-\ TAY                   \ Store argument A into Y, for later use
+\TAY                    \ Store argument A into Y, for later use
 \
-\ EOR INWK+2,X          \ Set A = A EOR x_sign
+\EOR INWK+2,X           \ Set A = A EOR x_sign
 \
-\ BMI MV50              \ If the sign is negative, i.e. A and x_sign have
+\BMI MV50               \ If the sign is negative, i.e. A and x_sign have
 \                       \ different signs, jump to MV50
 \
 \                       \ The signs are the same, so we can add the two
 \                       \ arguments and keep the sign to get the result
 \
-\ LDA P+1               \ First we add the low bytes:
-\ CLC                   \
-\ ADC INWK,X            \   P+1 = P+1 + x_lo
-\ STA P+1
+\LDA P+1                \ First we add the low bytes:
+\CLC                    \
+\ADC INWK,X             \   P+1 = P+1 + x_lo
+\STA P+1
 \
-\ LDA P+2               \ And then the high bytes:
-\ ADC INWK+1,X          \
-\ STA P+2               \   P+2 = P+2 + x_hi
+\LDA P+2                \ And then the high bytes:
+\ADC INWK+1,X           \
+\STA P+2                \   P+2 = P+2 + x_hi
 \
-\ TYA                   \ Restore the original A argument that we stored earlier
+\TYA                    \ Restore the original A argument that we stored earlier
 \                       \ so that we keep the original sign
 \
-\ RTS                   \ Return from the subroutine
+\RTS                    \ Return from the subroutine
 \
 \.MV50
 \
-\ LDA INWK,X            \ First we subtract the low bytes:
-\ SEC                   \
-\ SBC P+1               \   P+1 = x_lo - P+1
-\ STA P+1
+\LDA INWK,X             \ First we subtract the low bytes:
+\SEC                    \
+\SBC P+1                \   P+1 = x_lo - P+1
+\STA P+1
 \
-\ LDA INWK+1,X          \ And then the high bytes:
-\ SBC P+2               \
-\ STA P+2               \   P+2 = x_hi - P+2
+\LDA INWK+1,X           \ And then the high bytes:
+\SBC P+2                \
+\STA P+2                \   P+2 = x_hi - P+2
 \
-\ BCC MV51              \ If the last subtraction underflowed, then the C flag
+\BCC MV51               \ If the last subtraction underflowed, then the C flag
 \                       \ will be clear and x_hi < P+2, so jump to MV51 to
 \                       \ negate the result
 \
-\ TYA                   \ Restore the original A argument that we stored earlier
-\ EOR #%10000000        \ but flip bit 7, which flips the sign. We do this
+\TYA                    \ Restore the original A argument that we stored earlier
+\EOR #%10000000         \ but flip bit 7, which flips the sign. We do this
 \                       \ because x_hi >= P+2 so we want the result to have the
 \                       \ same sign as x_hi (as it's the dominant side in this
 \                       \ calculation). The sign of x_hi is x_sign, and x_sign
 \                       \ has the opposite sign to A, so we flip the sign in A
 \                       \ to return the correct result
 \
-\ RTS                   \ Return from the subroutine
+\RTS                    \ Return from the subroutine
 \
 \.MV51
 \
-\ LDA #1                \ Our subtraction underflowed, so we negate the result
-\ SBC P+1               \ using two's complement, first with the low byte:
-\ STA P+1               \
+\LDA #1                 \ Our subtraction underflowed, so we negate the result
+\SBC P+1                \ using two's complement, first with the low byte:
+\STA P+1                \
 \                       \   P+1 = 1 - P+1
 \
-\ LDA #0                \ And then the high byte:
-\ SBC P+2               \
-\ STA P+2               \   P+2 = 0 - P+2
+\LDA #0                 \ And then the high byte:
+\SBC P+2                \
+\STA P+2                \   P+2 = 0 - P+2
 \
-\ TYA                   \ Restore the original A argument that we stored earlier
+\TYA                    \ Restore the original A argument that we stored earlier
 \                       \ as this is the correct sign for the result. This is
 \                       \ because x_hi < P+2, so we want to return the same sign
 \                       \ as P+2, the dominant side
 \
-\ RTS                   \ Return from the subroutine
+\RTS                    \ Return from the subroutine
 
                         \ --- End of removed code ----------------------------->
 
@@ -6177,12 +6177,12 @@ ENDIF
 
 \.PIX1
 \
-\ JSR ADD               \ Set (A X) = (A P) + (S R)
+\JSR ADD                \ Set (A X) = (A P) + (S R)
 \
-\ STA YY+1              \ Set YY+1 to A, the high byte of the result
+\STA YY+1               \ Set YY+1 to A, the high byte of the result
 \
-\ TXA                   \ Set SYL+Y to X, the low byte of the result
-\ STA SYL,Y
+\TXA                    \ Set SYL+Y to X, the low byte of the result
+\STA SYL,Y
 \
 \                       \ Fall through into PIX1 to draw the stardust particle
 \                       \ at (X1,Y1)
@@ -6218,43 +6218,43 @@ ENDIF
 
 \.PIXEL2
 \
-\ LDA X1                \ Fetch the x-coordinate offset into A
+\LDA X1                 \ Fetch the x-coordinate offset into A
 \
-\ BPL PX1               \ If the x-coordinate offset is positive, jump to PX1
+\BPL PX1                \ If the x-coordinate offset is positive, jump to PX1
 \                       \ to skip the following negation
 \
-\ EOR #%01111111        \ The x-coordinate offset is negative, so flip all the
-\ CLC                   \ bits apart from the sign bit and add 1, to convert it
-\ ADC #1                \ from a sign-magnitude number to a signed number
+\EOR #%01111111         \ The x-coordinate offset is negative, so flip all the
+\CLC                    \ bits apart from the sign bit and add 1, to convert it
+\ADC #1                 \ from a sign-magnitude number to a signed number
 \
 \.PX1
 \
-\ EOR #%10000000        \ Set X = X1 + 128
-\ TAX                   \
+\EOR #%10000000         \ Set X = X1 + 128
+\TAX                    \
 \                       \ So X is now the offset converted to an x-coordinate,
 \                       \ centred on x-coordinate 128
 \
-\ LDA Y1                \ Fetch the y-coordinate offset into A and clear the
-\ AND #%01111111        \ sign bit, so A = |Y1|
+\LDA Y1                 \ Fetch the y-coordinate offset into A and clear the
+\AND #%01111111         \ sign bit, so A = |Y1|
 \
-\ CMP #96               \ If |Y1| >= 96 then it's off the screen (as 96 is half
-\ BCS PX4               \ the screen height), so return from the subroutine (as
+\CMP #96                \ If |Y1| >= 96 then it's off the screen (as 96 is half
+\BCS PX4                \ the screen height), so return from the subroutine (as
 \                       \ PX4 contains an RTS)
 \
-\ LDA Y1                \ Fetch the y-coordinate offset into A
+\LDA Y1                 \ Fetch the y-coordinate offset into A
 \
-\ BPL PX2               \ If the y-coordinate offset is positive, jump to PX2
+\BPL PX2                \ If the y-coordinate offset is positive, jump to PX2
 \                       \ to skip the following negation
 \
-\ EOR #%01111111        \ The y-coordinate offset is negative, so flip all the
-\ ADC #1                \ bits apart from the sign bit and subtract 1, to negate
+\EOR #%01111111         \ The y-coordinate offset is negative, so flip all the
+\ADC #1                 \ bits apart from the sign bit and subtract 1, to negate
 \                       \ it to a positive number, i.e. A is now |Y1|
 \
 \.PX2
 \
-\ STA T                 \ Set A = 97 - Y1
-\ LDA #97               \
-\ SBC T                 \ So if Y is positive we display the point up from the
+\STA T                  \ Set A = 97 - Y1
+\LDA #97                \
+\SBC T                  \ So if Y is positive we display the point up from the
 \                       \ centre at y-coordinate 97, while a negative Y means
 \                       \ down from the centre
 \
@@ -6605,34 +6605,34 @@ ENDIF
 
 \.FLIP
 \
-\ LDY NOSTM             \ Set Y to the current number of stardust particles, so
+\LDY NOSTM              \ Set Y to the current number of stardust particles, so
 \                       \ we can use it as a counter through all the stardust
 \
 \.FLL1
 \
-\ LDX SY,Y              \ Copy the Y-th particle's y-coordinate from SY+Y into X
+\LDX SY,Y               \ Copy the Y-th particle's y-coordinate from SY+Y into X
 \
-\ LDA SX,Y              \ Copy the Y-th particle's x-coordinate from SX+Y into
-\ STA Y1                \ both Y1 and the particle's y-coordinate
-\ STA SY,Y
+\LDA SX,Y               \ Copy the Y-th particle's x-coordinate from SX+Y into
+\STA Y1                 \ both Y1 and the particle's y-coordinate
+\STA SY,Y
 \
-\ TXA                   \ Copy the Y-th particle's original y-coordinate into
-\ STA X1                \ both X1 and the particle's x-coordinate, so the x- and
-\ STA SX,Y              \ y-coordinates are now swapped and (X1, Y1) contains
+\TXA                    \ Copy the Y-th particle's original y-coordinate into
+\STA X1                 \ both X1 and the particle's x-coordinate, so the x- and
+\STA SX,Y               \ y-coordinates are now swapped and (X1, Y1) contains
 \                       \ the particle's new coordinates
 \
-\ LDA SZ,Y              \ Fetch the Y-th particle's distance from SZ+Y into ZZ
-\ STA ZZ
+\LDA SZ,Y               \ Fetch the Y-th particle's distance from SZ+Y into ZZ
+\STA ZZ
 \
-\ JSR PIXEL2            \ Draw a stardust particle at (X1,Y1) with distance ZZ
+\JSR PIXEL2             \ Draw a stardust particle at (X1,Y1) with distance ZZ
 \
-\ DEY                   \ Decrement the counter to point to the next particle of
+\DEY                    \ Decrement the counter to point to the next particle of
 \                       \ stardust
 \
-\ BNE FLL1              \ Loop back to FLL1 until we have moved all the stardust
+\BNE FLL1               \ Loop back to FLL1 until we have moved all the stardust
 \                       \ particles
 \
-\ RTS                   \ Return from the subroutine
+\RTS                    \ Return from the subroutine
 
                         \ --- End of removed code ----------------------------->
 
@@ -6660,20 +6660,20 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ EQUW 1                \ 0  Fuel, calculated in EQSHP  140.0 Cr (full tank)
-\ EQUW 300              \ 1  Missile                     30.0 Cr
-\ EQUW 4000             \ 2  Large Cargo Bay            400.0 Cr
-\ EQUW 6000             \ 3  E.C.M. System              600.0 Cr
-\ EQUW 4000             \ 4  Extra Pulse Lasers         400.0 Cr
-\ EQUW 10000            \ 5  Extra Beam Lasers         1000.0 Cr
-\ EQUW 5250             \ 6  Fuel Scoops                525.0 Cr
-\ EQUW 10000            \ 7  Escape Pod                1000.0 Cr
-\ EQUW 9000             \ 8  Energy Bomb                900.0 Cr
-\ EQUW 15000            \ 9  Energy Unit               1500.0 Cr
-\ EQUW 10000            \ 10 Docking Computer          1000.0 Cr
-\ EQUW 50000            \ 11 Galactic Hyperspace       5000.0 Cr
-\ EQUW 60000            \ 12 Extra Military Lasers     6000.0 Cr
-\ EQUW 8000             \ 13 Extra Mining Lasers        800.0 Cr
+\EQUW 1                 \ 0  Fuel, calculated in EQSHP  140.0 Cr (full tank)
+\EQUW 300               \ 1  Missile                     30.0 Cr
+\EQUW 4000              \ 2  Large Cargo Bay            400.0 Cr
+\EQUW 6000              \ 3  E.C.M. System              600.0 Cr
+\EQUW 4000              \ 4  Extra Pulse Lasers         400.0 Cr
+\EQUW 10000             \ 5  Extra Beam Lasers         1000.0 Cr
+\EQUW 5250              \ 6  Fuel Scoops                525.0 Cr
+\EQUW 10000             \ 7  Escape Pod                1000.0 Cr
+\EQUW 9000              \ 8  Energy Bomb                900.0 Cr
+\EQUW 15000             \ 9  Energy Unit               1500.0 Cr
+\EQUW 10000             \ 10 Docking Computer          1000.0 Cr
+\EQUW 50000             \ 11 Galactic Hyperspace       5000.0 Cr
+\EQUW 60000             \ 12 Extra Military Lasers     6000.0 Cr
+\EQUW 8000              \ 13 Extra Mining Lasers        800.0 Cr
 
                         \ --- And replaced by: -------------------------------->
 
@@ -6934,37 +6934,37 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDA #18               \ Print recursive token 132, which prints the next bit
-\ JSR plf2              \ of the Status Mode screen:
+\LDA #18                \ Print recursive token 132, which prints the next bit
+\JSR plf2               \ of the Status Mode screen:
 \                       \
 \                       \   EQUIPMENT:
 \                       \
 \                       \ followed by a newline and an indent of 6 characters
 \
-\ LDA CRGO              \ If our ship's cargo capacity is < 26 (i.e. we do not
-\ CMP #26               \ have a cargo bay extension), skip the following two
-\ BCC P%+7              \ instructions
+\LDA CRGO               \ If our ship's cargo capacity is < 26 (i.e. we do not
+\CMP #26                \ have a cargo bay extension), skip the following two
+\BCC P%+7               \ instructions
 \
-\ LDA #107              \ We do have a cargo bay extension, so print recursive
-\ JSR plf2              \ token 107 ("LARGE CARGO{sentence case} BAY"), followed
+\LDA #107               \ We do have a cargo bay extension, so print recursive
+\JSR plf2               \ token 107 ("LARGE CARGO{sentence case} BAY"), followed
 \                       \ by a newline and an indent of 6 characters
 \
-\ LDA BST               \ If we don't have fuel scoops fitted, skip the
-\ BEQ P%+7              \ following two instructions
+\LDA BST                \ If we don't have fuel scoops fitted, skip the
+\BEQ P%+7               \ following two instructions
 \
-\ LDA #111              \ We do have fuel scoops fitted, so print recursive
-\ JSR plf2              \ token 111 ("FUEL SCOOPS"), followed by a newline and
+\LDA #111               \ We do have fuel scoops fitted, so print recursive
+\JSR plf2               \ token 111 ("FUEL SCOOPS"), followed by a newline and
 \                       \ an indent of 6 characters
 \
-\ LDA ECM               \ If we don't have an E.C.M. fitted, skip the following
-\ BEQ P%+7              \ two instructions
+\LDA ECM                \ If we don't have an E.C.M. fitted, skip the following
+\BEQ P%+7               \ two instructions
 \
-\ LDA #108              \ We do have an E.C.M. fitted, so print recursive token
-\ JSR plf2              \ 108 ("E.C.M.SYSTEM"), followed by a newline and an
+\LDA #108               \ We do have an E.C.M. fitted, so print recursive token
+\JSR plf2               \ 108 ("E.C.M.SYSTEM"), followed by a newline and an
 \                       \ indent of 6 characters
 \
-\ LDA #113              \ We now cover the four pieces of equipment whose flags
-\ STA XX4               \ are stored in BOMB through BOMB+3, and whose names
+\LDA #113               \ We now cover the four pieces of equipment whose flags
+\STA XX4                \ are stored in BOMB through BOMB+3, and whose names
 \                       \ correspond with text tokens 113 through 116:
 \                       \
 \                       \   BOMB+0 = BOMB  = token 113 = Energy bomb
@@ -6978,21 +6978,21 @@ ENDIF
 \
 \.stqv
 \
-\ TAY                   \ Fetch byte BOMB+0 through BOMB+4 for values of XX4
-\ LDX BOMB-113,Y        \ from 113 through 117
+\TAY                    \ Fetch byte BOMB+0 through BOMB+4 for values of XX4
+\LDX BOMB-113,Y         \ from 113 through 117
 \
-\ BEQ P%+5              \ If it is zero then we do not own that piece of
+\BEQ P%+5               \ If it is zero then we do not own that piece of
 \                       \ equipment, so skip the next instruction
 \
-\ JSR plf2              \ Print the recursive token in A from 113 ("ENERGY
+\JSR plf2               \ Print the recursive token in A from 113 ("ENERGY
 \                       \ BOMB") through 116 ("GALACTIC HYPERSPACE "), followed
 \                       \ by a newline and an indent of 6 characters
 \
-\ INC XX4               \ Increment the counter (and A as well)
-\ LDA XX4
+\INC XX4                \ Increment the counter (and A as well)
+\LDA XX4
 \
-\ CMP #117              \ If A < 117, loop back up to stqv to print the next
-\ BCC stqv              \ piece of equipment
+\CMP #117               \ If A < 117, loop back up to stqv to print the next
+\BCC stqv               \ piece of equipment
 
                         \ --- And replaced by: -------------------------------->
 
@@ -7096,10 +7096,10 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ TXA                   \ Print recursive token 96 + X, which will print from 96
-\ CLC                   \ ("FRONT") through to 99 ("RIGHT"), followed by a space
-\ ADC #96
-\ JSR spc
+\TXA                    \ Print recursive token 96 + X, which will print from 96
+\CLC                    \ ("FRONT") through to 99 ("RIGHT"), followed by a space
+\ADC #96
+\JSR spc
 
                         \ --- And replaced by: -------------------------------->
 
@@ -7117,25 +7117,25 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ CPY #128+POW          \ If the laser power for view X is not #POW+128 (beam
-\ BNE P%+4              \ laser), skip the next LDA instruction
+\CPY #128+POW           \ If the laser power for view X is not #POW+128 (beam
+\BNE P%+4               \ laser), skip the next LDA instruction
 \
-\ LDA #104              \ This sets A = 104 if the laser in view X is a beam
+\LDA #104               \ This sets A = 104 if the laser in view X is a beam
 \                       \ laser (token 104 is "BEAM LASER")
 \
-\ CPY #Armlas           \ If the laser power for view X is not #Armlas (military
-\ BNE P%+4              \ laser), skip the next LDA instruction
+\CPY #Armlas            \ If the laser power for view X is not #Armlas (military
+\BNE P%+4               \ laser), skip the next LDA instruction
 \
-\ LDA #117              \ This sets A = 117 if the laser in view X is a military
+\LDA #117               \ This sets A = 117 if the laser in view X is a military
 \                       \ laser (token 117 is "MILITARY  LASER")
 \
-\ CPY #Mlas             \ If the laser power for view X is not #Mlas (mining
-\ BNE P%+4              \ laser), skip the next LDA instruction
+\CPY #Mlas              \ If the laser power for view X is not #Mlas (mining
+\BNE P%+4               \ laser), skip the next LDA instruction
 \
-\ LDA #118              \ This sets A = 118 if the laser in view X is a mining
+\LDA #118               \ This sets A = 118 if the laser in view X is a mining
 \                       \ laser (token 118 is "MINING  LASER")
 \
-\ JSR plf2              \ Print the text token in A (which contains the laser
+\JSR plf2               \ Print the text token in A (which contains the laser
 \                       \ type) followed by a newline and an indent of 6
 \                       \ characters
 
@@ -7205,12 +7205,12 @@ ENDIF
 
 \.plf2
 \
-\ JSR plf               \ Print the text token in A followed by a newline
+\JSR plf                \ Print the text token in A followed by a newline
 \
-\ LDX #6                \ Move the text cursor to column 6
-\ STX XC
+\LDX #6                 \ Move the text cursor to column 6
+\STX XC
 \
-\ RTS                   \ Return from the subroutine
+\RTS                    \ Return from the subroutine
 
                         \ --- End of removed code ----------------------------->
 
@@ -9001,22 +9001,22 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDA #0                \ Set R = P = 0 for the low bytes in the call to the ADD
-\ STA R                 \ routine below
-\ STA P
+\LDA #0                 \ Set R = P = 0 for the low bytes in the call to the ADD
+\STA R                  \ routine below
+\STA P
 \
-\ LDA #8                \ Set S = 8, which is the value of the centre of the
-\ STA S                 \ roll indicator
+\LDA #8                 \ Set S = 8, which is the value of the centre of the
+\STA S                  \ roll indicator
 \
-\ LDA ALP1              \ Fetch the roll angle alpha as a value between 0 and
-\ LSR A                 \ 31, and divide by 4 to get a value of 0 to 7
-\ LSR A
+\LDA ALP1               \ Fetch the roll angle alpha as a value between 0 and
+\LSR A                  \ 31, and divide by 4 to get a value of 0 to 7
+\LSR A
 \
-\ ORA ALP2              \ Apply the roll sign to the value, and flip the sign,
-\ EOR #%10000000        \ so it's now in the range -7 to +7, with a positive
+\ORA ALP2               \ Apply the roll sign to the value, and flip the sign,
+\EOR #%10000000         \ so it's now in the range -7 to +7, with a positive
 \                       \ roll angle alpha giving a negative value in A
 \
-\ JSR ADD               \ We now add A to S to give us a value in the range 1 to
+\JSR ADD                \ We now add A to S to give us a value in the range 1 to
 \                       \ 15, which we can pass to DIL2 to draw the vertical
 \                       \ bar on the indicator at this position. We use the ADD
 \                       \ routine like this:
@@ -9042,21 +9042,21 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDA BETA              \ Fetch the pitch angle beta as a value between -8 and
+\LDA BETA               \ Fetch the pitch angle beta as a value between -8 and
 \                       \ +8
 \
-\ LDX BET1              \ Fetch the magnitude of the pitch angle beta, and if it
-\ BEQ P%+4              \ is 0 (i.e. we are not pitching), skip the next
+\LDX BET1               \ Fetch the magnitude of the pitch angle beta, and if it
+\BEQ P%+4               \ is 0 (i.e. we are not pitching), skip the next
 \                       \ instruction
 \
-\ SBC #1                \ The pitch angle beta is non-zero, so set A = A - 1
+\SBC #1                 \ The pitch angle beta is non-zero, so set A = A - 1
 \                       \ (the C flag is set by the call to DIL2 above, so we
 \                       \ don't need to do a SEC). This gives us a value of A
 \                       \ from -7 to +7 because these are magnitude-based
 \                       \ numbers with sign bits, rather than two's complement
 \                       \ numbers
 \
-\ JSR ADD               \ We now add A to S to give us a value in the range 1 to
+\JSR ADD                \ We now add A to S to give us a value in the range 1 to
 \                       \ 15, which we can pass to DIL2 to draw the vertical
 \                       \ bar on the indicator at this position (see the JSR ADD
 \                       \ above for more on this)
@@ -9132,9 +9132,9 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDA ENERGY            \ Set A = Q = ENERGY / 4, so they are both now in the
-\ LSR A                 \ range 0-63 (so that's a maximum of 16 in each of the
-\ LSR A                 \ banks, and a maximum of 15 in the top bank)
+\LDA ENERGY             \ Set A = Q = ENERGY / 4, so they are both now in the
+\LSR A                  \ range 0-63 (so that's a maximum of 16 in each of the
+\LSR A                  \ banks, and a maximum of 15 in the top bank)
 
                         \ --- And replaced by: -------------------------------->
 
@@ -9224,12 +9224,12 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDA FSH               \ Draw the forward shield indicator using a range of
-\ JSR DILX              \ 0-255, and increment SC to point to the next indicator
+\LDA FSH                \ Draw the forward shield indicator using a range of
+\JSR DILX               \ 0-255, and increment SC to point to the next indicator
 \                       \ (the aft shield)
 \
-\ LDA ASH               \ Draw the aft shield indicator using a range of 0-255,
-\ JSR DILX              \ and increment SC to point to the next indicator (the
+\LDA ASH                \ Draw the aft shield indicator using a range of 0-255,
+\JSR DILX               \ and increment SC to point to the next indicator (the
 \                       \ fuel level)
 
                         \ --- And replaced by: -------------------------------->
@@ -9328,20 +9328,20 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDA MCNT              \ A will be non-zero for 8 out of every 16 main loop
-\ AND #%00001000        \ counts, when bit 4 is set, so this is what we use to
+\LDA MCNT               \ A will be non-zero for 8 out of every 16 main loop
+\AND #%00001000         \ counts, when bit 4 is set, so this is what we use to
 \                       \ flash the "danger" colour
 \
-\ AND FLH               \ A will be zeroed if flashing colours are disabled
+\AND FLH                \ A will be zeroed if flashing colours are disabled
 \
-\ BEQ P%+4              \ If A is zero, skip to the LDA instruction below
+\BEQ P%+4               \ If A is zero, skip to the LDA instruction below
 \
-\ TXA                   \ Otherwise flashing colours are enabled and it's the
+\TXA                    \ Otherwise flashing colours are enabled and it's the
 \                       \ main loop iteration where we flash them, so set A to
 \                       \ colour 2 (yellow/white) and use the BIT trick below to
 \                       \ return from the subroutine
 \
-\ EQUB &2C              \ Skip the next instruction by turning it into
+\EQUB &2C               \ Skip the next instruction by turning it into
 \                       \ &2C &A9 &0F, or BIT &0FA9, which does nothing apart
 \                       \ from affect the flags
 
@@ -9429,7 +9429,7 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ BNE DL31              \ Jump down to DL31 (this BNE is effectively a JMP as A
+\BNE DL31               \ Jump down to DL31 (this BNE is effectively a JMP as A
 \                       \ will never be zero)
 
                         \ --- And replaced by: -------------------------------->
@@ -10656,17 +10656,17 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDA LIL3+2            \ Flip bit 6 of LIL3+2 to change the EOR (SC),Y in LIL3
-\ EOR #%01000000        \ to an ORA (SC),Y (or back again)
-\ STA LIL3+2
+\LDA LIL3+2             \ Flip bit 6 of LIL3+2 to change the EOR (SC),Y in LIL3
+\EOR #%01000000         \ to an ORA (SC),Y (or back again)
+\STA LIL3+2
 \
-\ LDA LIL5+2            \ Flip bit 6 of LIL2+2 to change the EOR (SC),Y in LIL5
-\ EOR #%01000000        \ to an ORA (SC),Y (or back again)
-\ STA LIL5+2
+\LDA LIL5+2             \ Flip bit 6 of LIL2+2 to change the EOR (SC),Y in LIL5
+\EOR #%01000000         \ to an ORA (SC),Y (or back again)
+\STA LIL5+2
 \
-\ LDA LIL6+2            \ Flip bit 6 of LIL2+2 to change the EOR (SC),Y in LIL6
-\ EOR #%01000000        \ to an ORA (SC),Y (or back again)
-\ STA LIL6+2
+\LDA LIL6+2             \ Flip bit 6 of LIL2+2 to change the EOR (SC),Y in LIL6
+\EOR #%01000000         \ to an ORA (SC),Y (or back again)
+\STA LIL6+2
 
                         \ --- And replaced by: -------------------------------->
 
@@ -10702,25 +10702,25 @@ ENDIF
 
 \.LL164
 \
-\ LDA #56               \ Call the NOISE routine with A = 56 to make the sound
-\ JSR NOISE             \ of the hyperspace drive being engaged
+\LDA #56                \ Call the NOISE routine with A = 56 to make the sound
+\JSR NOISE              \ of the hyperspace drive being engaged
 \
-\ LDA #1                \ Set HFX to 1, which switches the screen mode to a full
-\ STA HFX               \ mode 5 screen, therefore making the hyperspace rings
+\LDA #1                 \ Set HFX to 1, which switches the screen mode to a full
+\STA HFX                \ mode 5 screen, therefore making the hyperspace rings
 \                       \ multi-coloured and all zig-zaggy (see the IRQ1 routine
 \                       \ for details)
 \
-\ LDA #4                \ Set the step size for the hyperspace rings to 4, so
+\LDA #4                 \ Set the step size for the hyperspace rings to 4, so
 \                       \ there are more sections in the rings and they are
 \                       \ quite round (compared to the step size of 8 used in
 \                       \ the much more polygonal launch rings)
 \
-\ JSR HFS2              \ Call HFS2 to draw the hyperspace tunnel rings
+\JSR HFS2               \ Call HFS2 to draw the hyperspace tunnel rings
 \
-\ DEC HFX               \ Set HFX back to 0, so we switch back to the normal
+\DEC HFX                \ Set HFX back to 0, so we switch back to the normal
 \                       \ split-screen mode
 \
-\ RTS                   \ Return from the subroutine
+\RTS                    \ Return from the subroutine
 
                         \ --- End of removed code ----------------------------->
 
@@ -10741,10 +10741,10 @@ ENDIF
 
 \.LAUN
 \
-\ LDA #48               \ Call the NOISE routine with A = 48 to make the sound
-\ JSR NOISE             \ of the ship launching from the station
+\LDA #48                \ Call the NOISE routine with A = 48 to make the sound
+\JSR NOISE              \ of the ship launching from the station
 \
-\ LDA #8                \ Set the step size for the launch tunnel rings to 8, so
+\LDA #8                 \ Set the step size for the launch tunnel rings to 8, so
 \                       \ there are fewer sections in the rings and they are
 \                       \ quite polygonal (compared to the step size of 4 used
 \                       \ in the much rounder hyperspace rings)
@@ -10782,11 +10782,11 @@ ENDIF
 
 \.HFS2
 \
-\ STA STP               \ Store the step size in A
+\STA STP                \ Store the step size in A
 \
-\ JSR TTX66             \ Clear the screen and draw a white border
+\JSR TTX66              \ Clear the screen and draw a white border
 \
-\ JSR HFS1              \ Call HFS1 below and then fall through into the same
+\JSR HFS1               \ Call HFS1 below and then fall through into the same
 \                       \ routine, so this effectively runs HFS1 twice, and as
 \                       \ HFS1 draws 8 concentric rings, this means we draw 16
 \                       \ of them in all
@@ -10866,17 +10866,17 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ EQUB &8C, &E7
-\ EQUB &8D, &ED
-\ EQUB &8A, &E6
-\ EQUB &C1, &C8
-\ EQUB &C8, &8B
-\ EQUB &E0, &8A
-\ EQUB &E6, &D6
-\ EQUB &C5, &C6
-\ EQUB &C1, &CA
-\ EQUB &95, &9D
-\ EQUB &9C, &97
+\EQUB &8C, &E7
+\EQUB &8D, &ED
+\EQUB &8A, &E6
+\EQUB &C1, &C8
+\EQUB &C8, &8B
+\EQUB &E0, &8A
+\EQUB &E6, &D6
+\EQUB &C5, &C6
+\EQUB &C1, &CA
+\EQUB &95, &9D
+\EQUB &9C, &97
 
                         \ --- End of removed code ----------------------------->
 
@@ -10900,14 +10900,14 @@ ENDIF
 
 \.MU5
 \
-\ STA K                 \ Set K(3 2 1 0) to (A A A A)
-\ STA K+1
-\ STA K+2
-\ STA K+3
+\STA K                  \ Set K(3 2 1 0) to (A A A A)
+\STA K+1
+\STA K+2
+\STA K+3
 \
-\ CLC                   \ Clear the C flag
+\CLC                    \ Clear the C flag
 \
-\ RTS                   \ Return from the subroutine
+\RTS                    \ Return from the subroutine
 
                         \ --- End of removed code ----------------------------->
 
@@ -10935,14 +10935,14 @@ ENDIF
 
 \.MLS2
 \
-\ LDX XX                \ Set (S R) = XX(1 0), starting with the low bytes
-\ STX R
+\LDX XX                 \ Set (S R) = XX(1 0), starting with the low bytes
+\STX R
 \
-\ LDX XX+1              \ And then doing the high bytes
-\ STX S
+\LDX XX+1               \ And then doing the high bytes
+\STX S
 \
-\ LDX ALP1              \ This repeats the first two instructions of MLS1, which
-\ STX P                 \ is presumably unintentional (though it has no effect)
+\LDX ALP1               \ This repeats the first two instructions of MLS1, which
+\STX P                  \ is presumably unintentional (though it has no effect)
 \
 \                       \ Fall through into MLS1 to calculate (A P) = A * ALP1
 
@@ -11036,8 +11036,8 @@ ENDIF
 
 \.MLU1
 \
-\ LDA SY,Y              \ Set Y1 the Y-th byte of SY
-\ STA Y1
+\LDA SY,Y               \ Set Y1 the Y-th byte of SY
+\STA Y1
 \
 \                       \ Fall through into MLU2 to calculate:
 \                       \
@@ -11065,8 +11065,8 @@ ENDIF
 
 \.MLU2
 \
-\ AND #%01111111        \ Clear the sign bit in P, so P = |A|
-\ STA P
+\AND #%01111111         \ Clear the sign bit in P, so P = |A|
+\STA P
 \
 \                       \ Fall through into MULTU to calculate:
 \                       \
@@ -11184,10 +11184,10 @@ ENDIF
 
 \.MU6
 \
-\ STA P+1               \ Set P(1 0) = (A A)
-\ STA P
+\STA P+1                \ Set P(1 0) = (A A)
+\STA P
 \
-\ RTS                   \ Return from the subroutine
+\RTS                    \ Return from the subroutine
 
                         \ --- End of removed code ----------------------------->
 
@@ -11335,23 +11335,23 @@ ENDIF
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
 \{
-\ LDX Q
-\ BEQ MU1
-\ DEX
-\ STX T
-\ LDA #0
-\ LDX #8
-\ LSR P
+\LDX Q
+\BEQ MU1
+\DEX
+\STX T
+\LDA #0
+\LDX #8
+\LSR P
 \
 \.MUL6
 \
-\ BCC P%+4
-\ ADC T
-\ ROR A
-\ ROR P
-\ DEX
-\ BNE MUL6
-\ RTS
+\BCC P%+4
+\ADC T
+\ROR A
+\ROR P
+\DEX
+\BNE MUL6
+\RTS
 \}
 
                         \ --- End of removed code ----------------------------->
@@ -11403,55 +11403,55 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ STX Q                 \ Store X in Q
+\STX Q                  \ Store X in Q
 \
 \.MLTU2
 \
-\ EOR #%11111111        \ Flip the bits in A and rotate right, storing the
-\ LSR A                 \ result in P+1, so we now calculate (P+1 P) * Q
-\ STA P+1
+\EOR #%11111111         \ Flip the bits in A and rotate right, storing the
+\LSR A                  \ result in P+1, so we now calculate (P+1 P) * Q
+\STA P+1
 \
-\ LDA #0                \ Set A = 0 so we can start building the answer in A
+\LDA #0                 \ Set A = 0 so we can start building the answer in A
 \
-\ LDX #16               \ Set up a counter in X to count the 16 bits in (P+1 P)
+\LDX #16                \ Set up a counter in X to count the 16 bits in (P+1 P)
 \
-\ ROR P                 \ Set P = P >> 1 with bit 7 = bit 0 of A
+\ROR P                  \ Set P = P >> 1 with bit 7 = bit 0 of A
 \                       \ and C flag = bit 0 of P
 \
 \.MUL7
 \
-\ BCS MU21              \ If C (i.e. the next bit from P) is set, do not do the
+\BCS MU21               \ If C (i.e. the next bit from P) is set, do not do the
 \                       \ addition for this bit of P, and instead skip to MU21
 \                       \ to just do the shifts
 \
-\ ADC Q                 \ Do the addition for this bit of P:
+\ADC Q                  \ Do the addition for this bit of P:
 \                       \
 \                       \   A = A + Q + C
 \                       \     = A + Q
 \
-\ ROR A                 \ Rotate (A P+1 P) to the right, so we capture the next
-\ ROR P+1               \ digit of the result in P+1, and extract the next digit
-\ ROR P                 \ of (P+1 P) in the C flag
+\ROR A                  \ Rotate (A P+1 P) to the right, so we capture the next
+\ROR P+1                \ digit of the result in P+1, and extract the next digit
+\ROR P                  \ of (P+1 P) in the C flag
 \
-\ DEX                   \ Decrement the loop counter
+\DEX                    \ Decrement the loop counter
 \
-\ BNE MUL7              \ Loop back for the next bit until P has been rotated
+\BNE MUL7               \ Loop back for the next bit until P has been rotated
 \                       \ all the way
 \
-\ RTS                   \ Return from the subroutine
+\RTS                    \ Return from the subroutine
 \
 \.MU21
 \
-\ LSR A                 \ Shift (A P+1 P) to the right, so we capture the next
-\ ROR P+1               \ digit of the result in P+1, and extract the next digit
-\ ROR P                 \ of (P+1 P) in the C flag
+\LSR A                  \ Shift (A P+1 P) to the right, so we capture the next
+\ROR P+1                \ digit of the result in P+1, and extract the next digit
+\ROR P                  \ of (P+1 P) in the C flag
 \
-\ DEX                   \ Decrement the loop counter
+\DEX                    \ Decrement the loop counter
 \
-\ BNE MUL7              \ Loop back for the next bit until P has been rotated
+\BNE MUL7               \ Loop back for the next bit until P has been rotated
 \                       \ all the way
 \
-\ RTS                   \ Return from the subroutine
+\RTS                    \ Return from the subroutine
 
                         \ --- End of removed code ----------------------------->
 
@@ -11473,8 +11473,8 @@ ENDIF
 
 \.MUT3
 \
-\ LDX ALP1              \ Set P = ALP1, though this gets overwritten by the
-\ STX P                 \ following, so this has no effect
+\LDX ALP1               \ Set P = ALP1, though this gets overwritten by the
+\STX P                  \ following, so this has no effect
 \
 \                       \ Fall through into MUT2 to do the following:
 \                       \
@@ -11503,8 +11503,8 @@ ENDIF
 
 \.MUT2
 \
-\ LDX XX+1              \ Set S = XX+1
-\ STX S
+\LDX XX+1               \ Set S = XX+1
+\STX S
 \
 \                       \ Fall through into MUT1 to do the following:
 \                       \
@@ -11533,8 +11533,8 @@ ENDIF
 
 \.MUT1
 \
-\ LDX XX                \ Set R = XX
-\ STX R
+\LDX XX                 \ Set R = XX
+\STX R
 \
 \                       \ Fall through into MULT1 to do the following:
 \                       \
@@ -11703,29 +11703,29 @@ ENDIF
 
 \.TAS3
 \
-\ LDX INWK,Y            \ Set Q = the Y-th byte of INWK, i.e. vect_x
-\ STX Q
+\LDX INWK,Y             \ Set Q = the Y-th byte of INWK, i.e. vect_x
+\STX Q
 \
-\ LDA XX15              \ Set A = XX15
+\LDA XX15               \ Set A = XX15
 \
-\ JSR MULT12            \ Set (S R) = Q * A
+\JSR MULT12             \ Set (S R) = Q * A
 \                       \           = vect_x * XX15
 \
-\ LDX INWK+2,Y          \ Set Q = the Y+2-th byte of INWK, i.e. vect_y
-\ STX Q
+\LDX INWK+2,Y           \ Set Q = the Y+2-th byte of INWK, i.e. vect_y
+\STX Q
 \
-\ LDA XX15+1            \ Set A = XX15+1
+\LDA XX15+1             \ Set A = XX15+1
 \
-\ JSR MAD               \ Set (A X) = Q * A + (S R)
+\JSR MAD                \ Set (A X) = Q * A + (S R)
 \                       \           = vect_y * XX15+1 + vect_x * XX15
 \
-\ STA S                 \ Set (S R) = (A X)
-\ STX R
+\STA S                  \ Set (S R) = (A X)
+\STX R
 \
-\ LDX INWK+4,Y          \ Set Q = the Y+2-th byte of INWK, i.e. vect_z
-\ STX Q
+\LDX INWK+4,Y           \ Set Q = the Y+2-th byte of INWK, i.e. vect_z
+\STX Q
 \
-\ LDA XX15+2            \ Set A = XX15+2
+\LDA XX15+2             \ Set A = XX15+2
 \
 \                       \ Fall through into MAD to set:
 \                       \
@@ -11999,7 +11999,7 @@ ENDIF
 
 \.DV42
 \
-\ LDA SZ,Y              \ Fetch the Y-th dust particle's z_hi coordinate into A
+\LDA SZ,Y               \ Fetch the Y-th dust particle's z_hi coordinate into A
 \
 \                       \ Fall through into DV41 to do:
 \                       \
@@ -12042,9 +12042,9 @@ ENDIF
 
 \.DV41
 \
-\ STA Q                 \ Store A in Q
+\STA Q                  \ Store A in Q
 \
-\ LDA DELTA             \ Fetch the speed from DELTA into A
+\LDA DELTA              \ Fetch the speed from DELTA into A
 \
 \                       \ Fall through into DVID4 to do:
 \                       \
@@ -12165,16 +12165,16 @@ ENDIF
 
 \.DVID3B2
 \
-\ STA P+2               \ Set P+2 = A
+\STA P+2                \ Set P+2 = A
 \
-\ LDA INWK+6            \ Set Q = z_lo
-\ STA Q
+\LDA INWK+6             \ Set Q = z_lo
+\STA Q
 \
-\ LDA INWK+7            \ Set R = z_hi
-\ STA R
+\LDA INWK+7             \ Set R = z_hi
+\STA R
 \
-\ LDA INWK+8            \ Set S = z_sign
-\ STA S
+\LDA INWK+8             \ Set S = z_sign
+\STA S
 \
 \.DVID3B
 \
@@ -12183,19 +12183,19 @@ ENDIF
 \                       \
 \                       \   K(3 2 1 0) = P(2 1 0) / (S R Q)
 \
-\ LDA P                 \ Make sure P(2 1 0) is at least 1
-\ ORA #1
-\ STA P
+\LDA P                  \ Make sure P(2 1 0) is at least 1
+\ORA #1
+\STA P
 \
-\ LDA P+2               \ Set T to the sign of P+2 * S (i.e. the sign of the
-\ EOR S                 \ result) and store it in T
-\ AND #%10000000
-\ STA T
+\LDA P+2                \ Set T to the sign of P+2 * S (i.e. the sign of the
+\EOR S                  \ result) and store it in T
+\AND #%10000000
+\STA T
 \
-\ LDY #0                \ Set Y = 0 to store the scale factor
+\LDY #0                 \ Set Y = 0 to store the scale factor
 \
-\ LDA P+2               \ Clear the sign bit of P+2, so the division can be done
-\ AND #%01111111        \ with positive numbers and we'll set the correct sign
+\LDA P+2                \ Clear the sign bit of P+2, so the division can be done
+\AND #%01111111         \ with positive numbers and we'll set the correct sign
 \                       \ below, once all the maths is done
 \                       \
 \                       \ This also leaves A = P+2, which we use below
@@ -12209,16 +12209,16 @@ ENDIF
 \                       \ final result, we shift the result by the number of
 \                       \ places in Y, and in the correct direction
 \
-\ CMP #64               \ If A >= 64, jump down to DV14
-\ BCS DV14
+\CMP #64                \ If A >= 64, jump down to DV14
+\BCS DV14
 \
-\ ASL P                 \ Shift (A P+1 P) to the left
-\ ROL P+1
-\ ROL A
+\ASL P                  \ Shift (A P+1 P) to the left
+\ROL P+1
+\ROL A
 \
-\ INY                   \ Increment the scale factor in Y
+\INY                    \ Increment the scale factor in Y
 \
-\ BNE DVL9              \ Loop up to DVL9 (this BNE is effectively a JMP, as Y
+\BNE DVL9               \ Loop up to DVL9 (this BNE is effectively a JMP, as Y
 \                       \ will never be zero)
 \
 \.DV14
@@ -12227,13 +12227,13 @@ ENDIF
 \                       \ of the numerator, scaled up by the number of left
 \                       \ shifts in Y
 \
-\ STA P+2               \ Store A in P+2, so we now have the scaled value of
+\STA P+2                \ Store A in P+2, so we now have the scaled value of
 \                       \ the numerator in P(2 1 0)
 \
-\ LDA S                 \ Set A = |S|
-\ AND #%01111111
+\LDA S                  \ Set A = |S|
+\AND #%01111111
 \
-\ BMI DV9               \ If bit 7 of A is set, jump down to DV9 to skip the
+\BMI DV9                \ If bit 7 of A is set, jump down to DV9 to skip the
 \                       \ left-shifting of the denominator (though this branch
 \                       \ instruction has no effect as bit 7 of the above AND
 \                       \ can never be set, which is why this instruction was
@@ -12252,13 +12252,13 @@ ENDIF
 \                       \ We set A to |S| above, so the following actually
 \                       \ shifts (A R Q)
 \
-\ DEY                   \ Decrement the scale factor in Y
+\DEY                    \ Decrement the scale factor in Y
 \
-\ ASL Q                 \ Shift (A R Q) to the left
-\ ROL R
-\ ROL A
+\ASL Q                  \ Shift (A R Q) to the left
+\ROL R
+\ROL A
 \
-\ BPL DVL6              \ Loop up to DVL6 to do another shift, until bit 7 of A
+\BPL DVL6               \ Loop up to DVL6 to do another shift, until bit 7 of A
 \                       \ is set and we can't shift left any further
 \
 \.DV9
@@ -12269,14 +12269,14 @@ ENDIF
 \                       \ can now divide just the two highest bytes to get our
 \                       \ result
 \
-\ STA Q                 \ Set Q = A, the highest byte of the denominator
+\STA Q                  \ Set Q = A, the highest byte of the denominator
 \
-\ LDA #254              \ Set R to have bits 1-7 set, so we can pass this to
-\ STA R                 \ LL31 to act as the bit counter in the division
+\LDA #254               \ Set R to have bits 1-7 set, so we can pass this to
+\STA R                  \ LL31 to act as the bit counter in the division
 \
-\ LDA P+2               \ Set A to the highest byte of the numerator
+\LDA P+2                \ Set A to the highest byte of the numerator
 \
-\ JSR LL31              \ Call LL31 to calculate:
+\JSR LL31               \ Call LL31 to calculate:
 \                       \
 \                       \   R = 256 * A / Q
 \                       \     = 256 * numerator / denominator
@@ -12284,39 +12284,39 @@ ENDIF
 \                       \ The result of our division is now in R, so we just
 \                       \ need to shift it back by the scale factor in Y
 \
-\ LDA #0                \ Set K(3 2 1) = 0 to hold the result (we populate K
-\ STA K+1               \ next)
-\ STA K+2
-\ STA K+3
+\LDA #0                 \ Set K(3 2 1) = 0 to hold the result (we populate K
+\STA K+1                \ next)
+\STA K+2
+\STA K+3
 \
-\ TYA                   \ If Y is positive, jump to DV12
-\ BPL DV12
+\TYA                    \ If Y is positive, jump to DV12
+\BPL DV12
 \
 \                       \ If we get here then Y is negative, so we need to shift
 \                       \ the result R to the left by Y places, and then set the
 \                       \ correct sign for the result
 \
-\ LDA R                 \ Set A = R
+\LDA R                  \ Set A = R
 \
 \.DVL8
 \
-\ ASL A                 \ Shift (K+3 K+2 K+1 A) left
-\ ROL K+1
-\ ROL K+2
-\ ROL K+3
+\ASL A                  \ Shift (K+3 K+2 K+1 A) left
+\ROL K+1
+\ROL K+2
+\ROL K+3
 \
-\ INY                   \ Increment the scale factor in Y
+\INY                    \ Increment the scale factor in Y
 \
-\ BNE DVL8              \ Loop back to DVL8 until we have shifted left by Y
+\BNE DVL8               \ Loop back to DVL8 until we have shifted left by Y
 \                       \ places
 \
-\ STA K                 \ Store A in K so the result is now in K(3 2 1 0)
+\STA K                  \ Store A in K so the result is now in K(3 2 1 0)
 \
-\ LDA K+3               \ Set K+3 to the sign in T, which we set above to the
-\ ORA T                 \ correct sign for the result
-\ STA K+3
+\LDA K+3                \ Set K+3 to the sign in T, which we set above to the
+\ORA T                  \ correct sign for the result
+\STA K+3
 \
-\ RTS                   \ Return from the subroutine
+\RTS                    \ Return from the subroutine
 \
 \.DV13
 \
@@ -12324,17 +12324,17 @@ ENDIF
 \                       \ shift the result R, we just need to set the correct
 \                       \ sign for the result
 \
-\ LDA R                 \ Store R in K so the result is now in K(3 2 1 0)
-\ STA K
+\LDA R                  \ Store R in K so the result is now in K(3 2 1 0)
+\STA K
 \
-\ LDA T                 \ Set K+3 to the sign in T, which we set above to the
-\ STA K+3               \ correct sign for the result
+\LDA T                  \ Set K+3 to the sign in T, which we set above to the
+\STA K+3                \ correct sign for the result
 \
-\ RTS                   \ Return from the subroutine
+\RTS                    \ Return from the subroutine
 \
 \.DV12
 \
-\ BEQ DV13              \ We jumped here having set A to the scale factor in Y,
+\BEQ DV13               \ We jumped here having set A to the scale factor in Y,
 \                       \ so this jumps up to DV13 if Y = 0
 \
 \                       \ If we get here then Y is positive and non-zero, so we
@@ -12344,24 +12344,24 @@ ENDIF
 \                       \ lowest byte to the right, so no set bits will make
 \                       \ their way into the top three bytes
 \
-\ LDA R                 \ Set A = R
+\LDA R                  \ Set A = R
 \
 \.DVL10
 \
-\ LSR A                 \ Shift A right
+\LSR A                  \ Shift A right
 \
-\ DEY                   \ Decrement the scale factor in Y
+\DEY                    \ Decrement the scale factor in Y
 \
-\ BNE DVL10             \ Loop back to DVL10 until we have shifted right by Y
+\BNE DVL10              \ Loop back to DVL10 until we have shifted right by Y
 \                       \ places
 \
-\ STA K                 \ Store the shifted A in K so the result is now in
+\STA K                  \ Store the shifted A in K so the result is now in
 \                       \ K(3 2 1 0)
 \
-\ LDA T                 \ Set K+3 to the sign in T, which we set above to the
-\ STA K+3               \ correct sign for the result
+\LDA T                  \ Set K+3 to the sign in T, which we set above to the
+\STA K+3                \ correct sign for the result
 \
-\ RTS                   \ Return from the subroutine
+\RTS                    \ Return from the subroutine
 
                         \ --- End of removed code ----------------------------->
 
@@ -12387,35 +12387,35 @@ ENDIF
 
 \.cntr
 \
-\ LDA DAMP              \ If DAMP is non-zero, then keyboard damping is not
-\ BNE RE1               \ enabled, so jump to RE1 to return from the subroutine
+\LDA DAMP               \ If DAMP is non-zero, then keyboard damping is not
+\BNE RE1                \ enabled, so jump to RE1 to return from the subroutine
 \
-\ TXA                   \ If X < 128, then it's in the left-hand side of the
-\ BPL BUMP              \ dashboard slider, so jump to BUMP to bump it up by 1,
+\TXA                    \ If X < 128, then it's in the left-hand side of the
+\BPL BUMP               \ dashboard slider, so jump to BUMP to bump it up by 1,
 \                       \ to move it closer to the centre
 \
-\ DEX                   \ Otherwise X >= 128, so it's in the right-hand side
-\ BMI RE1               \ of the dashboard slider, so decrement X by 1, and if
+\DEX                    \ Otherwise X >= 128, so it's in the right-hand side
+\BMI RE1                \ of the dashboard slider, so decrement X by 1, and if
 \                       \ it's still >= 128, jump to RE1 to return from the
 \                       \ subroutine, otherwise fall through to BUMP to undo
 \                       \ the bump and then return
 \
 \.BUMP
 \
-\ INX                   \ Bump X up by 1, and if it hasn't overshot the end of
-\ BNE RE1               \ the dashboard slider, jump to RE1 to return from the
+\INX                    \ Bump X up by 1, and if it hasn't overshot the end of
+\BNE RE1                \ the dashboard slider, jump to RE1 to return from the
 \                       \ subroutine, otherwise fall through to REDU to drop
 \                       \ it down by 1 again
 \
 \.REDU
 \
-\ DEX                   \ Reduce X by 1, and if we have reached 0 jump up to
-\ BEQ BUMP              \ BUMP to add 1, because we need the value to be in the
+\DEX                    \ Reduce X by 1, and if we have reached 0 jump up to
+\BEQ BUMP               \ BUMP to add 1, because we need the value to be in the
 \                       \ range 1 to 255
 \
 \.RE1
 \
-\ RTS                   \ Return from the subroutine
+\RTS                    \ Return from the subroutine
 
                         \ --- End of removed code ----------------------------->
 
@@ -12457,34 +12457,34 @@ ENDIF
 
 \.BUMP2
 \
-\ STA T                 \ Store argument A in T so we can restore it later
+\STA T                  \ Store argument A in T so we can restore it later
 \
-\ TXA                   \ Copy argument X into A
+\TXA                    \ Copy argument X into A
 \
-\ CLC                   \ Clear the C flag so we can do addition without the
+\CLC                    \ Clear the C flag so we can do addition without the
 \                       \ C flag affecting the result
 \
-\ ADC T                 \ Set X = A = argument X + argument A
-\ TAX
+\ADC T                  \ Set X = A = argument X + argument A
+\TAX
 \
-\ BCC RE2               \ If the C flag is clear, then we didn't overflow, so
+\BCC RE2                \ If the C flag is clear, then we didn't overflow, so
 \                       \ jump to RE2 to auto-recentre and return the result
 \
-\ LDX #255              \ We have an overflow, so set X to the maximum possible
+\LDX #255               \ We have an overflow, so set X to the maximum possible
 \                       \ value of 255
 \
 \.RE2
 \
-\ BPL RE3+2             \ If X has bit 7 clear (i.e. the result < 128), then
+\BPL RE3+2              \ If X has bit 7 clear (i.e. the result < 128), then
 \                       \ jump to RE3+2 in routine REDU2 to do an auto-recentre,
 \                       \ if configured, because the result is on the left side
 \                       \ of the centre point of 128
 \
 \                       \ Jumps to RE2+2 end up here
 \
-\ LDA T                 \ Restore the original argument A from T into A
+\LDA T                  \ Restore the original argument A from T into A
 \
-\ RTS                   \ Return from the subroutine
+\RTS                    \ Return from the subroutine
 
                         \ --- End of removed code ----------------------------->
 
@@ -12527,25 +12527,25 @@ ENDIF
 
 \.REDU2
 \
-\ STA T                 \ Store argument A in T so we can restore it later
+\STA T                  \ Store argument A in T so we can restore it later
 \
-\ TXA                   \ Copy argument X into A
+\TXA                    \ Copy argument X into A
 \
-\ SEC                   \ Set the C flag so we can do subtraction without the
+\SEC                    \ Set the C flag so we can do subtraction without the
 \                       \ C flag affecting the result
 \
-\ SBC T                 \ Set X = A = argument X - argument A
-\ TAX
+\SBC T                  \ Set X = A = argument X - argument A
+\TAX
 \
-\ BCS RE3               \ If the C flag is set, then we didn't underflow, so
+\BCS RE3                \ If the C flag is set, then we didn't underflow, so
 \                       \ jump to RE3 to auto-recentre and return the result
 \
-\ LDX #1                \ We have an underflow, so set X to the minimum possible
+\LDX #1                 \ We have an underflow, so set X to the minimum possible
 \                       \ value, 1
 \
 \.RE3
 \
-\ BPL RE2+2             \ If X has bit 7 clear (i.e. the result < 128), then
+\BPL RE2+2              \ If X has bit 7 clear (i.e. the result < 128), then
 \                       \ jump to RE2+2 above to return the result as is,
 \                       \ because the result is on the left side of the centre
 \                       \ point of 128, so we don't need to auto-centre
@@ -12555,11 +12555,11 @@ ENDIF
 \                       \ If we get here, then we need to apply auto-recentre,
 \                       \ if it is configured
 \
-\ LDA DJD               \ If keyboard auto-recentre is disabled, then
-\ BNE RE2+2             \ jump to RE2+2 to restore A and return
+\LDA DJD                \ If keyboard auto-recentre is disabled, then
+\BNE RE2+2              \ jump to RE2+2 to restore A and return
 \
-\ LDX #128              \ If we get here then keyboard auto-recentre is enabled,
-\ BMI RE2+2             \ so set X to 128 (the middle of our range) and jump to
+\LDX #128               \ If we get here then keyboard auto-recentre is enabled,
+\BMI RE2+2              \ so set X to 128 (the middle of our range) and jump to
 \                       \ RE2+2 to restore A and return from the subroutine
 \                       \ (this BMI is effectively a JMP as bit 7 of X is always
 \                       \ set)
@@ -13182,31 +13182,31 @@ ENDIF
 
 \.SIGHT
 \
-\ LDY VIEW              \ Fetch the laser power for our new view
-\ LDA LASER,Y
+\LDY VIEW               \ Fetch the laser power for our new view
+\LDA LASER,Y
 \
-\ BEQ BOL1-1            \ If it is zero (i.e. there is no laser fitted to this
+\BEQ BOL1-1             \ If it is zero (i.e. there is no laser fitted to this
 \                       \ view), jump to BOL1-1 to return from the subroutine
 \                       \ (as BOL1-1 contains &60, which is the opcode for an
 \                       \ RTS)
 \
-\ LDA #128              \ Set QQ19 to the x-coordinate of the centre of the
-\ STA QQ19              \ screen
+\LDA #128               \ Set QQ19 to the x-coordinate of the centre of the
+\STA QQ19               \ screen
 \
-\ LDA #Y-24             \ Set QQ19+1 to the y-coordinate of the centre of the
-\ STA QQ19+1            \ screen, minus 24 (because TT15 will add 24 to the
+\LDA #Y-24              \ Set QQ19+1 to the y-coordinate of the centre of the
+\STA QQ19+1             \ screen, minus 24 (because TT15 will add 24 to the
 \                       \ coordinate when it draws the crosshairs)
 \
-\ LDA #20               \ Set QQ19+2 to size 20 for the crosshairs size
-\ STA QQ19+2
+\LDA #20                \ Set QQ19+2 to size 20 for the crosshairs size
+\STA QQ19+2
 \
-\ JSR TT15              \ Call TT15 to draw crosshairs of size 20 just to the
+\JSR TT15               \ Call TT15 to draw crosshairs of size 20 just to the
 \                       \ left of the middle of the screen
 \
-\ LDA #10               \ Set QQ19+2 to size 10 for the crosshairs size
-\ STA QQ19+2
+\LDA #10                \ Set QQ19+2 to size 10 for the crosshairs size
+\STA QQ19+2
 \
-\ JMP TT15              \ Call TT15 to draw crosshairs of size 10 at the same
+\JMP TT15               \ Call TT15 to draw crosshairs of size 10 at the same
 \                       \ location, which will remove the centre part from the
 \                       \ laser crosshairs, leaving a gap in the middle, and
 \                       \ return from the subroutine using a tail call
@@ -13552,9 +13552,9 @@ ENDIF
 
 \.CPIX4
 \
-\ JSR CPIX2             \ Call CPIX2 to draw a single-height dash at (X1, Y1)
+\JSR CPIX2              \ Call CPIX2 to draw a single-height dash at (X1, Y1)
 \
-\ DEC Y1                \ Decrement Y1
+\DEC Y1                 \ Decrement Y1
 \
 \                       \ Fall through into CPIX2 to draw a second single-height
 \                       \ dash on the pixel row above the first one, to create a
@@ -13590,68 +13590,68 @@ ENDIF
 
 \.CPIX2
 \
-\ LDA Y1                \ Fetch the y-coordinate into A
+\LDA Y1                 \ Fetch the y-coordinate into A
 \
-\ TAY                   \ Store the y-coordinate in Y
+\TAY                    \ Store the y-coordinate in Y
 \
-\ LSR A                 \ Set A = A / 8, so A now contains the character row we
-\ LSR A                 \ need to draw in (as each character row contains 8
-\ LSR A                 \ pixel rows)
+\LSR A                  \ Set A = A / 8, so A now contains the character row we
+\LSR A                  \ need to draw in (as each character row contains 8
+\LSR A                  \ pixel rows)
 \
-\ ORA #&60              \ Each character row in Elite's screen mode takes up one
+\ORA #&60               \ Each character row in Elite's screen mode takes up one
 \                       \ page in memory (256 bytes), so we now OR with &60 to
 \                       \ get the page containing the dash (see the comments in
 \                       \ routine TT26 for more discussion about calculating
 \                       \ screen memory addresses)
 \
-\ STA SCH               \ Store the screen page in the high byte of SC(1 0)
+\STA SCH                \ Store the screen page in the high byte of SC(1 0)
 \
-\ LDA X1                \ Each character block contains 8 pixel rows, so to get
-\ AND #%11111000        \ the address of the first byte in the character block
+\LDA X1                 \ Each character block contains 8 pixel rows, so to get
+\AND #%11111000         \ the address of the first byte in the character block
 \                       \ that we need to draw into, as an offset from the start
 \                       \ of the row, we clear bits 0-2
 \
-\ STA SC                \ Store the address of the character block in the low
+\STA SC                 \ Store the address of the character block in the low
 \                       \ byte of SC(1 0), so now SC(1 0) points to the
 \                       \ character block we need to draw into
 \
-\ TYA                   \ Set Y to just bits 0-2 of the y-coordinate, which will
-\ AND #%00000111        \ be the number of the pixel row we need to draw into
-\ TAY                   \ within the character block
+\TYA                    \ Set Y to just bits 0-2 of the y-coordinate, which will
+\AND #%00000111         \ be the number of the pixel row we need to draw into
+\TAY                    \ within the character block
 \
-\ LDA X1                \ Copy bits 0-1 of X1 to bits 1-2 of X, and clear the C
-\ AND #%00000110        \ flag in the process (using the LSR). X will now be
-\ LSR A                 \ a value between 0 and 3, and will be the pixel number
-\ TAX                   \ in the character row for the left pixel in the dash.
+\LDA X1                 \ Copy bits 0-1 of X1 to bits 1-2 of X, and clear the C
+\AND #%00000110         \ flag in the process (using the LSR). X will now be
+\LSR A                  \ a value between 0 and 3, and will be the pixel number
+\TAX                    \ in the character row for the left pixel in the dash.
 \                       \ This is because each character row is one byte that
 \                       \ contains 4 pixels, but covers 8 screen coordinates, so
 \                       \ this effectively does the division by 2 that we need
 \
-\ LDA CTWOS,X           \ Fetch a mode 5 1-pixel byte with the pixel position
-\ AND COL               \ at X, and AND with the colour byte so that pixel takes
+\LDA CTWOS,X            \ Fetch a mode 5 1-pixel byte with the pixel position
+\AND COL                \ at X, and AND with the colour byte so that pixel takes
 \                       \ on the colour we want to draw (i.e. A is acting as a
 \                       \ mask on the colour byte)
 \
-\ EOR (SC),Y            \ Draw the pixel on-screen using EOR logic, so we can
-\ STA (SC),Y            \ remove it later without ruining the background that's
+\EOR (SC),Y             \ Draw the pixel on-screen using EOR logic, so we can
+\STA (SC),Y             \ remove it later without ruining the background that's
 \                       \ already on-screen
 \
-\ LDA CTWOS+1,X         \ Fetch a mode 5 1-pixel byte with the pixel position
+\LDA CTWOS+1,X          \ Fetch a mode 5 1-pixel byte with the pixel position
 \                       \ at X+1, so we can draw the right pixel of the dash
 \
-\ BPL CP1               \ The CTWOS table has an extra row at the end of it that
+\BPL CP1                \ The CTWOS table has an extra row at the end of it that
 \                       \ repeats the first value, %10001000, so if we have not
 \                       \ fetched that value, then the right pixel of the dash
 \                       \ is in the same character block as the left pixel, so
 \                       \ jump to CP1 to draw it
 \
-\ LDA SC                \ Otherwise the left pixel we drew was at the last
-\ ADC #8                \ position of four in this character block, so we add
-\ STA SC                \ 8 to the screen address to move onto the next block
+\LDA SC                 \ Otherwise the left pixel we drew was at the last
+\ADC #8                 \ position of four in this character block, so we add
+\STA SC                 \ 8 to the screen address to move onto the next block
 \                       \ along (as there are 8 bytes in a character block).
 \                       \ The C flag was cleared above, so this ADC is correct
 \
-\ LDA CTWOS+1,X         \ Re-fetch the mode 5 1-pixel byte, as we just overwrote
+\LDA CTWOS+1,X          \ Re-fetch the mode 5 1-pixel byte, as we just overwrote
 \                       \ A (the byte will still be the fifth byte from the
 \                       \ table, which is correct as we want to draw the
 \                       \ leftmost pixel in the next character along as the
@@ -13659,13 +13659,13 @@ ENDIF
 \
 \.CP1
 \
-\ AND COL               \ Apply the colour mask to the pixel byte, as above
+\AND COL                \ Apply the colour mask to the pixel byte, as above
 \
-\ EOR (SC),Y            \ Draw the dash's right pixel according to the mask in
-\ STA (SC),Y            \ A, with the colour in COL, using EOR logic, just as
+\EOR (SC),Y             \ Draw the dash's right pixel according to the mask in
+\STA (SC),Y             \ A, with the colour in COL, using EOR logic, just as
 \                       \ above
 \
-\ RTS                   \ Return from the subroutine
+\RTS                    \ Return from the subroutine
 
                         \ --- End of removed code ----------------------------->
 
@@ -13783,7 +13783,7 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ PHA                   \ Store A on the stack
+\PHA                    \ Store A on the stack
 
                         \ --- End of removed code ----------------------------->
 
@@ -13807,7 +13807,7 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ ADC QQ20,X            \ Set A = A + the number of tonnes we have in the hold
+\ADC QQ20,X             \ Set A = A + the number of tonnes we have in the hold
 \                       \ of market item number X. Note that the first time we
 \                       \ go round this loop, the C flag is set (as we didn't
 \                       \ branch with the BCC above, so the effect of this loop
@@ -13833,7 +13833,7 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ CMP CRGO              \ If A < CRGO then the C flag will be clear (we have
+\CMP CRGO               \ If A < CRGO then the C flag will be clear (we have
 \                       \ room in the hold)
 \                       \
 \                       \ If A >= CRGO then the C flag will be set (we do not
@@ -13852,7 +13852,7 @@ ENDIF
 \                       \ actual cargo bay size, i.e. it's 22 for the standard
 \                       \ 20-tonne bay, and 37 for the large 35-tonne bay
 \
-\ PLA                   \ Restore A from the stack
+\PLA                    \ Restore A from the stack
 
                         \ --- And replaced by: -------------------------------->
 
@@ -13881,7 +13881,7 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ CMP #200              \ Is the result greater than 200 (the limit on
+\CMP #200               \ Is the result greater than 200 (the limit on
 \                       \ individual stocks of gold, platinum, gem-stones and
 \                       \ alien items)?
 \                       \
@@ -13889,7 +13889,7 @@ ENDIF
 \                       \
 \                       \ Otherwise it is clear (we have room)
 \
-\ PLA                   \ Restore A from the stack
+\PLA                    \ Restore A from the stack
 
                         \ --- End of removed code ----------------------------->
 
@@ -14492,9 +14492,9 @@ ENDIF
 \                       \ anywhere, so it's presumably a remnant of code from
 \                       \ an earlier version of the extended description code
 \
-\ LDX ZZ                \ Fetch the system number from ZZ into X
+\LDX ZZ                 \ Fetch the system number from ZZ into X
 \
-\ RTS                   \ Return from the subroutine
+\RTS                    \ Return from the subroutine
 
                         \ --- End of removed code ----------------------------->
 
@@ -14969,8 +14969,8 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDX #2                \ Set STP = 2, the step size for the circle
-\ STX STP
+\LDX #2                 \ Set STP = 2, the step size for the circle
+\STX STP
 
                         \ --- And replaced by: -------------------------------->
 
@@ -15025,8 +15025,8 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDA #%10000000        \ Set bit 7 of QQ17 to switch to Sentence Case, with the
-\ STA QQ17              \ next letter in capitals
+\LDA #%10000000         \ Set bit 7 of QQ17 to switch to Sentence Case, with the
+\STA QQ17               \ next letter in capitals
 
                         \ --- And replaced by: -------------------------------->
 
@@ -15099,10 +15099,10 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDX #0                \ These instructions have no effect, as they are
-\ STX R                 \ repeated at the start of gnum, which we call next.
-\ LDX #12               \ Perhaps they were left behind when code was moved from
-\ STX T1                \ here into gnum, and weren't deleted?
+\LDX #0                 \ These instructions have no effect, as they are
+\STX R                  \ repeated at the start of gnum, which we call next.
+\LDX #12                \ Perhaps they were left behind when code was moved from
+\STX T1                 \ here into gnum, and weren't deleted?
 
                         \ --- End of removed code ----------------------------->
 
@@ -15583,13 +15583,13 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDA #205              \ Print recursive token 45 ("SELL")
-\ JSR TT27
+\LDA #205               \ Print recursive token 45 ("SELL")
+\JSR TT27
 \
-\ LDA #206              \ Print extended token 206 ("{all caps}(Y/N)?")
-\ JSR DETOK
+\LDA #206               \ Print extended token 206 ("{all caps}(Y/N)?")
+\JSR DETOK
 \
-\ JSR gnum              \ Call gnum to get a number from the keyboard, which
+\JSR gnum               \ Call gnum to get a number from the keyboard, which
 \                       \ will be the number of the item we want to sell,
 \                       \ returning the number entered in A and R, and setting
 \                       \ the C flag if the number is bigger than the available
@@ -15636,7 +15636,7 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ JSR GCASH             \ Call GCASH to calculate
+\JSR GCASH              \ Call GCASH to calculate
 \                       \
 \                       \   (Y X) = P * Q * 4
 \                       \
@@ -15644,7 +15644,7 @@ ENDIF
 \                       \ (as P contains the quantity we're selling and Q
 \                       \ contains the item's price / 4)
 \
-\ JSR MCASH             \ Add (Y X) cash to the cash pot in CASH
+\JSR MCASH              \ Add (Y X) cash to the cash pot in CASH
 
                         \ --- And replaced by: -------------------------------->
 
@@ -15718,12 +15718,12 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDA CRGO              \ If our ship's cargo capacity is < 26 (i.e. we do not
-\ CMP #26               \ have a cargo bay extension), skip the following two
-\ BCC P%+7              \ instructions
+\LDA CRGO               \ If our ship's cargo capacity is < 26 (i.e. we do not
+\CMP #26                \ have a cargo bay extension), skip the following two
+\BCC P%+7               \ instructions
 \
-\ LDA #107              \ We do have a cargo bay extension, so print recursive
-\ JSR TT27              \ token 107 ("LARGE CARGO{sentence case} BAY")
+\LDA #107               \ We do have a cargo bay extension, so print recursive
+\JSR TT27               \ token 107 ("LARGE CARGO{sentence case} BAY")
 
                         \ --- And replaced by: -------------------------------->
 
@@ -15772,31 +15772,31 @@ ENDIF
 \
 \.TT221
 \
-\ JSR TT27              \ Print the text token in A
+\JSR TT27               \ Print the text token in A
 \
-\ LDA #206              \ Print extended token 206 ("{all caps}(Y/N)?")
-\ JSR DETOK
+\LDA #206               \ Print extended token 206 ("{all caps}(Y/N)?")
+\JSR DETOK
 \
-\ JSR TT217             \ Scan the keyboard until a key is pressed, and return
+\JSR TT217              \ Scan the keyboard until a key is pressed, and return
 \                       \ the key's ASCII code in A and X
 \
-\ ORA #%00100000        \ Set bit 5 in the value of the key pressed, which
+\ORA #%00100000         \ Set bit 5 in the value of the key pressed, which
 \                       \ converts it to lower case
 \
-\ CMP #'y'              \ If "y" was pressed, jump to TT218
-\ BEQ TT218
+\CMP #'y'               \ If "y" was pressed, jump to TT218
+\BEQ TT218
 \
-\ LDA #'n'              \ Otherwise jump to TT26 to print "n" and return from
-\ JMP TT26              \ the subroutine using a tail call (so all other
+\LDA #'n'               \ Otherwise jump to TT26 to print "n" and return from
+\JMP TT26               \ the subroutine using a tail call (so all other
 \                       \ responses apart from "y" indicate a no)
 \
 \.TT218
 \
-\ JSR TT26              \ Print the character in A, i.e. print "y"
+\JSR TT26               \ Print the character in A, i.e. print "y"
 \
-\ SEC                   \ Set the C flag to indicate a "yes" response
+\SEC                    \ Set the C flag to indicate a "yes" response
 \
-\ RTS                   \ Return from the subroutine
+\RTS                    \ Return from the subroutine
 
                         \ --- End of removed code ----------------------------->
 
@@ -16162,9 +16162,9 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDA QQ15+3            \ Set A = s1_hi - QQ0, the horizontal distance between
-\ SEC                   \ this system and the current system, where |A| < 20.
-\ SBC QQ0               \ Let's call this the x-delta, as it's the horizontal
+\LDA QQ15+3             \ Set A = s1_hi - QQ0, the horizontal distance between
+\SEC                    \ this system and the current system, where |A| < 20.
+\SBC QQ0                \ Let's call this the x-delta, as it's the horizontal
 \                       \ difference between the current system at the centre of
 \                       \ the chart, and this system (and this time we keep the
 \                       \ sign of A, so it can be negative if it's to the left
@@ -16199,9 +16199,9 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDA QQ15+1            \ Set A = s0_hi - QQ1, the vertical distance between
-\ SEC                   \ this system and the current system, where |A| < 38.
-\ SBC QQ1               \ Let's call this the y-delta, as it's the vertical
+\LDA QQ15+1             \ Set A = s0_hi - QQ1, the vertical distance between
+\SEC                    \ this system and the current system, where |A| < 38.
+\SBC QQ1                \ Let's call this the y-delta, as it's the vertical
 \                       \ difference between the current system at the centre of
 \                       \ the chart, and this system (and this time we keep the
 \                       \ sign of A, so it can be negative if it's above the
@@ -16272,8 +16272,8 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDA #%10000000        \ Set bit 7 of QQ17 to switch to Sentence Case
-\ STA QQ17
+\LDA #%10000000         \ Set bit 7 of QQ17 to switch to Sentence Case
+\STA QQ17
 
                         \ --- And replaced by: -------------------------------->
 
@@ -16694,31 +16694,31 @@ ENDIF
 
 \.hyp
 \
-\ LDA QQ22+1            \ Fetch QQ22+1, which contains the number that's shown
+\LDA QQ22+1             \ Fetch QQ22+1, which contains the number that's shown
 \                       \ on-screen during hyperspace countdown
 \
-\ ORA QQ12              \ If we are docked (QQ12 = &FF) or there is already a
-\ BNE zZ+1              \ countdown in progress, then return from the subroutine
+\ORA QQ12               \ If we are docked (QQ12 = &FF) or there is already a
+\BNE zZ+1               \ countdown in progress, then return from the subroutine
 \                       \ using a tail call (as zZ+1 contains an RTS), as we
 \                       \ can't hyperspace when docked, or there is already a
 \                       \ countdown in progress
 \
-\ JSR CTRL              \ Scan the keyboard to see if CTRL is currently pressed
+\JSR CTRL               \ Scan the keyboard to see if CTRL is currently pressed
 \
-\ BMI Ghy               \ If it is, then the galactic hyperdrive has been
+\BMI Ghy                \ If it is, then the galactic hyperdrive has been
 \                       \ activated, so jump to Ghy to process it
 \
-\ LDA QQ11              \ If the current view is 0 (i.e. the space view) then
-\ BEQ TTX110            \ jump to TTX110, which calls TT111 to set the current
+\LDA QQ11               \ If the current view is 0 (i.e. the space view) then
+\BEQ TTX110             \ jump to TTX110, which calls TT111 to set the current
 \                       \ system to the nearest system to (QQ9, QQ10), and jumps
 \                       \ back into this routine at TTX111 below
 \
-\ AND #%11000000        \ If neither bit 6 nor 7 of the view type is set - so
-\ BEQ zZ+1              \ this is neither the Short-range or Long-range Chart -
+\AND #%11000000         \ If neither bit 6 nor 7 of the view type is set - so
+\BEQ zZ+1               \ this is neither the Short-range or Long-range Chart -
 \                       \ then return from the subroutine (as zZ+1 contains an
 \                       \ RTS)
 \
-\ JSR hm                \ This is a chart view, so call hm to redraw the chart
+\JSR hm                 \ This is a chart view, so call hm to redraw the chart
 \                       \ crosshairs
 \
 \.TTX111
@@ -16726,40 +16726,40 @@ ENDIF
 \                       \ If we get here then the current view is either the
 \                       \ space view or a chart
 \
-\ LDA QQ8               \ If both bytes of the distance to the selected system
-\ ORA QQ8+1             \ in QQ8 are zero, return from the subroutine (as zZ+1
-\ BEQ zZ+1              \ contains an RTS), as the selected system is the
+\LDA QQ8                \ If both bytes of the distance to the selected system
+\ORA QQ8+1              \ in QQ8 are zero, return from the subroutine (as zZ+1
+\BEQ zZ+1               \ contains an RTS), as the selected system is the
 \                       \ current system
 \
-\ LDA #7                \ Move the text cursor to column 7, row 22 (in the
-\ STA XC                \ middle of the bottom text row)
-\ LDA #22
-\ STA YC
+\LDA #7                 \ Move the text cursor to column 7, row 22 (in the
+\STA XC                 \ middle of the bottom text row)
+\LDA #22
+\STA YC
 \
-\ LDA #0                \ Set QQ17 = 0 to switch to ALL CAPS
-\ STA QQ17
+\LDA #0                 \ Set QQ17 = 0 to switch to ALL CAPS
+\STA QQ17
 \
-\ LDA #189              \ Print recursive token 29 ("HYPERSPACE ")
-\ JSR TT27
+\LDA #189               \ Print recursive token 29 ("HYPERSPACE ")
+\JSR TT27
 \
-\ LDA QQ8+1             \ If the high byte of the distance to the selected
-\ BNE TT147             \ system in QQ8 is > 0, then it is definitely too far to
+\LDA QQ8+1              \ If the high byte of the distance to the selected
+\BNE TT147              \ system in QQ8 is > 0, then it is definitely too far to
 \                       \ jump (as our maximum range is 7.0 light years, or a
 \                       \ value of 70 in QQ8(1 0)), so jump to TT147 to print
 \                       \ "RANGE?" and return from the subroutine using a tail
 \                       \ call
 \
-\ LDA QQ14              \ Fetch our current fuel level from Q114 into A
+\LDA QQ14               \ Fetch our current fuel level from Q114 into A
 \
-\ CMP QQ8               \ If our fuel reserves are less than the distance to the
-\ BCC TT147             \ selected system, then we don't have enough fuel for
+\CMP QQ8                \ If our fuel reserves are less than the distance to the
+\BCC TT147              \ selected system, then we don't have enough fuel for
 \                       \ this jump, so jump to TT147 to print "RANGE?" and
 \                       \ return from the subroutine using a tail call
 \
-\ LDA #'-'              \ Print a hyphen
-\ JSR TT27
+\LDA #'-'               \ Print a hyphen
+\JSR TT27
 \
-\ JSR cpl               \ Call cpl to print the name of the selected system
+\JSR cpl                \ Call cpl to print the name of the selected system
 \
 \                       \ Fall through into wW to start the hyperspace countdown
 
@@ -16783,21 +16783,21 @@ ENDIF
 
 \.wW
 \
-\ LDA #15               \ The hyperspace countdown starts from 15, so set A to
+\LDA #15                \ The hyperspace countdown starts from 15, so set A to
 \                       \ 15 so we can set the two hyperspace counters
 \
-\ STA QQ22+1            \ Set the number in QQ22+1 to A, which is the number
+\STA QQ22+1             \ Set the number in QQ22+1 to A, which is the number
 \                       \ that's shown on-screen during the hyperspace countdown
 \
-\ STA QQ22              \ Set the number in QQ22 to 15, which is the internal
+\STA QQ22               \ Set the number in QQ22 to 15, which is the internal
 \                       \ counter that counts down by 1 each iteration of the
 \                       \ main game loop, and each time it reaches zero, the
 \                       \ on-screen counter gets decremented, and QQ22 gets set
 \                       \ to 5, so setting QQ22 to 15 here makes the first tick
 \                       \ of the hyperspace counter longer than subsequent ticks
 \
-\ TAX                   \ Print the 8-bit number in X (i.e. 15) at text location
-\ JMP ee3               \ (0, 1), padded to 5 digits, so it appears in the top
+\TAX                    \ Print the 8-bit number in X (i.e. 15) at text location
+\JMP ee3                \ (0, 1), padded to 5 digits, so it appears in the top
 \                       \ left corner of the screen, and return from the
 \                       \ subroutine using a tail call
 
@@ -16819,11 +16819,11 @@ ENDIF
 \                       \ This routine is only called from the hyp routine, and
 \                       \ it jumps back into hyp at label TTX111
 \
-\ JSR TT111             \ Call TT111 to set the current system to the nearest
+\JSR TT111              \ Call TT111 to set the current system to the nearest
 \                       \ system to (QQ9, QQ10), and put the seeds of the
 \                       \ nearest system into QQ15 to QQ15+5
 \
-\ JMP TTX111            \ Return to TTX111 in the hyp routine
+\JMP TTX111             \ Return to TTX111 in the hyp routine
 
                         \ --- End of removed code ----------------------------->
 
@@ -16865,53 +16865,53 @@ ENDIF
 
 \.Ghy
 \
-\ LDX GHYP              \ Fetch GHYP, which tells us whether we own a galactic
-\ BEQ hy5               \ hyperdrive, and if it is zero, which means we don't,
+\LDX GHYP               \ Fetch GHYP, which tells us whether we own a galactic
+\BEQ hy5                \ hyperdrive, and if it is zero, which means we don't,
 \                       \ return from the subroutine (as hy5 contains an RTS)
 \
-\ INX                   \ We own a galactic hyperdrive, so X is &FF, so this
+\INX                    \ We own a galactic hyperdrive, so X is &FF, so this
 \                       \ instruction sets X = 0
 \
-\ STX GHYP              \ The galactic hyperdrive is a one-use item, so set GHYP
+\STX GHYP               \ The galactic hyperdrive is a one-use item, so set GHYP
 \                       \ to 0 so we no longer have one fitted
 \
-\ STX FIST              \ Changing galaxy also clears our criminal record, so
+\STX FIST               \ Changing galaxy also clears our criminal record, so
 \                       \ set our legal status in FIST to 0 ("clean")
 \
-\ JSR wW                \ Call wW to start the hyperspace countdown
+\JSR wW                 \ Call wW to start the hyperspace countdown
 \
-\ LDX #5                \ To move galaxy, we rotate the galaxy's seeds left, so
+\LDX #5                 \ To move galaxy, we rotate the galaxy's seeds left, so
 \                       \ set a counter in X for the 6 seed bytes
 \
-\ INC GCNT              \ Increment the current galaxy number in GCNT
+\INC GCNT               \ Increment the current galaxy number in GCNT
 \
-\ LDA GCNT              \ Set GCNT = GCNT mod 8, so we jump from galaxy 7 back
-\ AND #7                \ to galaxy 0 (shown in-game as going from galaxy 8 back
-\ STA GCNT              \ to the starting point in galaxy 1)
+\LDA GCNT               \ Set GCNT = GCNT mod 8, so we jump from galaxy 7 back
+\AND #7                 \ to galaxy 0 (shown in-game as going from galaxy 8 back
+\STA GCNT               \ to the starting point in galaxy 1)
 \
 \.G1
 \
-\ LDA QQ21,X            \ Load the X-th seed byte into A
+\LDA QQ21,X             \ Load the X-th seed byte into A
 \
-\ ASL A                 \ Set the C flag to bit 7 of the seed
+\ASL A                  \ Set the C flag to bit 7 of the seed
 \
-\ ROL QQ21,X            \ Rotate the seed in memory, which will add bit 7 back
+\ROL QQ21,X             \ Rotate the seed in memory, which will add bit 7 back
 \                       \ in as bit 0, so this rolls the seed around on itself
 \
-\ DEX                   \ Decrement the counter
+\DEX                    \ Decrement the counter
 \
-\ BPL G1                \ Loop back for the next seed byte, until we have
+\BPL G1                 \ Loop back for the next seed byte, until we have
 \                       \ rotated them all
 \
 \.zZ
 \
-\ LDA #96               \ Set (QQ9, QQ10) to (96, 96), which is where we always
-\ STA QQ9               \ arrive in a new galaxy (the selected system will be
-\ STA QQ10              \ set to the nearest actual system later on)
+\LDA #96                \ Set (QQ9, QQ10) to (96, 96), which is where we always
+\STA QQ9                \ arrive in a new galaxy (the selected system will be
+\STA QQ10               \ set to the nearest actual system later on)
 \
-\ JSR TT110             \ Call TT110 to show the front space view
+\JSR TT110              \ Call TT110 to show the front space view
 \
-\ JSR TT111             \ Call TT111 to set the current system to the nearest
+\JSR TT111              \ Call TT111 to set the current system to the nearest
 \                       \ system to (QQ9, QQ10), and put the seeds of the
 \                       \ nearest system into QQ15 to QQ15+5
 \                       \
@@ -16925,12 +16925,12 @@ ENDIF
 \                       \ This call sets the current system correctly, so we
 \                       \ always arrive at the nearest system to (96, 96)
 \
-\ LDX #0                \ Set the distance to the selected system in QQ8(1 0)
-\ STX QQ8               \ to 0
-\ STX QQ8+1
+\LDX #0                 \ Set the distance to the selected system in QQ8(1 0)
+\STX QQ8                \ to 0
+\STX QQ8+1
 \
-\ LDA #116              \ Print recursive token 116 (GALACTIC HYPERSPACE ")
-\ JSR MESS              \ as an in-flight message
+\LDA #116               \ Print recursive token 116 (GALACTIC HYPERSPACE ")
+\JSR MESS               \ as an in-flight message
 \
 \                       \ Fall through into jmp to set the system to the
 \                       \ current system and return from the subroutine there
@@ -17048,7 +17048,7 @@ ENDIF
 
 \.TT147
 \
-\ LDA #202              \ Load A with token 42 ("RANGE") and fall through into
+\LDA #202               \ Load A with token 42 ("RANGE") and fall through into
 \                       \ prq to print it, followed by a question mark
 
                         \ --- End of removed code ----------------------------->
@@ -17392,8 +17392,8 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDX #%10000000        \ Set bit 7 of QQ17 to switch to Sentence Case, with the
-\ STX QQ17              \ next letter in capitals
+\LDX #%10000000         \ Set bit 7 of QQ17 to switch to Sentence Case, with the
+\STX QQ17               \ next letter in capitals
 
                         \ --- And replaced by: -------------------------------->
 
@@ -17622,12 +17622,12 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ JSR CATD              \ Call CATD to reload the disc catalogue
+\JSR CATD               \ Call CATD to reload the disc catalogue
 \
-\ LDX #LO(RDLI)         \ Set (Y X) to point to RDLI ("R.D.CODE")
-\ LDY #HI(RDLI)
+\LDX #LO(RDLI)          \ Set (Y X) to point to RDLI ("R.D.CODE")
+\LDY #HI(RDLI)
 \
-\ JMP OSCLI             \ Call OSCLI to run the OS command in RDLI, which *RUNs
+\JMP OSCLI              \ Call OSCLI to run the OS command in RDLI, which *RUNs
 \                       \ the main flight code in D.CODE, returning from the
 \                       \ subroutine using a tail call
 
@@ -17819,8 +17819,8 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ EQUS "R.D.CODE"       \ This is short for "*RUN D.CODE"
-\ EQUB 13
+\EQUS "R.D.CODE"        \ This is short for "*RUN D.CODE"
+\EQUB 13
 
                         \ --- And replaced by: -------------------------------->
 
@@ -17860,7 +17860,7 @@ ENDIF
 
 \.bay
 \
-\ JMP BAY               \ Go to the docking bay (i.e. show the Status Mode
+\JMP BAY                \ Go to the docking bay (i.e. show the Status Mode
 \                       \ screen)
 
                         \ --- End of removed code ----------------------------->
@@ -17884,8 +17884,8 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDA #%10000000        \ Set bit 7 of QQ17 to switch to Sentence Case, with the
-\ STA QQ17              \ next letter in capitals
+\LDA #%10000000         \ Set bit 7 of QQ17 to switch to Sentence Case, with the
+\STA QQ17               \ next letter in capitals
 
                         \ --- And replaced by: -------------------------------->
 
@@ -17898,25 +17898,25 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDA tek               \ Fetch the tech level of the current system from tek
-\ CLC                   \ and add 3 (the tech level is stored as 0-14, so A is
-\ ADC #3                \ now set to between 3 and 17)
+\LDA tek                \ Fetch the tech level of the current system from tek
+\CLC                    \ and add 3 (the tech level is stored as 0-14, so A is
+\ADC #3                 \ now set to between 3 and 17)
 \
-\ CMP #12               \ If A >= 12 then set A = 14, so A is now set to between
-\ BCC P%+4              \ 3 and 14
-\ LDA #14
+\CMP #12                \ If A >= 12 then set A = 14, so A is now set to between
+\BCC P%+4               \ 3 and 14
+\LDA #14
 \
-\ STA Q                 \ Set QQ25 = A (so QQ25 is in the range 3-14 and
-\ STA QQ25              \ represents number of the most advanced item available
-\ INC Q                 \ in this system, which we can pass to gnum below when
+\STA Q                  \ Set QQ25 = A (so QQ25 is in the range 3-14 and
+\STA QQ25               \ represents number of the most advanced item available
+\INC Q                  \ in this system, which we can pass to gnum below when
 \                       \ asking which item we want to buy)
 \                       \
 \                       \ Set Q = A + 1 (so Q is in the range 4-15 and contains
 \                       \ QQ25 + 1, i.e. the highest item number on sale + 1)
 \
-\ LDA #70               \ Set A = 70 - QQ14, where QQ14 contains the current
-\ SEC                   \ fuel in light years * 10, so this leaves the amount
-\ SBC QQ14              \ of fuel we need to fill 'er up (in light years * 10)
+\LDA #70                \ Set A = 70 - QQ14, where QQ14 contains the current
+\SEC                    \ fuel in light years * 10, so this leaves the amount
+\SBC QQ14               \ of fuel we need to fill 'er up (in light years * 10)
 
                         \ --- And replaced by: -------------------------------->
 
@@ -18054,9 +18054,9 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ PHA                   \ While preserving the value in A, call eq to subtract
-\ JSR eq                \ the price of the item we want to buy (which is in A)
-\ PLA                   \ from our cash pot, but only if we have enough cash in
+\PHA                    \ While preserving the value in A, call eq to subtract
+\JSR eq                 \ the price of the item we want to buy (which is in A)
+\PLA                    \ from our cash pot, but only if we have enough cash in
 \                       \ the pot. If we don't have enough cash, exit to the
 \                       \ docking bay (i.e. show the Status Mode screen)
 
@@ -18116,8 +18116,8 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDX #70               \ Set the current fuel level * 10 in QQ14 to 70, or 7.0
-\ STX QQ14              \ light years (a full tank)
+\LDX #70                \ Set the current fuel level * 10 in QQ14 to 70, or 7.0
+\STX QQ14               \ light years (a full tank)
 
                         \ --- And replaced by: -------------------------------->
 
@@ -18148,8 +18148,8 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ CPX #5                \ If buying this missile would give us 5 missiles, this
-\ BCS pres              \ is more than the maximum of 4 missiles that we can
+\CPX #5                 \ If buying this missile would give us 5 missiles, this
+\BCS pres               \ is more than the maximum of 4 missiles that we can
 \                       \ fit, so jump to pres to show the error "All Present",
 \                       \ beep and exit to the docking bay (i.e. show the Status
 \                       \ Mode screen)
@@ -18175,19 +18175,19 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDY #107              \ Set Y to recursive token 107 ("LARGE CARGO{sentence
+\LDY #107               \ Set Y to recursive token 107 ("LARGE CARGO{sentence
 \                       \ case} BAY")
 \
-\ CMP #2                \ If A is not 2 (i.e. the item we've just bought is not
-\ BNE et2               \ a large cargo bay), skip to et2
+\CMP #2                 \ If A is not 2 (i.e. the item we've just bought is not
+\BNE et2                \ a large cargo bay), skip to et2
 \
-\ LDX #37               \ If our current cargo capacity in CRGO is 37, then we
-\ CPX CRGO              \ already have a large cargo bay fitted, so jump to pres
-\ BEQ pres              \ to show the error "Large Cargo Bay Present", beep and
+\LDX #37                \ If our current cargo capacity in CRGO is 37, then we
+\CPX CRGO               \ already have a large cargo bay fitted, so jump to pres
+\BEQ pres               \ to show the error "Large Cargo Bay Present", beep and
 \                       \ exit to the docking bay (i.e. show the Status Mode
 \                       \ screen)
 \
-\ STX CRGO              \ Otherwise we just scored ourselves a large cargo bay,
+\STX CRGO               \ Otherwise we just scored ourselves a large cargo bay,
 \                       \ so update our current cargo capacity in CRGO to 37
 
                         \ --- And replaced by: -------------------------------->
@@ -18231,15 +18231,15 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ JSR qv                \ Print a menu listing the four views, with a "View ?"
+\JSR qv                 \ Print a menu listing the four views, with a "View ?"
 \                       \ prompt, and ask for a view number, which is returned
 \                       \ in X (which now contains 0-3)
 \
-\ LDA #POW              \ Call refund with A set to the power of the new pulse
-\ JSR refund            \ laser to install the new laser and process a refund if
+\LDA #POW               \ Call refund with A set to the power of the new pulse
+\JSR refund             \ laser to install the new laser and process a refund if
 \                       \ we already have a laser fitted to this view
 \
-\ LDA #4                \ Set A to 4 as we just overwrote the original value,
+\LDA #4                 \ Set A to 4 as we just overwrote the original value,
 \                       \ and we still need it set correctly so we can continue
 \                       \ through the conditional statements for all the other
 \                       \ equipment
@@ -18262,12 +18262,12 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ JSR qv                \ Print a menu listing the four views, with a "View ?"
+\JSR qv                 \ Print a menu listing the four views, with a "View ?"
 \                       \ prompt, and ask for a view number, which is returned
 \                       \ in X (which now contains 0-3)
 \
-\ LDA #POW+128          \ Call refund with A set to the power of the new beam
-\ JSR refund            \ laser to install the new laser and process a refund if
+\LDA #POW+128           \ Call refund with A set to the power of the new beam
+\JSR refund             \ laser to install the new laser and process a refund if
 \                       \ we already have a laser fitted to this view
 
                         \ --- And replaced by: -------------------------------->
@@ -18360,18 +18360,18 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ INY                   \ Increment Y to recursive token 113 ("ENERGY BOMB")
+\INY                    \ Increment Y to recursive token 113 ("ENERGY BOMB")
 \
-\ CMP #8                \ If A is not 8 (i.e. the item we've just bought is not
-\ BNE et8               \ an energy bomb), skip to et8
+\CMP #8                 \ If A is not 8 (i.e. the item we've just bought is not
+\BNE et8                \ an energy bomb), skip to et8
 \
-\ LDX BOMB              \ If we already have an energy bomb fitted (i.e. BOMB
-\ BNE pres              \ is non-zero), jump to pres to show the error "Energy
+\LDX BOMB               \ If we already have an energy bomb fitted (i.e. BOMB
+\BNE pres               \ is non-zero), jump to pres to show the error "Energy
 \                       \ Bomb Present", beep and exit to the docking bay (i.e.
 \                       \ show the Status Mode screen)
 \
-\ LDX #&7F              \ Otherwise we just bought an energy bomb, so set BOMB
-\ STX BOMB              \ to &7F
+\LDX #&7F               \ Otherwise we just bought an energy bomb, so set BOMB
+\STX BOMB               \ to &7F
 
                         \ --- And replaced by: -------------------------------->
 
@@ -18404,7 +18404,7 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ INC ENGY              \ Otherwise we just picked up an energy unit, so set
+\INC ENGY               \ Otherwise we just picked up an energy unit, so set
 \                       \ ENGY to 1 (as ENGY was 0 before the INC instruction)
 
                         \ --- And replaced by: -------------------------------->
@@ -18443,8 +18443,8 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDX GHYP              \ If we already have a galactic hyperdrive fitted (i.e.
-\ BNE pres              \ GHYP is non-zero), jump to pres to show the error
+\LDX GHYP               \ If we already have a galactic hyperdrive fitted (i.e.
+\BNE pres               \ GHYP is non-zero), jump to pres to show the error
 \                       \ "Galactic Hyperspace Present", beep and exit to the
 \                       \ docking bay (i.e. show the Status Mode screen)
 
@@ -18475,27 +18475,27 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ JSR qv                \ Print a menu listing the four views, with a "View ?"
+\JSR qv                 \ Print a menu listing the four views, with a "View ?"
 \                       \ prompt, and ask for a view number, which is returned
 \                       \ in X (which now contains 0-3)
 \
-\ LDA #Armlas           \ Call refund with A set to the power of the new
-\ JSR refund            \ military laser to install the new laser and process a
+\LDA #Armlas            \ Call refund with A set to the power of the new
+\JSR refund             \ military laser to install the new laser and process a
 \                       \ refund if we already have a laser fitted to this view
 \
 \.et10
 \
-\ INY                   \ Increment Y to recursive token 118 ("MINING  LASER")
+\INY                    \ Increment Y to recursive token 118 ("MINING  LASER")
 \
-\ CMP #13               \ If A is not 13 (i.e. the item we've just bought is not
-\ BNE et11              \ a mining laser), skip to et11
+\CMP #13                \ If A is not 13 (i.e. the item we've just bought is not
+\BNE et11               \ a mining laser), skip to et11
 \
-\ JSR qv                \ Print a menu listing the four views, with a "View ?"
+\JSR qv                 \ Print a menu listing the four views, with a "View ?"
 \                       \ prompt, and ask for a view number, which is returned
 \                       \ in X (which now contains 0-3)
 \
-\ LDA #Mlas             \ Call refund with A set to the power of the new mining
-\ JSR refund            \ laser to install the new laser and process a refund if
+\LDA #Mlas              \ Call refund with A set to the power of the new mining
+\JSR refund             \ laser to install the new laser and process a refund if
 \                       \ we already have a laser fitted to this view
 
                         \ --- And replaced by: -------------------------------->
@@ -18649,8 +18649,8 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDA #197              \ Otherwise we don't have enough cash to buy this piece
-\ JSR prq               \ of equipment, so print recursive token 37 ("CASH")
+\LDA #197               \ Otherwise we don't have enough cash to buy this piece
+\JSR prq                \ of equipment, so print recursive token 37 ("CASH")
 \                       \ followed by a question mark
 
                         \ --- And replaced by: -------------------------------->
@@ -18712,8 +18712,8 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ ASL A                 \ Set Y = A * 2, so it can act as an index into the
-\ TAY                   \ PRXS table, which has two bytes per entry
+\ASL A                  \ Set Y = A * 2, so it can act as an index into the
+\TAY                    \ PRXS table, which has two bytes per entry
 
                         \ --- And replaced by: -------------------------------->
 
@@ -18795,7 +18795,7 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ TYA                   \ Transfer the counter value from Y to A
+\TYA                    \ Transfer the counter value from Y to A
 
                         \ --- And replaced by: -------------------------------->
 
@@ -18817,10 +18817,10 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDY YC                \ Update Y with the incremented counter in YC
+\LDY YC                 \ Update Y with the incremented counter in YC
 \
-\ CPY #20               \ If Y < 20 then loop back up to qv1 to print the next
-\ BCC qv1               \ view in the menu
+\CPY #20                \ If Y < 20 then loop back up to qv1 to print the next
+\BCC qv1                \ view in the menu
 
                         \ --- And replaced by: -------------------------------->
 
@@ -18855,8 +18855,8 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ CMP #4                \ If the number entered in A < 4, then it is a valid
-\ BCC qv3               \ view number, so jump down to qv3 as we are done
+\CMP #4                 \ If the number entered in A < 4, then it is a valid
+\BCC qv3                \ view number, so jump down to qv3 as we are done
 
                         \ --- And replaced by: -------------------------------->
 
@@ -18940,22 +18940,22 @@ ENDIF
 
 \IF _STH_DISC OR _SRAM_DISC
 \
-\ NOP                   \ In the first version of disc Elite, there was a nasty
-\ NOP                   \ bug where buying a laser that you already owned
-\ NOP                   \ affected your credit balance, so if you were clever,
-\ NOP                   \ you could keep doing this to get as many credits as
-\ NOP                   \ you liked. This was quickly fixed by replacing the
-\ NOP                   \ incorrect code with NOPs, which is what we have here
-\ NOP
-\ NOP
-\ NOP
+\NOP                    \ In the first version of disc Elite, there was a nasty
+\NOP                    \ bug where buying a laser that you already owned
+\NOP                    \ affected your credit balance, so if you were clever,
+\NOP                    \ you could keep doing this to get as many credits as
+\NOP                    \ you liked. This was quickly fixed by replacing the
+\NOP                    \ incorrect code with NOPs, which is what we have here
+\NOP
+\NOP
+\NOP
 \
 \.refund
 \
-\ STA T1                \ Store A in T1 so we can retrieve it later
+\STA T1                 \ Store A in T1 so we can retrieve it later
 \
-\ LDA LASER,X           \ If there is no laser in view X (i.e. the laser power
-\ BEQ ref3              \ is zero), jump to ref3 to skip the refund code
+\LDA LASER,X            \ If there is no laser in view X (i.e. the laser power
+\BEQ ref3               \ is zero), jump to ref3 to skip the refund code
 \
 \ELIF _IB_DISC
 \
@@ -18968,8 +18968,8 @@ ENDIF
 \
 \.ref2
 \
-\ LDY #187              \ Print out the error: "LASER PRESENT" and refund the
-\ JMP pres              \ value of the laser, returning from the subroutine
+\LDY #187               \ Print out the error: "LASER PRESENT" and refund the
+\JMP pres               \ value of the laser, returning from the subroutine
 \                       \ using a tail call. This is the cause of the refund
 \                       \ bug, as pres is called with the laser power in A
 \                       \ rather than the item number, so the prx routine
@@ -18981,29 +18981,29 @@ ENDIF
 \
 \.refund
 \
-\ STA T1                \ Store A in T1 so we can retrieve it later
+\STA T1                 \ Store A in T1 so we can retrieve it later
 \
-\ LDA LASER,X           \ If there is no laser in view X (i.e. the laser power
-\ BEQ ref3              \ is zero), jump to ref3 to skip the refund code
+\LDA LASER,X            \ If there is no laser in view X (i.e. the laser power
+\BEQ ref3               \ is zero), jump to ref3 to skip the refund code
 \
-\ CMP T1                \ If we are trying to replace a laser with one of the
-\ BEQ ref2              \ same type, jump up ref2 above
+\CMP T1                 \ If we are trying to replace a laser with one of the
+\BEQ ref2               \ same type, jump up ref2 above
 \
 \ENDIF
 \
-\ LDY #4                \ If the current laser has power #POW (pulse laser),
-\ CMP #POW              \ jump to ref1 with Y = 4 (the item number of a pulse
-\ BEQ ref1              \ laser in the table at PRXS)
+\LDY #4                 \ If the current laser has power #POW (pulse laser),
+\CMP #POW               \ jump to ref1 with Y = 4 (the item number of a pulse
+\BEQ ref1               \ laser in the table at PRXS)
 \
-\ LDY #5                \ If the current laser has power #POW+128 (beam laser),
-\ CMP #POW+128          \ jump to ref1 with Y = 5 (the item number of a beam
-\ BEQ ref1              \ laser in the table at PRXS)
+\LDY #5                 \ If the current laser has power #POW+128 (beam laser),
+\CMP #POW+128           \ jump to ref1 with Y = 5 (the item number of a beam
+\BEQ ref1               \ laser in the table at PRXS)
 \
-\ LDY #12               \ If the current laser has power #Armlas (military
-\ CMP #Armlas           \ laser), jump to ref1 with Y = 12 (the item number of a
-\ BEQ ref1              \ military laser in the table at PRXS)
+\LDY #12                \ If the current laser has power #Armlas (military
+\CMP #Armlas            \ laser), jump to ref1 with Y = 12 (the item number of a
+\BEQ ref1               \ military laser in the table at PRXS)
 \
-\ LDY #13               \ Otherwise this is a mining laser, so fall through into
+\LDY #13                \ Otherwise this is a mining laser, so fall through into
 \                       \ ref1 with Y = 13 (the item number of a mining laser in
 \                       \ the table at PRXS)
 \
@@ -19012,27 +19012,27 @@ ENDIF
 \                       \ We now want to refund the laser of type Y that we are
 \                       \ exchanging for the new laser
 \
-\ STX ZZ                \ Store the view number in ZZ so we can retrieve it
+\STX ZZ                 \ Store the view number in ZZ so we can retrieve it
 \                       \ later
 \
-\ TYA                   \ Copy the laser type to be refunded from Y to A
+\TYA                    \ Copy the laser type to be refunded from Y to A
 \
-\ JSR prx               \ Call prx to set (Y X) to the price of equipment item
+\JSR prx                \ Call prx to set (Y X) to the price of equipment item
 \                       \ number A
 \
-\ JSR MCASH             \ Call MCASH to add (Y X) to the cash pot
+\JSR MCASH              \ Call MCASH to add (Y X) to the cash pot
 \
-\ LDX ZZ                \ Retrieve the view number from ZZ
+\LDX ZZ                 \ Retrieve the view number from ZZ
 \
 \.ref3
 \
 \                       \ Finally, we install the new laser
 \
-\ LDA T1                \ Retrieve the new laser's power from T1 into A
+\LDA T1                 \ Retrieve the new laser's power from T1 into A
 \
-\ STA LASER,X           \ Set the laser view to the new laser's power
+\STA LASER,X            \ Set the laser view to the new laser's power
 \
-\ RTS                   \ Return from the subroutine
+\RTS                    \ Return from the subroutine
 
                         \ --- End of removed code ----------------------------->
 
@@ -19476,19 +19476,19 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ DEX                   \ If token > 6, skip the following three instructions
-\ BNE P%+7
+\DEX                    \ If token > 6, skip the following three instructions
+\BNE P%+7
 \
-\ LDA #%10000000        \ This token is control code 6 (switch to Sentence
-\ STA QQ17              \ Case), so set bit 7 of QQ17 to switch to Sentence Case
-\ RTS                   \ and return from the subroutine as we are done
+\LDA #%10000000         \ This token is control code 6 (switch to Sentence
+\STA QQ17               \ Case), so set bit 7 of QQ17 to switch to Sentence Case
+\RTS                    \ and return from the subroutine as we are done
 \
-\ DEX                   \ If token > 8, skip the following two instructions
-\ DEX
-\ BNE P%+5
+\DEX                    \ If token > 8, skip the following two instructions
+\DEX
+\BNE P%+5
 \
-\ STX QQ17              \ This token is control code 8 (switch to ALL CAPS), so
-\ RTS                   \ set QQ17 to 0 to switch to ALL CAPS and return from
+\STX QQ17               \ This token is control code 8 (switch to ALL CAPS), so
+\RTS                    \ set QQ17 to 0 to switch to ALL CAPS and return from
 \                       \ the subroutine as we are done
 
                         \ --- And replaced by: -------------------------------->
@@ -19951,12 +19951,12 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDA #LO(QQ18)         \ Set V(1 0) to point to the recursive token table at
-\ STA V                 \ location QQ18
-\ LDA #HI(QQ18)
-\ STA V+1
+\LDA #LO(QQ18)          \ Set V(1 0) to point to the recursive token table at
+\STA V                  \ location QQ18
+\LDA #HI(QQ18)
+\STA V+1
 \
-\ LDY #0                \ Set a counter Y to point to the character offset
+\LDY #0                 \ Set a counter Y to point to the character offset
 \                       \ as we scan through the table
 
                         \ --- And replaced by: -------------------------------->
@@ -20081,15 +20081,15 @@ ENDIF
 
 \.EX2
 \
-\ LDA INWK+31           \ Set bits 5 and 7 of the ship's byte #31 to denote that
-\ ORA #%10100000        \ the ship is exploding and has been killed
-\ STA INWK+31
+\LDA INWK+31            \ Set bits 5 and 7 of the ship's byte #31 to denote that
+\ORA #%10100000         \ the ship is exploding and has been killed
+\STA INWK+31
 \
-\ RTS                   \ Return from the subroutine
+\RTS                    \ Return from the subroutine
 \
 \.DOEXP
 \
-\ RTS                   \ Return from the subroutine
+\RTS                    \ Return from the subroutine
 
                         \ --- End of removed code ----------------------------->
 
@@ -20247,17 +20247,17 @@ ENDIF
 
 \.DET1
 \
-\ LDA #6                \ Set A to 6 so we can update 6845 register R6 below
+\LDA #6                 \ Set A to 6 so we can update 6845 register R6 below
 \
-\ SEI                   \ Disable interrupts so we can update the 6845
+\SEI                    \ Disable interrupts so we can update the 6845
 \
-\ STA VIA+&00           \ Set 6845 register R6 to the value in X. Register R6
-\ STX VIA+&01           \ is the "vertical displayed" register, which sets the
+\STA VIA+&00            \ Set 6845 register R6 to the value in X. Register R6
+\STX VIA+&01            \ is the "vertical displayed" register, which sets the
 \                       \ number of rows shown on the screen
 \
-\ CLI                   \ Re-enable interrupts
+\CLI                    \ Re-enable interrupts
 \
-\ RTS                   \ Return from the subroutine
+\RTS                    \ Return from the subroutine
 
                         \ --- End of removed code ----------------------------->
 
@@ -20283,16 +20283,16 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ DEX                   \ Increment the shield value so that it doesn't go past
+\DEX                    \ Increment the shield value so that it doesn't go past
 \                       \ a maximum of 255
 \
-\ RTS                   \ Return from the subroutine
+\RTS                    \ Return from the subroutine
 \
 \.SHD
 \
-\ INX                   \ Increment the shield value
+\INX                    \ Increment the shield value
 \
-\ BEQ SHD-2             \ If the shield value is 0 then this means it was 255
+\BEQ SHD-2              \ If the shield value is 0 then this means it was 255
 \                       \ before, which is the maximum value, so jump to SHD-2
 \                       \ to bring it back down to 258 and return
 \
@@ -20320,20 +20320,20 @@ ENDIF
 
 \.DENGY
 \
-\ DEC ENERGY            \ Decrement the energy banks in ENERGY
+\DEC ENERGY             \ Decrement the energy banks in ENERGY
 \
-\ PHP                   \ Save the flags on the stack
+\PHP                    \ Save the flags on the stack
 \
-\ BNE P%+5              \ If the energy levels are not yet zero, skip the
+\BNE P%+5               \ If the energy levels are not yet zero, skip the
 \                       \ following instruction
 \
-\ INC ENERGY            \ The minimum allowed energy level is 1, and we just
+\INC ENERGY             \ The minimum allowed energy level is 1, and we just
 \                       \ reached 0, so increment ENERGY back to 1
 \
-\ PLP                   \ Restore the flags from the stack, so we return with
+\PLP                    \ Restore the flags from the stack, so we return with
 \                       \ the Z flag from the DEC instruction above
 \
-\ RTS                   \ Return from the subroutine
+\RTS                    \ Return from the subroutine
 
                         \ --- End of removed code ----------------------------->
 
@@ -20394,20 +20394,20 @@ ENDIF
 
 \.SPS3
 \
-\ LDA K%+1,X            \ Copy x_hi into K3+X
-\ STA K3,X
+\LDA K%+1,X             \ Copy x_hi into K3+X
+\STA K3,X
 \
-\ LDA K%+2,X            \ Set A = Y = x_sign
-\ TAY
+\LDA K%+2,X             \ Set A = Y = x_sign
+\TAY
 \
-\ AND #%01111111        \ Set K3+1 = |x_sign|
-\ STA K3+1,X
+\AND #%01111111         \ Set K3+1 = |x_sign|
+\STA K3+1,X
 \
-\ TYA                   \ Set K3+2 = the sign of x_sign
-\ AND #%10000000
-\ STA K3+2,X
+\TYA                    \ Set K3+2 = the sign of x_sign
+\AND #%10000000
+\STA K3+2,X
 \
-\ RTS                   \ Return from the subroutine
+\RTS                    \ Return from the subroutine
 
                         \ --- End of removed code ----------------------------->
 
@@ -20735,14 +20735,14 @@ ENDIF
 
 \.NwS1
 \
-\ LDA INWK,X            \ Load the X-th byte of INWK into A and flip bit 7,
-\ EOR #%10000000        \ storing the result back in the X-th byte of INWK
-\ STA INWK,X
+\LDA INWK,X             \ Load the X-th byte of INWK into A and flip bit 7,
+\EOR #%10000000         \ storing the result back in the X-th byte of INWK
+\STA INWK,X
 \
-\ INX                   \ Add 2 to X
-\ INX
+\INX                    \ Add 2 to X
+\INX
 \
-\ RTS                   \ Return from the subroutine
+\RTS                    \ Return from the subroutine
 
                         \ --- End of removed code ----------------------------->
 
@@ -20765,7 +20765,7 @@ ENDIF
 
 \.ABORT
 \
-\ LDX #&FF              \ Set X to &FF, which is the value of MSTG when we have
+\LDX #&FF               \ Set X to &FF, which is the value of MSTG when we have
 \                       \ no target lock for our missile
 \
 \                       \ Fall through into ABORT2 to set the missile lock to
@@ -20807,15 +20807,15 @@ ENDIF
 
 \.ABORT2
 \
-\ STX MSTG              \ Store the target of our missile lock in MSTG
+\STX MSTG               \ Store the target of our missile lock in MSTG
 \
-\ LDX NOMSL             \ Call MSBAR to update the leftmost indicator in the
-\ JSR MSBAR             \ dashboard's missile bar, which returns with Y = 0
+\LDX NOMSL              \ Call MSBAR to update the leftmost indicator in the
+\JSR MSBAR              \ dashboard's missile bar, which returns with Y = 0
 \
-\ STY MSAR              \ Set MSAR = 0 to indicate that the leftmost missile
+\STY MSAR               \ Set MSAR = 0 to indicate that the leftmost missile
 \                       \ is no longer seeking a target lock
 \
-\ RTS                   \ Return from the subroutine
+\RTS                    \ Return from the subroutine
 
                         \ --- End of removed code ----------------------------->
 
@@ -20832,13 +20832,13 @@ ENDIF
 
 \.SPBLB
 \
-\ LDA #24*8             \ The space station bulb is in character block number 24
+\LDA #24*8              \ The space station bulb is in character block number 24
 \                       \ with each character taking 8 bytes, so this sets the
 \                       \ low byte of the screen address of the character block
 \                       \ we want to draw to
 \
-\ LDX #LO(SPBT)         \ Set (Y X) to point to the character definition in SPBT
-\ LDY #HI(SPBT)
+\LDX #LO(SPBT)          \ Set (Y X) to point to the character definition in SPBT
+\LDY #HI(SPBT)
 \
 \                       \ Fall through into BULB to draw the space station bulb
 
@@ -20875,16 +20875,16 @@ ENDIF
 
 \.BULB
 \
-\ STA SC                \ Store the low byte of the screen address in SC
+\STA SC                 \ Store the low byte of the screen address in SC
 \
-\ STX P+1               \ Set P(2 1) = (Y X)
-\ STY P+2
+\STX P+1                \ Set P(2 1) = (Y X)
+\STY P+2
 \
-\ LDA #&7D              \ Set A to the high byte of the screen address, which is
+\LDA #&7D               \ Set A to the high byte of the screen address, which is
 \                       \ &7D as the bulbs are both in the character row from
 \                       \ &7D00 to &7DFF
 \
-\ JMP RREN              \ Call RREN to print the character definition pointed to
+\JMP RREN               \ Call RREN to print the character definition pointed to
 \                       \ by P(2 1) at the screen address pointed to by (A SC),
 \                       \ returning from the subroutine using a tail call
 
@@ -20910,14 +20910,14 @@ ENDIF
 
 \.SPBT
 \
-\ EQUB %11100000        \ x x x .
-\ EQUB %11100000        \ x x x .
-\ EQUB %10000000        \ x . . .
-\ EQUB %11100000        \ x x x .
-\ EQUB %11100000        \ x x x .
-\ EQUB %00100000        \ . . x .
-\ EQUB %11100000        \ x x x .
-\ EQUB %11100000        \ x x x .
+\EQUB %11100000         \ x x x .
+\EQUB %11100000         \ x x x .
+\EQUB %10000000         \ x . . .
+\EQUB %11100000         \ x x x .
+\EQUB %11100000         \ x x x .
+\EQUB %00100000         \ . . x .
+\EQUB %11100000         \ x x x .
+\EQUB %11100000         \ x x x .
 
                         \ --- End of removed code ----------------------------->
 
@@ -20976,9 +20976,9 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDA #49               \ Set SC = 49 - T
-\ SBC T                 \        = 48 + 1 - (X * 8)
-\ STA SC
+\LDA #49                \ Set SC = 49 - T
+\SBC T                  \        = 48 + 1 - (X * 8)
+\STA SC
 
                         \ --- And replaced by: -------------------------------->
 
@@ -21621,26 +21621,26 @@ ENDIF
 
 \.CIRCLE
 \
-\ LDA #0                \ Set LSX2 = 0 to indicate that the ball line heap is
-\ STA LSX2              \ not empty, as we are about to fill it
+\LDA #0                 \ Set LSX2 = 0 to indicate that the ball line heap is
+\STA LSX2               \ not empty, as we are about to fill it
 \
-\ LDX K                 \ Set X = K = radius
+\LDX K                  \ Set X = K = radius
 \
-\ LDA #8                \ Set A = 8
+\LDA #8                 \ Set A = 8
 \
-\ CPX #8                \ If the radius < 8, skip to PL89
-\ BCC PL89
+\CPX #8                 \ If the radius < 8, skip to PL89
+\BCC PL89
 \
-\ LSR A                 \ Halve A so A = 4
+\LSR A                  \ Halve A so A = 4
 \
-\ CPX #60               \ If the radius < 60, skip to PL89
-\ BCC PL89
+\CPX #60                \ If the radius < 60, skip to PL89
+\BCC PL89
 \
-\ LSR A                 \ Halve A so A = 2
+\LSR A                  \ Halve A so A = 2
 \
 \.PL89
 \
-\ STA STP               \ Set STP = A. STP is the step size for the circle, so
+\STA STP                \ Set STP = A. STP is the step size for the circle, so
 \                       \ the above sets a smaller step size for bigger circles
 \
 \                       \ Fall through into CIRCLE2 to draw the circle with the
@@ -21802,13 +21802,13 @@ ENDIF
 
 \.WP1
 \
-\ LDA #1                \ Set LSP = 1 to reset the ball line heap pointer
-\ STA LSP
+\LDA #1                 \ Set LSP = 1 to reset the ball line heap pointer
+\STA LSP
 \
-\ LDA #&FF              \ Set LSX2 = &FF to indicate the ball line heap is empty
-\ STA LSX2
+\LDA #&FF               \ Set LSX2 = &FF to indicate the ball line heap is empty
+\STA LSX2
 \
-\ RTS                   \ Return from the subroutine
+\RTS                    \ Return from the subroutine
 
                         \ --- End of removed code ----------------------------->
 
@@ -21843,42 +21843,42 @@ ENDIF
 
 \.WPLS
 \
-\ LDA LSX               \ If LSX < 0, the sun line heap is empty, so return from
-\ BMI PL44              \ the subroutine (as PL44 contains a CLC and RTS)
+\LDA LSX                \ If LSX < 0, the sun line heap is empty, so return from
+\BMI PL44               \ the subroutine (as PL44 contains a CLC and RTS)
 \
-\ LDA SUNX              \ Set YY(1 0) = SUNX(1 0), the x-coordinate of the
-\ STA YY                \ vertical centre axis of the sun that's currently on
-\ LDA SUNX+1            \ screen
-\ STA YY+1
+\LDA SUNX               \ Set YY(1 0) = SUNX(1 0), the x-coordinate of the
+\STA YY                 \ vertical centre axis of the sun that's currently on
+\LDA SUNX+1             \ screen
+\STA YY+1
 \
-\ LDY #2*Y-1            \ #Y is the y-coordinate of the centre of the space
+\LDY #2*Y-1             \ #Y is the y-coordinate of the centre of the space
 \                       \ view, so this sets Y as a counter for the number of
 \                       \ lines in the space view (i.e. 191), which is also the
 \                       \ number of lines in the LSO block
 \
 \.WPL2
 \
-\ LDA LSO,Y             \ Fetch the Y-th point from the sun line heap, which
+\LDA LSO,Y              \ Fetch the Y-th point from the sun line heap, which
 \                       \ gives us the half-width of the sun's line on this line
 \                       \ of the screen
 \
-\ BEQ P%+5              \ If A = 0, skip the following call to HLOIN2 as there
+\BEQ P%+5               \ If A = 0, skip the following call to HLOIN2 as there
 \                       \ is no sun line on this line of the screen
 \
-\ JSR HLOIN2            \ Call HLOIN2 to draw a horizontal line on pixel line Y,
+\JSR HLOIN2             \ Call HLOIN2 to draw a horizontal line on pixel line Y,
 \                       \ with centre point YY(1 0) and half-width A, and remove
 \                       \ the line from the sun line heap once done
 \
-\ DEY                   \ Decrement the loop counter
+\DEY                    \ Decrement the loop counter
 \
-\ BNE WPL2              \ Loop back for the next line in the line heap until
+\BNE WPL2               \ Loop back for the next line in the line heap until
 \                       \ we have gone through the entire heap
 \
-\ DEY                   \ This sets Y to &FF, as we end the loop with Y = 0
+\DEY                    \ This sets Y to &FF, as we end the loop with Y = 0
 \
-\ STY LSX               \ Set LSX to &FF to indicate the sun line heap is empty
+\STY LSX                \ Set LSX to &FF to indicate the sun line heap is empty
 \
-\ RTS                   \ Return from the subroutine
+\RTS                    \ Return from the subroutine
 
                         \ --- End of removed code ----------------------------->
 
@@ -22657,7 +22657,7 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDX #4                \ Set up a loop counter in X to count through all four
+\LDX #4                 \ Set up a loop counter in X to count through all four
 \                       \ missile indicators
 
                         \ --- And replaced by: -------------------------------->
@@ -22672,28 +22672,28 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ CPX NOMSL             \ If the counter is equal to the number of missiles,
-\ BEQ SAL8              \ jump down to SAL8 to draw the remaining missiles, as
+\CPX NOMSL              \ If the counter is equal to the number of missiles,
+\BEQ SAL8               \ jump down to SAL8 to draw the remaining missiles, as
 \                       \ the rest of them are present and should be drawn in
 \                       \ green/cyan
 \
-\ LDY #0                \ Draw the missile indicator at position X in black
-\ JSR MSBAR
+\LDY #0                 \ Draw the missile indicator at position X in black
+\JSR MSBAR
 \
-\ DEX                   \ Decrement the counter to point to the next missile
+\DEX                    \ Decrement the counter to point to the next missile
 \
-\ BNE ss                \ Loop back to ss if we still have missiles to draw
+\BNE ss                 \ Loop back to ss if we still have missiles to draw
 \
-\ RTS                   \ Return from the subroutine
+\RTS                    \ Return from the subroutine
 \
 \.SAL8
 \
-\ LDY #&EE              \ Draw the missile indicator at position X in green/cyan
-\ JSR MSBAR
+\LDY #&EE               \ Draw the missile indicator at position X in green/cyan
+\JSR MSBAR
 \
-\ DEX                   \ Decrement the counter to point to the next missile
+\DEX                    \ Decrement the counter to point to the next missile
 \
-\ BNE SAL8              \ Loop back to SAL8 if we still have missiles to draw
+\BNE SAL8               \ Loop back to SAL8 if we still have missiles to draw
 
                         \ --- And replaced by: -------------------------------->
 
@@ -22772,34 +22772,34 @@ ENDIF
 
 \.Ze
 \
-\ JSR ZINF              \ Call ZINF to reset the INWK ship workspace
+\JSR ZINF               \ Call ZINF to reset the INWK ship workspace
 \
-\ JSR DORND             \ Set A and X to random numbers
+\JSR DORND              \ Set A and X to random numbers
 \
-\ STA T1                \ Store A in T1
+\STA T1                 \ Store A in T1
 \
-\ AND #%10000000        \ Extract the sign of A and store in x_sign
-\ STA INWK+2
+\AND #%10000000         \ Extract the sign of A and store in x_sign
+\STA INWK+2
 \
-\ TXA                   \ Extract the sign of X and store in y_sign
-\ AND #%10000000
-\ STA INWK+5
+\TXA                    \ Extract the sign of X and store in y_sign
+\AND #%10000000
+\STA INWK+5
 \
-\ LDA #25               \ Set x_hi = y_hi = z_hi = 25, a fair distance away
-\ STA INWK+1
-\ STA INWK+4
-\ STA INWK+7
+\LDA #25                \ Set x_hi = y_hi = z_hi = 25, a fair distance away
+\STA INWK+1
+\STA INWK+4
+\STA INWK+7
 \
-\ TXA                   \ Set the C flag if X >= 245 (4% chance)
-\ CMP #245
+\TXA                    \ Set the C flag if X >= 245 (4% chance)
+\CMP #245
 \
-\ ROL A                 \ Set bit 0 of A to the C flag (i.e. there's a 4%
+\ROL A                  \ Set bit 0 of A to the C flag (i.e. there's a 4%
 \                       \ chance of this ship having E.C.M.)
 \
-\ ORA #%11000000        \ Set bits 6 and 7 of A, so the ship is hostile (bit 6
+\ORA #%11000000         \ Set bits 6 and 7 of A, so the ship is hostile (bit 6
 \                       \ and has AI (bit 7)
 \
-\ STA INWK+32           \ Store A in the AI flag of this ship
+\STA INWK+32            \ Store A in the AI flag of this ship
 \
 \                       \ Fall through into DORND2 to set A, X and the C flag
 \                       \ randomly
@@ -22833,7 +22833,7 @@ ENDIF
 
 \.DORND2
 \
-\ CLC                   \ Clear the C flag so the value of the C flag on entry
+\CLC                    \ Clear the C flag so the value of the C flag on entry
 \                       \ doesn't affect the outcome
 
                         \ --- End of removed code ----------------------------->
@@ -22908,7 +22908,7 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ BEQ P%+5              \ If the counter has reached zero, which it will do
+\BEQ P%+5               \ If the counter has reached zero, which it will do
 \                       \ every 256 main loops, skip the next JMP instruction
 \                       \ (or to put it another way, if the counter hasn't
 \                       \ reached zero, jump down to MLOOP, skipping all the
@@ -22916,7 +22916,7 @@ ENDIF
 \
 \.ytq
 \
-\ JMP MLOOP             \ Jump down to MLOOP to do some end-of-loop tidying and
+\JMP MLOOP              \ Jump down to MLOOP to do some end-of-loop tidying and
 \                       \ restart the main loop
 \
 \                       \ We only get here once every 256 iterations of the
@@ -22932,28 +22932,28 @@ ENDIF
 \                       \ time it will either be an asteroid (98.5% chance) or,
 \                       \ very rarely, a cargo canister (1.5% chance)
 \
-\ LDA MJ                \ If we are in witchspace following a mis-jump, skip the
-\ BNE ytq               \ following by jumping down to MLOOP (via ytq above)
+\LDA MJ                 \ If we are in witchspace following a mis-jump, skip the
+\BNE ytq                \ following by jumping down to MLOOP (via ytq above)
 \
-\ JSR DORND             \ Set A and X to random numbers
+\JSR DORND              \ Set A and X to random numbers
 \
-\ CMP #35               \ If A >= 35 (87% chance), jump down to MLOOP to skip
-\ BCS MLOOP             \ the following
+\CMP #35                \ If A >= 35 (87% chance), jump down to MLOOP to skip
+\BCS MLOOP              \ the following
 \
-\ LDA MANY+AST          \ If we already have 3 or more asteroids in the local
-\ CMP #3                \ bubble, jump down to MLOOP to skip the following
-\ BCS MLOOP
+\LDA MANY+AST           \ If we already have 3 or more asteroids in the local
+\CMP #3                 \ bubble, jump down to MLOOP to skip the following
+\BCS MLOOP
 \
-\ JSR ZINF              \ Call ZINF to reset the INWK ship workspace
+\JSR ZINF               \ Call ZINF to reset the INWK ship workspace
 \
-\ LDA #38               \ Set z_hi = 38 (far away)
-\ STA INWK+7
+\LDA #38                \ Set z_hi = 38 (far away)
+\STA INWK+7
 \
-\ JSR DORND             \ Set A, X and C flag to random numbers
+\JSR DORND              \ Set A, X and C flag to random numbers
 \
-\ STA INWK              \ Set x_lo = random
+\STA INWK               \ Set x_lo = random
 \
-\ STX INWK+3            \ Set y_lo = random
+\STX INWK+3             \ Set y_lo = random
 \                       \
 \                       \ Note that because we use the value of X returned by
 \                       \ DORND, and X contains the value of A returned by the
@@ -22961,15 +22961,15 @@ ENDIF
 \                       \ to a totally random location. See the deep dive on
 \                       \ "Fixing ship positions" for details
 \
-\ AND #%10000000        \ Set x_sign = bit 7 of x_lo
-\ STA INWK+2
+\AND #%10000000         \ Set x_sign = bit 7 of x_lo
+\STA INWK+2
 \
-\ TXA                   \ Set y_sign = bit 7 of y_lo
-\ AND #%10000000
-\ STA INWK+5
+\TXA                    \ Set y_sign = bit 7 of y_lo
+\AND #%10000000
+\STA INWK+5
 \
-\ ROL INWK+1            \ Set bit 1 of x_hi to the C flag, which is random, so
-\ ROL INWK+1            \ this randomly moves us off-centre by 512 (as if x_hi
+\ROL INWK+1             \ Set bit 1 of x_hi to the C flag, which is random, so
+\ROL INWK+1             \ this randomly moves us off-centre by 512 (as if x_hi
 \                       \ is %00000010, then (x_hi x_lo) is 512 + x_lo)
 
                         \ --- End of removed code ----------------------------->
@@ -23016,16 +23016,16 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDX GNTMP             \ If the laser temperature in GNTMP is non-zero,
-\ BEQ EE20              \ decrement it (i.e. cool it down a bit)
-\ DEC GNTMP
+\LDX GNTMP              \ If the laser temperature in GNTMP is non-zero,
+\BEQ EE20               \ decrement it (i.e. cool it down a bit)
+\DEC GNTMP
 \
 \.EE20
 \
-\ JSR DIALS             \ Call DIALS to update the dashboard
+\JSR DIALS              \ Call DIALS to update the dashboard
 \
-\ LDA QQ11              \ If this is a space view, skip the following two
-\ BEQ P%+7              \ instructions (i.e. jump to JSR TT17 below)
+\LDA QQ11               \ If this is a space view, skip the following two
+\BEQ P%+7               \ instructions (i.e. jump to JSR TT17 below)
 
                         \ --- End of removed code ----------------------------->
 
@@ -23153,9 +23153,9 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ CMP #f0               \ If red key f0 was pressed, jump to TT110 to launch our
-\ BNE fvw               \ ship (if docked), returning from the subroutine using
-\ JMP TT110             \ a tail call
+\CMP #f0                \ If red key f0 was pressed, jump to TT110 to launch our
+\BNE fvw                \ ship (if docked), returning from the subroutine using
+\JMP TT110              \ a tail call
 
                         \ --- And replaced by: -------------------------------->
 
@@ -23256,8 +23256,8 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ CMP #&36              \ If "O" was pressed, do the following three jumps,
-\ BNE ee2               \ otherwise skip to ee2 to continue
+\CMP #&36               \ If "O" was pressed, do the following three jumps,
+\BNE ee2                \ otherwise skip to ee2 to continue
 
                         \ --- And replaced by: -------------------------------->
 
@@ -23333,8 +23333,8 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDA #%10000000        \ Set bit 7 of QQ17 to switch to Sentence Case, with the
-\ STA QQ17              \ next letter in capitals
+\LDA #%10000000         \ Set bit 7 of QQ17 to switch to Sentence Case, with the
+\STA QQ17               \ next letter in capitals
 
                         \ --- And replaced by: -------------------------------->
 
@@ -23383,17 +23383,17 @@ ENDIF
 
 \.BAD
 \
-\ LDA QQ20+3            \ Set A to the number of tonnes of slaves in the hold
+\LDA QQ20+3             \ Set A to the number of tonnes of slaves in the hold
 \
-\ CLC                   \ Clear the C flag so we can do addition without the
+\CLC                    \ Clear the C flag so we can do addition without the
 \                       \ C flag affecting the result
 \
-\ ADC QQ20+6            \ Add the number of tonnes of narcotics in the hold
+\ADC QQ20+6             \ Add the number of tonnes of narcotics in the hold
 \
-\ ASL A                 \ Double the result and add the number of tonnes of
-\ ADC QQ20+10           \ firearms in the hold
+\ASL A                  \ Double the result and add the number of tonnes of
+\ADC QQ20+10            \ firearms in the hold
 \
-\ RTS                   \ Return from the subroutine
+\RTS                    \ Return from the subroutine
 
                         \ --- End of removed code ----------------------------->
 
@@ -23697,36 +23697,36 @@ ENDIF
 \                       \ to Acornsoft via the competition code that there has
 \                       \ been some hacking going on with this competition entry
 \
-\ EOR #&A9              \ X = checksum EOR &A9
-\ TAX
+\EOR #&A9               \ X = checksum EOR &A9
+\TAX
 \
-\ LDA COK               \ Set A to the competition flags in COK
+\LDA COK                \ Set A to the competition flags in COK
 \
-\ CPX CHK2              \ If X = CHK2, then skip the next instruction
-\ BEQ tZ
+\CPX CHK2               \ If X = CHK2, then skip the next instruction
+\BEQ tZ
 \
-\ ORA #%10000000        \ Set bit 7 of A to indicate this commander file has
+\ORA #%10000000         \ Set bit 7 of A to indicate this commander file has
 \                       \ been tampered with
 \
 \.tZ
 \
 \IF _STH_DISC OR _SRAM_DISC
 \
-\ ORA #%00100000        \ Set bit 5 of A to denote that this is the disc version
+\ORA #%00100000         \ Set bit 5 of A to denote that this is the disc version
 \                       \ with the refund bug fixed (in versions before the bug
 \                       \ was fixed, bit 2 is set)
 \
 \ELIF _IB_DISC
 \
-\ ORA #%00000100        \ Set bit 2 of A to denote that this is the disc version
+\ORA #%00000100         \ Set bit 2 of A to denote that this is the disc version
 \                       \ but before the refund bug was fixed (in versions after
 \                       \ the bug was fixed, bit 5 is set)
 \
 \ENDIF
 \
-\ STA COK               \ Store the updated competition flags in COK
+\STA COK                \ Store the updated competition flags in COK
 \
-\ RTS                   \ Return from the subroutine
+\RTS                    \ Return from the subroutine
 
                         \ --- And replaced by: -------------------------------->
 
@@ -23788,16 +23788,16 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDA &9F               \ As part of the copy protection, location &9F is set to
-\ CMP #219              \ 219 in the OSBmod routine in elite-loader3.asm. This
-\ BEQ tiwe              \ jumps to tiwe if the value is unchanged, otherwise it
+\LDA &9F                \ As part of the copy protection, location &9F is set to
+\CMP #219               \ 219 in the OSBmod routine in elite-loader3.asm. This
+\BEQ tiwe               \ jumps to tiwe if the value is unchanged, otherwise it
 \                       \ crashes the game with the following (as presumably
 \                       \ the game code has been tampered with)
 \
-\ LDA #&10              \ Modify the STA DELTA instruction in RES2 to &10 &FE,
-\ STA modify+2          \ which is a BPL P%-2 instruction, to create an infinite
-\ LDA #&FE              \ loop and hang the game
-\ STA modify+3
+\LDA #&10               \ Modify the STA DELTA instruction in RES2 to &10 &FE,
+\STA modify+2           \ which is a BPL P%-2 instruction, to create an infinite
+\LDA #&FE               \ loop and hang the game
+\STA modify+3
 \
 \.tiwe
 
@@ -23819,8 +23819,8 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ INX                   \ Set QQ17 to 128 (so bit 7 is set) to switch to
-\ STX QQ17              \ Sentence Case, with the next letter printing in upper
+\INX                    \ Set QQ17 to 128 (so bit 7 is set) to switch to
+\STX QQ17               \ Sentence Case, with the next letter printing in upper
 \                       \ case
 
                         \ --- And replaced by: -------------------------------->
@@ -24012,7 +24012,7 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ CLC                   \ Clear the C flag so we can do addition without the
+\CLC                    \ Clear the C flag so we can do addition without the
 \                       \ C flag affecting the result
 
                         \ --- And replaced by: -------------------------------->
@@ -24395,8 +24395,8 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ EQUS ".0"             \ The "0" part of the string is overwritten with the
-\ EQUB 13               \ actual drive number by the CATS routine
+\EQUS ".0"              \ The "0" part of the string is overwritten with the
+\EQUB 13                \ actual drive number by the CATS routine
 
                         \ --- And replaced by: -------------------------------->
 
@@ -24418,8 +24418,8 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ EQUS "DE.:0.E.1234567"\ Short for "*DELETE :0.E.1234567"
-\ EQUB 13
+\EQUS "DE.:0.E.1234567" \ Short for "*DELETE :0.E.1234567"
+\EQUB 13
 
                         \ --- And replaced by: -------------------------------->
 
@@ -24463,7 +24463,7 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ STA CTLI+1            \ Store the drive number in the second byte of the
+\STA CTLI+1             \ Store the drive number in the second byte of the
 \                       \ command string at CTLI, so it overwrites the "0" in
 \                       \ ".0" with the drive number to catalogue
 
@@ -24486,8 +24486,8 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDA #1                \ Set the CATF flag to 1, so that the TT26 routine will
-\ STA CATF              \ print out the disc catalogue correctly
+\LDA #1                 \ Set the CATF flag to 1, so that the TT26 routine will
+\STA CATF               \ print out the disc catalogue correctly
 
                         \ --- And replaced by: -------------------------------->
 
@@ -24566,8 +24566,8 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDA CTLI+1            \ The call to CATS above put the drive number into
-\ STA DELI+4            \ CTLI+1, so copy the drive number into DELI+4 so that
+\LDA CTLI+1             \ The call to CATS above put the drive number into
+\STA DELI+4             \ CTLI+1, so copy the drive number into DELI+4 so that
 \                       \ the drive number in the "DE.:0.E.1234567" string
 \                       \ gets updated (i.e. the number after the colon)
 
@@ -24601,8 +24601,8 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDA INWK+4,X          \ Copy the X-th byte of INWK+4 to the X-th byte of
-\ STA DELI+5,X          \ DELI+5
+\LDA INWK+4,X           \ Copy the X-th byte of INWK+4 to the X-th byte of
+\STA DELI+5,X           \ DELI+5
 
                         \ --- And replaced by: -------------------------------->
 
@@ -24639,7 +24639,7 @@ ENDIF
 
 \.stack
 \
-\ EQUB 0
+\EQUB 0
 
                         \ --- End of removed code ----------------------------->
 
@@ -24676,8 +24676,8 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDX stack             \ Set the stack pointer to the value that we stored in
-\ TXS                   \ the stack variable, so that's back to the value it had
+\LDX stack              \ Set the stack pointer to the value that we stored in
+\TXS                    \ the stack variable, so that's back to the value it had
 \                       \ before we set BRKV to point to MEBRK in the SVE
 \                       \ routine
 
@@ -24789,8 +24789,8 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ TSX                   \ Transfer the stack pointer to X and store it in stack,
-\ STX stack             \ so we can restore it in the MEBRK routine
+\TSX                    \ Transfer the stack pointer to X and store it in stack,
+\STX stack              \ so we can restore it in the MEBRK routine
 
                         \ --- And replaced by: -------------------------------->
 
@@ -24833,26 +24833,26 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ JSR GTNMEW            \ If we get here then option 1 (load) was chosen, so
+\JSR GTNMEW             \ If we get here then option 1 (load) was chosen, so
 \                       \ call GTNMEW to fetch the name of the commander file
 \                       \ to load (including drive number and directory) into
 \                       \ INWK
 \
-\ JSR LOD               \ Call LOD to load the commander file
+\JSR LOD                \ Call LOD to load the commander file
 \
-\ JSR TRNME             \ Transfer the commander filename from INWK to NA%
+\JSR TRNME              \ Transfer the commander filename from INWK to NA%
 \
-\ SEC                   \ Set the C flag to indicate we loaded a new commander
-\ BCS SVEX+1            \ file, and return from the subroutine (as SVEX+1
+\SEC                    \ Set the C flag to indicate we loaded a new commander
+\BCS SVEX+1             \ file, and return from the subroutine (as SVEX+1
 \                       \ contains an RTS)
 \
 \.SV1
 \
-\ BNE CAT               \ We get here following the CMP #'2' above, so this
+\BNE CAT                \ We get here following the CMP #'2' above, so this
 \                       \ jumps to CAT if option 2 was not chosen - in other
 \                       \ words, if option 3 (catalogue) was chosen
 \
-\ JSR GTNMEW            \ If we get here then option 2 (save) was chosen, so
+\JSR GTNMEW             \ If we get here then option 2 (save) was chosen, so
 \                       \ call GTNMEW to fetch the name of the commander file
 \                       \ to save (including drive number and directory) into
 \                       \ INWK
@@ -24900,10 +24900,10 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LSR SVC               \ Halve the save count value in SVC
+\LSR SVC                \ Halve the save count value in SVC
 \
-\ LDA #3                \ Print extended token 3 ("COMPETITION NUMBER:")
-\ JSR DETOK
+\LDA #3                 \ Print extended token 3 ("COMPETITION NUMBER:")
+\JSR DETOK
 
                         \ --- End of removed code ----------------------------->
 
@@ -24935,34 +24935,34 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ PHA                   \ Store the checksum on the stack
+\PHA                    \ Store the checksum on the stack
 \
-\ ORA #%10000000        \ Set K = checksum with bit 7 set
-\ STA K
+\ORA #%10000000         \ Set K = checksum with bit 7 set
+\STA K
 \
-\ EOR COK               \ Set K+2 = K EOR COK (the competition flags)
-\ STA K+2
+\EOR COK                \ Set K+2 = K EOR COK (the competition flags)
+\STA K+2
 \
-\ EOR CASH+2            \ Set K+1 = K+2 EOR CASH+2 (the third cash byte)
-\ STA K+1
+\EOR CASH+2             \ Set K+1 = K+2 EOR CASH+2 (the third cash byte)
+\STA K+1
 \
-\ EOR #&5A              \ Set K+3 = K+1 EOR &5A EOR TALLY+1 (the high byte of
-\ EOR TALLY+1           \ the kill tally)
-\ STA K+3
+\EOR #&5A               \ Set K+3 = K+1 EOR &5A EOR TALLY+1 (the high byte of
+\EOR TALLY+1            \ the kill tally)
+\STA K+3
 \
-\ CLC                   \ Clear the C flag so the call to BPRNT does not include
+\CLC                    \ Clear the C flag so the call to BPRNT does not include
 \                       \ a decimal point
 \
-\ JSR BPRNT             \ Print the competition number stored in K to K+3. The
+\JSR BPRNT              \ Print the competition number stored in K to K+3. The
 \                       \ value of U might affect how this is printed, and as
 \                       \ it's a temporary variable in zero page that isn't
 \                       \ reset by ZERO, it might have any value, but as the
 \                       \ competition code is a 10-digit number, this just means
 \                       \ it may or may not have an extra space of padding
 \
-\ JSR TT67              \ Print a newline
+\JSR TT67               \ Print a newline
 \
-\ PLA                   \ Restore the checksum from the stack
+\PLA                    \ Restore the checksum from the stack
 
                         \ --- End of removed code ----------------------------->
 
@@ -25249,11 +25249,11 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ BRK                   \ The error that is printed if we try to load an
-\ EQUB &49              \ invalid commander file with bit 7 of byte #0 set
-\ EQUS "Illegal "       \ (&49 is the error number)
-\ EQUS "ELITE II file"
-\ BRK
+\BRK                    \ The error that is printed if we try to load an
+\EQUB &49               \ invalid commander file with bit 7 of byte #0 set
+\EQUS "Illegal "        \ (&49 is the error number)
+\EQUS "ELITE II file"
+\BRK
 
                         \ --- And replaced by: -------------------------------->
 
@@ -25316,9 +25316,9 @@ ENDIF
 
 \.GTNMES
 \
-\ JSR GTNME             \ Fetch the name of a commander file to save or load
+\JSR GTNME              \ Fetch the name of a commander file to save or load
 \
-\ RTS                   \ Return from the subroutine
+\RTS                    \ Return from the subroutine
 
                         \ --- End of removed code ----------------------------->
 
@@ -25350,14 +25350,14 @@ ENDIF
 
 \.SPS1
 \
-\ LDX #0                \ Copy the two high bytes of the planet's x-coordinate
-\ JSR SPS3              \ into K3(2 1 0), separating out the sign bit into K3+2
+\LDX #0                 \ Copy the two high bytes of the planet's x-coordinate
+\JSR SPS3               \ into K3(2 1 0), separating out the sign bit into K3+2
 \
-\ LDX #3                \ Copy the two high bytes of the planet's y-coordinate
-\ JSR SPS3              \ into K3(5 4 3), separating out the sign bit into K3+5
+\LDX #3                 \ Copy the two high bytes of the planet's y-coordinate
+\JSR SPS3               \ into K3(5 4 3), separating out the sign bit into K3+5
 \
-\ LDX #6                \ Copy the two high bytes of the planet's z-coordinate
-\ JSR SPS3              \ into K3(8 7 6), separating out the sign bit into K3+8
+\LDX #6                 \ Copy the two high bytes of the planet's z-coordinate
+\JSR SPS3               \ into K3(8 7 6), separating out the sign bit into K3+8
 \
 \                       \ Fall through into TAS2 to build XX15 from K3
 
@@ -25423,59 +25423,59 @@ ENDIF
 
 \.TAS2
 \
-\ LDA K3                \ OR the three low bytes and 1 to get a byte that has
-\ ORA K3+3              \ a 1 wherever any of the three low bytes has a 1
-\ ORA K3+6              \ (as well as always having bit 0 set), and store in
-\ ORA #1                \ K3+9
-\ STA K3+9
+\LDA K3                 \ OR the three low bytes and 1 to get a byte that has
+\ORA K3+3               \ a 1 wherever any of the three low bytes has a 1
+\ORA K3+6               \ (as well as always having bit 0 set), and store in
+\ORA #1                 \ K3+9
+\STA K3+9
 \
-\ LDA K3+1              \ OR the three high bytes to get a byte in A that has a
-\ ORA K3+4              \ 1 wherever any of the three high bytes has a 1
-\ ORA K3+7
+\LDA K3+1               \ OR the three high bytes to get a byte in A that has a
+\ORA K3+4               \ 1 wherever any of the three high bytes has a 1
+\ORA K3+7
 \
 \                       \ (A K3+9) now has a 1 wherever any of the 16-bit
 \                       \ values in K3 has a 1
 \.TAL2
 \
-\ ASL K3+9              \ Shift (A K3+9) to the left, so bit 7 of the high byte
-\ ROL A                 \ goes into the C flag
+\ASL K3+9               \ Shift (A K3+9) to the left, so bit 7 of the high byte
+\ROL A                  \ goes into the C flag
 \
-\ BCS TA2               \ If the left shift pushed a 1 out of the end, then we
+\BCS TA2                \ If the left shift pushed a 1 out of the end, then we
 \                       \ know that at least one of the coordinates has a 1 in
 \                       \ this position, so jump to TA2 as we can't shift the
 \                       \ values in K3 any further to the left
 \
-\ ASL K3                \ Shift K3(1 0), the x-coordinate, to the left
-\ ROL K3+1
+\ASL K3                 \ Shift K3(1 0), the x-coordinate, to the left
+\ROL K3+1
 \
-\ ASL K3+3              \ Shift K3(4 3), the y-coordinate, to the left
-\ ROL K3+4
+\ASL K3+3               \ Shift K3(4 3), the y-coordinate, to the left
+\ROL K3+4
 \
-\ ASL K3+6              \ Shift K3(6 7), the z-coordinate, to the left
-\ ROL K3+7
+\ASL K3+6               \ Shift K3(6 7), the z-coordinate, to the left
+\ROL K3+7
 \
-\ BCC TAL2              \ Jump back to TAL2 to do another shift left (this BCC
+\BCC TAL2               \ Jump back to TAL2 to do another shift left (this BCC
 \                       \ is effectively a JMP as we know bit 7 of K3+7 is not a
 \                       \ 1, as otherwise bit 7 of A would have been a 1 and we
 \                       \ would have taken the BCS above)
 \
 \.TA2
 \
-\ LDA K3+1              \ Fetch the high byte of the x-coordinate from our left-
-\ LSR A                 \ shifted K3, shift it right to clear bit 7, stick the
-\ ORA K3+2              \ sign bit in there from the x_sign part of K3, and
-\ STA XX15              \ store the resulting signed 8-bit x-coordinate in XX15
+\LDA K3+1               \ Fetch the high byte of the x-coordinate from our left-
+\LSR A                  \ shifted K3, shift it right to clear bit 7, stick the
+\ORA K3+2               \ sign bit in there from the x_sign part of K3, and
+\STA XX15               \ store the resulting signed 8-bit x-coordinate in XX15
 \
-\ LDA K3+4              \ Fetch the high byte of the y-coordinate from our left-
-\ LSR A                 \ shifted K3, shift it right to clear bit 7, stick the
-\ ORA K3+5              \ sign bit in there from the y_sign part of K3, and
-\ STA XX15+1            \ store the resulting signed 8-bit y-coordinate in
+\LDA K3+4               \ Fetch the high byte of the y-coordinate from our left-
+\LSR A                  \ shifted K3, shift it right to clear bit 7, stick the
+\ORA K3+5               \ sign bit in there from the y_sign part of K3, and
+\STA XX15+1             \ store the resulting signed 8-bit y-coordinate in
 \                       \ XX15+1
 \
-\ LDA K3+7              \ Fetch the high byte of the z-coordinate from our left-
-\ LSR A                 \ shifted K3, shift it right to clear bit 7, stick the
-\ ORA K3+8              \ sign bit in there from the z_sign part of K3, and
-\ STA XX15+2            \ store the resulting signed 8-bit  z-coordinate in
+\LDA K3+7               \ Fetch the high byte of the z-coordinate from our left-
+\LSR A                  \ shifted K3, shift it right to clear bit 7, stick the
+\ORA K3+8               \ sign bit in there from the z_sign part of K3, and
+\STA XX15+2             \ store the resulting signed 8-bit  z-coordinate in
 \                       \ XX15+2
 \
 \                       \ Now we have a signed 8-bit version of the vector K3 in
@@ -25703,11 +25703,11 @@ ENDIF
 
 \.EXNO3
 \
-\ LDA #16               \ Call the NOISE routine with A = 16 to make the first
-\ JSR NOISE             \ death sound
+\LDA #16                \ Call the NOISE routine with A = 16 to make the first
+\JSR NOISE              \ death sound
 \
-\ LDA #24               \ Call the NOISE routine with A = 24 to make the second
-\ BNE NOISE             \ death sound and return from the subroutine using a
+\LDA #24                \ Call the NOISE routine with A = 24 to make the second
+\BNE NOISE              \ death sound and return from the subroutine using a
 \                       \ tail call (this BNE is effectively a JMP as A will
 \                       \ never be zero)
 
@@ -25726,8 +25726,8 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDA #32               \ Call the NOISE routine with A = 32 to make a short,
-\ BNE NOISE             \ high beep, returning from the subroutine using a tail
+\LDA #32                \ Call the NOISE routine with A = 32 to make a short,
+\BNE NOISE              \ high beep, returning from the subroutine using a tail
 \                       \ call (this BNE is effectively a JMP as A will never be
 \                       \ zero)
 
@@ -25758,18 +25758,18 @@ ENDIF
 
 \.EXNO2
 \
-\ INC TALLY             \ Increment the low byte of the kill count in TALLY
+\INC TALLY              \ Increment the low byte of the kill count in TALLY
 \
-\ BNE EXNO-2            \ If there is no carry, jump to the LDX #7 below (at
+\BNE EXNO-2             \ If there is no carry, jump to the LDX #7 below (at
 \                       \ EXNO-2)
 \
-\ INC TALLY+1           \ Increment the high byte of the kill count in TALLY
+\INC TALLY+1            \ Increment the high byte of the kill count in TALLY
 \
-\ LDA #101              \ The kill total is a multiple of 256, so it's time
-\ JSR MESS              \ for a pat on the back, so print recursive token 101
+\LDA #101               \ The kill total is a multiple of 256, so it's time
+\JSR MESS               \ for a pat on the back, so print recursive token 101
 \                       \ ("RIGHT ON COMMANDER!") as an in-flight message
 \
-\ LDX #7                \ Set X = 7 and fall through into EXNO to make the
+\LDX #7                 \ Set X = 7 and fall through into EXNO to make the
 \                       \ sound of a ship exploding
 
                         \ --- End of removed code ----------------------------->
@@ -25817,27 +25817,27 @@ ENDIF
 
 \.EXNO
 \
-\ STX T                 \ Store the distance in T
+\STX T                  \ Store the distance in T
 \
-\ LDA #24               \ Set A = 24 to denote the sound of us making a hit or
-\ JSR NOS1              \ kill (part 1 of the explosion), and call NOS1 to set
+\LDA #24                \ Set A = 24 to denote the sound of us making a hit or
+\JSR NOS1               \ kill (part 1 of the explosion), and call NOS1 to set
 \                       \ up the sound block in XX16
 \
-\ LDA INWK+7            \ Fetch z_hi, the distance of the ship being hit in
-\ LSR A                 \ terms of the z-axis (in and out of the screen), and
-\ LSR A                 \ divide by 4. If z_hi has either bit 6 or 7 set then
+\LDA INWK+7             \ Fetch z_hi, the distance of the ship being hit in
+\LSR A                  \ terms of the z-axis (in and out of the screen), and
+\LSR A                  \ divide by 4. If z_hi has either bit 6 or 7 set then
 \                       \ that ship is too far away to be shown on the scanner
 \                       \ (as per the SCAN routine), so we know the maximum
 \                       \ z_hi at this point is %00111111, and shifting z_hi
 \                       \ to the right twice gives us a maximum value of
 \                       \ %00001111
 \
-\ AND T                 \ This reduces A to a maximum of X; X can be either
+\AND T                  \ This reduces A to a maximum of X; X can be either
 \                       \ 7 = %0111 or 15 = %1111, so AND'ing with 15 will
 \                       \ not affect A, while AND'ing with 7 will clear bit
 \                       \ 3, reducing the maximum value in A to 7
 \
-\ ORA #%11110001        \ The SOUND statement's amplitude ranges from 0 (for no
+\ORA #%11110001         \ The SOUND statement's amplitude ranges from 0 (for no
 \                       \ sound) to -15 (full volume), so we can set bits 0 and
 \                       \ 4-7 in A, and keep bits 1-3 from the above to get
 \                       \ a value between -15 (%11110001) and -1 (%11111111),
@@ -25846,13 +25846,13 @@ ENDIF
 \                       \ the ship, i.e. the smaller the value of X, the louder
 \                       \ the sound)
 \
-\ STA XX16+2            \ The amplitude byte of the sound block in XX16 is in
+\STA XX16+2             \ The amplitude byte of the sound block in XX16 is in
 \                       \ byte #3 (where it's the low byte of the amplitude), so
 \                       \ this sets the amplitude to the value in A
 \
-\ JSR NO3               \ Make the sound from our updated sound block in XX16
+\JSR NO3                \ Make the sound from our updated sound block in XX16
 \
-\ LDA #16               \ Set A = 16 to denote we have made a hit or kill
+\LDA #16                \ Set A = 16 to denote we have made a hit or kill
 \                       \ (part 2 of the explosion), and fall through into NOISE
 \                       \ to make the sound
 
@@ -26222,32 +26222,32 @@ ENDIF
 
 \.DKJ1
 \
-\ LDA VIA+&40           \ Read 6522 System VIA input register IRB (SHEILA &40)
+\LDA VIA+&40            \ Read 6522 System VIA input register IRB (SHEILA &40)
 \
-\ TAX                   \ This instruction doesn't seem to have any effect, as
+\TAX                    \ This instruction doesn't seem to have any effect, as
 \                       \ X is overwritten in a few instructions
 \
-\ AND #%00010000        \ Bit 4 of IRB (PB4) is clear if joystick 1's fire
+\AND #%00010000         \ Bit 4 of IRB (PB4) is clear if joystick 1's fire
 \                       \ button is pressed, otherwise it is set, so AND'ing
 \                       \ the value of IRB with %10000 extracts this bit
 \
-\ EOR #%00010000        \ Flip bit 4 so that it's set if the fire button has
-\ STA KY7               \ been pressed, and store the result in the keyboard
+\EOR #%00010000         \ Flip bit 4 so that it's set if the fire button has
+\STA KY7                \ been pressed, and store the result in the keyboard
 \                       \ logger at location KY7, which is also where the A key
 \                       \ (fire lasers) key is logged
 \
-\ LDX #1                \ Call DKS2 to fetch the value of ADC channel 1 (the
-\ JSR DKS2              \ joystick X value) into (A X), and OR A with 1. This
-\ ORA #1                \ ensures that the high byte is at least 1, and then we
-\ STA JSTX              \ store the result in JSTX
+\LDX #1                 \ Call DKS2 to fetch the value of ADC channel 1 (the
+\JSR DKS2               \ joystick X value) into (A X), and OR A with 1. This
+\ORA #1                 \ ensures that the high byte is at least 1, and then we
+\STA JSTX               \ store the result in JSTX
 \
-\ LDX #2                \ Call DKS2 to fetch the value of ADC channel 2 (the
-\ JSR DKS2              \ joystick Y value) into (A X), and EOR A with JSTGY.
-\ EOR JSTGY             \ JSTGY will be &FF if the game is configured to
-\ STA JSTY              \ reverse the joystick Y channel, so this EOR does
+\LDX #2                 \ Call DKS2 to fetch the value of ADC channel 2 (the
+\JSR DKS2               \ joystick Y value) into (A X), and EOR A with JSTGY.
+\EOR JSTGY              \ JSTGY will be &FF if the game is configured to
+\STA JSTY               \ reverse the joystick Y channel, so this EOR does
 \                       \ exactly that, and then we store the result in JSTY
 \
-\ JMP DK4               \ We are done scanning the joystick flight controls,
+\JMP DK4                \ We are done scanning the joystick flight controls,
 \                       \ so jump to DK4 to scan for other keys, using a tail
 \                       \ call so we can return from the subroutine there
 
@@ -26266,8 +26266,8 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDA JSTK              \ If JSTK is zero, then we are configured to use the
-\ BEQ DK9               \ keyboard rather than the joystick, so jump to DK9 to
+\LDA JSTK               \ If JSTK is zero, then we are configured to use the
+\BEQ DK9                \ keyboard rather than the joystick, so jump to DK9 to
 \                       \ make sure the Bitstik is disabled as well (DK9 then
 \                       \ jumps to DK4 to scan for pause, configuration and
 \                       \ secondary flight keys)
@@ -26364,7 +26364,7 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ CPY #&47              \ The last toggle key is &46 (K), so check whether we
+\CPY #&47               \ The last toggle key is &46 (K), so check whether we
 \                       \ have just done that one
 
                         \ --- And replaced by: -------------------------------->
@@ -26394,17 +26394,17 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ CPX #&64              \ If "B" is not being pressed, skip to nobit
-\ BNE nobit
+\CPX #&64               \ If "B" is not being pressed, skip to nobit
+\BNE nobit
 \
-\ LDA BSTK              \ Toggle the value of BSTK between 0 and &FF
-\ EOR #&FF
-\ STA BSTK
+\LDA BSTK               \ Toggle the value of BSTK between 0 and &FF
+\EOR #&FF
+\STA BSTK
 \
-\ STA JSTK              \ Configure JSTK to the same value, so when the Bitstik
+\STA JSTK               \ Configure JSTK to the same value, so when the Bitstik
 \                       \ is enabled, so is the joystick
 \
-\ STA JSTE              \ Configure JSTE to the same value, so when the Bitstik
+\STA JSTE               \ Configure JSTE to the same value, so when the Bitstik
 \                       \ is enabled, the joystick is configured with reversed
 \                       \ channels
 \
@@ -26445,11 +26445,11 @@ ENDIF
 
 \.DK9
 \
-\ STA BSTK              \ DK9 is called from DOKEY using a BEQ, so we know A is
+\STA BSTK               \ DK9 is called from DOKEY using a BEQ, so we know A is
 \                       \ 0, so this disables the Bitstik and switched to
 \                       \ keyboard or joystick
 \
-\ BEQ DK4               \ Jump back to DK4 in DOKEY (this BEQ is effectively a
+\BEQ DK4                \ Jump back to DK4 in DOKEY (this BEQ is effectively a
 \                       \ JMP as A is always zero)
 
                         \ --- End of removed code ----------------------------->
@@ -27794,7 +27794,7 @@ ENDMACRO
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ JMP DOEXP             \ Jump to DOEXP to return from the subroutine using a
+\JMP DOEXP              \ Jump to DOEXP to return from the subroutine using a
 \                       \ tail call, as in the docked code DOEXP just contains
 \                       \ an RTS
 
@@ -29485,7 +29485,7 @@ ENDMACRO
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ JMP DOEXP             \ Jump to DOEXP to display the explosion cloud,
+\JMP DOEXP              \ Jump to DOEXP to display the explosion cloud,
 \                       \ returning from the subroutine using a tail call
 
                         \ --- And replaced by: -------------------------------->
@@ -32201,7 +32201,7 @@ ENDMACRO
 
 \.hyR
 \
-\ RTS                   \ Return from the subroutine
+\RTS                    \ Return from the subroutine
 
                         \ --- And replaced by: -------------------------------->
 
@@ -33150,21 +33150,21 @@ ENDMACRO
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ ECHR 'C'              \ Token 3:      "COMPETITION NUMBER:"
-\ ECHR 'O'              \
-\ ECHR 'M'              \ Encoded as:   "COMPE<251><251><223> <225>MB<244>:"
-\ ECHR 'P'
-\ ECHR 'E'
-\ ETWO 'T', 'I'
-\ ETWO 'T', 'I'
-\ ETWO 'O', 'N'
-\ ECHR ' '
-\ ETWO 'N', 'U'
-\ ECHR 'M'
-\ ECHR 'B'
-\ ETWO 'E', 'R'
-\ ECHR ':'
-\ EQUB VE
+\ECHR 'C'               \ Token 3:      "COMPETITION NUMBER:"
+\ECHR 'O'               \
+\ECHR 'M'               \ Encoded as:   "COMPE<251><251><223> <225>MB<244>:"
+\ECHR 'P'
+\ECHR 'E'
+\ETWO 'T', 'I'
+\ETWO 'T', 'I'
+\ETWO 'O', 'N'
+\ECHR ' '
+\ETWO 'N', 'U'
+\ECHR 'M'
+\ECHR 'B'
+\ETWO 'E', 'R'
+\ECHR ':'
+\EQUB VE
 
                         \ --- And replaced by: -------------------------------->
 
@@ -34614,7 +34614,7 @@ ENDMACRO
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ EQUB VE               \ Token 111:    ""
+\EQUB VE                \ Token 111:    ""
 \                       \
 \                       \ Encoded as:   ""
 
@@ -34642,11 +34642,11 @@ ENDMACRO
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ EQUB VE               \ Token 113:    ""
+\EQUB VE                \ Token 113:    ""
 \                       \
 \                       \ Encoded as:   ""
 \
-\ EQUB VE               \ Token 114:    ""
+\EQUB VE                \ Token 114:    ""
 \                       \
 \                       \ Encoded as:   ""
 
@@ -35545,35 +35545,35 @@ ENDMACRO
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ ECHR 'A'              \ Encoded as:   "{25}{9}{29}{14}{2}GOOD DAY [154]
-\ ECHR 'L'              \                 {4}[204]I{13} AM {19}AG<246>T {19}B
-\ ECHR ' '              \                <249>KE OF {19}NAVAL {19}<240>TEL<229>
-\ EJMP 19               \                G<246><233>[204]AS [179] K<227>W, [147]
-\ ETWO 'I', 'N'         \                {19}NAVY HA<250> <247><246> KEEP[195]
-\ ECHR 'T'              \                [147]{19}<226><238>GOIDS OFF [179]R ASS
-\ ECHR 'E'              \                 <217>T <240> DEEP SPA<233> F<253>
-\ ECHR 'L'              \                 <239>NY YE<238>S <227>W. {19}WELL
-\ ETWO 'L', 'E'         \                 [147]S<219>UA<251><223> HAS CH<255>G
-\ ECHR 'G'              \                <252>[204]<217>R BOYS <238>E <242>ADY F
-\ ETWO 'E', 'N'         \                <253>[208]PUSH RIGHT[201][147]HOME
-\ ETWO 'C', 'E'         \                 SYSTEM OF <226>O<218> MO<226><244>S
-\ ETOK 204              \                [204]{24}{9}{29}I{13} HA<250> OBTA
-\ ECHR 'A'              \                <240>[196][147]DEF<246><233> P<249>NS F
-\ ECHR 'S'              \                <253> <226>EIR {19}HI<250> {19}W<253>LD
-\ ECHR ' '              \                S[204][147]<247><221><229>S K<227>W WE'
-\ ETOK 179              \                <250> GOT <235>ME<226>[195]BUT <227>T W
-\ ECHR ' '              \                H<245>[204]IF {19}I T<248>NSM<219>
-\ ECHR 'K'              \                 [147]P<249>NS[201]<217>R BA<218> <223>
-\ ETWO 'N', 'O'         \                 {19}<234><242><248> <226>EY'LL <240>T
-\ ECHR 'W'              \                <244><233>PT [147]TR<255>SMISSI<223>.
-\ ECHR ','              \                 {19}I NE<252>[208][207][201]<239>KE
-\ ECHR ' '              \                 [147]RUN[204][179]'<242> E<229>CT<252>
-\ ETOK 147              \                [204][147]P<249>NS A<242> UNIPUL<218> C
-\ EJMP 19               \                OD[196]WI<226><240> [148]TR<255>SMISSI
-\ ECHR 'N'              \                <223>[204]{8}[179] W<220>L <247> PAID
-\ ECHR 'A'              \                [204]    {19}GOOD LUCK [154][212]{24}"
-\ ECHR 'V'
-\ ECHR 'Y'
+\ECHR 'A'               \ Encoded as:   "{25}{9}{29}{14}{2}GOOD DAY [154]
+\ECHR 'L'               \                 {4}[204]I{13} AM {19}AG<246>T {19}B
+\ECHR ' '               \                <249>KE OF {19}NAVAL {19}<240>TEL<229>
+\EJMP 19                \                G<246><233>[204]AS [179] K<227>W, [147]
+\ETWO 'I', 'N'          \                {19}NAVY HA<250> <247><246> KEEP[195]
+\ECHR 'T'               \                [147]{19}<226><238>GOIDS OFF [179]R ASS
+\ECHR 'E'               \                 <217>T <240> DEEP SPA<233> F<253>
+\ECHR 'L'               \                 <239>NY YE<238>S <227>W. {19}WELL
+\ETWO 'L', 'E'          \                 [147]S<219>UA<251><223> HAS CH<255>G
+\ECHR 'G'               \                <252>[204]<217>R BOYS <238>E <242>ADY F
+\ETWO 'E', 'N'          \                <253>[208]PUSH RIGHT[201][147]HOME
+\ETWO 'C', 'E'          \                 SYSTEM OF <226>O<218> MO<226><244>S
+\ETOK 204               \                [204]{24}{9}{29}I{13} HA<250> OBTA
+\ECHR 'A'               \                <240>[196][147]DEF<246><233> P<249>NS F
+\ECHR 'S'               \                <253> <226>EIR {19}HI<250> {19}W<253>LD
+\ECHR ' '               \                S[204][147]<247><221><229>S K<227>W WE'
+\ETOK 179               \                <250> GOT <235>ME<226>[195]BUT <227>T W
+\ECHR ' '               \                H<245>[204]IF {19}I T<248>NSM<219>
+\ECHR 'K'               \                 [147]P<249>NS[201]<217>R BA<218> <223>
+\ETWO 'N', 'O'          \                 {19}<234><242><248> <226>EY'LL <240>T
+\ECHR 'W'               \                <244><233>PT [147]TR<255>SMISSI<223>.
+\ECHR ','               \                 {19}I NE<252>[208][207][201]<239>KE
+\ECHR ' '               \                 [147]RUN[204][179]'<242> E<229>CT<252>
+\ETOK 147               \                [204][147]P<249>NS A<242> UNIPUL<218> C
+\EJMP 19                \                OD[196]WI<226><240> [148]TR<255>SMISSI
+\ECHR 'N'               \                <223>[204]{8}[179] W<220>L <247> PAID
+\ECHR 'A'               \                [204]    {19}GOOD LUCK [154][212]{24}"
+\ECHR 'V'
+\ECHR 'Y'
 
                         \ --- And replaced by: -------------------------------->
 
@@ -35720,8 +35720,8 @@ ENDMACRO
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ ECHR 'U'
-\ ECHR 'S'
+\ECHR 'U'
+\ECHR 'S'
 
                         \ --- And replaced by: -------------------------------->
 
@@ -35746,10 +35746,10 @@ ENDMACRO
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ ECHR 'S'
-\ ECHR 'Y'
-\ ECHR 'S'
-\ ECHR 'T'
+\ECHR 'S'
+\ECHR 'Y'
+\ECHR 'S'
+\ECHR 'T'
 
                         \ --- And replaced by: -------------------------------->
 
@@ -36044,17 +36044,17 @@ ENDMACRO
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ ECHR ' '              \                [196]US WELL[178]WE SH<228>L <242>MEMB
-\ ETWO 'S', 'E'         \                <244>[204]WE DID <227>T EXPECT [147]
-\ ECHR 'R'              \                {19}<226><238>GOIDS[201]F<240>D <217>T
-\ ECHR 'V'              \                 AB<217>T [179][204]F<253> [147]MOM
-\ ETOK 196              \                <246>T P<229>A<218> AC<233>PT [148]{19}
-\ ECHR 'U'              \                NAVY {6}[114]{5} AS PAYM<246>T[212]
-\ ECHR 'S'              \                {24}"
-\ ECHR ' '
-\ ECHR 'W'
-\ ECHR 'E'
-\ ECHR 'L'
+\ECHR ' '               \                [196]US WELL[178]WE SH<228>L <242>MEMB
+\ETWO 'S', 'E'          \                <244>[204]WE DID <227>T EXPECT [147]
+\ECHR 'R'               \                {19}<226><238>GOIDS[201]F<240>D <217>T
+\ECHR 'V'               \                 AB<217>T [179][204]F<253> [147]MOM
+\ETOK 196               \                <246>T P<229>A<218> AC<233>PT [148]{19}
+\ECHR 'U'               \                NAVY {6}[114]{5} AS PAYM<246>T[212]
+\ECHR 'S'               \                {24}"
+\ECHR ' '
+\ECHR 'W'
+\ECHR 'E'
+\ECHR 'L'
 
                         \ --- And replaced by: -------------------------------->
 
@@ -36091,11 +36091,11 @@ ENDMACRO
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ ECHR 'W'
-\ ECHR 'E'
-\ ECHR ' '
-\ ECHR 'D'
-\ ECHR 'I'
+\ECHR 'W'
+\ECHR 'E'
+\ECHR ' '
+\ECHR 'D'
+\ECHR 'I'
 
                         \ --- And replaced by: -------------------------------->
 
@@ -36138,8 +36138,8 @@ ENDMACRO
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ ECHR 'A'
-\ ECHR 'B'
+\ECHR 'A'
+\ECHR 'B'
 
                         \ --- And replaced by: -------------------------------->
 
@@ -36214,11 +36214,11 @@ ENDMACRO
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ ECHR 'B'              \ Token 227:    "BISON"
-\ ECHR 'I'              \
-\ ECHR 'S'              \ Encoded as:   "BIS<223>"
-\ ETWO 'O', 'N'
-\ EQUB VE
+\ECHR 'B'               \ Token 227:    "BISON"
+\ECHR 'I'               \
+\ECHR 'S'               \ Encoded as:   "BIS<223>"
+\ETWO 'O', 'N'
+\EQUB VE
 
                         \ --- And replaced by: -------------------------------->
 
@@ -36673,8 +36673,8 @@ ENDMACRO
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ ECHR 'L'
-\ ECHR 'O'
+\ECHR 'L'
+\ECHR 'O'
 
                         \ --- And replaced by: -------------------------------->
 
@@ -36840,8 +36840,8 @@ ENDMACRO
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ ECHR 'D'
-\ ECHR 'I'
+\ECHR 'D'
+\ECHR 'I'
 
                         \ --- And replaced by: -------------------------------->
 
@@ -37194,31 +37194,31 @@ ENDMACRO
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ ECHR 'A'
-\ ECHR '*'
-\ ECHR '*'
-\ ECHR '*'
-\ ECHR '*'
-\ ECHR '*'
-\ ECHR 'R'
-\ ETOK 202
-\ ECHR 'A'
-\ ECHR ' '
-\ ECHR 'P'
-\ ETWO 'R', 'E'
-\ ECHR 'T'
-\ ECHR 'T'
-\ ECHR 'Y'
-\ ECHR ' '
-\ ECHR 'N'
-\ ECHR 'E'
-\ ETWO 'A', 'T'
-\ ECHR ' '
-\ ECHR 'G'
-\ ECHR 'A'
-\ ECHR 'M'
-\ ECHR 'E'
-\ EQUB VE
+\ECHR 'A'
+\ECHR '*'
+\ECHR '*'
+\ECHR '*'
+\ECHR '*'
+\ECHR '*'
+\ECHR 'R'
+\ETOK 202
+\ECHR 'A'
+\ECHR ' '
+\ECHR 'P'
+\ETWO 'R', 'E'
+\ECHR 'T'
+\ECHR 'T'
+\ECHR 'Y'
+\ECHR ' '
+\ECHR 'N'
+\ECHR 'E'
+\ETWO 'A', 'T'
+\ECHR ' '
+\ECHR 'G'
+\ECHR 'A'
+\ECHR 'M'
+\ECHR 'E'
+\EQUB VE
 
                         \ --- And replaced by: -------------------------------->
 
@@ -37322,40 +37322,40 @@ ENDMACRO
 
 \IF _STH_DISC OR _SRAM_DISC
 \
-\ EQUB &45, &4E         \ These bytes appear to be unused
-\ EQUB &44, &2D
-\ EQUB &45, &4E
-\ EQUB &44, &2D
-\ EQUB &45, &4E
-\ EQUB &44, &52
-\ EQUB &50, &53
-\ EQUB &00, &8E
-\ EQUB &11, &D8
-\ EQUB &00, &00
-\ EQUB &06, &56
-\ EQUB &52, &49
-\ EQUB &45
+\EQUB &45, &4E          \ These bytes appear to be unused
+\EQUB &44, &2D
+\EQUB &45, &4E
+\EQUB &44, &2D
+\EQUB &45, &4E
+\EQUB &44, &52
+\EQUB &50, &53
+\EQUB &00, &8E
+\EQUB &11, &D8
+\EQUB &00, &00
+\EQUB &06, &56
+\EQUB &52, &49
+\EQUB &45
 \
-\ EQUB &E6              \ This checksum is at location &55FF, and is checked in
+\EQUB &E6               \ This checksum is at location &55FF, and is checked in
 \                       \ the LOAD routine in elite-loader3.asm
 \
 \ELIF _IB_DISC
 \
-\ EQUB &45, &4E         \ These bytes appear to be unused
-\ EQUB &44, &2D
-\ EQUB &45, &4E
-\ EQUB &44, &2D
-\ EQUB &45, &4E
-\ EQUB &44, &8E
-\ EQUB &13, &1C
-\ EQUB &00, &00
-\ EQUB &73, &56
-\ EQUB &52, &49
-\ EQUB &53, &00
-\ EQUB &8E, &13
-\ EQUB &34
+\EQUB &45, &4E          \ These bytes appear to be unused
+\EQUB &44, &2D
+\EQUB &45, &4E
+\EQUB &44, &2D
+\EQUB &45, &4E
+\EQUB &44, &8E
+\EQUB &13, &1C
+\EQUB &00, &00
+\EQUB &73, &56
+\EQUB &52, &49
+\EQUB &53, &00
+\EQUB &8E, &13
+\EQUB &34
 \
-\ EQUB &B3              \ This checksum is at location &55FF, and is checked in
+\EQUB &B3               \ This checksum is at location &55FF, and is checked in
 \                       \ the LOAD routine in elite-loader3.asm
 \
 \ENDIF
@@ -37693,7 +37693,7 @@ ENDMACRO
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ EQUB 17               \ Max. energy              = 17
+\EQUB 17                \ Max. energy              = 17
 
                         \ --- And replaced by: -------------------------------->
 
@@ -38038,7 +38038,7 @@ ENDMACRO
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ EQUB 150              \ Max. energy              = 150
+\EQUB 150               \ Max. energy              = 150
 
                         \ --- And replaced by: -------------------------------->
 
@@ -38175,7 +38175,7 @@ ENDMACRO
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ EQUB 250              \ Max. energy              = 250
+\EQUB 250               \ Max. energy              = 250
 
                         \ --- And replaced by: -------------------------------->
 
@@ -38283,7 +38283,7 @@ ENDMACRO
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ EQUB 100              \ Max. energy              = 100
+\EQUB 100               \ Max. energy              = 100
 
                         \ --- And replaced by: -------------------------------->
 
@@ -38382,8 +38382,8 @@ ENDMACRO
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ EQUB 20               \ Visibility distance      = 20
-\ EQUB 80               \ Max. energy              = 80
+\EQUB 20                \ Visibility distance      = 20
+\EQUB 80                \ Max. energy              = 80
 
                         \ --- And replaced by: -------------------------------->
 
@@ -38399,7 +38399,7 @@ ENDMACRO
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ EQUB 2                \ Normals are scaled by    = 2^2 = 4
+\EQUB 2                 \ Normals are scaled by    = 2^2 = 4
 
                         \ --- And replaced by: -------------------------------->
 
@@ -38421,8 +38421,8 @@ ENDMACRO
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ VERTEX   90,    0,   87,     1,     0,     1,     1,         28    \ Vertex 5
-\ VERTEX  -90,    0,   87,     3,     2,     3,     3,         28    \ Vertex 6
+\VERTEX   90,    0,   87,     1,     0,     1,     1,         28     \ Vertex 5
+\VERTEX  -90,    0,   87,     3,     2,     3,     3,         28     \ Vertex 6
 
                         \ --- And replaced by: -------------------------------->
 
@@ -38456,9 +38456,9 @@ ENDMACRO
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ EDGE       3,       5,     1,     0,         28   \ Edge 8
-\ EDGE       4,       6,     3,     2,         28   \ Edge 9
-\ EDGE       1,       2,     5,     4,          5   \ Edge 10
+\EDGE       3,       5,     1,     0,         28    \ Edge 8
+\EDGE       4,       6,     3,     2,         28    \ Edge 9
+\EDGE       1,       2,     5,     4,          5    \ Edge 10
 
                         \ --- And replaced by: -------------------------------->
 
@@ -38484,12 +38484,12 @@ ENDMACRO
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
 \   \ normal_x, normal_y, normal_z, visibility
-\ FACE        7,       48,        6,         31   \ Face 0
-\ FACE        7,      -48,        6,         31   \ Face 1
-\ FACE       -7,      -48,        6,         31   \ Face 2
-\ FACE       -7,       48,        6,         31   \ Face 3
-\ FACE       77,        0,     -154,         31   \ Face 4
-\ FACE      -77,        0,     -154,         31   \ Face 5
+\FACE        7,       48,        6,         31    \ Face 0
+\FACE        7,      -48,        6,         31    \ Face 1
+\FACE       -7,      -48,        6,         31    \ Face 2
+\FACE       -7,       48,        6,         31    \ Face 3
+\FACE       77,        0,     -154,         31    \ Face 4
+\FACE      -77,        0,     -154,         31    \ Face 5
 
                         \ --- And replaced by: -------------------------------->
 
@@ -38533,8 +38533,8 @@ ENDMACRO
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ EQUB 200              \ Max. energy              = 200
-\ EQUB 55               \ Max. speed               = 55
+\EQUB 200               \ Max. energy              = 200
+\EQUB 55                \ Max. speed               = 55
 
                         \ --- And replaced by: -------------------------------->
 

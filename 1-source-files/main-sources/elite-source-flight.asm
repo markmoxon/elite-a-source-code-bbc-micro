@@ -1316,7 +1316,7 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ SKIP 2                \ These bytes appear to be unused (they were originally
+\SKIP 2                 \ These bytes appear to be unused (they were originally
 \                       \ used for up/down lasers, but they were dropped)
 
                         \ --- And replaced by: -------------------------------->
@@ -1427,7 +1427,7 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ SKIP 4                \ These bytes appear to be unused
+\SKIP 4                 \ These bytes appear to be unused
 
                         \ --- And replaced by: -------------------------------->
 
@@ -2201,15 +2201,15 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ JMP DEEOR             \ Decrypt the main flight code and join the main loop
+\JMP DEEOR              \ Decrypt the main flight code and join the main loop
 \
-\ JMP DEEOR             \ Decrypt the main flight code and start a new game
+\JMP DEEOR              \ Decrypt the main flight code and start a new game
 \
-\ JMP TT26              \ WRCHV is set to point here by elite-loader3.asm
+\JMP TT26               \ WRCHV is set to point here by elite-loader3.asm
 \
-\ EQUW IRQ1             \ IRQ1V is set to point here by elite-loader3.asm
+\EQUW IRQ1              \ IRQ1V is set to point here by elite-loader3.asm
 \
-\ JMP BRBR1             \ BRKV is set to point here by elite-loader3.asm
+\JMP BRBR1              \ BRKV is set to point here by elite-loader3.asm
 
                         \ --- And replaced by: -------------------------------->
 
@@ -2281,8 +2281,8 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ EQUS "L.T.CODE"       \ This is short for "*LOAD T.CODE"
-\ EQUB 13
+\EQUS "L.T.CODE"        \ This is short for "*LOAD T.CODE"
+\EQUB 13
 
                         \ --- And replaced by: -------------------------------->
 
@@ -2307,29 +2307,29 @@
 \
 \IF _STH_DISC OR _IB_DISC
 \
-\ LDY #0                \ We're going to work our way through a large number of
+\LDY #0                 \ We're going to work our way through a large number of
 \                       \ encrypted bytes, so we set Y to 0 to be the index of
 \                       \ the current byte within its page in memory
 \
-\ STY SC                \ Set the low byte of SC(1 0) to 0
+\STY SC                 \ Set the low byte of SC(1 0) to 0
 \
-\ LDX #&13              \ Set X to &13 to be the page number of the current
+\LDX #&13               \ Set X to &13 to be the page number of the current
 \                       \ byte, so we start the decryption with the first byte
 \                       \ of page &13
 \
 \.DEEORL
 \
-\ STX SCH               \ Set the high byte of SC(1 0) to X, so SC(1 0) now
+\STX SCH                \ Set the high byte of SC(1 0) to X, so SC(1 0) now
 \                       \ points to the first byte of page X
 \
-\ TYA                   \ Set A to Y, so A now contains the index of the current
+\TYA                    \ Set A to Y, so A now contains the index of the current
 \                       \ byte within its page
 \
-\ EOR (SC),Y            \ EOR the current byte with its index within the page
+\EOR (SC),Y             \ EOR the current byte with its index within the page
 \
-\ EOR #&33              \ EOR the current byte with &33
+\EOR #&33               \ EOR the current byte with &33
 \
-\ STA (SC),Y            \ Update the current byte
+\STA (SC),Y             \ Update the current byte
 \
 \                       \ The current byte is in page X at offset Y, and SC(1 0)
 \                       \ points to the first byte of page X, so we just did
@@ -2337,22 +2337,22 @@
 \                       \
 \                       \   (X Y) = (X Y) EOR Y EOR &33
 \
-\ DEY                   \ Decrement the index in Y to point to the next byte
+\DEY                    \ Decrement the index in Y to point to the next byte
 \
-\ BNE DEEORL            \ Loop back to DEEORL to decrypt the next byte until we
+\BNE DEEORL             \ Loop back to DEEORL to decrypt the next byte until we
 \                       \ have done the whole page
 \
-\ INX                   \ Increment X to point to the next page in memory
+\INX                    \ Increment X to point to the next page in memory
 \
-\ CPX #&56              \ Loop back to DEEORL to decrypt the next page until we
-\ BNE DEEORL            \ reach the start of page &56
+\CPX #&56               \ Loop back to DEEORL to decrypt the next page until we
+\BNE DEEORL             \ reach the start of page &56
 \
-\ JMP RSHIPS            \ Call RSHIPS to launch from the station, load a new set
+\JMP RSHIPS             \ Call RSHIPS to launch from the station, load a new set
 \                       \ of ship blueprints and jump into the main game loop
 \
 \ELIF _SRAM_DISC
 \
-\ JMP RSHIPS            \ Call RSHIPS to launch from the station, load a new set
+\JMP RSHIPS             \ Call RSHIPS to launch from the station, load a new set
 \                       \ of ship blueprints and jump into the main game loop
 \
 \ENDIF
@@ -2406,9 +2406,9 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ JSR CATD              \ Call CATD to reload the disc catalogue
+\JSR CATD               \ Call CATD to reload the disc catalogue
 \
-\ BNE INBAY             \ Jump to INBAY to load the docked code (this BNE is
+\BNE INBAY              \ Jump to INBAY to load the docked code (this BNE is
 \                       \ effectively a JMP)
 
                         \ --- And replaced by: -------------------------------->
@@ -2644,26 +2644,26 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDA BSTK              \ If BSTK = 0 then the Bitstik is not configured, so
-\ BEQ BS2               \ jump to BS2 to skip the following
+\LDA BSTK               \ If BSTK = 0 then the Bitstik is not configured, so
+\BEQ BS2                \ jump to BS2 to skip the following
 \
-\ LDX #3                \ Call OSBYTE with A = 128 to fetch the 16-bit value
-\ LDA #128              \ from ADC channel 3 (the Bitstik rotation value),
-\ JSR OSBYTE            \ returning the value in (Y X)
+\LDX #3                 \ Call OSBYTE with A = 128 to fetch the 16-bit value
+\LDA #128               \ from ADC channel 3 (the Bitstik rotation value),
+\JSR OSBYTE             \ returning the value in (Y X)
 \
-\ TYA                   \ Copy Y to A, so the result is now in (A X)
+\TYA                    \ Copy Y to A, so the result is now in (A X)
 \
-\ LSR A                 \ Divide A by 4
-\ LSR A
+\LSR A                  \ Divide A by 4
+\LSR A
 \
-\ CMP #40               \ If A < 40, skip the following instruction
-\ BCC P%+4
+\CMP #40                \ If A < 40, skip the following instruction
+\BCC P%+4
 \
-\ LDA #40               \ Set A = 40, which ensures a maximum speed of 40
+\LDA #40                \ Set A = 40, which ensures a maximum speed of 40
 \
-\ STA DELTA             \ Update our speed in DELTA
+\STA DELTA              \ Update our speed in DELTA
 \
-\ BNE MA4               \ If the speed we just set is non-zero, then jump to MA4
+\BNE MA4                \ If the speed we just set is non-zero, then jump to MA4
 \                       \ to skip the following, as we don't need to check the
 \                       \ keyboard for speed keys, otherwise do check the
 \                       \ keyboard (so Bitstik users can still use the keyboard
@@ -2715,12 +2715,12 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDA DELTA             \ The "go faster" key is being pressed, so first we
-\ CMP #40               \ fetch the current speed from DELTA into A, and if
-\ BCS MA17              \ A >= 40, we are already going at full pelt, so jump
+\LDA DELTA              \ The "go faster" key is being pressed, so first we
+\CMP #40                \ fetch the current speed from DELTA into A, and if
+\BCS MA17               \ A >= 40, we are already going at full pelt, so jump
 \                       \ down to MA17 to skip the following
 \
-\ INC DELTA             \ We can go a bit faster, so increment the speed in
+\INC DELTA              \ We can go a bit faster, so increment the speed in
 \                       \ location DELTA
 
                         \ --- And replaced by: -------------------------------->
@@ -2764,8 +2764,8 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDA #40               \ Call the NOISE routine with A = 40 to make a low,
-\ JSR NOISE             \ long beep to indicate the missile is now disarmed
+\LDA #40                \ Call the NOISE routine with A = 40 to make a low,
+\JSR NOISE              \ long beep to indicate the missile is now disarmed
 \
 \.MA31
 
@@ -2802,8 +2802,8 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDY #&E0              \ Change the leftmost missile indicator to yellow/white
-\ JSR MSBAR             \ on the missile bar (this call changes the leftmost
+\LDY #&E0               \ Change the leftmost missile indicator to yellow/white
+\JSR MSBAR              \ on the missile bar (this call changes the leftmost
 \                       \ indicator because we set X to the number of missiles
 \                       \ in NOMSL above, and the indicators are numbered from
 \                       \ right to left, so X is the number of the leftmost
@@ -2837,10 +2837,10 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDA KY12              \ If TAB is being pressed, keep going, otherwise jump
-\ BEQ MA76              \ down to MA76 to skip the following
+\LDA KY12               \ If TAB is being pressed, keep going, otherwise jump
+\BEQ MA76               \ down to MA76 to skip the following
 \
-\ ASL BOMB              \ The "energy bomb" key is being pressed, so double
+\ASL BOMB               \ The "energy bomb" key is being pressed, so double
 \                       \ the value in BOMB. If we have an energy bomb fitted,
 \                       \ BOMB will contain &7F (%01111111) before this shift
 \                       \ and will contain &FE (%11111110) after the shift; if
@@ -2881,11 +2881,11 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDA KY20              \ If "P" is being pressed, keep going, otherwise skip
-\ BEQ MA78              \ the next two instructions
+\LDA KY20               \ If "P" is being pressed, keep going, otherwise skip
+\BEQ MA78               \ the next two instructions
 \
-\ LDA #0                \ The "cancel docking computer" key is bring pressed,
-\ STA auto              \ so turn it off by setting auto to 0
+\LDA #0                 \ The "cancel docking computer" key is bring pressed,
+\STA auto               \ so turn it off by setting auto to 0
 
                         \ --- And replaced by: -------------------------------->
 
@@ -2949,11 +2949,11 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDA KY19              \ If "C" is being pressed, and we have a docking
-\ AND DKCMP             \ computer fitted, keep going, otherwise jump down to
-\ BEQ MA68              \ MA68 to skip the following
+\LDA KY19               \ If "C" is being pressed, and we have a docking
+\AND DKCMP              \ computer fitted, keep going, otherwise jump down to
+\BEQ MA68               \ MA68 to skip the following
 \
-\ STA auto              \ Set auto to the non-zero value of A, so the docking
+\STA auto               \ Set auto to the non-zero value of A, so the docking
 \                       \ computer is activated
 
                         \ --- End of removed code ----------------------------->
@@ -2997,9 +2997,9 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ AND #%01111111        \ Set LAS and LAS2 to bits 0-6 of the laser power
-\ STA LAS
-\ STA LAS2
+\AND #%01111111         \ Set LAS and LAS2 to bits 0-6 of the laser power
+\STA LAS
+\STA LAS2
 
                         \ --- And replaced by: -------------------------------->
 
@@ -3029,8 +3029,8 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ AND #%11111010        \ LASCT will be set to 0 for beam lasers, and to the
-\ STA LASCT             \ laser power AND %11111010 for pulse lasers, which
+\AND #%11111010         \ LASCT will be set to 0 for beam lasers, and to the
+\STA LASCT              \ laser power AND %11111010 for pulse lasers, which
 \                       \ comes to 10 (as pulse lasers have a power of 15). See
 \                       \ MA23 below for more on laser pulsing and LASCT
 
@@ -3162,22 +3162,22 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDA BOMB              \ If we set off our energy bomb (see MA24 above), then
-\ BPL MA21              \ BOMB is now negative, so this skips to MA21 if our
+\LDA BOMB               \ If we set off our energy bomb (see MA24 above), then
+\BPL MA21               \ BOMB is now negative, so this skips to MA21 if our
 \                       \ energy bomb is not going off
 \
-\ CPY #2*SST            \ If the ship in Y is the space station, jump to BA21
-\ BEQ MA21              \ as energy bombs are useless against space stations
+\CPY #2*SST             \ If the ship in Y is the space station, jump to BA21
+\BEQ MA21               \ as energy bombs are useless against space stations
 \
-\ LDA INWK+31           \ If the ship we are checking has bit 5 set in its ship
-\ AND #%00100000        \ byte #31, then it is already exploding, so jump to
-\ BNE MA21              \ BA21 as ships can't explode more than once
+\LDA INWK+31            \ If the ship we are checking has bit 5 set in its ship
+\AND #%00100000         \ byte #31, then it is already exploding, so jump to
+\BNE MA21               \ BA21 as ships can't explode more than once
 \
-\ ASL INWK+31           \ The energy bomb is killing this ship, so set bit 7 of
-\ SEC                   \ the ship byte #31 to indicate that it has now been
-\ ROR INWK+31           \ killed
+\ASL INWK+31            \ The energy bomb is killing this ship, so set bit 7 of
+\SEC                    \ the ship byte #31 to indicate that it has now been
+\ROR INWK+31            \ killed
 \
-\ JSR EXNO2             \ Call EXNO2 to process the fact that we have killed a
+\JSR EXNO2              \ Call EXNO2 to process the fact that we have killed a
 \                       \ ship (so increase the kill tally, make an explosion
 \                       \ sound and possibly display "RIGHT ON COMMANDER!")
 
@@ -3354,8 +3354,8 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ JSR DORND             \ Set A and X to random numbers and reduce A to a
-\ AND #7                \ random number in the range 0-7
+\JSR DORND              \ Set A and X to random numbers and reduce A to a
+\AND #7                 \ random number in the range 0-7
 
                         \ --- And replaced by: -------------------------------->
 
@@ -3378,33 +3378,33 @@
 \                       \ computers, while escape pods contain slaves, and
 \                       \ Thargons become alien items when scooped
 \
-\ JSR tnpr1             \ Call tnpr1 with the scooped cargo type stored in A
+\JSR tnpr1              \ Call tnpr1 with the scooped cargo type stored in A
 \                       \ to work out whether we have room in the hold for one
 \                       \ tonne of this cargo (A is set to 1 by this call, and
 \                       \ the C flag contains the result)
 \
-\ LDY #78               \ This instruction has no effect, so presumably it used
+\LDY #78                \ This instruction has no effect, so presumably it used
 \                       \ to do something, but didn't get removed
 \
-\ BCS MA59              \ If the C flag is set then we have no room in the hold
+\BCS MA59               \ If the C flag is set then we have no room in the hold
 \                       \ for the scooped item, so jump down to MA59 make a
 \                       \ sound to indicate failure, before destroying the
 \                       \ canister
 \
-\ LDY QQ29              \ Scooping was successful, so set Y to the type of
+\LDY QQ29               \ Scooping was successful, so set Y to the type of
 \                       \ item we just scooped, which we stored in QQ29 above
 \
-\ ADC QQ20,Y            \ Add A (which we set to 1 above) to the number of items
-\ STA QQ20,Y            \ of type Y in the cargo hold, as we just successfully
+\ADC QQ20,Y             \ Add A (which we set to 1 above) to the number of items
+\STA QQ20,Y             \ of type Y in the cargo hold, as we just successfully
 \                       \ scooped one canister of type Y
 \
-\ TYA                   \ Print recursive token 48 + Y as an in-flight token,
-\ ADC #208              \ which will be in the range 48 ("FOOD") to 64 ("ALIEN
-\ JSR MESS              \ ITEMS"), so this prints the scooped item's name
+\TYA                    \ Print recursive token 48 + Y as an in-flight token,
+\ADC #208               \ which will be in the range 48 ("FOOD") to 64 ("ALIEN
+\JSR MESS               \ ITEMS"), so this prints the scooped item's name
 \
-\ ASL NEWB              \ The item has now been scooped, so set bit 7 of its
-\ SEC                   \ NEWB flags to indicate this
-\ ROR NEWB
+\ASL NEWB               \ The item has now been scooped, so set bit 7 of its
+\SEC                    \ NEWB flags to indicate this
+\ROR NEWB
 
                         \ --- And replaced by: -------------------------------->
 
@@ -3492,7 +3492,7 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ JSR SPS1              \ Call SPS1 to calculate the vector to the planet and
+\JSR SPS1               \ Call SPS1 to calculate the vector to the planet and
 \                       \ store it in XX15
 
                         \ --- And replaced by: -------------------------------->
@@ -3539,11 +3539,11 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDA DELTA             \ If the ship's speed is < 5, jump to MA67 to register
-\ CMP #5                \ some damage, but not a huge amount
-\ BCC MA67
+\LDA DELTA              \ If the ship's speed is < 5, jump to MA67 to register
+\CMP #5                 \ some damage, but not a huge amount
+\BCC MA67
 \
-\ JMP DEATH             \ Otherwise we have just crashed into the station, so
+\JMP DEATH              \ Otherwise we have just crashed into the station, so
 \                       \ process our death
 
                         \ --- And replaced by: -------------------------------->
@@ -3586,7 +3586,7 @@
 \
 \                       \ If we get here then scooping failed
 \
-\ JSR EXNO3             \ Make the sound of the cargo canister being destroyed
+\JSR EXNO3              \ Make the sound of the cargo canister being destroyed
 \                       \ and fall through into MA60 to remove the canister
 \                       \ from our local bubble
 \
@@ -3594,13 +3594,13 @@
 \
 \                       \ If we get here then scooping was successful
 \
-\ ASL INWK+31           \ Set bit 7 of the scooped or destroyed item, to denote
-\ SEC                   \ that it has been killed and should be removed from
-\ ROR INWK+31           \ the local bubble
+\ASL INWK+31            \ Set bit 7 of the scooped or destroyed item, to denote
+\SEC                    \ that it has been killed and should be removed from
+\ROR INWK+31            \ the local bubble
 \
 \.MA61
 \
-\ BNE MA26              \ Jump to MA26 to skip over the collision routines and
+\BNE MA26               \ Jump to MA26 to skip over the collision routines and
 \                       \ to move on to missile targeting (this BNE is
 \                       \ effectively a JMP as A will never be zero)
 \
@@ -3609,11 +3609,11 @@
 \                       \ If we get here then we have collided with something,
 \                       \ but not fatally
 \
-\ LDA #1                \ Set the speed in DELTA to 1 (i.e. a sudden stop)
-\ STA DELTA
+\LDA #1                 \ Set the speed in DELTA to 1 (i.e. a sudden stop)
+\STA DELTA
 \
-\ LDA #5                \ Set the amount of damage in A to 5 (a small dent) and
-\ BNE MA63              \ jump down to MA63 to process the damage (this BNE is
+\LDA #5                 \ Set the amount of damage in A to 5 (a small dent) and
+\BNE MA63               \ jump down to MA63 to process the damage (this BNE is
 \                       \ effectively a JMP as A will never be zero)
 \
 \.MA58
@@ -3621,14 +3621,14 @@
 \                       \ If we get here, we have collided with something in a
 \                       \ potentially fatal way
 \
-\ ASL INWK+31           \ Set bit 7 of the ship we just collided with, to
-\ SEC                   \ denote that it has been killed and should be removed
-\ ROR INWK+31           \ from the local bubble
+\ASL INWK+31            \ Set bit 7 of the ship we just collided with, to
+\SEC                    \ denote that it has been killed and should be removed
+\ROR INWK+31            \ from the local bubble
 \
-\ LDA INWK+35           \ Load A with the energy level of the ship we just hit
+\LDA INWK+35            \ Load A with the energy level of the ship we just hit
 \
-\ SEC                   \ Set the amount of damage in A to 128 + A / 2, so
-\ ROR A                 \ this is quite a big dent, and colliding with higher
+\SEC                    \ Set the amount of damage in A to 128 + A / 2, so
+\ROR A                  \ this is quite a big dent, and colliding with higher
 \                       \ energy ships will cause more damage
 
                         \ --- And replaced by: -------------------------------->
@@ -3753,43 +3753,43 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDA TYPE              \ Did we just hit the space station? If so, jump to
-\ CMP #SST              \ MA14+2 to make the station hostile, skipping the
-\ BEQ MA14+2            \ following as we can't destroy a space station
+\LDA TYPE               \ Did we just hit the space station? If so, jump to
+\CMP #SST               \ MA14+2 to make the station hostile, skipping the
+\BEQ MA14+2             \ following as we can't destroy a space station
 \
-\ CMP #CON              \ If the ship we hit is not a Constrictor, jump to BURN
-\ BNE BURN              \ to skip the following
+\CMP #CON               \ If the ship we hit is not a Constrictor, jump to BURN
+\BNE BURN               \ to skip the following
 \
-\ LDA LAS               \ Set A to the power of the laser we just used to hit
+\LDA LAS                \ Set A to the power of the laser we just used to hit
 \                       \ the ship (i.e. the laser in the current view)
 \
-\ CMP #(Armlas AND 127) \ If the laser is not a military laser, jump to MA8
-\ BNE MA8               \ to skip the following, as only military lasers have
+\CMP #(Armlas AND 127)  \ If the laser is not a military laser, jump to MA8
+\BNE MA8                \ to skip the following, as only military lasers have
 \                       \ any effect on the Constrictor
 \
-\ LSR LAS               \ Divide the laser power of the current view by 4, so
-\ LSR LAS               \ the damage inflicted on the super-ship is a quarter of
+\LSR LAS                \ Divide the laser power of the current view by 4, so
+\LSR LAS                \ the damage inflicted on the super-ship is a quarter of
 \                       \ the damage our military lasers would inflict on a
 \                       \ normal ship
 \
 \.BURN
 \
-\ LDA INWK+35           \ Fetch the hit ship's energy from byte #35 and subtract
-\ SEC                   \ our current laser power, and if the result is greater
-\ SBC LAS               \ than zero, the other ship has survived the hit, so
-\ BCS MA14              \ jump down to MA14 to make it angry
+\LDA INWK+35            \ Fetch the hit ship's energy from byte #35 and subtract
+\SEC                    \ our current laser power, and if the result is greater
+\SBC LAS                \ than zero, the other ship has survived the hit, so
+\BCS MA14               \ jump down to MA14 to make it angry
 \
-\ ASL INWK+31           \ Set bit 7 of the ship byte #31 to indicate that it has
-\ SEC                   \ now been killed
-\ ROR INWK+31
+\ASL INWK+31            \ Set bit 7 of the ship byte #31 to indicate that it has
+\SEC                    \ now been killed
+\ROR INWK+31
 \
-\ LDA TYPE              \ Did we just kill an asteroid? If not, jump to nosp,
-\ CMP #AST              \ otherwise keep going
-\ BNE nosp
+\LDA TYPE               \ Did we just kill an asteroid? If not, jump to nosp,
+\CMP #AST               \ otherwise keep going
+\BNE nosp
 \
-\ LDA LAS               \ Did we kill the asteroid using mining lasers? If not,
-\ CMP #Mlas             \ jump to nosp, otherwise keep going
-\ BNE nosp
+\LDA LAS                \ Did we kill the asteroid using mining lasers? If not,
+\CMP #Mlas              \ jump to nosp, otherwise keep going
+\BNE nosp
 
                         \ --- And replaced by: -------------------------------->
 
@@ -3856,10 +3856,10 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ STA INWK+35           \ Store the hit ship's updated energy in ship byte #35
+\STA INWK+35            \ Store the hit ship's updated energy in ship byte #35
 \
-\ LDA TYPE              \ Call ANGRY to make this ship hostile, now that we
-\ JSR ANGRY             \ have hit it
+\LDA TYPE               \ Call ANGRY to make this ship hostile, now that we
+\JSR ANGRY              \ have hit it
 
                         \ --- And replaced by: -------------------------------->
 
@@ -3918,13 +3918,13 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDA NEWB              \ Extract bit 6 of the ship's NEWB flags, so A = 64 if
-\ AND #%01000000        \ bit 6 is set, or 0 if it is clear. Bit 6 is set if
+\LDA NEWB               \ Extract bit 6 of the ship's NEWB flags, so A = 64 if
+\AND #%01000000         \ bit 6 is set, or 0 if it is clear. Bit 6 is set if
 \                       \ this ship is a cop, so A = 64 if we just killed a
 \                       \ policeman, otherwise it is 0
 \
-\ ORA FIST              \ Update our FIST flag ("fugitive/innocent status") to
-\ STA FIST              \ at least the value in A, which will instantly make us
+\ORA FIST               \ Update our FIST flag ("fugitive/innocent status") to
+\STA FIST               \ at least the value in A, which will instantly make us
 \                       \ a fugitive if we just shot the sheriff, but won't
 \                       \ affect our status if the enemy wasn't a copper
 
@@ -4010,9 +4010,9 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDY #10               \ Fetch byte #10 of the ship's blueprint, which is the
-\ LDA (XX0),Y           \ low byte of the bounty awarded when this ship is
-\ BEQ KS1S              \ killed (in Cr * 10), and if it's zero jump to KS1S as
+\LDY #10                \ Fetch byte #10 of the ship's blueprint, which is the
+\LDA (XX0),Y            \ low byte of the bounty awarded when this ship is
+\BEQ KS1S               \ killed (in Cr * 10), and if it's zero jump to KS1S as
 \                       \ there is no on-screen bounty to display
 
                         \ --- And replaced by: -------------------------------->
@@ -4148,11 +4148,11 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDA BOMB              \ If we set off our energy bomb (see MA24 above), then
-\ BPL MA77              \ BOMB is now negative, so this skips to MA21 if our
+\LDA BOMB               \ If we set off our energy bomb (see MA24 above), then
+\BPL MA77               \ BOMB is now negative, so this skips to MA21 if our
 \                       \ energy bomb is not going off
 \
-\ ASL BOMB              \ We set off our energy bomb, so rotate BOMB to the
+\ASL BOMB               \ We set off our energy bomb, so rotate BOMB to the
 \                       \ left by one place. BOMB was rotated left once already
 \                       \ during this iteration of the main loop, back at MA24,
 \                       \ so if this is the first pass it will already be
@@ -4160,12 +4160,12 @@
 \                       \ if we set off an energy bomb, it stays activated
 \                       \ (BOMB > 0) for four iterations of the main loop
 \
-\ JSR WSCAN             \ Call WSCAN to wait for the vertical sync, so the whole
+\JSR WSCAN              \ Call WSCAN to wait for the vertical sync, so the whole
 \                       \ screen gets drawn and the following palette change
 \                       \ won't kick in while the screen is still refreshing
 \
-\ LDA #%00110000        \ Set the palette byte at SHEILA &21 to map logical
-\ STA VIA+&21           \ colour 0 to physical colour 7 (white), but with only
+\LDA #%00110000         \ Set the palette byte at SHEILA &21 to map logical
+\STA VIA+&21            \ colour 0 to physical colour 7 (white), but with only
 \                       \ one mapping (rather than the 7 mappings required to
 \                       \ do the mapping properly). This makes the space screen
 \                       \ flash with black and white stripes. See p.382 of the
@@ -4543,9 +4543,9 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ CMP #70               \ If A > 70 then set A = 70 (as 70 is the maximum fuel
-\ BCC P%+4              \ level, or 7.0 light years)
-\ LDA #70
+\CMP #70                \ If A > 70 then set A = 70 (as 70 is the maximum fuel
+\BCC P%+4               \ level, or 7.0 light years)
+\LDA #70
 
                         \ --- And replaced by: -------------------------------->
 
@@ -5630,9 +5630,9 @@
 
 \.FLKB
 \
-\ LDA #15               \ Call OSBYTE with A = 15 and Y <> 0 to flush the input
-\ TAX                   \ buffers (i.e. flush the operating system's keyboard
-\ JMP OSBYTE            \ buffer) and return from the subroutine using a tail
+\LDA #15                \ Call OSBYTE with A = 15 and Y <> 0 to flush the input
+\TAX                    \ buffers (i.e. flush the operating system's keyboard
+\JMP OSBYTE             \ buffer) and return from the subroutine using a tail
 \                       \ call
 
                         \ --- End of removed code ----------------------------->
@@ -6090,13 +6090,13 @@
 
 \.PX3
 \
-\ LDA TWOS,X            \ Fetch a 1-pixel byte from TWOS and EOR it into SC+Y
-\ EOR (SC),Y
-\ STA (SC),Y
+\LDA TWOS,X             \ Fetch a 1-pixel byte from TWOS and EOR it into SC+Y
+\EOR (SC),Y
+\STA (SC),Y
 \
-\ LDY T1                \ Restore Y from T1, so Y is preserved by the routine
+\LDY T1                 \ Restore Y from T1, so Y is preserved by the routine
 \
-\ RTS                   \ Return from the subroutine
+\RTS                    \ Return from the subroutine
 
                         \ --- End of removed code ----------------------------->
 
@@ -6279,9 +6279,9 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDA ZZ                \ If distance in ZZ >= 144, then this point is a very
-\ CMP #144              \ long way away, so jump to PX3 to fetch a 1-pixel point
-\ BCS PX3               \ from TWOS and EOR it into SC+Y
+\LDA ZZ                 \ If distance in ZZ >= 144, then this point is a very
+\CMP #144               \ long way away, so jump to PX3 to fetch a 1-pixel point
+\BCS PX3                \ from TWOS and EOR it into SC+Y
 
                         \ --- And replaced by: -------------------------------->
 
@@ -7286,15 +7286,15 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ BEQ ST3               \ If we have just done the last particle, skip the next
+\BEQ ST3                \ If we have just done the last particle, skip the next
 \                       \ instruction to return from the subroutine
 \
-\ JMP STL6              \ We have more stardust to process, so jump back up to
+\JMP STL6               \ We have more stardust to process, so jump back up to
 \                       \ STL6 for the next particle
 \
 \.ST3
 \
-\ RTS                   \ Return from the subroutine
+\RTS                    \ Return from the subroutine
 
                         \ --- And replaced by: -------------------------------->
 
@@ -7772,12 +7772,12 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDA CRGO              \ If our ship's cargo capacity is < 26 (i.e. we do not
-\ CMP #26               \ have a cargo bay extension), skip the following two
-\ BCC P%+7              \ instructions
+\LDA CRGO               \ If our ship's cargo capacity is < 26 (i.e. we do not
+\CMP #26                \ have a cargo bay extension), skip the following two
+\BCC P%+7               \ instructions
 \
-\ LDA #107              \ We do have a cargo bay extension, so print recursive
-\ JSR plf2              \ token 107 ("LARGE CARGO{sentence case} BAY"), followed
+\LDA #107               \ We do have a cargo bay extension, so print recursive
+\JSR plf2               \ token 107 ("LARGE CARGO{sentence case} BAY"), followed
 \                       \ by a newline and an indent of 6 characters
 
                         \ --- And replaced by: -------------------------------->
@@ -7852,10 +7852,10 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ TXA                   \ Print recursive token 96 + X, which will print from 96
-\ CLC                   \ ("FRONT") through to 99 ("RIGHT"), followed by a space
-\ ADC #96
-\ JSR spc
+\TXA                    \ Print recursive token 96 + X, which will print from 96
+\CLC                    \ ("FRONT") through to 99 ("RIGHT"), followed by a space
+\ADC #96
+\JSR spc
 
                         \ --- And replaced by: -------------------------------->
 
@@ -7873,20 +7873,20 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ CPY #128+POW          \ If the laser power for view X is not #POW+128 (beam
-\ BNE P%+4              \ laser), skip the next LDA instruction
+\CPY #128+POW           \ If the laser power for view X is not #POW+128 (beam
+\BNE P%+4               \ laser), skip the next LDA instruction
 \
-\ LDA #104              \ This sets A = 104 if the laser in view X is a beam
+\LDA #104               \ This sets A = 104 if the laser in view X is a beam
 \                       \ laser (token 104 is "BEAM LASER")
 \
-\ CPY #Armlas           \ If the laser power for view X is not #Armlas (military
-\ BNE P%+4              \ laser), skip the next LDA instruction
+\CPY #Armlas            \ If the laser power for view X is not #Armlas (military
+\BNE P%+4               \ laser), skip the next LDA instruction
 \
-\ LDA #117              \ This sets A = 117 if the laser in view X is a military
+\LDA #117               \ This sets A = 117 if the laser in view X is a military
 \                       \ laser (token 117 is "MILITARY  LASER")
 \
-\ CPY #Mlas             \ If the laser power for view X is not #Mlas (mining
-\ BNE P%+4              \ laser), skip the next LDA instruction
+\CPY #Mlas              \ If the laser power for view X is not #Mlas (mining
+\BNE P%+4               \ laser), skip the next LDA instruction
 
                         \ --- And replaced by: -------------------------------->
 
@@ -7953,8 +7953,8 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDX #6                \ Move the text cursor to column 6
-\ STX XC
+\LDX #6                 \ Move the text cursor to column 6
+\STX XC
 
                         \ --- And replaced by: -------------------------------->
 
@@ -9767,29 +9767,29 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDX #CYL              \ Set the current ship type to a Cobra Mk III, so we
-\ STX TYPE              \ can show our ship disappear into the distance when we
+\LDX #CYL               \ Set the current ship type to a Cobra Mk III, so we
+\STX TYPE               \ can show our ship disappear into the distance when we
 \                       \ eject in our pod
 \
-\ JSR FRS1              \ Call FRS1 to launch the Cobra Mk III straight ahead,
+\JSR FRS1               \ Call FRS1 to launch the Cobra Mk III straight ahead,
 \                       \ like a missile launch, but with our ship instead
 \
-\ BCS ES1               \ If the Cobra was successfully added to the local
+\BCS ES1                \ If the Cobra was successfully added to the local
 \                       \ bubble, jump to ES1 to skip the following instructions
 \
-\ LDX #CYL2             \ The Cobra wasn't added to the local bubble for some
-\ JSR FRS1              \ reason, so try launching a pirate Cobra Mk III instead
+\LDX #CYL2              \ The Cobra wasn't added to the local bubble for some
+\JSR FRS1               \ reason, so try launching a pirate Cobra Mk III instead
 \
 \.ES1
 \
-\ LDA #8                \ Set the Cobra's byte #27 (speed) to 8
-\ STA INWK+27
+\LDA #8                 \ Set the Cobra's byte #27 (speed) to 8
+\STA INWK+27
 \
-\ LDA #194              \ Set the Cobra's byte #30 (pitch counter) to 194, so it
-\ STA INWK+30           \ pitches up as we pull away
+\LDA #194               \ Set the Cobra's byte #30 (pitch counter) to 194, so it
+\STA INWK+30            \ pitches up as we pull away
 \
-\ LSR A                 \ Set the Cobra's byte #32 (AI flag) to %01100001, so it
-\ STA INWK+32           \ has no AI, and we can use this value as a counter to
+\LSR A                  \ Set the Cobra's byte #32 (AI flag) to %01100001, so it
+\STA INWK+32            \ has no AI, and we can use this value as a counter to
 \                       \ do the following loop 97 times
 
                         \ --- And replaced by: -------------------------------->
@@ -9832,7 +9832,7 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDX #16               \ We lose all our cargo when using our escape pod, so
+\LDX #16                \ We lose all our cargo when using our escape pod, so
 \                       \ up a counter in X so we can zero the 17 cargo slots
 \                       \ in QQ20
 
@@ -9866,8 +9866,8 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDA #70               \ Our replacement ship is delivered with a full tank of
-\ STA QQ14              \ fuel, so set the current fuel level in QQ14 to 70, or
+\LDA #70                \ Our replacement ship is delivered with a full tank of
+\STA QQ14               \ fuel, so set the current fuel level in QQ14 to 70, or
 \                       \ 7.0 light years
 
                         \ --- And replaced by: -------------------------------->
@@ -9983,8 +9983,8 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDA #250              \ Call OOPS to damage the ship by 250, which is a pretty
-\ JMP OOPS              \ big hit, and return from the subroutine using a tail
+\LDA #250               \ Call OOPS to damage the ship by 250, which is a pretty
+\JMP OOPS               \ big hit, and return from the subroutine using a tail
 \                       \ call
 
                         \ --- And replaced by: -------------------------------->
@@ -10082,8 +10082,8 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ ORA #%10000000        \ Otherwise set bit 7 of the target's byte #31 to mark
-\ STA (V),Y             \ the ship as having been killed, so it explodes
+\ORA #%10000000         \ Otherwise set bit 7 of the target's byte #31 to mark
+\STA (V),Y              \ the ship as having been killed, so it explodes
 
                         \ --- And replaced by: -------------------------------->
 
@@ -10110,8 +10110,8 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDA #80               \ Otherwise the missile just got destroyed near us, so
-\ JSR OOPS              \ call OOPS to damage the ship by 80, which is nowhere
+\LDA #80                \ Otherwise the missile just got destroyed near us, so
+\JSR OOPS               \ call OOPS to damage the ship by 80, which is nowhere
 \                       \ near as bad as the 250 damage from a missile slamming
 \                       \ straight into us, but it's still pretty nasty
 
@@ -10238,8 +10238,8 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDA MANY+SHU+1        \ The station is not hostile, so check how many
-\ BNE TA1               \ Transporters there are in the vicinity, and if we
+\LDA MANY+SHU+1         \ The station is not hostile, so check how many
+\BNE TA1                \ Transporters there are in the vicinity, and if we
 \                       \ already have one, return from the subroutine (as TA1
 \                       \ contains an RTS)
 
@@ -10294,9 +10294,9 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDA MANY+COPS         \ Check how many cops there are in the vicinity already,
-\ CMP #4                \ and if there are 4 or more, return from the subroutine
-\ BCS TA22              \ (as TA22 contains an RTS)
+\LDA MANY+COPS          \ Check how many cops there are in the vicinity already,
+\CMP #4                 \ and if there are 4 or more, return from the subroutine
+\BCS TA22               \ (as TA22 contains an RTS)
 
                         \ --- And replaced by: -------------------------------->
 
@@ -10532,15 +10532,15 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ CMP #ANA              \ If this is not an Anaconda, jump down to TN7 to skip
-\ BNE TN7               \ the following
+\CMP #ANA               \ If this is not an Anaconda, jump down to TN7 to skip
+\BNE TN7                \ the following
 \
-\ JSR DORND             \ Set A and X to random numbers
+\JSR DORND              \ Set A and X to random numbers
 \
-\ CMP #200              \ If A < 200 (78% chance), jump down to TN7 to skip the
-\ BCC TN7               \ following
+\CMP #200               \ If A < 200 (78% chance), jump down to TN7 to skip the
+\BCC TN7                \ following
 \
-\ LDX #WRM              \ Set X to the ship type for a Worm
+\LDX #WRM               \ Set X to the ship type for a Worm
 
                         \ --- And replaced by: -------------------------------->
 
@@ -10648,7 +10648,7 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ AND #31               \ Restrict A to a random number in the range 0-31
+\AND #31                \ Restrict A to a random number in the range 0-31
 
                         \ --- And replaced by: -------------------------------->
 
@@ -10771,7 +10771,7 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ JSR OOPS              \ Call OOPS to take some damage, which could do anything
+\JSR OOPS               \ Call OOPS to take some damage, which could do anything
 \                       \ from reducing the shields and energy, all the way to
 \                       \ losing cargo or dying (if the latter, we don't come
 \                       \ back from this subroutine)
@@ -12041,8 +12041,8 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDY #0                \ We have just launched a missile, so we need to remove
-\ JSR ABORT             \ missile lock and hide the leftmost indicator on the
+\LDY #0                 \ We have just launched a missile, so we need to remove
+\JSR ABORT              \ missile lock and hide the leftmost indicator on the
 \                       \ dashboard by setting it to black (Y = 0)
 
                         \ --- End of removed code ----------------------------->
@@ -12051,8 +12051,8 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDA #48               \ Call the NOISE routine with A = 48 to make the sound
-\ JMP NOISE             \ of a missile launch, returning from the subroutine
+\LDA #48                \ Call the NOISE routine with A = 48 to make the sound
+\JMP NOISE              \ of a missile launch, returning from the subroutine
 \                       \ using a tail call
 
                         \ --- And replaced by: -------------------------------->
@@ -12150,9 +12150,9 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDA TYPE              \ If the ship's type is < #CYL (i.e. a missile, Coriolis
-\ CMP #CYL              \ space station, escape pod, plate, cargo canister,
-\ BCC AN3               \ boulder, asteroid, splinter, Shuttle or Transporter),
+\LDA TYPE               \ If the ship's type is < #CYL (i.e. a missile, Coriolis
+\CMP #CYL               \ space station, escape pod, plate, cargo canister,
+\BCC AN3                \ boulder, asteroid, splinter, Shuttle or Transporter),
 \                       \ then jump to AN3 to skip the following
 
                         \ --- And replaced by: -------------------------------->
@@ -12537,8 +12537,8 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDA #48               \ Call the NOISE routine with A = 48 to make the sound
-\ JSR NOISE             \ of the ship launching from the station
+\LDA #48                \ Call the NOISE routine with A = 48 to make the sound
+\JSR NOISE              \ of the ship launching from the station
 
                         \ --- And replaced by: -------------------------------->
 
@@ -13010,10 +13010,10 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ STA K                 \ Set K(3 2 1 0) to (A A A A)
-\ STA K+1
-\ STA K+2
-\ STA K+3
+\STA K                  \ Set K(3 2 1 0) to (A A A A)
+\STA K+1
+\STA K+2
+\STA K+3
 
                         \ --- And replaced by: -------------------------------->
 
@@ -13676,13 +13676,13 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDX Q
-\ BEQ MU1
-\ DEX
-\ STX T
-\ LDA #0
-\ LDX #8
-\ LSR P
+\LDX Q
+\BEQ MU1
+\DEX
+\STX T
+\LDA #0
+\LDX #8
+\LSR P
 
                         \ --- End of removed code ----------------------------->
 
@@ -13836,8 +13836,8 @@
 
 \.MUT3
 \
-\ LDX ALP1              \ Set P = ALP1, though this gets overwritten by the
-\ STX P                 \ following, so this has no effect
+\LDX ALP1               \ Set P = ALP1, though this gets overwritten by the
+\STX P                  \ following, so this has no effect
 \
 \                       \ Fall through into MUT2 to do the following:
 \                       \
@@ -14603,10 +14603,10 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDA #0                \ Set K(3 2 1) = 0 to hold the result (we populate K
-\ STA K+1               \ next)
-\ STA K+2
-\ STA K+3
+\LDA #0                 \ Set K(3 2 1) = 0 to hold the result (we populate K
+\STA K+1                \ next)
+\STA K+2
+\STA K+3
 
                         \ --- And replaced by: -------------------------------->
 
@@ -15136,17 +15136,17 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ EQUB &8C, &E7
-\ EQUB &8D, &ED
-\ EQUB &8A, &E6
-\ EQUB &C1, &C8
-\ EQUB &C8, &8B
-\ EQUB &E0, &8A
-\ EQUB &E6, &D6
-\ EQUB &C5, &C6
-\ EQUB &C1, &CA
-\ EQUB &95, &9D
-\ EQUB &9C, &97
+\EQUB &8C, &E7
+\EQUB &8D, &ED
+\EQUB &8A, &E6
+\EQUB &C1, &C8
+\EQUB &C8, &8B
+\EQUB &E0, &8A
+\EQUB &E6, &D6
+\EQUB &C5, &C6
+\EQUB &C1, &CA
+\EQUB &95, &9D
+\EQUB &9C, &97
 
                         \ --- End of removed code ----------------------------->
 
@@ -15220,9 +15220,9 @@
 
 \.tnpr1
 \
-\ STA QQ29              \ Store the type of market item in QQ29
+\STA QQ29               \ Store the type of market item in QQ29
 \
-\ LDA #1                \ Set the number of units of this market item to 1
+\LDA #1                 \ Set the number of units of this market item to 1
 \
 \                       \ Fall through into tnpr to work out whether there is
 \                       \ room in the cargo hold for A tonnes of the item of
@@ -15539,8 +15539,8 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDA #%10000000        \ Set bit 7 of QQ17 to switch to Sentence Case
-\ STA QQ17
+\LDA #%10000000         \ Set bit 7 of QQ17 to switch to Sentence Case
+\STA QQ17
 
                         \ --- And replaced by: -------------------------------->
 
@@ -15735,8 +15735,8 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ CLC                   \ Call pr2 to print the technology level as a 3-digit
-\ JSR pr2               \ number without a decimal point (by clearing the C
+\CLC                    \ Call pr2 to print the technology level as a 3-digit
+\JSR pr2                \ number without a decimal point (by clearing the C
 \                       \ flag)
 
                         \ --- And replaced by: -------------------------------->
@@ -15872,8 +15872,8 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDA #0                \ Set QQ17 = 0 to switch to ALL CAPS
-\ STA QQ17
+\LDA #0                 \ Set QQ17 = 0 to switch to ALL CAPS
+\STA QQ17
 
                         \ --- And replaced by: -------------------------------->
 
@@ -16400,13 +16400,13 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDX #2                \ Set STP = 2, the step size for the circle
-\ STX STP
+\LDX #2                 \ Set STP = 2, the step size for the circle
+\STX STP
 \
-\ JSR CIRCLE2           \ Call CIRCLE2 to draw a circle with the centre at
+\JSR CIRCLE2            \ Call CIRCLE2 to draw a circle with the centre at
 \                       \ (K3(1 0), K4(1 0)) and radius K
 \
-\ RTS                   \ Return from the subroutine
+\RTS                    \ Return from the subroutine
 
                         \ --- And replaced by: -------------------------------->
 
@@ -16488,8 +16488,8 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ CLC                   \ Print the 8-bit number in X to 3 digits, without a
-\ JSR pr2               \ decimal point
+\CLC                    \ Print the 8-bit number in X to 3 digits, without a
+\JSR pr2                \ decimal point
 
                         \ --- And replaced by: -------------------------------->
 
@@ -16543,12 +16543,12 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDA CRGO              \ If our ship's cargo capacity is < 26 (i.e. we do not
-\ CMP #26               \ have a cargo bay extension), skip the following two
-\ BCC P%+7              \ instructions
+\LDA CRGO               \ If our ship's cargo capacity is < 26 (i.e. we do not
+\CMP #26                \ have a cargo bay extension), skip the following two
+\BCC P%+7               \ instructions
 \
-\ LDA #107              \ We do have a cargo bay extension, so print recursive
-\ JSR TT27              \ token 107 ("LARGE CARGO{sentence case} BAY")
+\LDA #107               \ We do have a cargo bay extension, so print recursive
+\JSR TT27               \ token 107 ("LARGE CARGO{sentence case} BAY")
 
                         \ --- And replaced by: -------------------------------->
 
@@ -16602,7 +16602,7 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ JSR WSCAN             \ Call WSCAN to wait for the vertical sync, so the whole
+\JSR WSCAN              \ Call WSCAN to wait for the vertical sync, so the whole
 \                       \ screen gets drawn and we can move the crosshairs with
 \                       \ no screen flicker
 
@@ -16935,9 +16935,9 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDA QQ15+3            \ Set A = s1_hi - QQ0, the horizontal distance between
-\ SEC                   \ this system and the current system, where |A| < 20.
-\ SBC QQ0               \ Let's call this the x-delta, as it's the horizontal
+\LDA QQ15+3             \ Set A = s1_hi - QQ0, the horizontal distance between
+\SEC                    \ this system and the current system, where |A| < 20.
+\SBC QQ0                \ Let's call this the x-delta, as it's the horizontal
 \                       \ difference between the current system at the centre of
 \                       \ the chart, and this system (and this time we keep the
 \                       \ sign of A, so it can be negative if it's to the left
@@ -16972,9 +16972,9 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDA QQ15+1            \ Set A = s0_hi - QQ1, the vertical distance between
-\ SEC                   \ this system and the current system, where |A| < 38.
-\ SBC QQ1               \ Let's call this the y-delta, as it's the vertical
+\LDA QQ15+1             \ Set A = s0_hi - QQ1, the vertical distance between
+\SEC                    \ this system and the current system, where |A| < 38.
+\SBC QQ1                \ Let's call this the y-delta, as it's the vertical
 \                       \ difference between the current system at the centre of
 \                       \ the chart, and this system (and this time we keep the
 \                       \ sign of A, so it can be negative if it's above the
@@ -17045,8 +17045,8 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDA #%10000000        \ Set bit 7 of QQ17 to switch to Sentence Case
-\ STA QQ17
+\LDA #%10000000         \ Set bit 7 of QQ17 to switch to Sentence Case
+\STA QQ17
 
                         \ --- And replaced by: -------------------------------->
 
@@ -17475,9 +17475,9 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDA QQ11              \ If the current view is 0 (i.e. the space view) then
-\ BNE P%+5              \ jump to TTX110, which calls TT111 to set the current
-\ JMP TTX110            \ system to the nearest system to (QQ9, QQ10), and jumps
+\LDA QQ11               \ If the current view is 0 (i.e. the space view) then
+\BNE P%+5               \ jump to TTX110, which calls TT111 to set the current
+\JMP TTX110             \ system to the nearest system to (QQ9, QQ10), and jumps
 \                       \ back into this routine at TTX111 below
 
                         \ --- And replaced by: -------------------------------->
@@ -17513,8 +17513,8 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDA #0                \ Set QQ17 = 0 to switch to ALL CAPS
-\ STA QQ17
+\LDA #0                 \ Set QQ17 = 0 to switch to ALL CAPS
+\STA QQ17
 
                         \ --- And replaced by: -------------------------------->
 
@@ -17577,8 +17577,8 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ TAX                   \ Print the 8-bit number in X (i.e. 15) at text location
-\ JMP ee3               \ (0, 1), padded to 5 digits, so it appears in the top
+\TAX                    \ Print the 8-bit number in X (i.e. 15) at text location
+\JMP ee3                \ (0, 1), padded to 5 digits, so it appears in the top
 \                       \ left corner of the screen, and return from the
 \                       \ subroutine using a tail call
 
@@ -17901,11 +17901,11 @@
 \                       \ This routine is only called from the hyp routine, and
 \                       \ it jumps back into hyp at label TTX111
 \
-\ JSR TT111             \ Call TT111 to set the current system to the nearest
+\JSR TT111              \ Call TT111 to set the current system to the nearest
 \                       \ system to (QQ9, QQ10), and put the seeds of the
 \                       \ nearest system into QQ15 to QQ15+5
 \
-\ JMP TTX111            \ Return to TTX111 in the hyp routine
+\JMP TTX111             \ Return to TTX111 in the hyp routine
 
                         \ --- End of removed code ----------------------------->
 
@@ -18220,8 +18220,8 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDX #%10000000        \ Set bit 7 of QQ17 to switch to Sentence Case, with the
-\ STX QQ17              \ next letter in capitals
+\LDX #%10000000         \ Set bit 7 of QQ17 to switch to Sentence Case, with the
+\STX QQ17               \ next letter in capitals
 
                         \ --- And replaced by: -------------------------------->
 
@@ -18352,7 +18352,7 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ JSR TT111             \ Select the system closest to galactic coordinates
+\JSR TT111              \ Select the system closest to galactic coordinates
 \                       \ (QQ9, QQ10)
 
                         \ --- End of removed code ----------------------------->
@@ -18566,9 +18566,9 @@
 
 \.ptg
 \
-\ LSR COK               \ Set bit 0 of the competition flags in COK, so that the
-\ SEC                   \ competition code will include the fact that we have
-\ ROL COK               \ manually forced a mis-jump into witchspace
+\LSR COK                \ Set bit 0 of the competition flags in COK, so that the
+\SEC                    \ competition code will include the fact that we have
+\ROL COK                \ manually forced a mis-jump into witchspace
 
                         \ --- End of removed code ----------------------------->
 
@@ -18667,14 +18667,14 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ JSR CTRL              \ Scan the keyboard to see if CTRL is currently pressed,
+\JSR CTRL               \ Scan the keyboard to see if CTRL is currently pressed,
 \                       \ returning a negative value in A if it is
 \
-\ AND PATG              \ If the game is configured to show the author's names
+\AND PATG               \ If the game is configured to show the author's names
 \                       \ on the start-up screen, then PATG will contain &FF,
 \                       \ otherwise it will be 0
 \
-\ BMI ptg               \ By now, A will be negative if we are holding down CTRL
+\BMI ptg                \ By now, A will be negative if we are holding down CTRL
 \                       \ and author names are configured, which is what we have
 \                       \ to do in order to trigger a manual mis-jump, so jump
 \                       \ to ptg to do a mis-jump (ptg not only mis-jumps, but
@@ -18682,12 +18682,12 @@
 \                       \ from the competition code whether this feature had
 \                       \ been used)
 \
-\ JSR DORND             \ Set A and X to random numbers
+\JSR DORND              \ Set A and X to random numbers
 \
-\ CMP #253              \ If A >= 253 (0.78% chance) then jump to MJP to trigger
-\ BCS MJP               \ a mis-jump into witchspace
+\CMP #253               \ If A >= 253 (0.78% chance) then jump to MJP to trigger
+\BCS MJP                \ a mis-jump into witchspace
 \
-\ JSR hyp1+3            \ Jump straight to the system at (QQ9, QQ10) without
+\JSR hyp1+3             \ Jump straight to the system at (QQ9, QQ10) without
 \                       \ first calculating which system is closest
 
                         \ --- And replaced by: -------------------------------->
@@ -18711,9 +18711,9 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDA QQ11              \ If the current view in QQ11 is not a space view (0) or
-\ AND #%00111111        \ one of the charts (64 or 128), return from the
-\ BNE TT113             \ subroutine (as TT113 contains an RTS)
+\LDA QQ11               \ If the current view in QQ11 is not a space view (0) or
+\AND #%00111111         \ one of the charts (64 or 128), return from the
+\BNE TT113              \ subroutine (as TT113 contains an RTS)
 
                         \ --- And replaced by: -------------------------------->
 
@@ -18877,13 +18877,13 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDA CASH+1            \ Then the third most significant bytes (which are 0):
-\ ADC #0                \
-\ STA CASH+1            \   CASH+1 = CASH+1 + 0
+\LDA CASH+1             \ Then the third most significant bytes (which are 0):
+\ADC #0                 \
+\STA CASH+1             \   CASH+1 = CASH+1 + 0
 \
-\ LDA CASH              \ And finally the most significant bytes (which are 0):
-\ ADC #0                \
-\ STA CASH              \   CASH = CASH + 0
+\LDA CASH               \ And finally the most significant bytes (which are 0):
+\ADC #0                 \
+\STA CASH               \   CASH = CASH + 0
 
                         \ --- And replaced by: -------------------------------->
 
@@ -18934,7 +18934,7 @@
 
 \.GCASH
 \
-\ JSR MULTU             \ Call MULTU to calculate (A P) = P * Q
+\JSR MULTU              \ Call MULTU to calculate (A P) = P * Q
 
                         \ --- End of removed code ----------------------------->
 
@@ -19230,7 +19230,7 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ CLC                   \ We don't want to print the galaxy number with a
+\CLC                    \ We don't want to print the galaxy number with a
 \                       \ decimal point, so clear the C flag for pr2 to take as
 \                       \ an argument
 
@@ -19244,7 +19244,7 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ JMP pr2               \ Jump to pr2, which prints the number in X to a width
+\JMP pr2                \ Jump to pr2, which prints the number in X to a width
 \                       \ of 3 figures, left-padding with spaces to a width of
 \                       \ 3, and return from the subroutine using a tail call
 
@@ -19465,19 +19465,19 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ DEX                   \ If token > 6, skip the following three instructions
-\ BNE P%+7
+\DEX                    \ If token > 6, skip the following three instructions
+\BNE P%+7
 \
-\ LDA #%10000000        \ This token is control code 6 (switch to Sentence
-\ STA QQ17              \ Case), so set bit 7 of QQ17 to switch to Sentence Case
-\ RTS                   \ and return from the subroutine as we are done
+\LDA #%10000000         \ This token is control code 6 (switch to Sentence
+\STA QQ17               \ Case), so set bit 7 of QQ17 to switch to Sentence Case
+\RTS                    \ and return from the subroutine as we are done
 \
-\ DEX                   \ If token > 8, skip the following two instructions
-\ DEX
-\ BNE P%+5
+\DEX                    \ If token > 8, skip the following two instructions
+\DEX
+\BNE P%+5
 \
-\ STX QQ17              \ This token is control code 8 (switch to ALL CAPS), so
-\ RTS                   \ set QQ17 to 0 to switch to ALL CAPS and return from
+\STX QQ17               \ This token is control code 8 (switch to ALL CAPS), so
+\RTS                    \ set QQ17 to 0 to switch to ALL CAPS and return from
 \                       \ the subroutine as we are done
 
                         \ --- And replaced by: -------------------------------->
@@ -19941,12 +19941,12 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDA #LO(QQ18)         \ Set V(1 0) to point to the recursive token table at
-\ STA V                 \ location QQ18
-\ LDA #HI(QQ18)
-\ STA V+1
+\LDA #LO(QQ18)          \ Set V(1 0) to point to the recursive token table at
+\STA V                  \ location QQ18
+\LDA #HI(QQ18)
+\STA V+1
 \
-\ LDY #0                \ Set a counter Y to point to the character offset
+\LDY #0                 \ Set a counter Y to point to the character offset
 \                       \ as we scan through the table
 
                         \ --- And replaced by: -------------------------------->
@@ -20486,7 +20486,7 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LSR FIST              \ Halve our legal status in FIST, making us less bad,
+\LSR FIST               \ Halve our legal status in FIST, making us less bad,
 \                       \ and moving bit 0 into the C flag (so every time we
 \                       \ arrive in a new system, our legal status improves a
 \                       \ bit)
@@ -20979,14 +20979,14 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDA SSPR              \ If we are inside the space station safe zone, jump to
-\ BNE SP1               \ SP1 to draw the space station on the compass
+\LDA SSPR               \ If we are inside the space station safe zone, jump to
+\BNE SP1                \ SP1 to draw the space station on the compass
 \
-\ JSR SPS1              \ Otherwise we need to draw the planet on the compass,
+\JSR SPS1               \ Otherwise we need to draw the planet on the compass,
 \                       \ so first call SPS1 to calculate the vector to the
 \                       \ planet and store it in XX15
 \
-\ JMP SP2               \ Jump to SP2 to draw XX15 on the compass, returning
+\JMP SP2                \ Jump to SP2 to draw XX15 on the compass, returning
 \                       \ from the subroutine using a tail call
 
                         \ --- And replaced by: -------------------------------->
@@ -21040,44 +21040,44 @@
 
 \.SPS2
 \
-\ ASL A                 \ Set X = |A| * 2, and set the C flag to the sign bit of
-\ TAX                   \ A
+\ASL A                  \ Set X = |A| * 2, and set the C flag to the sign bit of
+\TAX                    \ A
 \
-\ LDA #0                \ Set Y to have the sign bit from A in bit 7, with the
-\ ROR A                 \ rest of its bits zeroed, so Y now contains the sign of
-\ TAY                   \ the original argument
+\LDA #0                 \ Set Y to have the sign bit from A in bit 7, with the
+\ROR A                  \ rest of its bits zeroed, so Y now contains the sign of
+\TAY                    \ the original argument
 \
-\ LDA #20               \ Set Q = 20
-\ STA Q
+\LDA #20                \ Set Q = 20
+\STA Q
 \
-\ TXA                   \ Copy X into A, so A now contains the argument A * 2
+\TXA                    \ Copy X into A, so A now contains the argument A * 2
 \
-\ JSR DVID4             \ Calculate the following:
+\JSR DVID4              \ Calculate the following:
 \                       \
 \                       \   P = A / Q
 \                       \     = |argument A| * 2 / 20
 \                       \     = |argument A| / 10
 \
-\ LDX P                 \ Set X to the result
+\LDX P                  \ Set X to the result
 \
-\ TYA                   \ If the sign of the original argument A is negative,
-\ BMI LL163             \ jump to LL163 to flip the sign of the result
+\TYA                    \ If the sign of the original argument A is negative,
+\BMI LL163              \ jump to LL163 to flip the sign of the result
 \
-\ LDY #0                \ Set the high byte of the result to 0, as the result is
+\LDY #0                 \ Set the high byte of the result to 0, as the result is
 \                       \ positive
 \
-\ RTS                   \ Return from the subroutine
+\RTS                    \ Return from the subroutine
 \
 \.LL163
 \
-\ LDY #&FF              \ The result is negative, so set the high byte to &FF
+\LDY #&FF               \ The result is negative, so set the high byte to &FF
 \
-\ TXA                   \ Flip the low byte and add 1 to get the negated low
-\ EOR #&FF              \ byte, using two's complement
-\ TAX
-\ INX
+\TXA                    \ Flip the low byte and add 1 to get the negated low
+\EOR #&FF               \ byte, using two's complement
+\TAX
+\INX
 \
-\ RTS                   \ Return from the subroutine
+\RTS                    \ Return from the subroutine
 
                         \ --- End of moved code ------------------------------->
 
@@ -21099,21 +21099,21 @@
 
 \.SPS4
 \
-\ LDX #8                \ First we need to copy the space station's coordinates
+\LDX #8                 \ First we need to copy the space station's coordinates
 \                       \ into K3, so set a counter to copy the first 9 bytes
 \                       \ (the 3-byte x, y and z coordinates) from the station's
 \                       \ data block at K% + NI% into K3
 \
 \.SPL1
 \
-\ LDA K%+NI%,X          \ Copy the X-th byte from the station's data block at
-\ STA K3,X              \ K% + NI% to the X-th byte of K3
+\LDA K%+NI%,X           \ Copy the X-th byte from the station's data block at
+\STA K3,X               \ K% + NI% to the X-th byte of K3
 \
-\ DEX                   \ Decrement the loop counter
+\DEX                    \ Decrement the loop counter
 \
-\ BPL SPL1              \ Loop back to SPL1 until we have copied all 9 bytes
+\BPL SPL1               \ Loop back to SPL1 until we have copied all 9 bytes
 \
-\ JMP TAS2              \ Call TAS2 to build XX15 from K3, returning from the
+\JMP TAS2               \ Call TAS2 to build XX15 from K3, returning from the
 \                       \ subroutine using a tail call
 
                         \ --- End of removed code ----------------------------->
@@ -21131,7 +21131,7 @@
 
 \.SP1
 \
-\ JSR SPS4              \ Call SPS4 to calculate the vector to the space station
+\JSR SPS4               \ Call SPS4 to calculate the vector to the space station
 \                       \ and store it in XX15
 \
 \                       \ Fall through into SP2 to draw XX15 on the compass
@@ -21597,11 +21597,11 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDA K%+1,X            \ Copy x_hi into K3+X
-\ STA K3,X
+\LDA K%+1,X             \ Copy x_hi into K3+X
+\STA K3,X
 \
-\ LDA K%+2,X            \ Set A = Y = x_sign
-\ TAY
+\LDA K%+2,X             \ Set A = Y = x_sign
+\TAY
 
                         \ --- And replaced by: -------------------------------->
 
@@ -21618,9 +21618,9 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ TYA                   \ Set K3+2 = the sign of x_sign
-\ AND #%10000000
-\ STA K3+2,X
+\TYA                    \ Set K3+2 = the sign of x_sign
+\AND #%10000000
+\STA K3+2,X
 
                         \ --- And replaced by: -------------------------------->
 
@@ -21694,10 +21694,10 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDX #0                \ Set pitch counter to 0 (no pitch, roll only)
-\ STX INWK+30
+\LDX #0                 \ Set pitch counter to 0 (no pitch, roll only)
+\STX INWK+30
 \
-\ STX NEWB              \ Set NEWB to %00000000, though this gets overridden by
+\STX NEWB               \ Set NEWB to %00000000, though this gets overridden by
 \                       \ the default flags from E% in NWSHP below
 
                         \ --- And replaced by: -------------------------------->
@@ -21717,8 +21717,8 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ DEX                   \ Set the roll counter to 255 (maximum anti-clockwise
-\ STX INWK+29           \ roll with no damping)
+\DEX                    \ Set the roll counter to 255 (maximum anti-clockwise
+\STX INWK+29            \ roll with no damping)
 
                         \ --- And replaced by: -------------------------------->
 
@@ -21766,10 +21766,10 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDA #LO(LSO)          \ Set bytes #33 and #34 to point to LSO for the ship
-\ STA INWK+33           \ line heap for the space station
-\ LDA #HI(LSO)
-\ STA INWK+34
+\LDA #LO(LSO)           \ Set bytes #33 and #34 to point to LSO for the ship
+\STA INWK+33            \ line heap for the space station
+\LDA #HI(LSO)
+\STA INWK+34
 
                         \ --- End of removed code ----------------------------->
 
@@ -22163,8 +22163,8 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDX NOMSL             \ Call MSBAR to update the leftmost indicator in the
-\ JSR MSBAR             \ dashboard's missile bar, which returns with Y = 0
+\LDX NOMSL              \ Call MSBAR to update the leftmost indicator in the
+\JSR MSBAR              \ dashboard's missile bar, which returns with Y = 0
 
                         \ --- And replaced by: -------------------------------->
 
@@ -22279,10 +22279,10 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ STX P+1               \ Set P(2 1) = (Y X)
-\ STY P+2
+\STX P+1                \ Set P(2 1) = (Y X)
+\STY P+2
 \
-\ LDA #&7D              \ Set A to the high byte of the screen address, which is
+\LDA #&7D               \ Set A to the high byte of the screen address, which is
 \                       \ &7D as the bulbs are both in the character row from
 \                       \ &7D00 to &7DFF
 
@@ -22407,15 +22407,15 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ TXA                   \ Set T = X * 8
-\ ASL A
-\ ASL A
-\ ASL A
-\ STA T
+\TXA                    \ Set T = X * 8
+\ASL A
+\ASL A
+\ASL A
+\STA T
 \
-\ LDA #49               \ Set SC = 49 - T
-\ SBC T                 \        = 48 + 1 - (X * 8)
-\ STA SC
+\LDA #49                \ Set SC = 49 - T
+\SBC T                  \        = 48 + 1 - (X * 8)
+\STA SC
 
                         \ --- And replaced by: -------------------------------->
 
@@ -23494,11 +23494,11 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ TXA                   \ Negate X using two's complement, so X = ~X + 1
-\ EOR #%11111111
-\ CLC
-\ ADC #1
-\ TAX
+\TXA                    \ Negate X using two's complement, so X = ~X + 1
+\EOR #%11111111
+\CLC
+\ADC #1
+\TAX
 
                         \ --- And replaced by: -------------------------------->
 
@@ -24461,14 +24461,14 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ BNE ED3               \ If the high byte subtraction is non-zero, then skip
+\BNE ED3                \ If the high byte subtraction is non-zero, then skip
 \                       \ to ED3
 \
-\ CLC                   \ Otherwise the high byte of the subtraction was zero,
+\CLC                    \ Otherwise the high byte of the subtraction was zero,
 \                       \ so the line fits on-screen and we clear the C flag to
 \                       \ indicate success
 \
-\ RTS                   \ Return from the subroutine
+\RTS                    \ Return from the subroutine
 \
 \.ED3
 
@@ -26060,7 +26060,7 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDX #4                \ Set up a loop counter in X to count through all four
+\LDX #4                 \ Set up a loop counter in X to count through all four
 \                       \ missile indicators
 
                         \ --- And replaced by: -------------------------------->
@@ -26075,28 +26075,28 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ CPX NOMSL             \ If the counter is equal to the number of missiles,
-\ BEQ SAL8              \ jump down to SAL8 to draw the remaining missiles, as
+\CPX NOMSL              \ If the counter is equal to the number of missiles,
+\BEQ SAL8               \ jump down to SAL8 to draw the remaining missiles, as
 \                       \ the rest of them are present and should be drawn in
 \                       \ green/cyan
 \
-\ LDY #0                \ Draw the missile indicator at position X in black
-\ JSR MSBAR
+\LDY #0                 \ Draw the missile indicator at position X in black
+\JSR MSBAR
 \
-\ DEX                   \ Decrement the counter to point to the next missile
+\DEX                    \ Decrement the counter to point to the next missile
 \
-\ BNE ss                \ Loop back to ss if we still have missiles to draw
+\BNE ss                 \ Loop back to ss if we still have missiles to draw
 \
-\ RTS                   \ Return from the subroutine
+\RTS                    \ Return from the subroutine
 \
 \.SAL8
 \
-\ LDY #&EE              \ Draw the missile indicator at position X in green/cyan
-\ JSR MSBAR
+\LDY #&EE               \ Draw the missile indicator at position X in green/cyan
+\JSR MSBAR
 \
-\ DEX                   \ Decrement the counter to point to the next missile
+\DEX                    \ Decrement the counter to point to the next missile
 \
-\ BNE SAL8              \ Loop back to SAL8 if we still have missiles to draw
+\BNE SAL8               \ Loop back to SAL8 if we still have missiles to draw
 
                         \ --- And replaced by: -------------------------------->
 
@@ -26175,25 +26175,25 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ JSR ZINF              \ Call ZINF to reset the INWK ship workspace
+\JSR ZINF               \ Call ZINF to reset the INWK ship workspace
 \
-\ JSR DORND             \ Set A and X to random numbers
+\JSR DORND              \ Set A and X to random numbers
 \
-\ STA T1                \ Store A in T1
+\STA T1                 \ Store A in T1
 \
-\ AND #%10000000        \ Extract the sign of A and store in x_sign
-\ STA INWK+2
+\AND #%10000000         \ Extract the sign of A and store in x_sign
+\STA INWK+2
 \
-\ TXA                   \ Extract the sign of X and store in y_sign
-\ AND #%10000000
-\ STA INWK+5
+\TXA                    \ Extract the sign of X and store in y_sign
+\AND #%10000000
+\STA INWK+5
 \
-\ LDA #25               \ Set x_hi = y_hi = z_hi = 25, a fair distance away
-\ STA INWK+1
-\ STA INWK+4
-\ STA INWK+7
+\LDA #25                \ Set x_hi = y_hi = z_hi = 25, a fair distance away
+\STA INWK+1
+\STA INWK+4
+\STA INWK+7
 \
-\ JSR DORND             \ Set A and X to random numbers
+\JSR DORND              \ Set A and X to random numbers
 
                         \ --- And replaced by: -------------------------------->
 
@@ -26314,9 +26314,9 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ AND #15               \ Set the ship speed to our random number, set to a
-\ ORA #16               \ minimum of 16 and a maximum of 31
-\ STA INWK+27
+\AND #15                \ Set the ship speed to our random number, set to a
+\ORA #16                \ minimum of 16 and a maximum of 31
+\STA INWK+27
 
                         \ --- And replaced by: -------------------------------->
 
@@ -26344,18 +26344,18 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ AND #2                \ If we jumped here with a random value of A from the
+\AND #2                 \ If we jumped here with a random value of A from the
 \                       \ BMI above, then this reduces A to a random value of
 \                       \ either 0 or 2; if we didn't take the BMI and made the
 \                       \ ship hostile, then A will be 0
 \
-\ ADC #CYL              \ Set A = A + C + #CYL
+\ADC #CYL               \ Set A = A + C + #CYL
 \                       \
 \                       \ where A is 0 or 2 and C is 0 or 1, so this gives us a
 \                       \ ship type from the following: Cobra Mk III, Python,
 \                       \ Boa or Anaconda
 \
-\ JSR NWSHP             \ Add a new ship of type A to the local bubble and fall
+\JSR NWSHP              \ Add a new ship of type A to the local bubble and fall
 \                       \ through into the main game loop again
 
                         \ --- And replaced by: -------------------------------->
@@ -26450,8 +26450,8 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ CMP #35               \ If A >= 35 (87% chance), jump down to MTT1 to skip
-\ BCS MTT1              \ the spawning of an asteroid or cargo canister and
+\CMP #35                \ If A >= 35 (87% chance), jump down to MTT1 to skip
+\BCS MTT1               \ the spawning of an asteroid or cargo canister and
 \                       \ potentially spawn something else
 
                         \ --- And replaced by: -------------------------------->
@@ -26468,16 +26468,16 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ JSR ZINF              \ Call ZINF to reset the INWK ship workspace
+\JSR ZINF               \ Call ZINF to reset the INWK ship workspace
 \
-\ LDA #38               \ Set z_hi = 38 (far away)
-\ STA INWK+7
+\LDA #38                \ Set z_hi = 38 (far away)
+\STA INWK+7
 \
-\ JSR DORND             \ Set A, X and C flag to random numbers
+\JSR DORND              \ Set A, X and C flag to random numbers
 \
-\ STA INWK              \ Set x_lo = random
+\STA INWK               \ Set x_lo = random
 \
-\ STX INWK+3            \ Set y_lo = random
+\STX INWK+3             \ Set y_lo = random
 \                       \
 \                       \ Note that because we use the value of X returned by
 \                       \ DORND, and X contains the value of A returned by the
@@ -26485,27 +26485,27 @@
 \                       \ to a totally random location. See the deep dive on
 \                       \ "Fixing ship positions" for details
 \
-\ AND #%10000000        \ Set x_sign = bit 7 of x_lo
-\ STA INWK+2
+\AND #%10000000         \ Set x_sign = bit 7 of x_lo
+\STA INWK+2
 \
-\ TXA                   \ Set y_sign = bit 7 of y_lo
-\ AND #%10000000
-\ STA INWK+5
+\TXA                    \ Set y_sign = bit 7 of y_lo
+\AND #%10000000
+\STA INWK+5
 \
-\ ROL INWK+1            \ Set bit 1 of x_hi to the C flag, which is random, so
-\ ROL INWK+1            \ this randomly moves us off-centre by 512 (as if x_hi
+\ROL INWK+1             \ Set bit 1 of x_hi to the C flag, which is random, so
+\ROL INWK+1             \ this randomly moves us off-centre by 512 (as if x_hi
 \                       \ is %00000010, then (x_hi x_lo) is 512 + x_lo)
 \
-\ JSR DORND             \ Set A, X and V flag to random numbers
+\JSR DORND              \ Set A, X and V flag to random numbers
 \
-\ BVS MTT4              \ If V flag is set (50% chance), jump up to MTT4 to
+\BVS MTT4               \ If V flag is set (50% chance), jump up to MTT4 to
 \                       \ spawn a trader
 \
 \IF _STH_DISC OR _SRAM_DISC
 \
-\ NOP                   \ In the first version of disc Elite, asteroids never
-\ NOP                   \ appeared. It turned out that the authors had put in a
-\ NOP                   \ jump to force traders to spawn, so they could test
+\NOP                    \ In the first version of disc Elite, asteroids never
+\NOP                    \ appeared. It turned out that the authors had put in a
+\NOP                    \ jump to force traders to spawn, so they could test
 \                       \ that part of the code, but had forgotten to remove it,
 \                       \ so this was fixed in later versions by replacing the
 \                       \ JMP instruction with NOPs... and this is where that
@@ -26513,7 +26513,7 @@
 \
 \ELIF _IB_DISC
 \
-\ JMP MTT4              \ In the first version of disc Elite, asteroids never
+\JMP MTT4               \ In the first version of disc Elite, asteroids never
 \                       \ appeared. It turned out that the authors had put in a
 \                       \ jump to force traders to spawn, so they could test
 \                       \ that part of the code, but had forgotten to remove it,
@@ -26524,25 +26524,25 @@
 \
 \ENDIF
 \
-\ ORA #%01101111        \ Take the random number in A and set bits 0-3 and 5-6,
-\ STA INWK+29           \ so the result has a 50% chance of being positive or
+\ORA #%01101111         \ Take the random number in A and set bits 0-3 and 5-6,
+\STA INWK+29            \ so the result has a 50% chance of being positive or
 \                       \ negative, and a 50% chance of bits 0-6 being 127.
 \                       \ Storing this number in the roll counter therefore
 \                       \ gives our new ship a fast roll speed with a 50%
 \                       \ chance of having no damping, plus a 50% chance of
 \                       \ rolling clockwise or anti-clockwise
 \
-\ LDA SSPR              \ If we are inside the space station safe zone, jump
-\ BNE MTT1              \ down to MTT1 to skip the following and potentially
+\LDA SSPR               \ If we are inside the space station safe zone, jump
+\BNE MTT1               \ down to MTT1 to skip the following and potentially
 \                       \ spawn something else
 \
-\ TXA                   \ Set A to the random X we set above, which we haven't
-\ BCS MTT2              \ used yet, and if the C flag is set (50% chance) jump
+\TXA                    \ Set A to the random X we set above, which we haven't
+\BCS MTT2               \ used yet, and if the C flag is set (50% chance) jump
 \                       \ down to MTT2 to skip the following
 \
-\ AND #31               \ Set the ship speed to our random number, set to a
-\ ORA #16               \ minimum of 16 and a maximum of 31
-\ STA INWK+27
+\AND #31                \ Set the ship speed to our random number, set to a
+\ORA #16                \ minimum of 16 and a maximum of 31
+\STA INWK+27
 
                         \ --- And replaced by: -------------------------------->
 
@@ -26598,7 +26598,7 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ JSR NWSHP             \ Add our new asteroid or canister to the universe
+\JSR NWSHP              \ Add our new asteroid or canister to the universe
 
                         \ --- And replaced by: -------------------------------->
 
@@ -26667,15 +26667,15 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ CMP T                 \ If the random value in A >= our badness level, which
-\ BCS P%+7              \ will be the case unless we have been really, really
+\CMP T                  \ If the random value in A >= our badness level, which
+\BCS P%+7               \ will be the case unless we have been really, really
 \                       \ bad, then skip the following two instructions (so
 \                       \ if we are really bad, there's a higher chance of
 \                       \ spawning a cop, otherwise we got away with it, for
 \                       \ now)
 \
-\ LDA #COPS             \ Add a new police ship to the local bubble
-\ JSR NWSHP
+\LDA #COPS              \ Add a new police ship to the local bubble
+\JSR NWSHP
 
                         \ --- And replaced by: -------------------------------->
 
@@ -26785,7 +26785,7 @@
 \                       \ Now to spawn a lone bounty hunter or a group of
 \                       \ pirates
 \
-\ JSR Ze                \ Call Ze to initialise INWK to a potentially hostile
+\JSR Ze                 \ Call Ze to initialise INWK to a potentially hostile
 \                       \ ship, and set A and X to random values
 \                       \
 \                       \ Note that because Ze uses the value of X returned by
@@ -26794,8 +26794,8 @@
 \                       \ to a totally random location. See the deep dive on
 \                       \ "Fixing ship positions" for details
 \
-\ CMP #100              \ If the random number in A >= 100 (61% chance), jump
-\ BCS mt1               \ to mt1 to spawn pirates, otherwise keep going to
+\CMP #100               \ If the random number in A >= 100 (61% chance), jump
+\BCS mt1                \ to mt1 to spawn pirates, otherwise keep going to
 \                       \ spawn a lone bounty hunter
 
                         \ --- And replaced by: -------------------------------->
@@ -26817,7 +26817,7 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ ADC #CYL2             \ Add A to #CYL2 (we know the C flag is clear as we
+\ADC #CYL2              \ Add A to #CYL2 (we know the C flag is clear as we
 \                       \ passed through the BCS above), so A is now one of the
 \                       \ lone bounty hunter ships, i.e. Cobra Mk III (pirate),
 \                       \ Asp Mk II, Python (pirate) or Fer-de-lance
@@ -26920,37 +26920,37 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ AND #3                \ It's time to spawn a group of pirates, so set A to a
+\AND #3                 \ It's time to spawn a group of pirates, so set A to a
 \                       \ random number in the range 0-3, which will be the
 \                       \ loop counter for spawning pirates below (so we will
 \                       \ spawn 1-4 pirates)
 \
-\ STA EV                \ Delay further spawnings by this number
+\STA EV                 \ Delay further spawnings by this number
 \
-\ STA XX13              \ Store the number in XX13, the pirate counter
+\STA XX13               \ Store the number in XX13, the pirate counter
 \
 \.mt3
 \
-\ JSR DORND             \ Set A and X to random numbers
+\JSR DORND              \ Set A and X to random numbers
 \
-\ STA T                 \ Set T to a random number
+\STA T                  \ Set T to a random number
 \
-\ JSR DORND             \ Set A and X to random numbers
+\JSR DORND              \ Set A and X to random numbers
 \
-\ AND T                 \ Set A to the AND of two random numbers, so each bit
+\AND T                  \ Set A to the AND of two random numbers, so each bit
 \                       \ has 25% chance of being set which makes the chances
 \                       \ of a smaller number higher
 \
-\ AND #7                \ Reduce A to a random number in the range 0-7, though
+\AND #7                 \ Reduce A to a random number in the range 0-7, though
 \                       \ with a bigger chance of a smaller number in this range
 \
-\ STA CPIR              \ Set CPIR to this random number in the range 0-7
+\STA CPIR               \ Set CPIR to this random number in the range 0-7
 \
 \.more
 \
-\ LDA CPIR              \ Set A to the ship type in CPIR
+\LDA CPIR               \ Set A to the ship type in CPIR
 \
-\ ADC #PACK             \ #PACK is set to #SH3, the ship type for a Sidewinder,
+\ADC #PACK              \ #PACK is set to #SH3, the ship type for a Sidewinder,
 \                       \ so this sets our new ship type to one of the pack
 \                       \ hunters, namely a Sidewinder, Mamba, Krait, Adder,
 \                       \ Gecko, Cobra Mk I, Worm or Cobra Mk III (pirate)
@@ -27060,23 +27060,23 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ BCS P%+7              \ If the ship was successfully added, skip the following
+\BCS P%+7               \ If the ship was successfully added, skip the following
 \                       \ two instructions
 \
-\ DEC CPIR              \ The ship wasn't added, which might be because the ship
+\DEC CPIR               \ The ship wasn't added, which might be because the ship
 \                       \ blueprint for this ship type isn't in the currently
 \                       \ loaded ship blueprints file, so decrement CPIR to
 \                       \ point to the previous ship type, so we can try
 \                       \ spawning that type of pirate instead
 \
-\ BPL more              \ Loop back to more to have another go at spawning this
+\BPL more               \ Loop back to more to have another go at spawning this
 \                       \ pirate, until we have tried spawning a Sidewinder when
 \                       \ CPIR is 0, in which case give up and move on to the
 \                       \ next pirate to spawn
 \
-\ DEC XX13              \ Decrement the pirate counter
+\DEC XX13               \ Decrement the pirate counter
 \
-\ BPL mt3               \ If we need more pirates, loop back up to mt3,
+\BPL mt3                \ If we need more pirates, loop back up to mt3,
 \                       \ otherwise we are done spawning, so fall through into
 \                       \ the end of the main loop at MLOOP
 
@@ -27158,12 +27158,12 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDA QQ11              \ If this is a space view, skip the following five
-\ BEQ P%+13             \ instructions (i.e. jump to JSR TT17 below)
+\LDA QQ11               \ If this is a space view, skip the following five
+\BEQ P%+13              \ instructions (i.e. jump to JSR TT17 below)
 \
-\ AND PATG              \ If PATG = &FF (author names are shown on start-up)
-\ LSR A                 \ and bit 0 of QQ11 is 1 (the current view is type 1),
-\ BCS P%+7              \ then skip the following two instructions
+\AND PATG               \ If PATG = &FF (author names are shown on start-up)
+\LSR A                  \ and bit 0 of QQ11 is 1 (the current view is type 1),
+\BCS P%+7               \ then skip the following two instructions
 
                         \ --- And replaced by: -------------------------------->
 
@@ -27375,12 +27375,12 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDA QQ11              \ If the current view is a chart (QQ11 = 64 or 128),
-\ AND #%11000000        \ keep going, otherwise jump down to TT107 to skip the
-\ BEQ TT107             \ following
+\LDA QQ11               \ If the current view is a chart (QQ11 = 64 or 128),
+\AND #%11000000         \ keep going, otherwise jump down to TT107 to skip the
+\BEQ TT107              \ following
 \
-\ LDA QQ22+1            \ If the on-screen hyperspace counter is non-zero,
-\ BNE TT107             \ then we are already counting down, so jump to TT107
+\LDA QQ22+1             \ If the on-screen hyperspace counter is non-zero,
+\BNE TT107              \ then we are already counting down, so jump to TT107
 \                       \ to skip the following
 
                         \ --- And replaced by: -------------------------------->
@@ -27397,8 +27397,8 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ CMP #&36              \ If "O" was pressed, do the following three jumps,
-\ BNE ee2               \ otherwise skip to ee2 to continue
+\CMP #&36               \ If "O" was pressed, do the following three jumps,
+\BNE ee2                \ otherwise skip to ee2 to continue
 
                         \ --- And replaced by: -------------------------------->
 
@@ -27417,7 +27417,7 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ JSR TT103             \ Draw small crosshairs at coordinates (QQ9, QQ10),
+\JSR TT103              \ Draw small crosshairs at coordinates (QQ9, QQ10),
 \                       \ which will draw the crosshairs at our current home
 \                       \ system
 
@@ -27547,8 +27547,8 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDA #%10000000        \ Set bit 7 of QQ17 to switch to Sentence Case, with the
-\ STA QQ17              \ next letter in capitals
+\LDA #%10000000         \ Set bit 7 of QQ17 to switch to Sentence Case, with the
+\STA QQ17               \ next letter in capitals
 
                         \ --- And replaced by: -------------------------------->
 
@@ -27597,17 +27597,17 @@
 
 \.BAD
 \
-\ LDA QQ20+3            \ Set A to the number of tonnes of slaves in the hold
+\LDA QQ20+3             \ Set A to the number of tonnes of slaves in the hold
 \
-\ CLC                   \ Clear the C flag so we can do addition without the
+\CLC                    \ Clear the C flag so we can do addition without the
 \                       \ C flag affecting the result
 \
-\ ADC QQ20+6            \ Add the number of tonnes of narcotics in the hold
+\ADC QQ20+6             \ Add the number of tonnes of narcotics in the hold
 \
-\ ASL A                 \ Double the result and add the number of tonnes of
-\ ADC QQ20+10           \ firearms in the hold
+\ASL A                  \ Double the result and add the number of tonnes of
+\ADC QQ20+10            \ firearms in the hold
 \
-\ RTS                   \ Return from the subroutine
+\RTS                    \ Return from the subroutine
 
                         \ --- End of removed code ----------------------------->
 
@@ -28003,15 +28003,15 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ CLC                   \ Convert A from 0-15 to 'A' to 'P'
-\ ADC #'A'
+\CLC                    \ Convert A from 0-15 to 'A' to 'P'
+\ADC #'A'
 \
-\ STA SHIPI+6           \ Store the letter of the ship blueprints file we want
+\STA SHIPI+6            \ Store the letter of the ship blueprints file we want
 \                       \ in the seventh byte of the command string at SHIPI, so
 \                       \ it overwrites the "0" in "D.MO0" with the file letter
 \                       \ to load, from D.MOA to D.MOP
 \
-\ JSR CATD              \ Call CATD to reload the disc catalogue
+\JSR CATD               \ Call CATD to reload the disc catalogue
 
                         \ --- And replaced by: -------------------------------->
 
@@ -28045,8 +28045,8 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ EQUS "L.D.MO0"        \ This is short for "*LOAD D.MO0"
-\ EQUB 13
+\EQUS "L.D.MO0"         \ This is short for "*LOAD D.MO0"
+\EQUB 13
 
                         \ --- And replaced by: -------------------------------->
 
@@ -28186,14 +28186,14 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDX #0                \ Copy the two high bytes of the planet's x-coordinate
-\ JSR SPS3              \ into K3(2 1 0), separating out the sign bit into K3+2
+\LDX #0                 \ Copy the two high bytes of the planet's x-coordinate
+\JSR SPS3               \ into K3(2 1 0), separating out the sign bit into K3+2
 \
-\ LDX #3                \ Copy the two high bytes of the planet's y-coordinate
-\ JSR SPS3              \ into K3(5 4 3), separating out the sign bit into K3+5
+\LDX #3                 \ Copy the two high bytes of the planet's y-coordinate
+\JSR SPS3               \ into K3(5 4 3), separating out the sign bit into K3+5
 \
-\ LDX #6                \ Copy the two high bytes of the planet's z-coordinate
-\ JSR SPS3              \ into K3(8 7 6), separating out the sign bit into K3+8
+\LDX #6                 \ Copy the two high bytes of the planet's z-coordinate
+\JSR SPS3               \ into K3(8 7 6), separating out the sign bit into K3+8
 
                         \ --- And replaced by: -------------------------------->
 
@@ -28390,15 +28390,15 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ STA T                 \ Set (T P) = (A P) = y^2
+\STA T                  \ Set (T P) = (A P) = y^2
 \
-\ LDA P                 \ Set (R Q) = (R Q) + (T P) = x^2 + y^2
-\ ADC Q                 \
-\ STA Q                 \ First, doing the low bytes, Q = Q + P
+\LDA P                  \ Set (R Q) = (R Q) + (T P) = x^2 + y^2
+\ADC Q                  \
+\STA Q                  \ First, doing the low bytes, Q = Q + P
 \
-\ LDA T                 \ And then the high bytes, R = R + T
-\ ADC R
-\ STA R
+\LDA T                  \ And then the high bytes, R = R + T
+\ADC R
+\STA R
 
                         \ --- And replaced by: -------------------------------->
 
@@ -28420,15 +28420,15 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ STA T                 \ Set (T P) = (A P) = z^2
+\STA T                  \ Set (T P) = (A P) = z^2
 \
-\ LDA P                 \ Set (R Q) = (R Q) + (T P) = x^2 + y^2 + z^2
-\ ADC Q                 \
-\ STA Q                 \ First, doing the low bytes, Q = Q + P
+\LDA P                  \ Set (R Q) = (R Q) + (T P) = x^2 + y^2 + z^2
+\ADC Q                  \
+\STA Q                  \ First, doing the low bytes, Q = Q + P
 \
-\ LDA T                 \ And then the high bytes, R = R + T
-\ ADC R
-\ STA R
+\LDA T                  \ And then the high bytes, R = R + T
+\ADC R
+\STA R
 
                         \ --- And replaced by: -------------------------------->
 
@@ -28771,8 +28771,8 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDA #16               \ Call the NOISE routine with A = 16 to make the first
-\ JSR NOISE             \ death sound
+\LDA #16                \ Call the NOISE routine with A = 16 to make the first
+\JSR NOISE              \ death sound
 
                         \ --- And replaced by: -------------------------------->
 
@@ -29006,7 +29006,7 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDX DNOIZ             \ Set X to the DNOIZ configuration setting
+\LDX DNOIZ              \ Set X to the DNOIZ configuration setting
 
                         \ --- And replaced by: -------------------------------->
 
@@ -29019,8 +29019,8 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDX #LO(XX16)         \ Otherwise set (Y X) to point to the sound block in
-\ LDY #HI(XX16)         \ XX16
+\LDX #LO(XX16)          \ Otherwise set (Y X) to point to the sound block in
+\LDY #HI(XX16)          \ XX16
 
                         \ --- And replaced by: -------------------------------->
 
@@ -29148,14 +29148,14 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ EQUB &60              \ TAB       KYTB+8      Energy bomb
-\ EQUB &70              \ ESCAPE    KYTB+9      Launch escape pod
-\ EQUB &23              \ T         KYTB+10     Arm missile
-\ EQUB &35              \ U         KYTB+11     Unarm missile
-\ EQUB &65              \ M         KYTB+12     Fire missile
-\ EQUB &22              \ E         KYTB+13     E.C.M.
-\ EQUB &45              \ J         KYTB+14     In-system jump
-\ EQUB &52              \ C         KYTB+15     Docking computer
+\EQUB &60               \ TAB       KYTB+8      Energy bomb
+\EQUB &70               \ ESCAPE    KYTB+9      Launch escape pod
+\EQUB &23               \ T         KYTB+10     Arm missile
+\EQUB &35               \ U         KYTB+11     Unarm missile
+\EQUB &65               \ M         KYTB+12     Fire missile
+\EQUB &22               \ E         KYTB+13     E.C.M.
+\EQUB &45               \ J         KYTB+14     In-system jump
+\EQUB &52               \ C         KYTB+15     Docking computer
 
                         \ --- And replaced by: -------------------------------->
 
@@ -29429,7 +29429,7 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ BPL DKS2-1            \ The key is not being pressed, so return from the
+\BPL DKS2-1             \ The key is not being pressed, so return from the
 \                       \ subroutine (as DKS2-1 contains an RTS)
 
                         \ --- And replaced by: -------------------------------->
@@ -29831,13 +29831,13 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDA JSTK              \ If JSTK is non-zero, then we are configured to use
-\ BNE DKJ1              \ the joystick rather than keyboard, so jump to DKJ1
+\LDA JSTK               \ If JSTK is non-zero, then we are configured to use
+\BNE DKJ1               \ the joystick rather than keyboard, so jump to DKJ1
 \                       \ to read the joystick flight controls, before jumping
 \                       \ to DK4 to scan for pause, configuration and secondary
 \                       \ flight keys
 \
-\ STA BSTK              \ Set BSTK = 0 to disable the Bitstik
+\STA BSTK               \ Set BSTK = 0 to disable the Bitstik
 
                         \ --- And replaced by: -------------------------------->
 
@@ -30132,7 +30132,7 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ CPY #&47              \ The last toggle key is &46 (K), so check whether we
+\CPY #&47               \ The last toggle key is &46 (K), so check whether we
 \                       \ have just done that one
 
                         \ --- And replaced by: -------------------------------->
@@ -30162,17 +30162,17 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ CPX #&64              \ If "B" is not being pressed, skip to nobit
-\ BNE nobit
+\CPX #&64               \ If "B" is not being pressed, skip to nobit
+\BNE nobit
 \
-\ LDA BSTK              \ Toggle the value of BSTK between 0 and &FF
-\ EOR #&FF
-\ STA BSTK
+\LDA BSTK               \ Toggle the value of BSTK between 0 and &FF
+\EOR #&FF
+\STA BSTK
 \
-\ STA JSTK              \ Configure JSTK to the same value, so when the Bitstik
+\STA JSTK               \ Configure JSTK to the same value, so when the Bitstik
 \                       \ is enabled, so is the joystick
 \
-\ STA JSTE              \ Configure JSTE to the same value, so when the Bitstik
+\STA JSTE               \ Configure JSTE to the same value, so when the Bitstik
 \                       \ is enabled, the joystick is configured with reversed
 \                       \ channels
 \
@@ -30200,21 +30200,21 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDA #&FF              \ Set A to &FF so we can store this in the keyboard
+\LDA #&FF               \ Set A to &FF so we can store this in the keyboard
 \                       \ logger for keys that are being pressed
 \
 \.DKL1
 \
-\ LDX KYTB,Y            \ Get the internal key number of the Y-th flight key
+\LDX KYTB,Y             \ Get the internal key number of the Y-th flight key
 \                       \ the KYTB keyboard table
 \
-\ CPX KL                \ We stored the key that's being pressed in KL above,
+\CPX KL                 \ We stored the key that's being pressed in KL above,
 \                       \ so check to see if the Y-th flight key is being
 \                       \ pressed
 \
-\ BNE DK1               \ If it is not being pressed, skip to DK1 below
+\BNE DK1                \ If it is not being pressed, skip to DK1 below
 \
-\ STA KL,Y              \ The Y-th flight key is being pressed, so set that
+\STA KL,Y               \ The Y-th flight key is being pressed, so set that
 \                       \ key's location in the key logger to &FF
 \
 \.DK1
@@ -30287,9 +30287,9 @@
 
 \.ou2
 \
-\ LDA #108              \ Set A to recursive token 108 ("E.C.M.SYSTEM")
+\LDA #108               \ Set A to recursive token 108 ("E.C.M.SYSTEM")
 \
-\ EQUB &2C              \ Fall through into ou3 to print the new message, but
+\EQUB &2C               \ Fall through into ou3 to print the new message, but
 \                       \ skip the first instruction by turning it into
 \                       \ &2C &A9 &6F, or BIT &6FA9, which does nothing apart
 \                       \ from affect the flags
@@ -30309,7 +30309,7 @@
 
 \.ou3
 \
-\ LDA #111              \ Set A to recursive token 111 ("FUEL SCOOPS")
+\LDA #111               \ Set A to recursive token 111 ("FUEL SCOOPS")
 
                         \ --- End of removed code ----------------------------->
 
@@ -30368,8 +30368,8 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDX #0                \ Set QQ17 = 0 to switch to ALL CAPS
-\ STX QQ17
+\LDX #0                 \ Set QQ17 = 0 to switch to ALL CAPS
+\STX QQ17
 
                         \ --- And replaced by: -------------------------------->
 
@@ -30439,11 +30439,11 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ CPX #22               \ If X >= 22 (91% chance), return from the subroutine
-\ BCS DK5               \ (as DK5 contains an RTS)
+\CPX #22                \ If X >= 22 (91% chance), return from the subroutine
+\BCS DK5                \ (as DK5 contains an RTS)
 \
-\ LDA QQ20,X            \ If we do not have any of item QQ20+X, return from the
-\ BEQ DK5               \ subroutine (as DK5 contains an RTS). X is in the range
+\LDA QQ20,X             \ If we do not have any of item QQ20+X, return from the
+\BEQ DK5                \ subroutine (as DK5 contains an RTS). X is in the range
 \                       \ 0-21, so this not only checks for cargo, but also for
 \                       \ E.C.M., fuel scoops, energy bomb, energy unit and
 \                       \ docking computer, all of which can be destroyed
@@ -30471,16 +30471,16 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ STA QQ20,X            \ A is 0 (as we didn't branch with the BNE above), so
+\STA QQ20,X             \ A is 0 (as we didn't branch with the BNE above), so
 \                       \ this sets QQ20+X to 0, which destroys any cargo or
 \                       \ equipment we have of that type
 \
-\ CPX #17               \ If X >= 17 then we just lost a piece of equipment, so
-\ BCS ou1               \ jump to ou1 to print the relevant message
+\CPX #17                \ If X >= 17 then we just lost a piece of equipment, so
+\BCS ou1                \ jump to ou1 to print the relevant message
 \
-\ TXA                   \ Print recursive token 48 + A as an in-flight token,
-\ ADC #208              \ which will be in the range 48 ("FOOD") to 64 ("ALIEN
-\ BNE MESS              \ ITEMS") as the C flag is clear, so this prints the
+\TXA                    \ Print recursive token 48 + A as an in-flight token,
+\ADC #208               \ which will be in the range 48 ("FOOD") to 64 ("ALIEN
+\BNE MESS               \ ITEMS") as the C flag is clear, so this prints the
 \                       \ destroyed item's name, followed by " DESTROYED" (as we
 \                       \ set bit 1 of the de flag above), and returns from the
 \                       \ subroutine using a tail call
@@ -30532,23 +30532,23 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ BEQ ou2               \ If X = 17, jump to ou2 to print "E.C.M.SYSTEM
+\BEQ ou2                \ If X = 17, jump to ou2 to print "E.C.M.SYSTEM
 \                       \ DESTROYED" and return from the subroutine using a tail
 \                       \ call
 \
-\ CPX #18               \ If X = 18, jump to ou3 to print "FUEL SCOOPS
-\ BEQ ou3               \ DESTROYED" and return from the subroutine using a tail
+\CPX #18                \ If X = 18, jump to ou3 to print "FUEL SCOOPS
+\BEQ ou3                \ DESTROYED" and return from the subroutine using a tail
 \                       \ call
 \
-\ TXA                   \ Otherwise X is in the range 19 to 21 and the C flag is
-\ ADC #113-20           \ set (as we got here via a BCS to ou1), so we set A as
+\TXA                    \ Otherwise X is in the range 19 to 21 and the C flag is
+\ADC #113-20            \ set (as we got here via a BCS to ou1), so we set A as
 \                       \ follows:
 \                       \
 \                       \   A = 113 - 20 + X + C
 \                       \     = 113 - 19 + X
 \                       \     = 113 to 115
 \
-\ BNE MESS              \ Print recursive token A ("ENERGY BOMB", "ENERGY UNIT"
+\BNE MESS               \ Print recursive token A ("ENERGY BOMB", "ENERGY UNIT"
 \                       \ or "DOCKING COMPUTERS") as an in-flight message,
 \                       \ followed by " DESTROYED", and return from the
 \                       \ subroutine using a tail call
@@ -36579,8 +36579,8 @@ ENDMACRO
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDA #%10000000        \ Set bit 7 of QQ17 to switch to Sentence Case
-\ STA QQ17
+\LDA #%10000000         \ Set bit 7 of QQ17 to switch to Sentence Case
+\STA QQ17
 
                         \ --- And replaced by: -------------------------------->
 
@@ -36926,7 +36926,7 @@ ENDMACRO
  EQUB &0F               \ Index 2: Debris = %00001111
 
 \EQUB &FF               \ Index 3: Missile = %11111111
-
+\
 \EQUB &F0               \ Index 4: Offender/fugitive = %11110000
 
                         \ --- End of added code ------------------------------->
@@ -37023,28 +37023,28 @@ ENDMACRO
 
 \IF _STH_DISC OR _IB_DISC
 \
-\ LDX #&FF              \ Set X to the default scanner colour of green/cyan
+\LDX #&FF               \ Set X to the default scanner colour of green/cyan
 \                       \ (a 4-pixel mode 5 byte in colour 3)
 \
-\ CMP #MSL              \ If this is not a missile, skip the following
-\ BNE P%+4              \ instruction
+\CMP #MSL               \ If this is not a missile, skip the following
+\BNE P%+4               \ instruction
 \
-\ LDX #&F0              \ This is a missile, so set X to colour 2 (yellow/white)
+\LDX #&F0               \ This is a missile, so set X to colour 2 (yellow/white)
 \
 \ELIF _SRAM_DISC
 \
-\ JSR SCANCOL           \ Call SCANCOL to set the correct colour on the scanner
+\JSR SCANCOL            \ Call SCANCOL to set the correct colour on the scanner
 \                       \ for the current ship type
 \
-\ NOP                   \ Pad out the code so it takes up the same amount of
-\ NOP                   \ space as in the original version
-\ NOP
-\ NOP
-\ NOP
+\NOP                    \ Pad out the code so it takes up the same amount of
+\NOP                    \ space as in the original version
+\NOP
+\NOP
+\NOP
 \
 \ENDIF
 \
-\ STX COL               \ Store X, the colour of this ship on the scanner, in
+\STX COL                \ Store X, the colour of this ship on the scanner, in
 \                       \ COL
 
                         \ --- And replaced by: -------------------------------->
@@ -37226,7 +37226,7 @@ ENDMACRO
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ PHP                   \ Store the flags (specifically the C flag) from the
+\PHP                    \ Store the flags (specifically the C flag) from the
 \                       \ above subtraction
 
                         \ --- End of removed code ----------------------------->
@@ -37252,23 +37252,23 @@ ENDMACRO
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDA CTWOS+1,X         \ Load the same mode 5 1-pixel byte that we just used
-\ AND COL               \ for the top-right pixel, and mask it with the same
-\ STA X1                \ colour, storing the result in X1, so we can use it as
+\LDA CTWOS+1,X          \ Load the same mode 5 1-pixel byte that we just used
+\AND COL                \ for the top-right pixel, and mask it with the same
+\STA X1                 \ colour, storing the result in X1, so we can use it as
 \                       \ the character row byte for the stick
 \
-\ PLA                   \ Restore the stick height from the stack into A
+\PLA                    \ Restore the stick height from the stack into A
 \
-\ PLP                   \ Restore the flags from above, so the C flag once again
+\PLP                    \ Restore the flags from above, so the C flag once again
 \                       \ reflects the sign of the stick height
 \
-\ TAX                   \ Copy the stick height into X
+\TAX                    \ Copy the stick height into X
 \
-\ BEQ RTS               \ If the stick height is zero, then there is no stick to
+\BEQ RTS                \ If the stick height is zero, then there is no stick to
 \                       \ draw, so return from the subroutine (as RTS contains
 \                       \ an RTS)
 \
-\ BCC RTS+1             \ If the C flag is clear then the stick height in A is
+\BCC RTS+1              \ If the C flag is clear then the stick height in A is
 \                       \ negative, so jump down to RTS+1
 
                         \ --- And replaced by: -------------------------------->

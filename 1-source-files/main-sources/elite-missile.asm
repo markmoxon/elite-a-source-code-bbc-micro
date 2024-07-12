@@ -327,13 +327,13 @@ ENDMACRO
 
 \IF _STH_DISC OR _IB_DISC
 \
-\ FACE        0,      160,      110,         31   \ Face 7
-\ FACE        0,       64,        4,          0   \ Face 8
+\FACE        0,      160,      110,         31    \ Face 7
+\FACE        0,       64,        4,          0    \ Face 8
 \
 \ELIF _SRAM_DISC
 \
-\ FACE        0,       32,        0,         31   \ Face 7
-\ FACE        0,        0,     -176,         31   \ Face 8
+\FACE        0,       32,        0,         31    \ Face 7
+\FACE        0,        0,     -176,         31    \ Face 8
 \
 \ENDIF
 
@@ -359,7 +359,7 @@ ENDMACRO
 
 \IF _STH_DISC OR _IB_DISC
 \
-\ EQUW &0004            \ VEC = &7FFE
+\EQUW &0004             \ VEC = &7FFE
 \                       \
 \                       \ This gets set to the value of the original IRQ1 vector
 \                       \ by the loading process
@@ -370,7 +370,7 @@ ENDMACRO
 \
 \ELIF _SRAM_DISC
 \
-\ SKIP 2                \ VEC = &7FFE
+\SKIP 2                 \ VEC = &7FFE
 \                       \
 \                       \ This gets set to the value of the original IRQ1 vector
 \                       \ by the loading process

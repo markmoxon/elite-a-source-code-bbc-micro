@@ -409,18 +409,18 @@ ENDMACRO
 
 \IF _STH_DISC OR _IB_DISC
 \
-\ JSR PROT1             \ Call PROT1 to calculate checksums into CHKSM
+\JSR PROT1              \ Call PROT1 to calculate checksums into CHKSM
 \
 \ELIF _SRAM_DISC
 \
-\ JSR PROT4             \ Fetch the address of the keyboard translation table
+\JSR PROT4              \ Fetch the address of the keyboard translation table
 \                       \ before calling PROT1 to calculate checksums into CHKSM
 \
 \ENDIF
 \
-\ LDA #144              \ Call OSBYTE with A = 144, X = 255 and Y = 0 to move
-\ LDX #255              \ the screen down one line and turn screen interlace on
-\ JSR OSB
+\LDA #144               \ Call OSBYTE with A = 144, X = 255 and Y = 0 to move
+\LDX #255               \ the screen down one line and turn screen interlace on
+\JSR OSB
 
                         \ --- And replaced by: -------------------------------->
 
@@ -457,9 +457,9 @@ ENDMACRO
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDA #16               \ Call OSBYTE with A = 16 and X = 3 to set the ADC to
-\ LDX #3                \ sample 3 channels from the joystick/Bitstik
-\ JSR OSBYTE
+\LDA #16                \ Call OSBYTE with A = 16 and X = 3 to set the ADC to
+\LDX #3                 \ sample 3 channels from the joystick/Bitstik
+\JSR OSBYTE
 
                         \ --- And replaced by: -------------------------------->
 
@@ -485,14 +485,14 @@ ENDMACRO
 
 \IF _STH_DISC OR _IB_DISC
 \
-\ LDA #200              \ Call OSBYTE with A = 200, X = 0 and Y = 0 to enable
-\ LDX #0                \ the ESCAPE key and disable memory clearing if the
-\ JSR OSB               \ BREAK key is pressed
+\LDA #200               \ Call OSBYTE with A = 200, X = 0 and Y = 0 to enable
+\LDX #0                 \ the ESCAPE key and disable memory clearing if the
+\JSR OSB                \ BREAK key is pressed
 \
 \ELIF _SRAM_DISC
 \
-\ LDA #219              \ Store 219 in location &9F. This gets checked by the
-\ STA &9F               \ TITLE routine in the main docked code as part of the
+\LDA #219               \ Store 219 in location &9F. This gets checked by the
+\STA &9F                \ TITLE routine in the main docked code as part of the
 \                       \ copy protection (the game hangs if it doesn't match)
 \                       \
 \                       \ This is normally done in the OSBmod routine, but the
@@ -500,9 +500,9 @@ ENDMACRO
 \                       \ of the copy protection is disabled, so we set the
 \                       \ value of location &BF here instead
 \
-\ NOP                   \ Pad out the code so it takes up the same amount of
-\ NOP                   \ space as in the original version
-\ NOP
+\NOP                    \ Pad out the code so it takes up the same amount of
+\NOP                    \ space as in the original version
+\NOP
 \
 \ENDIF
 
@@ -524,8 +524,8 @@ ENDMACRO
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDA #12               \ Set A = 12 and X = 0 to pretend that this is an
-\ LDX #0                \ innocent call to OSBYTE to reset the keyboard delay
+\LDA #12                \ Set A = 12 and X = 0 to pretend that this is an
+\LDX #0                 \ innocent call to OSBYTE to reset the keyboard delay
 \                       \ and auto-repeat rate to the default, when in reality
 \                       \ the OSB address in the next instruction gets modified
 \                       \ to point to OSBmod
@@ -534,15 +534,15 @@ ENDMACRO
 \
 \IF _STH_DISC OR _IB_DISC
 \
-\ JSR OSB               \ This JSR gets modified by code inserted into PLL1 so
+\JSR OSB                \ This JSR gets modified by code inserted into PLL1 so
 \                       \ that it points to OSBmod instead of OSB, so this
 \                       \ actually calls OSBmod to calculate some checksums
 \
 \ELIF _SRAM_DISC
 \
-\ NOP                   \ The sideways RAM variant has this part of the copy
-\ NOP                   \ protection disabled, so pad out the code so it takes
-\ NOP                   \ up the same amount of space as in the original version
+\NOP                    \ The sideways RAM variant has this part of the copy
+\NOP                    \ protection disabled, so pad out the code so it takes
+\NOP                    \ up the same amount of space as in the original version
 \
 \ENDIF
 
@@ -580,7 +580,7 @@ ENDMACRO
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ JSR MVPG              \ Call MVPG to move and decrypt a page of memory from
+\JSR MVPG               \ Call MVPG to move and decrypt a page of memory from
 \                       \ TVT1code to &1100-&11FF
 
                         \ --- And replaced by: -------------------------------->
@@ -607,42 +607,42 @@ ENDMACRO
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ JSR MVBL              \ Call MVBL to move and decrypt 8 pages of memory from
+\JSR MVBL               \ Call MVBL to move and decrypt 8 pages of memory from
 \                       \ DIALS to &7800-&7FFF
 \
-\ SEI                   \ Disable interrupts while we set up our interrupt
+\SEI                    \ Disable interrupts while we set up our interrupt
 \                       \ handler to support the split-screen mode
 \
-\ LDA VIA+&44           \ Read the 6522 System VIA T1C-L timer 1 low-order
-\ STA &0001             \ counter (SHEILA &44), which decrements one million
+\LDA VIA+&44            \ Read the 6522 System VIA T1C-L timer 1 low-order
+\STA &0001              \ counter (SHEILA &44), which decrements one million
 \                       \ times a second and will therefore be pretty random,
 \                       \ and store it in location &0001, which is among the
 \                       \ main game code's random seeds (so this seeds the
 \                       \ random number generator for the main game)
 \
-\ LDA #%00111001        \ Set 6522 System VIA interrupt enable register IER
-\ STA VIA+&4E           \ (SHEILA &4E) bits 0 and 3-5 (i.e. disable the Timer1,
+\LDA #%00111001         \ Set 6522 System VIA interrupt enable register IER
+\STA VIA+&4E            \ (SHEILA &4E) bits 0 and 3-5 (i.e. disable the Timer1,
 \                       \ CB1, CB2 and CA2 interrupts from the System VIA)
 \
-\ LDA #%01111111        \ Set 6522 User VIA interrupt enable register IER
-\ STA VIA+&6E           \ (SHEILA &6E) bits 0-7 (i.e. disable all hardware
+\LDA #%01111111         \ Set 6522 User VIA interrupt enable register IER
+\STA VIA+&6E            \ (SHEILA &6E) bits 0-7 (i.e. disable all hardware
 \                       \ interrupts from the User VIA)
 \
-\ LDA IRQ1V             \ Copy the current IRQ1V vector address into VEC(1 0)
-\ STA VEC
-\ LDA IRQ1V+1
-\ STA VEC+1
+\LDA IRQ1V              \ Copy the current IRQ1V vector address into VEC(1 0)
+\STA VEC
+\LDA IRQ1V+1
+\STA VEC+1
 \
-\ LDA #LO(IRQ1)         \ Set the IRQ1V vector to IRQ1, so IRQ1 is now the
-\ STA IRQ1V             \ interrupt handler
-\ LDA #HI(IRQ1)
-\ STA IRQ1V+1
+\LDA #LO(IRQ1)          \ Set the IRQ1V vector to IRQ1, so IRQ1 is now the
+\STA IRQ1V              \ interrupt handler
+\LDA #HI(IRQ1)
+\STA IRQ1V+1
 \
-\ LDA #VSCAN            \ Set 6522 System VIA T1C-L timer 1 high-order counter
-\ STA VIA+&45           \ (SHEILA &45) to VSCAN (57) to start the T1 counter
+\LDA #VSCAN             \ Set 6522 System VIA T1C-L timer 1 high-order counter
+\STA VIA+&45            \ (SHEILA &45) to VSCAN (57) to start the T1 counter
 \                       \ counting down from 14622 at a rate of 1 MHz
 \
-\ CLI                   \ Re-enable interrupts
+\CLI                    \ Re-enable interrupts
 
                         \ --- And replaced by: -------------------------------->
 
@@ -682,38 +682,38 @@ ENDMACRO
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ JSR MVPG              \ Call MVPG to move and decrypt a page of memory from
+\JSR MVPG               \ Call MVPG to move and decrypt a page of memory from
 \                       \ CpASOFT to &7600-&76FF
 \
-\ LDA #&00              \ Set the following:
-\ STA ZP                \
-\ LDA #&04              \   ZP(1 0) = &0400
-\ STA ZP+1              \   P(1 0) = WORDS
-\ LDA #LO(WORDS)        \   X = 4
-\ STA P
-\ LDA #HI(WORDS)
-\ STA P+1
-\ LDX #4
+\LDA #&00               \ Set the following:
+\STA ZP                 \
+\LDA #&04               \   ZP(1 0) = &0400
+\STA ZP+1               \   P(1 0) = WORDS
+\LDA #LO(WORDS)         \   X = 4
+\STA P
+\LDA #HI(WORDS)
+\STA P+1
+\LDX #4
 \
-\ JSR MVBL              \ Call MVBL to move and decrypt 4 pages of memory from
+\JSR MVBL               \ Call MVBL to move and decrypt 4 pages of memory from
 \                       \ WORDS to &0400-&07FF
 \
-\ LDX #35               \ We now want to copy the disc catalogue routine from
+\LDX #35                \ We now want to copy the disc catalogue routine from
 \                       \ CATDcode to CATD, so set a counter in X for the 36
 \                       \ bytes to copy
 \
 \.loop2
 \
-\ LDA CATDcode,X        \ Copy the X-th byte of CATDcode to the X-th byte of
-\ STA CATD,X            \ CATD
+\LDA CATDcode,X         \ Copy the X-th byte of CATDcode to the X-th byte of
+\STA CATD,X             \ CATD
 \
-\ DEX                   \ Decrement the loop counter
+\DEX                    \ Decrement the loop counter
 \
-\ BPL loop2             \ Loop back to copy the next byte until they are all
+\BPL loop2              \ Loop back to copy the next byte until they are all
 \                       \ done
 \
-\ LDA &76               \ Set the drive number in the CATD routine to the
-\ STA CATBLOCK          \ contents of &76, which gets set in ELITE3
+\LDA &76                \ Set the drive number in the CATD routine to the
+\STA CATBLOCK           \ contents of &76, which gets set in ELITE3
 
                         \ --- And replaced by: -------------------------------->
 
@@ -735,41 +735,41 @@ ENDMACRO
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDA #LO(LOAD)         \ Set the following:
-\ STA ZP                \
-\ LDA #HI(LOAD)         \   ZP(1 0) = LOAD
-\ STA ZP+1              \   P(1 0) = LOADcode
-\ LDA #LO(LOADcode)
-\ STA P
-\ LDA #HI(LOADcode)
-\ STA P+1
+\LDA #LO(LOAD)          \ Set the following:
+\STA ZP                 \
+\LDA #HI(LOAD)          \   ZP(1 0) = LOAD
+\STA ZP+1               \   P(1 0) = LOADcode
+\LDA #LO(LOADcode)
+\STA P
+\LDA #HI(LOADcode)
+\STA P+1
 \
-\ LDY #0                \ We now want to move and decrypt one page of memory
+\LDY #0                 \ We now want to move and decrypt one page of memory
 \                       \ from LOADcode to LOAD, so set Y as a byte counter
 \
 \.loop3
 \
-\ LDA (P),Y             \ Fetch the Y-th byte of the P(1 0) memory block
+\LDA (P),Y              \ Fetch the Y-th byte of the P(1 0) memory block
 \
 \IF _STH_DISC OR _IB_DISC
 \
-\ EOR #&18              \ Decrypt it by EOR'ing with &18
+\EOR #&18               \ Decrypt it by EOR'ing with &18
 \
 \ELIF _SRAM_DISC
 \
-\ EOR CHKSM             \ Decrypt it by EOR'ing with the checksum value
+\EOR CHKSM              \ Decrypt it by EOR'ing with the checksum value
 \
 \ENDIF
 \
-\ STA (ZP),Y            \ Store the decrypted result in the Y-th byte of the
+\STA (ZP),Y             \ Store the decrypted result in the Y-th byte of the
 \                       \ ZP(1 0) memory block
 \
-\ DEY                   \ Decrement the byte counter
+\DEY                    \ Decrement the byte counter
 \
-\ BNE loop3             \ Loop back to copy the next byte until we have done a
+\BNE loop3              \ Loop back to copy the next byte until we have done a
 \                       \ whole page of 256 bytes
 \
-\ JMP LOAD              \ Jump to the start of the routine we just decrypted
+\JMP LOAD               \ Jump to the start of the routine we just decrypted
 
                         \ --- And replaced by: -------------------------------->
 
@@ -1205,73 +1205,73 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDX #LO(LTLI)         \ Set (Y X) to point to LTLI ("L.T.CODE")
-\ LDY #HI(LTLI)
+\LDX #LO(LTLI)          \ Set (Y X) to point to LTLI ("L.T.CODE")
+\LDY #HI(LTLI)
 \
-\ JSR OSCLI             \ Call OSCLI to run the OS command in LTLI, which loads
+\JSR OSCLI              \ Call OSCLI to run the OS command in LTLI, which loads
 \                       \ the T.CODE binary (the main docked code) to its load
 \                       \ address of &11E3
 \
-\ LDA #LO(S%+11)        \ Point BRKV to the fifth entry in the main docked
-\ STA BRKV              \ code's S% workspace, which contains JMP BRBR1
-\ LDA #HI(S%+11)
-\ STA BRKV+1
+\LDA #LO(S%+11)         \ Point BRKV to the fifth entry in the main docked
+\STA BRKV               \ code's S% workspace, which contains JMP BRBR1
+\LDA #HI(S%+11)
+\STA BRKV+1
 \
-\ LDA #LO(S%+6)         \ Point WRCHV to the third entry in the main docked
-\ STA WRCHV             \ code's S% workspace, which contains JMP CHPR
-\ LDA #HI(S%+6)
-\ STA WRCHV+1
+\LDA #LO(S%+6)          \ Point WRCHV to the third entry in the main docked
+\STA WRCHV              \ code's S% workspace, which contains JMP CHPR
+\LDA #HI(S%+6)
+\STA WRCHV+1
 \
-\ SEC                   \ Set the C flag so the checksum we calculate in A
+\SEC                    \ Set the C flag so the checksum we calculate in A
 \                       \ starts with an initial value of 18 (17 plus carry)
 \
-\ LDY #0                \ Set Y = 0 to act as a byte pointer
+\LDY #0                 \ Set Y = 0 to act as a byte pointer
 \
-\ STY ZP                \ Set the low byte of ZP(1 0) to 0, so ZP(1 0) always
+\STY ZP                 \ Set the low byte of ZP(1 0) to 0, so ZP(1 0) always
 \                       \ points to the start of a page
 \
-\ LDX #&11              \ Set X = &11, so ZP(1 0) will point to &1100 when we
+\LDX #&11               \ Set X = &11, so ZP(1 0) will point to &1100 when we
 \                       \ stick X in ZP+1 below
 \
-\ TXA                   \ Set A = &11 = 17, to set the initial value of the
+\TXA                    \ Set A = &11 = 17, to set the initial value of the
 \                       \ checksum to 18 (17 plus carry)
 \
 \.l1
 \
-\ STX ZP+1              \ Set the high byte of ZP(1 0) to the page number in X
+\STX ZP+1               \ Set the high byte of ZP(1 0) to the page number in X
 \
-\ ADC (ZP),Y            \ Set A = A + the Y-th byte of ZP(1 0)
+\ADC (ZP),Y             \ Set A = A + the Y-th byte of ZP(1 0)
 \
-\ DEY                   \ Decrement the byte pointer
+\DEY                    \ Decrement the byte pointer
 \
-\ BNE l1                \ Loop back to add the next byte until we have added the
+\BNE l1                 \ Loop back to add the next byte until we have added the
 \                       \ whole page
 \
-\ INX                   \ Increment the page number in X
+\INX                    \ Increment the page number in X
 \
-\ CPX #&54              \ Loop back to checksum the next page until we have
-\ BCC l1                \ checked up to (but not including) page &54
+\CPX #&54               \ Loop back to checksum the next page until we have
+\BCC l1                 \ checked up to (but not including) page &54
 \
-\ CMP &55FF             \ Compare the checksum with the value in &55FF, which is
+\CMP &55FF              \ Compare the checksum with the value in &55FF, which is
 \                       \ in the docked file we just loaded, in the byte before
 \                       \ the ship hangar blueprints at XX21
 \
 \IF _REMOVE_CHECKSUMS
 \
-\ NOP                   \ If we have disabled checksums, then ignore the result
-\ NOP                   \ of the checksum comparison
+\NOP                    \ If we have disabled checksums, then ignore the result
+\NOP                    \ of the checksum comparison
 \
 \ELSE
 \
 \IF _STH_DISC OR _IB_DISC
 \
-\ BNE P%                \ If the checksums don't match then enter an infinite
+\BNE P%                 \ If the checksums don't match then enter an infinite
 \                       \ loop, which hangs the computer
 \
 \ELIF _SRAM_DISC
 \
-\ NOP                   \ The sideways RAM variant ignores the result of the
-\ NOP                   \ checksum comparison
+\NOP                    \ The sideways RAM variant ignores the result of the
+\NOP                    \ checksum comparison
 \
 \ENDIF
 \
@@ -1295,10 +1295,10 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ EQUS "L.T.CODE"       \ This is short for "*LOAD T.CODE"
-\ EQUB 13
+\EQUS "L.T.CODE"        \ This is short for "*LOAD T.CODE"
+\EQUB 13
 \
-\ EQUS "Does your mother know you do this?"
+\EQUS "Does your mother know you do this?"
 
                         \ --- And replaced by: -------------------------------->
 
@@ -1345,8 +1345,8 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDA #LO(OSBmod)       \ As part of the copy protection, the JSR OSB
-\ STA OSBjsr+1          \ instruction at OSBjsr gets modified to point to OSBmod
+\LDA #LO(OSBmod)        \ As part of the copy protection, the JSR OSB
+\STA OSBjsr+1           \ instruction at OSBjsr gets modified to point to OSBmod
 \                       \ instead of OSB, and this is where we modify the low
 \                       \ byte of the destination address
 
@@ -1545,8 +1545,8 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDA #HI(OSBmod)       \ As part of the copy protection, the JSR OSB
-\ STA OSBjsr+2          \ instruction at OSBjsr gets modified to point to OSBmod
+\LDA #HI(OSBmod)        \ As part of the copy protection, the JSR OSB
+\STA OSBjsr+2           \ instruction at OSBjsr gets modified to point to OSBmod
 \                       \ instead of OSB, and this is where we modify the high
 \                       \ byte of the destination address
 
@@ -1688,13 +1688,13 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDA #LO(ELITE)        \ Set P(1 0) = ELITE
-\ STA P
-\ LDA #HI(ELITE)
-\ STA P+1
+\LDA #LO(ELITE)         \ Set P(1 0) = ELITE
+\STA P
+\LDA #HI(ELITE)
+\STA P+1
 \
-\ LDX #8                \ Call MVPG with X = 8 to copy 8 pages of memory from
-\ JSR MVPG              \ ELITE to &6300
+\LDX #8                 \ Call MVPG with X = 8 to copy 8 pages of memory from
+\JSR MVPG               \ ELITE to &6300
 
                         \ --- And replaced by: -------------------------------->
 
@@ -1994,7 +1994,7 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ JMP P%                \ This would hang the computer, but we never get here as
+\JMP P%                 \ This would hang the computer, but we never get here as
 \                       \ the checksum code has been disabled
 
                         \ --- End of removed code ----------------------------->
@@ -2129,7 +2129,7 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ EOR #&A5              \ Decrypt it by EOR'ing with &A5
+\EOR #&A5               \ Decrypt it by EOR'ing with &A5
 
                         \ --- End of removed code ----------------------------->
 
@@ -2193,8 +2193,8 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ EQUS "*DIR E"
-\ EQUB 13
+\EQUS "*DIR E"
+\EQUB 13
 
                         \ --- And replaced by: -------------------------------->
 
@@ -2529,8 +2529,8 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ EQUS "JAMESON"        \ The current commander name, which defaults to JAMESON
-\ EQUB 13               \
+\EQUS "JAMESON"         \ The current commander name, which defaults to JAMESON
+\EQUB 13                \
 \                       \ The commander name can be up to 7 characters (the DFS
 \                       \ limit for filenames), and is terminated by a carriage
 \                       \ return
@@ -2571,12 +2571,12 @@ ENDIF
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
 \IF Q%
-\ EQUD &00CA9A3B        \ CASH = Amount of cash (100,000,000 Cr), #9-12
+\EQUD &00CA9A3B         \ CASH = Amount of cash (100,000,000 Cr), #9-12
 \ELSE
-\ EQUD &E8030000        \ CASH = Amount of cash (100 Cr), #9-12
+\EQUD &E8030000         \ CASH = Amount of cash (100 Cr), #9-12
 \ENDIF
 \
-\ EQUB 70               \ QQ14 = Fuel level, #13
+\EQUB 70                \ QQ14 = Fuel level, #13
 
                         \ --- And replaced by: -------------------------------->
 
@@ -2596,19 +2596,19 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ EQUB POW+(128 AND Q%) \ LASER = Front laser, #16
+\EQUB POW+(128 AND Q%)  \ LASER = Front laser, #16
 \
-\ EQUB (POW+128) AND Q% \ LASER+1 = Rear laser, #17
+\EQUB (POW+128) AND Q%  \ LASER+1 = Rear laser, #17
 \
-\ EQUB 0                \ LASER+2 = Left laser, #18
+\EQUB 0                 \ LASER+2 = Left laser, #18
 \
-\ EQUB 0                \ LASER+3 = Right laser, #19
+\EQUB 0                 \ LASER+3 = Right laser, #19
 \
-\ EQUW 0                \ These bytes appear to be unused (they were originally
+\EQUW 0                 \ These bytes appear to be unused (they were originally
 \                       \ used for up/down lasers, but they were dropped),
 \                       \ #20-21
 \
-\ EQUB 22 + (15 AND Q%) \ CRGO = Cargo capacity, #22
+\EQUB 22 + (15 AND Q%)  \ CRGO = Cargo capacity, #22
 
                         \ --- And replaced by: -------------------------------->
 
@@ -2652,7 +2652,7 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ EQUB Q% AND 127       \ BOMB = Energy bomb, #42
+\EQUB Q% AND 127        \ BOMB = Energy bomb, #42
 
                         \ --- And replaced by: -------------------------------->
 
@@ -2670,9 +2670,9 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ EQUD 0                \ These four bytes appear to be unused, #47-50
+\EQUD 0                 \ These four bytes appear to be unused, #47-50
 \
-\ EQUB 3 + (Q% AND 1)   \ NOMSL = Number of missiles, #51
+\EQUB 3 + (Q% AND 1)    \ NOMSL = Number of missiles, #51
 
                         \ --- And replaced by: -------------------------------->
 
@@ -2690,7 +2690,7 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ EQUB 16               \ AVL+0  = Market availability of food, #53
+\EQUB 16                \ AVL+0  = Market availability of food, #53
 
                         \ --- And replaced by: -------------------------------->
 
@@ -2722,7 +2722,7 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ EQUB 128              \ SVC = Save count, #73
+\EQUB 128               \ SVC = Save count, #73
 
                         \ --- And replaced by: -------------------------------->
 
@@ -2753,7 +2753,7 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ EQUB &03 EOR &A9      \ The checksum value for the default commander, EOR'd
+\EQUB &03 EOR &A9       \ The checksum value for the default commander, EOR'd
 \                       \ with &A9 to make it harder to tamper with the checksum
 \                       \ byte, #74
 
@@ -2788,7 +2788,7 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ EQUB &03              \ The checksum value for the default commander, #75
+\EQUB &03               \ The checksum value for the default commander, #75
 
                         \ --- And replaced by: -------------------------------->
 
@@ -2851,16 +2851,16 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ EQUB &64, &5F, &61    \ These bytes appear to be unused
-\ EQUB &74, &74, &72
-\ EQUB &69, &62, &75
-\ EQUB &74, &65, &73
-\ EQUB &00, &C4, &24
-\ EQUB &6A, &43, &67
-\ EQUB &65, &74, &72
-\ EQUB &64, &69, &73
-\ EQUB &63, &00, &B6
-\ EQUB &3C, &C6
+\EQUB &64, &5F, &61     \ These bytes appear to be unused
+\EQUB &74, &74, &72
+\EQUB &69, &62, &75
+\EQUB &74, &65, &73
+\EQUB &00, &C4, &24
+\EQUB &6A, &43, &67
+\EQUB &65, &74, &72
+\EQUB &64, &69, &73
+\EQUB &63, &00, &B6
+\EQUB &3C, &C6
 
                         \ --- End of removed code ----------------------------->
 

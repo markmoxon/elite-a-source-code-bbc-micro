@@ -465,7 +465,7 @@ ENDMACRO
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ EQUB 17               \ Max. energy              = 17
+\EQUB 17                \ Max. energy              = 17
 
                         \ --- And replaced by: -------------------------------->
 
@@ -534,7 +534,7 @@ ENDMACRO
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ EQUW 0                \ Bounty                   = 0
+\EQUW 0                 \ Bounty                   = 0
 
                         \ --- And replaced by: -------------------------------->
 
@@ -547,7 +547,7 @@ ENDMACRO
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ EQUB 17               \ Max. energy              = 17
+\EQUB 17                \ Max. energy              = 17
 
                         \ --- And replaced by: -------------------------------->
 
@@ -637,7 +637,7 @@ ENDMACRO
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ EQUB 100              \ Max. energy              = 100
+\EQUB 100               \ Max. energy              = 100
 
                         \ --- And replaced by: -------------------------------->
 
@@ -654,7 +654,7 @@ ENDMACRO
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ EQUB %00010001        \ Laser power              = 2
+\EQUB %00010001         \ Laser power              = 2
 \                       \ Missiles                 = 1
 
                         \ --- And replaced by: -------------------------------->
@@ -858,7 +858,7 @@ ENDMACRO
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ EQUW 0                \ Bounty                   = 0
+\EQUW 0                 \ Bounty                   = 0
 
                         \ --- And replaced by: -------------------------------->
 
@@ -871,7 +871,7 @@ ENDMACRO
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ EQUB 250              \ Max. energy              = 250
+\EQUB 250               \ Max. energy              = 250
 
                         \ --- And replaced by: -------------------------------->
 
@@ -888,7 +888,7 @@ ENDMACRO
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ EQUB %00011011        \ Laser power              = 3
+\EQUB %00011011         \ Laser power              = 3
 \                       \ Missiles                 = 3
 
                         \ --- And replaced by: -------------------------------->
@@ -905,7 +905,7 @@ ENDMACRO
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ VERTEX    0,   48,   48,     0,      1,    4,     5,         31   \ Vertex 1
+\VERTEX    0,   48,   48,     0,      1,    4,     5,         31    \ Vertex 1
 
                         \ --- And replaced by: -------------------------------->
 
@@ -918,7 +918,7 @@ ENDMACRO
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ VERTEX    0,   48,  -32,     4,      5,    8,     9,         31   \ Vertex 4
+\VERTEX    0,   48,  -32,     4,      5,    8,     9,         31    \ Vertex 4
 
                         \ --- And replaced by: -------------------------------->
 
@@ -932,9 +932,9 @@ ENDMACRO
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ VERTEX    0,  -48,   48,     2,      3,    6,     7,         31   \ Vertex 8
-\ VERTEX    0,  -48,  -32,     6,      7,   10,    11,         31   \ Vertex 9
-\ VERTEX    0,  -24, -112,    10,     11,   12,    12,         31   \ Vertex 10
+\VERTEX    0,  -48,   48,     2,      3,    6,     7,         31    \ Vertex 8
+\VERTEX    0,  -48,  -32,     6,      7,   10,    11,         31    \ Vertex 9
+\VERTEX    0,  -24, -112,    10,     11,   12,    12,         31    \ Vertex 10
 
                         \ --- And replaced by: -------------------------------->
 
@@ -950,7 +950,7 @@ ENDMACRO
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ EDGE       0,       8,     2,     3,         31   \ Edge 0
+\EDGE       0,       8,     2,     3,         31    \ Edge 0
 
                         \ --- And replaced by: -------------------------------->
 
@@ -963,19 +963,19 @@ ENDMACRO
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ EDGE       0,       1,     0,     1,         31   \ Edge 3
-\ EDGE       2,       4,     9,     5,         31   \ Edge 4
-\ EDGE       1,       2,     1,     5,         31   \ Edge 5
-\ EDGE       2,       8,     7,     3,         31   \ Edge 6
-\ EDGE       1,       3,     0,     4,         31   \ Edge 7
-\ EDGE       3,       8,     2,     6,         31   \ Edge 8
-\ EDGE       2,       9,     7,    10,         31   \ Edge 9
-\ EDGE       3,       4,     4,     8,         31   \ Edge 10
-\ EDGE       3,       9,     6,    11,         31   \ Edge 11
-\ EDGE       3,       5,     8,     8,          7   \ Edge 12
-\ EDGE       3,      10,    11,    11,          7   \ Edge 13
-\ EDGE       2,       5,     9,     9,          7   \ Edge 14
-\ EDGE       2,      10,    10,    10,          7   \ Edge 15
+\EDGE       0,       1,     0,     1,         31    \ Edge 3
+\EDGE       2,       4,     9,     5,         31    \ Edge 4
+\EDGE       1,       2,     1,     5,         31    \ Edge 5
+\EDGE       2,       8,     7,     3,         31    \ Edge 6
+\EDGE       1,       3,     0,     4,         31    \ Edge 7
+\EDGE       3,       8,     2,     6,         31    \ Edge 8
+\EDGE       2,       9,     7,    10,         31    \ Edge 9
+\EDGE       3,       4,     4,     8,         31    \ Edge 10
+\EDGE       3,       9,     6,    11,         31    \ Edge 11
+\EDGE       3,       5,     8,     8,          7    \ Edge 12
+\EDGE       3,      10,    11,    11,          7    \ Edge 13
+\EDGE       2,       5,     9,     9,          7    \ Edge 14
+\EDGE       2,      10,    10,    10,          7    \ Edge 15
 
                         \ --- And replaced by: -------------------------------->
 
@@ -1002,12 +1002,12 @@ ENDMACRO
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ EDGE       7,      10,    12,    10,         31   \ Edge 20
-\ EDGE       6,      10,    11,    12,         31   \ Edge 21
-\ EDGE       4,       5,     8,     9,         31   \ Edge 22
-\ EDGE       9,      10,    10,    11,         31   \ Edge 23
-\ EDGE       1,       4,     4,     5,         31   \ Edge 24
-\ EDGE       8,       9,     6,     7,         31   \ Edge 25
+\EDGE       7,      10,    12,    10,         31    \ Edge 20
+\EDGE       6,      10,    11,    12,         31    \ Edge 21
+\EDGE       4,       5,     8,     9,         31    \ Edge 22
+\EDGE       9,      10,    10,    11,         31    \ Edge 23
+\EDGE       1,       4,     4,     5,         31    \ Edge 24
+\EDGE       8,       9,     6,     7,         31    \ Edge 25
 
                         \ --- And replaced by: -------------------------------->
 
@@ -1025,19 +1025,19 @@ ENDMACRO
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
 \   \ normal_x, normal_y, normal_z, visibility
-\ FACE      -27,       40,       11,        31   \ Face 0
-\ FACE       27,       40,       11,        31   \ Face 1
-\ FACE      -27,      -40,       11,        31   \ Face 2
-\ FACE       27,      -40,       11,        31   \ Face 3
-\ FACE      -19,       38,        0,        31   \ Face 4
-\ FACE       19,       38,        0,        31   \ Face 5
-\ FACE      -19,      -38,        0,        31   \ Face 6
-\ FACE       19,      -38,        0,        31   \ Face 7
-\ FACE      -25,       37,      -11,        31   \ Face 8
-\ FACE       25,       37,      -11,        31   \ Face 9
-\ FACE       25,      -37,      -11,        31   \ Face 10
-\ FACE      -25,      -37,      -11,        31   \ Face 11
-\ FACE        0,        0,     -112,        31   \ Face 12
+\FACE      -27,       40,       11,        31    \ Face 0
+\FACE       27,       40,       11,        31    \ Face 1
+\FACE      -27,      -40,       11,        31    \ Face 2
+\FACE       27,      -40,       11,        31    \ Face 3
+\FACE      -19,       38,        0,        31    \ Face 4
+\FACE       19,       38,        0,        31    \ Face 5
+\FACE      -19,      -38,        0,        31    \ Face 6
+\FACE       19,      -38,        0,        31    \ Face 7
+\FACE      -25,       37,      -11,        31    \ Face 8
+\FACE       25,       37,      -11,        31    \ Face 9
+\FACE       25,      -37,      -11,        31    \ Face 10
+\FACE      -25,      -37,      -11,        31    \ Face 11
+\FACE        0,        0,     -112,        31    \ Face 12
 
                         \ --- And replaced by: -------------------------------->
 
@@ -1084,7 +1084,7 @@ ENDMACRO
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ EQUW 0                \ Bounty                   = 0
+\EQUW 0                 \ Bounty                   = 0
 
                         \ --- And replaced by: -------------------------------->
 
@@ -1097,7 +1097,7 @@ ENDMACRO
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ EQUB 250              \ Max. energy              = 250
+\EQUB 250               \ Max. energy              = 250
 
                         \ --- And replaced by: -------------------------------->
 
@@ -1114,7 +1114,7 @@ ENDMACRO
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ EQUB %00011100        \ Laser power              = 3
+\EQUB %00011100         \ Laser power              = 3
 \                       \ Missiles                 = 4
 
                         \ --- And replaced by: -------------------------------->
@@ -1407,7 +1407,7 @@ ENDMACRO
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ EQUB 90               \ Max. energy              = 90
+\EQUB 90                \ Max. energy              = 90
 
                         \ --- And replaced by: -------------------------------->
 
@@ -1424,7 +1424,7 @@ ENDMACRO
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ EQUB %00010010        \ Laser power              = 2
+\EQUB %00010010         \ Laser power              = 2
 \                       \ Missiles                 = 2
 
                         \ --- And replaced by: -------------------------------->
@@ -1531,7 +1531,7 @@ ENDMACRO
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ EQUW 0                \ Bounty                   = 0
+\EQUW 0                 \ Bounty                   = 0
 
                         \ --- And replaced by: -------------------------------->
 
@@ -1544,7 +1544,7 @@ ENDMACRO
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ EQUB 16               \ Max. energy              = 16
+\EQUB 16                \ Max. energy              = 16
 
                         \ --- And replaced by: -------------------------------->
 
