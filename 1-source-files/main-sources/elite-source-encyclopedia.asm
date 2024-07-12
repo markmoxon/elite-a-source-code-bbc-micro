@@ -1309,7 +1309,7 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ SKIP 2                \ These bytes appear to be unused (they were originally
+\SKIP 2                 \ These bytes appear to be unused (they were originally
 \                       \ used for up/down lasers, but they were dropped)
 
                         \ --- And replaced by: -------------------------------->
@@ -1420,7 +1420,7 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ SKIP 4                \ These bytes appear to be unused
+\SKIP 4                 \ These bytes appear to be unused
 
                         \ --- And replaced by: -------------------------------->
 
@@ -2194,17 +2194,17 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ JMP DOENTRY           \ Decrypt the main docked code and dock at the station
+\JMP DOENTRY            \ Decrypt the main docked code and dock at the station
 \
-\ JMP DOBEGIN           \ Decrypt the main docked code and start a new game
+\JMP DOBEGIN            \ Decrypt the main docked code and start a new game
 \
-\ JMP CHPR              \ WRCHV is set to point here by elite-loader3.asm
+\JMP CHPR               \ WRCHV is set to point here by elite-loader3.asm
 \
-\ EQUW IRQ1             \ IRQ1V is set to point here by elite-loader3.asm
+\EQUW IRQ1              \ IRQ1V is set to point here by elite-loader3.asm
 \
-\ JMP BRBR1             \ BRKV is set to point here by elite-loader3.asm
+\JMP BRBR1              \ BRKV is set to point here by elite-loader3.asm
 \
-\ BRKV = P% - 2         \ The address of the destination address in the above
+\BRKV = P% - 2          \ The address of the destination address in the above
 \                       \ JMP BRBR1 instruction. This ensures that any code that
 \                       \ updates BRKV will update this instruction instead of
 \                       \ the actual vector
@@ -2282,8 +2282,8 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ EQUS "L.T.CODE"       \ This is short for "*LOAD T.CODE"
-\ EQUB 13
+\EQUS "L.T.CODE"        \ This is short for "*LOAD T.CODE"
+\EQUB 13
 
                         \ --- And replaced by: -------------------------------->
 
@@ -2516,7 +2516,7 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ BNE DETOK             \ Jump to DETOK to print extended token 220-221,
+\BNE DETOK              \ Jump to DETOK to print extended token 220-221,
 \                       \ returning from the subroutine using a tail call (this
 \                       \ BNE is effectively a JMP as A is never zero)
 
@@ -2603,7 +2603,7 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ EOR #VE               \ Tokens are stored in memory having been EOR'd with
+\EOR #VE                \ Tokens are stored in memory having been EOR'd with
 \                       \ #VE, so we repeat the EOR to get the actual character
 \                       \ in this token
 
@@ -2653,7 +2653,7 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ EOR #VE               \ Tokens are stored in memory having been EOR'd with
+\EOR #VE                \ Tokens are stored in memory having been EOR'd with
 \                       \ #VE, so we repeat the EOR to get the actual character
 \                       \ in this token
 
@@ -3418,9 +3418,9 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ EQUW TT27             \ Token  4: Print the commander's name
-\ EQUW MT5              \ Token  5: Switch to extended tokens
-\ EQUW MT6              \ Token  6: Switch to standard tokens, in Sentence Case
+\EQUW TT27              \ Token  4: Print the commander's name
+\EQUW MT5               \ Token  5: Switch to extended tokens
+\EQUW MT6               \ Token  6: Switch to standard tokens, in Sentence Case
 
                         \ --- And replaced by: -------------------------------->
 
@@ -3448,10 +3448,10 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ EQUW PAUSE            \ Token 22: Display ship and wait for key press
-\ EQUW MT23             \ Token 23: Move to row 10, white text, set lower case
-\ EQUW PAUSE2           \ Token 24: Wait for a key press
-\ EQUW BRIS             \ Token 25: Show incoming message screen, wait 2 seconds
+\EQUW PAUSE             \ Token 22: Display ship and wait for key press
+\EQUW MT23              \ Token 23: Move to row 10, white text, set lower case
+\EQUW PAUSE2            \ Token 24: Wait for a key press
+\EQUW BRIS              \ Token 25: Show incoming message screen, wait 2 seconds
 
                         \ --- And replaced by: -------------------------------->
 
@@ -8032,9 +8032,9 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDA QQ8               \ If either byte in QQ18(1 0) is non-zero, meaning that
-\ ORA QQ8+1             \ the distance from the current system to the selected
-\ BNE PD1               \ is non-zero, jump to PD1 to show the standard "goat
+\LDA QQ8                \ If either byte in QQ18(1 0) is non-zero, meaning that
+\ORA QQ8+1              \ the distance from the current system to the selected
+\BNE PD1                \ is non-zero, jump to PD1 to show the standard "goat
 \                       \ soup" description
 \
 \                       \ If we get here, then the current system is the same as
@@ -8042,72 +8042,72 @@ ENDIF
 \                       \ whether there is a special override token for this
 \                       \ system
 \
-\ LDY #NRU%             \ Set Y as a loop counter as we work our way through the
+\LDY #NRU%              \ Set Y as a loop counter as we work our way through the
 \                       \ system numbers in RUPLA, starting at NRU% (which is
 \                       \ the number of entries in RUPLA, 26) and working our
 \                       \ way down to 1
 \
 \.PDL1
 \
-\ LDA RUPLA-1,Y         \ Fetch the Y-th byte from RUPLA-1 into A (we use
+\LDA RUPLA-1,Y          \ Fetch the Y-th byte from RUPLA-1 into A (we use
 \                       \ RUPLA-1 because Y is looping from 26 to 1)
 \
-\ CMP ZZ                \ If A doesn't match the system whose description we
-\ BNE PD2               \ are printing (in ZZ), jump to PD2 to keep looping
+\CMP ZZ                 \ If A doesn't match the system whose description we
+\BNE PD2                \ are printing (in ZZ), jump to PD2 to keep looping
 \                       \ through the system numbers in RUPLA
 \
 \                       \ If we get here we have found a match for this system
 \                       \ number in RUPLA
 \
-\ LDA RUGAL-1,Y         \ Fetch the Y-th byte from RUGAL-1 into A
+\LDA RUGAL-1,Y          \ Fetch the Y-th byte from RUGAL-1 into A
 \
-\ AND #%01111111        \ Extract bits 0-6 of A
+\AND #%01111111         \ Extract bits 0-6 of A
 \
-\ CMP GCNT              \ If the result does not equal the current galaxy
-\ BNE PD2               \ number, jump to PD2 to keep looping through the system
+\CMP GCNT               \ If the result does not equal the current galaxy
+\BNE PD2                \ number, jump to PD2 to keep looping through the system
 \                       \ numbers in RUPLA
 \
-\ LDA RUGAL-1,Y         \ Fetch the Y-th byte from RUGAL-1 into A, once again
+\LDA RUGAL-1,Y          \ Fetch the Y-th byte from RUGAL-1 into A, once again
 \
-\ BMI PD3               \ If bit 7 is set, jump to PD3 to print the extended
+\BMI PD3                \ If bit 7 is set, jump to PD3 to print the extended
 \                       \ token in A from the second table in RUTOK
 \
-\ LDA TP                \ Fetch bit 0 of TP into the C flag, and skip to PD1 if
-\ LSR A                 \ it is clear (i.e. if mission 1 is not in progress) to
-\ BCC PD1               \ print the "goat soup" extended description
+\LDA TP                 \ Fetch bit 0 of TP into the C flag, and skip to PD1 if
+\LSR A                  \ it is clear (i.e. if mission 1 is not in progress) to
+\BCC PD1                \ print the "goat soup" extended description
 \
 \                       \ If we get here then mission 1 is in progress, so we
 \                       \ print out the corresponding token from RUTOK
 \
-\ JSR MT14              \ Call MT14 to switch to justified text
+\JSR MT14               \ Call MT14 to switch to justified text
 \
-\ LDA #1                \ Set A = 1 so that extended token 1 (an empty string)
+\LDA #1                 \ Set A = 1 so that extended token 1 (an empty string)
 \                       \ gets printed below instead of token 176, followed by
 \                       \ the Y-th token in RUTOK
 \
-\ EQUB &2C              \ Skip the next instruction by turning it into
+\EQUB &2C               \ Skip the next instruction by turning it into
 \                       \ &2C &A9 &B0, or BIT &B0A9, which does nothing apart
 \                       \ from affect the flags
 \
 \.PD3
 \
-\ LDA #176              \ Print extended token 176 ("{lower case}{justify}
-\ JSR DETOK2            \ {single cap}")
+\LDA #176               \ Print extended token 176 ("{lower case}{justify}
+\JSR DETOK2             \ {single cap}")
 \
-\ TYA                   \ Print the extended token in Y from the second table
-\ JSR DETOK3            \ in RUTOK
+\TYA                    \ Print the extended token in Y from the second table
+\JSR DETOK3             \ in RUTOK
 \
-\ LDA #177              \ Set A = 177 so when we jump to PD4 in the next
+\LDA #177               \ Set A = 177 so when we jump to PD4 in the next
 \                       \ instruction, we print token 177 (".{cr}{left align}")
 \
-\ BNE PD4               \ Jump to PD4 to print the extended token in A and
+\BNE PD4                \ Jump to PD4 to print the extended token in A and
 \                       \ return from the subroutine using a tail call
 \
 \.PD2
 \
-\ DEY                   \ Decrement the byte counter in Y
+\DEY                    \ Decrement the byte counter in Y
 \
-\ BNE PDL1              \ Loop back to check the next byte in RUPLA until we
+\BNE PDL1               \ Loop back to check the next byte in RUPLA until we
 \                       \ either find a match for the system in ZZ, or we fall
 \                       \ through into the "goat soup" extended description
 \                       \ routine
@@ -8233,7 +8233,7 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ BEQ PAUSE2            \ Keep looping up to PAUSE2 until a key is pressed
+\BEQ PAUSE2             \ Keep looping up to PAUSE2 until a key is pressed
 
                         \ --- And replaced by: -------------------------------->
 
@@ -9164,7 +9164,7 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ JMP PDESC             \ Jump to PDESC to print the system's extended
+\JMP PDESC              \ Jump to PDESC to print the system's extended
 \                       \ description, returning from the subroutine using a
 \                       \ tail call
 \
@@ -9172,9 +9172,9 @@ ENDIF
 \                       \ anywhere, so it's presumably a remnant of code from
 \                       \ an earlier version of the extended description code
 \
-\ LDX ZZ                \ Fetch the system number from ZZ into X
+\LDX ZZ                 \ Fetch the system number from ZZ into X
 \
-\ RTS                   \ Return from the subroutine
+\RTS                    \ Return from the subroutine
 
                         \ --- And replaced by: -------------------------------->
 
@@ -10672,11 +10672,11 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ CMP #'y'              \ If "Y" was pressed, jump to NWDAV1 to return the
-\ BEQ NWDAV1            \ maximum number allowed (i.e. buy/sell the whole stock)
+\CMP #'y'               \ If "Y" was pressed, jump to NWDAV1 to return the
+\BEQ NWDAV1             \ maximum number allowed (i.e. buy/sell the whole stock)
 \
-\ CMP #'n'              \ If "N" was pressed, jump to NWDAV3 to return from the
-\ BEQ NWDAV3            \ subroutine with a result of 0 (i.e. abort transaction)
+\CMP #'n'               \ If "N" was pressed, jump to NWDAV3 to return from the
+\BEQ NWDAV3             \ subroutine with a result of 0 (i.e. abort transaction)
 
                         \ --- End of removed code ----------------------------->
 
@@ -10694,8 +10694,8 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ CMP #10               \ If A >= 10, jump to BAY2 to display the Inventory
-\ BCS BAY2              \ screen, as the key pressed was a letter or other
+\CMP #10                \ If A >= 10, jump to BAY2 to display the Inventory
+\BCS BAY2               \ screen, as the key pressed was a letter or other
 \                       \ non-digit and is greater than ASCII "9"
 
                         \ --- And replaced by: -------------------------------->
@@ -10756,23 +10756,23 @@ ENDIF
 \                       \ If we get here then "Y" was pressed, so we return the
 \                       \ maximum number allowed, which is in QQ25
 \
-\ JSR TT26              \ Print the character for the key that was pressed
+\JSR TT26               \ Print the character for the key that was pressed
 \
-\ LDA QQ25              \ Set R = QQ25, so we return the maximum value allowed
-\ STA R
+\LDA QQ25               \ Set R = QQ25, so we return the maximum value allowed
+\STA R
 \
-\ RTS                   \ Return from the subroutine
+\RTS                    \ Return from the subroutine
 \
 \.NWDAV3
 \
 \                       \ If we get here then "N" was pressed, so we return 0
 \
-\ JSR TT26              \ Print the character for the key that was pressed
+\JSR TT26               \ Print the character for the key that was pressed
 \
-\ LDA #0                \ Set R = 0, so we return 0
-\ STA R
+\LDA #0                 \ Set R = 0, so we return 0
+\STA R
 \
-\ RTS                   \ Return from the subroutine
+\RTS                    \ Return from the subroutine
 
                         \ --- End of removed code ----------------------------->
 
@@ -12069,8 +12069,8 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ CPY #2*SST            \ If the ship type is a space station (SST), then jump
-\ BEQ NW6               \ to NW6, skipping the heap space steps below, as the
+\CPY #2*SST             \ If the ship type is a space station (SST), then jump
+\BEQ NW6                \ to NW6, skipping the heap space steps below, as the
 \                       \ space station has its own line heap at LSO (which it
 \                       \ shares with the sun)
 
@@ -13536,7 +13536,7 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ JSR DIALS             \ Update the dashboard
+\JSR DIALS              \ Update the dashboard
 
                         \ --- End of removed code ----------------------------->
 
@@ -13654,7 +13654,7 @@ ENDIF
 
 \.DORND2
 \
-\ CLC                   \ Clear the C flag so the value of the C flag on entry
+\CLC                    \ Clear the C flag so the value of the C flag on entry
 \                       \ doesn't affect the outcome
 
                         \ --- End of removed code ----------------------------->
@@ -13729,7 +13729,7 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ BEQ P%+5              \ If the counter has reached zero, which it will do
+\BEQ P%+5               \ If the counter has reached zero, which it will do
 \                       \ every 256 main loops, skip the next JMP instruction
 \                       \ (or to put it another way, if the counter hasn't
 \                       \ reached zero, jump down to MLOOP, skipping all the
@@ -13737,7 +13737,7 @@ ENDIF
 \
 \.ytq
 \
-\ JMP MLOOP             \ Jump down to MLOOP to do some end-of-loop tidying and
+\JMP MLOOP              \ Jump down to MLOOP to do some end-of-loop tidying and
 \                       \ restart the main loop
 \
 \                       \ We only get here once every 256 iterations of the
@@ -13753,28 +13753,28 @@ ENDIF
 \                       \ time it will either be an asteroid (98.5% chance) or,
 \                       \ very rarely, a cargo canister (1.5% chance)
 \
-\ LDA MJ                \ If we are in witchspace following a mis-jump, skip the
-\ BNE ytq               \ following by jumping down to MLOOP (via ytq above)
+\LDA MJ                 \ If we are in witchspace following a mis-jump, skip the
+\BNE ytq                \ following by jumping down to MLOOP (via ytq above)
 \
-\ JSR DORND             \ Set A and X to random numbers
+\JSR DORND              \ Set A and X to random numbers
 \
-\ CMP #35               \ If A >= 35 (87% chance), jump down to MLOOP to skip
-\ BCS MLOOP             \ the following
+\CMP #35                \ If A >= 35 (87% chance), jump down to MLOOP to skip
+\BCS MLOOP              \ the following
 \
-\ LDA MANY+AST          \ If we already have 3 or more asteroids in the local
-\ CMP #3                \ bubble, jump down to MLOOP to skip the following
-\ BCS MLOOP
+\LDA MANY+AST           \ If we already have 3 or more asteroids in the local
+\CMP #3                 \ bubble, jump down to MLOOP to skip the following
+\BCS MLOOP
 \
-\ JSR ZINF              \ Call ZINF to reset the INWK ship workspace
+\JSR ZINF               \ Call ZINF to reset the INWK ship workspace
 \
-\ LDA #38               \ Set z_hi = 38 (far away)
-\ STA INWK+7
+\LDA #38                \ Set z_hi = 38 (far away)
+\STA INWK+7
 \
-\ JSR DORND             \ Set A, X and C flag to random numbers
+\JSR DORND              \ Set A, X and C flag to random numbers
 \
-\ STA INWK              \ Set x_lo = random
+\STA INWK               \ Set x_lo = random
 \
-\ STX INWK+3            \ Set y_lo = random
+\STX INWK+3             \ Set y_lo = random
 \                       \
 \                       \ Note that because we use the value of X returned by
 \                       \ DORND, and X contains the value of A returned by the
@@ -13782,15 +13782,15 @@ ENDIF
 \                       \ to a totally random location. See the deep dive on
 \                       \ "Fixing ship positions" for details
 \
-\ AND #%10000000        \ Set x_sign = bit 7 of x_lo
-\ STA INWK+2
+\AND #%10000000         \ Set x_sign = bit 7 of x_lo
+\STA INWK+2
 \
-\ TXA                   \ Set y_sign = bit 7 of y_lo
-\ AND #%10000000
-\ STA INWK+5
+\TXA                    \ Set y_sign = bit 7 of y_lo
+\AND #%10000000
+\STA INWK+5
 \
-\ ROL INWK+1            \ Set bit 1 of x_hi to the C flag, which is random, so
-\ ROL INWK+1            \ this randomly moves us off-centre by 512 (as if x_hi
+\ROL INWK+1             \ Set bit 1 of x_hi to the C flag, which is random, so
+\ROL INWK+1             \ this randomly moves us off-centre by 512 (as if x_hi
 \                       \ is %00000010, then (x_hi x_lo) is 512 + x_lo)
 
                         \ --- End of removed code ----------------------------->
@@ -13837,16 +13837,16 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDX GNTMP             \ If the laser temperature in GNTMP is non-zero,
-\ BEQ EE20              \ decrement it (i.e. cool it down a bit)
-\ DEC GNTMP
+\LDX GNTMP              \ If the laser temperature in GNTMP is non-zero,
+\BEQ EE20               \ decrement it (i.e. cool it down a bit)
+\DEC GNTMP
 \
 \.EE20
 \
-\ JSR DIALS             \ Call DIALS to update the dashboard
+\JSR DIALS              \ Call DIALS to update the dashboard
 \
-\ LDA QQ11              \ If this is a space view, skip the following two
-\ BEQ P%+7              \ instructions (i.e. jump to JSR TT17 below)
+\LDA QQ11               \ If this is a space view, skip the following two
+\BEQ P%+7               \ instructions (i.e. jump to JSR TT17 below)
 
                         \ --- End of removed code ----------------------------->
 
@@ -13941,22 +13941,22 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ CMP #f8               \ If red key f8 was pressed, jump to STATUS to show the
-\ BNE P%+5              \ Status Mode screen, returning from the subroutine
-\ JMP STATUS            \ using a tail call
+\CMP #f8                \ If red key f8 was pressed, jump to STATUS to show the
+\BNE P%+5               \ Status Mode screen, returning from the subroutine
+\JMP STATUS             \ using a tail call
 \
-\ CMP #f4               \ If red key f4 was pressed, jump to TT22 to show the
-\ BNE P%+5              \ Long-range Chart, returning from the subroutine using
-\ JMP TT22              \ a tail call
+\CMP #f4                \ If red key f4 was pressed, jump to TT22 to show the
+\BNE P%+5               \ Long-range Chart, returning from the subroutine using
+\JMP TT22               \ a tail call
 \
-\ CMP #f5               \ If red key f5 was pressed, jump to TT23 to show the
-\ BNE P%+5              \ Short-range Chart, returning from the subroutine using
-\ JMP TT23              \ a tail call
+\CMP #f5                \ If red key f5 was pressed, jump to TT23 to show the
+\BNE P%+5               \ Short-range Chart, returning from the subroutine using
+\JMP TT23               \ a tail call
 \
-\ CMP #f6               \ If red key f6 was pressed, call TT111 to select the
-\ BNE TT92              \ system nearest to galactic coordinates (QQ9, QQ10)
-\ JSR TT111             \ (the location of the chart crosshairs) and set ZZ to
-\ JMP TT25              \ the system number, and then jump to TT25 to show the
+\CMP #f6                \ If red key f6 was pressed, call TT111 to select the
+\BNE TT92               \ system nearest to galactic coordinates (QQ9, QQ10)
+\JSR TT111              \ (the location of the chart crosshairs) and set ZZ to
+\JMP TT25               \ the system number, and then jump to TT25 to show the
 \                       \ Data on System screen (along with an extended system
 \                       \ description for the system in ZZ if we're docked),
 \                       \ returning from the subroutine using a tail call
@@ -14002,17 +14002,17 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ CMP #f9               \ If red key f9 was pressed, jump to TT213 to show the
-\ BNE P%+5              \ Inventory screen, returning from the subroutine
-\ JMP TT213             \ using a tail call
+\CMP #f9                \ If red key f9 was pressed, jump to TT213 to show the
+\BNE P%+5               \ Inventory screen, returning from the subroutine
+\JMP TT213              \ using a tail call
 \
-\ CMP #f7               \ If red key f7 was pressed, jump to TT167 to show the
-\ BNE P%+5              \ Market Price screen, returning from the subroutine
-\ JMP TT167             \ using a tail call
+\CMP #f7                \ If red key f7 was pressed, jump to TT167 to show the
+\BNE P%+5               \ Market Price screen, returning from the subroutine
+\JMP TT167              \ using a tail call
 \
-\ CMP #f0               \ If red key f0 was pressed, jump to TT110 to launch our
-\ BNE fvw               \ ship (if docked), returning from the subroutine using
-\ JMP TT110             \ a tail call
+\CMP #f0                \ If red key f0 was pressed, jump to TT110 to launch our
+\BNE fvw                \ ship (if docked), returning from the subroutine using
+\JMP TT110              \ a tail call
 
                         \ --- And replaced by: -------------------------------->
 
@@ -14034,32 +14034,32 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ CMP #f3               \ If red key f3 was pressed, jump to EQSHP to show the
-\ BNE P%+5              \ Equip Ship screen, returning from the subroutine using
-\ JMP EQSHP             \ a tail call
+\CMP #f3                \ If red key f3 was pressed, jump to EQSHP to show the
+\BNE P%+5               \ Equip Ship screen, returning from the subroutine using
+\JMP EQSHP              \ a tail call
 \
-\ CMP #f1               \ If red key f1 was pressed, jump to TT219 to show the
-\ BNE P%+5              \ Buy Cargo screen, returning from the subroutine using
-\ JMP TT219             \ a tail call
+\CMP #f1                \ If red key f1 was pressed, jump to TT219 to show the
+\BNE P%+5               \ Buy Cargo screen, returning from the subroutine using
+\JMP TT219              \ a tail call
 \
-\ CMP #&47              \ If "@" was not pressed, skip to nosave
-\ BNE nosave
+\CMP #&47               \ If "@" was not pressed, skip to nosave
+\BNE nosave
 \
-\ JSR SVE               \ "@" was pressed, so call SVE to show the disc access
+\JSR SVE                \ "@" was pressed, so call SVE to show the disc access
 \                       \ menu
 \
-\ BCC P%+5              \ If the C flag was set by SVE, then we loaded a new
-\ JMP QU5               \ commander file, so jump to QU5 to restart the game
+\BCC P%+5               \ If the C flag was set by SVE, then we loaded a new
+\JMP QU5                \ commander file, so jump to QU5 to restart the game
 \                       \ with the newly loaded commander
 \
-\ JMP BAY               \ Otherwise the C flag was clear, so jump to BAY to go
+\JMP BAY                \ Otherwise the C flag was clear, so jump to BAY to go
 \                       \ to the docking bay (i.e. show the Status Mode screen)
 \
 \.nosave
 \
-\ CMP #f2               \ If red key f2 was pressed, jump to TT208 to show the
-\ BNE LABEL_3           \ Sell Cargo screen, returning from the subroutine using
-\ JMP TT208             \ a tail call
+\CMP #f2                \ If red key f2 was pressed, jump to TT208 to show the
+\BNE LABEL_3            \ Sell Cargo screen, returning from the subroutine using
+\JMP TT208              \ a tail call
 \
 \.INSP
 
@@ -14131,8 +14131,8 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ CMP #&36              \ If "O" was pressed, do the following three jumps,
-\ BNE ee2               \ otherwise skip to ee2 to continue
+\CMP #&36               \ If "O" was pressed, do the following three jumps,
+\BNE ee2                \ otherwise skip to ee2 to continue
 
                         \ --- And replaced by: -------------------------------->
 
@@ -14250,29 +14250,29 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDX #3                \ Set XC = 3 (set text cursor to column 3)
-\ STX XC
+\LDX #3                 \ Set XC = 3 (set text cursor to column 3)
+\STX XC
 \
-\ JSR FX200             \ Disable the ESCAPE key and clear memory if the BREAK
+\JSR FX200              \ Disable the ESCAPE key and clear memory if the BREAK
 \                       \ key is pressed (*FX 200,3)
 \
-\ LDX #CYL              \ Call TITLE to show a rotating Cobra Mk III (#CYL) and
-\ LDA #6                \ token 6 ("LOAD NEW {single cap}COMMANDER {all caps}
-\ JSR TITLE             \ (Y/N)?{sentence case}{cr}{cr}"), returning with the
+\LDX #CYL               \ Call TITLE to show a rotating Cobra Mk III (#CYL) and
+\LDA #6                 \ token 6 ("LOAD NEW {single cap}COMMANDER {all caps}
+\JSR TITLE              \ (Y/N)?{sentence case}{cr}{cr}"), returning with the
 \                       \ internal number of the key pressed in A
 \
-\ CMP #&44              \ Did we press "Y"? If not, jump to QU5, otherwise
-\ BNE QU5               \ continue on to load a new commander
+\CMP #&44               \ Did we press "Y"? If not, jump to QU5, otherwise
+\BNE QU5                \ continue on to load a new commander
 \
-\ JSR DFAULT            \ Call DFAULT to reset the current commander data block
+\JSR DFAULT             \ Call DFAULT to reset the current commander data block
 \                       \ to the last saved commander
 \
-\ JSR SVE               \ Call SVE to load a new commander into the last saved
+\JSR SVE                \ Call SVE to load a new commander into the last saved
 \                       \ commander data block
 \
 \.QU5
 \
-\ JSR DFAULT            \ Call DFAULT to reset the current commander data block
+\JSR DFAULT             \ Call DFAULT to reset the current commander data block
 \                       \ to the last saved commander
 
                         \ --- And replaced by: -------------------------------->
@@ -14360,8 +14360,8 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDA #f8               \ Jump into the main loop at FRCE, setting the key
-\ JMP FRCE              \ that's "pressed" to red key f8 (so we show the Status
+\LDA #f8                \ Jump into the main loop at FRCE, setting the key
+\JMP FRCE               \ that's "pressed" to red key f8 (so we show the Status
 \                       \ Mode screen)
 
                         \ --- And replaced by: -------------------------------->
@@ -14763,8 +14763,8 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDA #32               \ Call the NOISE routine with A = 32 to make a short,
-\ BNE NOISE             \ high beep, returning from the subroutine using a tail
+\LDA #32                \ Call the NOISE routine with A = 32 to make a short,
+\BNE NOISE              \ high beep, returning from the subroutine using a tail
 \                       \ call (this BNE is effectively a JMP as A will never be
 \                       \ zero)
 
@@ -15134,8 +15134,8 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ LDA JSTK              \ If JSTK is zero, then we are configured to use the
-\ BEQ DK9               \ keyboard rather than the joystick, so jump to DK9 to
+\LDA JSTK               \ If JSTK is zero, then we are configured to use the
+\BEQ DK9                \ keyboard rather than the joystick, so jump to DK9 to
 \                       \ make sure the Bitstik is disabled as well (DK9 then
 \                       \ jumps to DK4 to scan for pause, configuration and
 \                       \ secondary flight keys)
@@ -15232,7 +15232,7 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ CPY #&47              \ The last toggle key is &46 (K), so check whether we
+\CPY #&47               \ The last toggle key is &46 (K), so check whether we
 \                       \ have just done that one
 
                         \ --- And replaced by: -------------------------------->
@@ -15259,20 +15259,20 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ JMP BR1               \ ESCAPE is being pressed, so jump to BR1 to end the
+\JMP BR1                \ ESCAPE is being pressed, so jump to BR1 to end the
 \                       \ game
 \
-\ CPX #&64              \ If "B" is not being pressed, skip to nobit
-\ BNE nobit
+\CPX #&64               \ If "B" is not being pressed, skip to nobit
+\BNE nobit
 \
-\ LDA BSTK              \ Toggle the value of BSTK between 0 and &FF
-\ EOR #&FF
-\ STA BSTK
+\LDA BSTK               \ Toggle the value of BSTK between 0 and &FF
+\EOR #&FF
+\STA BSTK
 \
-\ STA JSTK              \ Configure JSTK to the same value, so when the Bitstik
+\STA JSTK               \ Configure JSTK to the same value, so when the Bitstik
 \                       \ is enabled, so is the joystick
 \
-\ STA JSTE              \ Configure JSTE to the same value, so when the Bitstik
+\STA JSTE               \ Configure JSTE to the same value, so when the Bitstik
 \                       \ is enabled, the joystick is configured with reversed
 \                       \ channels
 \
@@ -15318,11 +15318,11 @@ ENDIF
 
 \.DK9
 \
-\ STA BSTK              \ DK9 is called from DOKEY using a BEQ, so we know A is
+\STA BSTK               \ DK9 is called from DOKEY using a BEQ, so we know A is
 \                       \ 0, so this disables the Bitstik and switched to
 \                       \ keyboard or joystick
 \
-\ BEQ DK4               \ Jump back to DK4 in DOKEY (this BEQ is effectively a
+\BEQ DK4                \ Jump back to DK4 in DOKEY (this BEQ is effectively a
 \                       \ JMP as A is always zero)
 
                         \ --- End of removed code ----------------------------->
@@ -16665,7 +16665,7 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ JMP DOEXP             \ Jump to DOEXP to return from the subroutine using a
+\JMP DOEXP              \ Jump to DOEXP to return from the subroutine using a
 \                       \ tail call, as in the docked code DOEXP just contains
 \                       \ an RTS
 
@@ -18356,7 +18356,7 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\ JMP DOEXP             \ Jump to DOEXP to display the explosion cloud,
+\JMP DOEXP              \ Jump to DOEXP to display the explosion cloud,
 \                       \ returning from the subroutine using a tail call
 
                         \ --- And replaced by: -------------------------------->
