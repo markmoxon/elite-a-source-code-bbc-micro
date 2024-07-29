@@ -2058,7 +2058,7 @@ ENDIF
 \
 \       Name: K%
 \       Type: Workspace
-\    Address: &0900 to &0CFF
+\    Address: &0900 to &0ABB
 \   Category: Workspaces
 \    Summary: Ship data blocks and ship line heaps
 \  Deep dive: Ship data blocks
@@ -27245,7 +27245,7 @@ ENDMACRO
                         \ subroutine early (i.e. LL9). This works because we
                         \ called Shpt from above with a JSR, so nono-2 removes
                         \ that return address from the stack, leaving the next
-                        \ return address exposed. LL9 called SHPPT with a JMP.
+                        \ return address exposed. LL9 called SHPPT with a JMP,
                         \ so the next return address is the one that was put on
                         \ the stack by the original call to LL9. So the RTS in
                         \ nono will actually return us from the original call
