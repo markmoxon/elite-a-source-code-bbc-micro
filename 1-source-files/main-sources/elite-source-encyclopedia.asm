@@ -5564,10 +5564,6 @@ ENDIF
 \                       drawing anything (as we need two points, i.e. two calls,
 \                       before we can draw a line)
 \
-\   K                   The circle's radius
-\
-\   K3(1 0)             Pixel x-coordinate of the centre of the circle
-\
 \   K4(1 0)             Pixel y-coordinate of the centre of the circle
 \
 \   K5(1 0)             Screen x-coordinate of the previous point added to the
@@ -5575,8 +5571,6 @@ ENDIF
 \
 \   K5(3 2)             Screen y-coordinate of the previous point added to the
 \                       ball line heap (if this is not the first point)
-\
-\   SWAP                If non-zero, we swap (X1, Y1) and (X2, Y2)
 \
 \ ------------------------------------------------------------------------------
 \
@@ -5603,7 +5597,7 @@ ENDIF
  STA K6+2               \
  LDA K4+1               \ so K6(3 2) now contains the y-coordinate of the new
  ADC T                  \ point on the circle but as a screen coordinate, to go
- STA K6+3               \ along with the screen y-coordinate in K6(1 0)
+ STA K6+3               \ along with the screen x-coordinate in K6(1 0)
 
  LDA FLAG               \ If FLAG = 0, jump down to BL1
  BEQ BL1
@@ -12884,7 +12878,8 @@ ENDIF
  ADC #0                 \ now negated the y-coordinate in (T X)
  STA T
 
- CLC                    \ Clear the C flag so we can do some more addition below
+ CLC                    \ Clear the C flag so the addition at the start of BLINE
+                        \ will work
 
 .PL38
 
