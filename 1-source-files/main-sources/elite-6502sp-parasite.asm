@@ -53379,7 +53379,7 @@ ENDIF
 
  LDA BSTK               \ Send the second parameter to the I/O processor:
  JSR tube_write         \
-                        \   * delta14b = BTSK
+                        \   * delta14b = BSTK
 
  JSR tube_read          \ Set A to the response from the I/O processor, which
                         \ will be the key number, but with bit 7 clear if the
