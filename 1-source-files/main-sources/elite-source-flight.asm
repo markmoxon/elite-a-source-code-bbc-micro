@@ -29197,7 +29197,7 @@
 \   Fire laser                                    Fire laser
 \
 \   Slow down              Fire laser             Speed up
-\   Unarm Missile          Fire Missile           Target missile
+\   Unarm missile          Fire missile           Target missile
 \   Hyperspace Unit        E.C.M.                 Escape pod
 \   Docking computer off   In-system jump         Docking computer on
 \
@@ -29248,7 +29248,7 @@
 \   Fire laser                                    Fire laser
 \
 \   Slow down              Fire laser             Speed up
-\   Unarm Missile          Fire Missile           Target missile
+\   Unarm missile          Fire missile           Target missile
 \   Hyperspace Unit        E.C.M.                 Escape pod
 \   Docking computer off   In-system jump         Docking computer on
 \
