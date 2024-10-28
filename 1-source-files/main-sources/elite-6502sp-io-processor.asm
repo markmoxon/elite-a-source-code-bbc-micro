@@ -3888,7 +3888,10 @@ ENDIF
 \   Slow down              Fire laser             Speed up
 \   Unarm Missile          Fire Missile           Target missile
 \   Hyperspace Unit        E.C.M.                 Escape pod
-\   Docking computer on    In-system jump         Docking computer off
+\   Docking computer off   In-system jump         Docking computer on
+\
+\ Note that this is different to the layout in Angus Duggan's documentation, as
+\ he has the docking computer buttons the wrong way around in his instructions.
 \
 \ ******************************************************************************
 
@@ -3932,7 +3935,10 @@ ENDIF
 \   Slow down              Fire laser             Speed up
 \   Unarm Missile          Fire Missile           Target missile
 \   Hyperspace Unit        E.C.M.                 Escape pod
-\   Docking computer on    In-system jump         Docking computer off
+\   Docking computer off   In-system jump         Docking computer on
+\
+\ Note that this is different to the layout in Angus Duggan's documentation, as
+\ he has the docking computer buttons the wrong way around in his instructions.
 \
 \ ------------------------------------------------------------------------------
 \
