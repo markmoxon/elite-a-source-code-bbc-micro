@@ -399,5 +399,5 @@ ENDMACRO
  PRINT "Execute at ", ~LOAD%
  PRINT "Reload at ", ~LOAD%
 
- PRINT "S.MISSILE ",~CODE%," ",~P%," ",~LOAD%," ",~LOAD%
+ PRINT "S.MISSILE ", ~CODE%, " ", ~P%, " ", ~LOAD%, " ", ~LOAD%
  SAVE "3-assembled-output/MISSILE.bin", CODE%, P%, LOAD%

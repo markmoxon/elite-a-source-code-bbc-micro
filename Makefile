@@ -56,15 +56,15 @@ endif
 
 ifeq ($(variant), source-disc)
   variant-number=2
-  folder=/source-disc
+  folder=source-disc
   suffix=-flicker-free-from-source-disc
 else ifeq ($(variant), bug-fix)
   variant-number=3
-  folder=/bug-fix
+  folder=bug-fix
   suffix=-flicker-free-bug-fix
 else
   variant-number=1
-  folder=/released
+  folder=released
   suffix=-flicker-free-released
 endif
 
@@ -109,7 +109,7 @@ all:
 	$(PYTHON) 2-build-files/elite-checksum.py $(unencrypt) -rel$(variant-number)
 	$(BEEBASM) -i 1-source-files/main-sources/elite-disc.asm -do 5-compiled-game-discs/elite-a$(suffix).ssd -opt 3 -title "E L I T E"
 ifneq ($(verify), no)
-	@$(PYTHON) 2-build-files/crc32.py 4-reference-binaries$(folder) 3-assembled-output
+	@$(PYTHON) 2-build-files/crc32.py 4-reference-binaries/$(folder) 3-assembled-output
 endif
 
 .PHONY:b2

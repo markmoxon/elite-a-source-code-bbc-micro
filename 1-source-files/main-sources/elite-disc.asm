@@ -27,6 +27,7 @@
 \
 \   * elite-a-released.ssd
 \   * elite-a-from-source-disc.ssd
+\   * elite-a-bug-fix.ssd
 \
 \ This can be loaded into an emulator or a real BBC Micro.
 \
