@@ -15294,7 +15294,7 @@ ENDIF
 \.DK9
 \
 \STA BSTK               \ DK9 is called from DOKEY using a BEQ, so we know A is
-\                       \ 0, so this disables the Bitstik and switched to
+\                       \ 0, so this disables the Bitstik and switches to
 \                       \ keyboard or joystick
 \
 \BEQ DK4                \ Jump back to DK4 in DOKEY (this BEQ is effectively a
