@@ -3884,7 +3884,6 @@ ENDIF
 \ the same as the top button in the middle row):
 \
 \   Fire laser                                    Fire laser
-\
 \   Slow down              Fire laser             Speed up
 \   Unarm missile          Fire missile           Target missile
 \   Hyperspace Unit        E.C.M.                 Escape pod
@@ -3931,7 +3930,6 @@ ENDIF
 \ are treated the same as the top button in the middle row):
 \
 \   Fire laser                                    Fire laser
-\
 \   Slow down              Fire laser             Speed up
 \   Unarm missile          Fire missile           Target missile
 \   Hyperspace Unit        E.C.M.                 Escape pod
