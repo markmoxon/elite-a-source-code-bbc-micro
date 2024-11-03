@@ -10938,7 +10938,7 @@ ENDIF
 \LDX ALP1               \ This repeats the first two instructions of MLS1, which
 \STX P                  \ is presumably unintentional (though it has no effect)
 \
-\                       \ Fall through into MLS1 to calculate (A P) = A * ALP1
+\                       \ Fall through into SQUA to calculate (A P) = A * ALP1
 
                         \ --- End of removed code ----------------------------->
 
