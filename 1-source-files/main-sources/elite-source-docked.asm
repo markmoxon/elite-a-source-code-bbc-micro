@@ -189,7 +189,7 @@ ENDIF
 \
 \       Name: ZP
 \       Type: Workspace
-\    Address: &0000 to &00B0
+\    Address: &0000 to &00E1
 \   Category: Workspaces
 \    Summary: Lots of important variables are stored in the zero page workspace
 \             as it is quicker and more space-efficient to access memory here
@@ -13149,7 +13149,7 @@ ENDIF
 .PAUSE2
 
  JSR RDKEY              \ Scan the keyboard for a key press and return the
-                        \ internal key number in X (or 0 for no key press)
+                        \ internal key number in A and X (or 0 for no key press)
 
  BNE PAUSE2             \ If a key was already being held down when we entered
                         \ this routine, keep looping back up to PAUSE2, until
@@ -13157,7 +13157,7 @@ ENDIF
 
  JSR RDKEY              \ Any pre-existing key press is now gone, so we can
                         \ start scanning the keyboard again, returning the
-                        \ internal key number in X (or 0 for no key press)
+                        \ internal key number in A and X (or 0 for no key press)
 
  BEQ PAUSE2             \ Keep looping up to PAUSE2 until a key is pressed
 
@@ -25990,7 +25990,7 @@ ENDIF
 .CTRL
 
  LDX #1                 \ Set X to the internal key number for CTRL and fall
-                        \ through to DKS4 to scan the keyboard
+                        \ through into DKS4 to scan the keyboard
 
 \ ******************************************************************************
 \
@@ -26315,7 +26315,7 @@ ENDIF
 .DK4
 
  JSR RDKEY              \ Scan the keyboard for a key press and return the
-                        \ internal key number in X (or 0 for no key press)
+                        \ internal key number in A and X (or 0 for no key press)
 
  STX KL                 \ Store X in KL, byte #0 of the key logger
 
@@ -26334,7 +26334,7 @@ ENDIF
                         \ screen gets drawn
 
  JSR RDKEY              \ Scan the keyboard for a key press and return the
-                        \ internal key number in X (or 0 for no key press)
+                        \ internal key number in A and X (or 0 for no key press)
 
  CPX #&51               \ If "S" is not being pressed, skip to DK6
  BNE DK6
@@ -26492,7 +26492,7 @@ ENDIF
  JSR DELAY              \ don't take up too much CPU time while looping round
 
  JSR RDKEY              \ Scan the keyboard for a key press and return the
-                        \ internal key number in X (or 0 for no key press)
+                        \ internal key number in A and X (or 0 for no key press)
 
  BNE t                  \ If a key was already being held down when we entered
                         \ this routine, keep looping back up to t, until the
@@ -26502,7 +26502,7 @@ ENDIF
 
  JSR RDKEY              \ Any pre-existing key press is now gone, so we can
                         \ start scanning the keyboard again, returning the
-                        \ internal key number in X (or 0 for no key press)
+                        \ internal key number in A and X (or 0 for no key press)
 
  BEQ t2                 \ Keep looping up to t2 until a key is pressed
 
