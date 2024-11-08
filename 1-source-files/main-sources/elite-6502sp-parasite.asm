@@ -787,7 +787,7 @@
 
  SKIP 2                 \ Temporary storage, used in a number of places
 
- PRINT "Zero page variables from ", ~ZP, " to ", ~P%
+ PRINT "ZP workspace from ", ~ZP, "to ", ~P%-1, "inclusive"
 
 \ ******************************************************************************
 \
@@ -815,13 +815,17 @@
 \
 \       Name: UP
 \       Type: Workspace
-\    Address: &0300 to &03CF
+\    Address: &0300 to &03DE
 \   Category: Workspaces
 \    Summary: Ship slots, variables
 \
 \ ******************************************************************************
 
  ORG &0300
+
+.UP
+
+ SKIP 0                 \ The start of the UP workspace
 
 .KL
 
@@ -2035,6 +2039,8 @@
                         \ are default values for it in the new_details table,
                         \ though these are commented out
 
+ PRINT "UP workspace from ", ~UP, "to ", ~P%-1, "inclusive"
+
 \ ******************************************************************************
 \
 \       Name: K%
@@ -2066,6 +2072,8 @@
 .K%
 
  SKIP NOSH * NI%        \ Ship data blocks and ship line heap
+
+ PRINT "K% workspace from ", ~K%, "to ", ~P%-1, "inclusive"
 
 \ ******************************************************************************
 \
@@ -2184,7 +2192,7 @@
                         \ through the list of pirate ship blueprints until we
                         \ find one that has been loaded
 
- PRINT "WP workspace from  ", ~WP," to ", ~P%
+ PRINT "WP workspace from ", ~WP, "to ", ~P%-1, "inclusive"
 
 \ ******************************************************************************
 \
