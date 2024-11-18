@@ -1540,12 +1540,10 @@ ENDMACRO
   N = ABS(SIN((I% / 64) * 2 * PI))
 
   IF N >= 1
-   B% = 255
+   EQUB 255
   ELSE
-   B% = INT(256 * N + 0.5)
+   EQUB INT(256 * N + 0.5)
   ENDIF
-
-  EQUB B%
 
  NEXT
 

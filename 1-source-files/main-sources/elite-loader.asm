@@ -1503,7 +1503,7 @@ ENDIF
                         \
                         \   x = random number from 0 to 255
                         \   y = random number from 0 to 255
-                        \   (x^2 + y^2) div 256 >= 17
+                        \   HI(x^2 + y^2) >= 17
                         \
                         \ which is what we want
 
