@@ -783,7 +783,7 @@ ENDIF
 
 .KY1
 
- SKIP 1                 \ "?" is being pressed
+ SKIP 1                 \ "?" is being pressed (slow down)
                         \
                         \   * 0 = no
                         \
@@ -791,7 +791,7 @@ ENDIF
 
 .KY2
 
- SKIP 1                 \ Space is being pressed
+ SKIP 1                 \ Space is being pressed (speed up)
                         \
                         \   * 0 = no
                         \
@@ -799,7 +799,7 @@ ENDIF
 
 .KY3
 
- SKIP 1                 \ "<" is being pressed
+ SKIP 1                 \ "<" is being pressed (roll left)
                         \
                         \   * 0 = no
                         \
@@ -807,7 +807,7 @@ ENDIF
 
 .KY4
 
- SKIP 1                 \ ">" is being pressed
+ SKIP 1                 \ ">" is being pressed (roll right)
                         \
                         \   * 0 = no
                         \
@@ -815,7 +815,7 @@ ENDIF
 
 .KY5
 
- SKIP 1                 \ "X" is being pressed
+ SKIP 1                 \ "X" is being pressed (pull up)
                         \
                         \   * 0 = no
                         \
@@ -823,7 +823,7 @@ ENDIF
 
 .KY6
 
- SKIP 1                 \ "S" is being pressed
+ SKIP 1                 \ "S" is being pressed (pitch down)
                         \
                         \   * 0 = no
                         \
@@ -831,7 +831,7 @@ ENDIF
 
 .KY7
 
- SKIP 1                 \ "A" is being pressed
+ SKIP 1                 \ "A" is being pressed (fire lasers)
                         \
                         \   * 0 = no
                         \
@@ -842,7 +842,7 @@ ENDIF
 
 .KY12
 
- SKIP 1                 \ TAB is being pressed
+ SKIP 1                 \ TAB is being pressed (energy bomb)
                         \
                         \   * 0 = no
                         \
@@ -850,7 +850,7 @@ ENDIF
 
 .KY13
 
- SKIP 1                 \ ESCAPE is being pressed
+ SKIP 1                 \ ESCAPE is being pressed (launch escape pod)
                         \
                         \   * 0 = no
                         \
@@ -858,7 +858,7 @@ ENDIF
 
 .KY14
 
- SKIP 1                 \ "T" is being pressed
+ SKIP 1                 \ "T" is being pressed (target missile)
                         \
                         \   * 0 = no
                         \
@@ -866,7 +866,7 @@ ENDIF
 
 .KY15
 
- SKIP 1                 \ "U" is being pressed
+ SKIP 1                 \ "U" is being pressed (unarm missile)
                         \
                         \   * 0 = no
                         \
@@ -874,7 +874,7 @@ ENDIF
 
 .KY16
 
- SKIP 1                 \ "M" is being pressed
+ SKIP 1                 \ "M" is being pressed (fire missile)
                         \
                         \   * 0 = no
                         \
@@ -882,7 +882,7 @@ ENDIF
 
 .KY17
 
- SKIP 1                 \ "E" is being pressed
+ SKIP 1                 \ "E" is being pressed (activate E.C.M.)
                         \
                         \   * 0 = no
                         \
@@ -890,7 +890,7 @@ ENDIF
 
 .KY18
 
- SKIP 1                 \ "J" is being pressed
+ SKIP 1                 \ "J" is being pressed (in-system jump)
                         \
                         \   * 0 = no
                         \
@@ -898,7 +898,7 @@ ENDIF
 
 .KY19
 
- SKIP 1                 \ "C" is being pressed
+ SKIP 1                 \ "C" is being pressed (activate docking computer)
                         \
                         \   * 0 = no
                         \
@@ -906,7 +906,7 @@ ENDIF
 
 .KY20
 
- SKIP 1                 \ "P" is being pressed
+ SKIP 1                 \ "P" is being pressed (deactivate docking computer)
                         \
                         \   * 0 = no
                         \

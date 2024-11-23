@@ -3839,7 +3839,7 @@ ENDIF
  EQUB &62 + 128         \ Space     KYTB+2      Speed up
  EQUB &66 + 128         \ <         KYTB+3      Roll left
  EQUB &67 + 128         \ >         KYTB+4      Roll right
- EQUB &42 + 128         \ X         KYTB+5      Pitch up
+ EQUB &42 + 128         \ X         KYTB+5      Pull up
  EQUB &51 + 128         \ S         KYTB+6      Pitch down
  EQUB &41 + 128         \ A         KYTB+7      Fire lasers
 
@@ -3900,7 +3900,7 @@ ENDIF
  EQUB &31               \ Right column   Top row      KYTB+2    Speed up
  EQUB &80               \ -                           KYTB+3    Roll left
  EQUB &80               \ -                           KYTB+4    Roll right
- EQUB &80               \ -                           KYTB+5    Pitch up
+ EQUB &80               \ -                           KYTB+5    Pull up
  EQUB &80               \ -                           KYTB+6    Pitch down
  EQUB &51               \ Middle column  Top row      KYTB+7    Fire lasers
  EQUB &64               \ Left column    Third row    KYTB+8    Hyperspace unit
