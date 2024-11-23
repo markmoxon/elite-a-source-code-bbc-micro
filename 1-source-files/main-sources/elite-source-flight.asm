@@ -20352,7 +20352,7 @@
                         \           = x +/- random * cloud size
 
  BNE EX4                \ If A is non-zero, the particle is off-screen as the
-                        \ coordinate is bigger than 255), so jump to EX11 to do
+                        \ coordinate is bigger than 255), so jump to EX4 to do
                         \ the next particle
 
                         \ Otherwise X contains a random x-coordinate within the
