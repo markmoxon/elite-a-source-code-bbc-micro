@@ -13006,8 +13006,8 @@ ENDIF
  JSR DETOK              \ to row 10, white, lower case}{white}{all caps}INCOMING
                         \ MESSAGE"
 
- LDY #100               \ Delay for 100 vertical syncs (100/50 = 2 seconds) and
- JMP DELAY              \ return from the subroutine using a tail call
+ LDY #100               \ Wait for 100/50 of a second (2 seconds) and return
+ JMP DELAY              \ from the subroutine using a tail call
 
 \ ******************************************************************************
 \
@@ -18596,8 +18596,8 @@ ENDIF
 
  JSR BEEP               \ Call the BEEP subroutine to make a short, high beep
 
- LDY #50                \ Delay for 50 vertical syncs (50/50 = 1 second) and
- JMP DELAY              \ return from the subroutine using a tail call
+ LDY #50                \ Wait for 50/50 of a second (1 second) and return
+ JMP DELAY              \ from the subroutine using a tail call
 
 \ ******************************************************************************
 \
@@ -26184,8 +26184,8 @@ ENDIF
 
  JSR BELL               \ Make a beep sound so we know something has happened
 
- JSR DELAY              \ Wait for Y vertical syncs (Y is between 64 and 70, so
-                        \ this is always a bit longer than a second)
+ JSR DELAY              \ Wait for Y/50 seconds (Y is between 64 and 70, so this
+                        \ is always a bit longer than a second)
 
  LDY T                  \ Restore the configuration key argument into Y
 
@@ -26485,8 +26485,9 @@ ENDIF
 
 .t
 
- LDY #2                 \ Delay for 2 vertical syncs (2/50 = 0.04 seconds) so we
- JSR DELAY              \ don't take up too much CPU time while looping round
+ LDY #2                 \ Wait for 2/50 of a second (0.04 seconds) to implement
+ JSR DELAY              \ a simple keyboard debounce and prevent multiple key
+                        \ presses being recorded
 
  JSR RDKEY              \ Scan the keyboard for a key press and return the
                         \ internal key number in A and X (or 0 for no key press)
@@ -31643,8 +31644,8 @@ ENDMACRO
 
  JMP cash_query         \ Otherwise we didn't have enough cash, so jump to
                         \ cash_query to print "CASH?", make a short, high beep,
-                        \ delay for 1 second and go to the docking bay (i.e.
-                        \ show the Status Mode screen)
+                        \ wait for 1 second and go to the docking bay (i.e. show
+                        \ the Status Mode screen)
 
 .cour_cash
 
@@ -32045,7 +32046,7 @@ ENDMACRO
  STA cmdr_cour
  STA cmdr_cour+1
 
- LDY #96                \ Wait for 96 vertical syncs (96/50 = 1.92 seconds)
+ LDY #96                \ Wait for 96/50 of a second (1.92 seconds)
  JSR DELAY
 
 .cour_half

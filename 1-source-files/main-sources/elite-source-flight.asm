@@ -29681,8 +29681,8 @@
 
  JSR BELL               \ Make a beep sound so we know something has happened
 
- JSR DELAY              \ Wait for Y vertical syncs (Y is between 64 and 70, so
-                        \ this is always a bit longer than a second)
+ JSR DELAY              \ Wait for Y/50 seconds (Y is between 64 and 70, so this
+                        \ is always a bit longer than a second)
 
  LDY T                  \ Restore the configuration key argument into Y
 
