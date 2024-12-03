@@ -422,18 +422,18 @@ ENDMACRO
 .SHIP_DODO_FACES
 
     \ normal_x, normal_y, normal_z, visibility
- FACE        0,        0,      196,         31    \ Face 0
- FACE      103,      142,       88,         31    \ Face 1
- FACE      169,      -55,       89,         31    \ Face 2
- FACE        0,     -176,       88,         31    \ Face 3
- FACE     -169,      -55,       89,         31    \ Face 4
- FACE     -103,      142,       88,         31    \ Face 5
- FACE        0,      176,      -88,         31    \ Face 6
- FACE      169,       55,      -89,         31    \ Face 7
- FACE      103,     -142,      -88,         31    \ Face 8
- FACE     -103,     -142,      -88,         31    \ Face 9
- FACE     -169,       55,      -89,         31    \ Face 10
- FACE        0,        0,     -196,         31    \ Face 11
+ FACE        0,        0,      196,         31      \ Face 0
+ FACE      103,      142,       88,         31      \ Face 1
+ FACE      169,      -55,       89,         31      \ Face 2
+ FACE        0,     -176,       88,         31      \ Face 3
+ FACE     -169,      -55,       89,         31      \ Face 4
+ FACE     -103,      142,       88,         31      \ Face 5
+ FACE        0,      176,      -88,         31      \ Face 6
+ FACE      169,       55,      -89,         31      \ Face 7
+ FACE      103,     -142,      -88,         31      \ Face 8
+ FACE     -103,     -142,      -88,         31      \ Face 9
+ FACE     -169,       55,      -89,         31      \ Face 10
+ FACE        0,        0,     -196,         31      \ Face 11
 
 \ ******************************************************************************
 \
@@ -503,10 +503,10 @@ ENDMACRO
 .SHIP_ESCAPE_POD_FACES
 
     \ normal_x, normal_y, normal_z, visibility
- FACE       52,        0,     -122,         31    \ Face 0
- FACE       39,      103,       30,         31    \ Face 1
- FACE       39,     -103,       30,         31    \ Face 2
- FACE     -112,        0,        0,         31    \ Face 3
+ FACE       52,        0,     -122,         31      \ Face 0
+ FACE       39,      103,       30,         31      \ Face 1
+ FACE       39,     -103,       30,         31      \ Face 2
+ FACE     -112,        0,        0,         31      \ Face 3
 
 \ ******************************************************************************
 \
@@ -600,13 +600,13 @@ ENDMACRO
 .SHIP_CANISTER_FACES
 
     \ normal_x, normal_y, normal_z, visibility
- FACE       96,        0,        0,         31    \ Face 0
- FACE        0,       41,       30,         31    \ Face 1
- FACE        0,      -18,       48,         31    \ Face 2
- FACE        0,      -51,        0,         31    \ Face 3
- FACE        0,      -18,      -48,         31    \ Face 4
- FACE        0,       41,      -30,         31    \ Face 5
- FACE      -96,        0,        0,         31    \ Face 6
+ FACE       96,        0,        0,         31      \ Face 0
+ FACE        0,       41,       30,         31      \ Face 1
+ FACE        0,      -18,       48,         31      \ Face 2
+ FACE        0,      -51,        0,         31      \ Face 3
+ FACE        0,      -18,      -48,         31      \ Face 4
+ FACE        0,       41,      -30,         31      \ Face 5
+ FACE      -96,        0,        0,         31      \ Face 6
 
 \ ******************************************************************************
 \
@@ -710,13 +710,13 @@ ENDMACRO
 .SHIP_VIPER_FACES
 
     \ normal_x, normal_y, normal_z, visibility
- FACE        0,       32,        0,         31    \ Face 0
- FACE      -22,       33,       11,         31    \ Face 1
- FACE       22,       33,       11,         31    \ Face 2
- FACE      -22,      -33,       11,         31    \ Face 3
- FACE       22,      -33,       11,         31    \ Face 4
- FACE        0,      -32,        0,         31    \ Face 5
- FACE        0,        0,      -48,         31    \ Face 6
+ FACE        0,       32,        0,         31      \ Face 0
+ FACE      -22,       33,       11,         31      \ Face 1
+ FACE       22,       33,       11,         31      \ Face 2
+ FACE      -22,      -33,       11,         31      \ Face 3
+ FACE       22,      -33,       11,         31      \ Face 4
+ FACE        0,      -32,        0,         31      \ Face 5
+ FACE        0,        0,      -48,         31      \ Face 6
 
 \ ******************************************************************************
 \
@@ -798,15 +798,15 @@ ENDMACRO
 .SHIP_BUSHMASTER_FACES
 
     \ normal_x, normal_y, normal_z, visibility
- FACE      -23,       88,       29,         31    \ Face 0
- FACE       23,       88,       29,         31    \ Face 1
- FACE      -14,      -93,       18,         31    \ Face 2
- FACE       14,      -93,       18,         31    \ Face 3
- FACE      -31,       89,      -13,         31    \ Face 4
- FACE       31,       89,      -13,         31    \ Face 5
- FACE      -42,      -85,       -7,         31    \ Face 6
- FACE       42,      -85,       -7,         31    \ Face 7
- FACE        0,        0,      -96,         31    \ Face 8
+ FACE      -23,       88,       29,         31      \ Face 0
+ FACE       23,       88,       29,         31      \ Face 1
+ FACE      -14,      -93,       18,         31      \ Face 2
+ FACE       14,      -93,       18,         31      \ Face 3
+ FACE      -31,       89,      -13,         31      \ Face 4
+ FACE       31,       89,      -13,         31      \ Face 5
+ FACE      -42,      -85,       -7,         31      \ Face 6
+ FACE       42,      -85,       -7,         31      \ Face 7
+ FACE        0,        0,      -96,         31      \ Face 8
 
                         \ --- End of added code ------------------------------->
 
@@ -930,11 +930,11 @@ ENDMACRO
 .SHIP_MAMBA_FACES
 
     \ normal_x, normal_y, normal_z, visibility
- FACE        0,      -24,        2,         30    \ Face 0
- FACE        0,       24,        2,         30    \ Face 1
- FACE      -32,       64,       16,         30    \ Face 2
- FACE       32,       64,       16,         30    \ Face 3
- FACE        0,        0,     -127,         30    \ Face 4
+ FACE        0,      -24,        2,         30      \ Face 0
+ FACE        0,       24,        2,         30      \ Face 1
+ FACE      -32,       64,       16,         30      \ Face 2
+ FACE       32,       64,       16,         30      \ Face 3
+ FACE        0,        0,     -127,         30      \ Face 4
 
 \ ******************************************************************************
 \
@@ -1038,13 +1038,13 @@ ENDMACRO
 .SHIP_SIDEWINDER_FACES
 
     \ normal_x, normal_y, normal_z, visibility
- FACE        0,       32,        8,         31    \ Face 0
- FACE      -12,       47,        6,         31    \ Face 1
- FACE       12,       47,        6,         31    \ Face 2
- FACE        0,        0,     -112,         31    \ Face 3
- FACE      -12,      -47,        6,         31    \ Face 4
- FACE        0,      -32,        8,         31    \ Face 5
- FACE       12,      -47,        6,         31    \ Face 6
+ FACE        0,       32,        8,         31      \ Face 0
+ FACE      -12,       47,        6,         31      \ Face 1
+ FACE       12,       47,        6,         31      \ Face 2
+ FACE        0,        0,     -112,         31      \ Face 3
+ FACE      -12,      -47,        6,         31      \ Face 4
+ FACE        0,      -32,        8,         31      \ Face 5
+ FACE       12,      -47,        6,         31      \ Face 6
 
 \ ******************************************************************************
 \
@@ -1169,16 +1169,16 @@ ENDMACRO
 .SHIP_FER_DE_LANCE_FACES
 
     \ normal_x, normal_y, normal_z, visibility
- FACE        0,       24,        6,         28    \ Face 0
- FACE      -68,        0,       24,         31    \ Face 1
- FACE      -63,        0,      -37,         31    \ Face 2
- FACE        0,        0,     -104,         31    \ Face 3
- FACE       63,        0,      -37,         31    \ Face 4
- FACE       68,        0,       24,         31    \ Face 5
- FACE      -12,       46,      -19,         28    \ Face 6
- FACE        0,       45,      -22,         28    \ Face 7
- FACE       12,       46,      -19,         28    \ Face 8
- FACE        0,      -28,        0,         31    \ Face 9
+ FACE        0,       24,        6,         28      \ Face 0
+ FACE      -68,        0,       24,         31      \ Face 1
+ FACE      -63,        0,      -37,         31      \ Face 2
+ FACE        0,        0,     -104,         31      \ Face 3
+ FACE       63,        0,      -37,         31      \ Face 4
+ FACE       68,        0,       24,         31      \ Face 5
+ FACE      -12,       46,      -19,         28      \ Face 6
+ FACE        0,       45,      -22,         28      \ Face 7
+ FACE       12,       46,      -19,         28      \ Face 8
+ FACE        0,      -28,        0,         31      \ Face 9
 
 \ ******************************************************************************
 \
@@ -1280,15 +1280,15 @@ ENDMACRO
 .SHIP_MORAY_FACES
 
     \ normal_x, normal_y, normal_z, visibility
- FACE        0,       43,        7,         31    \ Face 0
- FACE      -10,       49,        7,         31    \ Face 1
- FACE       10,       49,        7,         31    \ Face 2
- FACE      -59,      -28,     -101,         24    \ Face 3
- FACE        0,      -52,      -78,         24    \ Face 4
- FACE       59,      -28,     -101,         24    \ Face 5
- FACE      -72,      -99,       50,         31    \ Face 6
- FACE        0,      -83,       30,         31    \ Face 7
- FACE       72,      -99,       50,         31    \ Face 8
+ FACE        0,       43,        7,         31      \ Face 0
+ FACE      -10,       49,        7,         31      \ Face 1
+ FACE       10,       49,        7,         31      \ Face 2
+ FACE      -59,      -28,     -101,         24      \ Face 3
+ FACE        0,      -52,      -78,         24      \ Face 4
+ FACE       59,      -28,     -101,         24      \ Face 5
+ FACE      -72,      -99,       50,         31      \ Face 6
+ FACE        0,      -83,       30,         31      \ Face 7
+ FACE       72,      -99,       50,         31      \ Face 8
 
 \ ******************************************************************************
 \
@@ -1383,14 +1383,14 @@ ENDMACRO
 .SHIP_WORM_FACES
 
     \ normal_x, normal_y, normal_z, visibility
- FACE        0,       88,       70,         31    \ Face 0
- FACE        0,       69,       14,         31    \ Face 1
- FACE       70,       66,       35,         31    \ Face 2
- FACE      -70,       66,       35,         31    \ Face 3
- FACE       64,       49,       14,         31    \ Face 4
- FACE      -64,       49,       14,         31    \ Face 5
- FACE        0,        0,     -200,         31    \ Face 6
- FACE        0,      -80,        0,         31    \ Face 7
+ FACE        0,       88,       70,         31      \ Face 0
+ FACE        0,       69,       14,         31      \ Face 1
+ FACE       70,       66,       35,         31      \ Face 2
+ FACE      -70,       66,       35,         31      \ Face 3
+ FACE       64,       49,       14,         31      \ Face 4
+ FACE      -64,       49,       14,         31      \ Face 5
+ FACE        0,        0,     -200,         31      \ Face 6
+ FACE        0,      -80,        0,         31      \ Face 7
 
 \ ******************************************************************************
 \
@@ -1488,15 +1488,15 @@ ENDMACRO
 .SHIP_GECKO_FACES
 
     \ normal_x, normal_y, normal_z, visibility
- FACE        0,       31,        5,         31    \ Face 0
- FACE        4,       45,        8,         31    \ Face 1
- FACE       25,     -108,       19,         31    \ Face 2
- FACE        0,      -84,       12,         31    \ Face 3
- FACE      -25,     -108,       19,         31    \ Face 4
- FACE       -4,       45,        8,         31    \ Face 5
- FACE      -88,       16,     -214,         31    \ Face 6
- FACE        0,        0,     -187,         31    \ Face 7
- FACE       88,       16,     -214,         31    \ Face 8
+ FACE        0,       31,        5,         31      \ Face 0
+ FACE        4,       45,        8,         31      \ Face 1
+ FACE       25,     -108,       19,         31      \ Face 2
+ FACE        0,      -84,       12,         31      \ Face 3
+ FACE      -25,     -108,       19,         31      \ Face 4
+ FACE       -4,       45,        8,         31      \ Face 5
+ FACE      -88,       16,     -214,         31      \ Face 6
+ FACE        0,        0,     -187,         31      \ Face 7
+ FACE       88,       16,     -214,         31      \ Face 8
 
 \ ******************************************************************************
 \
@@ -1574,7 +1574,7 @@ ENDMACRO
 .SHIP_PLATE_FACES
 
     \ normal_x, normal_y, normal_z, visibility
- FACE        0,        0,        0,          0    \ Face 0
+ FACE        0,        0,        0,          0      \ Face 0
 
  EQUB 6                 \ This byte appears to be unused
 

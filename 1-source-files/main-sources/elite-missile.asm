@@ -315,32 +315,32 @@ ENDMACRO
 .SHIP_MISSILE_FACES
 
     \ normal_x, normal_y, normal_z, visibility
- FACE      -64,        0,       16,         31    \ Face 0
- FACE        0,      -64,       16,         31    \ Face 1
- FACE       64,        0,       16,         31    \ Face 2
- FACE        0,       64,       16,         31    \ Face 3
- FACE       32,        0,        0,         31    \ Face 4
- FACE        0,      -32,        0,         31    \ Face 5
- FACE      -32,        0,        0,         31    \ Face 6
+ FACE      -64,        0,       16,         31      \ Face 0
+ FACE        0,      -64,       16,         31      \ Face 1
+ FACE       64,        0,       16,         31      \ Face 2
+ FACE        0,       64,       16,         31      \ Face 3
+ FACE       32,        0,        0,         31      \ Face 4
+ FACE        0,      -32,        0,         31      \ Face 5
+ FACE      -32,        0,        0,         31      \ Face 6
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
 \IF _STH_DISC OR _IB_DISC
 \
-\FACE        0,      160,      110,         31    \ Face 7
-\FACE        0,       64,        4,          0    \ Face 8
+\FACE        0,      160,      110,         31      \ Face 7
+\FACE        0,       64,        4,          0      \ Face 8
 \
 \ELIF _SRAM_DISC
 \
-\FACE        0,       32,        0,         31    \ Face 7
-\FACE        0,        0,     -176,         31    \ Face 8
+\FACE        0,       32,        0,         31      \ Face 7
+\FACE        0,        0,     -176,         31      \ Face 8
 \
 \ENDIF
 
                         \ --- And replaced by: -------------------------------->
 
- FACE        0,       32,        0,         31    \ Face 7
- FACE        0,        0,     -176,         31    \ Face 8
+ FACE        0,       32,        0,         31      \ Face 7
+ FACE        0,        0,     -176,         31      \ Face 8
 
                         \ --- End of replacement ------------------------------>
 
