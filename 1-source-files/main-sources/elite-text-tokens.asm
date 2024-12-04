@@ -22,6 +22,11 @@
 \
 \ ------------------------------------------------------------------------------
 \
+\ This source file contains the game data for Elite-A, which includes the game
+\ text.
+\
+\ ------------------------------------------------------------------------------
+\
 \ This source file produces the following binary file:
 \
 \   * WORDS.bin

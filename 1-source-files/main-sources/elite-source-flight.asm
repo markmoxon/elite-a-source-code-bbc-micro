@@ -22,6 +22,12 @@
 \
 \ ------------------------------------------------------------------------------
 \
+\ This source file contains the main game code for Elite-A, for when the player
+\ is flying in space. It loads the ship blueprints from one of the ship
+\ blueprint files.
+\
+\ ------------------------------------------------------------------------------
+\
 \ This source file produces the following binary file:
 \
 \   * 1.F.bin

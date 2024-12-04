@@ -22,6 +22,12 @@
 \
 \ ------------------------------------------------------------------------------
 \
+\ This source file contains the I/O processor code for Elite-A on the 6502
+\ Second Processor. This is the code that runs in the I/O processor (i.e. the
+\ BBC Micro).
+\
+\ ------------------------------------------------------------------------------
+\
 \ This source file produces the following binary file:
 \
 \   * 2.H.bin

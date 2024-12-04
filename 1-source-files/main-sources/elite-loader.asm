@@ -22,6 +22,10 @@
 \
 \ ------------------------------------------------------------------------------
 \
+\ This source file contains the loader for Elite-A.
+\
+\ ------------------------------------------------------------------------------
+\
 \ This source file produces the following binary file:
 \
 \   * ELITE.bin

@@ -22,6 +22,10 @@
 \
 \ ------------------------------------------------------------------------------
 \
+\ This source file contains ship blueprints for Elite-A.
+\
+\ ------------------------------------------------------------------------------
+\
 \ This source file produces the following binary file:
 \
 \   * S.A.bin

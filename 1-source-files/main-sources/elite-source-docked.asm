@@ -22,6 +22,11 @@
 \
 \ ------------------------------------------------------------------------------
 \
+\ This source file contains the main game code for Elite-A, for when the player
+\ is docked.
+\
+\ ------------------------------------------------------------------------------
+\
 \ This source file produces the following binary file:
 \
 \   * 1.D.bin

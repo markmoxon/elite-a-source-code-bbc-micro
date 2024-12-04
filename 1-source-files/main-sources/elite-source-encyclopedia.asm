@@ -22,6 +22,10 @@
 \
 \ ------------------------------------------------------------------------------
 \
+\ This source file contains the encyclopedia code for Elite-A.
+\
+\ ------------------------------------------------------------------------------
+\
 \ This source file produces the following binary file:
 \
 \   * 1.E.bin

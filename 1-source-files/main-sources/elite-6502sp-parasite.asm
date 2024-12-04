@@ -22,6 +22,12 @@
 \
 \ ------------------------------------------------------------------------------
 \
+\ This source file contains the main game code for Elite-A on the 6502 Second
+\ Processor. This is the code that runs in the parasite (i.e. the second
+\ processor).
+\
+\ ------------------------------------------------------------------------------
+\
 \ This source file produces the following binary file:
 \
 \   * 2.T.bin

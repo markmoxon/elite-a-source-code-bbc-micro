@@ -22,6 +22,10 @@
 \
 \ ------------------------------------------------------------------------------
 \
+\ This source file contains the missile ship blueprint for Elite-A.
+\
+\ ------------------------------------------------------------------------------
+\
 \ This source file produces the following binary file:
 \
 \   * MISSILE.bin

@@ -22,6 +22,10 @@
 \
 \ ------------------------------------------------------------------------------
 \
+\ This source file produces a README file for Elite-A.
+\
+\ ------------------------------------------------------------------------------
+\
 \ This source file produces the following binary file:
 \
 \   * !BOOT.txt
