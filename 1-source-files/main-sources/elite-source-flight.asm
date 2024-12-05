@@ -19466,7 +19466,7 @@
                         \ and return from the subroutine using a tail call
 
  DEX                    \ If token = 4, this is control code 4 (commander
- BEQ cmn                \ name), so jump to cmm to print the commander name
+ BEQ cmn                \ name), so jump to cmn to print the commander name
                         \ and return from the subroutine using a tail call
 
  DEX                    \ If token = 5, this is control code 5 (fuel, newline,
