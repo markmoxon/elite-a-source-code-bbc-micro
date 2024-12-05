@@ -7,7 +7,7 @@
 \ The original Elite was written by Ian Bell and David Braben and is copyright
 \ Acornsoft 1984, and the extra code in Elite-A is copyright Angus Duggan
 \
-\ The code on this site is identical to Angus Duggan's source discs (it's just
+\ The code in this file is identical to Angus Duggan's source discs (it's just
 \ been reformatted, and the label names have been changed to be consistent with
 \ the sources for the original BBC Micro disc version on which it is based)
 \
