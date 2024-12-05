@@ -1,6 +1,6 @@
 \ ******************************************************************************
 \
-\ ELITE-A LOADER SOURCE
+\ ELITE-A GAME LOADER SOURCE
 \
 \ Elite-A is an extended version of BBC Micro Elite by Angus Duggan
 \

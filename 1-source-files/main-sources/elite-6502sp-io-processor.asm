@@ -1,6 +1,6 @@
 \ ******************************************************************************
 \
-\ ELITE-A GAME SOURCE (I/O PROCESSOR)
+\ ELITE-A MAIN GAME SOURCE (I/O PROCESSOR)
 \
 \ Elite-A is an extended version of BBC Micro Elite by Angus Duggan
 \

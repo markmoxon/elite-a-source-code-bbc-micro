@@ -1,6 +1,6 @@
 \ ******************************************************************************
 \
-\ ELITE-A GAME SOURCE (PARASITE)
+\ ELITE-A MAIN GAME SOURCE (PARASITE)
 \
 \ Elite-A is an extended version of BBC Micro Elite by Angus Duggan
 \

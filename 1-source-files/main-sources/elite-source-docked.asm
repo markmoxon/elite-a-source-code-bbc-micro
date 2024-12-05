@@ -1,6 +1,6 @@
 \ ******************************************************************************
 \
-\ ELITE-A DOCKED SOURCE
+\ ELITE-A MAIN GAME SOURCE (DOCKED)
 \
 \ Elite-A is an extended version of BBC Micro Elite by Angus Duggan
 \

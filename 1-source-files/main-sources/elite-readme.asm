@@ -1,6 +1,6 @@
 \ ******************************************************************************
 \
-\ ELITE-A README AND BOOT FILE
+\ ELITE-A README AND BOOT FILE SOURCE
 \
 \ Elite-A is an extended version of BBC Micro Elite by Angus Duggan
 \

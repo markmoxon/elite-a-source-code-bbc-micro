@@ -1,6 +1,6 @@
 \ ******************************************************************************
 \
-\ ELITE-A MISSILE SHIP BLUEPRINT FILE
+\ ELITE-A MISSILE SHIP BLUEPRINT SOURCE
 \
 \ Elite-A is an extended version of BBC Micro Elite by Angus Duggan
 \

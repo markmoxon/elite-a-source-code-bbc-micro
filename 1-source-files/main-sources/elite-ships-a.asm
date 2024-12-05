@@ -1,6 +1,6 @@
 \ ******************************************************************************
 \
-\ ELITE-A SHIP BLUEPRINTS FILE A
+\ ELITE-A SHIP BLUEPRINTS FILE A SOURCE
 \
 \ Elite-A is an extended version of BBC Micro Elite by Angus Duggan
 \

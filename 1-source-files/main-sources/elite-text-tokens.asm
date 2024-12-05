@@ -1,6 +1,6 @@
 \ ******************************************************************************
 \
-\ ELITE-A RECURSIVE TEXT TOKEN FILE
+\ ELITE-A GAME DATA SOURCE
 \
 \ Elite-A is an extended version of BBC Micro Elite by Angus Duggan
 \
@@ -22,8 +22,7 @@
 \
 \ ------------------------------------------------------------------------------
 \
-\ This source file contains the game data for Elite-A, which includes the game
-\ text.
+\ This source file contains the game data for Elite-A, including the game text.
 \
 \ ------------------------------------------------------------------------------
 \

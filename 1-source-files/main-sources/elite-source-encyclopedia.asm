@@ -1,6 +1,6 @@
 \ ******************************************************************************
 \
-\ ELITE-A ENCYCLOPEDIA SOURCE
+\ ELITE-A MAIN GAME SOURCE (ENCYCLOPEDIA)
 \
 \ Elite-A is an extended version of BBC Micro Elite by Angus Duggan
 \
