@@ -156,9 +156,7 @@ ENDIF
                         \ Elite draws on-screen by poking bytes directly into
                         \ screen memory, and SC(1 0) is typically set to the
                         \ address of the character block containing the pixel
-                        \ we want to draw (see the deep dives on "Drawing
-                        \ monochrome pixels in mode 4" and "Drawing colour
-                        \ pixels in mode 5" for more details)
+                        \ we want to draw
 
 .SCH
 
@@ -1022,7 +1020,7 @@ ENDIF
 \       Type: Variable
 \   Category: Drawing pixels
 \    Summary: Ready-made single-pixel character row bytes for mode 4
-\  Deep dive: Drawing monochrome pixels in mode 4
+\  Deep dive: Drawing monochrome pixels on the BBC Micro
 \
 \ ------------------------------------------------------------------------------
 \
@@ -1048,7 +1046,7 @@ ENDIF
 \       Type: Variable
 \   Category: Drawing pixels
 \    Summary: Ready-made double-pixel character row bytes for mode 4
-\  Deep dive: Drawing monochrome pixels in mode 4
+\  Deep dive: Drawing monochrome pixels on the BBC Micro
 \
 \ ------------------------------------------------------------------------------
 \
@@ -1074,7 +1072,7 @@ ENDIF
 \       Type: Variable
 \   Category: Drawing pixels
 \    Summary: Ready-made single-pixel character row bytes for mode 5
-\  Deep dive: Drawing colour pixels in mode 5
+\  Deep dive: Drawing colour pixels on the BBC Micro
 \
 \ ------------------------------------------------------------------------------
 \
@@ -1859,7 +1857,7 @@ ENDIF
 \       Type: Subroutine
 \   Category: Drawing lines
 \    Summary: Implement the draw_hline command (draw a horizontal line
-\  Deep dive: Drawing monochrome pixels in mode 4
+\  Deep dive: Drawing monochrome pixels on the BBC Micro
 \
 \ ------------------------------------------------------------------------------
 \
@@ -1867,9 +1865,6 @@ ENDIF
 \ horizontal line.
 \
 \ We do not draw a pixel at the right end of the line.
-\
-\ To understand how this routine works, you might find it helpful to read the
-\ deep dive on "Drawing monochrome pixels in mode 4".
 \
 \ ------------------------------------------------------------------------------
 \
@@ -2170,7 +2165,7 @@ ENDIF
 \       Type: Subroutine
 \   Category: Drawing pixels
 \    Summary: Implement the draw_pixel command (draw space view pixels)
-\  Deep dive: Drawing monochrome pixels in mode 4
+\  Deep dive: Drawing monochrome pixels on the BBC Micro
 \
 \ ------------------------------------------------------------------------------
 \
@@ -3277,7 +3272,7 @@ ENDIF
 \       Type: Subroutine
 \   Category: Drawing pixels
 \    Summary: Draw a single-height dash on the dashboard
-\  Deep dive: Drawing colour pixels in mode 5
+\  Deep dive: Drawing colour pixels on the BBC Micro
 \
 \ ------------------------------------------------------------------------------
 \
@@ -4590,8 +4585,7 @@ ENDIF
                         \ patterns, as the structure of each mode 5 screen
                         \ memory byte is interleaved so that the first pixel is
                         \ in bits 0 and 4, the second is in bits 1 and 5, and
-                        \ so on (see the deep dive on "Drawing colour pixels in
-                        \ mode 5" for more on this)
+                        \ so on
                         \
                         \ The idea is that we convert each interleaved pixel
                         \ pair into a two-dot wide pixel, so the colour screen

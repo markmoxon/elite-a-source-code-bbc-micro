@@ -81,9 +81,6 @@
 \
 \ To include an apostrophe, use a backtick character, as in CHAR '`'.
 \
-\ See the deep dive on "Printing text tokens" for details on how characters are
-\ stored in the recursive token table.
-\
 \ ------------------------------------------------------------------------------
 \
 \ Arguments:
@@ -115,9 +112,6 @@ ENDMACRO
 \ The following macro is used when building the recursive token table:
 \
 \   TWOK 'x', 'y'       Insert two-letter token "xy"
-\
-\ See the deep dive on "Printing text tokens" for details on how two-letter
-\ tokens are stored in the recursive token table.
 \
 \ ------------------------------------------------------------------------------
 \
@@ -277,9 +271,6 @@ ENDMACRO
 \
 \   CONT n              Insert control code token {n}
 \
-\ See the deep dive on "Printing text tokens" for details on how characters are
-\ stored in the recursive token table.
-\
 \ ------------------------------------------------------------------------------
 \
 \ Arguments:
@@ -313,9 +304,6 @@ ENDMACRO
 \                         * Tokens 128-145 get stored as n - 114
 \
 \                         * Tokens 96-127 get stored as n
-\
-\ See the deep dive on "Printing text tokens" for details on how recursive
-\ tokens are stored in the recursive token table.
 \
 \ ------------------------------------------------------------------------------
 \
