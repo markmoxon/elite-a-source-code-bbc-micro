@@ -2568,7 +2568,7 @@ ENDIF
  BCC DL2                \ indicator, which is less than a full character's
                         \ width, so jump down to DL2 to do this
 
- SBC #4                 \ Otherwise we can draw a 4-pixel wide block, so
+ SBC #4                 \ Otherwise we can draw a four-pixel wide block, so
  STA bar_1              \ subtract 4 from bar_1 so it contains the amount of the
                         \ indicator that's left to draw after this character
 
@@ -4546,7 +4546,7 @@ ENDIF
                         \ contents of the buffer into pixel patterns (as the
                         \ printer can only print monochrome dots). Finally, we
                         \ send the character block to the printer as a sequence
-                        \ of one-pixel-wide vertical slices of eight pixels in
+                        \ of one-pixel wide vertical slices of eight pixels in
                         \ height, working our way from left to right until the
                         \ character block is printed. And then we move onto the
                         \ next character block until the whole screen is printed
