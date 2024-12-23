@@ -1010,23 +1010,33 @@ ENDIF
 \LDY #HI(tube_400)      \ source
 \LDA #1
 \JSR &0406
+\
 \LDA #LO(WORDS)
 \STA &72
 \LDA #HI(WORDS)
 \STA &73
+\
 \LDX #&04
 \LDY #&00
+\
 \.tube_wr
+\
 \LDA (&72),Y
 \JSR tube_wait
+\
 \BIT tube_r3s
 \BVC tube_wr
+\
 \STA tube_r3d
+\
 \INY
 \BNE tube_wr
+\
 \INC &73
+\
 \DEX
 \BNE tube_wr
+\
 \LDA #LO(tube_wrch)
 \STA WRCHV
 \LDA #HI(tube_wrch)
@@ -1045,12 +1055,19 @@ ENDIF
                         \ "*RUN 2.H")
 
 \.tube_400              \ These instructions are commented out in the original
-\EQUD &0400             \ source
+\                       \ source
+\EQUD &0400
+\
 \.tube_wait
+\
 \JSR tube_wait2
+\
 \.tube_wait2
+\
 \JSR tube_wait3
+\
 \.tube_wait3
+\
 \RTS
 
                         \ --- End of replacement ------------------------------>

@@ -35763,7 +35763,9 @@ ENDMACRO
 
 \CPX #&37               \ These instructions are commented out in the original
 \BNE dont_dump          \ source
+\
 \JSR printer
+\
 \.dont_dump
 
  CPX #&59               \ If DELETE is not being pressed, we are still paused,
@@ -38844,13 +38846,18 @@ ENDIF
 \ ******************************************************************************
 
 \.printer               \ These instructions are commented out in the original
-\TXA                    \ source
+\                       \ source
+\TXA
 \PHA
+\
 \LDA #&9C
 \JSR tube_write
+\
 \JSR tube_read
+\
 \PLA
 \TAX
+\
 \RTS
 
 \ ******************************************************************************
@@ -40160,6 +40167,7 @@ ENDIF
 
 \BCC n_defense          \ These instructions are commented out in the original
 \LDA #&FF               \ source
+\
 \.n_defense
 
  CLC                    \ Otherwise the hit was stronger than the enemy shields,
@@ -53895,7 +53903,9 @@ ENDIF
 
 \CPX #&37               \ These instructions are commented out in the original
 \BNE dont_dump          \ source
+\
 \JSR printer
+\
 \.dont_dump
 
  CPX #&59               \ If DELETE is not being pressed, we are still paused,

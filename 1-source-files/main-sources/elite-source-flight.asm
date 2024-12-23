@@ -4014,6 +4014,7 @@
 
 \BCC n_defense          \ These instructions are commented out in the original
 \LDA #&FF               \ source
+\
 \.n_defense
 
  CLC                    \ Otherwise the hit was stronger than the enemy shields,
