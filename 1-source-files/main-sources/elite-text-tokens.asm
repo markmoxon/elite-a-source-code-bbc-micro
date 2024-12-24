@@ -338,6 +338,12 @@ ENDMACRO
 \
 \ ------------------------------------------------------------------------------
 \
+\ The encodings shown for each recursive text token use the following notation:
+\
+\   {n}           Control code              n = 0 to 13
+\   <n>           Two-letter token          n = 128 to 159
+\   [n]           Recursive token           n = 0 to 148
+\
 \ Other entry points:
 \
 \   new_name            This part of token 132 is updated with our current

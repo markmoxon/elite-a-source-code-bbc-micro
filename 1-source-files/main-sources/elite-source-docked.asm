@@ -33079,6 +33079,15 @@ ENDMACRO
 \    Summary: The first extended token table for recursive tokens 0-255 (DETOK)
 \  Deep dive: Extended text tokens
 \
+\ ------------------------------------------------------------------------------
+\
+\ The encodings shown for each extended text token use the following notation:
+\
+\   {n}           Jump token                n = 1 to 31
+\   [n?]          Random token              n = 91 to 128
+\   [n]           Recursive token           n = 129 to 215
+\   <n>           Two-letter token          n = 215 to 255
+\
 \ ******************************************************************************
 
 .TKN1
@@ -36567,6 +36576,13 @@ ENDMACRO
 \     normal extended description if the criteria in RUPLA and RUGAL are met
 \
 \ See the PDESC routine for details of how extended system descriptions work.
+\
+\ The encodings shown for each extended text token use the following notation:
+\
+\   {n}           Jump token                n = 1 to 31
+\   [n?]          Random token              n = 91 to 128
+\   [n]           Recursive token           n = 129 to 215
+\   <n>           Two-letter token          n = 215 to 255
 \
 \ ******************************************************************************
 
