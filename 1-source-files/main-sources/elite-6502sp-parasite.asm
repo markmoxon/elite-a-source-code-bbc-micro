@@ -56395,7 +56395,7 @@ ENDMACRO
 .SHIP_PLATE
 
  EQUB 0 + (8 << 4)      \ Max. canisters on demise = 0
-                        \ Market item when scooped = 8 + 1 = 9 (Alloys)
+                        \ Market item when scooped = 8 + 1 = 9 (alloys)
  EQUW 10 * 10           \ Targetable area          = 10 * 10
 
  EQUB LO(SHIP_PLATE_EDGES - SHIP_PLATE)            \ Edges data offset (low)
@@ -56891,7 +56891,7 @@ ENDMACRO
 .SHIP_SPLINTER
 
  EQUB 0 + (11 << 4)     \ Max. canisters on demise = 0
-                        \ Market item when scooped = 11 + 1 = 12 (Minerals)
+                        \ Market item when scooped = 11 + 1 = 12 (minerals)
  EQUW 16 * 16           \ Targetable area          = 16 * 16
 
 IF _RELEASED OR _SOURCE_DISC
