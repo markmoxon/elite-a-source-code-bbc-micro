@@ -14546,6 +14546,7 @@ ENDIF
 \       Type: Subroutine
 \   Category: Charts
 \    Summary: Show the Long-range Chart (red key f4)
+\  Deep dive: A sense of scale
 \
 \ ******************************************************************************
 
