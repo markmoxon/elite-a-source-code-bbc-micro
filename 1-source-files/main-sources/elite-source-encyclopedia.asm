@@ -14123,19 +14123,18 @@ ENDIF
 \       Name: brkd
 \       Type: Variable
 \   Category: Utility routines
-\    Summary: The brkd counter for error handling
-\
-\ ------------------------------------------------------------------------------
-\
-\ This counter starts at zero, and is decremented whenever the BRKV handler at
-\ BRBR prints an error message. It is incremented every time an error message
-\ is printed out as part of the TITLE routine.
+\    Summary: A flag that indicates whether a system error has occured
 \
 \ ******************************************************************************
 
 .brkd
 
- EQUB 0
+ EQUB 0                 \ A flag to record whether a system error has occured,
+                        \ so we can print it out
+                        \
+                        \   * 0 = no system error has occured
+                        \
+                        \   * &FF = a system error has occured
 
 \ ******************************************************************************
 \
@@ -14193,10 +14192,9 @@ ENDIF
 \
 \ ------------------------------------------------------------------------------
 \
-\ This routine is used to display error messages, before restarting the game.
-\ When called, it makes a beep and prints the system error message in the block
-\ pointed to by (&FD &FE), which is where the MOS will put any system errors. It
-\ then waits for a key press and restarts the game.
+\ This routine is used to display error messages. It does this by restarting the
+\ game to display the title screen, and the TITLE routine then prints the error
+\ message on-screen.
 \
 \ BRKV is set to this routine in the loader, when the docked code is loaded, and
 \ at the end of the SVE routine after the disc access menu has been processed.
@@ -14206,17 +14204,25 @@ ENDIF
 \ When it is the BRKV handler, the routine can be triggered using a BRK
 \ instruction. The main differences between this routine and the MEBRK handler
 \ that is used during disc access operations are that this routine restarts the
-\ game rather than returning to the disc access menu, and this handler
-\ decrements the brkd counter.
+\ game rather than returning to the disc access menu.
 \
 \ ******************************************************************************
 
 .BRBR
 
- DEC brkd               \ Decrement the brkd counter
+                        \ When we call this routine, we know that brkd will be
+                        \ zero, as it is initialised to zero and the only other
+                        \ place it gets changed is in the TITLE routine, where
+                        \ it also gets set to 0
 
- BNE BR1                \ If the brkd counter is non-zero, jump to BR1 to
-                        \ restart the game
+ DEC brkd               \ Set brkd = &FF to indicate that there is a system
+                        \ error that needs to be printed out on the title screen
+                        \ by the TITLE routine
+
+ BNE BR1                \ If brkd is non-zero then it must be &FF, which
+                        \ indicates that where is a system error that we need to
+                        \ print, so jump to BR1 to restart the game and fall
+                        \ through into the TITLE routine to print the error
 
 \ ******************************************************************************
 \
