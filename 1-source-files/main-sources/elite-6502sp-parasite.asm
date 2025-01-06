@@ -16923,6 +16923,7 @@ ENDIF
 \       Type: Subroutine
 \   Category: Utility routines
 \    Summary: The standard BRKV handler for the game
+\  Deep dive: Swapping between the docked and flight code
 \
 \ ------------------------------------------------------------------------------
 \
@@ -17986,6 +17987,7 @@ ENDIF
 \       Type: Subroutine
 \   Category: Save and load
 \    Summary: The BRKV handler for disc access operations
+\  Deep dive: Swapping between the docked and flight code
 \
 \ ------------------------------------------------------------------------------
 \

@@ -2170,6 +2170,7 @@ ENDIF
 \    Address: &11E3 to &11F0
 \   Category: Workspaces
 \    Summary: Entry points and vector addresses in the main docked code
+\  Deep dive: Swapping between the docked and flight code
 \
 \ ******************************************************************************
 
@@ -2220,6 +2221,7 @@ ENDIF
 \   Category: Loader
 \    Summary: Set the break handler and go to the docking bay without showing
 \             the tunnel or ship hangar, or checking mission progress
+\  Deep dive: Swapping between the docked and flight code
 \
 \ ******************************************************************************
 
@@ -2406,6 +2408,7 @@ ENDIF
 \             mission progression
 \  Deep dive: The Constrictor mission
 \             The Thargoid Plans mission
+\             Swapping between the docked and flight code
 \
 \ ------------------------------------------------------------------------------
 \
@@ -17520,6 +17523,7 @@ ENDIF
 \       Type: Subroutine
 \   Category: Flight
 \    Summary: Launch from a station or show the front space view
+\             Swapping between the docked and flight code
 \
 \ ------------------------------------------------------------------------------
 \
@@ -17739,6 +17743,7 @@ ENDIF
 \       Type: Variable
 \   Category: Loader
 \    Summary: The OS command string for running the flight code in file 1.F
+\  Deep dive: Swapping between the docked and flight code
 \
 \ ******************************************************************************
 
@@ -23345,6 +23350,7 @@ ENDIF
 \       Type: Subroutine
 \   Category: Utility routines
 \    Summary: The standard BRKV handler for the game
+\  Deep dive: Swapping between the docked and flight code
 \
 \ ------------------------------------------------------------------------------
 \
@@ -24582,6 +24588,7 @@ ENDIF
 \       Type: Subroutine
 \   Category: Save and load
 \    Summary: The BRKV handler for disc access operations
+\  Deep dive: Swapping between the docked and flight code
 \
 \ ------------------------------------------------------------------------------
 \

@@ -2114,6 +2114,7 @@ ENDIF
 \    Address: &11E3 to &11F0
 \   Category: Workspaces
 \    Summary: Entry points and vector addresses in the main docked code
+\  Deep dive: Swapping between the docked and flight code
 \
 \ ******************************************************************************
 
@@ -2163,6 +2164,7 @@ ENDIF
 \       Type: Subroutine
 \   Category: Loader
 \    Summary: Load and run the main docked code in 1.D
+\  Deep dive: Swapping between the docked and flight code
 \
 \ ******************************************************************************
 
@@ -2204,6 +2206,7 @@ ENDIF
 \       Type: Variable
 \   Category: Loader
 \    Summary: The OS command string for loading the docked code in file 1.D
+\  Deep dive: Swapping between the docked and flight code
 \
 \ ******************************************************************************
 
@@ -14189,6 +14192,7 @@ ENDIF
 \       Type: Subroutine
 \   Category: Utility routines
 \    Summary: The standard BRKV handler for the game
+\  Deep dive: Swapping between the docked and flight code
 \
 \ ------------------------------------------------------------------------------
 \
