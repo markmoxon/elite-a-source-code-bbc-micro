@@ -4989,7 +4989,7 @@
  TAX                    \ each pixel line in the character block is 8 pixels
                         \ wide)
 
- LDA TWOS,X             \ Fetch a 1-pixel byte from TWOS where pixel X is set,
+ LDA TWOS,X             \ Fetch a one-pixel byte from TWOS where pixel X is set,
  STA R                  \ and store it in R
 
                         \ The following calculates:
@@ -5319,7 +5319,7 @@
  TAX                    \ each pixel line in the character block is 8 pixels
                         \ wide)
 
- LDA TWOS,X             \ Fetch a 1-pixel byte from TWOS where pixel X is set,
+ LDA TWOS,X             \ Fetch a one-pixel byte from TWOS where pixel X is set,
  STA R                  \ and store it in R
 
  LDA Y1                 \ Set Y = Y1 mod 8, which is the pixel row within the
@@ -5868,9 +5868,9 @@
 
 .HLL1
 
- LDA #%11111111         \ Store a full-width 8-pixel horizontal line in SC(1 0)
- EOR (SC),Y             \ so that it draws the line on-screen, using EOR logic
- STA (SC),Y             \ so it merges with whatever is already on-screen
+ LDA #%11111111         \ Store a full-width eight-pixel horizontal line in
+ EOR (SC),Y             \ SC(1 0) so that it draws the line on-screen, using EOR
+ STA (SC),Y             \ logic so it merges with whatever is already on-screen
 
  TYA                    \ Set Y = Y + 8 so (SC),Y points to the next character
  ADC #8                 \ block along, on the same pixel row as before
@@ -6036,7 +6036,7 @@
 
 \.PX3
 \
-\LDA TWOS,X             \ Fetch a 1-pixel byte from TWOS and EOR it into SC+Y
+\LDA TWOS,X             \ Fetch a one-pixel byte from TWOS and EOR it into SC+Y
 \EOR (SC),Y
 \STA (SC),Y
 \
@@ -6075,7 +6075,14 @@
 \
 \   Y1                  The y-coordinate offset
 \
-\   ZZ                  The distance of the point (further away = smaller point)
+\   ZZ                  The distance of the point, with bigger distances drawing
+\                       smaller points:
+\
+\                         * ZZ < 80           Double-height four-pixel square
+\
+\                         * 80 <= ZZ <= 143   Single-height two-pixel dash
+\
+\                         * ZZ > 143          Single-height one-pixel dot
 \
 \ ******************************************************************************
 
@@ -6088,7 +6095,7 @@
  TXA                    \ Set SYL+Y to X, the low byte of the result
  STA SYL,Y
 
-                        \ Fall through into PIX1 to draw the stardust particle
+                        \ Fall through into PIXEL2 to draw the stardust particle
                         \ at (X1,Y1)
 
 \ ******************************************************************************
@@ -6112,7 +6119,14 @@
 \   Y1                  The y-coordinate offset (positive means up the screen
 \                       from the centre, negative means down the screen)
 \
-\   ZZ                  The distance of the point (further away = smaller point)
+\   ZZ                  The distance of the point, with bigger distances drawing
+\                       smaller points:
+\
+\                         * ZZ < 80           Double-height four-pixel square
+\
+\                         * 80 <= ZZ <= 143   Single-height two-pixel dash
+\
+\                         * ZZ > 143          Single-height one-pixel dot
 \
 \ ******************************************************************************
 
@@ -6166,7 +6180,7 @@
 \       Name: PIXEL
 \       Type: Subroutine
 \   Category: Drawing pixels
-\    Summary: Draw a 1-pixel dot, 2-pixel dash or 4-pixel square
+\    Summary: Draw a one-pixel dot, two-pixel dash or four-pixel square
 \  Deep dive: Drawing monochrome pixels on the BBC Micro
 \
 \ ------------------------------------------------------------------------------
@@ -6183,7 +6197,14 @@
 \
 \   A                   The screen y-coordinate of the point to draw
 \
-\   ZZ                  The distance of the point (further away = smaller point)
+\   ZZ                  The distance of the point, with bigger distances drawing
+\                       smaller points:
+\
+\                         * ZZ < 80           Double-height four-pixel square
+\
+\                         * 80 <= ZZ <= 143   Single-height two-pixel dash
+\
+\                         * ZZ > 143          Single-height one-pixel dot
 \
 \ ------------------------------------------------------------------------------
 \
@@ -6201,7 +6222,8 @@
 
 .PIXEL
 
- STY T1                 \ Store Y in T1
+ STY T1                 \ Store Y in T1 so we can restore it at the end of the
+                        \ subroutine
 
  TAY                    \ Copy A into Y, for use later
 
@@ -6227,8 +6249,8 @@
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
 \LDA ZZ                 \ If distance in ZZ >= 144, then this point is a very
-\CMP #144               \ long way away, so jump to PX3 to fetch a 1-pixel point
-\BCS PX3                \ from TWOS and EOR it into SC+Y
+\CMP #144               \ long way away, so jump to PX3 to fetch a one-pixel
+\BCS PX3                \ point from TWOS and EOR it into SC+Y
 
                         \ --- And replaced by: -------------------------------->
 
@@ -6236,28 +6258,29 @@
  CMP #144               \ this point is not a very long way away
  BCC thick_dot
 
- LDA TWOS,X             \ This point is a very long way away, so fetch a 2-pixel
- BCS PX14+3             \ dash from TWOS2 and jump to PX14+3 to EOR it into SC+Y
+ LDA TWOS,X             \ This point is a very long way away, so fetch a
+ BCS PX14+3             \ two-pixel dash from TWOS2 and jump to PX14+3 to EOR
+                        \ it into SC+Y
 
 .thick_dot
 
                         \ --- End of replacement ------------------------------>
 
- LDA TWOS2,X            \ Otherwise fetch a 2-pixel dash from TWOS2 and EOR it
+ LDA TWOS2,X            \ Otherwise fetch a two-pixel dash from TWOS2 and EOR it
  EOR (SC),Y             \ into SC+Y
  STA (SC),Y
 
  LDA ZZ                 \ If distance in ZZ >= 80, then this point is a medium
  CMP #80                \ distance away, so jump to PX13 to stop drawing, as a
- BCS PX13               \ 2-pixel dash is enough
+ BCS PX13               \ two-pixel dash is enough
 
                         \ Otherwise we keep going to draw another 2 pixel point
                         \ either above or below the one we just drew, to make a
-                        \ 4-pixel square
+                        \ four-pixel square
 
  DEY                    \ Reduce Y by 1 to point to the pixel row above the one
  BPL PX14               \ we just plotted, and if it is still positive, jump to
-                        \ PX14 to draw our second 2-pixel dash
+                        \ PX14 to draw our second two-pixel dash
 
  LDY #1                 \ Reducing Y by 1 made it negative, which means Y was
                         \ 0 before we did the DEY above, so set Y to 1 to point
@@ -6265,8 +6288,8 @@
 
 .PX14
 
- LDA TWOS2,X            \ Fetch a 2-pixel dash from TWOS2 and EOR it into this
- EOR (SC),Y             \ second row to make a 4-pixel square
+ LDA TWOS2,X            \ Fetch a two-pixel dash from TWOS2 and EOR it into this
+ EOR (SC),Y             \ second row to make a four-pixel square
  STA (SC),Y
 
 .PX13
@@ -9382,11 +9405,11 @@
 \                       threshold is in pixels, so it should have a value from
 \                       0-16, as each bar indicator is 16 pixels wide
 \
-\   K                   The colour to use when A is a high value, as a 4-pixel
-\                       mode 5 character row byte
+\   K                   The colour to use when A is a high value, as a
+\                       four-pixel mode 5 character row byte
 \
-\   K+1                 The colour to use when A is a low value, as a 4-pixel
-\                       mode 5 character row byte
+\   K+1                 The colour to use when A is a low value, as a
+\                       four-pixel mode 5 character row byte
 \
 \   SC(1 0)             The screen address of the first character block in the
 \                       indicator
@@ -9466,11 +9489,11 @@
  LDA R                  \ Fetch the shape of the indicator row that we need to
                         \ display from R, so we can use it as a mask when
                         \ painting the indicator. It will be &FF at this point
-                        \ (i.e. a full 4-pixel row)
+                        \ (i.e. a full four-pixel row)
 
 .DL5
 
- AND COL                \ Fetch the 4-pixel mode 5 colour byte from COL, and
+ AND COL                \ Fetch the four-pixel mode 5 colour byte from COL, and
                         \ only keep pixels that have their equivalent bits set
                         \ in the mask byte in A
 
@@ -9520,7 +9543,7 @@
  AND #%11101111         \ clear bit 4, which has the effect of shifting zeroes
                         \ from the left into each nibble (i.e. xxxx xxxx becomes
                         \ xxx0 xxx0, which blanks out the last column in the
-                        \ 4-pixel mode 5 character block)
+                        \ four-pixel mode 5 character block)
 
  DEC Q                  \ Decrement the counter for the number of columns to
                         \ blank out
@@ -9624,20 +9647,20 @@
                         \ drawing blank characters after this one until we reach
                         \ the end of the indicator row
 
- LDA CTWOS,X            \ CTWOS is a table of ready-made 1-pixel mode 5 bytes,
+ LDA CTWOS,X            \ CTWOS is a table of ready-made one-pixel mode 5 bytes,
                         \ just like the TWOS and TWOS2 tables for mode 4 (see
                         \ the PIXEL routine for details of how they work). This
-                        \ fetches a mode 5 1-pixel byte with the pixel position
-                        \ at X, so the pixel is at the offset that we want for
-                        \ our vertical bar
+                        \ fetches a mode 5 one-pixel byte with the pixel
+                        \ position at X, so the pixel is at the offset that we
+                        \ want for our vertical bar
 
- AND #&F0               \ The 4-pixel mode 5 colour byte &F0 represents four
+ AND #&F0               \ The four-pixel mode 5 colour byte &F0 represents four
                         \ pixels of colour %10 (3), which is yellow in the
                         \ normal dashboard palette and white if we have an
                         \ escape pod fitted. We AND this with A so that we only
                         \ keep the pixel that matches the position of the
                         \ vertical bar (i.e. A is acting as a mask on the
-                        \ 4-pixel colour byte)
+                        \ four-pixel colour byte)
 
  JMP DLL12              \ Jump to DLL12 to skip the code for drawing a blank,
                         \ and move on to drawing the indicator
@@ -15673,14 +15696,14 @@
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\CLC                    \ Call pr2 to print the technology level as a 3-digit
-\JSR pr2                \ number without a decimal point (by clearing the C
-\                       \ flag)
+\CLC                    \ Call pr2 to print the technology level as a
+\JSR pr2                \ three-digit number without a decimal point (by
+\                       \ clearing the C flag)
 
                         \ --- And replaced by: -------------------------------->
 
- JSR pr2-1              \ Call pr2-1 to print the technology level as a 3-digit
-                        \ number without a decimal point
+ JSR pr2-1              \ Call pr2-1 to print the technology level as a
+                        \ three-digit number without a decimal point
 
                         \ --- End of replacement ------------------------------>
 
@@ -15689,9 +15712,9 @@
  LDA #192               \ Print recursive token 32 ("POPULATION") followed by a
  JSR TT68               \ colon
 
- SEC                    \ Call pr2 to print the population as a 3-digit number
- LDX QQ6                \ with a decimal point (by setting the C flag), so the
- JSR pr2                \ number printed will be population / 10
+ SEC                    \ Call pr2 to print the population as a three-digit
+ LDX QQ6                \ number with a decimal point (by setting the C flag),
+ JSR pr2                \ so the number printed will be population / 10
 
  LDA #198               \ Print recursive token 38 (" BILLION"), followed by a
  JSR TT60               \ paragraph break and Sentence Case
@@ -16054,9 +16077,9 @@
 
  JSR PIXEL              \ Call PIXEL to draw a point at (X, A), with the size of
                         \ the point dependent on the distance specified in ZZ
-                        \ (so a high value of ZZ will produce a 1-pixel point,
-                        \ a medium value will produce a 2-pixel dash, and a
-                        \ small value will produce a 4-pixel square)
+                        \ (so a high value of ZZ will produce a one-pixel point,
+                        \ a medium value will produce a two-pixel dash, and a
+                        \ small value will produce a four-pixel square)
 
  JSR TT20               \ We want to move on to the next system, so call TT20
                         \ to twist the three 16-bit seeds in QQ15
@@ -16499,7 +16522,7 @@
                         \ of free space plus 1
 
  JSR pr2-1              \ Call pr2-1 to print the amount of free space as a
-                        \ 3-digit number without a decimal point
+                        \ three-digit number without a decimal point
 
  JSR TT160              \ Print "t" (for tonne) and a space
 
@@ -17985,7 +18008,7 @@
 
  LDA XC                 \ Move the text cursor in XC to the right by 4 columns,
  ADC #4                 \ so the cursor is where the last digit would be if we
- STA XC                 \ were printing a 5-digit availability number
+ STA XC                 \ were printing a five-digit availability number
 
  LDA #'-'               \ Print a "-" character by jumping to TT162+2, which
  BNE TT162+2            \ contains JMP TT27 (this BNE is effectively a JMP as A
@@ -21041,8 +21064,8 @@
 \
 \LDX #8                 \ First we need to copy the space station's coordinates
 \                       \ into K3, so set a counter to copy the first 9 bytes
-\                       \ (the 3-byte x, y and z coordinates) from the station's
-\                       \ data block at K% + NI% into K3
+\                       \ (the three-byte x, y and z coordinates) from the
+\                       \ station's data block at K% + NI% into K3
 \
 \.SPL1
 \
@@ -21132,7 +21155,7 @@
                         \
                         \   COMY = 204 - X - (1 - 0) = 203 - X
 
- LDA #&F0               \ Set A to a 4-pixel mode 5 byte row in colour 2
+ LDA #&F0               \ Set A to a four-pixel mode 5 byte row in colour 2
                         \ (yellow/white), the colour for when the planet or
                         \ station in the compass is in front of us
 
@@ -21141,8 +21164,8 @@
 
  LDA #&FF               \ The z-coordinate of XX15 is negative, so the planet or
                         \ station is behind us and the compass dot should be in
-                        \ green/cyan, so set A to a 4-pixel mode 5 byte row in
-                        \ colour 3
+                        \ green/cyan, so set A to a four-pixel mode 5 byte row
+                        \ in colour 3
 
  STA COMC               \ Store the compass colour in COMC
 
@@ -21289,7 +21312,7 @@
                         \ contains 4 pixels, but covers 8 screen coordinates, so
                         \ this effectively does the division by 2 that we need
 
- LDA CTWOS,X            \ Fetch a mode 5 1-pixel byte with the pixel position
+ LDA CTWOS,X            \ Fetch a mode 5 one-pixel byte with the pixel position
  AND COL                \ at X, and AND with the colour byte so that pixel takes
                         \ on the colour we want to draw (i.e. A is acting as a
                         \ mask on the colour byte)
@@ -21298,7 +21321,7 @@
  STA (SC),Y             \ remove it later without ruining the background that's
                         \ already on-screen
 
- LDA CTWOS+1,X          \ Fetch a mode 5 1-pixel byte with the pixel position
+ LDA CTWOS+1,X          \ Fetch a mode 5 one-pixel byte with the pixel position
                         \ at X+1, so we can draw the right pixel of the dash
 
  BPL CP1                \ The CTWOS table has an extra row at the end of it that
@@ -21313,10 +21336,10 @@
                         \ along (as there are 8 bytes in a character block).
                         \ The C flag was cleared above, so this ADC is correct
 
- LDA CTWOS+1,X          \ Re-fetch the mode 5 1-pixel byte, as we just overwrote
-                        \ A (the byte will still be the fifth byte from the
-                        \ table, which is correct as we want to draw the
-                        \ leftmost pixel in the next character along as the
+ LDA CTWOS+1,X          \ Re-fetch the mode 5 one-pixel byte, as we just
+                        \ overwrote A (the byte will still be the fifth byte
+                        \ from the table, which is correct as we want to draw
+                        \ the leftmost pixel in the next character along as the
                         \ dash's right pixel)
 
 .CP1
@@ -22415,9 +22438,10 @@
 
 .MBL1
 
- STA (SC),Y             \ Draw the 3-pixel row, and as we do not use EOR logic,
-                        \ this will overwrite anything that is already there
-                        \ (so drawing a black missile will delete what's there)
+ STA (SC),Y             \ Draw the three-pixel row, and as we do not use EOR
+                        \ logic, this will overwrite anything that is already
+                        \ there (so drawing a black missile will delete what's
+                        \ there)
 
  DEY                    \ Decrement the counter for the next row
 
@@ -26443,23 +26467,26 @@
 \IF _STH_DISC OR _SRAM_DISC
 \
 \NOP                    \ In the first version of disc Elite, asteroids never
-\NOP                    \ appeared. It turned out that the authors had put in a
+\NOP                    \ appeared; it turned out that the authors had put in a
 \NOP                    \ jump to force traders to spawn, so they could test
-\                       \ that part of the code, but had forgotten to remove it,
-\                       \ so this was fixed in later versions by replacing the
+\                       \ that part of the code, but had forgotten to remove it
+\                       \
+\                       \ This bug was fixed in later versions by replacing the
 \                       \ JMP instruction with NOPs... and this is where that
 \                       \ was done
 \
 \ELIF _IB_DISC
 \
-\JMP MTT4               \ In the first version of disc Elite, asteroids never
-\                       \ appeared. It turned out that the authors had put in a
-\                       \ jump to force traders to spawn, so they could test
-\                       \ that part of the code, but had forgotten to remove it,
-\                       \ so this was fixed in later versions by replacing the
-\                       \ JMP instruction with NOPs. The version on Ian Bell's
-\                       \ site still contains the test jump, so asteroids never
-\                       \ appear in this version
+\JMP MTT4               \ This JMP instruction was added during development to
+\                       \ test the spawning of traders, as it forces a jump to
+\                       \ MTT4 to spawn a trader
+\                       \
+\                       \ Unfortunately it was left in by accident for the first
+\                       \ release of disc Elite, which meant that asteroids
+\                       \ never appeared
+\                       \
+\                       \ The version on Ian Bell's site contains the bugged JMP
+\                       \ instruction, so asteroids never appear in this version
 \
 \ENDIF
 \
@@ -29015,8 +29042,9 @@
  ADC #3                 \ Set Y = A + 3, so Y now points to the last byte of
  TAY                    \ four within the block of four-byte values
 
- LDX #7                 \ We want to copy four bytes, spread out into an 8-byte
-                        \ block, so set a counter in Y to cover 8 bytes
+ LDX #7                 \ We want to copy four bytes, spread out into an
+                        \ eight-byte block, so set a counter in Y to cover eight
+                        \ bytes
 
 .NOL1
 
@@ -31128,8 +31156,8 @@ ENDMACRO
                         \ from byte Y-1 to byte Y+2. If the ship's screen point
                         \ turns out to be off-screen, then this routine aborts
                         \ the entire call to LL9, exiting via nono. The four
-                        \ bytes define a horizontal 4-pixel dash, for either the
-                        \ top or the bottom of the ship's dot
+                        \ bytes define a horizontal four-pixel dash, for either
+                        \ the top or the bottom of the ship's dot
 
  STA (XX19),Y           \ Store A in byte Y of the ship line heap (i.e. Y1)
 
@@ -36974,7 +37002,7 @@ ENDMACRO
 \IF _STH_DISC OR _IB_DISC
 \
 \LDX #&FF               \ Set X to the default scanner colour of green/cyan
-\                       \ (a 4-pixel mode 5 byte in colour 3)
+\                       \ (a four-pixel mode 5 byte in colour 3)
 \
 \CMP #MSL               \ If this is not a missile, skip the following
 \BNE P%+4               \ instruction
@@ -37199,7 +37227,7 @@ ENDMACRO
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\LDA CTWOS+1,X          \ Load the same mode 5 1-pixel byte that we just used
+\LDA CTWOS+1,X          \ Load the same mode 5 one-pixel byte that we just used
 \AND COL                \ for the top-right pixel, and mask it with the same
 \STA X1                 \ colour, storing the result in X1, so we can use it as
 \                       \ the character row byte for the stick
@@ -37220,14 +37248,14 @@ ENDMACRO
 
                         \ --- And replaced by: -------------------------------->
 
- LDA CTWOS+1,X          \ Load the same mode 5 1-pixel byte that we just used
+ LDA CTWOS+1,X          \ Load the same mode 5 one-pixel byte that we just used
  TAX                    \ and make a copy in X
 
- AND COL                \ Mask the 1-pixel byte with the same colour, storing
+ AND COL                \ Mask the one-pixel byte with the same colour, storing
  STA X1                 \ the result in X1, so we can use it as the character
                         \ rowbyte for the stick
 
- TXA                    \ Mask the 1-pixel byte with the colour in Y2, which
+ TXA                    \ Mask the one-pixel byte with the colour in Y2, which
  AND Y2                 \ we set to the alternating colour for the stick, and
  STA Y1                 \ store the result in Y1
 

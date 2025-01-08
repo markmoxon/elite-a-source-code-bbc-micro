@@ -4621,8 +4621,8 @@ ENDIF
 \       Name: PIXEL
 \       Type: Subroutine
 \   Category: Drawing pixels
-\    Summary: Draw a 1-pixel dot, 2-pixel dash or 4-pixel square by sending a
-\             draw_pixel command to the I/O processor
+\    Summary: Draw a one-pixel dot, two-pixel dash or four-pixel square by
+\             sending a draw_pixel command to the I/O processor
 \
 \ ------------------------------------------------------------------------------
 \
@@ -4638,7 +4638,14 @@ ENDIF
 \
 \   A                   The screen y-coordinate of the point to draw
 \
-\   ZZ                  The distance of the point (further away = smaller point)
+\   ZZ                  The distance of the point, with bigger distances drawing
+\                       smaller points:
+\
+\                         * ZZ < 80           Double-height four-pixel square
+\
+\                         * 80 <= ZZ <= 143   Single-height two-pixel dash
+\
+\                         * ZZ > 143          Single-height one-pixel dot
 \
 \ ******************************************************************************
 
@@ -7161,11 +7168,11 @@ ENDIF
 \                       threshold is in pixels, so it should have a value from
 \                       0-16, as each bar indicator is 16 pixels wide
 \
-\   K                   The colour to use when A is a high value, as a 4-pixel
-\                       mode 5 character row byte
+\   K                   The colour to use when A is a high value, as a
+\                       four-pixel mode 5 character row byte
 \
-\   K+1                 The colour to use when A is a low value, as a 4-pixel
-\                       mode 5 character row byte
+\   K+1                 The colour to use when A is a low value, as a
+\                       four-pixel mode 5 character row byte
 \
 \   SC(1 0)             The screen address of the first character block in the
 \                       indicator
@@ -10169,18 +10176,18 @@ ENDIF
  INX                    \ is stored in the range 0-14 but the displayed range
                         \ should be 1-15
 
- CLC                    \ Call pr2 to print the technology level as a 3-digit
- JSR pr2                \ number without a decimal point (by clearing the C
-                        \ flag)
+ CLC                    \ Call pr2 to print the technology level as a
+ JSR pr2                \ three-digit number without a decimal point (by
+                        \ clearing the C flag)
 
  JSR TTX69              \ Print a paragraph break and set Sentence Case
 
  LDA #192               \ Print recursive token 32 ("POPULATION") followed by a
  JSR TT68               \ colon
 
- SEC                    \ Call pr2 to print the population as a 3-digit number
- LDX QQ6                \ with a decimal point (by setting the C flag), so the
- JSR pr2                \ number printed will be population / 10
+ SEC                    \ Call pr2 to print the population as a three-digit
+ LDX QQ6                \ number with a decimal point (by setting the C flag),
+ JSR pr2                \ so the number printed will be population / 10
 
  LDA #198               \ Print recursive token 38 (" BILLION"), followed by a
  JSR TT60               \ paragraph break and Sentence Case
@@ -10546,9 +10553,9 @@ ENDIF
 
  JSR PIXEL              \ Call PIXEL to draw a point at (X, A), with the size of
                         \ the point dependent on the distance specified in ZZ
-                        \ (so a high value of ZZ will produce a 1-pixel point,
-                        \ a medium value will produce a 2-pixel dash, and a
-                        \ small value will produce a 4-pixel square)
+                        \ (so a high value of ZZ will produce a one-pixel point,
+                        \ a medium value will produce a two-pixel dash, and a
+                        \ small value will produce a four-pixel square)
 
  JSR TT20               \ We want to move on to the next system, so call TT20
                         \ to twist the three 16-bit seeds in QQ15
@@ -11508,8 +11515,8 @@ ENDIF
                         \ of free space plus 1
 
  CLC                    \ Call pr2 to print the amount of free space as a
- JSR pr2                \ 3-digit number without a decimal point (by clearing
-                        \ the C flag)
+ JSR pr2                \ three-digit number without a decimal point (by
+                        \ clearing the C flag)
 
  JSR TT160              \ Print "t" (for tonne) and a space
 
@@ -12583,7 +12590,7 @@ ENDIF
 
  LDA XC                 \ Move the text cursor in XC to the right by 4 columns,
  ADC #4                 \ so the cursor is where the last digit would be if we
- STA XC                 \ were printing a 5-digit availability number
+ STA XC                 \ were printing a five-digit availability number
 
  LDA #'-'               \ Print a "-" character by jumping to TT162+2, which
  BNE TT162+2            \ contains JMP TT27 (this BNE is effectively a JMP as A
@@ -18819,8 +18826,9 @@ ENDIF
  ADC #3                 \ Set Y = A + 3, so Y now points to the last byte of
  TAY                    \ four within the block of four-byte values
 
- LDX #7                 \ We want to copy four bytes, spread out into an 8-byte
-                        \ block, so set a counter in Y to cover 8 bytes
+ LDX #7                 \ We want to copy four bytes, spread out into an
+                        \ eight-byte block, so set a counter in Y to cover eight
+                        \ bytes
 
 .NOL1
 
@@ -19851,8 +19859,8 @@ ENDMACRO
                         \ from byte Y-1 to byte Y+2. If the ship's screen point
                         \ turns out to be off-screen, then this routine aborts
                         \ the entire call to LL9, exiting via nono. The four
-                        \ bytes define a horizontal 4-pixel dash, for either the
-                        \ top or the bottom of the ship's dot
+                        \ bytes define a horizontal four-pixel dash, for either
+                        \ the top or the bottom of the ship's dot
 
  STA (XX19),Y           \ Store A in byte Y of the ship line heap (i.e. Y1)
 
@@ -35898,14 +35906,14 @@ ENDMACRO
                         \ after our current position of card_pattern + Y
 
  INY                    \ Increment Y by 3 to step to the next line of data (as
- INY                    \ the card_pattern table is made up of lines of 3 bytes
- INY                    \ each)
+ INY                    \ the card_pattern table is made up of lines of three
+ INY                    \ bytes each)
 
- LDA card_pattern-1,Y   \ Fetch the last byte of the previous 3-byte line
+ LDA card_pattern-1,Y   \ Fetch the last byte of the previous three-byte line
 
  BNE card_find          \ If it is non-zero then we are still in the same
                         \ pattern as in the previous iteration, so loop back to
-                        \ move onto the next line of 3 bytes
+                        \ move onto the next line of three bytes
 
                         \ Otherwise we have moved onto the next pattern, so now
                         \ we check whether we have reached the pattern we seek
@@ -35949,16 +35957,16 @@ ENDMACRO
                         \   * Text row
                         \   * What to print (i.e. a label or ship data)
 
- LDA card_pattern,Y     \ The first byte of each 3-byte line in the pattern is
- STA XC                 \ the x-coordinate where we should print the text, so
+ LDA card_pattern,Y     \ The first byte of each three-byte line in the pattern
+ STA XC                 \ is the x-coordinate where we should print the text, so
                         \ move the text cursor to the correct column
 
- LDA card_pattern+1,Y   \ The second byte of each 3-byte line in the pattern
+ LDA card_pattern+1,Y   \ The second byte of each three-byte line in the pattern
  STA YC                 \ is the y-coordinate where we should print the text, so
                         \ move the text cursor to the correct row
 
- LDA card_pattern+2,Y   \ The third byte of each 3-byte line in the pattern is
-                        \ either a text token to print for the label (if it's
+ LDA card_pattern+2,Y   \ The third byte of each three-byte line in the pattern
+                        \ is either a text token to print for the label (if it's
                         \ non-zero) or it denotes that we should print the
                         \ relevant ship data (if it's zero), so fetch the value
                         \ into A
@@ -35970,8 +35978,8 @@ ENDMACRO
                         \ A, which prints the label in the right place
 
  INY                    \ We now need to fetch the next line of the pattern, so
- INY                    \ we increment Y by 3 to step to the next 3-byte line of
- INY                    \ pattern data
+ INY                    \ we increment Y by 3 to step to the next three-byte
+ INY                    \ line of pattern data
 
  BNE card_found         \ Loop back to card_found to move onto the next line in
                         \ the pattern (the BNE is effectively a JMP as Y is
@@ -40864,7 +40872,14 @@ ENDIF
 \
 \   Y1                  The y-coordinate offset
 \
-\   ZZ                  The distance of the point (further away = smaller point)
+\   ZZ                  The distance of the point, with bigger distances drawing
+\                       smaller points:
+\
+\                         * ZZ < 80           Double-height four-pixel square
+\
+\                         * 80 <= ZZ <= 143   Single-height two-pixel dash
+\
+\                         * ZZ > 143          Single-height one-pixel dot
 \
 \ ******************************************************************************
 
@@ -40877,7 +40892,7 @@ ENDIF
  TXA                    \ Set SYL+Y to X, the low byte of the result
  STA SYL,Y
 
-                        \ Fall through into PIX1 to draw the stardust particle
+                        \ Fall through into PIXEL2 to draw the stardust particle
                         \ at (X1,Y1)
 
 \ ******************************************************************************
@@ -40901,7 +40916,14 @@ ENDIF
 \   Y1                  The y-coordinate offset (positive means up the screen
 \                       from the centre, negative means down the screen)
 \
-\   ZZ                  The distance of the point (further away = smaller point)
+\   ZZ                  The distance of the point, with bigger distances drawing
+\                       smaller points:
+\
+\                         * ZZ < 80           Double-height four-pixel square
+\
+\                         * 80 <= ZZ <= 143   Single-height two-pixel dash
+\
+\                         * ZZ > 143          Single-height one-pixel dot
 \
 \ ******************************************************************************
 
@@ -48167,7 +48189,7 @@ ENDIF
                         \
                         \   COMY = 204 - X - (1 - 0) = 203 - X
 
- LDA #&F0               \ Set A to a 4-pixel mode 5 byte row in colour 2
+ LDA #&F0               \ Set A to a four-pixel mode 5 byte row in colour 2
                         \ (yellow/white), the colour for when the planet or
                         \ station in the compass is in front of us
 
@@ -48176,8 +48198,8 @@ ENDIF
 
  LDA #&FF               \ The z-coordinate of XX15 is negative, so the planet or
                         \ station is behind us and the compass dot should be in
-                        \ green/cyan, so set A to a 4-pixel mode 5 byte row in
-                        \ colour 3
+                        \ green/cyan, so set A to a four-pixel mode 5 byte row
+                        \ in colour 3
 
  STA COMC               \ Store the compass colour in COMC
 

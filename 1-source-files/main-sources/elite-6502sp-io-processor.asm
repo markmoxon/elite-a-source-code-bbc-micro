@@ -1282,7 +1282,7 @@ ENDIF
  TAX                    \ each pixel line in the character block is 8 pixels
                         \ wide)
 
- LDA TWOS,X             \ Fetch a 1-pixel byte from TWOS where pixel X is set,
+ LDA TWOS,X             \ Fetch a one-pixel byte from TWOS where pixel X is set,
  STA R                  \ and store it in R
 
                         \ The following calculates:
@@ -1608,7 +1608,7 @@ ENDIF
  TAX                    \ each pixel line in the character block is 8 pixels
                         \ wide)
 
- LDA TWOS,X             \ Fetch a 1-pixel byte from TWOS where pixel X is set,
+ LDA TWOS,X             \ Fetch a one-pixel byte from TWOS where pixel X is set,
  STA R                  \ and store it in R
 
  LDA Y1                 \ Set Y = Y1 mod 8, which is the pixel row within the
@@ -1992,9 +1992,9 @@ ENDIF
 
 .HLL1
 
- LDA #%11111111         \ Store a full-width 8-pixel horizontal line in SC(1 0)
- EOR (SC),Y             \ so that it draws the line on-screen, using EOR logic
- STA (SC),Y             \ so it merges with whatever is already on-screen
+ LDA #%11111111         \ Store a full-width eight-pixel horizontal line in
+ EOR (SC),Y             \ SC(1 0) so that it draws the line on-screen, using EOR
+ STA (SC),Y             \ logic so it merges with whatever is already on-screen
 
  TYA                    \ Set Y = Y + 8 so (SC),Y points to the next character
  ADC #8                 \ block along, on the same pixel row as before
@@ -2153,7 +2153,7 @@ ENDIF
 
 .PX3
 
- LDA TWOS,X             \ Fetch a 1-pixel byte from TWOS and EOR it into SC+Y
+ LDA TWOS,X             \ Fetch a one-pixel byte from TWOS and EOR it into SC+Y
  EOR (SC),Y
  STA (SC),Y
 
@@ -2180,7 +2180,14 @@ ENDIF
 \
 \   A                   The screen y-coordinate of the point to draw
 \
-\   ZZ                  The distance of the point (further away = smaller point)
+\   ZZ                  The distance of the point, with bigger distances drawing
+\                       smaller points:
+\
+\                         * ZZ < 80           Double-height four-pixel square
+\
+\                         * 80 <= ZZ <= 143   Single-height two-pixel dash
+\
+\                         * ZZ > 143          Single-height one-pixel dot
 \
 \ ------------------------------------------------------------------------------
 \
@@ -2226,24 +2233,24 @@ ENDIF
                         \ wide)
 
  LDA ZZ                 \ If distance in ZZ >= 144, then this point is a very
- CMP #144               \ long way away, so jump to PX3 to fetch a 1-pixel point
- BCS PX3                \ from TWOS and EOR it into SC+Y
+ CMP #144               \ long way away, so jump to PX3 to fetch a one-pixel
+ BCS PX3                \ point from TWOS and EOR it into SC+Y
 
- LDA TWOS2,X            \ Otherwise fetch a 2-pixel dash from TWOS2 and EOR it
+ LDA TWOS2,X            \ Otherwise fetch a two-pixel dash from TWOS2 and EOR it
  EOR (SC),Y             \ into SC+Y
  STA (SC),Y
 
  LDA ZZ                 \ If distance in ZZ >= 80, then this point is a medium
  CMP #80                \ distance away, so jump to PX13 to stop drawing, as a
- BCS PX13               \ 2-pixel dash is enough
+ BCS PX13               \ two-pixel dash is enough
 
                         \ Otherwise we keep going to draw another 2 pixel point
                         \ either above or below the one we just drew, to make a
-                        \ 4-pixel square
+                        \ four-pixel square
 
  DEY                    \ Reduce Y by 1 to point to the pixel row above the one
  BPL PX14               \ we just plotted, and if it is still positive, jump to
-                        \ PX14 to draw our second 2-pixel dash
+                        \ PX14 to draw our second two-pixel dash
 
  LDY #1                 \ Reducing Y by 1 made it negative, which means Y was
                         \ 0 before we did the DEY above, so set Y to 1 to point
@@ -2251,8 +2258,8 @@ ENDIF
 
 .PX14
 
- LDA TWOS2,X            \ Fetch a 2-pixel dash from TWOS2 and EOR it into this
- EOR (SC),Y             \ second row to make a 4-pixel square
+ LDA TWOS2,X            \ Fetch a two-pixel dash from TWOS2 and EOR it into this
+ EOR (SC),Y             \ second row to make a four-pixel square
  STA (SC),Y
 
 .PX13
@@ -2575,13 +2582,13 @@ ENDIF
  LDA bar_3              \ Fetch the shape of the indicator row that we need to
                         \ display from bar_3, so we can use it as a mask when
                         \ painting the indicator. It will be &FF at this point
-                        \ (i.e. a full 4-pixel row)
+                        \ (i.e. a full four-pixel row)
 
 .DL5
 
- AND bar_2              \ Fetch the 4-pixel mode 5 colour byte from bar_2, and
-                        \ only keep pixels that have their equivalent bits set
-                        \ in the mask byte in A
+ AND bar_2              \ Fetch the four-pixel mode 5 colour byte from bar_2,
+                        \ and only keep pixels that have their equivalent bits
+                        \ set in the mask byte in A
 
  STA (SC),Y             \ Draw the shape of the mask on pixel row Y of the
                         \ character block we are processing
@@ -2629,7 +2636,7 @@ ENDIF
  AND #%11101111         \ clear bit 4, which has the effect of shifting zeroes
                         \ from the left into each nibble (i.e. xxxx xxxx becomes
                         \ xxx0 xxx0, which blanks out the last column in the
-                        \ 4-pixel mode 5 character block)
+                        \ four-pixel mode 5 character block)
 
  DEC bar_1              \ Decrement the counter for the number of columns to
                         \ blank out
@@ -2739,20 +2746,20 @@ ENDIF
                         \ keep drawing blank characters after this one until we
                         \ reach the end of the indicator row
 
- LDA CTWOS,X            \ CTWOS is a table of ready-made 1-pixel mode 5 bytes,
+ LDA CTWOS,X            \ CTWOS is a table of ready-made one-pixel mode 5 bytes,
                         \ just like the TWOS and TWOS2 tables for mode 4 (see
                         \ the PIXEL routine for details of how they work). This
-                        \ fetches a mode 5 1-pixel byte with the pixel position
-                        \ at X, so the pixel is at the offset that we want for
-                        \ our vertical bar
+                        \ fetches a mode 5 one-pixel byte with the pixel
+                        \ position at X, so the pixel is at the offset that we
+                        \ want for our vertical bar
 
- AND #&F0               \ The 4-pixel mode 5 colour byte &F0 represents four
+ AND #&F0               \ The four-pixel mode 5 colour byte &F0 represents four
                         \ pixels of colour %10 (3), which is yellow in the
                         \ normal dashboard palette and white if we have an
                         \ escape pod fitted. We AND this with A so that we only
                         \ keep the pixel that matches the position of the
                         \ vertical bar (i.e. A is acting as a mask on the
-                        \ 4-pixel colour byte)
+                        \ four-pixel colour byte)
 
  JMP DLL12              \ Jump to DLL12 to skip the code for drawing a blank,
                         \ and move on to drawing the indicator
@@ -2869,9 +2876,10 @@ ENDIF
 
 .MBL1
 
- STA (SC),Y             \ Draw the 3-pixel row, and as we do not use EOR logic,
-                        \ this will overwrite anything that is already there
-                        \ (so drawing a black missile will delete what's there)
+ STA (SC),Y             \ Draw the three-pixel row, and as we do not use EOR
+                        \ logic, this will overwrite anything that is already
+                        \ there (so drawing a black missile will delete what's
+                        \ there)
 
  DEY                    \ Decrement the counter for the next row
 
@@ -3327,7 +3335,7 @@ ENDIF
                         \ contains 4 pixels, but covers 8 screen coordinates, so
                         \ this effectively does the division by 2 that we need
 
- LDA CTWOS,X            \ Fetch a mode 5 1-pixel byte with the pixel position
+ LDA CTWOS,X            \ Fetch a mode 5 one-pixel byte with the pixel position
  AND COL                \ at X, and AND with the colour byte so that pixel takes
                         \ on the colour we want to draw (i.e. A is acting as a
                         \ mask on the colour byte)
@@ -3336,7 +3344,7 @@ ENDIF
  STA (SC),Y             \ remove it later without ruining the background that's
                         \ already on-screen
 
- LDA CTWOS+1,X          \ Fetch a mode 5 1-pixel byte with the pixel position
+ LDA CTWOS+1,X          \ Fetch a mode 5 one-pixel byte with the pixel position
                         \ at X+1, so we can draw the right pixel of the dash
 
  BPL CP1                \ The CTWOS table has an extra row at the end of it that
@@ -3351,10 +3359,10 @@ ENDIF
                         \ along (as there are 8 bytes in a character block).
                         \ The C flag was cleared above, so this ADC is correct
 
- LDA CTWOS+1,X          \ Re-fetch the mode 5 1-pixel byte, as we just overwrote
-                        \ A (the byte will still be the fifth byte from the
-                        \ table, which is correct as we want to draw the
-                        \ leftmost pixel in the next character along as the
+ LDA CTWOS+1,X          \ Re-fetch the mode 5 one-pixel byte, as we just
+                        \ overwrote A (the byte will still be the fifth byte
+                        \ from the table, which is correct as we want to draw
+                        \ the leftmost pixel in the next character along as the
                         \ dash's right pixel)
 
 .CP1
@@ -3425,13 +3433,13 @@ ENDIF
                         \ We can use there as the starting point for drawing the
                         \ stick, if there is one
 
- LDA CTWOS+1,X          \ Load the same mode 5 1-pixel byte that we just used
+ LDA CTWOS+1,X          \ Load the same mode 5 one-pixel byte that we just used
  AND COL                \ for the top-right pixel, mask it with the base colour
  STA COL                \ in COL, and store the result in COL, so we can use it
                         \ as the character row byte for the base colour stripes
                         \ in the stick
 
- LDA CTWOS+1,X          \ Load the same mode 5 1-pixel byte that we just used
+ LDA CTWOS+1,X          \ Load the same mode 5 one-pixel byte that we just used
  AND Y2                 \ for the top-right pixel, mask it with the EOR colour
  STA Y2                 \ in Y2, and store the result in Y2, so we can use it
                         \ as the character row byte for the alternate colour
@@ -4243,7 +4251,7 @@ ENDIF
 
  LDA #%00000100         \ Now to draw the same line but from the right edge of
                         \ the screen, so set a pixel mask in A to check the
-                        \ sixth pixel of the last byte, so we skip the 2-pixel
+                        \ sixth pixel of the last byte, so we skip the two-pixel
                         \ screen border at the right edge of the screen
 
  LDY #248               \ Set Y = 248 so the call to HAS3 starts drawing the
@@ -4322,10 +4330,11 @@ ENDIF
  STX SC+1               \ the start of screen, so SC(1 0) now points to the
                         \ address where the line starts
 
- LDX #%10000000         \ Set a mask in X to the first pixel the 8-pixel byte
+ LDX #%10000000         \ Set a mask in X to the first pixel the eight-pixel
+                        \ byte
 
  LDY #1                 \ We are going to start drawing the line from the second
-                        \ pixel from the top (to avoid drawing on the 1-pixel
+                        \ pixel from the top (to avoid drawing on the one-pixel
                         \ border), so set Y to 1 to point to the second row in
                         \ the first character block
 
@@ -4388,7 +4397,7 @@ ENDIF
 
  LDA #%00100000         \ Set A to the pixel pattern for a mode 4 character row
                         \ byte with the third pixel set, so we start drawing the
-                        \ horizontal line just to the right of the 2-pixel
+                        \ horizontal line just to the right of the two-pixel
                         \ border along the edge of the screen
 
 .HAL2
@@ -4425,7 +4434,7 @@ ENDIF
  TAY
 
  LDA #%10000000         \ Reset the pixel mask in A to the first pixel in the
-                        \ new 8-pixel character block
+                        \ new eight-pixel character block
 
  BCC HAL2               \ If the above addition didn't overflow, jump back to
                         \ HAL2 to keep drawing the line in the next character
@@ -4486,7 +4495,8 @@ ENDIF
  SBC #8                 \ to the next character block to the left
  TAY
 
- LDA #%00000001         \ Set a mask in A to the last pixel in the 8-pixel byte
+ LDA #%00000001         \ Set a mask in A to the last pixel in the eight-pixel
+                        \ byte
 
  BCS HAS3               \ If the above subtraction didn't underflow, jump back
                         \ to HAS3 to keep drawing the line in the next character
