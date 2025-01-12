@@ -389,7 +389,7 @@ ENDIF
 .X1
 
  SKIP 1                 \ Temporary storage, typically used for x-coordinates in
-                        \ line-drawing routines
+                        \ the line-drawing routines
 
 .Y1
 
@@ -399,7 +399,7 @@ ENDIF
 .X2
 
  SKIP 1                 \ Temporary storage, typically used for x-coordinates in
-                        \ line-drawing routines
+                        \ the line-drawing routines
 
 .Y2
 
@@ -4738,8 +4738,6 @@ ENDIF
 \  Deep dive: The local bubble of universe
 \             Ship data blocks
 \
-\ ------------------------------------------------------------------------------
-\
 \ ******************************************************************************
 
 .UNIV
@@ -5603,7 +5601,7 @@ ENDIF
  STA SC
 
  CLC                    \ Clear the C flag so it doesn't affect the additions
-                        \ below
+                        \ if we loop back
 
 .LIC6
 
@@ -23939,7 +23937,8 @@ ENDIF
 
  BEQ TL2                \ If the joystick fire button is pressed, jump to TL2
 
- JSR RDKEY              \ Scan the keyboard for a key press
+ JSR RDKEY              \ Scan the keyboard for a key press and return the
+                        \ internal key number in A and X (or 0 for no key press)
 
  BEQ TLL2               \ If no key was pressed, loop back up to move/rotate
                         \ the ship and check again for a key press

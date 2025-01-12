@@ -172,7 +172,7 @@ ENDIF
 .X1
 
  SKIP 1                 \ Temporary storage, typically used for x-coordinates in
-                        \ line-drawing routines
+                        \ the line-drawing routines
 
 .bar_2
 .picture_2
@@ -187,7 +187,7 @@ ENDIF
 .X2
 
  SKIP 1                 \ Temporary storage, typically used for x-coordinates in
-                        \ line-drawing routines
+                        \ the line-drawing routines
 
 .XSAV2
 .Y2
@@ -1843,7 +1843,7 @@ ENDIF
  STA SC
 
  CLC                    \ Clear the C flag so it doesn't affect the additions
-                        \ below
+                        \ if we loop back
 
 .LIC6
 
