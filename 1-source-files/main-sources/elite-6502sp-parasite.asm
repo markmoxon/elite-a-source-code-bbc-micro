@@ -9410,8 +9410,8 @@ ENDIF
 \       Name: TTX66
 \       Type: Subroutine
 \   Category: Drawing the screen
-\    Summary: Clear the top part of the screen and draw a border box by
-\             sending a clr_scrn command to the I/O processor
+\    Summary: Clear the top part of the screen and draw a border box by sending
+\             a clr_scrn command to the I/O processor
 \
 \ ------------------------------------------------------------------------------
 \
