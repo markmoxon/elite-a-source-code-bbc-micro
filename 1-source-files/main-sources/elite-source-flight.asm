@@ -8930,7 +8930,7 @@
                         \
                         \ and so on
 
- INC XC                 \ Move the text cursor to the right by 1 column
+ INC XC                 \ Move the text cursor to the right by one column
 
  LDA YC                 \ Fetch YC, the y-coordinate (row) of the text cursor
 
