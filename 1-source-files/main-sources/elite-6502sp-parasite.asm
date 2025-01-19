@@ -13927,7 +13927,7 @@ ENDIF
 \
 \ Set the system closest to galactic coordinates (QQ9, QQ10) as the selected
 \ system, redraw the crosshairs on the chart accordingly (if they are being
-\ shown), and, if this is not a space view, clear the bottom three text rows of
+\ shown), and if this is not the space view, clear the bottom three text rows of
 \ the screen.
 \
 \ ******************************************************************************
@@ -13945,9 +13945,8 @@ ENDIF
                         \ system
 
  JMP CLYNS              \ Clear the bottom three text rows of the upper screen,
-                        \ and move the text cursor to the first cleared row
-
-                        \ Return from the subroutine using a tail call
+                        \ move the text cursor to the first cleared row, and
+                        \ return from the subroutine using a tail call
 
 \ ******************************************************************************
 \
