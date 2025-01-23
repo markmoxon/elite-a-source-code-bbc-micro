@@ -4636,7 +4636,7 @@ ENDIF
  LSR A                  \       = y div 8
  LSR A                  \
                         \ So A now contains the number of the character row
-                        \ that will contain the the (X1, Y1) pixel
+                        \ that will contain the (X1, Y1) pixel
 
  ORA #&60               \ As A < 32, this effectively adds &60 to A, which gives
                         \ us the screen address of the character row (as each
@@ -14141,18 +14141,18 @@ ENDIF
 \       Name: brkd
 \       Type: Variable
 \   Category: Utility routines
-\    Summary: A flag that indicates whether a system error has occured
+\    Summary: A flag that indicates whether a system error has occurred
 \
 \ ******************************************************************************
 
 .brkd
 
- EQUB 0                 \ A flag to record whether a system error has occured,
+ EQUB 0                 \ A flag to record whether a system error has occurred,
                         \ so we can print it out
                         \
-                        \   * 0 = no system error has occured
+                        \   * 0 = no system error has occurred
                         \
-                        \   * &FF = a system error has occured
+                        \   * &FF = a system error has occurred
 
 \ ******************************************************************************
 \

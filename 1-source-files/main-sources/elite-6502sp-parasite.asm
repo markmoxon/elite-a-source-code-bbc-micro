@@ -16847,18 +16847,18 @@ ENDIF
 \       Name: brkd
 \       Type: Variable
 \   Category: Utility routines
-\    Summary: A flag that indicates whether a system error has occured
+\    Summary: A flag that indicates whether a system error has occurred
 \
 \ ******************************************************************************
 
 .brkd
 
- EQUB 0                 \ A flag to record whether a system error has occured,
+ EQUB 0                 \ A flag to record whether a system error has occurred,
                         \ so we can print it out
                         \
-                        \   * 0 = no system error has occured
+                        \   * 0 = no system error has occurred
                         \
-                        \   * &FF = a system error has occured
+                        \   * &FF = a system error has occurred
 
 \ ******************************************************************************
 \
@@ -17283,7 +17283,7 @@ ENDIF
  BEQ BRBR2              \ we do not have a system error message to display
 
                         \ If we get here then brkd = &FF, which indicates that
-                        \ wa have a system error we need to display
+                        \ we have a system error we need to display
 
  INC brkd               \ Set brkd = 0 to clear the error flag and indicate that
                         \ the error has been processed
