@@ -5839,7 +5839,7 @@ S.T.ELTB &1652  &1EC8  &11E3  &1652
      21C3   D0 CE      BNE &2193
 .PD1
      21C5   A2 03      LDX #&03
-.PDL1
+.PDL1K
      21C7   B5 6E      LDA &6E,X
      21C9   95 00      STA &00,X
      21CB   CA         DEX
@@ -28183,7 +28183,7 @@ S.D.ELTB &1669  &20D4  &11E3  &1669
      283B   46 1B      LSR &1B
      283D   D0 F1      BNE &2830
      283F   60         RTS
-.MUL6
+.MUL6K
      2840   90 02      BCC &2844
      2842   65 D1      ADC &D1
      2844   6A         ROR A
@@ -36879,7 +36879,7 @@ S.F.ELTB &15E2  &1B8D  &11E3  &15E2
 .PDESC
 .PD1
      1C6D   A2 03      LDX #&03
-.PDL1
+.PDL1K
      1C6F   B5 6E      LDA &6E,X
      1C71   95 00      STA &00,X
      1C73   CA         DEX
@@ -60185,7 +60185,7 @@ S.2.ELTB &14C1  &1AE2  &1000  &14C1
      1D6D   D0 CE      BNE &1D3D
 .PD1
      1D6F   A2 03      LDX #&03
-.PDL1
+.PDL1K
      1D71   B5 6E      LDA &6E,X
      1D73   95 00      STA &00,X
      1D75   CA         DEX
@@ -94333,7 +94333,7 @@ S.2.ELTJ &6ECB  &766E  &1000  &6ECB
      7D63   85 1C      STA &1C
      7D65   85 1B      STA &1B
      7D67   60         RTS
-.MUL6
+.MUL6K
      7D68   90 02      BCC &7D6C
      7D6A   65 D1      ADC &D1
      7D6C   6A         ROR A

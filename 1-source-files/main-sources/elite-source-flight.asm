@@ -13645,8 +13645,6 @@
 \
 \ ******************************************************************************
 
-{
-
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
 \LDX Q
@@ -13659,16 +13657,20 @@
 
                         \ --- End of removed code ----------------------------->
 
-.MUL6
+.MUL6K                  \ This label is a duplicate of a label in the MULTU
+                        \ routine
+                        \
+                        \ In the original source this label is MUL6, but
+                        \ because BeebAsm doesn't allow us to redefine labels,
+                        \ I have renamed it to MUL6K
 
  BCC P%+4
  ADC T
  ROR A
  ROR P
  DEX
- BNE MUL6
+ BNE MUL6K
  RTS
-}
 
 \ ******************************************************************************
 \

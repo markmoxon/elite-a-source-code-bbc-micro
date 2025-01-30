@@ -11312,7 +11312,6 @@ ENDIF
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\{
 \LDX Q
 \BEQ MU1
 \DEX
@@ -11321,16 +11320,20 @@ ENDIF
 \LDX #8
 \LSR P
 \
-\.MUL6
+\.MUL6K                 \ This label is a duplicate of a label in the MULTU
+\                       \ routine
+\                       \
+\                       \ In the original source this label is MUL6, but
+\                       \ because BeebAsm doesn't allow us to redefine labels,
+\                       \ I have renamed it to MUL6K
 \
 \BCC P%+4
 \ADC T
 \ROR A
 \ROR P
 \DEX
-\BNE MUL6
+\BNE MUL6K
 \RTS
-\}
 
                         \ --- End of removed code ----------------------------->
 
@@ -12666,22 +12669,22 @@ ENDIF
                         \ every time we call PDESC, so set a counter in X for
                         \ copying 4 bytes
 
-{
-.PDL1                   \ This label is a duplicate of the label above (which is
-                        \ why we need to surround it with braces, as BeebAsm
-                        \ doesn't allow us to redefine labels, unlike BBC BASIC)
+.PDL1K                  \ This label is a duplicate of the label above
+                        \
+                        \ In the original source this label is PDL1, but
+                        \ because BeebAsm doesn't allow us to redefine labels,
+                        \ I have renamed it to PDL1K
 
  LDA QQ15+2,X           \ Copy QQ15+2 to QQ15+5 (s1 and s2) to RAND to RAND+3
  STA RAND,X
 
  DEX                    \ Decrement the loop counter
 
- BPL PDL1               \ Loop back to PDL1 until we have copied all
+ BPL PDL1K              \ Loop back to PDL1K until we have copied all
 
  LDA #5                 \ Set A = 5, so we print extended token 5 in the next
                         \ instruction ("{lower case}{justify}{single cap}[86-90]
                         \ IS [140-144].{cr}{left align}"
-}
 
 .PD4
 
