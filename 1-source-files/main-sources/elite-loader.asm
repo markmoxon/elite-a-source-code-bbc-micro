@@ -2294,17 +2294,18 @@ ENDIF
 \
 \ Palette data is given as a set of bytes, with each byte mapping a logical
 \ colour to a physical one. In each byte, the logical colour is given in bits
-\ 4-7 and the physical colour in bits 0-3. See p.379 of the "Advanced User Guide
-\ for the BBC Micro" by Bray, Dickens and Holmes for details of how palette
-\ mapping works, as in modes 4 and 5 we have to do multiple palette commands to
-\ change the colours correctly, and the physical colour value is EOR'd with 7,
-\ just to make things even more confusing.
+\ 4-7 and the physical colour in bits 0-3. See page 379 of the "Advanced User
+\ Guide for the BBC Micro" by Bray, Dickens and Holmes for details of how
+\ palette mapping works, as in modes 4 and 5 we have to do multiple palette
+\ commands to change the colours correctly, and the physical colour value is
+\ EOR'd with 7, just to make things even more confusing.
 \
 \ Similarly, the palette at TVT1+16 is for the monochrome space view, where
 \ logical colour 1 is mapped to physical colour 0 EOR 7 = 7 (white), and
 \ logical colour 0 is mapped to physical colour 7 EOR 7 = 0 (black). Each of
-\ these mappings requires six calls to SHEILA &21 - see p.379 of the "Advanced
-\ User Guide for the BBC Micro" by Bray, Dickens and Holmes for an explanation.
+\ these mappings requires six calls to SHEILA &21 - see page 379 of the
+\ "Advanced User Guide for the BBC Micro" by Bray, Dickens and Holmes for an
+\ explanation.
 \
 \ The mode 5 palette table has two blocks which overlap. The block used depends
 \ on whether or not we have an escape pod fitted. The block at TVT1 is used for

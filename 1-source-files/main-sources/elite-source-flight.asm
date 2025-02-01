@@ -4124,8 +4124,8 @@
 \STA VIA+&21            \ colour 0 to physical colour 7 (white), but with only
 \                       \ one mapping (rather than the 7 mappings required to
 \                       \ do the mapping properly). This makes the space screen
-\                       \ flash with black and white stripes. See p.382 of the
-\                       \ "Advanced User Guide for the BBC Micro" by Bray,
+\                       \ flash with black and white stripes. See page 382 of
+\                       \ the "Advanced User Guide for the BBC Micro" by Bray,
 \                       \ Dickens and Holmes for details of why this single
 \                       \ palette change creates a special effect
 
@@ -27253,8 +27253,8 @@
 \
 \ Arguments:
 \
-\   A                   The internal key number of the key pressed (see p.142 of
-\                       the "Advanced User Guide for the BBC Micro" by Bray,
+\   A                   The internal key number of the key pressed (see page 142
+\                       of the "Advanced User Guide for the BBC Micro" by Bray,
 \                       Dickens and Holmes for a list of internal key numbers)
 \
 \   X                   The amount to move the crosshairs in the x-axis
@@ -28473,9 +28473,9 @@
 \ ------------------------------------------------------------------------------
 \
 \ Scan the keyboard, starting with internal key number 16 ("Q") and working
-\ through the set of internal key numbers (see p.142 of the "Advanced User Guide
-\ for the BBC Micro" by Bray, Dickens and Holmes for a list of internal key
-\ numbers).
+\ through the set of internal key numbers (see page 142 of the "Advanced User
+\ Guide for the BBC Micro" by Bray, Dickens and Holmes for a list of internal
+\ key numbers).
 \
 \ This routine is effectively the same as OSBYTE 122, though the OSBYTE call
 \ preserves A, unlike this routine.
@@ -29100,8 +29100,8 @@
 \ ------------------------------------------------------------------------------
 \
 \ Keyboard table for in-flight controls. This table contains the internal key
-\ codes for the flight keys (see p.142 of the "Advanced User Guide for the BBC
-\ Micro" by Bray, Dickens and Holmes for a list of internal key numbers).
+\ codes for the flight keys (see page 142 of the "Advanced User Guide for the
+\ BBC Micro" by Bray, Dickens and Holmes for a list of internal key numbers).
 \
 \ The pitch, roll, speed and laser keys (i.e. the seven primary flight
 \ control keys) have bit 7 set, so they have 128 added to their internal
@@ -29483,7 +29483,7 @@
 \
 \ Arguments:
 \
-\   X                   The internal number of the key to check (see p.142 of
+\   X                   The internal number of the key to check (see page 142 of
 \                       the "Advanced User Guide for the BBC Micro" by Bray,
 \                       Dickens and Holmes for a list of internal key numbers)
 \
@@ -29621,7 +29621,7 @@
 \   * K toggles keyboard and joystick (&46)
 \   * @ toggles keyboard and Delta 14B joystick (&47)
 \
-\ The numbers in brackets are the internal key numbers (see p.142 of the
+\ The numbers in brackets are the internal key numbers (see page 142 of the
 \ "Advanced User Guide for the BBC Micro" by Bray, Dickens and Holmes for a list
 \ of internal key numbers). We pass the key that has been pressed in X, and the
 \ configuration option to check it against in Y, so this routine is typically
