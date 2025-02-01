@@ -3007,8 +3007,8 @@ ENDIF
 \ Arguments:
 \
 \   X                   The internal number of the key to check (see p.142 of
-\                       the Advanced User Guide for a list of internal key
-\                       numbers)
+\                       the "Advanced User Guide for the BBC Micro" by Bray,
+\                       Dickens and Holmes for a list of internal key numbers)
 \
 \ ------------------------------------------------------------------------------
 \
@@ -3094,8 +3094,9 @@ ENDIF
 \ ------------------------------------------------------------------------------
 \
 \ Scan the keyboard, starting with internal key number 16 ("Q") and working
-\ through the set of internal key numbers (see p.142 of the Advanced User Guide
-\ for a list of internal key numbers).
+\ through the set of internal key numbers (see p.142 of the "Advanced User Guide
+\ for the BBC Micro" by Bray, Dickens and Holmes for a list of internal key
+\ numbers).
 \
 \ This routine is effectively the same as OSBYTE 122, though the OSBYTE call
 \ preserves A, unlike this routine.
@@ -3839,8 +3840,8 @@ ENDIF
 \ ------------------------------------------------------------------------------
 \
 \ Keyboard table for in-flight controls. This table contains the internal key
-\ codes for the flight keys (see p.142 of the Advanced User Guide for a list of
-\ internal key numbers).
+\ codes for the flight keys (see p.142 of the "Advanced User Guide for the BBC
+\ Micro" by Bray, Dickens and Holmes for a list of internal key numbers).
 \
 \ The pitch, roll, speed and laser keys (i.e. the seven primary flight
 \ control keys) have bit 7 set, so they have 128 added to their internal
