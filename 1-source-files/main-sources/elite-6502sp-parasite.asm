@@ -48913,14 +48913,14 @@ ENDIF
 .NW2
 
  STA FRIN,X             \ Store the ship type in the X-th byte of FRIN, so the
-                        \ this slot is now shown as occupied in the index table
+                        \ slot is now shown as occupied in the index table
 
  TAX                    \ Copy the ship type into X
 
  BMI NW8                \ If the ship type is negative (planet or sun), then
                         \ jump to NW8 to skip the following instructions
 
- CPX #JL                \ If JL <= X < JH, i.e. the type of ship we killed in X
+ CPX #JL                \ If JL <= X < JH, i.e. the type of ship we added in X
  BCC NW7                \ is junk (escape pod, alloy plate, cargo canister,
  CPX #JH                \ asteroid, splinter, Shuttle or Transporter), then keep
  BCS NW7                \ going, otherwise jump to NW7
