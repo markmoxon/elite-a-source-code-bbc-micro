@@ -25841,8 +25841,8 @@
 \
 \     * ALP1, ALP2 - Set roll signs to 0
 \
-\ It also sets QQ12 to &FF, to indicate we are docked, recharges the shields and
-\ energy banks, and then falls through into RES2.
+\ It also recharges the shields and energy banks, and then falls through into
+\ RES2.
 \
 \ ******************************************************************************
 
@@ -27864,7 +27864,7 @@
 
  JSR RESET              \ Call RESET to reset most variables
 
- LDA #&FF               \ Set QQ1 to &FF to indicate we are docked, so when
+ LDA #&FF               \ Set QQ12 to &FF to indicate we are docked, so when
  STA QQ12               \ we reach TT110 after calling FRCE below, it shows the
                         \ launch tunnel
 
