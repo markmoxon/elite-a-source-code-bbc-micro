@@ -17022,6 +17022,8 @@ ENDIF
 \
 \ BRKV is set to point to BR1 by the loading process.
 \
+\ ------------------------------------------------------------------------------
+\
 \ Other entry points:
 \
 \   QU5                 Restart the game using the last saved commander without
