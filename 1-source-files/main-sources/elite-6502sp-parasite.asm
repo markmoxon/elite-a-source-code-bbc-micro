@@ -17994,7 +17994,7 @@ ENDIF
  LDY #HI(DELI)          \ contains the DFS command for deleting this file
 
  JSR OSCLI              \ Call OSCLI to execute the OS command at (Y X), which
-                        \ catalogues the disc
+                        \ deletes the file
 
  JMP SVE                \ Jump to SVE to display the disc access menu and return
                         \ from the subroutine using a tail call

@@ -2130,11 +2130,14 @@ ENDIF
 \
 \JMP DOBEGIN            \ Decrypt the main docked code and start a new game
 \
-\JMP CHPR               \ WRCHV is set to point here by elite-loader3.asm
+\JMP CHPR               \ WRCHV is set to point here by elite-loader3.asm, so
+\                       \ CHPR is set as the character write routine
 \
-\EQUW IRQ1              \ IRQ1V is set to point here by elite-loader3.asm
+\EQUW IRQ1              \ IRQ1V is set to the address in these two bytes by
+\                       \ elite-loader3.asm, so IRQ1V points to IRQ1
 \
-\JMP BRBR1              \ BRKV is set to point here by elite-loader3.asm
+\JMP BRBR1              \ BRKV is set to point here by elite-loader3.asm, so
+\                       \ BRBR1 is set as the break handler
 \
 \BRKV = P% - 2          \ The address of the destination address in the above
 \                       \ JMP BRBR1 instruction. This ensures that any code that
@@ -2147,11 +2150,14 @@ ENDIF
 
  JMP DOENTRY            \ Initialise the encyclopedia and show the menu screen
 
- JMP CHPR               \ WRCHV is set to point here by elite-loader.asm
+ JMP CHPR               \ WRCHV is set to point here by elite-loader3.asm, so
+                        \ CHPR is set as the character write routine
 
- EQUW IRQ1              \ IRQ1V is set to point here by elite-loader.asm
+ EQUW IRQ1              \ IRQ1V is set to the address in these two bytes by
+                        \ elite-loader.asm, so IRQ1V points to IRQ1
 
- JMP BRBR               \ BRKV is set to point here by elite-loader.asm
+ JMP BRBR               \ BRKV is set to point here by elite-loader.asm, so
+                        \ BRBR is set as the break handler
 
  BRKV = P% - 2          \ The address of the destination address in the above
                         \ JMP BRBR instruction. This ensures that any code that

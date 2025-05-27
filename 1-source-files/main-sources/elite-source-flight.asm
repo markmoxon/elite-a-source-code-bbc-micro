@@ -2159,11 +2159,14 @@
 \
 \JMP DEEOR              \ Decrypt the main flight code and start a new game
 \
-\JMP TT26               \ WRCHV is set to point here by elite-loader3.asm
+\JMP TT26               \ WRCHV is set to point here by elite-loader.asm, so
+\                       \ TT26 is set as the character write routine
 \
-\EQUW IRQ1              \ IRQ1V is set to point here by elite-loader3.asm
+\EQUW IRQ1              \ IRQ1V is set to the address in these two bytes by
+\                       \ elite-loader3.asm, so IRQ1V points to IRQ1
 \
-\JMP BRBR1              \ BRKV is set to point here by elite-loader3.asm
+\JMP BRBR1              \ BRKV is set to point here by elite-loader3.asm, so
+\                       \ BRBR1 is set as the break handler
 
                         \ --- And replaced by: -------------------------------->
 
@@ -2173,11 +2176,14 @@
  JMP RSHIPS             \ Load a new set of ship blueprints, set the space view
                         \ and jump into the main game loop
 
- JMP TT26               \ WRCHV is set to point here by elite-loader.asm
+ JMP TT26               \ WRCHV is set to point here by elite-loader.asm, so
+                        \ TT26 is set as the character write routine
 
- EQUW IRQ1              \ IRQ1V is set to point here by elite-loader.asm
+ EQUW IRQ1              \ IRQ1V is set to the address in these two bytes by
+                        \ elite-loader.asm, so IRQ1V points to IRQ1
 
- JMP BRBR1              \ BRKV is set to point here by elite-loader.asm
+ JMP BRBR1              \ BRKV is set to point here by elite-loader.asm, so
+                        \ BRBR1 is set as the break handler
 
                         \ --- End of replacement ------------------------------>
 
