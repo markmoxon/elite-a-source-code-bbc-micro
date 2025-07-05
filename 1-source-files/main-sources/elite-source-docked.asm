@@ -30960,7 +30960,7 @@ ENDMACRO
 \   (S R) = |S R|
 \
 \ This sets up the variables required above to calculate (S R) / XX12+2 and give
-\ the result the opposite sign to XX13+3.
+\ the result the opposite sign to XX12+3.
 \
 \ ******************************************************************************
 
