@@ -54,7 +54,7 @@
 
  SHIP_MISSILE = &7F00   \ The address of the missile ship blueprint
 
- ORG CODE%
+ ORG CODE%              \ Set the assembly address to CODE%
 
 \ ******************************************************************************
 \

@@ -128,7 +128,7 @@ ENDIF
 \
 \ ******************************************************************************
 
- ORG &008B
+ ORG &008B              \ Set the assembly address to &008B
 
 .DL
 
@@ -140,7 +140,7 @@ ENDIF
                         \ vertical sync, by setting DL to 0 and then monitoring
                         \ its value until it changes to 30
 
- ORG &0090
+ ORG &0090              \ Set the assembly address to &0090
 
 .key_tube
 
@@ -255,7 +255,7 @@ ENDIF
 \
 \ ******************************************************************************
 
- ORG CODE%
+ ORG CODE%              \ Set the assembly address to CODE%
 
 \ ******************************************************************************
 \

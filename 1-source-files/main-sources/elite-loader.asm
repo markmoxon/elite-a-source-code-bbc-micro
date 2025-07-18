@@ -118,7 +118,7 @@
 \
 \ ******************************************************************************
 
- ORG &0004
+ ORG &0004              \ Set the assembly address to &0004
 
 .TRTB%
 
@@ -126,7 +126,7 @@
                         \ table, which is used to translate internal key
                         \ numbers to ASCII
 
- ORG &0020
+ ORG &0020              \ Set the assembly address to &0020
 
 .INF
 
@@ -134,7 +134,7 @@
                         \ address of a ship's data block, so it can be copied
                         \ to and from the internal workspace at INWK
 
- ORG &0070
+ ORG &0070              \ Set the assembly address to &0070
 
 .ZP
 
@@ -173,7 +173,7 @@
 
  SKIP 2                 \ Used in the copy protection code
 
- ORG &008B
+ ORG &008B              \ Set the assembly address to &008B
 
 .DL
 
@@ -194,7 +194,7 @@
                         \ as part of the main flight loop. See the table at XX21
                         \ for information about ship types
 
- ORG &0090
+ ORG &0090              \ Set the assembly address to &0090
 
 .key_tube
 
@@ -203,7 +203,7 @@
                         \ table), which is used to translate internal key
                         \ numbers to ASCII in the I/O processor code
 
- ORG &00F4
+ ORG &00F4              \ Set the assembly address to &00F4
 
 .LATCH
 
@@ -216,7 +216,7 @@
 \
 \ ******************************************************************************
 
- ORG CODE%
+ ORG CODE%              \ Set the assembly address to CODE%
 
 \ ******************************************************************************
 \
@@ -1084,7 +1084,7 @@ ENDIF
 
 .iff_index_code
 
- ORG &0D7A
+ ORG &0D7A              \ Set the assembly address to &0D7A
 
 \ ******************************************************************************
 \
@@ -1206,7 +1206,7 @@ ENDIF
 
 .LOADcode
 
- ORG &0B00
+ ORG &0B00              \ Set the assembly address to &0B00
 
 \ ******************************************************************************
 \
@@ -2278,7 +2278,7 @@ ENDIF
 
 .TVT1code
 
- ORG &1100
+ ORG &1100              \ Set the assembly address to &1100
 
 \ ******************************************************************************
 \
@@ -2947,7 +2947,7 @@ ENDIF
 
 .to_dd00
 
- ORG &DD00
+ ORG &DD00              \ Set the assembly address to &DD00
 
 \ ******************************************************************************
 \
