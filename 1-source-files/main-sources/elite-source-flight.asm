@@ -26399,9 +26399,8 @@
 \ This section covers the following:
 \
 \   * Spawn a trader, i.e. a Cobra Mk III, Python, Boa or Anaconda, with a 50%
-\     chance of it having a missile, a 50% chance of it having an E.C.M., a 50%
-\     chance of it docking, a random aggression level, a speed between 16 and
-\     31, and a gentle clockwise roll
+\     chance of it having an E.C.M., a 50% chance of it docking, a random
+\     aggression level, a speed between 16 and 31, and a gentle clockwise roll
 \
 \ We call this from within the main loop.
 \
@@ -26421,9 +26420,15 @@
                         \ clockwise roll (as bit 7 is clear), and a 1 in 127
                         \ chance of it having no damping
 
- ROL INWK+31            \ Set bit 0 of the ship's missile count randomly (as the
-                        \ C flag was set), giving the ship either no missiles or
-                        \ one missile
+ ROL INWK+31            \ This instruction would appear to set bit 0 of the
+                        \ ship's missile count randomly (as the C flag was set),
+                        \ giving the ship either no missiles or one missile
+                        \
+                        \ However, INWK+31 is overwritten in the call to the
+                        \ NWSHP routine below, where it is set to the number of
+                        \ missiles from the ship blueprint, and the value of the
+                        \ C flag is not used, so this instruction actually has
+                        \ no effect
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
