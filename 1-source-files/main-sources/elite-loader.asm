@@ -30,6 +30,15 @@
 \
 \   * ELITE.bin
 \
+\ after reading in the following files:
+\
+\   * P.A-SOFT.bin
+\   * P.(C)ASFT.bin
+\   * P.DIALS.bin
+\   * P.ELITE.bin
+\   * MISSILE.bin
+\   * WORDS.bin
+\
 \ ******************************************************************************
 
  INCLUDE "1-source-files/main-sources/elite-build-options.asm"
