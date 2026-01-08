@@ -59,7 +59,7 @@ See the [introduction](#introduction) for more information, or jump straight int
 
 ## Introduction
 
-This repository contains the original source code for Angus Duggan's Elite-A on the BBC Micro.
+This repository contains the original source code for Angus Duggan's classic game Elite-A on the BBC Micro.
 
 You can build the fully functioning game from this source. [Three variants](#building-different-variants-of-elite-a) are currently supported: the officially released version from Angus's site, the variant produced by the original source discs (which was never released), and a variant that fixes various bugs and which works on the BBC Master (which the original doesn't).
 
