@@ -112381,11 +112381,11 @@ End macro FNE
      1D62   44 49 52 ...
      1D67   0D
 .DIALS
-     1D68   F0 80 87 ... INCBIN "versions/elite-a/1-source-files/images/P.DIALS.bin"
+     1D68   F0 80 87 ... INCBIN "1-source-files/images/P.DIALS.bin"
 .SHIP_MISSILE
-     2468   00 40 06 ... INCBIN "versions/elite-a/3-assembled-output/MISSILE.bin"
+     2468   00 40 06 ... INCBIN "3-assembled-output/MISSILE.bin"
 .WORDS
-     2568   4C 32 24 ... INCBIN "versions/elite-a/3-assembled-output/WORDS.bin"
+     2568   4C 32 24 ... INCBIN "3-assembled-output/WORDS.bin"
 .TVT1code
 .TVT1
      1100   D4
@@ -112551,11 +112551,11 @@ End macro FNE
      11DF   D0 F8      BNE &11D9
      11E1   F0 FE      BEQ &11E1
 .ELITE
-     2A4B   00 00 00 ... INCBIN "versions/elite-a/1-source-files/images/P.ELITE.bin"
+     2A4B   00 00 00 ... INCBIN "1-source-files/images/P.ELITE.bin"
 .ASOFT
-     2B4B   00 00 00 ... INCBIN "versions/elite-a/1-source-files/images/P.A-SOFT.bin"
+     2B4B   00 00 00 ... INCBIN "1-source-files/images/P.A-SOFT.bin"
 .CpASOFT
-     2C4B   00 00 00 ... INCBIN "versions/elite-a/1-source-files/images/P.(C)ASFT.bin"
+     2C4B   00 00 00 ... INCBIN "1-source-files/images/P.(C)ASFT.bin"
 .to_dd00
 .do_FILEV
      DD00   20 5B DD   JSR &DD5B
