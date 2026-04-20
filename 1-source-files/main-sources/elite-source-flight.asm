@@ -4488,60 +4488,6 @@
                         \ range 0 = far away to &FF = extremely close, ouch,
                         \ hot, hot, hot!
 
-                        \ --- Mod: Code removed for Elite-A: ------------------>
-
-\ADC #30                \ Add the minimum cabin temperature of 30, plus the C
-\                       \ flag, so we get one of the following:
-\                       \
-\                       \
-\                       \   * If the MAS3 calculation overflowed then we are a
-\                       \     long way from the sun, A will be zero and the C
-\                       \     flag will be set, so this addition sets A = 31
-\                       \     and clears the C flag
-\                       \
-\                       \   * If the result of the MAS3 calculation fitted into
-\                       \     one byte, then A will be in the range 0 to 255 and
-\                       \     the C flag will be clear, so this addition has a
-\                       \     result in the range 0 to 285, with the higher
-\                       \     values overflowing the addition and setting the
-\                       \     C flag
-\                       \
-\                       \ So the C flag is set if the cabin temperature is too
-\                       \ hot to handle, and if it's clear then A contains the
-\                       \ cabin temperature
-\
-\STA CABTMP             \ Store the updated cabin temperature
-\
-\BCS MA28               \ If the C flag is set then jump to MA28 to die, as
-\                       \ our temperature is off the scale
-\
-\CMP #224               \ If the cabin temperature < 224 then jump to MA23 to
-\BCC MA23               \ skip fuel scooping, as we aren't close enough
-\
-\LDA BST                \ If we don't have fuel scoops fitted, jump to BA23 to
-\BEQ MA23               \ skip fuel scooping, as we can't scoop without fuel
-\                       \ scoops
-\
-\LDA DELT4+1            \ We are now successfully fuel scooping, so it's time
-\LSR A                  \ to work out how much fuel we're scooping. Fetch the
-\                       \ high byte of DELT4, which contains our current speed
-\                       \ divided by 4, and halve it to get our current speed
-\                       \ divided by 8 (so it's now a value between 1 and 5, as
-\                       \ our speed is normally between 1 and 40). This gives
-\                       \ us the amount of fuel that's being scooped in A, so
-\                       \ the faster we go, the more fuel we scoop, and because
-\                       \ the fuel levels are stored as 10 * the fuel in light
-\                       \ years, that means we just scooped between 0.1 and 0.5
-\                       \ light years of free fuel
-\
-\ADC QQ14               \ Set A = A + the current fuel level * 10 (from QQ14)
-\
-\CMP #70                \ If A > 70 then set A = 70 (as 70 is the maximum fuel
-\BCC P%+4               \ level, or 7.0 light years)
-\LDA #70
-
-                        \ --- And replaced by: -------------------------------->
-
  ADC #30                \ Add the minimum cabin temperature of 30, plus the C
                         \ flag, so we get one of the following:
                         \
@@ -4586,6 +4532,14 @@
                         \ light years of free fuel
 
  ADC QQ14               \ Set A = A + the current fuel level * 10 (from QQ14)
+
+                        \ --- Mod: Code removed for Elite-A: ------------------>
+
+\CMP #70                \ If A > 70 then set A = 70 (as 70 is the maximum fuel
+\BCC P%+4               \ level, or 7.0 light years)
+\LDA #70
+
+                        \ --- And replaced by: -------------------------------->
 
  CMP new_range          \ If A > new_range then set A = new_range (as new_range
  BCC P%+5               \ is the maximum fuel level for our current ship
