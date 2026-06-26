@@ -8627,7 +8627,7 @@ ENDIF
  LDX CATF               \ If CATF = 0, jump to RR5, otherwise we are printing a
  BEQ RR5                \ disc catalogue
 
- CPY #' '               \ If the character we want to print in Y is a space,
+ CPY #' '               \ If the character we want to print in Y is not a space,
  BNE RR5                \ jump to RR5
 
                         \ If we get here, then CATF is non-zero, so we are
@@ -20736,7 +20736,7 @@ ENDIF
 \       Name: ABORT, Removed
 \       Type: Subroutine
 \   Category: Dashboard
-\    Summary: Disarm missiles and update the dashboard indicators
+\    Summary: Unarm missiles and update the dashboard indicators
 \
 \ ------------------------------------------------------------------------------
 \
@@ -20750,7 +20750,7 @@ ENDIF
 \
 \                         * &E0 = yellow/white (armed)
 \
-\                         * &EE = green/cyan (disarmed)
+\                         * &EE = green/cyan (unarmed)
 \
 \ ******************************************************************************
 
@@ -20762,7 +20762,7 @@ ENDIF
 \                       \ no target lock for our missile
 \
 \                       \ Fall through into ABORT2 to set the missile lock to
-\                       \ the value in X, which effectively disarms the missile
+\                       \ the value in X, which effectively unarms the missile
 
                         \ --- End of removed code ----------------------------->
 
@@ -20792,7 +20792,7 @@ ENDIF
 \
 \                         * &E0 = yellow/white (armed)
 \
-\                         * &EE = green/cyan (disarmed)
+\                         * &EE = green/cyan (unarmed)
 \
 \ ******************************************************************************
 
@@ -20947,7 +20947,7 @@ ENDIF
 \
 \                         * &E0 = yellow/white (armed)
 \
-\                         * &EE = green/cyan (disarmed)
+\                         * &EE = green/cyan (unarmed)
 \
 \ ------------------------------------------------------------------------------
 \
@@ -20962,26 +20962,27 @@ ENDIF
 .MSBAR
 
  TXA                    \ Set T = X * 8
- ASL A
- ASL A
- ASL A
+ ASL A                  \
+ ASL A                  \ This also clears the C flag, as X is in the range 0
+ ASL A                  \ to 3
  STA T
 
                         \ --- Mod: Code removed for Elite-A: ------------------>
 
-\LDA #49                \ Set SC = 49 - T
-\SBC T                  \        = 48 + 1 - (X * 8)
-\STA SC
+\LDA #49                \ Set SC = 49 - T - (1 - C)
+\SBC T                  \        = 49 - (X * 8) - 1
+\STA SC                 \        = 48 - (X * 8)
 
                         \ --- And replaced by: -------------------------------->
 
- LDA #41                \ Set SC = 41 - T
- SBC T                  \        = 40 + 1 - (X * 8)
- STA SC                 \        = 48 + 1 - ((X + 1) * 8)
+ LDA #41                \ Set SC = 41 - T - (1 - C)
+ SBC T                  \        = 41 - (X * 8) - 1
+ STA SC                 \        = 40 - (X * 8)
+                        \        = 48 - ((X + 1) * 8)
                         \
                         \ This is the same calculation as in the disc version's
-                        \ MSBAR routine, but because the missile number in the
-                        \ Elite-A version is in the range 0-3 rather than 1-3,
+                        \ MSBAR routine, but because the missile number X in the
+                        \ Elite-A version is in the range 0-3 rather than 1-4,
                         \ we subtract from 41 instead of 49 to get the screen
                         \ address
 
@@ -20993,9 +20994,6 @@ ENDIF
                         \
                         \   * 48 (character block 7, as byte #7 * 8 = 48), the
                         \     character block of the rightmost missile
-                        \
-                        \   * 1 (so we start drawing on the second row of the
-                        \     character block)
                         \
                         \   * Move left one character (8 bytes) for each count
                         \     of X, so when X = 0 we are drawing the rightmost

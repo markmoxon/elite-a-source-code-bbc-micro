@@ -6994,7 +6994,7 @@ ENDIF
  LDX CATF               \ If CATF = 0, jump to RR5, otherwise we are printing a
  BEQ RR5                \ disc catalogue
 
- CPY #' '               \ If the character we want to print in Y is a space,
+ CPY #' '               \ If the character we want to print in Y is not a space,
  BNE RR5                \ jump to RR5
 
                         \ If we get here, then CATF is non-zero, so we are
