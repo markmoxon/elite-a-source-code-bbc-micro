@@ -13289,7 +13289,7 @@
  STA T
 
  TXA                    \ Set A = |A|
- AND #127
+ AND #%01111111
 
  BEQ MU6                \ If A = 0, jump to MU6 to set P(1 0) = 0 and return
                         \ from the subroutine using a tail call
@@ -20388,8 +20388,8 @@
                         \           = y +/- random * cloud size
 
  BNE EX11               \ If A is non-zero, the particle is off-screen as the
-                        \ coordinate is bigger than 255), so jump to EX11 to do
-                        \ the next particle
+                        \ coordinate is either negative or bigger than 255, so
+                        \ jump to EX11 to do the next particle
 
  CPX #2*Y-1             \ If X > the y-coordinate of the bottom of the screen,
  BCS EX11               \ the particle is off the bottom of the screen, so jump
