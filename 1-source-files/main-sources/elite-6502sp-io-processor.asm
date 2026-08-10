@@ -957,7 +957,7 @@ IF _BUG_FIX
                         \ This routine switches the MOS character definitions
                         \ into memory at &C000 on a BBC Master
 
- LDA #0                 \ Call OSBYTE with A = 0 and X = 1 to fetch bit 0 of the
+ LDA #0                 \ Call OSBYTE with A = 0 and X = 1 to fetch the
  LDX #1                 \ operating system version into X
  JSR OSBYTE
 
@@ -995,7 +995,7 @@ IF _BUG_FIX
                         \ &C000 on a BBC Master, but only if we overwrote it in
                         \ SwitchToCharSet
 
- LDA #0                 \ Call OSBYTE with A = 0 and X = 1 to fetch bit 0 of the
+ LDA #0                 \ Call OSBYTE with A = 0 and X = 1 to fetch the
  LDX #1                 \ operating system version into X
  JSR OSBYTE
 

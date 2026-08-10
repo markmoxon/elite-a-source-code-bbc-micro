@@ -830,7 +830,7 @@ ENDMACRO
 
  CLI                    \ Re-enable interrupts
 
- LDA #0                 \ Call OSBYTE with A = 0 and X = 1 to fetch bit 0 of the
+ LDA #0                 \ Call OSBYTE with A = 0 and X = 1 to fetch the
  LDX #1                 \ operating system version into X
  JSR OSBYTE
 
