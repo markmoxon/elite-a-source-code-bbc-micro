@@ -111,7 +111,7 @@
 
  OSWORD = &FFF1         \ The address for the OSWORD routine
 
- OSCLI = &FFF7          \ The address for the OSCLI vector
+ OSCLI = &FFF7          \ The address for the OSCLI routine
 
  VEC = &7FFE            \ VEC is where we store the original value of the IRQ1
                         \ vector, matching the address in the elite-missile.asm
